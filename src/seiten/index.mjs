@@ -39,6 +39,11 @@ function baldSpan(titel, { knopf = false } = {}) {
 
 // ---------- D1: Hero (K1: Anordnung < 1024px geändert) ----------
 
+// P7: /mitglied-werden/ existiert jetzt – echter Link statt baldSpan(). Anders
+// als header.mjs/footer.mjs (die seitenUrls kennen, siehe navigation.mjs)
+// bekommen Seitenmodule wie dieses hier keine seitenUrls von tools/build.mjs
+// übergeben – ein im Inhalt eingebetteter baldSpan() würde sich beim Bau
+// dieser Seite also nie von selbst in einen Link verwandeln.
 function heroAbschnitt(daten) {
   const verein = daten.verein ?? {};
   return `<section class="hero abschnitt--blau">
@@ -53,7 +58,7 @@ function heroAbschnitt(daten) {
       <p class="hero__lead">Elf Fußballmannschaften von der G-Jugend bis zu den Herren, eine Karnevalabteilung und ein eigener Platz an der Mainzer Landstraße. Wir sind ein Verein für Menschen: Gemeinschaft, Respekt und Freude am Spiel.</p>
       <p class="knopfzeile">
         <a class="knopf knopf--weiss knopf--gross" href="${escapeHtml(PROBETRAINING_MAILTO)}">Probetraining vereinbaren</a>
-        ${baldSpan("Mitglied werden", { knopf: true })}
+        <a class="knopf" href="${PFAD}mitglied-werden/">Mitglied werden</a>
       </p>
       <ul class="hero__fakten" role="list">
         <li>Gegründet ${escapeHtml(String(verein.gruendung_jahr ?? ""))}</li>

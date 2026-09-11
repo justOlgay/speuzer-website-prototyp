@@ -506,6 +506,38 @@ function seiteBausteine(daten) {
   </ul>`
     : `<p class="meta">Kein Eintrag mit Fakten in data/news.json gefunden.</p>`;
 
+  // P7-Korrektur A2: Ergebniszeile (.ergebnis) – Artikelseiten /news/<slug>/.
+  const beispielErgebnis = (daten.news ?? []).find((n) => n.ergebnis);
+  const ergebnisBeispiel = beispielErgebnis
+    ? `<div class="ergebnis" aria-label="Endstand" style="max-width:480px;">
+    <span class="ergebnis__team">FFV Sportfreunde 04</span>
+    <span class="ergebnis__resultat">${escapeHtml(beispielErgebnis.ergebnis)}</span>
+    <span class="ergebnis__team">${escapeHtml(beispielErgebnis.gegner ?? "")}</span>
+  </div>`
+    : `<p class="meta">Kein Eintrag mit Ergebnis in data/news.json gefunden.</p>`;
+
+  // P7: Formular (.formular) – /mitglied-werden/: zwei Felder, eine
+  // Checkbox, ein Fehlerzustand (PLZ-Feld mit sichtbarer Fehlermeldung, wie
+  // sie assets/js/formular.js nach einem ungültigen Absenden einblendet).
+  const formularBeispiel = `<form class="formular inhalt" novalidate style="max-width:420px;">
+    <div class="formular__feld">
+      <label for="sg-vorname">Vorname <span class="formular__pflicht">*</span></label>
+      <input type="text" id="sg-vorname" name="sg-vorname" required aria-describedby="sg-vorname-fehler">
+      <p class="formular__fehler" id="sg-vorname-fehler" hidden></p>
+    </div>
+    <div class="formular__feld">
+      <label for="sg-plz">PLZ <span class="formular__pflicht">*</span></label>
+      <input type="text" id="sg-plz" name="sg-plz" inputmode="numeric" pattern="\\d{5}" maxlength="5" required aria-describedby="sg-plz-fehler">
+      <p class="formular__fehler" id="sg-plz-fehler">Bitte eine gültige Postleitzahl eingeben (5 Ziffern)</p>
+    </div>
+    <div class="formular__checkzeile-block">
+      <div class="formular__checkzeile">
+        <input type="checkbox" id="sg-check" name="sg-check" required>
+        <label for="sg-check">Ich erteile das SEPA-Lastschriftmandat. <span class="formular__pflicht">*</span></label>
+      </div>
+    </div>
+  </form>`;
+
   return `<h2>Bausteine</h2>
 <p class="inhalt">Alle Bausteine mit echten Daten aus data/, wie sie später auf den Inhaltsseiten verwendet werden. Ziele, deren Seite im aktuellen Paket noch nicht existiert, sind als Karten mit &lt;span&gt; statt &lt;a&gt; ausgegeben.</p>
 
@@ -596,7 +628,15 @@ ${toreBeispiel}
 
 <h3>Fakten (.fakten)</h3>
 <p class="inhalt">Artikelseiten /news/&lt;slug&gt;/ (P6): Eckdaten (Termin, Uhrzeit, Ort) als Tags/Zeilen vor dem Fließtext.</p>
-${faktenBeispiel}`;
+${faktenBeispiel}
+
+<h3>Ergebniszeile (.ergebnis)</h3>
+<p class="inhalt">Artikelseiten /news/&lt;slug&gt;/ (P7-Korrektur A2): dreiteilige Zeile statt Überschrift – Vereinsname links, Ergebnis mittig auf --blau-50-Fläche, Gegner rechts. Grid 1fr auto 1fr, unter 480px untereinander (Ergebnis mittig). Kein h2 (das Ergebnis ist keine Überschrift), stattdessen aria-label="Endstand" auf dem Container.</p>
+${ergebnisBeispiel}
+
+<h3>Formular (.formular)</h3>
+<p class="inhalt">/mitglied-werden/ (P7): Aufnahmeantrag-Entwurf. Eingabefelder 48px hoch, Checkboxen auf 44×44px vergrößert (Tippziel), Fehlertext in --warn unter dem Feld (hier am PLZ-Feld sichtbar, wie assets/js/formular.js ihn nach einem ungültigen Absenden einblendet).</p>
+${formularBeispiel}`;
 }
 
 export function seite(daten) {

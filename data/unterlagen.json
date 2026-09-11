@@ -1,0 +1,26 @@
+{
+  "neuanmeldung": [
+    "Aufnahmeantrag des Vereins (unterschrieben)",
+    "Antrag auf Spielerlaubnis beim Hessischen Fußball-Verband (nur Name und Unterschriften eintragen, den Rest füllt der Verein aus)",
+    "Einzugsermächtigung / SEPA-Lastschriftmandat",
+    "Ärztliches Attest über die Sporttauglichkeit",
+    "Kopie der Geburtsurkunde",
+    "Aktuelles Passbild für den Spielerpass",
+    "20 € Aufnahmegebühr in bar"
+  ],
+  "vereinswechsel": [
+    "Aufnahmeantrag des Vereins",
+    "Antrag auf Spielerlaubnis beim Hessischen Fußball-Verband",
+    "Einzugsermächtigung / SEPA-Lastschriftmandat",
+    "Abmeldebestätigung des bisherigen Vereins oder Vollmacht zur Abmeldung durch den aufnehmenden Verein",
+    "Aktuelles Passbild für den Spielerpass",
+    "20 € Aufnahmegebühr in bar"
+  ],
+  "ohne_deutsche_staatsangehoerigkeit": [
+    "Meldebescheinigung der Wohnortgemeinde",
+    "Kopie des Reisepasses",
+    "Zusatzerklärung für Spieler zwischen 12 und 18 Jahren"
+  ],
+  "hinweis_ausland": "Spieler aus den USA, Mexiko, Argentinien oder Brasilien benötigen ein weiteres Zusatzformular des HFV.",
+  "probetraining": "Ein- oder zweimal ohne Anmeldung mittrainieren ist möglich; danach ist der Aufnahmeantrag Pflicht."
+}
