@@ -7,8 +7,13 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { mailLink, datumLang } from "../vorlagen/hilfen.mjs";
+import { bild } from "../vorlagen/bild.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+
+// Diese Seite liegt immer unter "/styleguide/" (Tiefe 1), daher immer "../"
+// (siehe pfadZurWurzel() in tools/build.mjs).
+const PFAD = "../";
 
 function liesWappen(datei) {
   return readFileSync(path.join(ROOT, "assets", "logo", datei), "utf8");
@@ -308,6 +313,44 @@ function seiteBausteine(daten) {
     <p>${escapeHtml(verein.sportstaette?.plz ?? "")} ${escapeHtml(verein.sportstaette?.ort ?? "")}</p>
   </address>`;
 
+  const trainingsrasterTeams = ["d1", "d2", "d3"].map((slug) => teamNachSlug[slug]).filter(Boolean);
+  const trainingsrasterZeilen = trainingsrasterTeams
+    .map((team) => {
+      const einheiten = (team.training ?? [])
+        .map((t) => `<span>${escapeHtml(t.tag.slice(0, 2))} ${escapeHtml(t.von)}–${escapeHtml(t.bis)}</span>`)
+        .join("\n        ");
+      return `<li class="trainingsraster__zeile">
+        <span class="trainingsraster__name">${escapeHtml(team.name)}</span>
+        <span class="trainingsraster__jahrgang meta">${escapeHtml(team.jahrgang ?? "–")}</span>
+        <span class="trainingsraster__einheiten">
+        ${einheiten}
+        </span>
+      </li>`;
+    })
+    .join("\n      ");
+  const trainingsrasterBeispiel = `<ul class="trainingsraster" role="list">
+    <li class="trainingsraster__kopf" aria-hidden="true">
+      <span>Mannschaft</span><span>Jahrgang</span><span>Training</span>
+    </li>
+    ${trainingsrasterZeilen}
+  </ul>`;
+
+  const beispielNewsContain = (daten.news ?? []).find((n) => n.bild_passung === "contain" && n.bild);
+  const karteContainBeispiel = beispielNewsContain
+    ? `<article class="karte" style="max-width:320px;">
+    ${bild({
+      pfad: PFAD,
+      daten,
+      name: beispielNewsContain.bild.replace(/\.[^./]+$/, ""),
+      alt: beispielNewsContain.alt ?? "",
+      sizes: "320px",
+      klasse: "karte__bild karte__bild--contain",
+    })}
+    <p class="karte__meta">${escapeHtml(beispielNewsContain.quelle)}</p>
+    <h4 class="karte__titel" style="font-size:var(--fs-lg);">${escapeHtml(beispielNewsContain.titel)}</h4>
+  </article>`
+    : `<p class="meta">Kein Eintrag mit bild_passung "contain" in data/news.json gefunden.</p>`;
+
   return `<h2>Bausteine</h2>
 <p class="inhalt">Alle Bausteine mit echten Daten aus data/, wie sie später auf den Inhaltsseiten verwendet werden. Ziele, deren Seite im aktuellen Paket noch nicht existiert, sind als Karten mit &lt;span&gt; statt &lt;a&gt; ausgegeben.</p>
 
@@ -348,7 +391,13 @@ ${heroFaktenBeispiel}
 ${schritteBeispiel}
 
 <h3>Adresse</h3>
-${addressBeispiel}`;
+${addressBeispiel}
+
+<h3>Trainingsraster</h3>
+${trainingsrasterBeispiel}
+
+<h3>Karte mit Bild „contain“ (.karte__bild--contain)</h3>
+${karteContainBeispiel}`;
 }
 
 export function seite(daten) {

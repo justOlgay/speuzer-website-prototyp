@@ -1,5 +1,5 @@
-// Startseite (P2) – Hero, nächste Spiele, Trainingszeiten, Aktuelles,
-// Probetraining, Adresse & Anfahrt, Karneval. Ersetzt den P0-Platzhalter.
+// Startseite (P2, Korrekturen P2-K) – Hero, nächste Spiele, Trainingszeiten,
+// Aktuelles, Probetraining, Adresse & Anfahrt, Karneval.
 
 import { bild } from "../vorlagen/bild.mjs";
 import { datumLang, naechsteSpiele, spielZeile, mailLink } from "../vorlagen/hilfen.mjs";
@@ -40,30 +40,77 @@ function baldSpan(titel, { knopf = false } = {}) {
   return `<span class="${klassen}" aria-disabled="true" title="Seite folgt">${escapeHtml(titel)}</span>`;
 }
 
-// Erster Satz eines Textes (bis zum ersten "." oder "!", das von Leerzeichen
-// oder Textende gefolgt wird – vermeidet Fehltreffer bei Datumsangaben wie
-// "06.09.2026"), ohne Emojis, maximal `maxLaenge` Zeichen.
-function ersterSatz(text, maxLaenge = 160) {
-  const ohneEmoji = String(text ?? "")
-    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu, "")
-    .replace(/\s+/g, " ")
-    .trim();
-  const treffer = ohneEmoji.match(/^(.*?[.!])(?:\s|$)/);
-  let satz = treffer ? treffer[1] : ohneEmoji;
-  if (satz.length > maxLaenge) {
-    satz = satz.slice(0, maxLaenge).trim();
-  }
-  return satz;
+// ---------- K4: Teaser-Regel ----------
+
+function istKomplettVersal(text) {
+  const buchstaben = text.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ]/g, "");
+  return buchstaben.length > 0 && buchstaben === buchstaben.toUpperCase() && buchstaben !== buchstaben.toLowerCase();
 }
 
-// ---------- D1: Hero ----------
+// Text in Sätze zerlegen: "." "!" "?" zählen nur als Satzende, wenn ihnen ein
+// Leerzeichen/Textende folgt (sonst z. B. "19.09.2026" mitten im Satz) und
+// ihnen kein einzelner Buchstabe nach einem Punkt/Leerzeichen vorausgeht
+// (Abkürzungen wie "F.F.V." oder "e.V.").
+function teiltSaetze(text) {
+  const saetze = [];
+  let start = 0;
+  const re = /[.!?]+/g;
+  let treffer;
+  while ((treffer = re.exec(text))) {
+    const ende = treffer.index + treffer[0].length;
+    const danach = text.slice(ende, ende + 1);
+    if (danach !== "" && !/\s/.test(danach)) continue;
+
+    const davor1 = text[treffer.index - 1] ?? "";
+    const davor2 = text[treffer.index - 2] ?? "";
+    const istAbkuerzung =
+      /[A-Za-zÀ-ÖØ-öø-ÿ]/.test(davor1) && (davor2 === "" || davor2 === "." || /\s/.test(davor2));
+    if (istAbkuerzung) continue;
+
+    saetze.push(text.slice(start, ende).trim());
+    start = ende;
+  }
+  const rest = text.slice(start).trim();
+  if (rest) saetze.push(rest);
+  return saetze;
+}
+
+// Ersten Satz, der (a) nicht komplett in Versalien steht und (b) mindestens
+// 40 Zeichen hat; Ausrufezeichen-Ketten auf eines gekürzt; auf `max` Zeichen
+// an Wortgrenze mit „…" gekürzt.
+function teaser(text, max = 160) {
+  const bereinigt = String(text ?? "")
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu, "")
+    .replace(/!{2,}/g, "!")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const saetze = teiltSaetze(bereinigt);
+  let gewaehlt =
+    saetze.find((s) => s.length >= 40 && !istKomplettVersal(s)) ??
+    saetze.find((s) => s.length > 0) ??
+    bereinigt;
+
+  if (gewaehlt.length > max) {
+    const abschnitt = gewaehlt.slice(0, max);
+    const letzterRaum = abschnitt.lastIndexOf(" ");
+    gewaehlt = (letzterRaum > 0 ? abschnitt.slice(0, letzterRaum) : abschnitt).trim() + "…";
+  }
+  return gewaehlt;
+}
+
+// ---------- D1: Hero (K1: Anordnung < 1024px geändert) ----------
 
 function heroAbschnitt(daten) {
   const verein = daten.verein ?? {};
   return `<section class="hero abschnitt--blau">
   <div class="container hero__raster">
-    <div class="hero__text">
-      <p class="hero__kicker">Frankfurter Fußballverein Sportfreunde 1904 e.V. · Gallus</p>
+    <p class="hero__kicker">Frankfurter Fußballverein Sportfreunde 1904 e.V. · Gallus</p>
+    <div class="hero__wappen-block">
+      <span class="hero__wappen-ring" aria-hidden="true"></span>
+      <img class="hero__wappen" src="${PFAD}assets/logo/wappen-weiss.svg" width="219" height="213" alt="" aria-hidden="true">
+    </div>
+    <div class="hero__inhalt">
       <h1 class="hero__titel">Fußball im Gallus – seit 1904.</h1>
       <p class="hero__lead">Elf Fußballmannschaften von der G-Jugend bis zu den Herren, eine Karnevalabteilung und ein eigener Platz an der Mainzer Landstraße. Wir sind ein Verein für Menschen: Gemeinschaft, Respekt und Freude am Spiel.</p>
       <p class="knopfzeile">
@@ -75,10 +122,6 @@ function heroAbschnitt(daten) {
         <li>${escapeHtml(String(verein.anzahl_mannschaften ?? ""))} Mannschaften</li>
         <li>${escapeHtml(verein.sportstaette?.strasse ?? "")}</li>
       </ul>
-    </div>
-    <div class="hero__wappen-block">
-      <span class="hero__wappen-ring" aria-hidden="true"></span>
-      <img class="hero__wappen" src="${PFAD}assets/logo/wappen-weiss.svg" width="219" height="213" alt="" aria-hidden="true">
     </div>
   </div>
 </section>`;
@@ -98,7 +141,7 @@ function naechsteSpieleAbschnitt(daten) {
     : `<p class="meta">Keine kommenden Spiele ab dem Build-Datum gefunden.</p>`;
 
   return `<section class="abschnitt">
-  <div class="container">
+  <div class="container fluss">
     <h2>Nächste Spiele</h2>
     <p class="meta">Alle Mannschaften · Stand ${datumLang(daten.stand)}</p>
     ${inhalt}
@@ -110,41 +153,35 @@ function naechsteSpieleAbschnitt(daten) {
 </section>`;
 }
 
-// ---------- D3: Trainingszeiten ----------
+// ---------- D3: Trainingszeiten (K7: .trainingsraster statt Tabelle) ----------
 
 function trainingszeitenAbschnitt(daten) {
   const verein = daten.verein ?? {};
   const zeilen = (daten.teams ?? [])
     .map((team) => {
-      const trainingsZeile = (team.training ?? [])
-        .map((t) => `${escapeHtml(TAG_KUERZEL[t.tag] ?? t.tag)} ${escapeHtml(t.von)}–${escapeHtml(t.bis)}`)
-        .join("<br>");
-      return `<tr>
-        <td>${baldSpan(team.name)}</td>
-        <td>${escapeHtml(team.jahrgang ?? "–")}</td>
-        <td>${trainingsZeile}</td>
-      </tr>`;
+      const einheiten = (team.training ?? [])
+        .map((t) => `<span>${escapeHtml(TAG_KUERZEL[t.tag] ?? t.tag)} ${escapeHtml(t.von)}–${escapeHtml(t.bis)}</span>`)
+        .join("\n        ");
+      return `<li class="trainingsraster__zeile">
+        <span class="trainingsraster__name">${baldSpan(team.name)}</span>
+        <span class="trainingsraster__jahrgang meta">${escapeHtml(team.jahrgang ?? "–")}</span>
+        <span class="trainingsraster__einheiten">
+        ${einheiten}
+        </span>
+      </li>`;
     })
     .join("\n      ");
 
   return `<section class="abschnitt--hell abschnitt">
-  <div class="container">
+  <div class="container fluss">
     <h2>Trainingszeiten</h2>
     <p class="inhalt">Alle Mannschaften trainieren auf dem Vereinsplatz an der Mainzer Landstraße 480 – nur die Herren auf der Anlage von SW Griesheim am Rebstock.</p>
-    <div class="tabelle-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Mannschaft</th>
-            <th>Jahrgang</th>
-            <th>Training</th>
-          </tr>
-        </thead>
-        <tbody>
+    <ul class="trainingsraster" role="list">
+      <li class="trainingsraster__kopf" aria-hidden="true">
+        <span>Mannschaft</span><span>Jahrgang</span><span>Training</span>
+      </li>
       ${zeilen}
-        </tbody>
-      </table>
-    </div>
+    </ul>
     <div class="hinweis hinweis--info">
       <p style="margin:0;">${escapeHtml(verein.hinweise?.ferien ?? "")}</p>
     </div>
@@ -155,7 +192,7 @@ function trainingszeitenAbschnitt(daten) {
 </section>`;
 }
 
-// ---------- D4: Aktuelles ----------
+// ---------- D4: Aktuelles (K5: bild_passung) ----------
 
 function aktuellesAbschnitt(daten) {
   const neueste = (daten.news ?? [])
@@ -165,6 +202,7 @@ function aktuellesAbschnitt(daten) {
 
   const karten = neueste
     .map((n) => {
+      const passungKlasse = n.bild_passung === "contain" ? " karte__bild--contain" : "";
       const bildHtml = n.bild
         ? bild({
             pfad: PFAD,
@@ -172,21 +210,21 @@ function aktuellesAbschnitt(daten) {
             name: n.bild.replace(/\.[^./]+$/, ""),
             alt: n.alt ?? "",
             sizes: "(min-width: 1024px) 50vw, 100vw",
-            klasse: "karte__bild",
+            klasse: `karte__bild${passungKlasse}`,
           })
         : "";
-      const teaser = ersterSatz(n.text);
+      const teaserText = teaser(n.text);
       return `<article class="karte">
       ${bildHtml}
       <p class="karte__meta">${datumLang(n.datum)} · ${escapeHtml(n.quelle)}</p>
       <h3 class="karte__titel">${escapeHtml(n.titel)}</h3>
-      <p>${escapeHtml(teaser)}</p>
+      <p>${escapeHtml(teaserText)}</p>
     </article>`;
     })
     .join("\n    ");
 
   return `<section class="abschnitt">
-  <div class="container">
+  <div class="container fluss">
     <h2>Aktuelles</h2>
     <div class="raster raster--2">
     ${karten}
@@ -202,7 +240,7 @@ function aktuellesAbschnitt(daten) {
 
 function probetrainingAbschnitt() {
   return `<section class="abschnitt--hell abschnitt">
-  <div class="container">
+  <div class="container fluss">
     <h2>Einfach vorbeikommen und mittrainieren</h2>
     <p class="inhalt">Kinder und Jugendliche können ein- oder zweimal ohne Anmeldung mittrainieren. Vorher klären wir, ob in der passenden Mannschaft Platz ist – am einfachsten per E-Mail an die Jugendleitung mit dem Jahrgang des Kindes. Danach ist der Aufnahmeantrag Pflicht.</p>
     <ol class="schritte">
@@ -226,7 +264,7 @@ function adresseAbschnitt(daten) {
   const karten = verein.karten ?? {};
 
   return `<section class="abschnitt">
-  <div class="container">
+  <div class="container fluss">
     <h2>Sportplatz Mainzer Landstraße</h2>
     <div class="anfahrt__raster">
       <div>
@@ -263,8 +301,8 @@ function adresseAbschnitt(daten) {
 function karnevalAbschnitt(daten) {
   const verein = daten.verein ?? {};
   return `<section class="abschnitt--hell abschnitt abschnitt--eng">
-  <div class="container">
-    <article class="karte">
+  <div class="container fluss">
+    <article class="karte fluss">
       <h2 class="karte__titel">Karnevalabteilung „Die Schnauzer“</h2>
       <p>Fünf Gruppen von den Little Fruities bis zu den Dreamboys – die zweite Abteilung des Vereins.</p>
       <p class="knopfzeile">
@@ -293,7 +331,7 @@ export function seite(daten) {
     // Wörtlicher Text lt. Plan hat 171 Zeichen (Grenze im Plan selbst 120–170,
     // dazu hartes Gate in tools/pruefen.mjs bei > 170) – kleinstmögliche
     // Korrektur: abschließenden Punkt entfernt (170 Zeichen), Wortlaut sonst
-    // unverändert. Siehe Abschlussbericht, Abschnitt „Abweichungen“.
+    // unverändert. Siehe Abschlussbericht (P2), Abschnitt „Abweichungen“.
     description:
       "F.F.V. Sportfreunde 04 im Frankfurter Gallus: Trainingszeiten, nächste Spiele und Aktuelles unserer elf Fußballmannschaften. Probetraining vereinbaren und Mitglied werden",
     inhalt,
