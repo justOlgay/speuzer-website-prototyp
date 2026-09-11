@@ -382,7 +382,6 @@ body.menue-offen {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  padding-block: var(--sp-1);
 }
 
 .fuss__gruppe h2 {
@@ -481,12 +480,39 @@ body.menue-offen {
   margin-top: var(--fluss, var(--sp-4));
 }
 
-.fluss > h2 {
+/* Nur wenn eine Überschrift auf vorheriges Fluss-Inhalt folgt (z. B. im
+   Styleguide mehrere Abschnitte in einem gemeinsamen .fluss) – nicht, wenn
+   sie das erste Kind ist (z. B. jede Startseiten-Sektion, P2-K/K6: dort
+   übernimmt bereits das Abschnitt-Padding den oberen Abstand). */
+.fluss > * + h2 {
   margin-top: var(--sp-8);
 }
 
-.fluss > h3 {
+.fluss > * + h3 {
   margin-top: var(--sp-6);
+}
+
+/* Rhythmus-System (P2-K/K6): jeder .abschnitt > .container erhält den
+   größeren Fluss-Abstand --sp-5, mit gezielten Ausnahmen, damit z. B. eine
+   Überschrift nicht auf ihrem Folgeelement "sitzt", aber sichtbar dazugehört. */
+.abschnitt > .container.fluss {
+  --fluss: var(--sp-5);
+}
+
+.fluss > h2 + * {
+  margin-top: var(--sp-3);
+}
+
+.fluss > :is(ul, ol, .tabelle-wrap, .hinweis) + .knopfzeile {
+  margin-top: var(--sp-6);
+}
+
+.fluss > .tabelle-wrap + .hinweis {
+  margin-top: var(--sp-5);
+}
+
+.fluss > * + .schritte {
+  margin-top: var(--sp-5);
 }
 
 .prosa p,
@@ -557,7 +583,7 @@ body.menue-offen {
 
 .karte__bild {
   display: block;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   border-radius: var(--r-md);
   margin-bottom: var(--sp-3);
@@ -567,6 +593,16 @@ body.menue-offen {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* Für Poster/Grafiken mit Text, die nicht beschnitten werden dürfen
+   (P2-K/K5, siehe data/news.json Feld "bild_passung"). */
+.karte__bild--contain {
+  background: var(--blau-900);
+}
+
+.karte__bild--contain img {
+  object-fit: contain;
 }
 
 .karte__titel {
@@ -954,21 +990,36 @@ body.menue-offen {
 }
 
 /* ==========================================================================
-   Hero (Startseite, P2)
+   Hero (Startseite, P2 + Korrekturen P2-K/K1)
+   Unter 1024px: Wappen (72px) klein neben dem Kicker in einer Zeile, Inhalt
+   (H1/Lead/Knöpfe/Fakten) darunter über die volle Breite. Ab 1024px: Kicker
+   über dem Inhalt in der Textspalte (7/12), großes Wappen mit Schatten-Ring
+   in der Spalte daneben (5/12), über die volle Höhe zentriert.
    ========================================================================== */
 
 .hero__raster {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--sp-5);
-  /* Unter 1024px knapper als das übliche --sektion: Wappen + Kicker + H1 +
-     Lead + Knopfzeile + Fakten sind zusammen bereits sehr hoch (siehe
-     Abschlussbericht, Abschnitt „Sichtprüfung“/„Beobachtungen“). */
-  padding-block: var(--sp-6) var(--sp-7);
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "wappen kicker"
+    "inhalt inhalt";
+  column-gap: var(--sp-3);
+  row-gap: var(--sp-3);
+  align-items: center;
+  padding-block: var(--sp-7);
+}
+
+.hero__kicker {
+  grid-area: kicker;
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--blau-100);
+  margin: 0;
 }
 
 .hero__wappen-block {
-  order: -1;
+  grid-area: wappen;
   position: relative;
   display: flex;
   align-items: center;
@@ -977,7 +1028,6 @@ body.menue-offen {
      der Schatten-Ring (140% Breite) breiter als der Bildschirm und würde
      die Kopfzeile/den Burger-Knopf überlagern (siehe hero__wappen-ring). */
   width: fit-content;
-  margin-inline: auto;
 }
 
 .hero__wappen-ring {
@@ -995,22 +1045,15 @@ body.menue-offen {
 .hero__wappen {
   position: relative;
   z-index: 1;
-  width: 120px;
+  width: 72px;
   height: auto;
 }
 
-.hero__text {
+.hero__inhalt {
+  grid-area: inhalt;
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
-}
-
-.hero__kicker {
-  font-size: var(--fs-sm);
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  color: var(--blau-100);
-  margin: 0;
 }
 
 .hero__titel {
@@ -1023,7 +1066,7 @@ body.menue-offen {
 }
 
 .hero__lead {
-  font-size: var(--fs-lg);
+  font-size: var(--fs-md);
   color: var(--blau-100);
   max-width: 34ch;
   margin: 0;
@@ -1032,34 +1075,60 @@ body.menue-offen {
 .hero__fakten {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--sp-1) var(--sp-3);
-  font-size: var(--fs-sm);
+  gap: var(--sp-2) var(--sp-3);
+  font-size: var(--fs-xs);
   color: var(--blau-100);
   margin: 0;
 }
 
 .hero__fakten li + li::before {
-  content: "· ";
+  content: "·";
+  margin-right: var(--sp-2);
+}
+
+/* Unter 1024px beide Hero-Knöpfe auf normaler Höhe (44px), damit sie bei
+   flex-wrap nebeneinander passen – groß (52px) nur ab 1024px. */
+.hero .knopf--gross {
+  min-height: 44px;
+  font-size: var(--fs-md);
+  padding: 0 var(--sp-5);
 }
 
 @media (min-width: 1024px) {
   .hero__raster {
     grid-template-columns: 7fr 5fr;
-    align-items: center;
-    gap: var(--sp-8);
+    grid-template-areas:
+      "kicker wappen"
+      "inhalt wappen";
+    column-gap: var(--sp-8);
+    row-gap: 0;
     padding-block: var(--sektion);
   }
 
-  .hero__text {
+  .hero__kicker {
+    font-size: var(--fs-sm);
+  }
+
+  .hero__inhalt {
     gap: var(--sp-4);
   }
 
-  .hero__wappen-block {
-    order: 0;
+  .hero__lead {
+    font-size: var(--fs-lg);
+  }
+
+  .hero__fakten {
+    font-size: var(--fs-sm);
   }
 
   .hero__wappen {
     width: clamp(160px, 22vw, 320px);
+  }
+
+  .hero .knopf--gross {
+    min-height: 52px;
+    font-size: var(--fs-lg);
+    padding: 0 var(--sp-6);
   }
 }
 
@@ -1072,7 +1141,7 @@ body.menue-offen {
   counter-reset: schritt;
   display: flex;
   flex-direction: column;
-  gap: var(--sp-5);
+  gap: var(--sp-4);
   margin: 0;
   padding: 0;
 }
@@ -1080,14 +1149,15 @@ body.menue-offen {
 .schritte li {
   display: flex;
   gap: var(--sp-4);
-  align-items: flex-start;
+  align-items: center;
 }
 
 .schritte li::before {
   counter-increment: schritt;
   content: counter(schritt);
   flex: none;
-  min-width: 1.4em;
+  width: 40px;
+  text-align: center;
   font-family: var(--font-head);
   font-size: var(--fs-2xl);
   line-height: 1;
@@ -1096,7 +1166,6 @@ body.menue-offen {
 
 .schritte p {
   margin: 0;
-  padding-top: var(--sp-1);
 }
 
 /* ==========================================================================
@@ -1111,5 +1180,79 @@ body.menue-offen {
 @media (min-width: 768px) {
   .anfahrt__raster {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ==========================================================================
+   Trainingsraster (P2-K/K7) – ersetzt eine Tabelle für Mannschaft/Jahrgang/
+   Training: Uhrzeiten (white-space: nowrap) dürfen nie umbrechen, das war in
+   einer echten <table> bei schmalen Breiten sonst der Fall.
+   ========================================================================== */
+
+.trainingsraster {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.trainingsraster__kopf {
+  display: none;
+}
+
+.trainingsraster__zeile {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "name einheiten"
+    "jahrgang einheiten";
+  column-gap: var(--sp-4);
+  align-items: center;
+  padding-block: var(--sp-3);
+  border-bottom: 1px solid var(--line);
+}
+
+.trainingsraster__name {
+  grid-area: name;
+  font-weight: 600;
+}
+
+.trainingsraster__jahrgang {
+  grid-area: jahrgang;
+}
+
+.trainingsraster__einheiten {
+  grid-area: einheiten;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  gap: var(--sp-1);
+}
+
+.trainingsraster__einheiten span {
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .trainingsraster__kopf {
+    display: grid;
+    grid-template-columns: minmax(200px, 1fr) 160px auto;
+    column-gap: var(--sp-4);
+    padding-block: var(--sp-3);
+    border-bottom: 1px solid var(--line);
+    text-transform: uppercase;
+    font-size: var(--fs-xs);
+    letter-spacing: .06em;
+    color: var(--ink-3);
+  }
+
+  .trainingsraster__zeile {
+    grid-template-columns: minmax(200px, 1fr) 160px auto;
+    grid-template-areas: "name jahrgang einheiten";
+  }
+
+  .trainingsraster__einheiten {
+    align-items: flex-start;
+    text-align: left;
   }
 }

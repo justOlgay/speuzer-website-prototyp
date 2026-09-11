@@ -108,19 +108,34 @@ export function spielZeile(spiel, { pfad, mitTeam, naechstes } = {}) {
   const ort = spiel.spielstaette ? escapeHtml(spiel.spielstaette) : "Ort folgt";
   const teamTag =
     mitTeam && spiel.teamName ? `<span class="tag">${escapeHtml(spiel.teamName)}</span> ` : "";
+
+  // Kinderfestivals ohne festen Gegner (Feld "gegner" leer): benennen statt
+  // leer lassen (P2-K/K2). "heim" ist dann der gastgebende Verein.
+  const istKinderfestivalOhneGegner = !spiel.gegner && spiel.wettbewerb === "Kinderfestival";
+  const gegnerText = istKinderfestivalOhneGegner
+    ? spiel.heimspiel
+      ? "Kinderfestival – Heimspieltag"
+      : `Kinderfestival bei ${spiel.heim ?? ""}`
+    : spiel.gegner ?? "";
+
+  // Der Wettbewerbs-Zusatz entfällt, wenn "Kinderfestival" schon im Titel steht (K2).
   const wettbewerbZusatz =
-    spiel.wettbewerb && spiel.wettbewerb !== "Meisterschaft"
+    !istKinderfestivalOhneGegner && spiel.wettbewerb && spiel.wettbewerb !== "Meisterschaft"
       ? `<span class="meta spiel__wettbewerb">${escapeHtml(spiel.wettbewerb)}</span>`
       : "";
+
+  // Kein Strich mehr bei fehlendem Ergebnis – leere Spalte (K3).
   const ergebnisInhalt = spiel.entfaellt
     ? `<span class="spiel__hinweis">entfällt</span>`
-    : escapeHtml(spiel.ergebnis) || "–";
+    : spiel.ergebnis
+      ? escapeHtml(spiel.ergebnis)
+      : "";
 
   return `<li class="${klassen}">
       <span class="spiel__datum">${datumKurz(spiel.datum)} · ${zeit(spiel.zeit)}</span>
       <span class="tag ${tagKlasse}">${tagText}</span>
       <span class="spiel__gegner-block">
-        <span class="spiel__gegner">${teamTag}${escapeHtml(spiel.gegner ?? "")}</span>
+        <span class="spiel__gegner">${teamTag}${escapeHtml(gegnerText)}</span>
         <span class="spiel__ort meta">${ort}</span>
         ${wettbewerbZusatz}
       </span>

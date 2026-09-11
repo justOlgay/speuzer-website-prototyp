@@ -60,6 +60,16 @@ h2 { font-size: var(--fs-2xl); }
 h3 { font-size: var(--fs-xl); }
 h4 { font-size: var(--fs-lg); }
 
+/* Ausgewogenerer Zeilenumbruch (P2-K/K1); .hero h1 bricht damit z. B. bei
+   1440px sauber „FUSSBALL IM GALLUS – / SEIT 1904.“ statt zufällig. */
+h1, h2, h3 {
+  text-wrap: balance;
+}
+
+.hero h1 {
+  max-width: 18ch;
+}
+
 a {
   color: var(--blau-700);
 }
