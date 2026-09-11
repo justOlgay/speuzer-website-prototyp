@@ -175,6 +175,7 @@ async function main() {
   const { footer } = await import(pathToFileURL(path.join(SRC, "vorlagen", "footer.mjs")).href);
 
   const seiten = await sammleSeiten(daten);
+  const seitenUrls = new Set(seiten.map((seite) => normUrl(seite.url)));
 
   mkdirSync(DOCS, { recursive: true });
   const geschrieben = [];
@@ -197,9 +198,9 @@ async function main() {
       canonical,
       og,
       pfad,
-      header: header({ pfad, daten }),
+      header: header({ pfad, daten, aktuelleUrl: url, seitenUrls }),
       inhalt: seite.inhalt,
-      footer: footer({ pfad, daten }),
+      footer: footer({ pfad, daten, seitenUrls }),
       bodyclass: seite.bodyclass ?? "",
     });
 
@@ -228,9 +229,9 @@ async function main() {
       canonical,
       og,
       pfad,
-      header: header({ pfad, daten }),
+      header: header({ pfad, daten, aktuelleUrl: null, seitenUrls }),
       inhalt,
-      footer: footer({ pfad, daten }),
+      footer: footer({ pfad, daten, seitenUrls }),
       bodyclass: "",
     });
     writeFileSync(path.join(DOCS, "404.html"), html, "utf8");

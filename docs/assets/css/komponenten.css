@@ -1,7 +1,889 @@
 /*
-  Speuzer Blau-Weiß – Komponenten
-  Bausteine (Kopfleiste, Karte, Kachel-Knopf, Spiel-Zeile, Trainings-Zeile,
-  Personen-Karte, Logo-Reihe, Hinweiskasten „offen“, Fußbereich) folgen in
-  Paket P1. In P0 bewusst leer, damit build.mjs die Datei bereits einbinden
-  kann, ohne dass Inhalte vorgegriffen werden.
+  Speuzer Blau-Weiß – Komponenten (P1)
+  Kopfzeile, Fußbereich und Bausteine. Alles mobile-first, ausschließlich mit
+  Tokens aus tokens.css (Ausnahme: --warn-bg, dort ergänzt). Klassen deutsch,
+  BEM-ähnliche Schreibweise (Baustein__teil, Baustein--variante).
 */
+
+/* ==========================================================================
+   Kopfzeile (.kopf)
+   ========================================================================== */
+
+.kopf {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.kopf__zeile {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 60px;
+}
+
+/* Marke: Wappen + Wortmarke */
+.kopf__marke {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  text-decoration: none;
+}
+
+.kopf__marke:hover {
+  text-decoration: none;
+}
+
+.kopf__wappen {
+  flex: none;
+}
+
+.kopf__name {
+  font-family: var(--font-head);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: var(--fs-lg);
+  color: var(--blau-900);
+  line-height: 1.1;
+}
+
+.kopf__name-kurz {
+  display: none;
+}
+
+@media (max-width: 479.98px) {
+  .kopf__name-lang {
+    display: none;
+  }
+  .kopf__name-kurz {
+    display: inline;
+  }
+}
+
+/* Burger-Knopf: nur mit .js sichtbar, nur unter 1024px */
+.kopf__burger {
+  display: none;
+  align-items: center;
+  gap: var(--sp-2);
+  width: 48px;
+  height: 48px;
+  padding: 0 var(--sp-2);
+  margin-left: var(--sp-2);
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.kopf__burger-balken,
+.kopf__burger-balken::before,
+.kopf__burger-balken::after {
+  content: "";
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+}
+
+.kopf__burger-balken {
+  position: relative;
+}
+
+.kopf__burger-balken::before {
+  position: absolute;
+  left: 0;
+  top: -7px;
+}
+
+.kopf__burger-balken::after {
+  position: absolute;
+  left: 0;
+  top: 7px;
+}
+
+.kopf__burger-text {
+  display: none;
+  font-weight: 600;
+  font-size: var(--fs-sm);
+}
+
+@media (min-width: 480px) {
+  .kopf__burger-text {
+    display: inline;
+  }
+}
+
+/* Schließen-Knopf im Menü-Panel: nur mit .js sichtbar, nur unter 1024px */
+.kopf__schliessen {
+  display: none;
+  position: absolute;
+  top: var(--sp-3);
+  right: var(--sp-3);
+  width: 48px;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--weiss);
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* Hauptnavigation: ohne JS immer als einfache Liste unterhalb der Kopfzeile sichtbar */
+.kopf__nav {
+  flex-basis: 100%;
+  order: 3;
+}
+
+.kopf__nav ul {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: var(--sp-2) 0;
+}
+
+.kopf__nav ul li {
+  border-top: 1px solid var(--line);
+}
+
+.kopf__nav ul a,
+.kopf__nav .nav__bald {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--sp-2);
+  font-family: var(--font-text);
+  font-weight: 600;
+  font-size: var(--fs-md);
+  text-decoration: none;
+}
+
+.kopf__nav ul a {
+  color: var(--ink);
+}
+
+.kopf__nav ul a:hover {
+  color: var(--blau-700);
+}
+
+.kopf__nav ul a[aria-current="page"] {
+  color: var(--blau-900);
+}
+
+/* .nav__bald in Kombination mit .knopf (Primärknopf-Fläche): --ink-3 wäre auf
+   dem gefüllten --blau-700 nahezu unlesbar (Kontrast < 2:1) – hier stattdessen
+   --blau-100, wie schon im dunklen Menü-Panel und im Fußbereich. */
+.nav__bald.knopf {
+  color: var(--blau-100);
+}
+
+/* Ab 1024px: horizontale Leiste rechtsbündig */
+@media (min-width: 1024px) {
+  .kopf__zeile {
+    flex-wrap: nowrap;
+    min-height: 72px;
+  }
+
+  .kopf__nav {
+    flex-basis: auto;
+    order: 0;
+  }
+
+  .kopf__nav ul {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--sp-5);
+    padding: 0;
+  }
+
+  .kopf__nav ul li {
+    border-top: none;
+  }
+
+  .kopf__nav ul a:not(.knopf),
+  .kopf__nav .nav__bald:not(.knopf) {
+    height: 44px;
+    min-height: 44px;
+    padding: 0 var(--sp-2);
+    border-bottom: 3px solid transparent;
+  }
+
+  .kopf__nav ul a[aria-current="page"] {
+    border-bottom-color: var(--blau-700);
+  }
+
+  .kopf__nav .knopf {
+    height: 44px;
+    min-height: 44px;
+  }
+}
+
+/* Unter 1024px, mit JS: Menü wird zum Vollflächen-Panel */
+@media (max-width: 1023.98px) {
+  .js .kopf__burger {
+    display: inline-flex;
+  }
+
+  .js .kopf__schliessen {
+    display: flex;
+  }
+
+  .js .kopf__nav {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    flex-basis: auto;
+    background: var(--blau-900);
+    overflow-y: auto;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-12px);
+    transition: opacity var(--t-mittel), transform var(--t-mittel), visibility 0s linear var(--t-mittel);
+  }
+
+  .js .kopf__nav.ist-offen {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity var(--t-mittel), transform var(--t-mittel), visibility 0s linear 0s;
+  }
+
+  .js .kopf__nav ul {
+    padding: var(--sp-8) var(--sp-4) var(--sp-4);
+  }
+
+  .js .kopf__nav ul li {
+    border-top: none;
+    border-bottom: 1px solid rgba(255, 255, 255, .12);
+  }
+
+  .js .kopf__nav ul a,
+  .js .kopf__nav .nav__bald {
+    min-height: 56px;
+    padding: var(--sp-2) var(--sp-4);
+    font-family: var(--font-head);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: var(--fs-2xl);
+    color: var(--weiss);
+  }
+
+  .js .kopf__nav ul a[aria-current="page"] {
+    color: var(--weiss);
+    text-decoration: underline;
+    text-underline-offset: 6px;
+  }
+
+  .js .kopf__nav .nav__bald {
+    color: var(--blau-100);
+  }
+
+  .js .kopf__nav li:has(.knopf) {
+    border-bottom: none;
+    margin-top: var(--sp-4);
+  }
+
+  .js .kopf__nav .knopf {
+    display: inline-flex;
+    width: 100%;
+    justify-content: center;
+    min-height: 52px;
+    background: transparent;
+    border: 2px solid var(--weiss);
+    color: var(--weiss);
+  }
+
+  .js .kopf__nav .knopf:hover {
+    background: rgba(255, 255, 255, .12);
+  }
+
+  .js .kopf__nav :focus-visible {
+    outline-color: var(--weiss);
+  }
+}
+
+body.menue-offen {
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   Fußbereich (.fuss)
+   ========================================================================== */
+
+.fuss {
+  background: var(--blau-950);
+  color: var(--blau-100);
+  padding-block: var(--sektion);
+}
+
+.fuss a {
+  color: var(--weiss);
+  text-decoration: none;
+}
+
+.fuss a:hover {
+  text-decoration: underline;
+}
+
+.fuss :focus-visible {
+  outline-color: var(--weiss);
+}
+
+.fuss__raster {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-7);
+}
+
+@media (min-width: 640px) {
+  .fuss__raster {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .fuss__raster {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.fuss__wappen {
+  margin-bottom: var(--sp-3);
+}
+
+.fuss__registername {
+  font-weight: 600;
+  color: var(--weiss);
+  margin: 0 0 var(--sp-3);
+}
+
+.fuss__adresse {
+  font-style: normal;
+  margin: 0 0 var(--sp-3);
+}
+
+.fuss__adresse p {
+  margin: 0;
+}
+
+.fuss__kontakt {
+  line-height: 2;
+  margin: 0;
+}
+
+.fuss__gruppe h2 {
+  font-family: var(--font-head);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  font-size: var(--fs-lg);
+  color: var(--weiss);
+  margin: 0 0 var(--sp-3);
+}
+
+.fuss__gruppe ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.fuss__gruppe a,
+.fuss__gruppe .nav__bald {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.fuss__gruppe .nav__bald {
+  color: var(--blau-100);
+}
+
+.fuss__schluss {
+  margin-top: var(--sp-7);
+  padding-top: var(--sp-4);
+  border-top: 1px solid rgba(255, 255, 255, .12);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  font-size: var(--fs-sm);
+}
+
+.fuss__schluss p {
+  margin: 0;
+}
+
+/* ==========================================================================
+   Tote-Link-Ersatz (Header + Footer, siehe navigation.mjs)
+   ========================================================================== */
+
+.nav__bald {
+  color: var(--ink-3);
+  text-decoration: none;
+  cursor: default;
+}
+
+/* ==========================================================================
+   Abschnitte und Fließtext-Rhythmus
+   ========================================================================== */
+
+.abschnitt {
+  padding-block: var(--sektion);
+}
+
+.abschnitt--hell {
+  background: var(--surface);
+}
+
+.abschnitt--blau {
+  background: var(--blau-900);
+  color: var(--weiss);
+}
+
+.abschnitt--blau h1,
+.abschnitt--blau h2,
+.abschnitt--blau h3,
+.abschnitt--blau h4 {
+  color: var(--weiss);
+}
+
+.abschnitt--blau a {
+  color: var(--blau-100);
+}
+
+.abschnitt--blau a:hover {
+  color: var(--weiss);
+}
+
+.abschnitt--blau :focus-visible {
+  outline-color: var(--weiss);
+}
+
+.abschnitt--eng {
+  padding-block: var(--sp-7);
+}
+
+.fluss > * + * {
+  margin-top: var(--fluss, var(--sp-4));
+}
+
+.fluss > h2 {
+  margin-top: var(--sp-8);
+}
+
+.fluss > h3 {
+  margin-top: var(--sp-6);
+}
+
+.prosa p,
+.prosa li {
+  max-width: var(--measure);
+}
+
+/* ==========================================================================
+   Seitenkopf
+   ========================================================================== */
+
+.seitenkopf {
+  margin-bottom: var(--sp-7);
+}
+
+.seitenkopf h1 {
+  font-size: var(--fs-3xl);
+  margin: 0;
+}
+
+.seitenkopf__lead {
+  font-size: var(--fs-lg);
+  color: var(--ink-2);
+  max-width: var(--measure);
+  margin-top: var(--sp-3);
+}
+
+/* ==========================================================================
+   Raster und Karte
+   ========================================================================== */
+
+.raster {
+  display: grid;
+  gap: var(--sp-5);
+}
+
+.raster--2 {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+
+.raster--3 {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+}
+
+.raster--4 {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+}
+
+.karte {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-1);
+  padding: var(--sp-5);
+}
+
+.karte--link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  transition: box-shadow var(--t-kurz), transform var(--t-kurz);
+}
+
+.karte--link:hover {
+  box-shadow: var(--sh-2);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.karte__titel {
+  font-family: var(--font-head);
+  font-size: var(--fs-xl);
+  text-transform: uppercase;
+  color: var(--blau-900);
+  margin: 0 0 var(--sp-2);
+}
+
+.karte__meta {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+/* ==========================================================================
+   Tags
+   ========================================================================== */
+
+.tag {
+  display: inline-block;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding: 3px 8px;
+  border-radius: var(--r-pill);
+  background: var(--blau-100);
+  color: var(--blau-900);
+}
+
+.tag--heim {
+  background: var(--blau-700);
+  color: var(--weiss);
+}
+
+.tag--auswaerts {
+  background: transparent;
+  border: 1px solid var(--blau-700);
+  color: var(--blau-700);
+}
+
+.tag--ok {
+  background: var(--blau-50);
+  color: var(--ok);
+}
+
+.tag--warn {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+
+/* ==========================================================================
+   Spiel-Zeile und Trainings-Zeile
+   ========================================================================== */
+
+.spiele,
+.trainings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.spiel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--sp-3);
+  row-gap: var(--sp-1);
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--line);
+}
+
+.spiel__datum {
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--blau-900);
+  min-width: 96px;
+}
+
+.spiel__gegner-block {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.spiel__gegner {
+  font-weight: 600;
+  display: block;
+}
+
+.spiel__ort {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+  display: block;
+}
+
+.spiel__ergebnis {
+  font-family: var(--font-head);
+  font-size: var(--fs-xl);
+  margin-left: auto;
+  color: var(--ink);
+}
+
+.spiel--naechstes {
+  background: var(--blau-50);
+  border-left: 4px solid var(--blau-700);
+  padding-left: calc(var(--sp-4) - 4px);
+}
+
+.spiel--entfaellt {
+  opacity: .7;
+}
+
+.spiel--entfaellt .spiel__datum,
+.spiel--entfaellt .spiel__gegner {
+  text-decoration: line-through;
+}
+
+.spiel__hinweis {
+  font-size: var(--fs-sm);
+  color: var(--warn);
+}
+
+.training {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--sp-4);
+  row-gap: var(--sp-1);
+  padding: var(--sp-2) var(--sp-4);
+  border-bottom: 1px solid var(--line);
+}
+
+.training__tag {
+  font-weight: 600;
+  min-width: 110px;
+}
+
+.training__zeit {
+  font-variant-numeric: tabular-nums;
+}
+
+.training__platz {
+  color: var(--ink-3);
+}
+
+/* ==========================================================================
+   Personen-Karte
+   ========================================================================== */
+
+.person {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.person__bild {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: var(--r-md);
+  background: var(--blau-100);
+}
+
+/* Platzhalter ohne Foto (nur im Styleguide): Wappen statt Bild */
+.person__bild--platzhalter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-6);
+  background: var(--blau-50);
+}
+
+.person__bild--platzhalter svg {
+  width: 100%;
+  height: 100%;
+  color: var(--blau-700);
+}
+
+.person__name {
+  font-family: var(--font-head);
+  font-size: var(--fs-lg);
+  color: var(--blau-900);
+  margin: 0;
+}
+
+.person__funktion {
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+
+.person__mail {
+  font-size: var(--fs-sm);
+  overflow-wrap: anywhere;
+}
+
+/* ==========================================================================
+   Logo-Reihe (Sponsoren)
+   ========================================================================== */
+
+.logo-reihe {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--sp-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.logo-reihe__kachel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: var(--sp-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-reihe__kachel img {
+  max-height: 56px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* ==========================================================================
+   Hinweiskasten
+   ========================================================================== */
+
+.hinweis {
+  border-left: 4px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  padding: var(--sp-4);
+}
+
+.hinweis__label {
+  display: inline-block;
+  margin-bottom: var(--sp-2);
+}
+
+.hinweis--offen {
+  border-left-color: var(--warn);
+  background: var(--warn-bg);
+  color: var(--ink);
+}
+
+.hinweis--info {
+  border-left-color: var(--blau-700);
+  background: var(--blau-50);
+  color: var(--ink);
+}
+
+/* ==========================================================================
+   Tabellen
+   ========================================================================== */
+
+.tabelle-wrap {
+  overflow-x: auto;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+}
+
+.tabelle-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabelle-wrap th {
+  text-transform: uppercase;
+  font-size: var(--fs-xs);
+  letter-spacing: .06em;
+  color: var(--ink-3);
+  text-align: left;
+  padding: var(--sp-3);
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.tabelle-wrap td {
+  padding: var(--sp-3);
+  border-bottom: 1px solid var(--line);
+}
+
+.tabelle-wrap tr:last-child td {
+  border-bottom: none;
+}
+
+.tabelle-wrap .zahl {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabelle-wrap tr.eigene {
+  background: var(--blau-50);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Knöpfe, Meta, Hilfsklassen
+   ========================================================================== */
+
+.knopf--gross {
+  min-height: 52px;
+  font-size: var(--fs-lg);
+  padding: 0 var(--sp-6);
+}
+
+.knopf--weiss {
+  background: var(--weiss);
+  color: var(--blau-800);
+}
+
+.knopf--weiss:hover {
+  background: var(--blau-50);
+  color: var(--blau-700);
+}
+
+.knopfzeile {
+  display: flex;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+.meta {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
