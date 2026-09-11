@@ -1,0 +1,236 @@
+[
+  {
+    "slug": "herren",
+    "name": "1. Herrenmannschaft",
+    "kurz": "Herren",
+    "kategorie": "Senioren",
+    "jahrgang": null,
+    "staffel": "Kreisliga A · KLA Frankfurt Gr. 1",
+    "spielbetrieb": "Meisterschaft, Kreispokal",
+    "training": [
+      { "tag": "Mittwoch", "von": "19:30", "bis": "21:00" },
+      { "tag": "Freitag", "von": "19:30", "bis": "21:00" }
+    ],
+    "platz": "Bezirkssportanlage am Rebstock (Anlage SW Griesheim), Am Römerhof 9, 60486 Frankfurt",
+    "heimspiele": "Am Römerhof 9 (Anlage SW Griesheim)",
+    "trainer": ["Martin Reyschmidt", "Nick Janovsky"],
+    "mail": "senioren_mannschaft@sportfreunde04.de",
+    "fussballde_id": "011MICFB14000000VTVG0001VTR8C1K7",
+    "csv": "HERREN",
+    "tabelle": true,
+    "kalender": "herren.ics"
+  },
+  {
+    "slug": "a-jugend",
+    "name": "A-Jugend",
+    "kurz": "A-Jugend",
+    "kategorie": "Jugend",
+    "jahrgang": "2008/2009",
+    "staffel": "Gruppenliga · AJGL Frankfurt",
+    "spielbetrieb": "Meisterschaft, Kreispokal",
+    "training": [
+      { "tag": "Montag", "von": "19:00", "bis": "21:00" },
+      { "tag": "Mittwoch", "von": "19:00", "bis": "20:30" }
+    ],
+    "platz": "Vereinsplatz Mainzer Landstraße 480, linke Hälfte Tor 1",
+    "heimspiele": "Am Römerhof 9 (Anlage SW Griesheim)",
+    "trainer": ["Ahmed Douzi", "Hüseyin Ulutürk"],
+    "mail": "trainer_a_jugend@sportfreunde04.de",
+    "fussballde_id": "019ORCB50G000000VV0AG80NVUQ1MD7G",
+    "csv": "A",
+    "tabelle": true,
+    "kalender": "a.ics"
+  },
+  {
+    "slug": "d1",
+    "name": "D1-Jugend",
+    "kurz": "D1",
+    "kategorie": "Jugend",
+    "jahrgang": "2014",
+    "staffel": "Kreisliga A · DJKL F Gr. 1",
+    "spielbetrieb": "Meisterschaft, Kreispokal",
+    "training": [
+      { "tag": "Dienstag", "von": "17:30", "bis": "19:30" },
+      { "tag": "Mittwoch", "von": "17:30", "bis": "19:00" },
+      { "tag": "Freitag", "von": "17:30", "bis": "19:30" }
+    ],
+    "platz": "Vereinsplatz Mainzer Landstraße 480, linke Hälfte Tor 1",
+    "heimspiele": "Mainzer Landstraße 480",
+    "trainer": ["Vassilios Miamis", "Daniel Heyer"],
+    "mail": "trainer_d_jugend@sportfreunde04.de",
+    "fussballde_id": "011MIE88PK000000VTVG0001VTR8C1K7",
+    "csv": "D1",
+    "tabelle": true,
+    "kalender": "d1.ics"
+  },
+  {
+    "slug": "d2",
+    "name": "D2-Jugend",
+    "kurz": "D2",
+    "kategorie": "Jugend",
+    "jahrgang": "2015",
+    "staffel": "1. Kreisklasse · DJ KK F Gr. 05",
+    "spielbetrieb": "Meisterschaft",
+    "training": [
+      { "tag": "Dienstag", "von": "17:30", "bis": "19:30" },
+      { "tag": "Mittwoch", "von": "17:30", "bis": "19:00" },
+      { "tag": "Freitag", "von": "17:30", "bis": "19:30" }
+    ],
+    "platz": "Vereinsplatz Mainzer Landstraße 480, linke Hälfte Tor 2",
+    "heimspiele": "Mainzer Landstraße 480",
+    "trainer": ["Beyhun Gelberi", "Damian Porombka-Kepa"],
+    "mail": "trainer_d_jugend@sportfreunde04.de",
+    "fussballde_id": "011MIF9LDC000000VTVG0001VTR8C1K7",
+    "csv": "D2",
+    "tabelle": true,
+    "kalender": "d2.ics"
+  },
+  {
+    "slug": "d3",
+    "name": "D3-Jugend",
+    "kurz": "D3",
+    "kategorie": "Jugend",
+    "jahrgang": "2014/2015",
+    "staffel": "1. Kreisklasse · DJ KK F Gr. 04",
+    "spielbetrieb": "Meisterschaft",
+    "training": [
+      { "tag": "Dienstag", "von": "17:30", "bis": "19:30" },
+      { "tag": "Freitag", "von": "17:30", "bis": "19:30" }
+    ],
+    "platz": "Vereinsplatz Mainzer Landstraße 480, rechte Hälfte Tor 1",
+    "heimspiele": "Mainzer Landstraße 480",
+    "trainer": ["Olgay Özkan", "Marcel Hogg", "Flo Lehr"],
+    "mail": "trainer_d_jugend@sportfreunde04.de",
+    "fussballde_id": "02USD4SHUG000000VS5489BRVS0D3BPJ",
+    "csv": "D3",
+    "tabelle": true,
+    "kalender": "d3.ics"
+  },
+  {
+    "slug": "e1",
+    "name": "E1-Jugend",
+    "kurz": "E1",
+    "kategorie": "Jugend",
+    "jahrgang": "2016",
+    "staffel": "1. Kreisklasse · EJ Quali Gr. 08",
+    "spielbetrieb": "Qualifikationsrunde, Kreispokal; Hauptrunde ab Oktober",
+    "training": [
+      { "tag": "Montag", "von": "17:30", "bis": "19:00" },
+      { "tag": "Mittwoch", "von": "17:30", "bis": "19:00" },
+      { "tag": "Donnerstag", "von": "17:30", "bis": "19:00" }
+    ],
+    "platz": "Vereinsplatz Mainzer Landstraße 480, rechte Hälfte",
+    "heimspiele": "Mainzer Landstraße 480",
+    "trainer": ["Mohamed Bardouch", "Mario Orsolic", "Bernhard Henrich"],
+    "mail": "trainer_e_jugend@sportfreunde04.de",
+    "fussballde_id": "011MIDBD8C000000VTVG0001VTR8C1K7",
+    "csv": "E1",
+    "tabelle": true,
+    "kalender": "e1.ics"
+  },
+  {
+    "slug": "e2",
+    "name": "E2-Jugend",
+    "kurz": "E2",
+    "kategorie": "Jugend",
+    "jahrgang": "2017",
+    "staffel": "1. Kreisklasse · EJ Quali Gr. 18",
+    "spielbetrieb": "Qualifikationsrunde; Hauptrunde ab Oktober",
+    "training": [
+      { "tag": "Montag", "von": "17:30", "bis": "19:00" },
+      { "tag": "Dienstag", "von": "16:30", "bis": "18:00" },
+      { "tag": "Donnerstag", "von": "17:30", "bis": "19:00" }
+    ],
+    "platz": "Vereinsplatz Mainzer Landstraße 480, linke bzw. rechte Hälfte",
+    "heimspiele": "Mainzer Landstraße 480",
+    "trainer": ["Markus Rees", "Samson Tesfay"],
+    "mail": "trainer_e_jugend@sportfreunde04.de",
+    "fussballde_id": "011MIE1KH4000000VTVG0001VTR8C1K7",
+    "csv": "E2",
+    "tabelle": true,
+    "kalender": "e2.ics"
+  },
+  {
+    "slug": "e3",
+    "name": "E3-Jugend",
+    "kurz": "E3",
+    "kategorie": "Jugend",
+    "jahrgang": "2016/2017",
+    "staffel": "1. Kreisklasse · EJ Quali Gr. 22",
+    "spielbetrieb": "Qualifikationsrunde; Hauptrunde ab Oktober",
+    "training": [
+      { "tag": "Montag", "von": "16:00", "bis": "17:30" },
+      { "tag": "Mittwoch", "von": "16:00", "bis": "17:30" }
+    ],
+    "platz": "Vereinsplatz Mainzer Landstraße 480, rechte Hälfte",
+    "heimspiele": "Mainzer Landstraße 480",
+    "trainer": ["Ümit Maras"],
+    "mail": "trainer_e_jugend@sportfreunde04.de",
+    "fussballde_id": "02PS0CFJCO000000VS5489B1VVQNIHJA",
+    "csv": "E3",
+    "tabelle": true,
+    "kalender": "e3.ics"
+  },
+  {
+    "slug": "f1",
+    "name": "F1-Jugend",
+    "kurz": "F1",
+    "kategorie": "Jugend",
+    "jahrgang": "2018",
+    "staffel": "Kinderfußball · F-Junioren 4+1 Gr. 2",
+    "spielbetrieb": "Kinderfestivals (keine Tabelle)",
+    "training": [
+      { "tag": "Montag", "von": "17:30", "bis": "19:00" },
+      { "tag": "Mittwoch", "von": "17:30", "bis": "19:00" }
+    ],
+    "platz": "Vereinsplatz Mainzer Landstraße 480, linke Hälfte Tor 1 bzw. rechte Hälfte",
+    "heimspiele": "Mainzer Landstraße 480",
+    "trainer": ["Ralf Schwager"],
+    "mail": "trainer_f_jugend@sportfreunde04.de",
+    "fussballde_id": null,
+    "csv": "F1",
+    "tabelle": false,
+    "kalender": "f1.ics"
+  },
+  {
+    "slug": "f2",
+    "name": "F2-Jugend",
+    "kurz": "F2",
+    "kategorie": "Jugend",
+    "jahrgang": "2019/2020",
+    "staffel": "Kinderfußball · F-Junioren 4vs4 Gr. 4",
+    "spielbetrieb": "Kinderfestivals (keine Tabelle)",
+    "training": [
+      { "tag": "Dienstag", "von": "17:30", "bis": "19:00" },
+      { "tag": "Donnerstag", "von": "17:30", "bis": "19:00" }
+    ],
+    "platz": "Vereinsplatz Mainzer Landstraße 480, Käfig bzw. rechte Hälfte",
+    "heimspiele": "Mainzer Landstraße 480",
+    "trainer": ["Martin Gehn", "Ercan Mutlu"],
+    "mail": "trainer_f_jugend@sportfreunde04.de",
+    "fussballde_id": null,
+    "csv": "F2",
+    "tabelle": false,
+    "kalender": "f2.ics"
+  },
+  {
+    "slug": "g-jugend",
+    "name": "G-Jugend (Bambinis)",
+    "kurz": "G-Jugend",
+    "kategorie": "Jugend",
+    "jahrgang": "2021 und jünger",
+    "staffel": "Kinderfußball · G-Junioren 3vs3 Gr. 4",
+    "spielbetrieb": "Kinderfestivals (keine Tabelle)",
+    "training": [
+      { "tag": "Montag", "von": "17:30", "bis": "19:00" }
+    ],
+    "platz": "Vereinsplatz Mainzer Landstraße 480, Court",
+    "heimspiele": "Mainzer Landstraße 480",
+    "trainer": ["Biljana Trninic"],
+    "mail": "trainer_g_jugend@sportfreunde04.de",
+    "fussballde_id": null,
+    "csv": "G1",
+    "tabelle": false,
+    "kalender": "g1.ics"
+  }
+]

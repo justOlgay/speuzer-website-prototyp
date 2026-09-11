@@ -1,0 +1,22 @@
+{
+  "stand": "Aufnahmeantrag Stand 9/2026 und Beitragsübersicht",
+  "fussball": [
+    { "gruppe": "Kinder und Jugendliche", "monat": 9, "jahr": 108 },
+    { "gruppe": "Erwachsene", "monat": 10, "jahr": 120 },
+    { "gruppe": "Passive, Frauen, Rentner", "monat": 7, "jahr": 84 },
+    { "gruppe": "Familien", "monat": 15, "jahr": 180 }
+  ],
+  "karneval": [
+    { "gruppe": "Kinder, Jugendliche, Auszubildende und Studierende (mit Nachweis)", "monat": 9, "jahr": 108 },
+    { "gruppe": "Erwachsene", "monat": 10, "jahr": 120 },
+    { "gruppe": "Rentner ab 65", "monat": 7, "jahr": 84 },
+    { "gruppe": "Familien", "monat": 15, "jahr": 180 },
+    { "gruppe": "Senatoren", "monat": null, "jahr": 144 }
+  ],
+  "aufnahmegebuehr": 20,
+  "zuschlag_ohne_sepa": 3,
+  "faelligkeit": "jährlich zum 1. Januar im Voraus, Abbuchung im ersten Quartal; bei Eintritt im Jahr anteilig mit der Aufnahme",
+  "kuendigung": "nur zum Ende eines Kalenderjahres, per Einschreiben an die Postanschrift",
+  "glaeubiger_id": "DE51FFV00000338939",
+  "mandatsreferenz": "Beitrag Sportfreunde 04"
+}

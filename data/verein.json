@@ -1,0 +1,35 @@
+{
+  "name_register": "Frankfurter Fußballverein Sportfreunde 1904 e.V.",
+  "name_kurz": "FFV Sportfreunde 04",
+  "spitzname": "Speuzer",
+  "gegruendet": "15. Mai 1904",
+  "gruendungsname": "Frankfurter FC Britannia",
+  "umbenannt": "1919",
+  "stadtteil": "Gallus",
+  "sportstaette": {
+    "strasse": "Mainzer Landstraße 480",
+    "plz": "60326",
+    "ort": "Frankfurt am Main"
+  },
+  "post": {
+    "postfach": "Postfach 190442",
+    "plz": "60091",
+    "ort": "Frankfurt am Main"
+  },
+  "mail": "geschaeftsstelle@sportfreunde04.de",
+  "tel_geschaeftsstelle": "+49 69 736868",
+  "tel_platzwart": "+49 69 732193",
+  "register": "Amtsgericht Frankfurt, VR 4727",
+  "vorsitz": ["Melanie Seipp (1. Vorsitzende)", "Uwe Korndörfer (2. Vorsitzender)"],
+  "instagram": "https://www.instagram.com/speuzer_ffm/",
+  "fanshop": "https://sportfreunde04.fan12.de/",
+  "teamshop": "https://www.11teamsports.com/de-de/clubshop/frankfurter-fussballvereine-sportfreunde-04/",
+  "mails": {
+    "jugendleitung": "jugendleitung@sportfreunde04.de",
+    "kassierer": "kassierer@sportfreunde04.de",
+    "kinderschutz": "kinderschutzbeauftragter@sportfreunde04.de",
+    "karneval": "karnevalabteilung@sportfreunde04.de",
+    "senioren": "spielausschuss_senioren@sportfreunde04.de",
+    "vorstand": "vorstand@sportfreunde04.de"
+  }
+}

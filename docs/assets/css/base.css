@@ -1,0 +1,141 @@
+/*
+  Speuzer Blau-Weiß – Basis
+  Reset, Typografie, Layout-Helfer, Fokus, reduzierte Bewegung.
+  Baut auf tokens.css auf (muss vorher eingebunden sein).
+*/
+
+/* Modernes Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body, h1, h2, h3, h4, p, figure, blockquote, dl, dd, ul, ol {
+  margin: 0;
+}
+
+ul[role="list"], ol[role="list"] {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+img, picture {
+  max-width: 100%;
+  display: block;
+}
+
+input, button, textarea, select {
+  font: inherit;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Grundtypografie */
+html, body {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-text);
+  line-height: var(--lh-text);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-head);
+  line-height: var(--lh-head);
+  color: var(--blau-900);
+  text-transform: uppercase;
+}
+
+h1 { font-size: var(--fs-3xl); }
+h2 { font-size: var(--fs-2xl); }
+h3 { font-size: var(--fs-xl); }
+h4 { font-size: var(--fs-lg); }
+
+a {
+  color: var(--blau-700);
+}
+
+a:hover {
+  color: var(--blau-600);
+  text-decoration: underline;
+}
+
+:focus-visible {
+  outline: var(--fokus);
+  outline-offset: 2px;
+}
+
+/* Sprungmarke „Zum Inhalt“ */
+.sprungmarke {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--surface);
+  color: var(--blau-900);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-md);
+  z-index: 100;
+}
+
+.sprungmarke:focus {
+  left: var(--sp-3);
+  top: var(--sp-3);
+}
+
+/* Layout-Helfer */
+.container {
+  max-width: var(--container);
+  padding: 0 var(--sp-4);
+  margin: 0 auto;
+}
+
+.inhalt {
+  max-width: var(--inhalt);
+}
+
+/* Knöpfe */
+.knopf {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 var(--sp-5);
+  border-radius: var(--r-md);
+  background: var(--blau-700);
+  color: var(--weiss);
+  border: none;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--t-kurz);
+}
+
+.knopf:hover {
+  background: var(--blau-600);
+  color: var(--weiss);
+  text-decoration: none;
+}
+
+.knopf--sekundaer {
+  background: transparent;
+  border: 2px solid var(--blau-700);
+  color: var(--blau-700);
+}
+
+.knopf--sekundaer:hover {
+  background: var(--blau-50);
+  color: var(--blau-600);
+  border-color: var(--blau-600);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

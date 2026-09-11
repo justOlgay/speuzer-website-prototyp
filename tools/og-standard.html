@@ -1,0 +1,55 @@
+<!doctype html>
+<!--
+  Erzeugt das Standard-OG-Bild (assets/og/standard.png, 1200×630).
+  Wird von build.mjs per headless Chrome gerendert, siehe tools/build.mjs.
+  Eigenständige Datei mit fest eingebetteten Pfaden (relativ zu tools/).
+-->
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<style>
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-weight: 700;
+  src: url("../assets/fonts/barlow-condensed-700.woff2") format('woff2');
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 1200px;
+  height: 630px;
+  background: #151A7A;
+}
+.buehne {
+  width: 1200px;
+  height: 630px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 56px;
+}
+.wappen {
+  width: 260px;
+  height: auto;
+  color: #FFFFFF;
+  flex: none;
+}
+.schriftzug {
+  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  font-weight: 700;
+  color: #FFFFFF;
+  font-size: 92px;
+  line-height: 1.05;
+  text-transform: uppercase;
+  max-width: 700px;
+}
+</style>
+</head>
+<body>
+<div class="buehne">
+  <div class="wappen">
+    <!--WAPPEN-->
+  </div>
+  <div class="schriftzug">FFV<br>Sportfreunde 04</div>
+</div>
+</body>
+</html>
