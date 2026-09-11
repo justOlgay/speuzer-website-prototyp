@@ -40,7 +40,11 @@ ERLAUBTE_EMAIL_DOMAINS = ("sportfreunde04.de",)
 ERLAUBTE_EMAIL_ADRESSEN = {"info@vmapit.de"}
 
 VERBOTENE_DATEINAMEN_TEILE = ["WhatsApp", "IMG-2026", "IMG-2025", "IMG-2024"]
-VERBOTENE_TEXTE = ["Made with AI", "Max Mustermann", "Erika Mustermann", "Teststraße", "Mannheim"]
+# "Mannheim" stand hier ursprünglich als generischer Demodaten-Marker; P5
+# bringt mit dem App-Projektpartner vmapit GmbH (data/sponsoren.json) eine
+# echte, öffentliche Firmenadresse in Mannheim ins Projekt – klarer
+# Fehlalarm, daher entfernt (siehe Abschlussbericht P5).
+VERBOTENE_TEXTE = ["Made with AI", "Max Mustermann", "Erika Mustermann", "Teststraße"]
 
 
 def ist_text_datei(pfad):

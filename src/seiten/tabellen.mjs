@@ -59,7 +59,7 @@ function tabelleZeile(zeile) {
         <td class="zahl tabelle__optional">${zeile.u}</td>
         <td class="zahl tabelle__optional">${zeile.v}</td>
         <td class="zahl tabelle__optional">${escapeHtml(zeile.tore)}</td>
-        <td class="zahl">${zeile.diff}</td>
+        <td class="zahl tabelle__optional-2">${zeile.diff}</td>
         <td class="zahl">${zeile.punkte}</td>
       </tr>`;
 }
@@ -96,7 +96,7 @@ function teamAbschnitt(team, daten, index) {
             <th class="zahl tabelle__optional">U</th>
             <th class="zahl tabelle__optional">V</th>
             <th class="zahl tabelle__optional">Tore</th>
-            <th class="zahl">Diff</th>
+            <th class="zahl tabelle__optional-2">Diff</th>
             <th class="zahl">Pkt</th>
           </tr>
         </thead>

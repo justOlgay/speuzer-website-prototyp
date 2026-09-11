@@ -1,0 +1,67 @@
+[
+  {
+    "firma": "SK SportConnects GbR",
+    "kategorie": "Partner",
+    "ort": "Hösbach",
+    "link": "www.sk-sportconnects.de",
+    "instagram": "sksportconnects",
+    "beschreibung": null,
+    "logo": {
+      "quelle": "sponsor-sk-sportconnects-gbr",
+      "bytes": 34968
+    },
+    "hinweis": null
+  },
+  {
+    "firma": "vmapit GmbH",
+    "kategorie": "App-Projektpartner",
+    "ort": "Mannheim",
+    "link": "https://www.appack.app/",
+    "instagram": null,
+    "beschreibung": "Wir entwickeln Apps für die unterschiedlichsten Anwendungsbereiche z.B. Bürger-Apps, Schul-Apps, Kindergarten- u. Kita-Apps, Kirchengemeinde-Apps, Mitarbeiter-Apps, speziell für Ihr Business oder Event, um Menschen zu erreichen und die Chancen der Digitalisierung zu nutzen.  \nFür Sportvereine, Bürgervereine, Non-Profits und gemeinnützige Organisationen sogar gefördert, gemeinsam mit dem DOSB, Stifter Helfen und vmapit.  \nOder haben Sie eine eigene, individuelle App Idee? \nSprechen Sie uns an!",
+    "logo": {
+      "quelle": "sponsor-vmapit-gmbh",
+      "bytes": 20913
+    },
+    "hinweis": null
+  },
+  {
+    "firma": "Bundeswehr",
+    "kategorie": "Partner",
+    "ort": null,
+    "link": null,
+    "instagram": null,
+    "beschreibung": null,
+    "logo": {
+      "quelle": "sponsor-bundeswehr",
+      "bytes": 71831
+    },
+    "hinweis": null
+  },
+  {
+    "firma": "Fußballschule VM Elite",
+    "kategorie": "App-Projektpartner",
+    "ort": null,
+    "link": null,
+    "instagram": null,
+    "beschreibung": null,
+    "logo": {
+      "quelle": "sponsor-fuballschule-vm-elite",
+      "bytes": 152104
+    },
+    "hinweis": "Live-Link zeigt auf instagram.com/bundeswehrkarriere – falsch; ohne Link übernehmen"
+  },
+  {
+    "firma": "11TeamSports",
+    "kategorie": "Partner",
+    "ort": null,
+    "link": null,
+    "instagram": null,
+    "beschreibung": null,
+    "logo": {
+      "quelle": "sponsor-11teamsports",
+      "bytes": 24700
+    },
+    "hinweis": null
+  }
+]

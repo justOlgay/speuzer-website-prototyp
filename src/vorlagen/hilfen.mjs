@@ -170,13 +170,16 @@ export function spielZeile(spiel, { pfad, mitTeam, naechstes, ohneDatum, vergang
 
   // Kein Strich mehr bei fehlendem Ergebnis – leere Spalte (K3). Bei
   // vergangenen Spielen ohne Ergebnis stattdessen ein Textlink auf
-  // FUSSBALL.DE, wenn vorhanden (P4) – kein Ergebnis wird erfunden.
+  // FUSSBALL.DE, wenn vorhanden (P4) – kein Ergebnis wird erfunden. Als
+  // .meta-Link (Inter, --fs-sm, --blau-700, Unterstrich nur bei Hover/Fokus)
+  // statt in der großen Ergebnis-Schrift (P5, Korrektur A2) – siehe
+  // ".spiel__ergebnis a" in komponenten.css.
   const ergebnisInhalt = spiel.entfaellt
     ? `<span class="spiel__hinweis">entfällt</span>`
     : spiel.ergebnis
       ? escapeHtml(spiel.ergebnis)
       : vergangen && spiel.fussballde_link
-        ? `<a href="${escapeHtml(spiel.fussballde_link)}" rel="noopener" target="_blank">Ergebnis auf FUSSBALL.DE</a>`
+        ? `<a class="meta" href="${escapeHtml(spiel.fussballde_link)}" rel="noopener" target="_blank">Ergebnis auf FUSSBALL.DE</a>`
         : "";
 
   // Bei ohneDatum:true nur die Uhrzeit (das Datum steht schon in der

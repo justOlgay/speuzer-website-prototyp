@@ -252,7 +252,7 @@ function seiteBausteine(daten) {
         <td class="zahl tabelle__optional">${z.u}</td>
         <td class="zahl tabelle__optional">${z.v}</td>
         <td class="zahl tabelle__optional">${escapeHtml(z.tore)}</td>
-        <td class="zahl">${z.diff}</td>
+        <td class="zahl tabelle__optional-2">${z.diff}</td>
         <td class="zahl">${z.punkte}</td>
       </tr>`
     )
@@ -268,7 +268,7 @@ function seiteBausteine(daten) {
           <th class="zahl tabelle__optional">U</th>
           <th class="zahl tabelle__optional">V</th>
           <th class="zahl tabelle__optional">Tore</th>
-          <th class="zahl">Diff</th>
+          <th class="zahl tabelle__optional-2">Diff</th>
           <th class="zahl">Punkte</th>
         </tr>
       </thead>
@@ -277,7 +277,7 @@ function seiteBausteine(daten) {
       </tbody>
     </table>
   </div>
-  <p class="meta">Staffel D3: ${escapeHtml(d3Tabelle?.staffel ?? "")} · Momentaufnahme vom ${escapeHtml(daten.tabellen?.stand ?? "")} · unter 640px werden G/U/V/Tore (Klasse <code>tabelle__optional</code>) ausgeblendet und Mannschaft (Klasse <code>tabelle__mannschaft</code>) gekürzt</p>`;
+  <p class="meta">Staffel D3: ${escapeHtml(d3Tabelle?.staffel ?? "")} · Momentaufnahme vom ${escapeHtml(daten.tabellen?.stand ?? "")} · unter 640px werden G/U/V/Tore (Klasse <code>tabelle__optional</code>) und Diff (Klasse <code>tabelle__optional-2</code>) ausgeblendet und Mannschaft (Klasse <code>tabelle__mannschaft</code>) gekürzt</p>`;
 
   const knoepfeBeispiel = `<p class="knopfzeile">
     <a class="knopf" href="#inhalt">Primärknopf</a>
@@ -414,6 +414,28 @@ function seiteBausteine(daten) {
       })()
     : `<p class="meta">Kein vergangenes Spiel vor dem Build-Datum in data/spiele.json gefunden.</p>`;
 
+  // P5: Zahlen-Kachel (.zahl) – wie im Abschnitt "Zahlen" auf /verein/.
+  const zahlenBeispiel = `<div class="abschnitt--blau" style="border-radius:var(--r-lg);padding:var(--sp-6);">
+    <div class="raster raster--4">
+      <div class="zahl"><span class="zahl__wert">${escapeHtml(String(verein.gruendung_jahr ?? ""))}</span><span class="zahl__label">gegründet</span></div>
+      <div class="zahl"><span class="zahl__wert">${escapeHtml(String(verein.anzahl_mannschaften ?? ""))}</span><span class="zahl__label">Fußballmannschaften</span></div>
+      <div class="zahl"><span class="zahl__wert">${escapeHtml(String((daten.karneval?.gruppen ?? []).length || 5))}</span><span class="zahl__label">Karnevalgruppen</span></div>
+      <div class="zahl"><span class="zahl__wert">2</span><span class="zahl__label">Abteilungen</span></div>
+    </div>
+  </div>`;
+
+  // P5: Download-Zeile (.download) – wie auf /verein/downloads/.
+  const beispielDownload = (daten.downloads ?? [])[0];
+  const downloadBeispiel = beispielDownload
+    ? `<ul class="downloads" role="list">
+    <li class="download">
+      <a href="${escapeHtml(beispielDownload.datei ?? "")}" rel="noopener" target="_blank">${escapeHtml(beispielDownload.titel ?? "")}</a>
+      <span class="meta">PDF${beispielDownload.seiten ? ` · ${escapeHtml(String(beispielDownload.seiten))} Seiten` : ""}${beispielDownload.kb ? ` · ${escapeHtml(String(beispielDownload.kb))} KB` : ""}</span>
+      <span class="meta">öffnet cdn.appack.de</span>
+    </li>
+  </ul>`
+    : `<p class="meta">Kein Eintrag in data/downloads.json gefunden.</p>`;
+
   const beispielNewsContain = (daten.news ?? []).find((n) => n.bild_passung === "contain" && n.bild);
   const karteContainBeispiel = beispielNewsContain
     ? `<article class="karte" style="max-width:320px;">
@@ -445,7 +467,7 @@ ${spieleBeispiel}
 <h3>Trainings-Zeile</h3>
 ${trainingsBeispiel}
 
-<h3>Personen-Karte</h3>
+<h3>Personen-Karte (mit Platzhalter ohne Foto)</h3>
 ${personBeispiel}
 
 <h3>Tags</h3>
@@ -496,7 +518,15 @@ ${sprungBeispiel}
 
 <h3>Vergangenes Spiel (.spiel--vergangen)</h3>
 <p class="inhalt">„Alle Spiele" auf den Team-Spielplanseiten (P4): gedämpfter Text statt der sonstigen Akzentfarben.</p>
-${spielVergangenBeispiel}`;
+${spielVergangenBeispiel}
+
+<h3>Zahlen-Kachel (.zahl)</h3>
+<p class="inhalt">Abschnitt "Zahlen" auf /verein/ (P5): Wert groß in Barlow Condensed/Weiß, Beschriftung in --blau-100, im vierspaltigen Raster auf --abschnitt--blau.</p>
+${zahlenBeispiel}
+
+<h3>Download-Zeile (.download)</h3>
+<p class="inhalt">/verein/downloads/ (P5): Titel als Link, darunter Format/Umfang und Hinweis auf das externe Ziel als .meta-Zeilen.</p>
+${downloadBeispiel}`;
 }
 
 export function seite(daten) {

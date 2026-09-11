@@ -1,0 +1,123 @@
+[
+  {
+    "name": "Melanie Seipp",
+    "funktion": "1. Vorsitzende",
+    "mail": "geschaeftsstelle@sportfreunde04.de",
+    "foto": {
+      "quelle": "vorstand-melanie-seipp",
+      "bytes": 525138
+    }
+  },
+  {
+    "name": "Uwe Korndörfer",
+    "funktion": "2. Vorsitzender",
+    "mail": "geschaeftsstelle@sportfreunde04.de",
+    "foto": {
+      "quelle": "vorstand-uwe-korndorfer",
+      "bytes": 517113
+    }
+  },
+  {
+    "name": "Wolfgang Schirmer",
+    "funktion": "1. Kassierer",
+    "mail": "kassierer@sportfreunde04.de",
+    "foto": {
+      "quelle": "vorstand-wolfgang-schirmer",
+      "bytes": 495840
+    }
+  },
+  {
+    "name": "Bernhard Henrich",
+    "funktion": "2. Kassierer",
+    "mail": "kassierer@sportfreunde04.de",
+    "foto": {
+      "quelle": "vorstand-bernhard-henrich",
+      "bytes": 135549
+    }
+  },
+  {
+    "name": "Ralf Schwager",
+    "funktion": "1. Jugendleiter",
+    "mail": "jugendleitung@sportfreunde04.de",
+    "foto": {
+      "quelle": "vorstand-ralf-schwager",
+      "bytes": 112402
+    }
+  },
+  {
+    "name": "Olgay Özkan",
+    "funktion": "2. Jugendleiter",
+    "mail": "jugendleitung@sportfreunde04.de",
+    "foto": {
+      "quelle": "vorstand-olgay-ozkan",
+      "bytes": 60038
+    }
+  },
+  {
+    "name": "Marcel Hogg",
+    "funktion": "Team Jugendleitung",
+    "mail": "jugendleitung@sportfreunde04.de",
+    "foto": {
+      "quelle": "vorstand-marcel-hogg",
+      "bytes": 125052
+    }
+  },
+  {
+    "name": "Vassilios Miamis",
+    "funktion": "Team Jugendleitung",
+    "mail": "jugendleitung@sportfreunde04.de",
+    "foto": {
+      "quelle": "vorstand-vassilios-miamis",
+      "bytes": 215395
+    }
+  },
+  {
+    "name": "Florian Müller",
+    "funktion": "Kinderschutzbeauftragter",
+    "mail": "kinderschutzbeauftragter@sportfreunde04.de",
+    "foto": {
+      "quelle": "vorstand-florian-muller",
+      "bytes": 69465
+    }
+  },
+  {
+    "name": null,
+    "funktion": "Schriftführer",
+    "mail": null,
+    "foto": null,
+    "hinweis": "nicht besetzt"
+  },
+  {
+    "name": "Wolfgang Krönung",
+    "funktion": "Sportliche Leitung Senioren",
+    "mail": "spielausschuss_senioren@sportfreunde04.de",
+    "foto": null
+  },
+  {
+    "name": "Christine Rothe",
+    "funktion": "Spielausschuss Senioren",
+    "mail": "spielausschuss_senioren@sportfreunde04.de",
+    "foto": null
+  },
+  {
+    "name": "Patrick Krösche",
+    "funktion": "Abteilungsleiter Karneval",
+    "mail": "karnevalabteilung@sportfreunde04.de",
+    "foto": {
+      "quelle": "vorstand-patrick-krosche",
+      "bytes": 221052
+    }
+  },
+  {
+    "name": "Sigrid Weber",
+    "funktion": "Kassiererin Abteilung Karneval",
+    "mail": "karnevalabteilung@sportfreunde04.de",
+    "foto": null
+  },
+  {
+    "name": "Bettina-Leven-Grieb",
+    "funktion": "Schriftführerin Abteilung Karneval",
+    "mail": "karnevalabteilung@sportfreunde04.de",
+    "foto": null
+  }
+]
