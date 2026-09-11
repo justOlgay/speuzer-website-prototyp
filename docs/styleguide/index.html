@@ -50,7 +50,7 @@
       <li><a href="../spielplan/">Spielplan &amp; Tabellen</a></li>
       <li><a href="../news/">News</a></li>
       <li><a href="../verein/">Verein</a></li>
-      <li><span class="nav__bald knopf" aria-disabled="true" title="Seite folgt">Mitglied werden</span></li>
+      <li><a href="../mitglied-werden/" class="knopf">Mitglied werden</a></li>
       </ul>
     </nav>
   </div>
@@ -60,7 +60,7 @@
 <section class="container abschnitt sg">
   <h1>Gestaltungssystem „Speuzer Blau-Weiß“</h1>
   <div class="fluss">
-  <p class="inhalt">Interner Anhang für das Übernahmepaket: alle Tokens aus assets/css/tokens.css und alle Bausteine aus assets/css/komponenten.css, sichtbar gemacht. Stand des Builds: 2026-09-11T20:20:48.160Z.</p>
+  <p class="inhalt">Interner Anhang für das Übernahmepaket: alle Tokens aus assets/css/tokens.css und alle Bausteine aus assets/css/komponenten.css, sichtbar gemacht. Stand des Builds: 2026-09-11T20:51:50.486Z.</p>
   <h2>Farben</h2>
 <p class="inhalt">Ein Blauklang aus dem Wappen (Hue 240) plus neutrale Tinte. Kein Rot, kein Gelb, kein dekoratives Grau. Kontrastwerte nach WCAG-Formel, siehe Plan Abschnitt 2.1.</p>
 <div class="sg-farbraster" role="list">
@@ -481,7 +481,7 @@
 </span>
     <p class="person__name">Florian Müller</p>
     <p class="person__funktion">Kinderschutzbeauftragter</p>
-    <p class="person__mail"><a class="mail" href="mailto:kinderschutzbeauftragter@sportfreunde04.de">kinderschutzbeauftragter<wbr>@sportfreunde04<wbr>.de</a></p>
+    <p class="person__mail"><a class="mail" href="mailto:kinderschutzbeauftragter@sportfreunde04.de">kinderschutzbeauftragter<wbr>@sportfreunde04.de</a></p>
   </div>
 
 <h3>Tags</h3>
@@ -953,6 +953,35 @@
     <li>ab 10:00 Uhr</li>
     <li>Vereinsgelände Mainzer Landstraße 480</li>
   </ul>
+
+<h3>Ergebniszeile (.ergebnis)</h3>
+<p class="inhalt">Artikelseiten /news/&lt;slug&gt;/ (P7-Korrektur A2): dreiteilige Zeile statt Überschrift – Vereinsname links, Ergebnis mittig auf --blau-50-Fläche, Gegner rechts. Grid 1fr auto 1fr, unter 480px untereinander (Ergebnis mittig). Kein h2 (das Ergebnis ist keine Überschrift), stattdessen aria-label="Endstand" auf dem Container.</p>
+<div class="ergebnis" aria-label="Endstand" style="max-width:480px;">
+    <span class="ergebnis__team">FFV Sportfreunde 04</span>
+    <span class="ergebnis__resultat">4:1</span>
+    <span class="ergebnis__team">TSG Niederrad 1898</span>
+  </div>
+
+<h3>Formular (.formular)</h3>
+<p class="inhalt">/mitglied-werden/ (P7): Aufnahmeantrag-Entwurf. Eingabefelder 48px hoch, Checkboxen auf 44×44px vergrößert (Tippziel), Fehlertext in --warn unter dem Feld (hier am PLZ-Feld sichtbar, wie assets/js/formular.js ihn nach einem ungültigen Absenden einblendet).</p>
+<form class="formular inhalt" novalidate style="max-width:420px;">
+    <div class="formular__feld">
+      <label for="sg-vorname">Vorname <span class="formular__pflicht">*</span></label>
+      <input type="text" id="sg-vorname" name="sg-vorname" required aria-describedby="sg-vorname-fehler">
+      <p class="formular__fehler" id="sg-vorname-fehler" hidden></p>
+    </div>
+    <div class="formular__feld">
+      <label for="sg-plz">PLZ <span class="formular__pflicht">*</span></label>
+      <input type="text" id="sg-plz" name="sg-plz" inputmode="numeric" pattern="\d{5}" maxlength="5" required aria-describedby="sg-plz-fehler">
+      <p class="formular__fehler" id="sg-plz-fehler">Bitte eine gültige Postleitzahl eingeben (5 Ziffern)</p>
+    </div>
+    <div class="formular__checkzeile-block">
+      <div class="formular__checkzeile">
+        <input type="checkbox" id="sg-check" name="sg-check" required>
+        <label for="sg-check">Ich erteile das SEPA-Lastschriftmandat. <span class="formular__pflicht">*</span></label>
+      </div>
+    </div>
+  </form>
   </div>
 </section>
 <style>
@@ -986,7 +1015,7 @@
         <p>Postfach 190442, 60091 Frankfurt am Main</p>
       </address>
       <ul class="fuss__kontakt" role="list">
-        <li><a class="mail" href="mailto:geschaeftsstelle@sportfreunde04.de">geschaeftsstelle<wbr>@sportfreunde04<wbr>.de</a></li>
+        <li><a class="mail" href="mailto:geschaeftsstelle@sportfreunde04.de">geschaeftsstelle<wbr>@sportfreunde04.de</a></li>
         <li><a href="tel:+4969736868">Geschäftsstelle +49 69 736868</a></li>
         <li><a href="tel:+4969732193">Platzwart +49 69 732193</a></li>
         <li><a href="https://www.instagram.com/speuzer_ffm/" rel="noopener" target="_blank">Instagram @speuzer_ffm</a></li>
@@ -1009,7 +1038,7 @@
         <li><a href="../spielplan/">Spielplan</a></li>
         <li><a href="../tabellen/">Tabellen</a></li>
         <li><a href="../news/">News</a></li>
-        <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">Mitglied werden</span></li>
+        <li><a href="../mitglied-werden/">Mitglied werden</a></li>
         </ul>
       </div>
       <div class="fuss__gruppe">

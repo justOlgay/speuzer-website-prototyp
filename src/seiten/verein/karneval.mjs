@@ -113,10 +113,12 @@ function ansprechpartnerAbschnitt(daten) {
 </section>`;
 }
 
+// P7: /mitglied-werden/ existiert jetzt – echter Link statt baldSpan() (siehe
+// gleiche Korrektur und Begründung in src/seiten/index.mjs, heroAbschnitt()).
 function hinweisAbschnitt() {
   return `<section class="abschnitt">
   <div class="container">
-    <p class="meta">Beiträge der Karnevalabteilung stehen unter „${baldSpan("Mitglied werden")}“.</p>
+    <p class="meta">Beiträge der Karnevalabteilung stehen unter „<a href="${PFAD}mitglied-werden/">Mitglied werden</a>“.</p>
   </div>
 </section>`;
 }

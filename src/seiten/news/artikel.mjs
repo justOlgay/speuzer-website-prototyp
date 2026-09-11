@@ -67,11 +67,18 @@ function bildAbschnitt(eintrag, daten) {
   </figure>`;
 }
 
-// ---------- Ergebniszeile (wie eine .karte--spiel-Ergebniszeile) ----------
+// ---------- Ergebniszeile (P7-Korrektur A2): dreiteilige Zeile statt
+// Überschrift – links der eigene Verein, Mitte das Ergebnis, rechts der
+// Gegner. Kein h2 (das Ergebnis ist keine Überschrift), stattdessen
+// aria-label="Endstand" auf dem Container. ----------
 
 function ergebnisAbschnitt(eintrag) {
   if (!eintrag.ergebnis) return "";
-  return `<p class="artikel__ergebnis">FFV Sportfreunde 04 ${escapeHtml(eintrag.ergebnis)} ${escapeHtml(eintrag.gegner ?? "")}</p>`;
+  return `<div class="ergebnis" aria-label="Endstand">
+    <span class="ergebnis__team">FFV Sportfreunde 04</span>
+    <span class="ergebnis__resultat">${escapeHtml(eintrag.ergebnis)}</span>
+    <span class="ergebnis__team">${escapeHtml(eintrag.gegner ?? "")}</span>
+  </div>`;
 }
 
 // ---------- Fakten (Termin, Uhrzeit, Ort als Tags/Zeilen vor dem Text) ----------

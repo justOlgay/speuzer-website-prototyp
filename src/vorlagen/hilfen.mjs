@@ -100,6 +100,10 @@ export function fussballdeTeamUrl(team) {
 
 // ---------- Mail-Link mit <wbr> vor "@" und vor jedem "." danach ----------
 
+// P7-Korrektur A3: <wbr> nur noch direkt vor dem "@", nicht mehr vor jedem
+// "." danach (Umbruch "…04 / .de" sah falsch aus). .person__mail .mail
+// (overflow-wrap: anywhere) bleibt als Sicherheitsnetz für sehr lange lokale
+// Teile bestehen.
 export function mailLink(adresse, text) {
   const anzeigeRoh = text ?? adresse ?? "";
   const anzeigeEscaped = escapeHtml(anzeigeRoh);
@@ -107,7 +111,7 @@ export function mailLink(adresse, text) {
   let anzeige = anzeigeEscaped;
   if (atIndex !== -1) {
     const vorAt = anzeigeEscaped.slice(0, atIndex);
-    const nachAt = anzeigeEscaped.slice(atIndex + 1).replaceAll(".", "<wbr>.");
+    const nachAt = anzeigeEscaped.slice(atIndex + 1);
     anzeige = `${vorAt}<wbr>@${nachAt}`;
   }
   return `<a class="mail" href="mailto:${escapeHtml(adresse ?? "")}">${anzeige}</a>`;
@@ -227,10 +231,17 @@ function istKomplettVersal(text) {
   return buchstaben.length > 0 && buchstaben === buchstaben.toUpperCase() && buchstaben !== buchstaben.toLowerCase();
 }
 
+// Bekannte mehrbuchstabige Abkürzungen (P7-Korrektur A1) – zusätzlich zu den
+// schon vorher erkannten Einzelbuchstaben-Abkürzungen wie "e." in "e.V."
+// (siehe istEinzelbuchstabeAbkuerzung unten).
+const ABKUERZUNGEN = ["e.V.", "F.F.V.", "Str.", "Nr.", "ca.", "bzw.", "Ffm."];
+
 // Text in Sätze zerlegen: "." "!" "?" zählen nur als Satzende, wenn ihnen ein
 // Leerzeichen/Textende folgt (sonst z. B. "19.09.2026" mitten im Satz) und
 // ihnen kein einzelner Buchstabe nach einem Punkt/Leerzeichen vorausgeht
-// (Abkürzungen wie "F.F.V." oder "e.V.").
+// (Abkürzungen wie "F.F.V." oder "e.V."), keine der Abkürzungen aus
+// ABKUERZUNGEN vorausgeht und es sich nicht um eine Ordnungszahl handelt
+// (P7-Korrektur A1, siehe istOrdnungszahl unten).
 function teiltSaetze(text) {
   const saetze = [];
   let start = 0;
@@ -241,11 +252,34 @@ function teiltSaetze(text) {
     const danach = text.slice(ende, ende + 1);
     if (danach !== "" && !/\s/.test(danach)) continue;
 
+    const vorText = text.slice(0, ende);
+    if (ABKUERZUNGEN.some((a) => vorText.endsWith(a))) continue;
+
     const davor1 = text[treffer.index - 1] ?? "";
     const davor2 = text[treffer.index - 2] ?? "";
-    const istAbkuerzung =
+    const istEinzelbuchstabeAbkuerzung =
       /[A-Za-zÀ-ÖØ-öø-ÿ]/.test(davor1) && (davor2 === "" || davor2 === "." || /\s/.test(davor2));
-    if (istAbkuerzung) continue;
+    if (istEinzelbuchstabeAbkuerzung) continue;
+
+    // Ordnungszahlen (P7-Korrektur A1): ein einzelner Punkt nach einer Zahl
+    // ohne führende Null (z. B. "1.", "19.") beendet keinen Satz, wenn danach
+    // ein Leerzeichen und ein Buchstabe oder eine weitere Zahl folgt ("in der
+    // 1. Minute", "Seit dem 1. September 2026"). Zahlen mit führender Null
+    // (z. B. "04." in "Sportfreunde 04.") gelten nicht als Ordnungszahl,
+    // damit ein echtes Satzende nach einem Vereinskürzel wie "Sportfreunde
+    // 04." erhalten bleibt – sonst ließen sich "1. September" (Fortsetzung)
+    // und "Sportfreunde 04." (echtes Satzende) nicht unterscheiden, da in
+    // beiden Fällen ein großgeschriebenes Wort folgt ("September"/"Sie").
+    // "19.09.2026" ist schon durch die Prüfung oben abgedeckt (kein
+    // Leerzeichen nach dem ersten Punkt).
+    if (treffer[0] === "." && /\d/.test(davor1)) {
+      let zahlStart = treffer.index;
+      while (zahlStart > 0 && /\d/.test(text[zahlStart - 1])) zahlStart--;
+      const zahl = text.slice(zahlStart, treffer.index);
+      const hatFuehrendeNull = zahl.length > 1 && zahl[0] === "0";
+      const folgtBuchstabeOderZahl = /^\s[A-Za-zÀ-ÖØ-öø-ÿ0-9]/.test(text.slice(ende));
+      if (!hatFuehrendeNull && folgtBuchstabeOderZahl) continue;
+    }
 
     saetze.push(text.slice(start, ende).trim());
     start = ende;

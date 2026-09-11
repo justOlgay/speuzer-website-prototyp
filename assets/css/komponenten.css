@@ -1613,14 +1613,49 @@ body.tabellen h2 {
 }
 
 /* ==========================================================================
-   Artikel-Ergebniszeile (.artikel__ergebnis, P6) – /news/<slug>/: wie eine
-   .karte--spiel-Ergebniszeile, aber freistehend über dem Fließtext.
+   Ergebniszeile (.ergebnis, P7-Korrektur A2) – /news/<slug>/: dreiteilige
+   Zeile statt Überschrift (kein h2 – das Ergebnis ist keine Überschrift,
+   siehe aria-label="Endstand" im Markup). Grid 1fr auto 1fr: Vereinsname
+   links, Ergebnis in der Mitte auf --blau-50-Fläche, Gegner rechts. Unter
+   480px untereinander, Ergebnis dabei zentriert.
    ========================================================================== */
 
-.artikel__ergebnis {
+.ergebnis {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.ergebnis__team {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+}
+
+.ergebnis__team:last-child {
+  text-align: right;
+}
+
+.ergebnis__resultat {
   font-family: var(--font-head);
-  font-size: var(--fs-2xl);
-  color: var(--blau-900);
+  font-size: var(--fs-3xl);
+  color: var(--blau-700);
+  background: var(--blau-50);
+  padding: var(--sp-3);
+  border-radius: var(--r-md);
+  text-align: center;
+}
+
+@media (max-width: 479.98px) {
+  .ergebnis {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .ergebnis__team:last-child {
+    text-align: center;
+  }
 }
 
 /* ==========================================================================
@@ -1680,4 +1715,110 @@ body.tabellen h2 {
   color: var(--blau-900);
   font-weight: 700;
   font-size: var(--fs-sm);
+}
+
+/* ==========================================================================
+   Formular (.formular, P7) – /mitglied-werden/: Aufnahmeantrag-Entwurf.
+   Fieldsets mit --sp-6 Abstand untereinander, Felder darin mit --sp-4
+   Abstand. Eingabefelder 48px hoch, 1px --line, Radius --r-sm, Fokus
+   var(--fokus). Checkboxen bewusst auf 44×44px vergrößert (Tippziel-Gate in
+   tools/pruefen.mjs prüft die tatsächliche Eingabefeld-Größe, nicht nur die
+   umschließende Zeile).
+   ========================================================================== */
+
+.formular {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+
+.formular fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.formular legend {
+  font-family: var(--font-head);
+  font-size: var(--fs-xl);
+  color: var(--blau-900);
+  text-transform: uppercase;
+  padding: 0;
+  margin: 0 0 var(--sp-2);
+}
+
+.formular__feld {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.formular label {
+  font-weight: 600;
+  font-size: var(--fs-sm);
+}
+
+.formular input[type="text"],
+.formular input[type="date"],
+.formular input[type="email"],
+.formular input[type="tel"],
+.formular select {
+  height: 48px;
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink);
+  width: 100%;
+  max-width: 100%;
+}
+
+.formular__pflicht {
+  color: var(--warn);
+}
+
+.formular__checkgruppe {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.formular__checkzeile-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.formular__checkzeile {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+}
+
+.formular__checkzeile input[type="checkbox"] {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  accent-color: var(--blau-700);
+}
+
+.formular__checkzeile label,
+.formular__checkzeile p {
+  font-weight: 400;
+  font-size: var(--fs-md);
+  margin: 0;
+}
+
+.formular__fehler {
+  color: var(--warn);
+  font-size: var(--fs-sm);
+  margin: 0;
+}
+
+.formular__fehler[hidden] {
+  display: none;
 }
