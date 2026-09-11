@@ -335,6 +335,28 @@ function seiteBausteine(daten) {
     ${trainingsrasterZeilen}
   </ul>`;
 
+  // P3: kompakte Team-Karte (.karte__training, .karte__mehr) – echter Link,
+  // da /mannschaften/d3/ inzwischen existiert.
+  const teamKarteBeispiel = d3
+    ? `<a class="karte karte--link" href="${PFAD}mannschaften/${d3.slug}/" style="max-width:280px;">
+    <span class="karte__titel">${escapeHtml(d3.name)}</span>
+    <span class="karte__meta">Jahrgang ${escapeHtml(d3.jahrgang ?? "")} · ${escapeHtml(d3.staffel)}</span>
+    <ul class="karte__training" role="list">
+      ${(d3.training ?? [])
+        .map((t) => `<li>${escapeHtml(t.tag.slice(0, 2))} ${escapeHtml(t.von)}–${escapeHtml(t.bis)}</li>`)
+        .join("\n      ")}
+    </ul>
+    <span class="karte__mehr">Zur Mannschaft →</span>
+  </a>`
+    : `<p class="meta">Kein Team "d3" in data/teams.json gefunden.</p>`;
+
+  // P3: zweispaltiges Layout (Teamseiten) – ab 1024px 7/12 + 5/12, darunter
+  // (Hauptspalte zuerst) untereinander.
+  const zweispaltigBeispiel = `<div class="zweispaltig">
+    <div class="karte">Hauptspalte (7/12 ab 1024px)</div>
+    <div class="karte">Seitenspalte (5/12 ab 1024px)</div>
+  </div>`;
+
   const beispielNewsContain = (daten.news ?? []).find((n) => n.bild_passung === "contain" && n.bild);
   const karteContainBeispiel = beispielNewsContain
     ? `<article class="karte" style="max-width:320px;">
@@ -396,8 +418,16 @@ ${addressBeispiel}
 <h3>Trainingsraster</h3>
 ${trainingsrasterBeispiel}
 
-<h3>Karte mit Bild „contain“ (.karte__bild--contain)</h3>
-${karteContainBeispiel}`;
+<h3>Karte mit Bild „contain” (.karte__bild--contain)</h3>
+${karteContainBeispiel}
+
+<h3>Team-Karte (.karte__training, .karte__mehr)</h3>
+<p class=”inhalt”>Mannschaften-Übersicht (P3): kompakte Trainingsliste und Pfeil-Hinweis unten rechts, die ganze Karte ist der Link.</p>
+${teamKarteBeispiel}
+
+<h3>Zweispaltiges Layout (.zweispaltig)</h3>
+<p class=”inhalt”>Teamseiten (P3): Hauptspalte 7/12 + Seitenspalte 5/12 ab 1024px, darunter (< 1024px) beide Spalten untereinander, Hauptspalte zuerst.</p>
+${zweispaltigBeispiel}`;
 }
 
 export function seite(daten) {

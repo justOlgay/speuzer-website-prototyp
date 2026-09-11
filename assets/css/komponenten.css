@@ -569,7 +569,8 @@ body.menue-offen {
 }
 
 .karte--link {
-  display: block;
+  display: flex;
+  flex-direction: column;
   color: inherit;
   text-decoration: none;
   transition: box-shadow var(--t-kurz), transform var(--t-kurz);
@@ -618,6 +619,37 @@ body.menue-offen {
   display: block;
   font-size: var(--fs-sm);
   color: var(--ink-3);
+}
+
+/* Kompakte Trainingsliste innerhalb einer Team-Karte (Mannschaften-Übersicht,
+   P3): jede Einheit auf einer Zeile, Uhrzeiten dürfen nie umbrechen. */
+.karte__training {
+  list-style: none;
+  margin: var(--sp-3) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+
+.karte__training li {
+  white-space: nowrap;
+}
+
+/* Pfeil-Hinweis unten rechts in einer Team-Karte (P3) – durch die
+   Flex-Spalte in .karte--link sitzt er unabhängig von der Trainingsanzahl
+   am unteren Kartenrand, auch wenn Karten in derselben Rasterzeile
+   unterschiedlich viel Inhalt haben (Grid streckt sie ohnehin auf gleiche
+   Höhe). */
+.karte__mehr {
+  display: block;
+  margin-top: auto;
+  padding-top: var(--sp-3);
+  font-size: var(--fs-sm);
+  color: var(--blau-700);
+  text-align: right;
 }
 
 /* ==========================================================================
@@ -1081,9 +1113,9 @@ body.menue-offen {
   margin: 0;
 }
 
-.hero__fakten li + li::before {
+.hero__fakten li:not(:last-child)::after {
   content: "·";
-  margin-right: var(--sp-2);
+  margin-left: var(--sp-2);
 }
 
 /* Unter 1024px beide Hero-Knöpfe auf normaler Höhe (44px), damit sie bei
@@ -1184,6 +1216,24 @@ body.menue-offen {
 }
 
 /* ==========================================================================
+   Zweispaltiges Layout (Teamseiten, P3) – Hauptspalte 7/12, Seitenspalte
+   5/12 ab 1024px; darunter (< 1024px) beide Spalten untereinander,
+   Hauptspalte zuerst (Reihenfolge im Markup entscheidet).
+   ========================================================================== */
+
+.zweispaltig {
+  display: grid;
+  gap: var(--sp-7);
+}
+
+@media (min-width: 1024px) {
+  .zweispaltig {
+    grid-template-columns: 7fr 5fr;
+    align-items: start;
+  }
+}
+
+/* ==========================================================================
    Trainingsraster (P2-K/K7) – ersetzt eine Tabelle für Mannschaft/Jahrgang/
    Training: Uhrzeiten (white-space: nowrap) dürfen nie umbrechen, das war in
    einer echten <table> bei schmalen Breiten sonst der Fall.
@@ -1193,6 +1243,7 @@ body.menue-offen {
   list-style: none;
   margin: 0;
   padding: 0;
+  max-width: 880px;
 }
 
 .trainingsraster__kopf {
@@ -1236,7 +1287,7 @@ body.menue-offen {
 @media (min-width: 768px) {
   .trainingsraster__kopf {
     display: grid;
-    grid-template-columns: minmax(200px, 1fr) 160px auto;
+    grid-template-columns: minmax(200px, 260px) 140px 1fr;
     column-gap: var(--sp-4);
     padding-block: var(--sp-3);
     border-bottom: 1px solid var(--line);
@@ -1247,7 +1298,7 @@ body.menue-offen {
   }
 
   .trainingsraster__zeile {
-    grid-template-columns: minmax(200px, 1fr) 160px auto;
+    grid-template-columns: minmax(200px, 260px) 140px 1fr;
     grid-template-areas: "name jahrgang einheiten";
   }
 

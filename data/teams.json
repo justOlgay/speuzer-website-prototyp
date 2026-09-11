@@ -4,6 +4,7 @@
     "name": "1. Herrenmannschaft",
     "kurz": "Herren",
     "kategorie": "Senioren",
+    "gruppe": "Senioren",
     "jahrgang": null,
     "staffel": "Kreisliga A · KLA Frankfurt Gr. 1",
     "spielbetrieb": "Meisterschaft, Kreispokal",
@@ -18,13 +19,15 @@
     "fussballde_id": "011MICFB14000000VTVG0001VTR8C1K7",
     "csv": "HERREN",
     "tabelle": true,
-    "kalender": "herren.ics"
+    "kalender": "herren.ics",
+    "trainingsKalender": "training-herren.ics"
   },
   {
     "slug": "a-jugend",
     "name": "A-Jugend",
     "kurz": "A-Jugend",
     "kategorie": "Jugend",
+    "gruppe": "Jugend",
     "jahrgang": "2008/2009",
     "staffel": "Gruppenliga · AJGL Frankfurt",
     "spielbetrieb": "Meisterschaft, Kreispokal",
@@ -39,13 +42,15 @@
     "fussballde_id": "019ORCB50G000000VV0AG80NVUQ1MD7G",
     "csv": "A",
     "tabelle": true,
-    "kalender": "a.ics"
+    "kalender": "a.ics",
+    "trainingsKalender": "training-a.ics"
   },
   {
     "slug": "d1",
     "name": "D1-Jugend",
     "kurz": "D1",
     "kategorie": "Jugend",
+    "gruppe": "Jugend",
     "jahrgang": "2014",
     "staffel": "Kreisliga A · DJKL F Gr. 1",
     "spielbetrieb": "Meisterschaft, Kreispokal",
@@ -61,13 +66,15 @@
     "fussballde_id": "011MIE88PK000000VTVG0001VTR8C1K7",
     "csv": "D1",
     "tabelle": true,
-    "kalender": "d1.ics"
+    "kalender": "d1.ics",
+    "trainingsKalender": "training-d1.ics"
   },
   {
     "slug": "d2",
     "name": "D2-Jugend",
     "kurz": "D2",
     "kategorie": "Jugend",
+    "gruppe": "Jugend",
     "jahrgang": "2015",
     "staffel": "1. Kreisklasse · DJ KK F Gr. 05",
     "spielbetrieb": "Meisterschaft",
@@ -83,13 +90,15 @@
     "fussballde_id": "011MIF9LDC000000VTVG0001VTR8C1K7",
     "csv": "D2",
     "tabelle": true,
-    "kalender": "d2.ics"
+    "kalender": "d2.ics",
+    "trainingsKalender": "training-d2.ics"
   },
   {
     "slug": "d3",
     "name": "D3-Jugend",
     "kurz": "D3",
     "kategorie": "Jugend",
+    "gruppe": "Jugend",
     "jahrgang": "2014/2015",
     "staffel": "1. Kreisklasse · DJ KK F Gr. 04",
     "spielbetrieb": "Meisterschaft",
@@ -104,13 +113,15 @@
     "fussballde_id": "02USD4SHUG000000VS5489BRVS0D3BPJ",
     "csv": "D3",
     "tabelle": true,
-    "kalender": "d3.ics"
+    "kalender": "d3.ics",
+    "trainingsKalender": "training-d3.ics"
   },
   {
     "slug": "e1",
     "name": "E1-Jugend",
     "kurz": "E1",
     "kategorie": "Jugend",
+    "gruppe": "Jugend",
     "jahrgang": "2016",
     "staffel": "1. Kreisklasse · EJ Quali Gr. 08",
     "spielbetrieb": "Qualifikationsrunde, Kreispokal; Hauptrunde ab Oktober",
@@ -126,13 +137,15 @@
     "fussballde_id": "011MIDBD8C000000VTVG0001VTR8C1K7",
     "csv": "E1",
     "tabelle": true,
-    "kalender": "e1.ics"
+    "kalender": "e1.ics",
+    "trainingsKalender": "training-e1.ics"
   },
   {
     "slug": "e2",
     "name": "E2-Jugend",
     "kurz": "E2",
     "kategorie": "Jugend",
+    "gruppe": "Jugend",
     "jahrgang": "2017",
     "staffel": "1. Kreisklasse · EJ Quali Gr. 18",
     "spielbetrieb": "Qualifikationsrunde; Hauptrunde ab Oktober",
@@ -148,13 +161,15 @@
     "fussballde_id": "011MIE1KH4000000VTVG0001VTR8C1K7",
     "csv": "E2",
     "tabelle": true,
-    "kalender": "e2.ics"
+    "kalender": "e2.ics",
+    "trainingsKalender": "training-e2.ics"
   },
   {
     "slug": "e3",
     "name": "E3-Jugend",
     "kurz": "E3",
     "kategorie": "Jugend",
+    "gruppe": "Jugend",
     "jahrgang": "2016/2017",
     "staffel": "1. Kreisklasse · EJ Quali Gr. 22",
     "spielbetrieb": "Qualifikationsrunde; Hauptrunde ab Oktober",
@@ -169,13 +184,15 @@
     "fussballde_id": "02PS0CFJCO000000VS5489B1VVQNIHJA",
     "csv": "E3",
     "tabelle": true,
-    "kalender": "e3.ics"
+    "kalender": "e3.ics",
+    "trainingsKalender": "training-e3.ics"
   },
   {
     "slug": "f1",
     "name": "F1-Jugend",
     "kurz": "F1",
     "kategorie": "Jugend",
+    "gruppe": "Kinderfußball",
     "jahrgang": "2018",
     "staffel": "Kinderfußball · F-Junioren 4+1 Gr. 2",
     "spielbetrieb": "Kinderfestivals (keine Tabelle)",
@@ -190,13 +207,15 @@
     "fussballde_id": null,
     "csv": "F1",
     "tabelle": false,
-    "kalender": "f1.ics"
+    "kalender": "f1.ics",
+    "trainingsKalender": "training-f1.ics"
   },
   {
     "slug": "f2",
     "name": "F2-Jugend",
     "kurz": "F2",
     "kategorie": "Jugend",
+    "gruppe": "Kinderfußball",
     "jahrgang": "2019/2020",
     "staffel": "Kinderfußball · F-Junioren 4vs4 Gr. 4",
     "spielbetrieb": "Kinderfestivals (keine Tabelle)",
@@ -211,13 +230,15 @@
     "fussballde_id": null,
     "csv": "F2",
     "tabelle": false,
-    "kalender": "f2.ics"
+    "kalender": "f2.ics",
+    "trainingsKalender": "training-f2.ics"
   },
   {
     "slug": "g-jugend",
     "name": "G-Jugend (Bambinis)",
     "kurz": "G-Jugend",
     "kategorie": "Jugend",
+    "gruppe": "Kinderfußball",
     "jahrgang": "2021 und jünger",
     "staffel": "Kinderfußball · G-Junioren 3vs3 Gr. 4",
     "spielbetrieb": "Kinderfestivals (keine Tabelle)",
@@ -231,6 +252,7 @@
     "fussballde_id": null,
     "csv": "G1",
     "tabelle": false,
-    "kalender": "g1.ics"
+    "kalender": "g1.ics",
+    "trainingsKalender": "training-g1.ics"
   }
 ]

@@ -2,14 +2,11 @@
 // Aktuelles, Probetraining, Adresse & Anfahrt, Karneval.
 
 import { bild } from "../vorlagen/bild.mjs";
-import { datumLang, naechsteSpiele, spielZeile, mailLink } from "../vorlagen/hilfen.mjs";
+import { datumLang, naechsteSpiele, spielZeile, mailLink, jahrgangText, PROBETRAINING_MAILTO } from "../vorlagen/hilfen.mjs";
 
 // Diese Seite ist immer die Wurzel ("/"), daher ist der Pfad zu den Assets
 // immer "./" (siehe pfadZurWurzel() in tools/build.mjs für Tiefe 0).
 const PFAD = "./";
-
-const MAILTO_PROBETRAINING =
-  "mailto:jugendleitung@sportfreunde04.de?subject=Probetraining%20beim%20FFV%20Sportfreunde%2004&body=Hallo%2C%0A%0Awir%20interessieren%20uns%20f%C3%BCr%20ein%20Probetraining.%0AJahrgang%20des%20Kindes%3A%20%0AVorerfahrung%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe";
 
 const TAG_KUERZEL = {
   Montag: "Mo",
@@ -114,7 +111,7 @@ function heroAbschnitt(daten) {
       <h1 class="hero__titel">Fußball im Gallus – seit 1904.</h1>
       <p class="hero__lead">Elf Fußballmannschaften von der G-Jugend bis zu den Herren, eine Karnevalabteilung und ein eigener Platz an der Mainzer Landstraße. Wir sind ein Verein für Menschen: Gemeinschaft, Respekt und Freude am Spiel.</p>
       <p class="knopfzeile">
-        <a class="knopf knopf--weiss knopf--gross" href="${escapeHtml(MAILTO_PROBETRAINING)}">Probetraining vereinbaren</a>
+        <a class="knopf knopf--weiss knopf--gross" href="${escapeHtml(PROBETRAINING_MAILTO)}">Probetraining vereinbaren</a>
         ${baldSpan("Mitglied werden", { knopf: true })}
       </p>
       <ul class="hero__fakten" role="list">
@@ -164,7 +161,7 @@ function trainingszeitenAbschnitt(daten) {
         .join("\n        ");
       return `<li class="trainingsraster__zeile">
         <span class="trainingsraster__name">${baldSpan(team.name)}</span>
-        <span class="trainingsraster__jahrgang meta">${escapeHtml(team.jahrgang ?? "–")}</span>
+        <span class="trainingsraster__jahrgang meta">${escapeHtml(jahrgangText(team))}</span>
         <span class="trainingsraster__einheiten">
         ${einheiten}
         </span>
@@ -249,7 +246,7 @@ function probetrainingAbschnitt() {
       <li><p>Aufnahmeantrag ausfüllen – Beiträge und Unterlagen stehen unter „Mitglied werden“</p></li>
     </ol>
     <p class="knopfzeile">
-      <a class="knopf" href="${escapeHtml(MAILTO_PROBETRAINING)}">Probetraining vereinbaren</a>
+      <a class="knopf" href="${escapeHtml(PROBETRAINING_MAILTO)}">Probetraining vereinbaren</a>
     </p>
   </div>
 </section>`;

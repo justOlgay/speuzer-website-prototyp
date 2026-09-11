@@ -11,6 +11,20 @@ function escapeHtml(text) {
     .replaceAll('"', "&quot;");
 }
 
+// ---------- Probetraining (P2, ab P3 auch auf /mannschaften/ verwendet) ----------
+
+export const PROBETRAINING_MAILTO =
+  "mailto:jugendleitung@sportfreunde04.de?subject=Probetraining%20beim%20FFV%20Sportfreunde%2004&body=Hallo%2C%0A%0Awir%20interessieren%20uns%20f%C3%BCr%20ein%20Probetraining.%0AJahrgang%20des%20Kindes%3A%20%0AVorerfahrung%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe";
+
+// ---------- Jahrgang-Anzeige ----------
+
+// Die Herren haben kein Jahrgang-Feld (kategorie "Senioren", jahrgang null) –
+// dort erscheint "Senioren" statt "–" (P3, Korrektur A1). Sonst unverändert.
+export function jahrgangText(team) {
+  if (team?.kategorie === "Senioren") return "Senioren";
+  return team?.jahrgang ?? "–";
+}
+
 // ---------- Datum und Zeit ----------
 
 const WOCHENTAGE_KURZ = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"]; // Index = Date#getDay()

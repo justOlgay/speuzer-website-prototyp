@@ -42,5 +42,6 @@
   "karten": {
     "apple": "https://maps.apple.com/?q=Mainzer+Landstra%C3%9Fe+480,+60326+Frankfurt+am+Main",
     "google": "https://www.google.com/maps/search/?api=1&query=Mainzer+Landstra%C3%9Fe+480%2C+60326+Frankfurt+am+Main"
-  }
+  },
+  "kalender_basis": "https://justolgay.github.io/speuzer-spielplan/"
 }

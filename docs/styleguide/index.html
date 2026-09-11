@@ -46,7 +46,7 @@
       </button>
       <ul>
       <li><a href="../">Start</a></li>
-      <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">Mannschaften</span></li>
+      <li><a href="../mannschaften/">Mannschaften</a></li>
       <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">Spielplan &amp; Tabellen</span></li>
       <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">News</span></li>
       <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">Verein</span></li>
@@ -60,7 +60,7 @@
 <section class="container abschnitt sg">
   <h1>Gestaltungssystem „Speuzer Blau-Weiß“</h1>
   <div class="fluss">
-  <p class="inhalt">Interner Anhang für das Übernahmepaket: alle Tokens aus assets/css/tokens.css und alle Bausteine aus assets/css/komponenten.css, sichtbar gemacht. Stand des Builds: 2026-09-11T18:15:46.516Z.</p>
+  <p class="inhalt">Interner Anhang für das Übernahmepaket: alle Tokens aus assets/css/tokens.css und alle Bausteine aus assets/css/komponenten.css, sichtbar gemacht. Stand des Builds: 2026-09-11T18:32:11.125Z.</p>
   <h2>Farben</h2>
 <p class="inhalt">Ein Blauklang aus dem Wappen (Hue 240) plus neutrale Tinte. Kein Rot, kein Gelb, kein dekoratives Grau. Kontrastwerte nach WCAG-Formel, siehe Plan Abschnitt 2.1.</p>
 <div class="sg-farbraster" role="list">
@@ -723,7 +723,7 @@
       </li>
   </ul>
 
-<h3>Karte mit Bild „contain“ (.karte__bild--contain)</h3>
+<h3>Karte mit Bild „contain” (.karte__bild--contain)</h3>
 <article class="karte" style="max-width:320px;">
     <picture class="karte__bild karte__bild--contain">
   <source type="image/avif" srcset="../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-480.avif 480w, ../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-960.avif 960w, ../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-1254.avif 1254w" sizes="320px">
@@ -733,6 +733,25 @@
     <p class="karte__meta">App-News</p>
     <h4 class="karte__titel" style="font-size:var(--fs-lg);">Heimsieg am Rebstock: 4:1 gegen die TSG Niederrad</h4>
   </article>
+
+<h3>Team-Karte (.karte__training, .karte__mehr)</h3>
+<p class=”inhalt”>Mannschaften-Übersicht (P3): kompakte Trainingsliste und Pfeil-Hinweis unten rechts, die ganze Karte ist der Link.</p>
+<a class="karte karte--link" href="../mannschaften/d3/" style="max-width:280px;">
+    <span class="karte__titel">D3-Jugend</span>
+    <span class="karte__meta">Jahrgang 2014/2015 · 1. Kreisklasse · DJ KK F Gr. 04</span>
+    <ul class="karte__training" role="list">
+      <li>Di 17:30–19:30</li>
+      <li>Fr 17:30–19:30</li>
+    </ul>
+    <span class="karte__mehr">Zur Mannschaft →</span>
+  </a>
+
+<h3>Zweispaltiges Layout (.zweispaltig)</h3>
+<p class=”inhalt”>Teamseiten (P3): Hauptspalte 7/12 + Seitenspalte 5/12 ab 1024px, darunter (< 1024px) beide Spalten untereinander, Hauptspalte zuerst.</p>
+<div class="zweispaltig">
+    <div class="karte">Hauptspalte (7/12 ab 1024px)</div>
+    <div class="karte">Seitenspalte (5/12 ab 1024px)</div>
+  </div>
   </div>
 </section>
 <style>
@@ -785,7 +804,7 @@
       <div class="fuss__gruppe">
         <h2>Sport</h2>
         <ul>
-        <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">Mannschaften &amp; Training</span></li>
+        <li><a href="../mannschaften/">Mannschaften &amp; Training</a></li>
         <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">Spielplan</span></li>
         <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">Tabellen</span></li>
         <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">News</span></li>
