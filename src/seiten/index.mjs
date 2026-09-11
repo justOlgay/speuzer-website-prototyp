@@ -143,7 +143,7 @@ function naechsteSpieleAbschnitt(daten) {
     <p class="meta">Alle Mannschaften · Stand ${datumLang(daten.stand)}</p>
     ${inhalt}
     <p class="knopfzeile">
-      ${baldSpan("Alle Spiele und Tabellen", { knopf: true })}
+      <a class="knopf" href="${PFAD}spielplan/">Alle Spiele und Tabellen</a>
       <a href="https://justolgay.github.io/speuzer-spielplan/" rel="noopener" target="_blank">Spielplan im Handy-Kalender abonnieren</a>
     </p>
   </div>

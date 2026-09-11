@@ -524,8 +524,23 @@ body.menue-offen {
    Seitenkopf
    ========================================================================== */
 
+/* .seitenkopf ist selbst ein .abschnitt (siehe Seitenmodule) mit eigenem
+   padding-block statt --sektion; der direkt folgende .abschnitt bekommt einen
+   kleineren padding-top, damit zwischen Lead und erstem Inhalt kein doppelter
+   Abschnittsabstand entsteht (P4, Korrektur A1). */
 .seitenkopf {
-  margin-bottom: var(--sp-7);
+  padding-block: var(--sp-8) var(--sp-6);
+}
+
+.seitenkopf + .abschnitt {
+  padding-top: var(--sp-6);
+}
+
+/* Auf /tabellen/ (P4) sitzt zwischen .seitenkopf und dem ersten .abschnitt die
+   Sprungliste (<nav>, kein .abschnitt) – ohne diese Ergänzung griffe die Regel
+   oben dort nicht und der Abstand bliebe bei der alten Abschnittsgröße. */
+.seitenkopf + nav + .abschnitt {
+  padding-top: var(--sp-6);
 }
 
 .seitenkopf h1 {
@@ -1306,4 +1321,88 @@ body.menue-offen {
     align-items: flex-start;
     text-align: left;
   }
+}
+
+/* ==========================================================================
+   Karte „Nächstes Spiel" (.karte--spiel, P4) – große Einzelkarte auf den
+   Team-Spielplanseiten: Datum/Zeit groß, Heim/Auswärts- und Wettbewerbs-Tag,
+   Gegner, Spielstätte mit Route-Knopf.
+   ========================================================================== */
+
+.karte--spiel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.karte__spiel-datum {
+  font-family: var(--font-head);
+  font-size: var(--fs-2xl);
+  color: var(--blau-900);
+  margin: 0;
+}
+
+.karte__spiel-gegner {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  margin: 0;
+}
+
+.karte__spiel-ort {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3);
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+  margin: 0;
+}
+
+/* ==========================================================================
+   Sprunglink-Pille (.sprung, P4) – Sprungliste zu den Tabellenabschnitten auf
+   /tabellen/: optisch wie .tag, aber mit Tippziel 44px.
+   ========================================================================== */
+
+.sprung {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  border-radius: var(--r-pill);
+  background: var(--blau-100);
+  color: var(--blau-900);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  text-decoration: none;
+}
+
+.sprung:hover {
+  background: var(--blau-50);
+  color: var(--blau-700);
+  text-decoration: none;
+}
+
+/* ==========================================================================
+   Vergangenes Spiel (.spiel--vergangen, P4) – Team-Spielplanseiten „Alle
+   Spiele": gedämpfter Text statt der sonstigen Akzentfarben. Kein
+   Durchstreichen (das bleibt .spiel--entfaellt vorbehalten).
+   ========================================================================== */
+
+.spiel--vergangen {
+  color: var(--ink-3);
+}
+
+.spiel--vergangen .spiel__datum,
+.spiel--vergangen .spiel__ergebnis {
+  color: var(--ink-3);
+}
+
+/* ==========================================================================
+   Tabellen-Sprungziele (/tabellen/, P4) – Überschrift soll nach dem Sprung
+   nicht am Bildschirmrand kleben.
+   ========================================================================== */
+
+body.tabellen h2 {
+  scroll-margin-top: var(--sp-6);
 }

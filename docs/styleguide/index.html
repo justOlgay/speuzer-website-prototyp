@@ -47,7 +47,7 @@
       <ul>
       <li><a href="../">Start</a></li>
       <li><a href="../mannschaften/">Mannschaften</a></li>
-      <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">Spielplan &amp; Tabellen</span></li>
+      <li><a href="../spielplan/">Spielplan &amp; Tabellen</a></li>
       <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">News</span></li>
       <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">Verein</span></li>
       <li><span class="nav__bald knopf" aria-disabled="true" title="Seite folgt">Mitglied werden</span></li>
@@ -60,7 +60,7 @@
 <section class="container abschnitt sg">
   <h1>Gestaltungssystem „Speuzer Blau-Weiß“</h1>
   <div class="fluss">
-  <p class="inhalt">Interner Anhang für das Übernahmepaket: alle Tokens aus assets/css/tokens.css und alle Bausteine aus assets/css/komponenten.css, sichtbar gemacht. Stand des Builds: 2026-09-11T18:32:11.125Z.</p>
+  <p class="inhalt">Interner Anhang für das Übernahmepaket: alle Tokens aus assets/css/tokens.css und alle Bausteine aus assets/css/komponenten.css, sichtbar gemacht. Stand des Builds: 2026-09-11T19:09:56.994Z.</p>
   <h2>Farben</h2>
 <p class="inhalt">Ein Blauklang aus dem Wappen (Hue 240) plus neutrale Tinte. Kein Rot, kein Gelb, kein dekoratives Grau. Kontrastwerte nach WCAG-Formel, siehe Plan Abschnitt 2.1.</p>
 <div class="sg-farbraster" role="list">
@@ -752,6 +752,41 @@
     <div class="karte">Hauptspalte (7/12 ab 1024px)</div>
     <div class="karte">Seitenspalte (5/12 ab 1024px)</div>
   </div>
+
+<h3>Karte „Nächstes Spiel" (.karte--spiel)</h3>
+<p class="inhalt">Team-Spielplanseiten (P4): große Einzelkarte für das nächste Spiel, Datum/Zeit groß in Barlow Condensed.</p>
+<div class="karte karte--spiel" style="max-width:360px;">
+    <p class="karte__spiel-datum">Samstag, 12. September 2026 · 09:00 Uhr</p>
+    <p class="knopfzeile" style="margin:0;">
+      <span class="tag tag--auswaerts">Auswärts</span>
+    </p>
+    <p class="karte__spiel-gegner">FFC Olympia 07 IV</p>
+    <p class="karte__spiel-ort">
+      <span>Ostparkstr. 16, 60385 Frankfurt am Main</span>
+    </p>
+  </div>
+
+<h3>Sprunglink-Pille (.sprung)</h3>
+<p class="inhalt">Sprungliste auf /tabellen/ (P4): optisch wie .tag, aber mit Tippziel 44px.</p>
+<p class="knopfzeile">
+    <a class="sprung" href="#inhalt">D1</a>
+    <a class="sprung" href="#inhalt">D2</a>
+    <a class="sprung" href="#inhalt">D3</a>
+  </p>
+
+<h3>Vergangenes Spiel (.spiel--vergangen)</h3>
+<p class="inhalt">„Alle Spiele" auf den Team-Spielplanseiten (P4): gedämpfter Text statt der sonstigen Akzentfarben.</p>
+<ul class="spiele" role="list">
+    <li class="spiel spiel--vergangen">
+      <span class="spiel__datum">Mi 09.09. · 19:00</span>
+      <span class="tag tag--heim">Heim</span>
+      <span class="spiel__gegner-block">
+        <span class="spiel__gegner">TSG Niederrad 1898 <span class="meta">(Herren)</span></span>
+        <span class="spiel__ort meta">Am Römerhof 9, 60486 Frankfurt am Main</span>
+      </span>
+      <span class="spiel__ergebnis"><a href="https://www.fussball.de/spiel/x/-/spiel/031D0TFEI8000000VS5489BUVUR5FS5A" rel="noopener" target="_blank">Ergebnis auf FUSSBALL.DE</a></span>
+    </li>
+  </ul>
   </div>
 </section>
 <style>
@@ -805,8 +840,8 @@
         <h2>Sport</h2>
         <ul>
         <li><a href="../mannschaften/">Mannschaften &amp; Training</a></li>
-        <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">Spielplan</span></li>
-        <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">Tabellen</span></li>
+        <li><a href="../spielplan/">Spielplan</a></li>
+        <li><a href="../tabellen/">Tabellen</a></li>
         <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">News</span></li>
         <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">Mitglied werden</span></li>
         </ul>

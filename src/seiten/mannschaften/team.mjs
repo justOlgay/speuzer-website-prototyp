@@ -84,14 +84,12 @@ function beschreibung(team) {
 // ---------- Seitenkopf ----------
 
 function seitenkopfAbschnitt(team) {
-  return `<section class="abschnitt">
+  return `<section class="abschnitt seitenkopf">
   <div class="container">
-    <div class="seitenkopf">
-      <p class="meta">Mannschaft · ${escapeHtml(team.gruppe ?? "")}</p>
-      <h1>${escapeHtml(team.name)}</h1>
-      <p class="seitenkopf__lead">${escapeHtml(jahrgangPraefix(team))} · ${escapeHtml(team.staffel ?? "")}</p>
-      <p class="inhalt">Spielbetrieb: ${escapeHtml(team.spielbetrieb ?? "")}.</p>
-    </div>
+    <p class="meta">Mannschaft · ${escapeHtml(team.gruppe ?? "")}</p>
+    <h1>${escapeHtml(team.name)}</h1>
+    <p class="seitenkopf__lead">${escapeHtml(jahrgangPraefix(team))} · ${escapeHtml(team.staffel ?? "")}</p>
+    <p class="inhalt">Spielbetrieb: ${escapeHtml(team.spielbetrieb ?? "")}.</p>
   </div>
 </section>`;
 }
@@ -122,7 +120,7 @@ function hauptspalte(team, daten) {
     </div>`;
 
   const tabelleTeil = team.tabelle
-    ? baldSpan("Tabelle", { knopf: true, sekundaer: true })
+    ? `<a class="knopf knopf--sekundaer" href="${PFAD}tabellen/#${team.slug}">Tabelle</a>`
     : `<span class="meta">Im Kinderfußball gibt es keine Tabellen.</span>`;
 
   return `<div class="fluss">
@@ -137,7 +135,7 @@ function hauptspalte(team, daten) {
     <h2>Nächste Spiele</h2>
     ${spieleHtml}
     <p class="knopfzeile">
-      ${baldSpan(`Spielplan ${team.kurz}`, { knopf: true })}
+      <a class="knopf" href="${PFAD}spielplan/${team.slug}/">Spielplan ${escapeHtml(team.kurz)}</a>
       ${tabelleTeil}
     </p>
   </div>`;
@@ -189,10 +187,18 @@ function seitenspalte(team, daten) {
 
 // ---------- Weitere Mannschaften derselben Gruppe + Zurück-Link ----------
 
+// P4, Korrektur A2: Reihenfolge nach Nähe im Alter statt Dateireihenfolge –
+// sortiert nach Abstand des Index in teams.json zum aktuellen Team
+// (aufsteigend), dann die ersten vier.
 function weitereMannschaftenAbschnitt(team, daten) {
-  const andere = (daten.teams ?? [])
-    .filter((t) => t.gruppe === team.gruppe && t.slug !== team.slug)
-    .slice(0, 4);
+  const alleTeams = daten.teams ?? [];
+  const aktuellerIndex = alleTeams.findIndex((t) => t.slug === team.slug);
+  const andere = alleTeams
+    .map((t, index) => ({ t, abstand: Math.abs(index - aktuellerIndex) }))
+    .filter(({ t }) => t.gruppe === team.gruppe && t.slug !== team.slug)
+    .sort((a, b) => a.abstand - b.abstand)
+    .slice(0, 4)
+    .map(({ t }) => t);
 
   const karten = andere
     .map(

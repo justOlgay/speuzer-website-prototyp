@@ -63,6 +63,35 @@ export function zeit(hhmm) {
   return `${hhmm} Uhr`;
 }
 
+// "September 2026" (P4)
+export function monatName(iso) {
+  const d = alsDatum(iso);
+  return `${MONATE_LANG[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+// Vergangen = Datum liegt vor dem Stand-Tag (heutiges Datum zählt noch nicht
+// als vergangen, siehe naechsteSpiele(), das denselben Tag noch als kommend
+// behandelt) (P4).
+export function istVergangen(spiel, stand) {
+  const heute = String(stand ?? "").slice(0, 10);
+  return String(spiel?.datum ?? "") < heute;
+}
+
+// Tag-Text für den Wettbewerb, sonst null bei "Meisterschaft" (P4).
+export function wettbewerbTag(spiel) {
+  const w = spiel?.wettbewerb ?? "";
+  if (w.includes("Pokal")) return "Pokal";
+  if (w.includes("Freundschaft")) return "Freundschaftsspiel";
+  if (w.includes("Kinderfestival")) return "Kinderfestival";
+  return null;
+}
+
+// Tabellen-Link auf fussball.de für ein Team, nur wenn fussballde_id bekannt (P4).
+export function fussballdeTeamUrl(team) {
+  if (!team?.fussballde_id) return null;
+  return `https://www.fussball.de/mannschaft/x/-/saison/2627/team-id/${team.fussballde_id}`;
+}
+
 // ---------- Mail-Link mit <wbr> vor "@" und vor jedem "." danach ----------
 
 export function mailLink(adresse, text) {
@@ -108,12 +137,13 @@ export function naechsteSpiele(daten, { ab, anzahl, team } = {}) {
 // in P2 aber noch nicht verwendet – die Ziel-Seiten gibt es noch nicht, und
 // ohne bekannte seitenUrls ließe sich ein toter Link nicht verlässlich
 // vermeiden.
-export function spielZeile(spiel, { pfad, mitTeam, naechstes } = {}) {
+export function spielZeile(spiel, { pfad, mitTeam, naechstes, ohneDatum, vergangen } = {}) {
   const tagKlasse = spiel.heimspiel ? "tag--heim" : "tag--auswaerts";
   const tagText = spiel.heimspiel ? "Heim" : "Auswärts";
   const klassen = [
     "spiel",
     naechstes ? "spiel--naechstes" : null,
+    vergangen ? "spiel--vergangen" : null,
     spiel.entfaellt ? "spiel--entfaellt" : null,
   ]
     .filter(Boolean)
@@ -138,15 +168,23 @@ export function spielZeile(spiel, { pfad, mitTeam, naechstes } = {}) {
       ? `<span class="meta spiel__wettbewerb">${escapeHtml(spiel.wettbewerb)}</span>`
       : "";
 
-  // Kein Strich mehr bei fehlendem Ergebnis – leere Spalte (K3).
+  // Kein Strich mehr bei fehlendem Ergebnis – leere Spalte (K3). Bei
+  // vergangenen Spielen ohne Ergebnis stattdessen ein Textlink auf
+  // FUSSBALL.DE, wenn vorhanden (P4) – kein Ergebnis wird erfunden.
   const ergebnisInhalt = spiel.entfaellt
     ? `<span class="spiel__hinweis">entfällt</span>`
     : spiel.ergebnis
       ? escapeHtml(spiel.ergebnis)
-      : "";
+      : vergangen && spiel.fussballde_link
+        ? `<a href="${escapeHtml(spiel.fussballde_link)}" rel="noopener" target="_blank">Ergebnis auf FUSSBALL.DE</a>`
+        : "";
+
+  // Bei ohneDatum:true nur die Uhrzeit (das Datum steht schon in der
+  // umschließenden Zwischenüberschrift, siehe /spielplan/, P4).
+  const datumInhalt = ohneDatum ? zeit(spiel.zeit) : `${datumKurz(spiel.datum)} · ${zeit(spiel.zeit)}`;
 
   return `<li class="${klassen}">
-      <span class="spiel__datum">${datumKurz(spiel.datum)} · ${zeit(spiel.zeit)}</span>
+      <span class="spiel__datum">${datumInhalt}</span>
       <span class="tag ${tagKlasse}">${tagText}</span>
       <span class="spiel__gegner-block">
         <span class="spiel__gegner">${teamTag}${escapeHtml(gegnerText)}</span>

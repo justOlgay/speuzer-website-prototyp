@@ -357,6 +357,63 @@ function seiteBausteine(daten) {
     <div class="karte">Seitenspalte (5/12 ab 1024px)</div>
   </div>`;
 
+  // P4: Karte „Nächstes Spiel" (.karte--spiel) – erstes kommendes Spiel mit
+  // bekanntem Gegner, wie auf den Team-Spielplanseiten.
+  const karteSpielBeispiel = kommendeSpiele.length
+    ? (() => {
+        const s = kommendeSpiele[0];
+        const tagKlasse = s.heimspiel ? "tag--heim" : "tag--auswaerts";
+        const tagText = s.heimspiel ? "Heim" : "Auswärts";
+        return `<div class="karte karte--spiel" style="max-width:360px;">
+    <p class="karte__spiel-datum">${escapeHtml(datumLang(s.datum))} · ${escapeHtml(s.zeit)} Uhr</p>
+    <p class="knopfzeile" style="margin:0;">
+      <span class="tag ${tagKlasse}">${tagText}</span>
+    </p>
+    <p class="karte__spiel-gegner">${escapeHtml(s.gegner)}</p>
+    <p class="karte__spiel-ort">
+      <span>${escapeHtml(s.spielstaette ?? "")}</span>
+    </p>
+  </div>`;
+      })()
+    : `<p class="meta">Kein kommendes Spiel mit bekanntem Gegner in data/spiele.json gefunden.</p>`;
+
+  // P4: Sprunglink-Pille (.sprung) – wie auf /tabellen/.
+  const sprungBeispiel = `<p class="knopfzeile">
+    <a class="sprung" href="#inhalt">D1</a>
+    <a class="sprung" href="#inhalt">D2</a>
+    <a class="sprung" href="#inhalt">D3</a>
+  </p>`;
+
+  // P4: Vergangenes Spiel (.spiel--vergangen) – letztes Spiel vor dem
+  // Build-Datum, wie in „Alle Spiele" auf den Team-Spielplanseiten.
+  const vergangenesSpiel = (daten.spiele ?? [])
+    .filter((s) => !s.entfaellt && s.datum < heute)
+    .sort((a, b) => (b.datum + b.zeit).localeCompare(a.datum + a.zeit))[0];
+  const spielVergangenBeispiel = vergangenesSpiel
+    ? (() => {
+        const s = vergangenesSpiel;
+        const team = teamNachSlug[s.team];
+        const tagKlasse = s.heimspiel ? "tag--heim" : "tag--auswaerts";
+        const tagText = s.heimspiel ? "Heim" : "Auswärts";
+        const ergebnisInhalt = s.ergebnis
+          ? escapeHtml(s.ergebnis)
+          : s.fussballde_link
+            ? `<a href="${escapeHtml(s.fussballde_link)}" rel="noopener" target="_blank">Ergebnis auf FUSSBALL.DE</a>`
+            : "";
+        return `<ul class="spiele" role="list">
+    <li class="spiel spiel--vergangen">
+      <span class="spiel__datum">${formatDatum(s.datum)} · ${escapeHtml(s.zeit)}</span>
+      <span class="tag ${tagKlasse}">${tagText}</span>
+      <span class="spiel__gegner-block">
+        <span class="spiel__gegner">${escapeHtml(s.gegner)} <span class="meta">(${escapeHtml(team?.kurz ?? s.team)})</span></span>
+        <span class="spiel__ort meta">${escapeHtml(s.spielstaette ?? "")}</span>
+      </span>
+      <span class="spiel__ergebnis">${ergebnisInhalt}</span>
+    </li>
+  </ul>`;
+      })()
+    : `<p class="meta">Kein vergangenes Spiel vor dem Build-Datum in data/spiele.json gefunden.</p>`;
+
   const beispielNewsContain = (daten.news ?? []).find((n) => n.bild_passung === "contain" && n.bild);
   const karteContainBeispiel = beispielNewsContain
     ? `<article class="karte" style="max-width:320px;">
@@ -427,7 +484,19 @@ ${teamKarteBeispiel}
 
 <h3>Zweispaltiges Layout (.zweispaltig)</h3>
 <p class=”inhalt”>Teamseiten (P3): Hauptspalte 7/12 + Seitenspalte 5/12 ab 1024px, darunter (< 1024px) beide Spalten untereinander, Hauptspalte zuerst.</p>
-${zweispaltigBeispiel}`;
+${zweispaltigBeispiel}
+
+<h3>Karte „Nächstes Spiel" (.karte--spiel)</h3>
+<p class="inhalt">Team-Spielplanseiten (P4): große Einzelkarte für das nächste Spiel, Datum/Zeit groß in Barlow Condensed.</p>
+${karteSpielBeispiel}
+
+<h3>Sprunglink-Pille (.sprung)</h3>
+<p class="inhalt">Sprungliste auf /tabellen/ (P4): optisch wie .tag, aber mit Tippziel 44px.</p>
+${sprungBeispiel}
+
+<h3>Vergangenes Spiel (.spiel--vergangen)</h3>
+<p class="inhalt">„Alle Spiele" auf den Team-Spielplanseiten (P4): gedämpfter Text statt der sonstigen Akzentfarben.</p>
+${spielVergangenBeispiel}`;
 }
 
 export function seite(daten) {
