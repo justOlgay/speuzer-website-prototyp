@@ -1,15 +1,18 @@
 #!/usr/bin/env node
-// Speuzer Website Prototyp – Qualitätsgates (P0)
+// Speuzer Website Prototyp – Qualitätsgates (P0 + P1)
 // Nutzt puppeteer-core mit lokalem Chrome, startet tools/server.mjs selbst.
 // Prüft pro Seite aus docs/sitemap.xml: Layout (kein horizontales Scrollen),
 // Semantik (lang, genau eine h1), Meta (title, description, og:*), Tippziele,
 // axe-core (Kontrast, Alt-Texte, Labels, Landmarken), interne Links, Bildgrößen.
+// P1 zusätzlich: Burger-Menü (öffnen, Fokus, ESC schließt), Header/Footer-Links
+// mit href oder .nav__bald, aria-current="page" genau einmal im Header.
 
 import puppeteer from "puppeteer-core";
 import { readFileSync, existsSync, statSync, mkdirSync, writeFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
+import { HAUPT } from "../src/vorlagen/navigation.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = path.join(ROOT, "docs");
@@ -186,6 +189,79 @@ async function pruefeSeite(browser, seitenPfad, axeSkript, bericht) {
       ergebnisSeite.fehler.push(`interner Link ohne Ziel: '${href}'`);
     }
   }
+
+  // --- Header/Footer: jeder <a> hat href oder trägt .nav__bald ---
+  const kaputteNavLinks = await page.evaluate(() => {
+    const treffer = [];
+    for (const el of document.querySelectorAll("header a, footer a")) {
+      const hatHref = !!el.getAttribute("href");
+      const istBald = el.classList.contains("nav__bald");
+      if (!hatHref && !istBald) {
+        treffer.push((el.textContent || "").trim().slice(0, 40));
+      }
+    }
+    return treffer;
+  });
+  for (const text of kaputteNavLinks) {
+    ergebnisSeite.fehler.push(`Header/Footer: <a> ohne href und ohne .nav__bald: "${text}"`);
+  }
+
+  // --- aria-current="page" genau einmal im Header, sofern die Seite in HAUPT vorkommt ---
+  const inHauptnav = HAUPT.some((eintrag) => eintrag.url === seitenPfad);
+  if (inHauptnav) {
+    const anzahlAriaCurrent = await page.evaluate(() => {
+      const header = document.querySelector("header");
+      return header ? header.querySelectorAll('[aria-current="page"]').length : 0;
+    });
+    if (anzahlAriaCurrent !== 1) {
+      ergebnisSeite.fehler.push(
+        `aria-current="page" im Header: ${anzahlAriaCurrent}×, erwartet genau 1× (Seite ist Teil von HAUPT)`
+      );
+    }
+  }
+
+  // --- Burger-Menü bei 390px: öffnen, Fokus im Panel, ESC schließt ---
+  await page.setViewport({ width: 390, height: 844 });
+  const hatBurger = (await page.$(".kopf__burger")) !== null;
+  if (!hatBurger) {
+    ergebnisSeite.fehler.push("Burger-Menü: .kopf__burger nicht gefunden");
+  } else {
+    await page.click(".kopf__burger");
+    await warte(300); // Übergang 240ms abwarten
+    const nachOeffnen = await page.evaluate(() => {
+      const nav = document.getElementById("hauptmenue");
+      if (!nav) return { vorhanden: false };
+      const stil = getComputedStyle(nav);
+      const aktiv = document.activeElement;
+      return {
+        vorhanden: true,
+        istOffen: nav.classList.contains("ist-offen"),
+        sichtbar: stil.visibility !== "hidden" && stil.display !== "none",
+        fokusImPanel: !!aktiv && aktiv !== document.body && nav.contains(aktiv),
+      };
+    });
+    if (!nachOeffnen.vorhanden) {
+      ergebnisSeite.fehler.push("Burger-Menü: #hauptmenue nicht im DOM gefunden");
+    } else {
+      if (!nachOeffnen.istOffen || !nachOeffnen.sichtbar) {
+        ergebnisSeite.fehler.push("Burger-Menü: #hauptmenue öffnet sich nach Klick auf .kopf__burger nicht sichtbar");
+      }
+      if (!nachOeffnen.fokusImPanel) {
+        ergebnisSeite.fehler.push("Burger-Menü: Fokus liegt nach dem Öffnen nicht innerhalb von #hauptmenue");
+      }
+
+      await page.keyboard.press("Escape");
+      await warte(300);
+      const nachEsc = await page.evaluate(() => {
+        const nav = document.getElementById("hauptmenue");
+        return !nav || !nav.classList.contains("ist-offen");
+      });
+      if (!nachEsc) {
+        ergebnisSeite.fehler.push("Burger-Menü: ESC schließt #hauptmenue nicht");
+      }
+    }
+  }
+  await page.setViewport({ width: 1440, height: 900 });
 
   await page.close();
   ergebnisSeite.bestanden = ergebnisSeite.fehler.length === 0;

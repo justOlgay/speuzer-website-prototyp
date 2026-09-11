@@ -13,6 +13,24 @@ function liesWappen(datei) {
   return readFileSync(path.join(ROOT, "assets", "logo", datei), "utf8");
 }
 
+function escapeHtml(text) {
+  return String(text ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+const WOCHENTAGE = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+
+function formatDatum(datumIso) {
+  const d = new Date(`${datumIso}T00:00:00`);
+  const tag = WOCHENTAGE[d.getDay()];
+  const tt = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  return `${tag} ${tt}.${mm}.`;
+}
+
 const FARBEN = [
   { token: "--blau-950", hex: "#0B0E4A", verwendung: "Fußbereich, dunkle Flächen", kontrast: "Weiß darauf 17,2:1", textHell: true },
   { token: "--blau-900", hex: "#151A7A", verwendung: "Kopfleiste, Überschriften auf Weiß", kontrast: "auf Weiß 14,4:1", textHell: true },
@@ -125,16 +143,187 @@ function seiteWappen() {
 </div>`;
 }
 
+function seiteKopfFuss() {
+  return `<h2>Kopf und Fuß</h2>
+<p class="inhalt">Die Kopfzeile mit Hauptnavigation (sechs Punkte, ab 1024px als Leiste, darunter als Burger-Menü) und der Fußbereich sind auf dieser Seite bereits live zu sehen – oben und unten. Ziele, deren Seite im aktuellen Paket noch nicht existiert, erscheinen gedämpft und ohne Link (<code>.nav__bald</code>); sobald die Seite gebaut ist, wird automatisch ein Link daraus.</p>`;
+}
+
+function seiteBausteine(daten) {
+  const teams = daten.teams ?? [];
+  const teamNachSlug = Object.fromEntries(teams.map((t) => [t.slug, t]));
+  const d3 = teamNachSlug.d3;
+
+  const seitenkopfBeispiel = `<div class="seitenkopf">
+    <h2 style="font-family:var(--font-head);text-transform:uppercase;font-size:var(--fs-3xl);line-height:var(--lh-head);color:var(--blau-900);margin:0;">Mannschaften</h2>
+    <p class="seitenkopf__lead">Alle Fußballmannschaften des F.F.V. Sportfreunde 04 mit Training, Spielplan und Ansprechpartner.</p>
+  </div>`;
+
+  const kartenTeams = ["d1", "d2", "d3"].map((slug) => teamNachSlug[slug]).filter(Boolean);
+  const karten = kartenTeams
+    .map(
+      (team) => `<span class="karte karte--link" aria-disabled="true" title="Seite folgt">
+      <span class="karte__titel">${escapeHtml(team.name)}</span>
+      <span class="karte__meta">${escapeHtml(team.jahrgang ?? "")} · ${escapeHtml(team.staffel)}</span>
+    </span>`
+    )
+    .join("\n    ");
+  const rasterBeispiel = `<div class="raster raster--3">
+    ${karten}
+  </div>`;
+
+  const heute = daten.stand.slice(0, 10);
+  const kommendeSpiele = (daten.spiele ?? [])
+    // nicht abgesagt, mit bekanntem Gegner (Kinderfestivals ohne festen Gegner
+    // hier ausgelassen – die brauchen eine eigene Darstellung, kommt mit P3/P4)
+    .filter((s) => !s.entfaellt && s.gegner && s.datum >= heute)
+    .sort((a, b) => (a.datum + a.zeit).localeCompare(b.datum + b.zeit))
+    .slice(0, 3);
+  const spieleZeilen = kommendeSpiele
+    .map((s, i) => {
+      const team = teamNachSlug[s.team];
+      const tagKlasse = s.heimspiel ? "tag--heim" : "tag--auswaerts";
+      const tagText = s.heimspiel ? "Heim" : "Auswärts";
+      const naechstesKlasse = i === 0 ? " spiel--naechstes" : "";
+      return `<li class="spiel${naechstesKlasse}">
+      <span class="spiel__datum">${formatDatum(s.datum)} · ${escapeHtml(s.zeit)}</span>
+      <span class="tag ${tagKlasse}">${tagText}</span>
+      <span class="spiel__gegner-block">
+        <span class="spiel__gegner">${escapeHtml(s.gegner)} <span class="meta">(${escapeHtml(team?.kurz ?? s.team)})</span></span>
+        <span class="spiel__ort">${escapeHtml(s.spielstaette)}</span>
+      </span>
+      <span class="spiel__ergebnis">${escapeHtml(s.ergebnis) || "–"}</span>
+    </li>`;
+    })
+    .join("\n    ");
+  const spieleBeispiel = kommendeSpiele.length
+    ? `<ul class="spiele" role="list">
+    ${spieleZeilen}
+  </ul>`
+    : `<p class="meta">Keine kommenden Spiele ab dem Build-Datum in data/spiele.json gefunden.</p>`;
+
+  const trainingsZeilen = (d3?.training ?? [])
+    .map(
+      (t) => `<li class="training">
+      <span class="training__tag">${escapeHtml(t.tag)}</span>
+      <span class="training__zeit">${escapeHtml(t.von)}–${escapeHtml(t.bis)} Uhr</span>
+      <span class="training__platz">${escapeHtml(d3.platz)}</span>
+    </li>`
+    )
+    .join("\n    ");
+  const trainingsBeispiel = `<ul class="trainings" role="list">
+    ${trainingsZeilen}
+  </ul>`;
+
+  const wappenPlatzhalter = liesWappen("wappen-blau.svg");
+  const personBeispiel = `<div class="person" style="max-width:220px;">
+    <span class="person__bild person__bild--platzhalter" aria-hidden="true">${wappenPlatzhalter}</span>
+    <p class="person__name">Florian Müller</p>
+    <p class="person__funktion">Kinderschutzbeauftragter</p>
+    <p class="person__mail"><a href="mailto:kinderschutzbeauftragter@sportfreunde04.de">kinderschutzbeauftragter@sportfreunde04.de</a></p>
+  </div>`;
+
+  const tagsBeispiel = `<p class="knopfzeile">
+    <span class="tag">Neutral</span>
+    <span class="tag tag--heim">Heim</span>
+    <span class="tag tag--auswaerts">Auswärts</span>
+    <span class="tag tag--ok">Bestätigt</span>
+    <span class="tag tag--warn">Offen</span>
+  </p>`;
+
+  const hinweisBeispiel = `<div class="hinweis hinweis--offen">
+    <span class="tag tag--warn hinweis__label">Offen</span>
+    <p style="margin:0;">Anfahrt und Parken: Angabe folgt</p>
+  </div>`;
+
+  const d3Tabelle = daten.tabellen?.teams?.d3;
+  const tabelleZeilen = (d3Tabelle?.zeilen ?? [])
+    .map(
+      (z) => `<tr${z.eigene ? ' class="eigene"' : ""}>
+        <td class="zahl">${z.platz}</td>
+        <td>${escapeHtml(z.mannschaft)}</td>
+        <td class="zahl">${z.spiele}</td>
+        <td class="zahl">${z.g}</td>
+        <td class="zahl">${z.u}</td>
+        <td class="zahl">${z.v}</td>
+        <td class="zahl">${escapeHtml(z.tore)}</td>
+        <td class="zahl">${z.diff}</td>
+        <td class="zahl">${z.punkte}</td>
+      </tr>`
+    )
+    .join("\n      ");
+  const tabelleBeispiel = `<div class="tabelle-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="zahl">Platz</th>
+          <th>Mannschaft</th>
+          <th class="zahl">Sp</th>
+          <th class="zahl">G</th>
+          <th class="zahl">U</th>
+          <th class="zahl">V</th>
+          <th class="zahl">Tore</th>
+          <th class="zahl">Diff</th>
+          <th class="zahl">Punkte</th>
+        </tr>
+      </thead>
+      <tbody>
+      ${tabelleZeilen}
+      </tbody>
+    </table>
+  </div>
+  <p class="meta">Staffel D3: ${escapeHtml(d3Tabelle?.staffel ?? "")} · Momentaufnahme vom ${escapeHtml(daten.tabellen?.stand ?? "")}</p>`;
+
+  const knoepfeBeispiel = `<p class="knopfzeile">
+    <a class="knopf" href="#inhalt">Primärknopf</a>
+    <a class="knopf knopf--sekundaer" href="#inhalt">Sekundärknopf</a>
+    <a class="knopf knopf--gross" href="#inhalt">Großer Knopf</a>
+  </p>`;
+
+  return `<h2>Bausteine</h2>
+<p class="inhalt">Alle Bausteine mit echten Daten aus data/, wie sie später auf den Inhaltsseiten verwendet werden. Ziele, deren Seite im aktuellen Paket noch nicht existiert, sind als Karten mit &lt;span&gt; statt &lt;a&gt; ausgegeben.</p>
+
+<h3>Seitenkopf</h3>
+${seitenkopfBeispiel}
+
+<h3>Raster und Karte</h3>
+${rasterBeispiel}
+
+<h3>Spiel-Zeile</h3>
+${spieleBeispiel}
+
+<h3>Trainings-Zeile</h3>
+${trainingsBeispiel}
+
+<h3>Personen-Karte</h3>
+${personBeispiel}
+
+<h3>Tags</h3>
+${tagsBeispiel}
+
+<h3>Hinweiskasten</h3>
+${hinweisBeispiel}
+
+<h3>Tabelle</h3>
+${tabelleBeispiel}
+
+<h3>Knöpfe</h3>
+${knoepfeBeispiel}`;
+}
+
 export function seite(daten) {
   const inhalt = `
-<section class="container sg">
+<section class="container abschnitt sg">
   <h1>Gestaltungssystem „Speuzer Blau-Weiß“</h1>
-  <p class="inhalt">Interner Anhang für das Übernahmepaket: alle Tokens aus assets/css/tokens.css, sichtbar gemacht. Stand des Builds: ${daten.stand}.</p>
+  <div class="fluss">
+  <p class="inhalt">Interner Anhang für das Übernahmepaket: alle Tokens aus assets/css/tokens.css und alle Bausteine aus assets/css/komponenten.css, sichtbar gemacht. Stand des Builds: ${daten.stand}.</p>
   ${seiteFarben()}
   ${seiteSchrift()}
   ${seiteAbstaendeRadienSchatten()}
   ${seiteKnoepfeFokus()}
   ${seiteWappen()}
+  ${seiteKopfFuss()}
+  ${seiteBausteine(daten)}
+  </div>
 </section>
 <style>
   .sg-farbraster { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: var(--sp-3); margin-block: var(--sp-4); }

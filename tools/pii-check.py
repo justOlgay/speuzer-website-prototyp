@@ -19,12 +19,15 @@ TEXT_ENDUNGEN = {
     ".xml", ".csv", ".md", ".svg", ".ics",
 }
 
-# Whitelist: die beiden Vereins-Festnetznummern (Geschäftsstelle, Platzwart) in allen Schreibweisen
+# Whitelist: die beiden Vereins-Festnetznummern (Geschäftsstelle, Platzwart) in allen Schreibweisen,
+# inklusive der kompakten Schreibweise ohne Leerzeichen, wie sie in tel:-Links (href) steht (P1: Fußbereich)
 WHITELIST_TELEFON = {
     "+49 69 736868",
     "+49 69 732193",
     "069 736868",
     "069 732193",
+    "+4969736868",
+    "+4969732193",
 }
 
 MUSTER_TELEFON_1 = re.compile(r"\+49[\d /()\-]{6,}")
