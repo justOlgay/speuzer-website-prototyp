@@ -142,12 +142,10 @@ function aufrufAbschnitt() {
 export function seite(daten) {
   const teamNachSlug = Object.fromEntries((daten.teams ?? []).map((t) => [t.slug, t]));
 
-  const seitenkopf = `<section class="abschnitt">
+  const seitenkopf = `<section class="abschnitt seitenkopf">
   <div class="container">
-    <div class="seitenkopf">
-      <h1>Mannschaften</h1>
-      <p class="seitenkopf__lead">Elf Fußballmannschaften von der G-Jugend bis zu den Herren. Für jedes Team findest du hier Jahrgang, Trainingszeiten, Ansprechpartner und den Weg zum Spielplan.</p>
-    </div>
+    <h1>Mannschaften</h1>
+    <p class="seitenkopf__lead">Elf Fußballmannschaften von der G-Jugend bis zu den Herren. Für jedes Team findest du hier Jahrgang, Trainingszeiten, Ansprechpartner und den Weg zum Spielplan.</p>
   </div>
 </section>`;
 
