@@ -555,6 +555,17 @@ body.menue-offen {
   margin-top: var(--sp-3);
 }
 
+/* Kicker im (hellen) Seitenkopf (P5, /verein/karneval/) – wie .hero__kicker,
+   aber in --ink-3 statt --blau-100 (das wäre auf hellem Grund unlesbar). */
+.seitenkopf__kicker {
+  display: block;
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ink-3);
+  margin: 0 0 var(--sp-2);
+}
+
 /* ==========================================================================
    Raster und Karte
    ========================================================================== */
@@ -782,6 +793,26 @@ body.menue-offen {
   display: block;
 }
 
+/* Vergangene Spielzeile ohne Ergebnis: Link auf FUSSBALL.DE statt der sonst
+   großen Ergebnis-Schrift (P5, Korrektur A2) – wie .meta (Inter, --fs-sm),
+   aber in --blau-700 mit Unterstrich nur bei Hover/Fokus; bleibt durch die
+   höhere Selektor-Spezifität blau, auch wenn zusätzlich die Klasse .meta
+   gesetzt ist. white-space: nowrap, damit "Ergebnis auf FUSSBALL.DE" nicht
+   mitten im Wort umbricht; rechtsbündig ergibt sich durch margin-left: auto
+   auf .spiel__ergebnis selbst. */
+.spiel__ergebnis a {
+  font-family: var(--font-text);
+  font-size: var(--fs-sm);
+  color: var(--blau-700);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.spiel__ergebnis a:hover,
+.spiel__ergebnis a:focus-visible {
+  text-decoration: underline;
+}
+
 .training {
   display: flex;
   flex-wrap: wrap;
@@ -816,25 +847,35 @@ body.menue-offen {
 }
 
 .person__bild {
+  display: block;
   width: 100%;
   aspect-ratio: 3 / 4;
-  object-fit: cover;
   border-radius: var(--r-md);
   background: var(--blau-100);
+  overflow: hidden;
 }
 
-/* Platzhalter ohne Foto (nur im Styleguide): Wappen statt Bild */
+/* bild() setzt die Klasse auf das äußere <picture> – object-fit/-position
+   müssen daher auf das <img> darin zielen (wie bei .karte__bild, P1). */
+.person__bild img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+/* Platzhalter ohne Foto (Vorstand/Karneval, P5): Fläche --blau-100 mit dem
+   Wappen bei 40% Breite, zentriert. */
 .person__bild--platzhalter {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--sp-6);
-  background: var(--blau-50);
+  background: var(--blau-100);
 }
 
 .person__bild--platzhalter svg {
-  width: 100%;
-  height: 100%;
+  width: 40%;
+  height: auto;
   color: var(--blau-700);
 }
 
@@ -879,7 +920,7 @@ body.menue-offen {
 }
 
 .logo-reihe__kachel img {
-  max-height: 56px;
+  max-height: 72px;
   width: auto;
   object-fit: contain;
 }
@@ -957,17 +998,26 @@ body.menue-offen {
   font-weight: 600;
 }
 
-/* Unter 640px: G/U/V/Tore ausblenden, Mannschaft mit Ellipsis kürzen (statt
-   dreizeiligem Umbruch bei langen Vereinsnamen). Kopfzeile behält dann Platz,
-   Mannschaft, Sp, Diff, Punkte. Der Wrapper bleibt zusätzlich als
-   Sicherheitsnetz horizontal scrollbar (overflow-x: auto, siehe oben). */
+/* Unter 640px: G/U/V/Tore (tabelle__optional) UND Diff (tabelle__optional-2,
+   P5-Korrektur A1) ausblenden, Mannschaft mit Ellipsis kürzen (statt
+   dreizeiligem Umbruch bei langen Vereinsnamen). Kopfzeile behält dann nur
+   noch Platz, Mannschaft, Sp, Punkte – so bleibt die Tabelle auch bei 390px
+   und 320px ohne horizontales Scrollen vollständig sichtbar. Der Wrapper
+   bleibt zusätzlich als Sicherheitsnetz horizontal scrollbar (overflow-x:
+   auto, siehe oben). */
 @media (max-width: 639.98px) {
-  .tabelle-wrap .tabelle__optional {
+  .tabelle-wrap .tabelle__optional,
+  .tabelle-wrap .tabelle__optional-2 {
     display: none;
   }
 
+  /* 46vw war auf die alte Spaltenzahl (Platz, Mannschaft, Sp, Diff, Pkt)
+     kalibriert – mit nur noch vier sichtbaren Spalten reicht das bei 320px
+     nicht mehr aus (Platz/Sp/Pkt sind durch die Kopfzeilen-Wörter breiter als
+     ihr Zahlenwert) und der Tabelle-Wrap läuft innen über. 38vw wurde gegen
+     320px und 390px geprüft (P5, Korrektur A1). */
   .tabelle-wrap .tabelle__mannschaft {
-    max-width: 46vw;
+    max-width: 38vw;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1405,4 +1455,54 @@ body.menue-offen {
 
 body.tabellen h2 {
   scroll-margin-top: var(--sp-6);
+}
+
+/* ==========================================================================
+   Zahlen-Kachel (.zahl, P5) – vier Kacheln im "Zahlen"-Abschnitt auf
+   /verein/ (abschnitt--blau): Wert groß in Barlow Condensed/Weiß, Beschriftung
+   klein in --blau-100. Layout über .raster.raster--4 (kein eigenes Grid nötig).
+   ========================================================================== */
+
+.zahl {
+  text-align: center;
+}
+
+.zahl__wert {
+  display: block;
+  font-family: var(--font-head);
+  font-size: var(--fs-3xl);
+  line-height: var(--lh-head);
+  color: var(--weiss);
+}
+
+.zahl__label {
+  display: block;
+  font-size: var(--fs-md);
+  color: var(--blau-100);
+}
+
+/* ==========================================================================
+   Download-Zeile (.download, P5) – /verein/downloads/: Titel als Link,
+   darunter je eine .meta-Zeile mit Format/Umfang und ggf. Verweis auf das
+   externe Ziel. Gleicher Zeilen-Rhythmus wie .spiel/.training.
+   ========================================================================== */
+
+.downloads {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.download {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--line);
+}
+
+.download:last-child {
+  border-bottom: none;
 }

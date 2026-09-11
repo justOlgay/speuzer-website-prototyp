@@ -107,7 +107,8 @@ function zusatzangeboteAbschnitt(daten) {
 }
 
 // Ferienhinweis + Karneval-Karte wie auf der Startseite (gleicher Text,
-// siehe src/seiten/index.mjs#karnevalAbschnitt).
+// siehe src/seiten/index.mjs#karnevalAbschnitt). P5: /verein/karneval/
+// existiert jetzt – echter Link statt baldSpan().
 function ferienUndKarnevalAbschnitt(daten) {
   const verein = daten.verein ?? {};
   return `<section class="abschnitt">
@@ -119,7 +120,7 @@ function ferienUndKarnevalAbschnitt(daten) {
       <h2 class="karte__titel">Karnevalabteilung „Die Schnauzer"</h2>
       <p>Fünf Gruppen von den Little Fruities bis zu den Dreamboys – die zweite Abteilung des Vereins.</p>
       <p class="knopfzeile">
-        ${baldSpan("Zur Karnevalabteilung")}
+        <a class="knopf" href="${PFAD}verein/karneval/">Zur Karnevalabteilung</a>
         ${mailLink(verein.mails?.karneval ?? "karnevalabteilung@sportfreunde04.de")}
       </p>
     </article>

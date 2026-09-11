@@ -1,0 +1,68 @@
+[
+  {
+    "titel": "Aufnahmeantrag / Vereinsanmeldung (Stand 9/2026)",
+    "datei": "https://cdn.appack.de/sportfreunde04/pdf/Vereinsanmeldung%20allgemein_NEU_9-2026%20%20(1).pdf",
+    "seiten": 4,
+    "kb": 213,
+    "gruppe": "Anmeldung",
+    "hinweis": "enthält Aufnahmeantrag, Beiträge, SEPA-Mandat, Einwilligung Fotos"
+  },
+  {
+    "titel": "Info-Blatt zur Anmeldung",
+    "datei": "https://cdn.appack.de/sportfreunde04/pdf/Info-Blatt-FFV-Sportfreunde-04%20(2).pdf",
+    "seiten": 4,
+    "kb": 121,
+    "gruppe": "Anmeldung"
+  },
+  {
+    "titel": "Wichtige Unterlagen, die mitzubringen sind",
+    "datei": "https://cdn.appack.de/sportfreunde04/pdf/1_Wichtige%20Unterlagen%20die%20mitzubringen%20sind.pdf",
+    "seiten": 1,
+    "kb": 57,
+    "gruppe": "Anmeldung"
+  },
+  {
+    "titel": "Zusatzerklärung für Spieler zwischen 12 und 18 Jahren ohne deutsche Staatsbürgerschaft",
+    "datei": "https://cdn.appack.de/sportfreunde04/pdf/Zusatzerklrung_12-18%20(1).pdf",
+    "seiten": 1,
+    "kb": null,
+    "gruppe": "Anmeldung"
+  },
+  {
+    "titel": "Beitragsübersicht",
+    "datei": "https://cdn.appack.de/sportfreunde04/pdf/Beitrags%C3%BCbersicht%20F.F.V.%20Sportfreunde%2004%20e.V._.pdf",
+    "seiten": 2,
+    "kb": 145,
+    "gruppe": "Verein"
+  },
+  {
+    "titel": "Satzung (Stand 2025)",
+    "datei": "https://cdn.appack.de/sportfreunde04/pdf/Satzung_Aktuell_2025%20(1).pdf",
+    "seiten": 8,
+    "kb": 138,
+    "gruppe": "Verein"
+  },
+  {
+    "titel": "Präventions- und Schutzkonzept (Stand Mai 2025)",
+    "datei": "https://cdn.appack.de/sportfreunde04/pdf/Pr%C3%A4ventions-%20und%20Schutzkonzept%20FFV%20Sportfreunde%2004%20Stand%20Mai%202025%20(1).pdf",
+    "seiten": null,
+    "kb": 489,
+    "gruppe": "Kinder- und Jugendschutz"
+  },
+  {
+    "titel": "Vereinsphilosophie und Zukunftskonzept",
+    "datei": "/assets/downloads/vereinsphilosophie-und-zukunftskonzept.pdf",
+    "seiten": 50,
+    "kb": 295,
+    "gruppe": "Verein",
+    "hinweis": "von Olgay am 11.09.2026 nachgeliefert (Autorin Melanie Seipp); Live-Link defekt (AccessDenied) – Datei ins Repo übernommen"
+  },
+  {
+    "titel": "Chronik des Vereins (27 Seiten)",
+    "datei": "https://cdn.appack.de/sportfreunde04/pdf/Chronik%20Sportfreunde.pdf",
+    "seiten": 27,
+    "kb": null,
+    "gruppe": "Verein",
+    "hinweis": "Link prüfen (Dateiname mit Leerzeichen)"
+  }
+]

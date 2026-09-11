@@ -1,0 +1,52 @@
+{
+  "name": "Karnevalabteilung „Die Schnauzer“",
+  "mail": "karnevalabteilung@sportfreunde04.de",
+  "leitung": "Patrick Krösche (Abteilungsleiter)",
+  "gruppen": [
+    {
+      "name": "Dreamboys",
+      "leitung": [
+        "Alexandra Schrödl (Trainerin)",
+        "Melanie Seipp (Co-Trainerin)"
+      ],
+      "uebungszeit": "Mittwoch 19:00–21:00 Uhr, Turnhalle Fridtjof-Nansen-Schule",
+      "offen": null
+    },
+    {
+      "name": "Little Fruities",
+      "leitung": [
+        "Stephanie Künstler (Trainerin)",
+        "Melanie Seipp (Co-Trainerin)"
+      ],
+      "uebungszeit": null,
+      "offen": "Übungszeit nicht belegt"
+    },
+    {
+      "name": "Freaky Fruities",
+      "leitung": [
+        "Stephanie Künstler (Trainerin)",
+        "Melanie Seipp (Co-Trainerin)"
+      ],
+      "uebungszeit": null,
+      "offen": "Übungszeit nicht belegt"
+    },
+    {
+      "name": "Flying Fruities",
+      "leitung": [
+        "Simone Bechstein (Trainerin)"
+      ],
+      "uebungszeit": null,
+      "offen": "Übungszeit nicht belegt"
+    },
+    {
+      "name": "Pfläumchen",
+      "leitung": [
+        "Simone Bechstein (Trainerin)",
+        "Stephanie Künstler (Co-Trainerin)"
+      ],
+      "uebungszeit": null,
+      "offen": "Übungszeit nicht belegt"
+    }
+  ],
+  "hinweis": "Live-Seite nennt 'Fridjof-Nansen-Schule' (Schreibweise der Schule: Fridtjof-Nansen-Schule)"
+}

@@ -103,5 +103,295 @@
         "jpg": "news-rewe-scheine-fuer-vereine-1080.jpg"
       }
     }
+  },
+  "sponsor-11teamsports": {
+    "breite": 1500,
+    "hoehe": 224,
+    "varianten": {
+      "480": {
+        "avif": "sponsor-11teamsports-480.avif",
+        "webp": "sponsor-11teamsports-480.webp",
+        "jpg": "sponsor-11teamsports-480.jpg"
+      },
+      "960": {
+        "avif": "sponsor-11teamsports-960.avif",
+        "webp": "sponsor-11teamsports-960.webp",
+        "jpg": "sponsor-11teamsports-960.jpg"
+      },
+      "1440": {
+        "avif": "sponsor-11teamsports-1440.avif",
+        "webp": "sponsor-11teamsports-1440.webp",
+        "jpg": "sponsor-11teamsports-1440.jpg"
+      }
+    }
+  },
+  "sponsor-bundeswehr": {
+    "breite": 1500,
+    "hoehe": 1100,
+    "varianten": {
+      "480": {
+        "avif": "sponsor-bundeswehr-480.avif",
+        "webp": "sponsor-bundeswehr-480.webp",
+        "jpg": "sponsor-bundeswehr-480.jpg"
+      },
+      "960": {
+        "avif": "sponsor-bundeswehr-960.avif",
+        "webp": "sponsor-bundeswehr-960.webp",
+        "jpg": "sponsor-bundeswehr-960.jpg"
+      },
+      "1440": {
+        "avif": "sponsor-bundeswehr-1440.avif",
+        "webp": "sponsor-bundeswehr-1440.webp",
+        "jpg": "sponsor-bundeswehr-1440.jpg"
+      }
+    }
+  },
+  "sponsor-fuballschule-vm-elite": {
+    "breite": 1051,
+    "hoehe": 1008,
+    "varianten": {
+      "480": {
+        "avif": "sponsor-fuballschule-vm-elite-480.avif",
+        "webp": "sponsor-fuballschule-vm-elite-480.webp",
+        "jpg": "sponsor-fuballschule-vm-elite-480.jpg"
+      },
+      "960": {
+        "avif": "sponsor-fuballschule-vm-elite-960.avif",
+        "webp": "sponsor-fuballschule-vm-elite-960.webp",
+        "jpg": "sponsor-fuballschule-vm-elite-960.jpg"
+      },
+      "1051": {
+        "avif": "sponsor-fuballschule-vm-elite-1051.avif",
+        "webp": "sponsor-fuballschule-vm-elite-1051.webp",
+        "jpg": "sponsor-fuballschule-vm-elite-1051.jpg"
+      }
+    }
+  },
+  "sponsor-sk-sportconnects-gbr": {
+    "breite": 1500,
+    "hoehe": 418,
+    "varianten": {
+      "480": {
+        "avif": "sponsor-sk-sportconnects-gbr-480.avif",
+        "webp": "sponsor-sk-sportconnects-gbr-480.webp",
+        "jpg": "sponsor-sk-sportconnects-gbr-480.jpg"
+      },
+      "960": {
+        "avif": "sponsor-sk-sportconnects-gbr-960.avif",
+        "webp": "sponsor-sk-sportconnects-gbr-960.webp",
+        "jpg": "sponsor-sk-sportconnects-gbr-960.jpg"
+      },
+      "1440": {
+        "avif": "sponsor-sk-sportconnects-gbr-1440.avif",
+        "webp": "sponsor-sk-sportconnects-gbr-1440.webp",
+        "jpg": "sponsor-sk-sportconnects-gbr-1440.jpg"
+      }
+    }
+  },
+  "sponsor-vmapit-gmbh": {
+    "breite": 1241,
+    "hoehe": 398,
+    "varianten": {
+      "480": {
+        "avif": "sponsor-vmapit-gmbh-480.avif",
+        "webp": "sponsor-vmapit-gmbh-480.webp",
+        "jpg": "sponsor-vmapit-gmbh-480.jpg"
+      },
+      "960": {
+        "avif": "sponsor-vmapit-gmbh-960.avif",
+        "webp": "sponsor-vmapit-gmbh-960.webp",
+        "jpg": "sponsor-vmapit-gmbh-960.jpg"
+      },
+      "1241": {
+        "avif": "sponsor-vmapit-gmbh-1241.avif",
+        "webp": "sponsor-vmapit-gmbh-1241.webp",
+        "jpg": "sponsor-vmapit-gmbh-1241.jpg"
+      }
+    }
+  },
+  "vorstand-bernhard-henrich": {
+    "breite": 1125,
+    "hoehe": 1500,
+    "varianten": {
+      "480": {
+        "avif": "vorstand-bernhard-henrich-480.avif",
+        "webp": "vorstand-bernhard-henrich-480.webp",
+        "jpg": "vorstand-bernhard-henrich-480.jpg"
+      },
+      "960": {
+        "avif": "vorstand-bernhard-henrich-960.avif",
+        "webp": "vorstand-bernhard-henrich-960.webp",
+        "jpg": "vorstand-bernhard-henrich-960.jpg"
+      },
+      "1125": {
+        "avif": "vorstand-bernhard-henrich-1125.avif",
+        "webp": "vorstand-bernhard-henrich-1125.webp",
+        "jpg": "vorstand-bernhard-henrich-1125.jpg"
+      }
+    }
+  },
+  "vorstand-florian-muller": {
+    "breite": 683,
+    "hoehe": 1024,
+    "varianten": {
+      "480": {
+        "avif": "vorstand-florian-muller-480.avif",
+        "webp": "vorstand-florian-muller-480.webp",
+        "jpg": "vorstand-florian-muller-480.jpg"
+      },
+      "683": {
+        "avif": "vorstand-florian-muller-683.avif",
+        "webp": "vorstand-florian-muller-683.webp",
+        "jpg": "vorstand-florian-muller-683.jpg"
+      }
+    }
+  },
+  "vorstand-marcel-hogg": {
+    "breite": 1125,
+    "hoehe": 1500,
+    "varianten": {
+      "480": {
+        "avif": "vorstand-marcel-hogg-480.avif",
+        "webp": "vorstand-marcel-hogg-480.webp",
+        "jpg": "vorstand-marcel-hogg-480.jpg"
+      },
+      "960": {
+        "avif": "vorstand-marcel-hogg-960.avif",
+        "webp": "vorstand-marcel-hogg-960.webp",
+        "jpg": "vorstand-marcel-hogg-960.jpg"
+      },
+      "1125": {
+        "avif": "vorstand-marcel-hogg-1125.avif",
+        "webp": "vorstand-marcel-hogg-1125.webp",
+        "jpg": "vorstand-marcel-hogg-1125.jpg"
+      }
+    }
+  },
+  "vorstand-melanie-seipp": {
+    "breite": 750,
+    "hoehe": 1000,
+    "varianten": {
+      "480": {
+        "avif": "vorstand-melanie-seipp-480.avif",
+        "webp": "vorstand-melanie-seipp-480.webp",
+        "jpg": "vorstand-melanie-seipp-480.jpg"
+      },
+      "750": {
+        "avif": "vorstand-melanie-seipp-750.avif",
+        "webp": "vorstand-melanie-seipp-750.webp",
+        "jpg": "vorstand-melanie-seipp-750.jpg"
+      }
+    }
+  },
+  "vorstand-olgay-ozkan": {
+    "breite": 683,
+    "hoehe": 1024,
+    "varianten": {
+      "480": {
+        "avif": "vorstand-olgay-ozkan-480.avif",
+        "webp": "vorstand-olgay-ozkan-480.webp",
+        "jpg": "vorstand-olgay-ozkan-480.jpg"
+      },
+      "683": {
+        "avif": "vorstand-olgay-ozkan-683.avif",
+        "webp": "vorstand-olgay-ozkan-683.webp",
+        "jpg": "vorstand-olgay-ozkan-683.jpg"
+      }
+    }
+  },
+  "vorstand-patrick-krosche": {
+    "breite": 999,
+    "hoehe": 1500,
+    "varianten": {
+      "480": {
+        "avif": "vorstand-patrick-krosche-480.avif",
+        "webp": "vorstand-patrick-krosche-480.webp",
+        "jpg": "vorstand-patrick-krosche-480.jpg"
+      },
+      "960": {
+        "avif": "vorstand-patrick-krosche-960.avif",
+        "webp": "vorstand-patrick-krosche-960.webp",
+        "jpg": "vorstand-patrick-krosche-960.jpg"
+      },
+      "999": {
+        "avif": "vorstand-patrick-krosche-999.avif",
+        "webp": "vorstand-patrick-krosche-999.webp",
+        "jpg": "vorstand-patrick-krosche-999.jpg"
+      }
+    }
+  },
+  "vorstand-ralf-schwager": {
+    "breite": 1125,
+    "hoehe": 1500,
+    "varianten": {
+      "480": {
+        "avif": "vorstand-ralf-schwager-480.avif",
+        "webp": "vorstand-ralf-schwager-480.webp",
+        "jpg": "vorstand-ralf-schwager-480.jpg"
+      },
+      "960": {
+        "avif": "vorstand-ralf-schwager-960.avif",
+        "webp": "vorstand-ralf-schwager-960.webp",
+        "jpg": "vorstand-ralf-schwager-960.jpg"
+      },
+      "1125": {
+        "avif": "vorstand-ralf-schwager-1125.avif",
+        "webp": "vorstand-ralf-schwager-1125.webp",
+        "jpg": "vorstand-ralf-schwager-1125.jpg"
+      }
+    }
+  },
+  "vorstand-uwe-korndorfer": {
+    "breite": 749,
+    "hoehe": 1000,
+    "varianten": {
+      "480": {
+        "avif": "vorstand-uwe-korndorfer-480.avif",
+        "webp": "vorstand-uwe-korndorfer-480.webp",
+        "jpg": "vorstand-uwe-korndorfer-480.jpg"
+      },
+      "749": {
+        "avif": "vorstand-uwe-korndorfer-749.avif",
+        "webp": "vorstand-uwe-korndorfer-749.webp",
+        "jpg": "vorstand-uwe-korndorfer-749.jpg"
+      }
+    }
+  },
+  "vorstand-vassilios-miamis": {
+    "breite": 1125,
+    "hoehe": 1500,
+    "varianten": {
+      "480": {
+        "avif": "vorstand-vassilios-miamis-480.avif",
+        "webp": "vorstand-vassilios-miamis-480.webp",
+        "jpg": "vorstand-vassilios-miamis-480.jpg"
+      },
+      "960": {
+        "avif": "vorstand-vassilios-miamis-960.avif",
+        "webp": "vorstand-vassilios-miamis-960.webp",
+        "jpg": "vorstand-vassilios-miamis-960.jpg"
+      },
+      "1125": {
+        "avif": "vorstand-vassilios-miamis-1125.avif",
+        "webp": "vorstand-vassilios-miamis-1125.webp",
+        "jpg": "vorstand-vassilios-miamis-1125.jpg"
+      }
+    }
+  },
+  "vorstand-wolfgang-schirmer": {
+    "breite": 750,
+    "hoehe": 1000,
+    "varianten": {
+      "480": {
+        "avif": "vorstand-wolfgang-schirmer-480.avif",
+        "webp": "vorstand-wolfgang-schirmer-480.webp",
+        "jpg": "vorstand-wolfgang-schirmer-480.jpg"
+      },
+      "750": {
+        "avif": "vorstand-wolfgang-schirmer-750.avif",
+        "webp": "vorstand-wolfgang-schirmer-750.webp",
+        "jpg": "vorstand-wolfgang-schirmer-750.jpg"
+      }
+    }
   }
 }
