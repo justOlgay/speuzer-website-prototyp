@@ -1,0 +1,260 @@
+#!/usr/bin/env node
+// Speuzer Website Prototyp – statischer Builder (P0)
+// Node 24, ohne Abhängigkeiten. Liest src/ und data/, schreibt nach docs/.
+
+import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, rmSync, cpSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { execFileSync } from "node:child_process";
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const SRC = path.join(ROOT, "src");
+const DATA_DIR = path.join(ROOT, "data");
+const ASSETS = path.join(ROOT, "assets");
+const DOCS = path.join(ROOT, "docs");
+const CACHE = path.join(ROOT, "tools", "cache");
+
+const BASIS_URL = "https://justolgay.github.io/speuzer-website-prototyp/";
+const VEREINSNAME = "FFV Sportfreunde 04";
+const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+
+const startZeit = Date.now();
+
+// ---------- Daten laden ----------
+
+function ladeDaten() {
+  const daten = {};
+  if (existsSync(DATA_DIR)) {
+    for (const datei of readdirSync(DATA_DIR)) {
+      if (datei.endsWith(".json")) {
+        const schluessel = datei.slice(0, -".json".length);
+        daten[schluessel] = JSON.parse(readFileSync(path.join(DATA_DIR, datei), "utf8"));
+      }
+    }
+  }
+  daten.stand = new Date().toISOString();
+  return daten;
+}
+
+// ---------- Seitenmodule einsammeln ----------
+
+function findeSeitenModule(dir) {
+  const treffer = [];
+  for (const eintrag of readdirSync(dir)) {
+    const voll = path.join(dir, eintrag);
+    const info = statSync(voll);
+    if (info.isDirectory()) {
+      treffer.push(...findeSeitenModule(voll));
+    } else if (eintrag.endsWith(".mjs")) {
+      treffer.push(voll);
+    }
+  }
+  return treffer;
+}
+
+async function sammleSeiten(daten) {
+  const seitenDir = path.join(SRC, "seiten");
+  const module = existsSync(seitenDir) ? findeSeitenModule(seitenDir) : [];
+  const alleSeiten = [];
+  for (const modulPfad of module) {
+    const modul = await import(pathToFileURL(modulPfad).href);
+    if (typeof modul.seite === "function") {
+      alleSeiten.push(modul.seite(daten));
+    } else if (typeof modul.seiten === "function") {
+      alleSeiten.push(...modul.seiten(daten));
+    } else {
+      console.warn(`  Warnung: ${path.relative(ROOT, modulPfad)} exportiert weder seite() noch seiten()`);
+    }
+  }
+  return alleSeiten;
+}
+
+// ---------- Hilfsfunktionen ----------
+
+function normUrl(url) {
+  let u = url;
+  if (!u.startsWith("/")) u = "/" + u;
+  if (!u.endsWith("/")) u = u + "/";
+  return u;
+}
+
+function pfadZurWurzel(url) {
+  const tiefe = url.split("/").filter(Boolean).length;
+  return tiefe === 0 ? "./" : "../".repeat(tiefe);
+}
+
+function escapeHtml(text) {
+  return String(text ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function baueOgBlock({ title, description, canonical, ogImageAbs }) {
+  const volltitel = `${title} – ${VEREINSNAME}`;
+  return [
+    `<meta property="og:type" content="website">`,
+    `<meta property="og:site_name" content="${escapeHtml(VEREINSNAME)}">`,
+    `<meta property="og:title" content="${escapeHtml(volltitel)}">`,
+    `<meta property="og:description" content="${escapeHtml(description)}">`,
+    `<meta property="og:url" content="${escapeHtml(canonical)}">`,
+    `<meta property="og:image" content="${escapeHtml(ogImageAbs)}">`,
+    `<meta name="twitter:card" content="summary_large_image">`,
+  ].join("\n");
+}
+
+function fuelleVorlage(basis, werte) {
+  let html = basis;
+  for (const [schluessel, wert] of Object.entries(werte)) {
+    html = html.replaceAll(`{{${schluessel}}}`, wert ?? "");
+  }
+  return html;
+}
+
+// ---------- OG-Standardbild erzeugen (nur wenn nötig) ----------
+
+function stelleOgStandardbildSicher() {
+  const ziel = path.join(ASSETS, "og", "standard.png");
+  if (existsSync(ziel)) return;
+
+  mkdirSync(path.dirname(ziel), { recursive: true });
+  mkdirSync(CACHE, { recursive: true });
+
+  const vorlage = readFileSync(path.join(ROOT, "tools", "og-standard.html"), "utf8");
+  const wappen = readFileSync(path.join(ASSETS, "logo", "wappen-weiss.svg"), "utf8");
+  const html = vorlage.replace("<!--WAPPEN-->", wappen);
+  const tempHtml = path.join(CACHE, "og-standard-render.html");
+  writeFileSync(tempHtml, html, "utf8");
+
+  const tempPng = path.join(CACHE, "og-standard-render.png");
+  execFileSync(CHROME, [
+    "--headless",
+    "--disable-gpu",
+    `--screenshot=${tempPng}`,
+    "--window-size=1200,630",
+    "--force-device-scale-factor=1",
+    pathToFileURL(tempHtml).href,
+  ], { stdio: "pipe" });
+
+  cpSync(tempPng, ziel);
+  console.log("  assets/og/standard.png erzeugt (1200×630)");
+}
+
+// ---------- Assets kopieren ----------
+
+function kopiereAssets() {
+  const zielAssets = path.join(DOCS, "assets");
+  rmSync(zielAssets, { recursive: true, force: true });
+  mkdirSync(zielAssets, { recursive: true });
+  for (const eintrag of readdirSync(ASSETS)) {
+    if (eintrag === "bilder") {
+      // bilder/quelle nicht mitkopieren, andere bilder-Unterordner (falls vorhanden) schon
+      const bilderQuelle = path.join(ASSETS, "bilder");
+      const bilderZiel = path.join(zielAssets, "bilder");
+      mkdirSync(bilderZiel, { recursive: true });
+      for (const unterordner of readdirSync(bilderQuelle)) {
+        if (unterordner === "quelle") continue;
+        cpSync(path.join(bilderQuelle, unterordner), path.join(bilderZiel, unterordner), { recursive: true });
+      }
+      continue;
+    }
+    cpSync(path.join(ASSETS, eintrag), path.join(zielAssets, eintrag), { recursive: true });
+  }
+}
+
+// ---------- Hauptablauf ----------
+
+async function main() {
+  const daten = ladeDaten();
+
+  stelleOgStandardbildSicher();
+
+  const basisVorlage = readFileSync(path.join(SRC, "vorlagen", "basis.html"), "utf8");
+  const { header } = await import(pathToFileURL(path.join(SRC, "vorlagen", "header.mjs")).href);
+  const { footer } = await import(pathToFileURL(path.join(SRC, "vorlagen", "footer.mjs")).href);
+
+  const seiten = await sammleSeiten(daten);
+
+  mkdirSync(DOCS, { recursive: true });
+  const geschrieben = [];
+
+  for (const seite of seiten) {
+    const url = normUrl(seite.url);
+    const pfad = pfadZurWurzel(url);
+    const canonical = BASIS_URL.replace(/\/$/, "") + url;
+    const ogImageAbs = seite.ogImage
+      ? (seite.ogImage.startsWith("http") ? seite.ogImage : BASIS_URL.replace(/\/$/, "") + "/" + seite.ogImage.replace(/^\//, ""))
+      : BASIS_URL + "assets/og/standard.png";
+
+    const titelVoll = `${seite.title} – ${VEREINSNAME}`;
+    const og = baueOgBlock({ title: seite.title, description: seite.description, canonical, ogImageAbs });
+
+    const html = fuelleVorlage(basisVorlage, {
+      lang: "de",
+      title: escapeHtml(titelVoll),
+      description: escapeHtml(seite.description),
+      canonical,
+      og,
+      pfad,
+      header: header({ pfad, daten }),
+      inhalt: seite.inhalt,
+      footer: footer({ pfad, daten }),
+      bodyclass: seite.bodyclass ?? "",
+    });
+
+    const zielDatei = path.join(DOCS, url.slice(1), "index.html");
+    mkdirSync(path.dirname(zielDatei), { recursive: true });
+    writeFileSync(zielDatei, html, "utf8");
+    geschrieben.push(url);
+  }
+
+  // 404-Seite (kein Verzeichnis, liegt direkt in docs/)
+  {
+    const pfad = "./";
+    const canonical = BASIS_URL.replace(/\/$/, "") + "/404.html";
+    const title = "Seite nicht gefunden";
+    const description = "Diese Seite gibt es im Prototyp nicht. Zurück zur Startseite.";
+    const og = baueOgBlock({ title, description, canonical, ogImageAbs: BASIS_URL + "assets/og/standard.png" });
+    const inhalt = `<section class="container">
+<h1>Seite nicht gefunden</h1>
+<p>Diese Seite gibt es im Prototyp nicht.</p>
+<p><a class="knopf" href="${pfad}">Zur Startseite</a></p>
+</section>`;
+    const html = fuelleVorlage(basisVorlage, {
+      lang: "de",
+      title: escapeHtml(`${title} – ${VEREINSNAME}`),
+      description: escapeHtml(description),
+      canonical,
+      og,
+      pfad,
+      header: header({ pfad, daten }),
+      inhalt,
+      footer: footer({ pfad, daten }),
+      bodyclass: "",
+    });
+    writeFileSync(path.join(DOCS, "404.html"), html, "utf8");
+  }
+
+  kopiereAssets();
+
+  writeFileSync(path.join(DOCS, ".nojekyll"), "", "utf8");
+  writeFileSync(path.join(DOCS, "robots.txt"), "User-agent: *\nDisallow: /\n", "utf8");
+
+  const sitemapEintraege = geschrieben
+    .map((url) => `  <url><loc>${BASIS_URL.replace(/\/$/, "") + url}</loc></url>`)
+    .join("\n");
+  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEintraege}\n</urlset>\n`;
+  writeFileSync(path.join(DOCS, "sitemap.xml"), sitemap, "utf8");
+
+  const dauer = ((Date.now() - startZeit) / 1000).toFixed(2);
+  console.log(`Gebaute Seiten (${geschrieben.length}):`);
+  for (const url of geschrieben) console.log(`  ${url}`);
+  console.log(`404.html, robots.txt, sitemap.xml, .nojekyll geschrieben.`);
+  console.log(`Fertig in ${dauer}s.`);
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

@@ -1,0 +1,26 @@
+{
+  "name": "speuzer-website-prototyp",
+  "version": "1.0.0",
+  "description": "Prototyp / Testumgebung für den Webauftritt des F.F.V. Sportfreunde 04 – keine Live-Seite.",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "pruefen": "node tools/pruefen.mjs",
+    "pii": "python3 tools/pii-check.py",
+    "daten": "python3 tools/daten.py",
+    "serve": "node tools/server.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "axe-core": "^4.13.0",
+    "lighthouse": "^13.4.1",
+    "puppeteer-core": "^25.10.0"
+  }
+}

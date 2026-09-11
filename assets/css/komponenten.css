@@ -1,0 +1,7 @@
+/*
+  Speuzer Blau-Weiß – Komponenten
+  Bausteine (Kopfleiste, Karte, Kachel-Knopf, Spiel-Zeile, Trainings-Zeile,
+  Personen-Karte, Logo-Reihe, Hinweiskasten „offen“, Fußbereich) folgen in
+  Paket P1. In P0 bewusst leer, damit build.mjs die Datei bereits einbinden
+  kann, ohne dass Inhalte vorgegriffen werden.
+*/

@@ -1,0 +1,78 @@
+/*
+  Speuzer Blau-Weiß – Gestaltungs-Tokens
+  Prototyp F.F.V. Sportfreunde 04, Stand 11.09.2026.
+  Alle Werte hier zentral als CSS-Variablen, damit das gesamte
+  Gestaltungssystem in einer einzigen Datei überschaubar bleibt.
+*/
+
+:root {
+  /* Farben: Blau aus dem Wappen (Hue 240), neutrale Tinte, keine weiteren Akzentfarben */
+  --blau-950: #0B0E4A;
+  --blau-900: #151A7A;
+  --blau-800: #191793;
+  --blau-700: #1F2DBE;
+  --blau-600: #2A3BDD;
+  --blau-500: #3D4FEA;
+  --blau-100: #E4E7FA;
+  --blau-50: #F3F5FC;
+  --ink: #12142B;
+  --ink-2: #3F4360;
+  --ink-3: #5B6079;
+  --line: #D8DBEA;
+  --bg: #F5F6FB;
+  --surface: #FFFFFF;
+  --weiss: #FFFFFF;
+  --ok: #1E6B3A;
+  --warn: #8A4B00;
+  --wappen: #0300FD;
+
+  /* Schrift: zwei Familien, Skala modular 1,25 auf fluider Basis 16→17px */
+  --font-head: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-text: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --fs-xs: .8rem;
+  --fs-sm: .9rem;
+  --fs-md: 1rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: 1.5625rem;
+  --fs-2xl: 1.953rem;
+  --fs-3xl: 2.441rem;
+  --fs-4xl: clamp(2.4rem, 5vw, 3.6rem);
+  --lh-head: 1.1;
+  --lh-text: 1.55;
+  --measure: 65ch;
+
+  /* Abstände: 4px-Raster, Sektions- und Containermaße */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+  --sp-9: 96px;
+  --sektion: clamp(48px, 8vw, 96px);
+  --container: 1200px;
+  --inhalt: 720px;
+
+  /* Radien */
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-lg: 20px;
+  --r-pill: 999px;
+
+  /* Schatten (zwei Stufen, blaustichig) */
+  --sh-1: 0 1px 2px rgba(11, 14, 74, .06), 0 1px 1px rgba(11, 14, 74, .04);
+  --sh-2: 0 8px 24px rgba(11, 14, 74, .10);
+
+  /* Fokus */
+  --fokus: 3px solid var(--blau-500);
+
+  /* Bewegung */
+  --t-kurz: 160ms ease-out;
+  --t-mittel: 240ms ease-out;
+}
+
+html {
+  font-size: clamp(16px, 0.95rem + 0.25vw, 17px);
+}
