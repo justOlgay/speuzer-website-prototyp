@@ -32,6 +32,10 @@ input, button, textarea, select {
   font-variant-numeric: tabular-nums;
 }
 
+address {
+  font-style: normal;
+}
+
 /* Grundtypografie */
 html, body {
   height: 100%;

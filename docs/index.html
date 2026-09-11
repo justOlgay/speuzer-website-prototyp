@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Start – FFV Sportfreunde 04</title>
-<meta name="description" content="Prototyp und Testumgebung für den künftigen Webauftritt des F.F.V. Sportfreunde 04 – noch im Aufbau, keine Live-Seite.">
+<meta name="description" content="F.F.V. Sportfreunde 04 im Frankfurter Gallus: Trainingszeiten, nächste Spiele und Aktuelles unserer elf Fußballmannschaften. Probetraining vereinbaren und Mitglied werden">
 <link rel="canonical" href="https://justolgay.github.io/speuzer-website-prototyp/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="FFV Sportfreunde 04">
 <meta property="og:title" content="Start – FFV Sportfreunde 04">
-<meta property="og:description" content="Prototyp und Testumgebung für den künftigen Webauftritt des F.F.V. Sportfreunde 04 – noch im Aufbau, keine Live-Seite.">
+<meta property="og:description" content="F.F.V. Sportfreunde 04 im Frankfurter Gallus: Trainingszeiten, nächste Spiele und Aktuelles unserer elf Fußballmannschaften. Probetraining vereinbaren und Mitglied werden">
 <meta property="og:url" content="https://justolgay.github.io/speuzer-website-prototyp/">
 <meta property="og:image" content="https://justolgay.github.io/speuzer-website-prototyp/assets/og/standard.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -56,13 +56,257 @@
   </div>
 </header>
 <main id="inhalt">
-
-<section class="container">
-  <h1>FFV Sportfreunde 04 – Prototyp im Aufbau</h1>
-  <p class="inhalt">Dies ist ein Prototyp / eine Testumgebung für den Vorstand des F.F.V. Sportfreunde 04. Hier entsteht Schritt für Schritt ein neuer Webauftritt – das ist nicht die Live-Seite und wird auch nicht automatisch dorthin übernommen.</p>
-  <p><a class="knopf" href="styleguide/">Zum Gestaltungssystem</a></p>
+<section class="hero abschnitt--blau">
+  <div class="container hero__raster">
+    <div class="hero__text">
+      <p class="hero__kicker">Frankfurter Fußballverein Sportfreunde 1904 e.V. · Gallus</p>
+      <h1 class="hero__titel">Fußball im Gallus – seit 1904.</h1>
+      <p class="hero__lead">Elf Fußballmannschaften von der G-Jugend bis zu den Herren, eine Karnevalabteilung und ein eigener Platz an der Mainzer Landstraße. Wir sind ein Verein für Menschen: Gemeinschaft, Respekt und Freude am Spiel.</p>
+      <p class="knopfzeile">
+        <a class="knopf knopf--weiss knopf--gross" href="mailto:jugendleitung@sportfreunde04.de?subject=Probetraining%20beim%20FFV%20Sportfreunde%2004&amp;body=Hallo%2C%0A%0Awir%20interessieren%20uns%20f%C3%BCr%20ein%20Probetraining.%0AJahrgang%20des%20Kindes%3A%20%0AVorerfahrung%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe">Probetraining vereinbaren</a>
+        <span class="nav__bald knopf" aria-disabled="true" title="Seite folgt">Mitglied werden</span>
+      </p>
+      <ul class="hero__fakten" role="list">
+        <li>Gegründet 1904</li>
+        <li>11 Mannschaften</li>
+        <li>Mainzer Landstraße 480</li>
+      </ul>
+    </div>
+    <div class="hero__wappen-block">
+      <span class="hero__wappen-ring" aria-hidden="true"></span>
+      <img class="hero__wappen" src="./assets/logo/wappen-weiss.svg" width="219" height="213" alt="" aria-hidden="true">
+    </div>
+  </div>
 </section>
-
+<section class="abschnitt">
+  <div class="container">
+    <h2>Nächste Spiele</h2>
+    <p class="meta">Alle Mannschaften · Stand Freitag, 11. September 2026</p>
+    <ul class="spiele" role="list">
+    <li class="spiel spiel--naechstes">
+      <span class="spiel__datum">Sa 12.09. · 09:00 Uhr</span>
+      <span class="tag tag--auswaerts">Auswärts</span>
+      <span class="spiel__gegner-block">
+        <span class="spiel__gegner"><span class="tag">G-Jugend</span> FFC Olympia 07 IV</span>
+        <span class="spiel__ort meta">Ostparkstr. 16, 60385 Frankfurt am Main</span>
+        <span class="meta spiel__wettbewerb">Kinderfestival</span>
+      </span>
+      <span class="spiel__ergebnis">–</span>
+    </li>
+    <li class="spiel">
+      <span class="spiel__datum">Sa 12.09. · 10:00 Uhr</span>
+      <span class="tag tag--heim">Heim</span>
+      <span class="spiel__gegner-block">
+        <span class="spiel__gegner"><span class="tag">F1</span> </span>
+        <span class="spiel__ort meta">Mainzer Landstr. 480, 60326 Frankfurt am Main</span>
+        <span class="meta spiel__wettbewerb">Kinderfestival</span>
+      </span>
+      <span class="spiel__ergebnis">–</span>
+    </li>
+    <li class="spiel">
+      <span class="spiel__datum">Sa 12.09. · 11:00 Uhr</span>
+      <span class="tag tag--heim">Heim</span>
+      <span class="spiel__gegner-block">
+        <span class="spiel__gegner"><span class="tag">E3</span> SG Harheim 2</span>
+        <span class="spiel__ort meta">Mainzer Landstr. 480, 60326 Frankfurt am Main</span>
+        
+      </span>
+      <span class="spiel__ergebnis">–</span>
+    </li>
+    <li class="spiel">
+      <span class="spiel__datum">Sa 12.09. · 11:00 Uhr</span>
+      <span class="tag tag--auswaerts">Auswärts</span>
+      <span class="spiel__gegner-block">
+        <span class="spiel__gegner"><span class="tag">F2</span> FC Tempo Ffm 2</span>
+        <span class="spiel__ort meta">Am Ginnheimer Wäldchen 9, 60431 Frankfurt am Main</span>
+        <span class="meta spiel__wettbewerb">Kinderfestival</span>
+      </span>
+      <span class="spiel__ergebnis">–</span>
+    </li>
+    <li class="spiel">
+      <span class="spiel__datum">Sa 12.09. · 11:30 Uhr</span>
+      <span class="tag tag--heim">Heim</span>
+      <span class="spiel__gegner-block">
+        <span class="spiel__gegner"><span class="tag">E2</span> SG Bornheim / GW 3</span>
+        <span class="spiel__ort meta">Mainzer Landstr. 480, 60326 Frankfurt am Main</span>
+        
+      </span>
+      <span class="spiel__ergebnis">–</span>
+    </li>
+  </ul>
+    <p class="knopfzeile">
+      <span class="nav__bald knopf" aria-disabled="true" title="Seite folgt">Alle Spiele und Tabellen</span>
+      <a href="https://justolgay.github.io/speuzer-spielplan/" rel="noopener" target="_blank">Spielplan im Handy-Kalender abonnieren</a>
+    </p>
+  </div>
+</section>
+<section class="abschnitt--hell abschnitt">
+  <div class="container">
+    <h2>Trainingszeiten</h2>
+    <p class="inhalt">Alle Mannschaften trainieren auf dem Vereinsplatz an der Mainzer Landstraße 480 – nur die Herren auf der Anlage von SW Griesheim am Rebstock.</p>
+    <div class="tabelle-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Mannschaft</th>
+            <th>Jahrgang</th>
+            <th>Training</th>
+          </tr>
+        </thead>
+        <tbody>
+      <tr>
+        <td><span class="nav__bald" aria-disabled="true" title="Seite folgt">1. Herrenmannschaft</span></td>
+        <td>–</td>
+        <td>Mi 19:30–21:00<br>Fr 19:30–21:00</td>
+      </tr>
+      <tr>
+        <td><span class="nav__bald" aria-disabled="true" title="Seite folgt">A-Jugend</span></td>
+        <td>2008/2009</td>
+        <td>Mo 19:00–21:00<br>Mi 19:00–20:30</td>
+      </tr>
+      <tr>
+        <td><span class="nav__bald" aria-disabled="true" title="Seite folgt">D1-Jugend</span></td>
+        <td>2014</td>
+        <td>Di 17:30–19:30<br>Mi 17:30–19:00<br>Fr 17:30–19:30</td>
+      </tr>
+      <tr>
+        <td><span class="nav__bald" aria-disabled="true" title="Seite folgt">D2-Jugend</span></td>
+        <td>2015</td>
+        <td>Di 17:30–19:30<br>Mi 17:30–19:00<br>Fr 17:30–19:30</td>
+      </tr>
+      <tr>
+        <td><span class="nav__bald" aria-disabled="true" title="Seite folgt">D3-Jugend</span></td>
+        <td>2014/2015</td>
+        <td>Di 17:30–19:30<br>Fr 17:30–19:30</td>
+      </tr>
+      <tr>
+        <td><span class="nav__bald" aria-disabled="true" title="Seite folgt">E1-Jugend</span></td>
+        <td>2016</td>
+        <td>Mo 17:30–19:00<br>Mi 17:30–19:00<br>Do 17:30–19:00</td>
+      </tr>
+      <tr>
+        <td><span class="nav__bald" aria-disabled="true" title="Seite folgt">E2-Jugend</span></td>
+        <td>2017</td>
+        <td>Mo 17:30–19:00<br>Di 16:30–18:00<br>Do 17:30–19:00</td>
+      </tr>
+      <tr>
+        <td><span class="nav__bald" aria-disabled="true" title="Seite folgt">E3-Jugend</span></td>
+        <td>2016/2017</td>
+        <td>Mo 16:00–17:30<br>Mi 16:00–17:30</td>
+      </tr>
+      <tr>
+        <td><span class="nav__bald" aria-disabled="true" title="Seite folgt">F1-Jugend</span></td>
+        <td>2018</td>
+        <td>Mo 17:30–19:00<br>Mi 17:30–19:00</td>
+      </tr>
+      <tr>
+        <td><span class="nav__bald" aria-disabled="true" title="Seite folgt">F2-Jugend</span></td>
+        <td>2019/2020</td>
+        <td>Di 17:30–19:00<br>Do 17:30–19:00</td>
+      </tr>
+      <tr>
+        <td><span class="nav__bald" aria-disabled="true" title="Seite folgt">G-Jugend (Bambinis)</span></td>
+        <td>2021 und jünger</td>
+        <td>Mo 17:30–19:00</td>
+      </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="hinweis hinweis--info">
+      <p style="margin:0;">In den hessischen Schulferien und an Feiertagen findet in der Regel kein Training statt. Ausnahmen sagt das Trainerteam an.</p>
+    </div>
+    <p class="knopfzeile">
+      <span class="nav__bald knopf" aria-disabled="true" title="Seite folgt">Zu den Mannschaften</span>
+    </p>
+  </div>
+</section>
+<section class="abschnitt">
+  <div class="container">
+    <h2>Aktuelles</h2>
+    <div class="raster raster--2">
+    <article class="karte">
+      <picture class="karte__bild">
+  <source type="image/avif" srcset="./assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-480.avif 480w, ./assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-960.avif 960w, ./assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-1254.avif 1254w" sizes="(min-width: 1024px) 50vw, 100vw">
+  <source type="image/webp" srcset="./assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-480.webp 480w, ./assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-960.webp 960w, ./assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-1254.webp 1254w" sizes="(min-width: 1024px) 50vw, 100vw">
+  <img src="./assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-960.jpg" srcset="./assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-480.jpg 480w, ./assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-960.jpg 960w, ./assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-1254.jpg 1254w" sizes="(min-width: 1024px) 50vw, 100vw" width="1254" height="1254" alt="Spielgrafik: Jubelnde Spieler der Sportfreunde in Blau, Endstand 4:1 gegen die TSG Niederrad 1898" loading="lazy" decoding="async">
+</picture>
+      <p class="karte__meta">Donnerstag, 10. September 2026 · App-News</p>
+      <h3 class="karte__titel">Heimsieg am Rebstock: 4:1 gegen die TSG Niederrad</h3>
+      <p>HEIMSIEG AM REBSTOCK!</p>
+    </article>
+    <article class="karte">
+      <picture class="karte__bild">
+  <source type="image/avif" srcset="./assets/bilder/erzeugt/news-arbeitstag-2026-09-19-480.avif 480w, ./assets/bilder/erzeugt/news-arbeitstag-2026-09-19-960.avif 960w, ./assets/bilder/erzeugt/news-arbeitstag-2026-09-19-1024.avif 1024w" sizes="(min-width: 1024px) 50vw, 100vw">
+  <source type="image/webp" srcset="./assets/bilder/erzeugt/news-arbeitstag-2026-09-19-480.webp 480w, ./assets/bilder/erzeugt/news-arbeitstag-2026-09-19-960.webp 960w, ./assets/bilder/erzeugt/news-arbeitstag-2026-09-19-1024.webp 1024w" sizes="(min-width: 1024px) 50vw, 100vw">
+  <img src="./assets/bilder/erzeugt/news-arbeitstag-2026-09-19-960.jpg" srcset="./assets/bilder/erzeugt/news-arbeitstag-2026-09-19-480.jpg 480w, ./assets/bilder/erzeugt/news-arbeitstag-2026-09-19-960.jpg 960w, ./assets/bilder/erzeugt/news-arbeitstag-2026-09-19-1024.jpg 1024w" sizes="(min-width: 1024px) 50vw, 100vw" width="1024" height="1536" alt="Plakat zum Arbeitstag am 19.09.2026 ab 10 Uhr mit Schubkarre und Gartenwerkzeug auf dem Sportplatz" loading="lazy" decoding="async">
+</picture>
+      <p class="karte__meta">Montag, 7. September 2026 · App-News</p>
+      <h3 class="karte__titel">Arbeitstag am 19. September: Viele Hände für unseren Platz</h3>
+      <p>GEMEINSAM FÜR UNSEREN VEREIN!</p>
+    </article>
+    </div>
+    <p class="knopfzeile">
+      <span class="nav__bald knopf" aria-disabled="true" title="Seite folgt">Alle Meldungen</span>
+    </p>
+  </div>
+</section>
+<section class="abschnitt--hell abschnitt">
+  <div class="container">
+    <h2>Einfach vorbeikommen und mittrainieren</h2>
+    <p class="inhalt">Kinder und Jugendliche können ein- oder zweimal ohne Anmeldung mittrainieren. Vorher klären wir, ob in der passenden Mannschaft Platz ist – am einfachsten per E-Mail an die Jugendleitung mit dem Jahrgang des Kindes. Danach ist der Aufnahmeantrag Pflicht.</p>
+    <ol class="schritte">
+      <li><p>E-Mail an die Jugendleitung mit Jahrgang und Vorerfahrung</p></li>
+      <li><p>Termin fürs Probetraining bekommen und ein- bis zweimal mitmachen</p></li>
+      <li><p>Aufnahmeantrag ausfüllen – Beiträge und Unterlagen stehen unter „Mitglied werden“</p></li>
+    </ol>
+    <p class="knopfzeile">
+      <a class="knopf" href="mailto:jugendleitung@sportfreunde04.de?subject=Probetraining%20beim%20FFV%20Sportfreunde%2004&amp;body=Hallo%2C%0A%0Awir%20interessieren%20uns%20f%C3%BCr%20ein%20Probetraining.%0AJahrgang%20des%20Kindes%3A%20%0AVorerfahrung%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe">Probetraining vereinbaren</a>
+    </p>
+  </div>
+</section>
+<section class="abschnitt">
+  <div class="container">
+    <h2>Sportplatz Mainzer Landstraße</h2>
+    <div class="anfahrt__raster">
+      <div>
+        <address>
+          <p>Frankfurter Fußballverein Sportfreunde 1904 e.V.</p>
+          <p>Mainzer Landstraße 480</p>
+          <p>60326 Frankfurt am Main</p>
+        </address>
+        <p><a class="mail" href="mailto:geschaeftsstelle@sportfreunde04.de">geschaeftsstelle<wbr>@sportfreunde04<wbr>.de</a></p>
+        <p><a href="tel:+4969736868">Geschäftsstelle +49 69 736868</a></p>
+        <p><a href="tel:+4969732193">Platzwart +49 69 732193</a></p>
+        <p class="knopfzeile">
+          <a class="knopf knopf--sekundaer" href="https://maps.apple.com/?q=Mainzer+Landstra%C3%9Fe+480,+60326+Frankfurt+am+Main" rel="noopener" target="_blank">Route in Apple Karten</a>
+          <a class="knopf knopf--sekundaer" href="https://www.google.com/maps/search/?api=1&amp;query=Mainzer+Landstra%C3%9Fe+480%2C+60326+Frankfurt+am+Main" rel="noopener" target="_blank">Route in Google Maps</a>
+        </p>
+      </div>
+      <div>
+        <div class="hinweis hinweis--info">
+          <h3 style="margin:0 0 var(--sp-2);">Parken</h3>
+          <p style="margin:0;">Der Parkplatz am Vereinsgelände ist wegen des Neubaus des Funktionsgebäudes voraussichtlich bis Ende Januar 2027 gesperrt. Der Zugang zum Gelände ist über den Hintereingang am „Haus der Jugend“ (Pavillon) möglich.</p>
+          <p class="meta" style="margin-top:var(--sp-2);">Quelle: App-News vom 21.07.2026</p>
+        </div>
+        <div class="hinweis hinweis--offen" style="margin-top:var(--sp-4);">
+          <p style="margin:0;">ÖPNV: Haltestelle und Fußweg folgen.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="abschnitt--hell abschnitt abschnitt--eng">
+  <div class="container">
+    <article class="karte">
+      <h2 class="karte__titel">Karnevalabteilung „Die Schnauzer“</h2>
+      <p>Fünf Gruppen von den Little Fruities bis zu den Dreamboys – die zweite Abteilung des Vereins.</p>
+      <p class="knopfzeile">
+        <span class="nav__bald" aria-disabled="true" title="Seite folgt">Zur Karnevalabteilung</span>
+        <a class="mail" href="mailto:karnevalabteilung@sportfreunde04.de">karnevalabteilung<wbr>@sportfreunde04<wbr>.de</a>
+      </p>
+    </article>
+  </div>
+</section>
 </main>
 <footer class="fuss">
   <div class="container fuss__raster">
@@ -74,12 +318,12 @@
         <p>60326 Frankfurt am Main</p>
         <p>Postfach 190442, 60091 Frankfurt am Main</p>
       </address>
-      <p class="fuss__kontakt">
-        <a href="mailto:geschaeftsstelle@sportfreunde04.de">geschaeftsstelle@sportfreunde04.de</a><br>
-        <a href="tel:+4969736868">Geschäftsstelle +49 69 736868</a><br>
-        <a href="tel:+4969732193">Platzwart +49 69 732193</a><br>
-        <a href="https://www.instagram.com/speuzer_ffm/" rel="noopener" target="_blank">Instagram @speuzer_ffm</a>
-      </p>
+      <ul class="fuss__kontakt" role="list">
+        <li><a class="mail" href="mailto:geschaeftsstelle@sportfreunde04.de">geschaeftsstelle<wbr>@sportfreunde04<wbr>.de</a></li>
+        <li><a href="tel:+4969736868">Geschäftsstelle +49 69 736868</a></li>
+        <li><a href="tel:+4969732193">Platzwart +49 69 732193</a></li>
+        <li><a href="https://www.instagram.com/speuzer_ffm/" rel="noopener" target="_blank">Instagram @speuzer_ffm</a></li>
+      </ul>
     </div>
     <div class="fuss__gruppe">
         <h2>Verein</h2>

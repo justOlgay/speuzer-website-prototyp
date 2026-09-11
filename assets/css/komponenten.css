@@ -372,8 +372,17 @@ body.menue-offen {
 }
 
 .fuss__kontakt {
-  line-height: 2;
-  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin: 0 0 var(--sp-3);
+}
+
+.fuss__kontakt a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-block: var(--sp-1);
 }
 
 .fuss__gruppe h2 {
@@ -546,15 +555,31 @@ body.menue-offen {
   text-decoration: none;
 }
 
+.karte__bild {
+  display: block;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--r-md);
+  margin-bottom: var(--sp-3);
+}
+
+.karte__bild img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .karte__titel {
+  display: block;
   font-family: var(--font-head);
   font-size: var(--fs-xl);
   text-transform: uppercase;
   color: var(--blau-900);
-  margin: 0 0 var(--sp-2);
+  margin: 0 0 var(--sp-1);
 }
 
 .karte__meta {
+  display: block;
   font-size: var(--fs-sm);
   color: var(--ink-3);
 }
@@ -668,6 +693,10 @@ body.menue-offen {
 .spiel__hinweis {
   font-size: var(--fs-sm);
   color: var(--warn);
+}
+
+.spiel__wettbewerb {
+  display: block;
 }
 
 .training {
@@ -845,6 +874,23 @@ body.menue-offen {
   font-weight: 600;
 }
 
+/* Unter 640px: G/U/V/Tore ausblenden, Mannschaft mit Ellipsis kürzen (statt
+   dreizeiligem Umbruch bei langen Vereinsnamen). Kopfzeile behält dann Platz,
+   Mannschaft, Sp, Diff, Punkte. Der Wrapper bleibt zusätzlich als
+   Sicherheitsnetz horizontal scrollbar (overflow-x: auto, siehe oben). */
+@media (max-width: 639.98px) {
+  .tabelle-wrap .tabelle__optional {
+    display: none;
+  }
+
+  .tabelle-wrap .tabelle__mannschaft {
+    max-width: 46vw;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 /* ==========================================================================
    Knöpfe, Meta, Hilfsklassen
    ========================================================================== */
@@ -865,6 +911,17 @@ body.menue-offen {
   color: var(--blau-700);
 }
 
+/* Höhere Spezifität als ".abschnitt--blau a"/".abschnitt--blau a:hover"
+   (Hero, P2): sonst gewinnt die allgemeine Link-Textfarbe (--blau-100) gegen
+   die weiße Knopf-Fläche – dort wäre der Text fast unlesbar. */
+.abschnitt--blau .knopf--weiss {
+  color: var(--blau-800);
+}
+
+.abschnitt--blau .knopf--weiss:hover {
+  color: var(--blau-700);
+}
+
 .knopfzeile {
   display: flex;
   gap: var(--sp-3);
@@ -874,6 +931,14 @@ body.menue-offen {
 .meta {
   font-size: var(--fs-sm);
   color: var(--ink-3);
+}
+
+/* Mail-Adressen: nicht mitten im Wort umbrechen (siehe mailLink() in
+   hilfen.mjs, das <wbr> vor "@" und vor jedem "." danach einfügt). */
+.mail {
+  overflow-wrap: normal;
+  word-break: keep-all;
+  hyphens: none;
 }
 
 .sr-only {
@@ -886,4 +951,165 @@ body.menue-offen {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* ==========================================================================
+   Hero (Startseite, P2)
+   ========================================================================== */
+
+.hero__raster {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-5);
+  /* Unter 1024px knapper als das übliche --sektion: Wappen + Kicker + H1 +
+     Lead + Knopfzeile + Fakten sind zusammen bereits sehr hoch (siehe
+     Abschlussbericht, Abschnitt „Sichtprüfung“/„Beobachtungen“). */
+  padding-block: var(--sp-6) var(--sp-7);
+}
+
+.hero__wappen-block {
+  order: -1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* an den Inhalt (Wappen) angepasst statt volle Rasterspalte – sonst wäre
+     der Schatten-Ring (140% Breite) breiter als der Bildschirm und würde
+     die Kopfzeile/den Burger-Knopf überlagern (siehe hero__wappen-ring). */
+  width: fit-content;
+  margin-inline: auto;
+}
+
+.hero__wappen-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 140%;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, .06);
+  pointer-events: none;
+}
+
+.hero__wappen {
+  position: relative;
+  z-index: 1;
+  width: 120px;
+  height: auto;
+}
+
+.hero__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.hero__kicker {
+  font-size: var(--fs-sm);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--blau-100);
+  margin: 0;
+}
+
+.hero__titel {
+  font-family: var(--font-head);
+  text-transform: uppercase;
+  font-size: var(--fs-4xl);
+  line-height: 1.05;
+  color: var(--weiss);
+  margin: 0;
+}
+
+.hero__lead {
+  font-size: var(--fs-lg);
+  color: var(--blau-100);
+  max-width: 34ch;
+  margin: 0;
+}
+
+.hero__fakten {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-3);
+  font-size: var(--fs-sm);
+  color: var(--blau-100);
+  margin: 0;
+}
+
+.hero__fakten li + li::before {
+  content: "· ";
+}
+
+@media (min-width: 1024px) {
+  .hero__raster {
+    grid-template-columns: 7fr 5fr;
+    align-items: center;
+    gap: var(--sp-8);
+    padding-block: var(--sektion);
+  }
+
+  .hero__text {
+    gap: var(--sp-4);
+  }
+
+  .hero__wappen-block {
+    order: 0;
+  }
+
+  .hero__wappen {
+    width: clamp(160px, 22vw, 320px);
+  }
+}
+
+/* ==========================================================================
+   Schritte (nummerierte Anleitung, P2)
+   ========================================================================== */
+
+.schritte {
+  list-style: none;
+  counter-reset: schritt;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  margin: 0;
+  padding: 0;
+}
+
+.schritte li {
+  display: flex;
+  gap: var(--sp-4);
+  align-items: flex-start;
+}
+
+.schritte li::before {
+  counter-increment: schritt;
+  content: counter(schritt);
+  flex: none;
+  min-width: 1.4em;
+  font-family: var(--font-head);
+  font-size: var(--fs-2xl);
+  line-height: 1;
+  color: var(--blau-700);
+}
+
+.schritte p {
+  margin: 0;
+  padding-top: var(--sp-1);
+}
+
+/* ==========================================================================
+   Adresse & Anfahrt – zweispaltiges Raster (P2)
+   ========================================================================== */
+
+.anfahrt__raster {
+  display: grid;
+  gap: var(--sp-6);
+}
+
+@media (min-width: 768px) {
+  .anfahrt__raster {
+    grid-template-columns: 1fr 1fr;
+  }
 }
