@@ -131,7 +131,7 @@ function zahlenAbschnitt() {
 
   return `<section class="abschnitt--blau abschnitt">
   <div class="container fluss">
-    <h2>Zahlen</h2>
+    <h2>Der Verein in Zahlen</h2>
     <div class="raster raster--4">
       ${kacheln}
     </div>

@@ -68,7 +68,7 @@ function gruppenAbschnitt({ titel, funktionen, nachFunktion, daten, hell }) {
   return `<section class="abschnitt${hellKlasse}">
   <div class="container fluss">
     <h2>${escapeHtml(titel)}</h2>
-    <div class="raster raster--4">
+    <div class="raster raster--personen">
       ${karten}
     </div>
   </div>

@@ -2,7 +2,7 @@
 // Aktuelles, Probetraining, Adresse & Anfahrt, Karneval.
 
 import { bild } from "../vorlagen/bild.mjs";
-import { datumLang, naechsteSpiele, spielZeile, mailLink, jahrgangText, PROBETRAINING_MAILTO } from "../vorlagen/hilfen.mjs";
+import { datumLang, naechsteSpiele, spielZeile, mailLink, jahrgangText, PROBETRAINING_MAILTO, teaser } from "../vorlagen/hilfen.mjs";
 
 // Diese Seite ist immer die Wurzel ("/"), daher ist der Pfad zu den Assets
 // immer "./" (siehe pfadZurWurzel() in tools/build.mjs für Tiefe 0).
@@ -35,65 +35,6 @@ function telHref(nummer) {
 function baldSpan(titel, { knopf = false } = {}) {
   const klassen = ["nav__bald", knopf ? "knopf" : null].filter(Boolean).join(" ");
   return `<span class="${klassen}" aria-disabled="true" title="Seite folgt">${escapeHtml(titel)}</span>`;
-}
-
-// ---------- K4: Teaser-Regel ----------
-
-function istKomplettVersal(text) {
-  const buchstaben = text.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ]/g, "");
-  return buchstaben.length > 0 && buchstaben === buchstaben.toUpperCase() && buchstaben !== buchstaben.toLowerCase();
-}
-
-// Text in Sätze zerlegen: "." "!" "?" zählen nur als Satzende, wenn ihnen ein
-// Leerzeichen/Textende folgt (sonst z. B. "19.09.2026" mitten im Satz) und
-// ihnen kein einzelner Buchstabe nach einem Punkt/Leerzeichen vorausgeht
-// (Abkürzungen wie "F.F.V." oder "e.V.").
-function teiltSaetze(text) {
-  const saetze = [];
-  let start = 0;
-  const re = /[.!?]+/g;
-  let treffer;
-  while ((treffer = re.exec(text))) {
-    const ende = treffer.index + treffer[0].length;
-    const danach = text.slice(ende, ende + 1);
-    if (danach !== "" && !/\s/.test(danach)) continue;
-
-    const davor1 = text[treffer.index - 1] ?? "";
-    const davor2 = text[treffer.index - 2] ?? "";
-    const istAbkuerzung =
-      /[A-Za-zÀ-ÖØ-öø-ÿ]/.test(davor1) && (davor2 === "" || davor2 === "." || /\s/.test(davor2));
-    if (istAbkuerzung) continue;
-
-    saetze.push(text.slice(start, ende).trim());
-    start = ende;
-  }
-  const rest = text.slice(start).trim();
-  if (rest) saetze.push(rest);
-  return saetze;
-}
-
-// Ersten Satz, der (a) nicht komplett in Versalien steht und (b) mindestens
-// 40 Zeichen hat; Ausrufezeichen-Ketten auf eines gekürzt; auf `max` Zeichen
-// an Wortgrenze mit „…" gekürzt.
-function teaser(text, max = 160) {
-  const bereinigt = String(text ?? "")
-    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu, "")
-    .replace(/!{2,}/g, "!")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  const saetze = teiltSaetze(bereinigt);
-  let gewaehlt =
-    saetze.find((s) => s.length >= 40 && !istKomplettVersal(s)) ??
-    saetze.find((s) => s.length > 0) ??
-    bereinigt;
-
-  if (gewaehlt.length > max) {
-    const abschnitt = gewaehlt.slice(0, max);
-    const letzterRaum = abschnitt.lastIndexOf(" ");
-    gewaehlt = (letzterRaum > 0 ? abschnitt.slice(0, letzterRaum) : abschnitt).trim() + "…";
-  }
-  return gewaehlt;
 }
 
 // ---------- D1: Hero (K1: Anordnung < 1024px geändert) ----------
@@ -211,12 +152,13 @@ function aktuellesAbschnitt(daten) {
           })
         : "";
       const teaserText = teaser(n.text);
-      return `<article class="karte">
+      const ziel = `${PFAD}news/${String(n.datum).slice(0, 10)}-${n.slug}/`;
+      return `<a class="karte karte--link" href="${ziel}">
       ${bildHtml}
       <p class="karte__meta">${datumLang(n.datum)} · ${escapeHtml(n.quelle)}</p>
       <h3 class="karte__titel">${escapeHtml(n.titel)}</h3>
       <p>${escapeHtml(teaserText)}</p>
-    </article>`;
+    </a>`;
     })
     .join("\n    ");
 
