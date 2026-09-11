@@ -91,10 +91,10 @@ function escapeHtml(text) {
     .replaceAll('"', "&quot;");
 }
 
-function baueOgBlock({ title, description, canonical, ogImageAbs }) {
+function baueOgBlock({ title, description, canonical, ogImageAbs, ogType }) {
   const volltitel = `${title} – ${VEREINSNAME}`;
   return [
-    `<meta property="og:type" content="website">`,
+    `<meta property="og:type" content="${escapeHtml(ogType ?? "website")}">`,
     `<meta property="og:site_name" content="${escapeHtml(VEREINSNAME)}">`,
     `<meta property="og:title" content="${escapeHtml(volltitel)}">`,
     `<meta property="og:description" content="${escapeHtml(description)}">`,
@@ -189,7 +189,7 @@ async function main() {
       : BASIS_URL + "assets/og/standard.png";
 
     const titelVoll = `${seite.title} – ${VEREINSNAME}`;
-    const og = baueOgBlock({ title: seite.title, description: seite.description, canonical, ogImageAbs });
+    const og = baueOgBlock({ title: seite.title, description: seite.description, canonical, ogImageAbs, ogType: seite.ogType });
 
     const html = fuelleVorlage(basisVorlage, {
       lang: "de",

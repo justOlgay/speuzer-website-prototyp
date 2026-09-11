@@ -25,7 +25,8 @@ function downloadZeile(eintrag) {
   const attrs = istIntern ? "" : ' rel="noopener" target="_blank"';
 
   const teile = ["PDF"];
-  if (eintrag.seiten) teile.push(`${eintrag.seiten} Seiten`);
+  // Singular/Plural (P5-Korrektur A2): "1 Seite" statt "1 Seiten".
+  if (eintrag.seiten) teile.push(`${eintrag.seiten} ${eintrag.seiten === 1 ? "Seite" : "Seiten"}`);
   if (eintrag.kb) teile.push(`${eintrag.kb} KB`);
   const metaText = teile.join(" · ");
 

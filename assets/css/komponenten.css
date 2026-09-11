@@ -587,6 +587,29 @@ body.menue-offen {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
 }
 
+/* Personen-Raster (P5-Korrektur A1) – ersetzt raster--3/raster--4 überall dort,
+   wo Personen-Karten liegen (Vorstand, Karnevalabteilung): mit wenigen
+   Einträgen (Senioren: 2, Karneval-Ansprechpartner: 3) wurden die Karten sonst
+   auf halbe Containerbreite gestreckt und der 3:4-Platzhalter über 700px hoch.
+   Ab 640px feste Kartenbreite (auto-fill statt auto-fit, dadurch kein Strecken
+   auf leere Spalten), darunter zwei bzw. eine Spalte. */
+.raster--personen {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 360px) {
+  .raster--personen {
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+  }
+}
+
+@media (min-width: 640px) {
+  .raster--personen {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 260px));
+    justify-content: start;
+  }
+}
+
 .karte {
   background: var(--surface);
   border-radius: var(--r-lg);
@@ -865,7 +888,9 @@ body.menue-offen {
 }
 
 /* Platzhalter ohne Foto (Vorstand/Karneval, P5): Fläche --blau-100 mit dem
-   Wappen bei 40% Breite, zentriert. */
+   Wappen bei 36% Breite (P5-Korrektur A1: von 40% auf 36% verkleinert, damit
+   das Wappen im jetzt auf max. 260px begrenzten .raster--personen nicht zu
+   groß wirkt), zentriert. */
 .person__bild--platzhalter {
   display: flex;
   align-items: center;
@@ -874,7 +899,7 @@ body.menue-offen {
 }
 
 .person__bild--platzhalter svg {
-  width: 40%;
+  width: 36%;
   height: auto;
   color: var(--blau-700);
 }
@@ -894,6 +919,18 @@ body.menue-offen {
 .person__mail {
   font-size: var(--fs-sm);
   overflow-wrap: anywhere;
+}
+
+/* .mail (siehe "Knöpfe, Meta, Hilfsklassen" weiter unten) verhindert mit
+   gleicher Klassen-Spezifität sonst das Umbrechen – im schmalen
+   .raster--personen (P6-Korrektur A1, zwei Spalten ab 360px) reicht die
+   Spaltenbreite für lange lokale Teile wie "kinderschutzbeauftragter" nicht
+   aus (horizontales Scrollen). Hier mit höherer Spezifität erzwungen, nur
+   innerhalb der Personen-Karte – das allgemeine .mail-Verhalten (z. B.
+   Fußbereich, Vorstands-Hinweiszeile) bleibt unverändert. */
+.person__mail .mail {
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 /* ==========================================================================
@@ -1505,4 +1542,142 @@ body.tabellen h2 {
 
 .download:last-child {
   border-bottom: none;
+}
+
+/* ==========================================================================
+   News-Karte ohne Bild (.karte__bild--leer, P6) – /news/: Kopfzeile in
+   --blau-100 mit zentriertem Wappen (64px) statt eines Fotos, gleiche
+   Proportion (4:3) und Abstand wie .karte__bild.
+   ========================================================================== */
+
+.karte__bild--leer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--r-md);
+  background: var(--blau-100);
+  margin-bottom: var(--sp-3);
+}
+
+.karte__bild--leer svg {
+  width: 64px;
+  height: auto;
+  color: var(--blau-700);
+}
+
+/* ==========================================================================
+   Artikel-Bild (.artikel__bild, P6) – /news/<slug>/: Grafiken (bild_passung
+   "contain") in fester 4:3-Box auf --blau-900 wie auf den Karten, Fotos in
+   natürlicher Proportion. Radius --r-lg (größer als die Karten, da hier ohne
+   umschließende .karte).
+   ========================================================================== */
+
+/* margin-bottom nur, kein margin-top: das übernimmt (mit höherer Spezifität
+   als der Basis-Reset in base.css) das Fluss-Rhythmus-System weiter oben in
+   dieser Datei (".fluss > * + *"). */
+/* Radius/Seitenverhältnis/Hintergrund sitzen auf dem <picture> (nicht auf dem
+   <figure> selbst): die <figcaption> bleibt dadurch außerhalb der dunklen
+   --blau-900-Fläche der Grafiken – sonst zu wenig Kontrast für den
+   --ink-3-Bildunterschrift-Text darauf (siehe .meta). */
+.artikel__bild {
+  display: block;
+  margin-bottom: var(--sp-3);
+}
+
+.artikel__bild picture {
+  display: block;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+
+.artikel__bild img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.artikel__bild--contain picture {
+  aspect-ratio: 4 / 3;
+  background: var(--blau-900);
+}
+
+.artikel__bild--contain img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.artikel__bild figcaption {
+  margin-top: var(--sp-2);
+}
+
+/* ==========================================================================
+   Artikel-Ergebniszeile (.artikel__ergebnis, P6) – /news/<slug>/: wie eine
+   .karte--spiel-Ergebniszeile, aber freistehend über dem Fließtext.
+   ========================================================================== */
+
+.artikel__ergebnis {
+  font-family: var(--font-head);
+  font-size: var(--fs-2xl);
+  color: var(--blau-900);
+}
+
+/* ==========================================================================
+   Tore-Liste (.tore, P6) – /news/<slug>/: je Tor Minute (tabular-nums, in
+   var(--font-head)), Torschütze und optional der Spielstand.
+   ========================================================================== */
+
+.tore {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tore li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  padding: var(--sp-2) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.tore li:last-child {
+  border-bottom: none;
+}
+
+.tore__minute {
+  font-family: var(--font-head);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--blau-900);
+  min-width: 2.5em;
+}
+
+/* ==========================================================================
+   Fakten-Liste (.fakten, P6) – /news/<slug>/: Eckdaten (Termin, Uhrzeit, Ort)
+   als Tags/Zeilen vor dem Fließtext, optisch wie .tag, aber als eigene Zeile
+   lesbar statt als einzelnes Wort.
+   ========================================================================== */
+
+.fakten {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-3);
+}
+
+.fakten li {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px var(--sp-3);
+  border-radius: var(--r-pill);
+  background: var(--blau-100);
+  color: var(--blau-900);
+  font-weight: 700;
+  font-size: var(--fs-sm);
 }

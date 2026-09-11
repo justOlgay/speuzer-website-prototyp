@@ -430,7 +430,7 @@ function seiteBausteine(daten) {
     ? `<ul class="downloads" role="list">
     <li class="download">
       <a href="${escapeHtml(beispielDownload.datei ?? "")}" rel="noopener" target="_blank">${escapeHtml(beispielDownload.titel ?? "")}</a>
-      <span class="meta">PDF${beispielDownload.seiten ? ` · ${escapeHtml(String(beispielDownload.seiten))} Seiten` : ""}${beispielDownload.kb ? ` · ${escapeHtml(String(beispielDownload.kb))} KB` : ""}</span>
+      <span class="meta">PDF${beispielDownload.seiten ? ` · ${escapeHtml(String(beispielDownload.seiten))} ${beispielDownload.seiten === 1 ? "Seite" : "Seiten"}` : ""}${beispielDownload.kb ? ` · ${escapeHtml(String(beispielDownload.kb))} KB` : ""}</span>
       <span class="meta">öffnet cdn.appack.de</span>
     </li>
   </ul>`
@@ -451,6 +451,60 @@ function seiteBausteine(daten) {
     <h4 class="karte__titel" style="font-size:var(--fs-lg);">${escapeHtml(beispielNewsContain.titel)}</h4>
   </article>`
     : `<p class="meta">Kein Eintrag mit bild_passung "contain" in data/news.json gefunden.</p>`;
+
+  // P6: News-Karte ohne Bild (.karte__bild--leer) – /news/, wenn "bild" in
+  // data/news.json fehlt (z. B. der App-Start-Eintrag).
+  const wappenBlauFuerKarte = liesWappen("wappen-blau.svg");
+  const beispielNewsOhneBild = (daten.news ?? []).find((n) => !n.bild);
+  const karteLeerBeispiel = beispielNewsOhneBild
+    ? `<a class="karte karte--link" href="${PFAD}news/" style="max-width:280px;">
+    <span class="karte__bild--leer" aria-hidden="true">${wappenBlauFuerKarte}</span>
+    <p class="karte__meta">${escapeHtml(beispielNewsOhneBild.quelle)}</p>
+    <h4 class="karte__titel" style="font-size:var(--fs-lg);">${escapeHtml(beispielNewsOhneBild.titel)}</h4>
+  </a>`
+    : `<p class="meta">Kein Eintrag ohne Bild in data/news.json gefunden.</p>`;
+
+  // P6-Korrektur A1: Personen-Raster (.raster--personen) – ersetzt
+  // raster--3/raster--4 bei Personen-Karten (Vorstand, Karnevalabteilung).
+  // Beispiel bewusst mit der Senioren-Gruppe (nur zwei Einträge): genau der
+  // Fall, in dem die Karten vorher auf halbe Containerbreite gestreckt wurden.
+  const seniorenPersonen = (daten.vorstand ?? []).filter((p) =>
+    ["Sportliche Leitung Senioren", "Spielausschuss Senioren"].includes(p.funktion)
+  );
+  const rasterPersonenBeispiel = seniorenPersonen.length
+    ? `<div class="raster raster--personen">
+    ${seniorenPersonen
+      .map(
+        (p) => `<div class="person">
+      <span class="person__bild person__bild--platzhalter" aria-hidden="true">${wappenBlauFuerKarte}</span>
+      <p class="person__name">${escapeHtml(p.name ?? "derzeit nicht besetzt")}</p>
+      <p class="person__funktion">${escapeHtml(p.funktion ?? "")}</p>
+    </div>`
+      )
+      .join("\n    ")}
+  </div>`
+    : `<p class="meta">Keine Senioren-Funktionen in data/vorstand.json gefunden.</p>`;
+
+  // P6: Tore-Liste (.tore) – Artikelseiten /news/<slug>/.
+  const beispielTore = (daten.news ?? []).find((n) => n.tore?.length);
+  const toreBeispiel = beispielTore
+    ? `<ul class="tore" role="list">
+    ${beispielTore.tore
+      .map(
+        (t) =>
+          `<li><span class="tore__minute">${escapeHtml(String(t.minute))}'</span> ${escapeHtml(t.name)}${t.stand ? ` · ${escapeHtml(t.stand)}` : ""}</li>`
+      )
+      .join("\n    ")}
+  </ul>`
+    : `<p class="meta">Kein Eintrag mit Toren in data/news.json gefunden.</p>`;
+
+  // P6: Fakten-Liste (.fakten) – Artikelseiten /news/<slug>/.
+  const beispielFakten = (daten.news ?? []).find((n) => n.fakten?.length);
+  const faktenBeispiel = beispielFakten
+    ? `<ul class="fakten" role="list">
+    ${beispielFakten.fakten.map((f) => `<li>${escapeHtml(f)}</li>`).join("\n    ")}
+  </ul>`
+    : `<p class="meta">Kein Eintrag mit Fakten in data/news.json gefunden.</p>`;
 
   return `<h2>Bausteine</h2>
 <p class="inhalt">Alle Bausteine mit echten Daten aus data/, wie sie später auf den Inhaltsseiten verwendet werden. Ziele, deren Seite im aktuellen Paket noch nicht existiert, sind als Karten mit &lt;span&gt; statt &lt;a&gt; ausgegeben.</p>
@@ -526,7 +580,23 @@ ${zahlenBeispiel}
 
 <h3>Download-Zeile (.download)</h3>
 <p class="inhalt">/verein/downloads/ (P5): Titel als Link, darunter Format/Umfang und Hinweis auf das externe Ziel als .meta-Zeilen.</p>
-${downloadBeispiel}`;
+${downloadBeispiel}
+
+<h3>News-Karte ohne Bild (.karte__bild--leer)</h3>
+<p class="inhalt">/news/ (P6): Kopfzeile in --blau-100 mit zentriertem Wappen (64px) statt Foto, wenn das Feld "bild" in data/news.json fehlt.</p>
+${karteLeerBeispiel}
+
+<h3>Personen-Raster (.raster--personen)</h3>
+<p class="inhalt">Vorstand und Karnevalabteilung (P5-Korrektur A1): ersetzt raster--3/raster--4 bei Personen-Karten. Ab 640px maximal 260px Kartenbreite (auto-fill statt auto-fit, dadurch kein Strecken auf halbe Containerbreite bei wenigen Einträgen), darunter zwei bzw. eine Spalte.</p>
+${rasterPersonenBeispiel}
+
+<h3>Tore (.tore)</h3>
+<p class="inhalt">Artikelseiten /news/&lt;slug&gt;/ (P6): je Tor Minute (tabular-nums, in var(--font-head)), Torschütze und optional der Spielstand.</p>
+${toreBeispiel}
+
+<h3>Fakten (.fakten)</h3>
+<p class="inhalt">Artikelseiten /news/&lt;slug&gt;/ (P6): Eckdaten (Termin, Uhrzeit, Ort) als Tags/Zeilen vor dem Fließtext.</p>
+${faktenBeispiel}`;
 }
 
 export function seite(daten) {

@@ -103,7 +103,7 @@ function ansprechpartnerAbschnitt(daten) {
   return `<section class="abschnitt--hell abschnitt">
   <div class="container fluss">
     <h2>Ansprechpartner</h2>
-    <div class="raster raster--3">
+    <div class="raster raster--personen">
       ${karten}
     </div>
     <p class="knopfzeile">
