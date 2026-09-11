@@ -3,6 +3,7 @@
 // als <span class="nav__bald"> statt als Link ausgegeben (siehe navigation.mjs).
 
 import { FUSS } from "./navigation.mjs";
+import { mailLink } from "./hilfen.mjs";
 
 function escapeHtml(text) {
   return String(text ?? "")
@@ -55,12 +56,12 @@ export function footer({ pfad, daten, seitenUrls }) {
         <p>${escapeHtml(sportstaette.plz ?? "")} ${escapeHtml(sportstaette.ort ?? "")}</p>
         <p>${escapeHtml(post.postfach ?? "")}, ${escapeHtml(post.plz ?? "")} ${escapeHtml(post.ort ?? "")}</p>
       </address>
-      <p class="fuss__kontakt">
-        <a href="mailto:${escapeHtml(verein.mail ?? "geschaeftsstelle@sportfreunde04.de")}">${escapeHtml(verein.mail ?? "geschaeftsstelle@sportfreunde04.de")}</a><br>
-        <a href="${telHref(verein.tel_geschaeftsstelle)}">Geschäftsstelle ${escapeHtml(verein.tel_geschaeftsstelle ?? "")}</a><br>
-        <a href="${telHref(verein.tel_platzwart)}">Platzwart ${escapeHtml(verein.tel_platzwart ?? "")}</a><br>
-        <a href="${escapeHtml(verein.instagram ?? "https://www.instagram.com/speuzer_ffm/")}" rel="noopener" target="_blank">Instagram @speuzer_ffm</a>
-      </p>
+      <ul class="fuss__kontakt" role="list">
+        <li>${mailLink(verein.mail ?? "geschaeftsstelle@sportfreunde04.de")}</li>
+        <li><a href="${telHref(verein.tel_geschaeftsstelle)}">Geschäftsstelle ${escapeHtml(verein.tel_geschaeftsstelle ?? "")}</a></li>
+        <li><a href="${telHref(verein.tel_platzwart)}">Platzwart ${escapeHtml(verein.tel_platzwart ?? "")}</a></li>
+        <li><a href="${escapeHtml(verein.instagram ?? "https://www.instagram.com/speuzer_ffm/")}" rel="noopener" target="_blank">Instagram @speuzer_ffm</a></li>
+      </ul>
     </div>
     ${gruppen}
   </div>

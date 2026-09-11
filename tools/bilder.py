@@ -35,11 +35,15 @@ STANDARD_BREITEN = [480, 960, 1440]
 MAX_BYTES = 200 * 1024
 QUELL_ENDUNGEN = {".jpg", ".jpeg", ".png"}
 
-# Startqualität und Minimum je Format (Schritt 6 des Plans)
+# Startqualität und Minimum je Format (Schritt 6 des Plans). "notfall_min":
+# einzelne große/kontrastreiche Quellbilder (z. B. textlastige Grafiken)
+# unterschreiten die reguläre Mindestqualität nicht immer die 200-KB-Grenze;
+# in diesem Fall wird zusätzlich bis "notfall_min" heruntergeregelt, damit die
+# harte 200-KB-Grenze eingehalten wird (P2, siehe erzeuge_mit_qualitaetsleiter).
 QUALITAET = {
-    "avif": {"start": 55, "min": 55, "schritt": 5},
-    "webp": {"start": 80, "min": 60, "schritt": 5},
-    "jpg": {"start": 82, "min": 65, "schritt": 5},
+    "avif": {"start": 55, "min": 55, "schritt": 5, "notfall_min": 35},
+    "webp": {"start": 80, "min": 60, "schritt": 5, "notfall_min": 35},
+    "jpg": {"start": 82, "min": 65, "schritt": 5, "notfall_min": 30},
 }
 
 
@@ -84,8 +88,17 @@ def erzeuge_mit_qualitaetsleiter(erzeuge_fn, ziel, format_):
         q = max(q - einstellung["schritt"], einstellung["min"])
         erzeuge_fn(q)
         groesse = ziel.stat().st_size
-        if q == einstellung["min"]:
-            break
+
+    # Notfall-Stufe: reguläre Mindestqualität reicht bei diesem Bild nicht –
+    # weiter absenken bis notfall_min, um die harte 200-KB-Grenze einzuhalten.
+    notfall_min = einstellung.get("notfall_min", einstellung["min"])
+    while groesse > MAX_BYTES and q > notfall_min:
+        q = max(q - einstellung["schritt"], notfall_min)
+        erzeuge_fn(q)
+        groesse = ziel.stat().st_size
+        if groesse <= MAX_BYTES:
+            print(f"  Hinweis: {ziel.name} musste auf Notfall-Qualität {q} (< reguläres Minimum {einstellung['min']}) gesenkt werden, um unter 200 KB zu bleiben.")
+
     if groesse > MAX_BYTES:
         print(f"  Warnung: {ziel.name} ist {groesse // 1024} KB (> 200 KB, Minimum-Qualität {q} erreicht)")
     return ziel.name

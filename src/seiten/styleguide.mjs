@@ -6,6 +6,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { mailLink, datumLang } from "../vorlagen/hilfen.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -219,7 +220,7 @@ function seiteBausteine(daten) {
     <span class="person__bild person__bild--platzhalter" aria-hidden="true">${wappenPlatzhalter}</span>
     <p class="person__name">Florian Müller</p>
     <p class="person__funktion">Kinderschutzbeauftragter</p>
-    <p class="person__mail"><a href="mailto:kinderschutzbeauftragter@sportfreunde04.de">kinderschutzbeauftragter@sportfreunde04.de</a></p>
+    <p class="person__mail">${mailLink("kinderschutzbeauftragter@sportfreunde04.de")}</p>
   </div>`;
 
   const tagsBeispiel = `<p class="knopfzeile">
@@ -240,12 +241,12 @@ function seiteBausteine(daten) {
     .map(
       (z) => `<tr${z.eigene ? ' class="eigene"' : ""}>
         <td class="zahl">${z.platz}</td>
-        <td>${escapeHtml(z.mannschaft)}</td>
+        <td class="tabelle__mannschaft">${escapeHtml(z.mannschaft)}</td>
         <td class="zahl">${z.spiele}</td>
-        <td class="zahl">${z.g}</td>
-        <td class="zahl">${z.u}</td>
-        <td class="zahl">${z.v}</td>
-        <td class="zahl">${escapeHtml(z.tore)}</td>
+        <td class="zahl tabelle__optional">${z.g}</td>
+        <td class="zahl tabelle__optional">${z.u}</td>
+        <td class="zahl tabelle__optional">${z.v}</td>
+        <td class="zahl tabelle__optional">${escapeHtml(z.tore)}</td>
         <td class="zahl">${z.diff}</td>
         <td class="zahl">${z.punkte}</td>
       </tr>`
@@ -256,12 +257,12 @@ function seiteBausteine(daten) {
       <thead>
         <tr>
           <th class="zahl">Platz</th>
-          <th>Mannschaft</th>
+          <th class="tabelle__mannschaft">Mannschaft</th>
           <th class="zahl">Sp</th>
-          <th class="zahl">G</th>
-          <th class="zahl">U</th>
-          <th class="zahl">V</th>
-          <th class="zahl">Tore</th>
+          <th class="zahl tabelle__optional">G</th>
+          <th class="zahl tabelle__optional">U</th>
+          <th class="zahl tabelle__optional">V</th>
+          <th class="zahl tabelle__optional">Tore</th>
           <th class="zahl">Diff</th>
           <th class="zahl">Punkte</th>
         </tr>
@@ -271,13 +272,41 @@ function seiteBausteine(daten) {
       </tbody>
     </table>
   </div>
-  <p class="meta">Staffel D3: ${escapeHtml(d3Tabelle?.staffel ?? "")} · Momentaufnahme vom ${escapeHtml(daten.tabellen?.stand ?? "")}</p>`;
+  <p class="meta">Staffel D3: ${escapeHtml(d3Tabelle?.staffel ?? "")} · Momentaufnahme vom ${escapeHtml(daten.tabellen?.stand ?? "")} · unter 640px werden G/U/V/Tore (Klasse <code>tabelle__optional</code>) ausgeblendet und Mannschaft (Klasse <code>tabelle__mannschaft</code>) gekürzt</p>`;
 
   const knoepfeBeispiel = `<p class="knopfzeile">
     <a class="knopf" href="#inhalt">Primärknopf</a>
     <a class="knopf knopf--sekundaer" href="#inhalt">Sekundärknopf</a>
     <a class="knopf knopf--gross" href="#inhalt">Großer Knopf</a>
   </p>`;
+
+  const verein = daten.verein ?? {};
+
+  const heroBeispiel = `<div class="abschnitt--blau" style="border-radius:var(--r-lg);padding:var(--sp-6);">
+    <p class="hero__kicker">Frankfurter Fußballverein Sportfreunde 1904 e.V. · Gallus</p>
+    <p class="hero__titel">Fußball im Gallus – seit 1904.</p>
+    <p class="hero__lead">Elf Fußballmannschaften von der G-Jugend bis zu den Herren, eine Karnevalabteilung und ein eigener Platz an der Mainzer Landstraße. Wir sind ein Verein für Menschen: Gemeinschaft, Respekt und Freude am Spiel.</p>
+  </div>`;
+
+  const heroFaktenBeispiel = `<div class="abschnitt--blau" style="border-radius:var(--r-lg);padding:var(--sp-5);">
+    <ul class="hero__fakten" role="list">
+      <li>Gegründet ${escapeHtml(String(verein.gruendung_jahr ?? ""))}</li>
+      <li>${escapeHtml(String(verein.anzahl_mannschaften ?? ""))} Mannschaften</li>
+      <li>${escapeHtml(verein.sportstaette?.strasse ?? "")}</li>
+    </ul>
+  </div>`;
+
+  const schritteBeispiel = `<ol class="schritte">
+    <li><p>E-Mail an die Jugendleitung mit Jahrgang und Vorerfahrung</p></li>
+    <li><p>Termin fürs Probetraining bekommen und ein- bis zweimal mitmachen</p></li>
+    <li><p>Aufnahmeantrag ausfüllen – Beiträge und Unterlagen stehen unter „Mitglied werden“</p></li>
+  </ol>`;
+
+  const addressBeispiel = `<address>
+    <p>${escapeHtml(verein.name_register ?? "")}</p>
+    <p>${escapeHtml(verein.sportstaette?.strasse ?? "")}</p>
+    <p>${escapeHtml(verein.sportstaette?.plz ?? "")} ${escapeHtml(verein.sportstaette?.ort ?? "")}</p>
+  </address>`;
 
   return `<h2>Bausteine</h2>
 <p class="inhalt">Alle Bausteine mit echten Daten aus data/, wie sie später auf den Inhaltsseiten verwendet werden. Ziele, deren Seite im aktuellen Paket noch nicht existiert, sind als Karten mit &lt;span&gt; statt &lt;a&gt; ausgegeben.</p>
@@ -307,7 +336,19 @@ ${hinweisBeispiel}
 ${tabelleBeispiel}
 
 <h3>Knöpfe</h3>
-${knoepfeBeispiel}`;
+${knoepfeBeispiel}
+
+<h3>Hero</h3>
+${heroBeispiel}
+
+<h3>Fakten-Zeile (.hero__fakten)</h3>
+${heroFaktenBeispiel}
+
+<h3>Schritte</h3>
+${schritteBeispiel}
+
+<h3>Adresse</h3>
+${addressBeispiel}`;
 }
 
 export function seite(daten) {
