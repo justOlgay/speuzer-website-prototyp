@@ -523,15 +523,17 @@ table.tabelle--anhangA {
 table.tabelle--anhangA th,
 table.tabelle--anhangA td {
   overflow-wrap: break-word;
-  padding: 1.2mm;
+  padding: 1.2mm 1.5mm;
 }
 
 /* P14c Punkt 1: die allgemeine Regel table.tabelle thead th (8,5 pt) ist
    spezifischer als table.tabelle--anhangA { font-size: 8pt } und würde sie
-   sonst für die Kopfzeile überstimmen – hier für Anhang A auf 8 pt
-   angeglichen, damit die kurzen Spaltenköpfe in die schmalen Spalten passen. */
+   sonst für die Kopfzeile überstimmen – hier für Anhang A angeglichen, damit
+   die kurzen Spaltenköpfe in die schmalen Spalten passen. P14d: auf 7,5 pt
+   verkleinert, damit zwischen den Spaltenköpfen ("Perf.", "Barr.", "BP")
+   sichtbar Luft bleibt und sie sich nicht mehr berühren. */
 table.tabelle--anhangA thead th {
-  font-size: 8pt;
+  font-size: 7.5pt;
 }
 
 /* P14c Punkt 1: schmalere Trennspalte (4 mm statt 6 mm) nur für Anhang A,
