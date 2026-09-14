@@ -22,6 +22,7 @@
      erst sichtbar umspringt (assets/js/nav.js setzt dieselbe Klasse
      zusätzlich, siehe dort). -->
 <script>
+document.documentElement.classList.add("js");
 if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentElement.classList.add("ansicht-app");
 </script>
 <link rel="preload" href="../../assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
