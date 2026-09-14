@@ -411,6 +411,23 @@ body.menue-offen {
   color: var(--blau-100);
 }
 
+/* App-Modus (P9): reiner Layout-Wrapper um die drei Linkgruppen –
+   display:contents lässt sie im Grid von .fuss__raster weiter als vier
+   direkte Kind-Elemente (Marke + drei Gruppen) erscheinen, ändert also am
+   normalen Layout nichts. Unter .ansicht-app blendet app-modus.css diesen
+   Wrapper (und damit alle drei Gruppen) mit einer einzigen Regel aus. */
+.fuss__spalten {
+  display: contents;
+}
+
+/* App-Modus (P9): kompakte Fußzeile (Kontaktzeile + Impressum/Datenschutz),
+   die immer mitgerendert, aber außerhalb von .ansicht-app ausgeblendet ist
+   (app-modus.css macht sie dort sichtbar und blendet dafür .fuss__spalten
+   sowie die übrige .fuss__marke-Fläche aus). */
+.fuss__app {
+  display: none;
+}
+
 .fuss__schluss {
   margin-top: var(--sp-7);
   padding-top: var(--sp-4);
@@ -551,6 +568,20 @@ body.menue-offen {
 .seitenkopf h1 {
   font-size: var(--fs-3xl);
   margin: 0;
+  /* P9-Korrektur A3 (/datenschutz/): zusammen mit dem &shy; im Titel
+     ("Datenschutz&shy;erklärung", siehe datenschutz.mjs) bricht der Browser
+     dort statt an einer beliebigen Stelle mitten im Wort. Das globale
+     overflow-wrap:anywhere (base.css) bleibt als Sicherheitsnetz bestehen. */
+  hyphens: manual;
+}
+
+/* P9-Korrektur A3 (/datenschutz/): unter 480px ist var(--fs-3xl) bei langen
+   Überschriften wie "Datenschutzerklärung" zu groß – clamp() verkleinert nur
+   dort, ab 480px bleibt --fs-3xl unverändert. */
+@media (max-width: 479.98px) {
+  .seitenkopf h1 {
+    font-size: clamp(1.8rem, 8vw, var(--fs-3xl));
+  }
 }
 
 .seitenkopf__lead {
@@ -569,6 +600,32 @@ body.menue-offen {
   letter-spacing: .08em;
   color: var(--ink-3);
   margin: 0 0 var(--sp-2);
+}
+
+/* ==========================================================================
+   Inhaltsverzeichnis (P9-Korrektur A3) – /datenschutz/: lief vorher über die
+   volle Containerbreite, während der Text darunter auf .inhalt (720px)
+   eingerückt war (siehe .container.inhalt in datenschutz.mjs). Ohne eigene
+   Listenzahlen (list-style:none), weil die Abschnittstitel bereits "1. …"
+   tragen.
+   ========================================================================== */
+
+.inhaltsverzeichnis {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.inhaltsverzeichnis a {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+.inhaltsverzeichnis a:hover {
+  color: var(--blau-700);
 }
 
 /* ==========================================================================
@@ -628,6 +685,19 @@ body.menue-offen {
   color: inherit;
   text-decoration: none;
   transition: box-shadow var(--t-kurz), transform var(--t-kurz);
+}
+
+/* Ansprechpartner-Karten (P9-Korrektur A1, /kontakt/): Flex-Spalte, damit die
+   Knopfzeile per margin-top:auto unten sitzt – im Raster gleich hohe Karten
+   trotz unterschiedlich langer Sätze, statt vorher ungleicher Kartenhöhen mit
+   leeren Flächen bei Karten ohne Satz. */
+.karte--anliegen {
+  display: flex;
+  flex-direction: column;
+}
+
+.karte--anliegen .knopfzeile {
+  margin-top: auto;
 }
 
 .karte--link:hover {
@@ -1314,6 +1384,11 @@ body.menue-offen {
 .anfahrt__raster {
   display: grid;
   gap: var(--sp-6);
+  /* P9-Korrektur A2 (/kontakt/, Geschäftsstelle): ohne diese Zeile streckt
+     der Grid-Standard (align-items: stretch) den Hinweiskasten
+     "Öffnungszeiten" auf die volle Höhe der Adress-Spalte – er soll aber nur
+     so hoch wie sein eigener Inhalt sein. */
+  align-items: start;
 }
 
 @media (min-width: 768px) {
@@ -1907,4 +1982,160 @@ body.datenschutz h2 {
 
 .formular__fehler[hidden] {
   display: none;
+}
+
+/* ==========================================================================
+   Tab-Leiste (.tabbar, P9) – untere App-Navigation im App-Modus
+   (?ansicht=app, siehe assets/js/nav.js und assets/css/app-modus.css). Vom
+   Header-Modul (src/vorlagen/header.mjs) auf jeder Seite immer mitgerendert;
+   ohne .ansicht-app bleibt sie über display:none unsichtbar. Sichtbarkeit,
+   Kopfzeilen-Anpassungen und die aktive Tab-Farbe stehen in app-modus.css
+   (alles unter .ansicht-app) – Größe, Icons und Grundfarben stehen hier, weil
+   .tabbar ein normaler Baustein ist (siehe Styleguide, Abschnitt
+   „Bausteine“).
+   ========================================================================== */
+
+.tabbar {
+  display: none;
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  height: 64px;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  z-index: 100;
+}
+
+.tabbar ul {
+  display: flex;
+  height: 100%;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* flex:1 1 0 steht auf dem <li> (dem direkten Kind von .tabbar ul), nicht auf
+   .tabbar__tab selbst – sonst bleiben die <li> so schmal wie ihr Inhalt und
+   alle fünf Tabs rutschen links zusammen, statt sich die Breite zu teilen. */
+.tabbar li {
+  flex: 1 1 0;
+  display: flex;
+}
+
+.tabbar__tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  height: 64px;
+  color: var(--ink-3);
+  text-decoration: none;
+}
+
+.tabbar__tab:hover {
+  color: var(--blau-700);
+  text-decoration: none;
+}
+
+.tabbar__tab--aktiv {
+  color: var(--blau-700);
+}
+
+.tabbar__label {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Telefonrahmen (.telefon, .telefone, P9) – /app/: Vorschau des Prototyps im
+   App-Format in einem gezeichneten Gerätefenster.
+   ========================================================================== */
+
+/* Breiter als der Standard-.container (max. 1200px): drei Rahmen à 414px
+   (390px Innenmaß + 12px Rand je Seite) plus zwei Lücken (--sp-6 = 32px)
+   brauchen ca. 1306px – dafür trägt .telefone hier seine eigene
+   Containerbreite/-mitte statt in .container zu stecken. */
+.telefone {
+  display: flex;
+  gap: var(--sp-6);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: var(--sp-4);
+  max-width: 1400px;
+  margin-inline: auto;
+  padding-inline: var(--sp-4);
+}
+
+.telefon-eintrag {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+}
+
+/* Rand oben bewusst breiter als an den anderen drei Seiten (12px): die
+   eingebetteten Seiten reservieren selbst keinen Sicherheitsabstand für die
+   Notch (kein safe-area-inset), ein reiner 12px-Rand rundum ließe die Notch
+   in die kompakte App-Kopfzeile hineinragen und deren Wappen/Wortmarke
+   überdecken. Mit 48px oben bleibt die Notch vollständig im Rand, ohne den
+   iframe-Inhalt zu verdecken – Innenmaß (390×844) und die 12px an den drei
+   übrigen Seiten bleiben wie im Plan. */
+.telefon {
+  position: relative;
+  width: 414px;
+  height: 904px;
+  padding: 48px 12px 12px;
+  box-sizing: border-box;
+  background: var(--blau-950);
+  border-radius: 44px;
+  box-shadow: var(--sh-2);
+}
+
+.telefon::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 28px;
+  background: #000;
+  border-radius: 14px;
+}
+
+.telefon iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 32px;
+  background: var(--surface);
+}
+
+/* Unter 480px: Rahmen per transform skaliert, damit auf schmalen Bildschirmen
+   nicht mehr Platz gebraucht wird als nötig. .telefon-skaliert ist der
+   Wrapper mit der verkleinerten Boxgröße (kein Überlaufen/keine leere
+   Fläche durch den unveränderten Layout-Platz des skalierten Kindes) –
+   .telefone bleibt ohnehin horizontal scrollbar (overflow-x: auto), die
+   Seite selbst scrollt dadurch nie horizontal (geprüft). Skalierung .7 statt
+   .82: bei 320px bleibt sonst (414px × .82 ≈ 339px) weniger Breite übrig, als
+   .telefone durch seine eigene Innenabstände (2 × --sp-4) zur Verfügung
+   stellt (320 − 32 = 288px) – ein ganzer Rahmen wäre dann erst nach seitlichem
+   Wischen zu sehen. Mit .7 (414px × .7 ≈ 290px) passt ein Rahmen bei 320px
+   vollständig hinein. */
+@media (max-width: 479.98px) {
+  .telefon-skaliert {
+    width: calc(414px * .7);
+    height: calc(904px * .7);
+    overflow: hidden;
+  }
+
+  .telefon-skaliert .telefon {
+    transform: scale(.7);
+    transform-origin: top left;
+  }
 }

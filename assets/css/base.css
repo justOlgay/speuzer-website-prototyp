@@ -115,6 +115,14 @@ a:hover {
 
 .inhalt {
   max-width: var(--inhalt);
+  /* P9-Korrektur A4: auf Seiten, die .inhalt zusammen mit .container auf
+     demselben Element setzen (/impressum/, /datenschutz/), zentrierte
+     .container das schmalere .inhalt sonst zusätzlich im Container – der
+     Seitenkopf blieb daneben linksbündig auf Containerbreite, wodurch die
+     Liste darunter eingerückt/zentriert wirkte. margin-inline:0 richtet
+     .inhalt einheitlich links aus, auf allen Seiten mit dieser Klasse
+     (Impressum, Datenschutz, News-Artikel, Mitglied-werden-Formular). */
+  margin-inline: 0;
 }
 
 /* Knöpfe */

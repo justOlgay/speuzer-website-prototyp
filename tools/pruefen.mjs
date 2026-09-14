@@ -6,6 +6,10 @@
 // axe-core (Kontrast, Alt-Texte, Labels, Landmarken), interne Links, Bildgrößen.
 // P1 zusätzlich: Burger-Menü (öffnen, Fokus, ESC schließt), Header/Footer-Links
 // mit href oder .nav__bald, aria-current="page" genau einmal im Header.
+// P9 zusätzlich: App-Modus (?ansicht=app) bei 390px für "/", "/mannschaften/d2/"
+// und "/spielplan/" – Tab-Leiste sichtbar, fünf Tabs ≥ 44px hoch, kein
+// horizontales Scrollen, genau ein aria-current in der Tab-Leiste, alle
+// internen Links mit ansicht=app.
 
 import puppeteer from "puppeteer-core";
 import { readFileSync, existsSync, statSync, mkdirSync, writeFileSync, readdirSync } from "node:fs";
@@ -24,6 +28,10 @@ const BASIS = `http://localhost:${PORT}`;
 const BASIS_URL = "https://justolgay.github.io/speuzer-website-prototyp/";
 
 const BREITEN = [320, 360, 390, 768, 1024, 1440, 1920];
+// P9, Plan-Abschnitt B3: App-Modus (?ansicht=app) zusätzlich bei 390px prüfen
+// – nur für diese drei Seiten (Startseite, eine Team- und die
+// Spielplan-Seite).
+const APP_MODUS_SEITEN = ["/", "/mannschaften/d2/", "/spielplan/"];
 const AXE_REGELN = [
   "color-contrast", "image-alt", "label", "link-name",
   "button-name", "landmark-one-main", "page-has-heading-one",
@@ -284,6 +292,68 @@ async function pruefeSeite(browser, seitenPfad, axeSkript, bericht) {
     }
   }
   await page.setViewport({ width: 1440, height: 900 });
+
+  // --- App-Modus (?ansicht=app, P9 Plan-Abschnitt B3): Tab-Leiste, Tippziele,
+  // kein horizontales Scrollen, genau ein aria-current, interne Links mit
+  // ansicht=app – bei 390px, nur für die drei genannten Seiten ---
+  if (APP_MODUS_SEITEN.includes(seitenPfad)) {
+    await page.goto(url + "?ansicht=app", { waitUntil: "networkidle0", timeout: 30000 });
+    await page.setViewport({ width: 390, height: 844 });
+
+    const appErgebnis = await page.evaluate(() => {
+      const tabbar = document.querySelector(".tabbar");
+      const stilTabbar = tabbar ? getComputedStyle(tabbar) : null;
+      const tabbarSichtbar = !!tabbar && stilTabbar.display !== "none" && stilTabbar.visibility !== "hidden";
+      const tabs = tabbar ? [...tabbar.querySelectorAll(".tabbar__tab")] : [];
+      const tabHoehen = tabs.map((t) => t.getBoundingClientRect().height);
+      const anzahlAriaCurrent = tabbar ? tabbar.querySelectorAll('[aria-current="page"]').length : 0;
+      const links = [...document.querySelectorAll("a[href]")].map((a) => a.getAttribute("href"));
+      return {
+        tabbarSichtbar,
+        anzahlTabs: tabs.length,
+        tabHoehen,
+        anzahlAriaCurrent,
+        scrollWidth: document.documentElement.scrollWidth,
+        innerWidth: window.innerWidth,
+        links,
+      };
+    });
+
+    if (!appErgebnis.tabbarSichtbar) {
+      ergebnisSeite.fehler.push("App-Modus: Tab-Leiste (.tabbar) bei ?ansicht=app nicht sichtbar");
+    }
+    if (appErgebnis.anzahlTabs !== 5) {
+      ergebnisSeite.fehler.push(`App-Modus: ${appErgebnis.anzahlTabs} Tabs in der Tab-Leiste gefunden, erwartet 5`);
+    }
+    appErgebnis.tabHoehen.forEach((hoehe, i) => {
+      if (hoehe < 44) {
+        ergebnisSeite.fehler.push(`App-Modus: Tab ${i + 1} ist ${Math.round(hoehe)}px hoch, erwartet ≥ 44px`);
+      }
+    });
+    if (appErgebnis.scrollWidth > appErgebnis.innerWidth + 1) {
+      ergebnisSeite.fehler.push(
+        `App-Modus: horizontales Scrollen bei 390px (scrollWidth ${appErgebnis.scrollWidth} > innerWidth ${appErgebnis.innerWidth})`
+      );
+    }
+    if (appErgebnis.anzahlAriaCurrent !== 1) {
+      ergebnisSeite.fehler.push(
+        `App-Modus: aria-current="page" in der Tab-Leiste ${appErgebnis.anzahlAriaCurrent}×, erwartet genau 1×`
+      );
+    }
+    for (const href of appErgebnis.links) {
+      if (!href) continue;
+      if (
+        href.startsWith("http://") || href.startsWith("https://") ||
+        href.startsWith("mailto:") || href.startsWith("tel:") ||
+        href.startsWith("#")
+      ) continue;
+      if (!href.includes("ansicht=app")) {
+        ergebnisSeite.fehler.push(`App-Modus: interner Link ohne ansicht=app: '${href}'`);
+      }
+    }
+
+    await page.setViewport({ width: 1440, height: 900 });
+  }
 
   await page.close();
   ergebnisSeite.bestanden = ergebnisSeite.fehler.length === 0;
