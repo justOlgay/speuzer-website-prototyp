@@ -518,6 +518,11 @@ body.menue-offen {
 .prosa p,
 .prosa li {
   max-width: var(--measure);
+  /* P8 (/datenschutz/): einzelne lange, nicht trennbare Wörter im wörtlich
+     übernommenen Rechtstext (z. B. zusammengesetzte Substantive, eine
+     E-Mail-Adresse) dürfen bei sehr schmalen Breiten (320/360px) nicht zu
+     horizontalem Scrollen führen. */
+  overflow-wrap: anywhere;
 }
 
 /* ==========================================================================
@@ -1494,6 +1499,12 @@ body.tabellen h2 {
   scroll-margin-top: var(--sp-6);
 }
 
+/* Abschnitts-Sprungziele /datenschutz/ (P8) – Inhaltsverzeichnis oben auf der
+   Seite, gleicher Grund wie bei /tabellen/. */
+body.datenschutz h2 {
+  scroll-margin-top: var(--sp-6);
+}
+
 /* ==========================================================================
    Zahlen-Kachel (.zahl, P5) – vier Kacheln im "Zahlen"-Abschnitt auf
    /verein/ (abschnitt--blau): Wert groß in Barlow Condensed/Weiß, Beschriftung
@@ -1718,12 +1729,66 @@ body.tabellen h2 {
 }
 
 /* ==========================================================================
-   Formular (.formular, P7) – /mitglied-werden/: Aufnahmeantrag-Entwurf.
-   Fieldsets mit --sp-6 Abstand untereinander, Felder darin mit --sp-4
-   Abstand. Eingabefelder 48px hoch, 1px --line, Radius --r-sm, Fokus
-   var(--fokus). Checkboxen bewusst auf 44×44px vergrößert (Tippziel-Gate in
-   tools/pruefen.mjs prüft die tatsächliche Eingabefeld-Größe, nicht nur die
-   umschließende Zeile).
+   Angaben-Liste (.angaben, P8) – /impressum/: Definitionsliste mit
+   Beschriftung (dt, --fs-sm/600/--ink-3) und Wert (dd, --fs-md).
+   ========================================================================== */
+
+.angaben {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  margin: 0;
+}
+
+.angaben dt {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.angaben dd {
+  margin: 0;
+  font-size: var(--fs-md);
+}
+
+/* Mehrere Zeilen in einer dd (z. B. zwei Telefonnummern, P8): als eigene
+   <p> statt <br> ausgezeichnet, damit die enthaltenen Links als
+   Fließtext-Links vom Tippziel-Gate in tools/pruefen.mjs ausgenommen sind
+   (das gilt nur für Links in p/li, nicht in dd) – mit kleinem Abstand
+   dazwischen. */
+.angaben dd p + p {
+  margin-top: var(--sp-1);
+}
+
+/* ==========================================================================
+   Formular (.formular, P7; Checkboxen ab P8-Korrektur A2) –
+   /mitglied-werden/: Aufnahmeantrag-Entwurf. Fieldsets mit --sp-6 Abstand
+   untereinander, Felder darin mit --sp-4 Abstand. Eingabefelder 48px hoch,
+   1px --line, Radius --r-sm, Fokus var(--fokus).
+
+   Checkboxen (P8-Korrektur A2): sichtbarer Kasten jetzt 24×24px (Rahmen 2px
+   --blau-700, Radius --r-sm) statt vorher 44×44px. Das Tippziel bleibt
+   trotzdem ≥44px hoch – jetzt über die umschließende Beschriftungszeile
+   .formular__checkzeile (align-items: flex-start statt center, zusätzlich
+   padding-block): bei checkboxFeld() in mitglied-werden.mjs ist das ein
+   <label>, das Eingabe und Text umschließt; bei checkboxFeldMitLink() bleibt
+   es ein <div> mit separatem, per aria-labelledby verknüpftem <p> (wegen des
+   darin enthaltenen Fließtext-Links, siehe Kommentar dort). tools/pruefen.mjs
+   prüft bei Checkbox-Inputs deshalb nicht mehr die Eingabefeld-Größe selbst,
+   sondern die Höhe dieser Beschriftung (siehe dort).
+
+   Häkchen NICHT über accent-color (wie im Plan zunächst vorgesehen): im für
+   dieses Projekt verbindlichen Chrome (tools/build.mjs/pruefen.mjs, fest
+   verdrahteter Pfad) wird bei input[type="checkbox"] mit nativer appearance
+   zwar accent-color respektiert, "border"/"border-radius" auf dem Kasten
+   selbst dagegen nicht (computed border bleibt "0px none", geprüft) – der
+   geforderte 2px-Rahmen in --blau-700 und Radius --r-sm blieben so unsichtbar
+   (nur das native, eckige, grau umrandete System-Kästchen). Mit appearance:
+   none greifen Rahmen/Radius, dafür entfällt die native Häkchen-Grafik
+   inklusive accent-color vollständig (leerer Kasten, auch angehakt) – daher
+   hier stattdessen :checked mit voller --blau-700-Fläche plus einem Häkchen
+   aus Textinhalt (content: "✓", weiß) nachgebildet; siehe Abschlussbericht,
+   Abschnitt „Abweichungen“.
    ========================================================================== */
 
 .formular {
@@ -1794,16 +1859,37 @@ body.tabellen h2 {
 
 .formular__checkzeile {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--sp-3);
   min-height: 44px;
+  padding-block: var(--sp-2);
 }
 
 .formular__checkzeile input[type="checkbox"] {
-  width: 44px;
-  height: 44px;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  margin: 0;
   flex: none;
-  accent-color: var(--blau-700);
+  border: 2px solid var(--blau-700);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.formular__checkzeile input[type="checkbox"]:checked {
+  background: var(--blau-700);
+}
+
+.formular__checkzeile input[type="checkbox"]:checked::after {
+  content: "\2713";
+  color: var(--weiss);
+  font-size: 16px;
+  line-height: 1;
 }
 
 .formular__checkzeile label,
