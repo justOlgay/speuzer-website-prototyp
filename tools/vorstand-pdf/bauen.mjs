@@ -826,10 +826,12 @@ async function baueKapitel9() {
 // nowrap; } in vergleich.css.
 const ANHANG_A_KOPF = ["Seite", "Perf.", "Barr.", "BP", "SEO", "LCP", "CLS"];
 
-// P14c Punkt 1: Spaltenbreiten für die Anhang-A-Tabelle (Inhaltsbreite
-// 174 mm, zwei Hälften mit 4 mm Trennspalte → je 85 mm): Seite 36, Perf. 8,
-// Barr. 8, BP 7, SEO 7, LCP 10, CLS 9 (Summe je Hälfte 85 mm).
-const ANHANG_A_SPALTENBREITEN = ["36mm", "8mm", "8mm", "7mm", "7mm", "10mm", "9mm"];
+// P14d: Spaltenbreiten für die Anhang-A-Tabelle (Inhaltsbreite 174 mm, zwei
+// Hälften mit 4 mm Trennspalte → je 85 mm): Seite 32, Perf. 10, Barr. 10,
+// BP 8, SEO 8, LCP 9, CLS 8 (Summe je Hälfte 85 mm). Breiter als zuvor
+// (Perf./Barr./BP), damit zwischen den Spaltenköpfen sichtbar Luft bleibt
+// und sie sich nicht mehr berühren.
+const ANHANG_A_SPALTENBREITEN = ["32mm", "10mm", "10mm", "8mm", "8mm", "9mm", "8mm"];
 
 // P14c Punkt 1: Pfade brechen nur noch an Schrägstrichen um (<wbr> nach
 // jedem "/" im HTML), nicht mehr mitten im Wort (siehe overflow-wrap: normal
