@@ -579,6 +579,25 @@ function seiteBausteine(daten) {
     </div>
   </div>`;
 
+  // P10: Vorher/Nachher-Paar (.vergleich) – /vorher-nachher/, hier ohne echte
+  // Bilder (Platzhalterflächen in --blau-50 statt bild()): zeigt nur die
+  // Struktur (Titel, zweispaltiges Raster ab 768px, Beschriftung über jedem
+  // Bild, Bildunterschrift als Fazit-Satz).
+  const vergleichBeispiel = `<figure class="vergleich vergleich--handy" style="max-width:420px;">
+    <h2>Beispiel-Paar</h2>
+    <div class="vergleich__raster">
+      <div class="vergleich__seite">
+        <span class="tag tag--warn">Vorher</span>
+        <div style="width:100%;max-width:390px;aspect-ratio:390/844;border-radius:var(--r-md);border:1px solid var(--line);background:var(--blau-50);"></div>
+      </div>
+      <div class="vergleich__seite">
+        <span class="tag tag--ok">Nachher</span>
+        <div style="width:100%;max-width:390px;aspect-ratio:390/844;border-radius:var(--r-md);border:1px solid var(--line);background:var(--blau-50);"></div>
+      </div>
+    </div>
+    <figcaption class="meta">Fazit-Satz zum gelösten Problem.</figcaption>
+  </figure>`;
+
   return `<h2>Bausteine</h2>
 <p class="inhalt">Alle Bausteine mit echten Daten aus data/, wie sie später auf den Inhaltsseiten verwendet werden. Ziele, deren Seite im aktuellen Paket noch nicht existiert, sind als Karten mit &lt;span&gt; statt &lt;a&gt; ausgegeben.</p>
 
@@ -689,7 +708,11 @@ ${tabbarBeispiel}
 
 <h3>Telefonrahmen (.telefon)</h3>
 <p class="inhalt">/app/ (P9): gezeichnetes Gerätefenster (390×844 Innenmaß, 12px Rand, Notch) für die drei Vorschau-Rahmen; dort mit echtem &lt;iframe src="…?ansicht=app"&gt;. Hier zur Anschauung verkleinert (transform:scale(.5)) und mit einer Platzhalterfläche statt des iframes.</p>
-${telefonBeispiel}`;
+${telefonBeispiel}
+
+<h3>Vorher/Nachher-Paar (.vergleich)</h3>
+<p class="inhalt">/vorher-nachher/ (P10): Titel, darunter ein zweispaltiges Bildraster ab 768px (darunter untereinander), Beschriftung (.tag--warn „Vorher" links, .tag--ok „Nachher" rechts) über jedem Bild, Bildunterschrift als Fazit-Satz. Bei Handy-Paaren (.vergleich--handy) bleibt das Bild auf 390px begrenzt und zentriert, statt auf volle Spaltenbreite gestreckt zu werden. Hier ohne echte Bilder, nur die Struktur.</p>
+${vergleichBeispiel}`;
 }
 
 export function seite(daten) {

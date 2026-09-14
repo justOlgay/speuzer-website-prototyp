@@ -33,7 +33,8 @@ function angabenAbschnitt(daten) {
   const vertretungHtml = vertretung.map((v) => `<li>${escapeHtml(v)}</li>`).join("\n          ");
 
   return `<section class="abschnitt">
-  <div class="container inhalt">
+  <div class="container">
+    <div class="inhalt">
     <dl class="angaben">
       <dt>Anbieter</dt>
       <dd>${escapeHtml(verein.name_register ?? "")}</dd>
@@ -66,25 +67,30 @@ function angabenAbschnitt(daten) {
       <dt>Registergericht / Registernummer</dt>
       <dd>${escapeHtml(verein.register ?? "")}</dd>
     </dl>
+    </div>
   </div>
 </section>`;
 }
 
 function haftungAbschnitt() {
   return `<section class="abschnitt--hell abschnitt">
-  <div class="container inhalt fluss">
+  <div class="container fluss">
+    <div class="inhalt fluss">
     <h2>Haftungshinweis</h2>
     <p>Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich.</p>
+    </div>
   </div>
 </section>`;
 }
 
 function prototypHinweisAbschnitt() {
   return `<section class="abschnitt">
-  <div class="container inhalt fluss">
+  <div class="container fluss">
+    <div class="inhalt fluss">
     <h2>Hinweis zum Prototyp</h2>
     <div class="hinweis hinweis--info">
       <p style="margin:0;">Diese Seite ist ein Prototyp und keine veröffentlichte Vereinswebsite. Sie dient der internen Abstimmung des Vorstands. Verbindliche Angaben stehen unter www.sportfreunde04.de.</p>
+    </div>
     </div>
   </div>
 </section>`;

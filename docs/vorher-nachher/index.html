@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vorher / Nachher – FFV Sportfreunde 04</title>
+<meta name="description" content="Website des FFV Sportfreunde 04 heute und als Prototyp im Vergleich: Startseite, Menü, Inhaltsrahmen, Mannschaften, Sponsoren, Mitgliedsantrag – je ein Satz zum Problem.">
+<link rel="canonical" href="https://justolgay.github.io/speuzer-website-prototyp/vorher-nachher/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FFV Sportfreunde 04">
+<meta property="og:title" content="Vorher / Nachher – FFV Sportfreunde 04">
+<meta property="og:description" content="Website des FFV Sportfreunde 04 heute und als Prototyp im Vergleich: Startseite, Menü, Inhaltsrahmen, Mannschaften, Sponsoren, Mitgliedsantrag – je ein Satz zum Problem.">
+<meta property="og:url" content="https://justolgay.github.io/speuzer-website-prototyp/vorher-nachher/">
+<meta property="og:image" content="https://justolgay.github.io/speuzer-website-prototyp/assets/og/standard.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#151A7A">
+<link rel="icon" href="../assets/logo/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/logo/apple-touch-icon.png">
+<!-- App-Modus (P9, Plan-Abschnitt B1): Klasse so früh wie möglich setzen,
+     vor den Stylesheets, damit die App-Kopfzeile/Tab-Leiste beim Laden nicht
+     erst sichtbar umspringt (assets/js/nav.js setzt dieselbe Klasse
+     zusätzlich, siehe dort). -->
+<script>
+if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentElement.classList.add("ansicht-app");
+</script>
+<link rel="preload" href="../assets/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/css/tokens.css">
+<link rel="stylesheet" href="../assets/css/fonts.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/komponenten.css">
+<link rel="stylesheet" href="../assets/css/app-modus.css">
+<script src="../assets/js/nav.js" defer></script>
+</head>
+<body class="">
+<a class="sprungmarke" href="#inhalt">Zum Inhalt</a>
+<header class="kopf">
+  <div class="container kopf__zeile">
+    <a class="kopf__marke" href="../">
+      <img class="kopf__wappen" src="../assets/logo/wappen-blau.svg" width="44" height="44" alt="" aria-hidden="true">
+      <span class="kopf__name">
+        <span class="kopf__name-lang">FFV Sportfreunde 04</span>
+        <span class="kopf__name-kurz">Sportfreunde 04</span>
+      </span>
+    </a>
+    <button type="button" class="kopf__burger" aria-expanded="false" aria-controls="hauptmenue" aria-label="Menü öffnen">
+      <span class="kopf__burger-balken" aria-hidden="true"></span>
+      <span class="kopf__burger-text">Menü</span>
+    </button>
+    <nav class="kopf__nav" id="hauptmenue" aria-label="Hauptnavigation">
+      <button type="button" class="kopf__schliessen" aria-label="Menü schließen">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      <ul>
+      <li><a href="../">Start</a></li>
+      <li><a href="../mannschaften/">Mannschaften</a></li>
+      <li><a href="../spielplan/">Spielplan &amp; Tabellen</a></li>
+      <li><a href="../news/">News</a></li>
+      <li><a href="../verein/">Verein</a></li>
+      <li><a href="../mitglied-werden/" class="knopf">Mitglied werden</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<nav class="tabbar" aria-label="App-Navigation">
+  <ul>
+      <li><a class="tabbar__tab" href="../"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/></svg><span class="tabbar__label">Start</span></a></li>
+      <li><a class="tabbar__tab" href="../mannschaften/"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="12" r="5"/><circle cx="15" cy="12" r="5"/></svg><span class="tabbar__label">Teams</span></a></li>
+      <li><a class="tabbar__tab" href="../spielplan/"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7l4.8 3.5-1.8 5.6H9l-1.8-5.6z"/></svg><span class="tabbar__label">Spiele</span></a></li>
+      <li><a class="tabbar__tab" href="../news/"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="1"/><path d="M7 9h10M7 12.5h10M7 16h6"/></svg><span class="tabbar__label">News</span></a></li>
+      <li><a class="tabbar__tab" href="../verein/"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 20 12 12 21 4 12z"/></svg><span class="tabbar__label">Verein</span></a></li>
+  </ul>
+</nav>
+<main id="inhalt">
+<section class="abschnitt seitenkopf">
+  <div class="container">
+    <h1>Vorher / Nachher</h1>
+    <p class="seitenkopf__lead">Links die Website, wie sie heute ist. Rechts der Prototyp. Zu jedem Paar ein Satz, welches Problem gelöst wird.</p>
+    <p class="meta">Vorher-Bilder: sportfreunde04.de am 11.09.2026, Fotos mit Kindern unkenntlich gemacht. Nachher-Bilder: Prototyp, Stand Montag, 14. September 2026.</p>
+  </div>
+</section>
+<section class="abschnitt">
+  <div class="container fluss">
+    <figure class="vergleich">
+  <h2>Startseite am Rechner</h2>
+  <div class="vergleich__raster">
+    <div class="vergleich__seite">
+      <span class="tag tag--warn">Vorher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/vorher-start-desktop-480.avif 480w, ../assets/bilder/erzeugt/vorher-start-desktop-960.avif 960w, ../assets/bilder/erzeugt/vorher-start-desktop-1440.avif 1440w" sizes="(min-width: 768px) 50vw, 100vw">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/vorher-start-desktop-480.webp 480w, ../assets/bilder/erzeugt/vorher-start-desktop-960.webp 960w, ../assets/bilder/erzeugt/vorher-start-desktop-1440.webp 1440w" sizes="(min-width: 768px) 50vw, 100vw">
+  <img src="../assets/bilder/erzeugt/vorher-start-desktop-960.jpg" srcset="../assets/bilder/erzeugt/vorher-start-desktop-480.jpg 480w, ../assets/bilder/erzeugt/vorher-start-desktop-960.jpg 960w, ../assets/bilder/erzeugt/vorher-start-desktop-1440.jpg 1440w" sizes="(min-width: 768px) 50vw, 100vw" width="1440" height="900" alt="Live-Startseite am Rechner: Foto über die gesamte Breite, Menüleiste mit zwölf Punkten" loading="lazy" decoding="async">
+</picture>
+    </div>
+    <div class="vergleich__seite">
+      <span class="tag tag--ok">Nachher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/nachher-start-desktop-480.avif 480w, ../assets/bilder/erzeugt/nachher-start-desktop-960.avif 960w, ../assets/bilder/erzeugt/nachher-start-desktop-1440.avif 1440w" sizes="(min-width: 768px) 50vw, 100vw">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/nachher-start-desktop-480.webp 480w, ../assets/bilder/erzeugt/nachher-start-desktop-960.webp 960w, ../assets/bilder/erzeugt/nachher-start-desktop-1440.webp 1440w" sizes="(min-width: 768px) 50vw, 100vw">
+  <img src="../assets/bilder/erzeugt/nachher-start-desktop-960.jpg" srcset="../assets/bilder/erzeugt/nachher-start-desktop-480.jpg 480w, ../assets/bilder/erzeugt/nachher-start-desktop-960.jpg 960w, ../assets/bilder/erzeugt/nachher-start-desktop-1440.jpg 1440w" sizes="(min-width: 768px) 50vw, 100vw" width="1440" height="900" alt="Prototyp-Startseite am Rechner: Wappen, Claim und Vereinsdaten oben, darunter die nächsten Spiele" loading="lazy" decoding="async">
+</picture>
+    </div>
+  </div>
+  <figcaption>Vorher füllt ein Foto den Bildschirm und beantwortet keine Frage; nachher stehen Wappen, Claim, Probetraining und die nächsten Spiele auf dem ersten Bildschirm.</figcaption>
+</figure>
+  <figure class="vergleich vergleich--handy">
+  <h2>Startseite am Handy</h2>
+  <div class="vergleich__raster">
+    <div class="vergleich__seite">
+      <span class="tag tag--warn">Vorher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/vorher-start-handy-480.avif 480w, ../assets/bilder/erzeugt/vorher-start-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/vorher-start-handy-480.webp 480w, ../assets/bilder/erzeugt/vorher-start-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/vorher-start-handy-780.jpg" srcset="../assets/bilder/erzeugt/vorher-start-handy-480.jpg 480w, ../assets/bilder/erzeugt/vorher-start-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Live-Startseite am Handy: ganzseitiges Foto ohne Text, nur Burger-Menü und Wappen oben" loading="lazy" decoding="async">
+</picture>
+    </div>
+    <div class="vergleich__seite">
+      <span class="tag tag--ok">Nachher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/nachher-start-handy-480.avif 480w, ../assets/bilder/erzeugt/nachher-start-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/nachher-start-handy-480.webp 480w, ../assets/bilder/erzeugt/nachher-start-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/nachher-start-handy-780.jpg" srcset="../assets/bilder/erzeugt/nachher-start-handy-480.jpg 480w, ../assets/bilder/erzeugt/nachher-start-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Prototyp-Startseite am Handy: Wappen, Vereinsname und Knöpfe für Probetraining und Mitgliedschaft auf dem ersten Bildschirm" loading="lazy" decoding="async">
+</picture>
+    </div>
+  </div>
+  <figcaption>Vorher ist der erste Bildschirm ein Bild ohne Text; nachher sieht man sofort, wer der Verein ist und was man tun kann.</figcaption>
+</figure>
+  <figure class="vergleich vergleich--handy">
+  <h2>Menü am Handy</h2>
+  <div class="vergleich__raster">
+    <div class="vergleich__seite">
+      <span class="tag tag--warn">Vorher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/vorher-menue-handy-480.avif 480w, ../assets/bilder/erzeugt/vorher-menue-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/vorher-menue-handy-480.webp 480w, ../assets/bilder/erzeugt/vorher-menue-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/vorher-menue-handy-780.jpg" srcset="../assets/bilder/erzeugt/vorher-menue-handy-480.jpg 480w, ../assets/bilder/erzeugt/vorher-menue-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Aufgeklapptes Live-Menü am Handy: 13 gleich gestaltete Punkte übereinander, im Hintergrund scheint das Seitenfoto durch" loading="lazy" decoding="async">
+</picture>
+    </div>
+    <div class="vergleich__seite">
+      <span class="tag tag--ok">Nachher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/nachher-menue-handy-480.avif 480w, ../assets/bilder/erzeugt/nachher-menue-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/nachher-menue-handy-480.webp 480w, ../assets/bilder/erzeugt/nachher-menue-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/nachher-menue-handy-780.jpg" srcset="../assets/bilder/erzeugt/nachher-menue-handy-480.jpg 480w, ../assets/bilder/erzeugt/nachher-menue-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Aufgeklapptes Prototyp-Menü am Handy: sechs Punkte vollflächig auf Blau, oben ein Schließen-Kreuz" loading="lazy" decoding="async">
+</picture>
+    </div>
+  </div>
+  <figcaption>Vorher 13 gleichrangige Punkte mit Doppelungen, der Hintergrund blitzt durch; nachher sechs Punkte, vollflächig, mit Schließen-Kreuz und Tastaturbedienung.</figcaption>
+</figure>
+  <figure class="vergleich">
+  <h2>Inhaltsrahmen am Rechner</h2>
+  <div class="vergleich__raster">
+    <div class="vergleich__seite">
+      <span class="tag tag--warn">Vorher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/vorher-vorstand-rahmen-desktop-480.avif 480w, ../assets/bilder/erzeugt/vorher-vorstand-rahmen-desktop-960.avif 960w, ../assets/bilder/erzeugt/vorher-vorstand-rahmen-desktop-1440.avif 1440w" sizes="(min-width: 768px) 50vw, 100vw">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/vorher-vorstand-rahmen-desktop-480.webp 480w, ../assets/bilder/erzeugt/vorher-vorstand-rahmen-desktop-960.webp 960w, ../assets/bilder/erzeugt/vorher-vorstand-rahmen-desktop-1440.webp 1440w" sizes="(min-width: 768px) 50vw, 100vw">
+  <img src="../assets/bilder/erzeugt/vorher-vorstand-rahmen-desktop-960.jpg" srcset="../assets/bilder/erzeugt/vorher-vorstand-rahmen-desktop-480.jpg 480w, ../assets/bilder/erzeugt/vorher-vorstand-rahmen-desktop-960.jpg 960w, ../assets/bilder/erzeugt/vorher-vorstand-rahmen-desktop-1440.jpg 1440w" sizes="(min-width: 768px) 50vw, 100vw" width="1440" height="900" alt="Live-Unterseite am Rechner: schmaler Inhaltsrahmen in der Seitenmitte mit eigenem Scrollbalken, daneben leere Fläche" loading="lazy" decoding="async">
+</picture>
+    </div>
+    <div class="vergleich__seite">
+      <span class="tag tag--ok">Nachher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/nachher-vorstand-desktop-480.avif 480w, ../assets/bilder/erzeugt/nachher-vorstand-desktop-960.avif 960w, ../assets/bilder/erzeugt/nachher-vorstand-desktop-1440.avif 1440w" sizes="(min-width: 768px) 50vw, 100vw">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/nachher-vorstand-desktop-480.webp 480w, ../assets/bilder/erzeugt/nachher-vorstand-desktop-960.webp 960w, ../assets/bilder/erzeugt/nachher-vorstand-desktop-1440.webp 1440w" sizes="(min-width: 768px) 50vw, 100vw">
+  <img src="../assets/bilder/erzeugt/nachher-vorstand-desktop-960.jpg" srcset="../assets/bilder/erzeugt/nachher-vorstand-desktop-480.jpg 480w, ../assets/bilder/erzeugt/nachher-vorstand-desktop-960.jpg 960w, ../assets/bilder/erzeugt/nachher-vorstand-desktop-1440.jpg 1440w" sizes="(min-width: 768px) 50vw, 100vw" width="1440" height="900" alt="Prototyp-Unterseite am Rechner: Inhalt über die volle Seitenbreite, ein Scrollbalken" loading="lazy" decoding="async">
+</picture>
+    </div>
+  </div>
+  <figcaption>Vorher läuft der Inhalt durch ein 592 Pixel breites Guckloch mit zwei Scrollbalken; nachher nutzt er die Seitenbreite mit einem Scrollbalken.</figcaption>
+</figure>
+  <figure class="vergleich vergleich--handy">
+  <h2>Mannschaftsseite am Handy</h2>
+  <div class="vergleich__raster">
+    <div class="vergleich__seite">
+      <span class="tag tag--warn">Vorher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/vorher-mannschaften-handy-480.avif 480w, ../assets/bilder/erzeugt/vorher-mannschaften-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/vorher-mannschaften-handy-480.webp 480w, ../assets/bilder/erzeugt/vorher-mannschaften-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/vorher-mannschaften-handy-780.jpg" srcset="../assets/bilder/erzeugt/vorher-mannschaften-handy-480.jpg 480w, ../assets/bilder/erzeugt/vorher-mannschaften-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Live-Mannschaftsliste am Handy: Kacheln mit Trainerfoto und kurzem Text, ohne Trainingszeiten" loading="lazy" decoding="async">
+</picture>
+    </div>
+    <div class="vergleich__seite">
+      <span class="tag tag--ok">Nachher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/nachher-mannschaft-d3-handy-480.avif 480w, ../assets/bilder/erzeugt/nachher-mannschaft-d3-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/nachher-mannschaft-d3-handy-480.webp 480w, ../assets/bilder/erzeugt/nachher-mannschaft-d3-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/nachher-mannschaft-d3-handy-780.jpg" srcset="../assets/bilder/erzeugt/nachher-mannschaft-d3-handy-480.jpg 480w, ../assets/bilder/erzeugt/nachher-mannschaft-d3-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Prototyp-Mannschaftsseite D3 am Handy: Trainingszeiten, nächste Spiele und Vereinsmail auf einer eigenen Seite" loading="lazy" decoding="async">
+</picture>
+    </div>
+  </div>
+  <figcaption>Vorher fehlen Wochentag, Uhrzeit und Platz, Kontakt läuft über 26 × 17 Pixel kleine Symbole; nachher stehen Training, nächste Spiele und die Vereinsmail auf einer eigenen Seite je Mannschaft.</figcaption>
+</figure>
+  <figure class="vergleich vergleich--handy">
+  <h2>Sponsoren am Handy</h2>
+  <div class="vergleich__raster">
+    <div class="vergleich__seite">
+      <span class="tag tag--warn">Vorher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/vorher-sponsoren-handy-480.avif 480w, ../assets/bilder/erzeugt/vorher-sponsoren-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/vorher-sponsoren-handy-480.webp 480w, ../assets/bilder/erzeugt/vorher-sponsoren-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/vorher-sponsoren-handy-780.jpg" srcset="../assets/bilder/erzeugt/vorher-sponsoren-handy-480.jpg 480w, ../assets/bilder/erzeugt/vorher-sponsoren-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Live-Sponsorenseite am Handy: oberste Kategorie zeigt ein Platzhalterbild, „App-Projektpartner“ erscheint zweimal" loading="lazy" decoding="async">
+</picture>
+    </div>
+    <div class="vergleich__seite">
+      <span class="tag tag--ok">Nachher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/nachher-sponsoren-handy-480.avif 480w, ../assets/bilder/erzeugt/nachher-sponsoren-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/nachher-sponsoren-handy-480.webp 480w, ../assets/bilder/erzeugt/nachher-sponsoren-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/nachher-sponsoren-handy-780.jpg" srcset="../assets/bilder/erzeugt/nachher-sponsoren-handy-480.jpg 480w, ../assets/bilder/erzeugt/nachher-sponsoren-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Prototyp-Sponsorenseite am Handy: zwei Kategorien mit echten Logos und ein Satz zum Sponsor werden" loading="lazy" decoding="async">
+</picture>
+    </div>
+  </div>
+  <figcaption>Vorher zeigt die oberste Kategorie einen Platzhalter und eine Kategorie gibt es doppelt; nachher zwei Kategorien und ein Satz, wie man Sponsor wird.</figcaption>
+</figure>
+  <figure class="vergleich vergleich--handy">
+  <h2>Mitglied werden am Handy</h2>
+  <div class="vergleich__raster">
+    <div class="vergleich__seite">
+      <span class="tag tag--warn">Vorher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/vorher-mitglied-werden-handy-480.avif 480w, ../assets/bilder/erzeugt/vorher-mitglied-werden-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/vorher-mitglied-werden-handy-480.webp 480w, ../assets/bilder/erzeugt/vorher-mitglied-werden-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/vorher-mitglied-werden-handy-780.jpg" srcset="../assets/bilder/erzeugt/vorher-mitglied-werden-handy-480.jpg 480w, ../assets/bilder/erzeugt/vorher-mitglied-werden-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Live-Formular am Handy: Antragsformular beginnt direkt mit den persönlichen Angaben, keine Beitragsangaben sichtbar" loading="lazy" decoding="async">
+</picture>
+    </div>
+    <div class="vergleich__seite">
+      <span class="tag tag--ok">Nachher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/nachher-mitglied-werden-handy-480.avif 480w, ../assets/bilder/erzeugt/nachher-mitglied-werden-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/nachher-mitglied-werden-handy-480.webp 480w, ../assets/bilder/erzeugt/nachher-mitglied-werden-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/nachher-mitglied-werden-handy-780.jpg" srcset="../assets/bilder/erzeugt/nachher-mitglied-werden-handy-480.jpg 480w, ../assets/bilder/erzeugt/nachher-mitglied-werden-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Prototyp-Seite Mitglied werden am Handy: Beitragstabelle für Fußball und Karneval vor dem Formular" loading="lazy" decoding="async">
+</picture>
+    </div>
+  </div>
+  <figcaption>Vorher beginnt die Seite mit dem Formular und nennt keine Beiträge; nachher stehen Beiträge, Ablauf und Unterlagen vor dem Antrag.</figcaption>
+</figure>
+  <figure class="vergleich vergleich--handy">
+  <h2>Service &amp; Anträge am Handy</h2>
+  <div class="vergleich__raster">
+    <div class="vergleich__seite">
+      <span class="tag tag--warn">Vorher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/vorher-service-handy-480.avif 480w, ../assets/bilder/erzeugt/vorher-service-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/vorher-service-handy-480.webp 480w, ../assets/bilder/erzeugt/vorher-service-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/vorher-service-handy-780.jpg" srcset="../assets/bilder/erzeugt/vorher-service-handy-480.jpg 480w, ../assets/bilder/erzeugt/vorher-service-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Live-Serviceseite am Handy: drei unterschiedlich gestaltete Kacheln, eine mit KI-Wasserzeichen und dem Tippfehler „Mitgliedsbescheinigugen“" loading="lazy" decoding="async">
+</picture>
+    </div>
+    <div class="vergleich__seite">
+      <span class="tag tag--ok">Nachher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/nachher-downloads-handy-480.avif 480w, ../assets/bilder/erzeugt/nachher-downloads-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/nachher-downloads-handy-480.webp 480w, ../assets/bilder/erzeugt/nachher-downloads-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/nachher-downloads-handy-780.jpg" srcset="../assets/bilder/erzeugt/nachher-downloads-handy-480.jpg 480w, ../assets/bilder/erzeugt/nachher-downloads-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Prototyp-Downloadseite am Handy: einheitliche Liste mit Dateiformat, Größe und Seitenzahl je Dokument" loading="lazy" decoding="async">
+</picture>
+    </div>
+  </div>
+  <figcaption>Vorher drei unterschiedlich gestaltete Kacheln, ein KI-Bild mit Wasserzeichen und ein Tippfehler; nachher eine Downloadliste mit Dateigröße und Seitenzahl.</figcaption>
+</figure>
+  <figure class="vergleich">
+  <h2>Sportangebote am Rechner</h2>
+  <div class="vergleich__raster">
+    <div class="vergleich__seite">
+      <span class="tag tag--warn">Vorher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/vorher-sportangebote-desktop-480.avif 480w, ../assets/bilder/erzeugt/vorher-sportangebote-desktop-960.avif 960w, ../assets/bilder/erzeugt/vorher-sportangebote-desktop-1440.avif 1440w" sizes="(min-width: 768px) 50vw, 100vw">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/vorher-sportangebote-desktop-480.webp 480w, ../assets/bilder/erzeugt/vorher-sportangebote-desktop-960.webp 960w, ../assets/bilder/erzeugt/vorher-sportangebote-desktop-1440.webp 1440w" sizes="(min-width: 768px) 50vw, 100vw">
+  <img src="../assets/bilder/erzeugt/vorher-sportangebote-desktop-960.jpg" srcset="../assets/bilder/erzeugt/vorher-sportangebote-desktop-480.jpg 480w, ../assets/bilder/erzeugt/vorher-sportangebote-desktop-960.jpg 960w, ../assets/bilder/erzeugt/vorher-sportangebote-desktop-1440.jpg 1440w" sizes="(min-width: 768px) 50vw, 100vw" width="1440" height="900" alt="Live-Sportangebote am Rechner: zwei Kacheln (Fußball, Karneval), darunter eine große leere Fläche" loading="lazy" decoding="async">
+</picture>
+    </div>
+    <div class="vergleich__seite">
+      <span class="tag tag--ok">Nachher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/nachher-mannschaften-desktop-480.avif 480w, ../assets/bilder/erzeugt/nachher-mannschaften-desktop-960.avif 960w, ../assets/bilder/erzeugt/nachher-mannschaften-desktop-1440.avif 1440w" sizes="(min-width: 768px) 50vw, 100vw">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/nachher-mannschaften-desktop-480.webp 480w, ../assets/bilder/erzeugt/nachher-mannschaften-desktop-960.webp 960w, ../assets/bilder/erzeugt/nachher-mannschaften-desktop-1440.webp 1440w" sizes="(min-width: 768px) 50vw, 100vw">
+  <img src="../assets/bilder/erzeugt/nachher-mannschaften-desktop-960.jpg" srcset="../assets/bilder/erzeugt/nachher-mannschaften-desktop-480.jpg 480w, ../assets/bilder/erzeugt/nachher-mannschaften-desktop-960.jpg 960w, ../assets/bilder/erzeugt/nachher-mannschaften-desktop-1440.jpg 1440w" sizes="(min-width: 768px) 50vw, 100vw" width="1440" height="900" alt="Prototyp-Mannschaftsübersicht am Rechner: elf Mannschaften in drei Gruppen mit Trainingszeiten" loading="lazy" decoding="async">
+</picture>
+    </div>
+  </div>
+  <figcaption>Vorher zwei Kacheln und darunter rund 450 Pixel Leere; nachher elf Mannschaften in drei Gruppen mit Trainingszeiten.</figcaption>
+</figure>
+  </div>
+</section>
+<section class="abschnitt--hell abschnitt">
+  <div class="container fluss">
+    <h2>Messbar</h2>
+    <div class="tabelle-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Merkmal</th>
+            <th>Vorher (Prüfung 04.09.2026)</th>
+            <th>Nachher (Prototyp)</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>Menüpunkte</td>
+          <td>12</td>
+          <td>6</td>
+        </tr>
+        <tr>
+          <td>Adressen</td>
+          <td>1 für alle Seiten</td>
+          <td>47 eigene Adressen</td>
+        </tr>
+        <tr>
+          <td>Inhaltsrahmen</td>
+          <td>fest 592 × 834 px</td>
+          <td>volle Breite, 320–1920 px</td>
+        </tr>
+        <tr>
+          <td>Scrollbalken</td>
+          <td>2</td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td>Tippziele</td>
+          <td>26 × 17 px</td>
+          <td>mindestens 44 × 44 px</td>
+        </tr>
+        <tr>
+          <td>Überschriftenstruktur</td>
+          <td>keine h1</td>
+          <td>genau eine h1 je Seite</td>
+        </tr>
+        <tr>
+          <td>Sprachangabe</td>
+          <td>fehlt</td>
+          <td>lang=de</td>
+        </tr>
+        <tr>
+          <td>Alternativtexte</td>
+          <td>alle leer</td>
+          <td>alle Bilder beschrieben</td>
+        </tr>
+        <tr>
+          <td>Startbild</td>
+          <td>296 KB, WhatsApp-Export</td>
+          <td>kein Bild über 200 KB, sprechende Namen</td>
+        </tr>
+        <tr>
+          <td>Private Telefonlinks</td>
+          <td>19</td>
+          <td>0</td>
+        </tr>
+        <tr>
+          <td>Trainingszeiten auf Mannschaftsseiten</td>
+          <td>keine</td>
+          <td>alle elf Mannschaften</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="meta">Vorher-Werte aus der Qualitätsprüfung vom 04.09.2026, Nachher-Werte aus der automatischen Prüfung des Prototyps (npm run pruefen).</p>
+  </div>
+</section>
+<section class="abschnitt">
+  <div class="container inhalt fluss">
+    <h2>Was der Prototyp nicht zeigen kann</h2>
+    <div class="hinweis hinweis--info">
+      <p style="margin:0;">Zwei Punkte lassen sich nur mit dem Anbieter appack/vmapit lösen: eigene Adressen unter sportfreunde04.de und ein Inhaltsrahmen, der mit dem Inhalt wächst. Beides steht im Übernahmepaket.</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="fuss">
+  <div class="container fuss__raster">
+    <div class="fuss__gruppe fuss__marke">
+      <img class="fuss__wappen" src="../assets/logo/wappen-weiss.svg" width="56" height="56" alt="" aria-hidden="true">
+      <p class="fuss__registername">Frankfurter Fußballverein Sportfreunde 1904 e.V.</p>
+      <address class="fuss__adresse">
+        <p>Mainzer Landstraße 480</p>
+        <p>60326 Frankfurt am Main</p>
+        <p>Postfach 190442, 60091 Frankfurt am Main</p>
+      </address>
+      <ul class="fuss__kontakt" role="list">
+        <li><a class="mail" href="mailto:geschaeftsstelle@sportfreunde04.de">geschaeftsstelle<wbr>@sportfreunde04.de</a></li>
+        <li><a href="tel:+4969736868">Geschäftsstelle +49 69 736868</a></li>
+        <li><a href="tel:+4969732193">Platzwart +49 69 732193</a></li>
+        <li><a href="https://www.instagram.com/speuzer_ffm/" rel="noopener" target="_blank">Instagram @speuzer_ffm</a></li>
+      </ul>
+    </div>
+    <div class="fuss__spalten">
+    <div class="fuss__gruppe">
+        <h2>Verein</h2>
+        <ul>
+        <li><a href="../verein/">Wer wir sind</a></li>
+        <li><a href="../verein/vorstand/">Vorstand</a></li>
+        <li><a href="../verein/sponsoren/">Sponsoren &amp; Partner</a></li>
+        <li><a href="../verein/mach-mit/">Mach mit</a></li>
+        <li><a href="../verein/downloads/">Downloads</a></li>
+        </ul>
+      </div>
+      <div class="fuss__gruppe">
+        <h2>Sport</h2>
+        <ul>
+        <li><a href="../mannschaften/">Mannschaften &amp; Training</a></li>
+        <li><a href="../spielplan/">Spielplan</a></li>
+        <li><a href="../tabellen/">Tabellen</a></li>
+        <li><a href="../news/">News</a></li>
+        <li><a href="../mitglied-werden/">Mitglied werden</a></li>
+        </ul>
+      </div>
+      <div class="fuss__gruppe">
+        <h2>Service</h2>
+        <ul>
+        <li><a href="../kontakt/">Kontakt &amp; Anfahrt</a></li>
+        <li><a href="../shop/">Shop</a></li>
+        <li><a href="../app/">App-Ansicht</a></li>
+        <li><a href="../vorher-nachher/">Vorher / Nachher</a></li>
+        <li><a href="../impressum/">Impressum</a></li>
+        <li><a href="../datenschutz/">Datenschutz</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container fuss__app">
+    <ul class="fuss__app-kontakt" role="list">
+      <li><a class="mail" href="mailto:geschaeftsstelle@sportfreunde04.de">geschaeftsstelle<wbr>@sportfreunde04.de</a></li>
+      <li><a href="tel:+4969736868">Geschäftsstelle +49 69 736868</a></li>
+    </ul>
+    <ul class="fuss__app-links" role="list">
+      <li><a href="../impressum/">Impressum</a></li>
+      <li><a href="../datenschutz/">Datenschutz</a></li>
+    </ul>
+  </div>
+  <div class="container fuss__schluss">
+    <p>© 2026 Frankfurter Fußballverein Sportfreunde 1904 e.V.</p>
+    <p>Prototyp · Testumgebung, keine Live-Seite</p>
+  </div>
+</footer>
+</body>
+</html>

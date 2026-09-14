@@ -150,21 +150,28 @@ export function seite(daten) {
   </div>
 </section>`;
 
+  // P10, Korrektur A2 (Olgay, 14.09.2026): Reihenfolge überall, wo alle
+  // Mannschaften dargestellt werden, beginnt bei den ältesten (Herren) und
+  // geht absteigend zu den jüngsten (G-Jugend) – Gruppenreihenfolge Senioren
+  // → Jugend → Kinderfußball, innerhalb der Gruppen wie in data/teams.json
+  // (a-jugend, d1, d2, d3, e1, e2, e3; f1, f2, g-jugend). Vorher stand hier
+  // Kinderfußball → Jugend → Senioren mit jeweils nach Alter aufsteigender
+  // slugs-Reihenfolge (jüngste zuerst) – exakt umgekehrt.
   const gruppen = [
-    {
-      titel: "Kinderfußball",
-      satz: "Kinderfestivals statt Ligabetrieb, keine Tabellen.",
-      slugs: ["g-jugend", "f2", "f1"],
-    },
-    {
-      titel: "Jugend",
-      satz: "Ligabetrieb im Kreis Frankfurt, Spielpläne und Tabellen aus dem DFBnet.",
-      slugs: ["e3", "e2", "e1", "d3", "d2", "d1", "a-jugend"],
-    },
     {
       titel: "Senioren",
       satz: "Kreisliga A, Heimspiele auf der Anlage von SW Griesheim am Rebstock.",
       slugs: ["herren"],
+    },
+    {
+      titel: "Jugend",
+      satz: "Ligabetrieb im Kreis Frankfurt, Spielpläne und Tabellen aus dem DFBnet.",
+      slugs: ["a-jugend", "d1", "d2", "d3", "e1", "e2", "e3"],
+    },
+    {
+      titel: "Kinderfußball",
+      satz: "Kinderfestivals statt Ligabetrieb, keine Tabellen.",
+      slugs: ["f1", "f2", "g-jugend"],
     },
   ].map((g) => gruppenAbschnitt({ ...g, teamNachSlug }));
 

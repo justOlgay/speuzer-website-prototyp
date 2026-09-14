@@ -34,4 +34,10 @@ npm run screenshots
                   (`--window-size`) wird unter 500px Breite ignoriert und ist deshalb bei
                   390px unbrauchbar – daher ein echter Browser-Viewport statt eines
                   Shell-Skripts.
+npm run vergleich
+                  Erzeugt die neun "nachher"-Screenshots für /vorher-nachher/ nach
+                  assets/bilder/quelle/ (puppeteer-core, startet den lokalen Server bei
+                  Bedarf selbst wie oben). Die neun "vorher"-Screenshots der Live-Seite
+                  liegen dort bereits fertig und anonymisiert; anschließend npm run
+                  bilder ausführen.
 ```

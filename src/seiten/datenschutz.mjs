@@ -42,10 +42,12 @@ function inhaltsverzeichnisAbschnitt(abschnitte) {
     .join("\n      ");
 
   return `<nav aria-label="Abschnitte">
-  <div class="container inhalt">
+  <div class="container">
+    <div class="inhalt">
     <ol class="inhaltsverzeichnis">
       ${eintraege}
     </ol>
+    </div>
   </div>
 </nav>`;
 }
@@ -124,19 +126,23 @@ function abschnittSection(abschnitt, index) {
     : "";
 
   return `<section id="abschnitt-${index + 1}" class="abschnitt">
-  <div class="container inhalt prosa fluss">
+  <div class="container fluss">
+    <div class="inhalt prosa fluss">
     <h2>${escapeHtml(abschnitt.titel)}</h2>
     ${absaetze}
     ${listeHtml}
+    </div>
   </div>
 </section>`;
 }
 
 function quelleAbschnitt(datenschutz) {
   return `<section class="abschnitt">
-  <div class="container inhalt fluss">
+  <div class="container fluss">
+    <div class="inhalt fluss">
     <p class="meta">Quelle: ${escapeHtml(datenschutz.quelle ?? "")}</p>
     <p><a href="https://cdn.appack.de/sportfreunde04/workspace/Datenschutzerklaerung.html" rel="noopener" target="_blank">Zur Live-Fassung auf cdn.appack.de</a></p>
+    </div>
   </div>
 </section>`;
 }
