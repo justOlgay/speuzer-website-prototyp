@@ -1,4 +1,163 @@
 {
+  "nachher-downloads-handy": {
+    "breite": 780,
+    "hoehe": 1688,
+    "varianten": {
+      "480": {
+        "avif": "nachher-downloads-handy-480.avif",
+        "webp": "nachher-downloads-handy-480.webp",
+        "jpg": "nachher-downloads-handy-480.jpg"
+      },
+      "780": {
+        "avif": "nachher-downloads-handy-780.avif",
+        "webp": "nachher-downloads-handy-780.webp",
+        "jpg": "nachher-downloads-handy-780.jpg"
+      }
+    }
+  },
+  "nachher-mannschaft-d3-handy": {
+    "breite": 780,
+    "hoehe": 1688,
+    "varianten": {
+      "480": {
+        "avif": "nachher-mannschaft-d3-handy-480.avif",
+        "webp": "nachher-mannschaft-d3-handy-480.webp",
+        "jpg": "nachher-mannschaft-d3-handy-480.jpg"
+      },
+      "780": {
+        "avif": "nachher-mannschaft-d3-handy-780.avif",
+        "webp": "nachher-mannschaft-d3-handy-780.webp",
+        "jpg": "nachher-mannschaft-d3-handy-780.jpg"
+      }
+    }
+  },
+  "nachher-mannschaften-desktop": {
+    "breite": 1440,
+    "hoehe": 900,
+    "varianten": {
+      "480": {
+        "avif": "nachher-mannschaften-desktop-480.avif",
+        "webp": "nachher-mannschaften-desktop-480.webp",
+        "jpg": "nachher-mannschaften-desktop-480.jpg"
+      },
+      "960": {
+        "avif": "nachher-mannschaften-desktop-960.avif",
+        "webp": "nachher-mannschaften-desktop-960.webp",
+        "jpg": "nachher-mannschaften-desktop-960.jpg"
+      },
+      "1440": {
+        "avif": "nachher-mannschaften-desktop-1440.avif",
+        "webp": "nachher-mannschaften-desktop-1440.webp",
+        "jpg": "nachher-mannschaften-desktop-1440.jpg"
+      }
+    }
+  },
+  "nachher-menue-handy": {
+    "breite": 780,
+    "hoehe": 1688,
+    "varianten": {
+      "480": {
+        "avif": "nachher-menue-handy-480.avif",
+        "webp": "nachher-menue-handy-480.webp",
+        "jpg": "nachher-menue-handy-480.jpg"
+      },
+      "780": {
+        "avif": "nachher-menue-handy-780.avif",
+        "webp": "nachher-menue-handy-780.webp",
+        "jpg": "nachher-menue-handy-780.jpg"
+      }
+    }
+  },
+  "nachher-mitglied-werden-handy": {
+    "breite": 780,
+    "hoehe": 1688,
+    "varianten": {
+      "480": {
+        "avif": "nachher-mitglied-werden-handy-480.avif",
+        "webp": "nachher-mitglied-werden-handy-480.webp",
+        "jpg": "nachher-mitglied-werden-handy-480.jpg"
+      },
+      "780": {
+        "avif": "nachher-mitglied-werden-handy-780.avif",
+        "webp": "nachher-mitglied-werden-handy-780.webp",
+        "jpg": "nachher-mitglied-werden-handy-780.jpg"
+      }
+    }
+  },
+  "nachher-sponsoren-handy": {
+    "breite": 780,
+    "hoehe": 1688,
+    "varianten": {
+      "480": {
+        "avif": "nachher-sponsoren-handy-480.avif",
+        "webp": "nachher-sponsoren-handy-480.webp",
+        "jpg": "nachher-sponsoren-handy-480.jpg"
+      },
+      "780": {
+        "avif": "nachher-sponsoren-handy-780.avif",
+        "webp": "nachher-sponsoren-handy-780.webp",
+        "jpg": "nachher-sponsoren-handy-780.jpg"
+      }
+    }
+  },
+  "nachher-start-desktop": {
+    "breite": 1440,
+    "hoehe": 900,
+    "varianten": {
+      "480": {
+        "avif": "nachher-start-desktop-480.avif",
+        "webp": "nachher-start-desktop-480.webp",
+        "jpg": "nachher-start-desktop-480.jpg"
+      },
+      "960": {
+        "avif": "nachher-start-desktop-960.avif",
+        "webp": "nachher-start-desktop-960.webp",
+        "jpg": "nachher-start-desktop-960.jpg"
+      },
+      "1440": {
+        "avif": "nachher-start-desktop-1440.avif",
+        "webp": "nachher-start-desktop-1440.webp",
+        "jpg": "nachher-start-desktop-1440.jpg"
+      }
+    }
+  },
+  "nachher-start-handy": {
+    "breite": 780,
+    "hoehe": 1688,
+    "varianten": {
+      "480": {
+        "avif": "nachher-start-handy-480.avif",
+        "webp": "nachher-start-handy-480.webp",
+        "jpg": "nachher-start-handy-480.jpg"
+      },
+      "780": {
+        "avif": "nachher-start-handy-780.avif",
+        "webp": "nachher-start-handy-780.webp",
+        "jpg": "nachher-start-handy-780.jpg"
+      }
+    }
+  },
+  "nachher-vorstand-desktop": {
+    "breite": 1440,
+    "hoehe": 900,
+    "varianten": {
+      "480": {
+        "avif": "nachher-vorstand-desktop-480.avif",
+        "webp": "nachher-vorstand-desktop-480.webp",
+        "jpg": "nachher-vorstand-desktop-480.jpg"
+      },
+      "960": {
+        "avif": "nachher-vorstand-desktop-960.avif",
+        "webp": "nachher-vorstand-desktop-960.webp",
+        "jpg": "nachher-vorstand-desktop-960.jpg"
+      },
+      "1440": {
+        "avif": "nachher-vorstand-desktop-1440.avif",
+        "webp": "nachher-vorstand-desktop-1440.webp",
+        "jpg": "nachher-vorstand-desktop-1440.jpg"
+      }
+    }
+  },
   "news-arbeitstag-2026-09-19": {
     "breite": 1024,
     "hoehe": 1536,
@@ -206,6 +365,165 @@
         "avif": "sponsor-vmapit-gmbh-1241.avif",
         "webp": "sponsor-vmapit-gmbh-1241.webp",
         "jpg": "sponsor-vmapit-gmbh-1241.jpg"
+      }
+    }
+  },
+  "vorher-mannschaften-handy": {
+    "breite": 780,
+    "hoehe": 1688,
+    "varianten": {
+      "480": {
+        "avif": "vorher-mannschaften-handy-480.avif",
+        "webp": "vorher-mannschaften-handy-480.webp",
+        "jpg": "vorher-mannschaften-handy-480.jpg"
+      },
+      "780": {
+        "avif": "vorher-mannschaften-handy-780.avif",
+        "webp": "vorher-mannschaften-handy-780.webp",
+        "jpg": "vorher-mannschaften-handy-780.jpg"
+      }
+    }
+  },
+  "vorher-menue-handy": {
+    "breite": 780,
+    "hoehe": 1688,
+    "varianten": {
+      "480": {
+        "avif": "vorher-menue-handy-480.avif",
+        "webp": "vorher-menue-handy-480.webp",
+        "jpg": "vorher-menue-handy-480.jpg"
+      },
+      "780": {
+        "avif": "vorher-menue-handy-780.avif",
+        "webp": "vorher-menue-handy-780.webp",
+        "jpg": "vorher-menue-handy-780.jpg"
+      }
+    }
+  },
+  "vorher-mitglied-werden-handy": {
+    "breite": 780,
+    "hoehe": 1688,
+    "varianten": {
+      "480": {
+        "avif": "vorher-mitglied-werden-handy-480.avif",
+        "webp": "vorher-mitglied-werden-handy-480.webp",
+        "jpg": "vorher-mitglied-werden-handy-480.jpg"
+      },
+      "780": {
+        "avif": "vorher-mitglied-werden-handy-780.avif",
+        "webp": "vorher-mitglied-werden-handy-780.webp",
+        "jpg": "vorher-mitglied-werden-handy-780.jpg"
+      }
+    }
+  },
+  "vorher-service-handy": {
+    "breite": 780,
+    "hoehe": 1688,
+    "varianten": {
+      "480": {
+        "avif": "vorher-service-handy-480.avif",
+        "webp": "vorher-service-handy-480.webp",
+        "jpg": "vorher-service-handy-480.jpg"
+      },
+      "780": {
+        "avif": "vorher-service-handy-780.avif",
+        "webp": "vorher-service-handy-780.webp",
+        "jpg": "vorher-service-handy-780.jpg"
+      }
+    }
+  },
+  "vorher-sponsoren-handy": {
+    "breite": 780,
+    "hoehe": 1688,
+    "varianten": {
+      "480": {
+        "avif": "vorher-sponsoren-handy-480.avif",
+        "webp": "vorher-sponsoren-handy-480.webp",
+        "jpg": "vorher-sponsoren-handy-480.jpg"
+      },
+      "780": {
+        "avif": "vorher-sponsoren-handy-780.avif",
+        "webp": "vorher-sponsoren-handy-780.webp",
+        "jpg": "vorher-sponsoren-handy-780.jpg"
+      }
+    }
+  },
+  "vorher-sportangebote-desktop": {
+    "breite": 1440,
+    "hoehe": 900,
+    "varianten": {
+      "480": {
+        "avif": "vorher-sportangebote-desktop-480.avif",
+        "webp": "vorher-sportangebote-desktop-480.webp",
+        "jpg": "vorher-sportangebote-desktop-480.jpg"
+      },
+      "960": {
+        "avif": "vorher-sportangebote-desktop-960.avif",
+        "webp": "vorher-sportangebote-desktop-960.webp",
+        "jpg": "vorher-sportangebote-desktop-960.jpg"
+      },
+      "1440": {
+        "avif": "vorher-sportangebote-desktop-1440.avif",
+        "webp": "vorher-sportangebote-desktop-1440.webp",
+        "jpg": "vorher-sportangebote-desktop-1440.jpg"
+      }
+    }
+  },
+  "vorher-start-desktop": {
+    "breite": 1440,
+    "hoehe": 900,
+    "varianten": {
+      "480": {
+        "avif": "vorher-start-desktop-480.avif",
+        "webp": "vorher-start-desktop-480.webp",
+        "jpg": "vorher-start-desktop-480.jpg"
+      },
+      "960": {
+        "avif": "vorher-start-desktop-960.avif",
+        "webp": "vorher-start-desktop-960.webp",
+        "jpg": "vorher-start-desktop-960.jpg"
+      },
+      "1440": {
+        "avif": "vorher-start-desktop-1440.avif",
+        "webp": "vorher-start-desktop-1440.webp",
+        "jpg": "vorher-start-desktop-1440.jpg"
+      }
+    }
+  },
+  "vorher-start-handy": {
+    "breite": 780,
+    "hoehe": 1688,
+    "varianten": {
+      "480": {
+        "avif": "vorher-start-handy-480.avif",
+        "webp": "vorher-start-handy-480.webp",
+        "jpg": "vorher-start-handy-480.jpg"
+      },
+      "780": {
+        "avif": "vorher-start-handy-780.avif",
+        "webp": "vorher-start-handy-780.webp",
+        "jpg": "vorher-start-handy-780.jpg"
+      }
+    }
+  },
+  "vorher-vorstand-rahmen-desktop": {
+    "breite": 1440,
+    "hoehe": 900,
+    "varianten": {
+      "480": {
+        "avif": "vorher-vorstand-rahmen-desktop-480.avif",
+        "webp": "vorher-vorstand-rahmen-desktop-480.webp",
+        "jpg": "vorher-vorstand-rahmen-desktop-480.jpg"
+      },
+      "960": {
+        "avif": "vorher-vorstand-rahmen-desktop-960.avif",
+        "webp": "vorher-vorstand-rahmen-desktop-960.webp",
+        "jpg": "vorher-vorstand-rahmen-desktop-960.jpg"
+      },
+      "1440": {
+        "avif": "vorher-vorstand-rahmen-desktop-1440.avif",
+        "webp": "vorher-vorstand-rahmen-desktop-1440.webp",
+        "jpg": "vorher-vorstand-rahmen-desktop-1440.jpg"
       }
     }
   },

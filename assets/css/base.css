@@ -115,13 +115,19 @@ a:hover {
 
 .inhalt {
   max-width: var(--inhalt);
-  /* P9-Korrektur A4: auf Seiten, die .inhalt zusammen mit .container auf
-     demselben Element setzen (/impressum/, /datenschutz/), zentrierte
-     .container das schmalere .inhalt sonst zusätzlich im Container – der
-     Seitenkopf blieb daneben linksbündig auf Containerbreite, wodurch die
-     Liste darunter eingerückt/zentriert wirkte. margin-inline:0 richtet
-     .inhalt einheitlich links aus, auf allen Seiten mit dieser Klasse
-     (Impressum, Datenschutz, News-Artikel, Mitglied-werden-Formular). */
+  /* P9-Korrektur A4 / P10-Korrektur A1: .inhalt ist schmaler als .container
+     und muss trotzdem linksbündig mit dem Seitenkopf stehen statt im breiteren
+     .container zusätzlich zentriert zu werden. P9 hatte dafür .container und
+     .inhalt auf demselben Element kombiniert (Impressum, Datenschutz) –
+     dadurch überschrieb margin-inline:0 aber auch das margin:0 auto von
+     .container selbst, und der ganze Block rutschte an den linken
+     Viewport-Rand statt an den Containerrand (Regression, siehe P10-Bericht).
+     Seit P10 ist .inhalt überall ein eigenes Kind-Element von .container
+     (nie dieselbe Klasse auf demselben Element) – margin-inline:0 zentriert
+     .inhalt dann nicht noch einmal zusätzlich innerhalb des schon
+     positionierten .container, sondern hält es an dessen linker Kante, auf
+     allen Seiten mit dieser Klasse (Impressum, Datenschutz, News-Artikel,
+     Mitglied-werden-Formular). */
   margin-inline: 0;
 }
 

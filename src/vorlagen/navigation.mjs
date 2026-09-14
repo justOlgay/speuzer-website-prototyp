@@ -41,6 +41,7 @@ export const FUSS = [
       { titel: "Kontakt & Anfahrt", url: "/kontakt/" },
       { titel: "Shop", url: "/shop/" },
       { titel: "App-Ansicht", url: "/app/" },
+      { titel: "Vorher / Nachher", url: "/vorher-nachher/" },
       { titel: "Impressum", url: "/impressum/" },
       { titel: "Datenschutz", url: "/datenschutz/" },
     ],

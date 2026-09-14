@@ -2139,3 +2139,66 @@ body.datenschutz h2 {
     transform-origin: top left;
   }
 }
+
+/* ==========================================================================
+   Vorher/Nachher-Paar (.vergleich) – P10
+   Ein Bildpaar auf /vorher-nachher/: Titel, zweispaltiges Bildraster ab
+   768px (darunter untereinander), Beschriftung (.tag--warn/.tag--ok) über
+   jedem Bild, Bildunterschrift als Fazit-Satz.
+   ========================================================================== */
+
+.vergleich {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.vergleich__raster {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-5);
+}
+
+@media (min-width: 768px) {
+  .vergleich__raster {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.vergleich__seite {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+/* .tag ist selbst display:inline-block – ohne align-self würde es als
+   Flex-Kind von .vergleich__seite (Spalte) auf die volle Breite gestreckt
+   (Standard align-items:stretch) statt als schmale Pille stehen zu bleiben. */
+.vergleich__seite .tag {
+  align-self: flex-start;
+}
+
+.vergleich__seite picture {
+  display: block;
+  width: 100%;
+}
+
+.vergleich__seite img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+}
+
+/* Handy-Paare (.vergleich--handy): Bild max. 390px breit und zentriert statt
+   auf volle (ggf. viel breitere) Spaltenbreite gestreckt – ein 390px breiter
+   Screenshot soll nicht künstlich vergrößert wirken. */
+.vergleich--handy .vergleich__seite picture {
+  max-width: 390px;
+  margin-inline: auto;
+}
+
+.vergleich figcaption {
+  margin-top: var(--sp-1);
+}
