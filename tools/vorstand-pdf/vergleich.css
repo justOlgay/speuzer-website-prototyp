@@ -300,13 +300,24 @@ ol.liste--beschluss li {
 .ankreuz-inline {
   display: inline-flex;
   align-items: center;
-  margin-left: 6mm;
   font-size: 9.5pt;
   white-space: nowrap;
 }
 
 .ankreuz-inline .ankreuz {
   margin-right: 1.5mm;
+}
+
+/* P14c Punkt 2: Antwortkästchen ("ja/nein", "Weg 1/Weg 2") stehen in eigener
+   Zeile unter dem Text des Punkts (siehe baueKapitel8 in bauen.mjs), damit
+   sie nicht mehr am Zeilenende umbrechen. Eingerückt auf die
+   Texteinzug-Kante, da der div-Block an derselben Kante wie der Text
+   beginnt. */
+.beschluss-antwort {
+  display: flex;
+  gap: 8mm;
+  white-space: nowrap;
+  margin-top: 4px;
 }
 
 /* ---------- Bilder / Screenshots ---------- */
@@ -453,6 +464,12 @@ table.tabelle td {
   vertical-align: top;
 }
 
+/* P14c Punkt 1: Spaltenköpfe brechen nicht mehr mitten im Wort um – kurze
+   Kopftexte statt automatischem Umbruch (siehe Anhang A). */
+th {
+  white-space: nowrap;
+}
+
 table.tabelle thead th {
   background: var(--blau-800);
   color: var(--weiss);
@@ -494,17 +511,44 @@ table.tabelle--messbar td {
   padding: 3px 6px;
 }
 
-/* P14b Punkt 7: Anhang A – 8,5 pt, feste (schmalere) Spaltenbreiten über
-   <colgroup> (siehe tabelleZweispaltigVerbunden), damit Zahlenspalten nicht
-   umbrechen und die Pfadspalte "Seite" etwas schmaler ist. */
+/* P14c Punkt 1: Anhang A – 8 pt, 1,2 mm Zellenpolster, feste Spaltenbreiten
+   über <colgroup> (siehe tabelleZweispaltigVerbunden), damit die kurzen
+   Spaltenköpfe ("Seite", "Perf.", "Barr.", "BP", "SEO", "LCP", "CLS") ohne
+   Umbruch in eine Zeile passen (siehe th { white-space: nowrap; } oben). */
 table.tabelle--anhangA {
-  font-size: 8.5pt;
+  font-size: 8pt;
   table-layout: fixed;
 }
 
 table.tabelle--anhangA th,
 table.tabelle--anhangA td {
   overflow-wrap: break-word;
+  padding: 1.2mm;
+}
+
+/* P14c Punkt 1: die allgemeine Regel table.tabelle thead th (8,5 pt) ist
+   spezifischer als table.tabelle--anhangA { font-size: 8pt } und würde sie
+   sonst für die Kopfzeile überstimmen – hier für Anhang A auf 8 pt
+   angeglichen, damit die kurzen Spaltenköpfe in die schmalen Spalten passen. */
+table.tabelle--anhangA thead th {
+  font-size: 8pt;
+}
+
+/* P14c Punkt 1: schmalere Trennspalte (4 mm statt 6 mm) nur für Anhang A,
+   damit die zwei Tabellenhälften zu je 85 mm (174 mm Satzbreite) passen. */
+table.tabelle--anhangA td.spalte-luecke,
+table.tabelle--anhangA th.spalte-luecke,
+table.tabelle--anhangA col.spalte-luecke {
+  width: 4mm;
+}
+
+/* P14c Punkt 1: Pfadspalte "Seite" (1. und 9. Zelle je Zeile: linke und
+   rechte Tabellenhälfte) bricht nur noch an <wbr> nach jedem Schrägstrich
+   (im HTML eingefügt), nicht mehr mitten im Wort. */
+table.tabelle--anhangA td:nth-child(1),
+table.tabelle--anhangA td:nth-child(9) {
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 /* P14b Punkt 9: Anhang C – 8,5 pt, 1,5 mm Zellenpolster. */

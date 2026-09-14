@@ -317,10 +317,26 @@ function tabelle({ kopf, zeilen, klasse = "" }) {
 // Trennspalte), damit die Tabelle wie jede normale Tabelle über mehrere
 // Seiten bricht (mit wiederholter Kopfzeile) – siehe vergleich.css für den
 // Hintergrund, warum kein CSS-Mehrspalten-Container verwendet wird.
-function tabelleZweispaltigVerbunden({ kopf, zeilen, klasse = "", spaltenbreiten = null }) {
-  const half = Math.ceil(zeilen.length / 2);
-  const links = zeilen.slice(0, half);
-  const rechts = zeilen.slice(half);
+//
+// P14c Punkt 1: restzeileEinzeln (nur von Anhang A gesetzt) – bei einer
+// ungeraden Zeilenzahl steht die letzte Zeile in einer eigenen, einhälftigen
+// Tabelle direkt darunter, statt als rechte Hälfte mit leeren Zellen in der
+// zweispaltigen Tabelle zu stehen. So wiederholt sich bei einem
+// Seitenumbruch nur der Tabellenkopf der Hälfte, die auch Zeilen hat.
+function tabelleZweispaltigVerbunden({
+  kopf,
+  zeilen,
+  klasse = "",
+  spaltenbreiten = null,
+  restzeileEinzeln = false,
+}) {
+  const ungerade = restzeileEinzeln && zeilen.length % 2 === 1;
+  const hauptZeilen = ungerade ? zeilen.slice(0, -1) : zeilen;
+  const restZeile = ungerade ? zeilen[zeilen.length - 1] : null;
+
+  const half = Math.ceil(hauptZeilen.length / 2);
+  const links = hauptZeilen.slice(0, half);
+  const rechts = hauptZeilen.slice(half);
   const leer = kopf.map(() => "");
 
   const kopfHtml =
@@ -346,11 +362,31 @@ function tabelleZweispaltigVerbunden({ kopf, zeilen, klasse = "", spaltenbreiten
     ? `<colgroup>${spaltenbreiten.map((b) => `<col style="width:${b}">`).join("")}<col class="spalte-luecke">${spaltenbreiten.map((b) => `<col style="width:${b}">`).join("")}</colgroup>`
     : "";
 
-  return `<table class="tabelle ${klasse}">
+  const hauptTabelle = `<table class="tabelle ${klasse}">
     ${colgroup}
     <thead><tr>${kopfHtml}</tr></thead>
     <tbody>${rows.join("\n")}</tbody>
   </table>`;
+
+  if (!restZeile) {
+    return hauptTabelle;
+  }
+
+  const restKopfHtml = kopf.map((k) => `<th>${escapeHtml(k)}</th>`).join("");
+  const restColgroup = spaltenbreiten
+    ? `<colgroup>${spaltenbreiten.map((b) => `<col style="width:${b}">`).join("")}</colgroup>`
+    : "";
+  const restBreite = spaltenbreiten
+    ? `${spaltenbreiten.reduce((summe, b) => summe + parseFloat(b), 0)}mm`
+    : "50%";
+  const restCells = restZeile.map((c) => `<td>${c}</td>`).join("");
+  const restTabelle = `<table class="tabelle ${klasse}" style="width:${restBreite}; margin-top:0;">
+    ${restColgroup}
+    <thead><tr>${restKopfHtml}</tr></thead>
+    <tbody><tr>${restCells}</tr></tbody>
+  </table>`;
+
+  return `${hauptTabelle}\n${restTabelle}`;
 }
 
 function paarFigur(paarKey, handyUeberschreiben) {
@@ -708,9 +744,13 @@ function ankreuzOption(text) {
 }
 
 function baueKapitel8() {
+  // P14c Punkt 2: Antwortkästchen stehen in eigener Zeile unter dem Text des
+  // Punkts, eingerückt auf die Texteinzug-Kante (siehe .beschluss-antwort in
+  // vergleich.css) – vorher standen sie am Zeilenende und brachen ungünstig
+  // um.
   const zusatzJeIndex = {
-    1: [ankreuzOption("ja"), ankreuzOption("nein")].join(""),
-    5: [ankreuzOption("Weg 1"), ankreuzOption("Weg 2")].join(""),
+    1: `<div class="beschluss-antwort">${ankreuzOption("ja")}${ankreuzOption("nein")}</div>`,
+    5: `<div class="beschluss-antwort">${ankreuzOption("Weg 1")}${ankreuzOption("Weg 2")}</div>`,
   };
   const items = T.K8_ENTSCHEIDUNGEN.map(
     (t, i) =>
@@ -781,21 +821,27 @@ async function baueKapitel9() {
 
 // ---------- Anhang ----------
 
-// P14b Punkt 7: Spaltenkopf "Barr." zu "Barriere-freiheit" ausschreiben, wenn
-// Platz ist, sonst auf "Barrierefr." zurückfallen. Bei der schmalen Spalte
-// (14 mm, siehe ANHANG_A_SPALTENBREITEN) bricht "Barriere-freiheit" mitten im
-// Wort auf vier Zeilen um – daher hier die kürzere Fassung.
-const ANHANG_A_BARR_KOPF = "Barrierefr.";
+// P14c Punkt 1: kurze Spaltenköpfe ohne Umbruch mitten im Wort ("Seite",
+// "Perf.", "Barr.", "BP", "SEO", "LCP", "CLS") – siehe th { white-space:
+// nowrap; } in vergleich.css.
+const ANHANG_A_KOPF = ["Seite", "Perf.", "Barr.", "BP", "SEO", "LCP", "CLS"];
 
-// Spaltenbreiten für die Anhang-A-Tabelle (7 Spalten je Seite, Summe je
-// Seitenhälfte ≈ (Satzbreite 174 mm − 6 mm Trennspalte) / 2 ≈ 84 mm): die
-// Pfadspalte "Seite" schmaler als zuvor, die übrigen Spalten gleichmäßig für
-// die (dank white-space: nowrap + geschütztem Leerzeichen) einzeiligen Werte.
-const ANHANG_A_SPALTENBREITEN = ["28mm", "8mm", "14mm", "7mm", "8mm", "10mm", "9mm"];
+// P14c Punkt 1: Spaltenbreiten für die Anhang-A-Tabelle (Inhaltsbreite
+// 174 mm, zwei Hälften mit 4 mm Trennspalte → je 85 mm): Seite 36, Perf. 8,
+// Barr. 8, BP 7, SEO 7, LCP 10, CLS 9 (Summe je Hälfte 85 mm).
+const ANHANG_A_SPALTENBREITEN = ["36mm", "8mm", "8mm", "7mm", "7mm", "10mm", "9mm"];
+
+// P14c Punkt 1: Pfade brechen nur noch an Schrägstrichen um (<wbr> nach
+// jedem "/" im HTML), nicht mehr mitten im Wort (siehe overflow-wrap: normal
+// für die Pfadzelle in vergleich.css). Lange Pfade ohne weiteren "/" dürfen
+// weiterhin an Bindestrichen umbrechen (Browser-Standardverhalten).
+function pfadMitWbr(text) {
+  return escapeHtml(text).replaceAll("/", "/<wbr>");
+}
 
 function baueAnhangA(lh) {
   const zeilen = lh.seiten.map((s) => [
-    escapeHtml(s.url),
+    pfadMitWbr(s.url),
     `<span class="zahl">${s.performance}</span>`,
     `<span class="zahl">${s.accessibility}</span>`,
     `<span class="zahl">${s.bestPractices}</span>`,
@@ -804,10 +850,11 @@ function baueAnhangA(lh) {
     `<span class="zahl">${s.cls.toFixed(2).replace(".", ",")}</span>`,
   ]);
   const table = tabelleZweispaltigVerbunden({
-    kopf: ["Seite", "Perf.", ANHANG_A_BARR_KOPF, "BP", "SEO", "LCP", "CLS"],
+    kopf: ANHANG_A_KOPF,
     zeilen,
     klasse: "tabelle--klein tabelle--anhangA",
     spaltenbreiten: ANHANG_A_SPALTENBREITEN,
+    restzeileEinzeln: true,
   });
   return `<section class="kapitel">
   <div class="kapitelnummer">Anhang A</div>
