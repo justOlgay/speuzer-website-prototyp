@@ -17,7 +17,8 @@
     "serve": "node tools/server.mjs",
     "screenshots": "node tools/screenshots.mjs",
     "vergleich": "node tools/vergleich.mjs",
-    "lighthouse": "node tools/lighthouse.mjs"
+    "lighthouse": "node tools/lighthouse.mjs",
+    "vorstand-pdf": "node tools/vorstand-pdf/bauen.mjs"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +26,7 @@
   "devDependencies": {
     "axe-core": "^4.13.0",
     "lighthouse": "^13.4.1",
-    "puppeteer-core": "^25.10.0"
+    "puppeteer-core": "^25.10.0",
+    "qrcode": "^1.5.4"
   }
 }

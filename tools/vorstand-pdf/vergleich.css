@@ -1,0 +1,570 @@
+/*
+  Speuzer Website Prototyp – P14 Vorstandsdokument „Website-Vergleich“
+  Druck-CSS für tools/vorstand-pdf/bauen.mjs. Verwendet ausschließlich die
+  Vereinsfarben aus assets/css/tokens.css (per <link> eingebunden, siehe
+  bauen.mjs) und die Schriften Barlow Condensed / Inter aus assets/css/fonts.css.
+  Kein Eintracht-Frankfurt-Design – dieses Dokument ist für den FFV
+  Sportfreunde 04, nicht für Eintracht Frankfurt.
+*/
+
+@page {
+  size: A4;
+  margin: 22mm 18mm 20mm 18mm;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-text);
+  font-size: 10.5pt;
+  line-height: 1.45;
+  color: var(--ink);
+  background: var(--weiss);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-head);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  margin: 0 0 8px 0;
+  line-height: 1.1;
+}
+
+p {
+  margin: 0 0 8px 0;
+  max-width: 160mm;
+}
+
+.einspaltig p {
+  max-width: 160mm;
+}
+
+.zweispaltig {
+  column-count: 2;
+  column-gap: 8mm;
+}
+
+.zweispaltig p {
+  max-width: 95mm;
+}
+
+a {
+  color: var(--blau-700);
+  text-decoration: none;
+}
+
+/* ---------- Kapitelstruktur ---------- */
+
+.kapitel {
+  break-before: page;
+}
+
+.kapitel:first-of-type {
+  break-before: auto;
+}
+
+.kapitelnummer {
+  font-family: var(--font-text);
+  font-size: 8pt;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--blau-700);
+  margin: 0 0 2px 0;
+}
+
+.kapitel h2 {
+  font-size: 22pt;
+  margin-bottom: 12px;
+}
+
+.kapitel h3 {
+  font-size: 14pt;
+  margin-top: 16px;
+}
+
+.linie-rot,
+.linie {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 10px 0 14px 0;
+}
+
+/* ---------- Titelseite ---------- */
+
+.titelseite {
+  height: 255mm; /* A4 (297mm) minus Seitenränder oben/unten (22+20mm) */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.titelseite__kopf {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 18mm;
+}
+
+.titelseite__wappen {
+  width: 36mm;
+  height: 36mm;
+  margin-bottom: 14mm;
+}
+
+.titelseite__titel {
+  font-family: var(--font-head);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  font-size: 40pt;
+  line-height: 1.1;
+  color: var(--ink);
+  margin: 0 0 6px 0;
+  max-width: 150mm;
+}
+
+.titelseite__untertitel {
+  font-family: var(--font-head);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  font-size: 20pt;
+  color: var(--blau-800);
+  margin: 0 0 16px 0;
+}
+
+.titelseite__zeile {
+  font-size: 11pt;
+  color: var(--ink-2);
+  margin: 0 0 4px 0;
+}
+
+.titelseite__vorgelegt {
+  font-size: 11pt;
+  color: var(--ink-2);
+}
+
+.titelseite__fuss {
+  display: flex;
+  align-items: center;
+  gap: 8mm;
+  border-top: 1px solid var(--line);
+  padding-top: 8mm;
+}
+
+.titelseite__qr {
+  width: 32mm;
+  height: 32mm;
+  flex: none;
+}
+
+.titelseite__fuss-text {
+  font-size: 9.5pt;
+  color: var(--ink-2);
+  max-width: 110mm;
+}
+
+.titelseite__fuss-text strong {
+  display: block;
+  color: var(--ink);
+  font-size: 11pt;
+  margin-bottom: 4px;
+}
+
+/* ---------- Kennzahlen-Kacheln ---------- */
+
+.kacheln {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4mm;
+  margin: 10px 0 14px 0;
+}
+
+.kachel {
+  break-inside: avoid;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--blau-50);
+  padding: 8px 10px;
+}
+
+.kachel__wert {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 22pt;
+  line-height: 1;
+  color: var(--blau-800);
+}
+
+.kachel__label {
+  font-size: 8.5pt;
+  color: var(--ink-2);
+  margin-top: 4px;
+  min-height: 22pt;
+}
+
+.kachel__vergleich {
+  margin-top: 6px;
+  font-size: 8pt;
+  line-height: 1.3;
+}
+
+.kachel__vorher {
+  color: var(--warn);
+  display: block;
+}
+
+.kachel__jetzt {
+  color: var(--ok);
+  display: block;
+}
+
+/* ---------- Kasten / Hinweis ---------- */
+
+.kasten {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin: 10px 0;
+  break-inside: avoid;
+}
+
+.kasten--empfehlung {
+  background: var(--blau-50);
+  border-color: var(--blau-100);
+}
+
+.kasten--warn {
+  background: var(--warn-bg);
+  border-color: var(--warn-bg);
+}
+
+.kasten__titel {
+  font-family: var(--font-head);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 11pt;
+  letter-spacing: 0.01em;
+  margin-bottom: 4px;
+  color: var(--ink);
+}
+
+.kasten p:last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- Listen ---------- */
+
+ul.liste, ol.liste {
+  margin: 0 0 10px 0;
+  padding-left: 18px;
+}
+
+ul.liste li, ol.liste li {
+  margin-bottom: 4px;
+  break-inside: avoid;
+}
+
+/* ---------- Bilder / Screenshots ---------- */
+
+figure {
+  margin: 10px 0;
+  break-inside: avoid;
+}
+
+.bild-rahmen {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+figcaption {
+  font-size: 8.5pt;
+  color: var(--ink-2);
+  margin-top: 4px;
+  line-height: 1.3;
+}
+
+.etikett {
+  display: inline-block;
+  font-size: 7.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 6px;
+  border-radius: 999px;
+  margin-bottom: 4px;
+}
+
+.etikett--warn {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+
+.etikett--ok {
+  background: var(--blau-50);
+  color: var(--ok);
+}
+
+.paar {
+  break-inside: avoid;
+  margin: 10px 0 14px 0;
+}
+
+.paar__titel {
+  font-family: var(--font-head);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 13pt;
+  margin-bottom: 6px;
+}
+
+.paar__raster {
+  display: grid;
+  gap: 6mm;
+}
+
+.paar__raster--handy {
+  grid-template-columns: 1fr 1fr;
+}
+
+.paar__raster--desktop {
+  grid-template-columns: 1fr;
+}
+
+.paar figcaption.paar__satz {
+  margin-top: 6px;
+  font-size: 9pt;
+  color: var(--ink);
+}
+
+.figur-einzeln {
+  margin: 10px 0;
+  break-inside: avoid;
+}
+
+.figur-einzeln--gross img {
+  width: 100%;
+}
+
+/* ---------- Tabellen ---------- */
+
+table.tabelle {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0 10px 0;
+  font-size: 9pt;
+}
+
+table.tabelle th,
+table.tabelle td {
+  border-bottom: 0.5pt solid var(--line);
+  padding: 4px 6px;
+  text-align: left;
+  vertical-align: top;
+}
+
+table.tabelle thead th {
+  background: var(--blau-800);
+  color: var(--weiss);
+  font-weight: 700;
+  font-size: 8.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+table.tabelle tbody tr:nth-child(even) {
+  background: var(--blau-50);
+}
+
+table.tabelle td.zahl,
+table.tabelle th.zahl {
+  text-align: right;
+  white-space: nowrap;
+}
+
+table.tabelle tr {
+  break-inside: avoid;
+}
+
+table.tabelle--klein {
+  font-size: 8pt;
+}
+
+table.tabelle--klein th,
+table.tabelle--klein td {
+  padding: 2px 4px;
+}
+
+/* Zweispaltiger Satz für lange Listen (Anhang A, C): keine CSS-Mehrspalten-
+   Container (brechen in Chrome/Puppeteer beim Druck unzuverlässig, siehe
+   Abschlussbericht P14 – erzeugten leere Seiten), sondern eine einzige
+   <table>, deren Zeilen je zwei Datenzeilen nebeneinander zeigen (siehe
+   tabelleZweispaltigVerbunden() in bauen.mjs). Dadurch bricht die Tabelle wie
+   jede normale Tabelle über Seiten hinweg, mit wiederholter Kopfzeile. */
+td.spalte-luecke,
+th.spalte-luecke {
+  width: 6mm;
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+/* ---------- Zwei-Spalten-Kästen (Kapitel 4, Kapitel 7 "Zwei Wege") ---------- */
+
+.zwei-kaesten {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6mm;
+  margin: 10px 0;
+}
+
+.zwei-kaesten .kasten {
+  margin: 0;
+}
+
+.zwei-spalten-listen {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6mm;
+  margin: 8px 0;
+}
+
+.zwei-spalten-listen h4 {
+  font-size: 10pt;
+  margin: 0 0 6px 0;
+}
+
+.zwei-spalten-listen ul {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 9pt;
+}
+
+.zwei-spalten-listen li {
+  margin-bottom: 4px;
+}
+
+/* ---------- Inhaltsverzeichnis ---------- */
+
+.inhaltsverzeichnis {
+  margin-top: 14px;
+}
+
+.inhaltsverzeichnis ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: kap;
+}
+
+.inhaltsverzeichnis li {
+  counter-increment: kap;
+  padding: 3px 0;
+  border-bottom: 0.5pt dotted var(--line);
+  font-size: 10pt;
+}
+
+.inhaltsverzeichnis li:not(.anhang-eintrag)::before {
+  content: "Kapitel " counter(kap) " – ";
+  color: var(--blau-700);
+  font-weight: 600;
+}
+
+.inhaltsverzeichnis .anhang-eintrag {
+  font-size: 9.5pt;
+  color: var(--ink-2);
+}
+
+/* ---------- Situationen (Kapitel 2) ---------- */
+
+.situation {
+  margin-bottom: 14px;
+}
+
+.situation h3 {
+  margin-bottom: 6px;
+  break-after: avoid;
+}
+
+.situation__spalten {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6mm;
+  margin-bottom: 8px;
+}
+
+.situation__spalte-titel {
+  font-weight: 600;
+  color: var(--blau-800);
+  font-size: 9pt;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 2px;
+}
+
+.whatsapp-vorschau {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+  max-width: 90mm;
+  font-size: 9pt;
+}
+
+.whatsapp-vorschau img {
+  width: 100%;
+  display: block;
+}
+
+.whatsapp-vorschau__text {
+  padding: 6px 8px;
+  background: var(--bg);
+}
+
+.whatsapp-vorschau__titel {
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.whatsapp-vorschau__beschreibung {
+  color: var(--ink-2);
+  font-size: 8pt;
+}
+
+.whatsapp-vorschau__domain {
+  color: var(--ink-3);
+  font-size: 7.5pt;
+  text-transform: uppercase;
+  padding: 3px 8px 6px 8px;
+  background: var(--bg);
+}
+
+.adresse-kasten {
+  font-family: monospace;
+  background: var(--warn-bg);
+  color: var(--warn);
+  border-radius: 6px;
+  padding: 6px 10px;
+  display: inline-block;
+  font-size: 9.5pt;
+  margin-bottom: 6px;
+}
+
+/* ---------- Fußzeile (nur als Referenz – tatsächliche Fußzeile kommt aus footerTemplate) ---------- */
+
+.meta {
+  color: var(--ink-2);
+  font-size: 8.5pt;
+}
