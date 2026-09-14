@@ -30,7 +30,7 @@ const PORT = 4173;
 const BASIS = `http://localhost:${PORT}`;
 const BASIS_URL = "https://justolgay.github.io/speuzer-website-prototyp/";
 
-const BREITEN = [320, 360, 390, 768, 1024, 1440, 1920];
+const BREITEN = [320, 360, 390, 768, 1024, 1280, 1440, 1920]; // P13, Schritt 3a: 1280 ergänzt (App-Ansicht /app/, Befund 2)
 // P9, Plan-Abschnitt B3: App-Modus (?ansicht=app) zusätzlich bei 390px prüfen
 // – nur für diese drei Seiten (Startseite, eine Team- und die
 // Spielplan-Seite).
@@ -99,6 +99,36 @@ function sammleBilddateien(dir, treffer = []) {
     }
   }
   return treffer;
+}
+
+// --- P13, Schritt 3b: 404-Seite (Befund 1) – docs/404.html darf keine
+// relative Referenz "./…" mehr enthalten; site.css, nav.js und mindestens
+// ein Wappen-Bild müssen absolut (BASIS_URL) eingebunden sein. Liest die
+// Datei direkt, ohne den lokalen Server/Puppeteer (404.html steht nicht in
+// der sitemap.xml und wird sonst nicht als eigene Seite geprüft). ---
+function pruefe404Seite() {
+  const fehler = [];
+  const pfad404 = path.join(DOCS, "404.html");
+  if (!existsSync(pfad404)) {
+    fehler.push("docs/404.html nicht gefunden");
+    return fehler;
+  }
+  const html = readFileSync(pfad404, "utf8");
+  if (html.includes('="./')) {
+    fehler.push(`404.html enthält noch relative Referenzen ('="./' gefunden)`);
+  }
+  const pruefeAbsolut = (bezeichnung, regex) => {
+    const treffer = html.match(regex);
+    if (!treffer) {
+      fehler.push(`404.html: ${bezeichnung} nicht gefunden`);
+    } else if (!treffer[1].startsWith(BASIS_URL)) {
+      fehler.push(`404.html: ${bezeichnung} ist nicht absolut ('${treffer[1]}')`);
+    }
+  };
+  pruefeAbsolut("site.css", /href="([^"]*site\.css)"/);
+  pruefeAbsolut("nav.js", /src="([^"]*nav\.js)"/);
+  pruefeAbsolut("Wappen-Bild", /src="([^"]*wappen[^"]*\.(?:svg|png))"/);
+  return fehler;
 }
 
 async function pruefeSeite(browser, seitenPfad, axeSkript, bericht) {
@@ -412,6 +442,11 @@ async function main() {
       await browser.close();
     }
 
+    // --- 404-Seite: absolute Referenzen (P13, Befund 1) ---
+    const fehler404 = pruefe404Seite();
+    bericht.seite404 = { fehler: fehler404 };
+    if (fehler404.length) allesOk = false;
+
     // --- Bildgrößen ---
     const bilderDir = path.join(DOCS, "assets");
     if (existsSync(bilderDir)) {
@@ -440,6 +475,12 @@ async function main() {
     for (const v of bericht.bilder.verstoesse) console.log(`  - ${v}`);
   } else {
     console.log("Bildgrößen: alle ≤ 200 KB.");
+  }
+  if (bericht.seite404.fehler.length) {
+    console.log("404-Seite (absolute Referenzen) – Verstöße:");
+    for (const f of bericht.seite404.fehler) console.log(`  - ${f}`);
+  } else {
+    console.log("404-Seite: alle Referenzen absolut.");
   }
   console.log(`\nBericht: tools/cache/pruefbericht.json`);
 
