@@ -14,9 +14,9 @@
 <meta property="og:image" content="https://justolgay.github.io/speuzer-website-prototyp/assets/og/standard.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#151A7A">
-<link rel="icon" href="./assets/logo/favicon.svg" type="image/svg+xml">
-<link rel="icon" href="./assets/logo/favicon-32.png" sizes="32x32" type="image/png">
-<link rel="apple-touch-icon" href="./assets/logo/apple-touch-icon.png">
+<link rel="icon" href="https://justolgay.github.io/speuzer-website-prototyp/assets/logo/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="https://justolgay.github.io/speuzer-website-prototyp/assets/logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="https://justolgay.github.io/speuzer-website-prototyp/assets/logo/apple-touch-icon.png">
 <!-- App-Modus (P9, Plan-Abschnitt B1): Klasse so früh wie möglich setzen,
      vor den Stylesheets, damit die App-Kopfzeile/Tab-Leiste beim Laden nicht
      erst sichtbar umspringt (assets/js/nav.js setzt dieselbe Klasse
@@ -24,22 +24,22 @@
 <script>
 if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentElement.classList.add("ansicht-app");
 </script>
-<link rel="preload" href="./assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="./assets/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="./assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
 <!-- P11, Plan-Abschnitt B2: ein gebündeltes, minifiziertes Stylesheet statt
      fünf einzelner Requests (weniger render-blockierende Anfragen). Die
      Einzeldateien liegen weiterhin unter assets/css/ (siehe tools/build.mjs,
      baueCssBuendel()) – der Styleguide verweist auf sie als Quelltext. -->
-<link rel="stylesheet" href="./assets/css/site.css">
-<script src="./assets/js/nav.js" defer></script>
+<link rel="stylesheet" href="https://justolgay.github.io/speuzer-website-prototyp/assets/css/site.css">
+<script src="https://justolgay.github.io/speuzer-website-prototyp/assets/js/nav.js" defer></script>
 </head>
 <body class="">
 <a class="sprungmarke" href="#inhalt">Zum Inhalt</a>
 <header class="kopf">
   <div class="container kopf__zeile">
-    <a class="kopf__marke" href="./">
-      <img class="kopf__wappen" src="./assets/logo/wappen-blau.svg" width="44" height="44" alt="" aria-hidden="true">
+    <a class="kopf__marke" href="https://justolgay.github.io/speuzer-website-prototyp/">
+      <img class="kopf__wappen" src="https://justolgay.github.io/speuzer-website-prototyp/assets/logo/wappen-blau.svg" width="44" height="44" alt="" aria-hidden="true">
       <span class="kopf__name">
         <span class="kopf__name-lang">FFV Sportfreunde 04</span>
         <span class="kopf__name-kurz">Sportfreunde 04</span>
@@ -54,36 +54,36 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
         <span aria-hidden="true">&times;</span>
       </button>
       <ul>
-      <li><a href="./">Start</a></li>
-      <li><a href="./mannschaften/">Mannschaften</a></li>
-      <li><a href="./spielplan/">Spielplan &amp; Tabellen</a></li>
-      <li><a href="./news/">News</a></li>
-      <li><a href="./verein/">Verein</a></li>
-      <li><a href="./mitglied-werden/" class="knopf">Mitglied werden</a></li>
+      <li><a href="https://justolgay.github.io/speuzer-website-prototyp/">Start</a></li>
+      <li><a href="https://justolgay.github.io/speuzer-website-prototyp/mannschaften/">Mannschaften</a></li>
+      <li><a href="https://justolgay.github.io/speuzer-website-prototyp/spielplan/">Spielplan &amp; Tabellen</a></li>
+      <li><a href="https://justolgay.github.io/speuzer-website-prototyp/news/">News</a></li>
+      <li><a href="https://justolgay.github.io/speuzer-website-prototyp/verein/">Verein</a></li>
+      <li><a href="https://justolgay.github.io/speuzer-website-prototyp/mitglied-werden/" class="knopf">Mitglied werden</a></li>
       </ul>
     </nav>
   </div>
 </header>
 <nav class="tabbar" aria-label="App-Navigation">
   <ul>
-      <li><a class="tabbar__tab" href="./"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/></svg><span class="tabbar__label">Start</span></a></li>
-      <li><a class="tabbar__tab" href="./mannschaften/"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="12" r="5"/><circle cx="15" cy="12" r="5"/></svg><span class="tabbar__label">Teams</span></a></li>
-      <li><a class="tabbar__tab" href="./spielplan/"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7l4.8 3.5-1.8 5.6H9l-1.8-5.6z"/></svg><span class="tabbar__label">Spiele</span></a></li>
-      <li><a class="tabbar__tab" href="./news/"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="1"/><path d="M7 9h10M7 12.5h10M7 16h6"/></svg><span class="tabbar__label">News</span></a></li>
-      <li><a class="tabbar__tab" href="./verein/"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 20 12 12 21 4 12z"/></svg><span class="tabbar__label">Verein</span></a></li>
+      <li><a class="tabbar__tab" href="https://justolgay.github.io/speuzer-website-prototyp/"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/></svg><span class="tabbar__label">Start</span></a></li>
+      <li><a class="tabbar__tab" href="https://justolgay.github.io/speuzer-website-prototyp/mannschaften/"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="12" r="5"/><circle cx="15" cy="12" r="5"/></svg><span class="tabbar__label">Teams</span></a></li>
+      <li><a class="tabbar__tab" href="https://justolgay.github.io/speuzer-website-prototyp/spielplan/"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7l4.8 3.5-1.8 5.6H9l-1.8-5.6z"/></svg><span class="tabbar__label">Spiele</span></a></li>
+      <li><a class="tabbar__tab" href="https://justolgay.github.io/speuzer-website-prototyp/news/"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="1"/><path d="M7 9h10M7 12.5h10M7 16h6"/></svg><span class="tabbar__label">News</span></a></li>
+      <li><a class="tabbar__tab" href="https://justolgay.github.io/speuzer-website-prototyp/verein/"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 20 12 12 21 4 12z"/></svg><span class="tabbar__label">Verein</span></a></li>
   </ul>
 </nav>
 <main id="inhalt">
 <section class="container">
 <h1>Seite nicht gefunden</h1>
 <p>Diese Seite gibt es im Prototyp nicht.</p>
-<p><a class="knopf" href="./">Zur Startseite</a></p>
+<p><a class="knopf" href="https://justolgay.github.io/speuzer-website-prototyp/">Zur Startseite</a></p>
 </section>
 </main>
 <footer class="fuss">
   <div class="container fuss__raster">
     <div class="fuss__gruppe fuss__marke">
-      <img class="fuss__wappen" src="./assets/logo/wappen-weiss.svg" width="56" height="56" alt="" aria-hidden="true">
+      <img class="fuss__wappen" src="https://justolgay.github.io/speuzer-website-prototyp/assets/logo/wappen-weiss.svg" width="56" height="56" alt="" aria-hidden="true">
       <p class="fuss__registername">Frankfurter Fußballverein Sportfreunde 1904 e.V.</p>
       <address class="fuss__adresse">
         <p>Mainzer Landstraße 480</p>
@@ -101,32 +101,32 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
     <div class="fuss__gruppe">
         <h2>Verein</h2>
         <ul>
-        <li><a href="./verein/">Wer wir sind</a></li>
-        <li><a href="./verein/vorstand/">Vorstand</a></li>
-        <li><a href="./verein/sponsoren/">Sponsoren &amp; Partner</a></li>
-        <li><a href="./verein/mach-mit/">Mach mit</a></li>
-        <li><a href="./verein/downloads/">Downloads</a></li>
+        <li><a href="https://justolgay.github.io/speuzer-website-prototyp/verein/">Wer wir sind</a></li>
+        <li><a href="https://justolgay.github.io/speuzer-website-prototyp/verein/vorstand/">Vorstand</a></li>
+        <li><a href="https://justolgay.github.io/speuzer-website-prototyp/verein/sponsoren/">Sponsoren &amp; Partner</a></li>
+        <li><a href="https://justolgay.github.io/speuzer-website-prototyp/verein/mach-mit/">Mach mit</a></li>
+        <li><a href="https://justolgay.github.io/speuzer-website-prototyp/verein/downloads/">Downloads</a></li>
         </ul>
       </div>
       <div class="fuss__gruppe">
         <h2>Sport</h2>
         <ul>
-        <li><a href="./mannschaften/">Mannschaften &amp; Training</a></li>
-        <li><a href="./spielplan/">Spielplan</a></li>
-        <li><a href="./tabellen/">Tabellen</a></li>
-        <li><a href="./news/">News</a></li>
-        <li><a href="./mitglied-werden/">Mitglied werden</a></li>
+        <li><a href="https://justolgay.github.io/speuzer-website-prototyp/mannschaften/">Mannschaften &amp; Training</a></li>
+        <li><a href="https://justolgay.github.io/speuzer-website-prototyp/spielplan/">Spielplan</a></li>
+        <li><a href="https://justolgay.github.io/speuzer-website-prototyp/tabellen/">Tabellen</a></li>
+        <li><a href="https://justolgay.github.io/speuzer-website-prototyp/news/">News</a></li>
+        <li><a href="https://justolgay.github.io/speuzer-website-prototyp/mitglied-werden/">Mitglied werden</a></li>
         </ul>
       </div>
       <div class="fuss__gruppe">
         <h2>Service</h2>
         <ul>
-        <li><a href="./kontakt/">Kontakt &amp; Anfahrt</a></li>
-        <li><a href="./shop/">Shop</a></li>
-        <li><a href="./app/">App-Ansicht</a></li>
-        <li><a href="./vorher-nachher/">Vorher / Nachher</a></li>
-        <li><a href="./impressum/">Impressum</a></li>
-        <li><a href="./datenschutz/">Datenschutz</a></li>
+        <li><a href="https://justolgay.github.io/speuzer-website-prototyp/kontakt/">Kontakt &amp; Anfahrt</a></li>
+        <li><a href="https://justolgay.github.io/speuzer-website-prototyp/shop/">Shop</a></li>
+        <li><a href="https://justolgay.github.io/speuzer-website-prototyp/app/">App-Ansicht</a></li>
+        <li><a href="https://justolgay.github.io/speuzer-website-prototyp/vorher-nachher/">Vorher / Nachher</a></li>
+        <li><a href="https://justolgay.github.io/speuzer-website-prototyp/impressum/">Impressum</a></li>
+        <li><a href="https://justolgay.github.io/speuzer-website-prototyp/datenschutz/">Datenschutz</a></li>
         </ul>
       </div>
     </div>
@@ -137,8 +137,8 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
       <li><a href="tel:+4969736868">Geschäftsstelle +49 69 736868</a></li>
     </ul>
     <ul class="fuss__app-links" role="list">
-      <li><a href="./impressum/">Impressum</a></li>
-      <li><a href="./datenschutz/">Datenschutz</a></li>
+      <li><a href="https://justolgay.github.io/speuzer-website-prototyp/impressum/">Impressum</a></li>
+      <li><a href="https://justolgay.github.io/speuzer-website-prototyp/datenschutz/">Datenschutz</a></li>
     </ul>
   </div>
   <div class="container fuss__schluss">

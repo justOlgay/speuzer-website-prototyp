@@ -251,7 +251,7 @@ async function main() {
 <p>Diese Seite gibt es im Prototyp nicht.</p>
 <p><a class="knopf" href="${pfad}">Zur Startseite</a></p>
 </section>`;
-    const html = fuelleVorlage(basisVorlage, {
+    let html = fuelleVorlage(basisVorlage, {
       lang: "de",
       title: escapeHtml(`${title} – ${VEREINSNAME}`),
       description: escapeHtml(description),
@@ -263,6 +263,31 @@ async function main() {
       footer: footer({ pfad, daten, seitenUrls }),
       bodyclass: "",
     });
+
+    // Befund 1 (P13, Sichtprüfung): GitHub Pages liefert docs/404.html für
+    // JEDEN nicht existierenden Pfad aus, auch verschachtelte (z. B.
+    // /gibt-es-nicht/x/). Die relativen "./"-Referenzen der Seite (aus
+    // pfadZurWurzel(), hier "./") lösen dann falsch relativ zum
+    // nicht-existierenden Verzeichnis auf. Deshalb hier – nur für 404.html,
+    // pfadZurWurzel/die allgemeine Pfadlogik bleibt unangetastet – jede
+    // href="./…", src="./…" sowie jeden srcset-Eintrag auf eine absolute
+    // BASIS_URL-Adresse umschreiben. <link rel="canonical"> ist bereits
+    // absolut, der Skip-Link href="#inhalt" beginnt nicht mit "./" und bleibt
+    // unverändert.
+    html = html.replace(/(href|src)="\.\//g, `$1="${BASIS_URL}`);
+    html = html.replace(/srcset="([^"]*)"/g, (_treffer, wert) => {
+      const neu = wert
+        .split(",")
+        .map((teil) => {
+          const t = teil.trim();
+          if (!t.startsWith("./")) return t;
+          const [url, ...deskriptor] = t.split(/\s+/);
+          return BASIS_URL + url.slice(2) + (deskriptor.length ? " " + deskriptor.join(" ") : "");
+        })
+        .join(", ");
+      return `srcset="${neu}"`;
+    });
+
     writeFileSync(path.join(DOCS, "404.html"), html, "utf8");
   }
 

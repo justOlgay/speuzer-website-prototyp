@@ -2077,6 +2077,22 @@ body.datenschutz h2 {
   padding-inline: var(--sp-4);
 }
 
+/* P13, Befund 2 (Sichtprüfung): drei Rahmen à 414px + zwei Lücken brauchen
+   ca. 1338px. Zwischen 900px und 1349px (unter 1350px passen drei Rahmen
+   nicht mehr nebeneinander, ab 900px ist aber schon genug Breite für zwei
+   Rahmen pro Zeile) wird der dritte Rahmen sonst rechts angeschnitten – das
+   wirkt wie ein Fehler statt wie der gewollte Streifen. Am Handy (< 900px)
+   bleibt der horizontal scrollende Streifen mit Anriss des zweiten Rahmens
+   bestehen; ab 1350px passen alle drei Rahmen ohnehin in eine Zeile. */
+@media (min-width: 900px) and (max-width: 1349px) {
+  .telefone {
+    flex-wrap: wrap;
+    justify-content: center;
+    overflow-x: visible;
+    scroll-snap-type: none;
+  }
+}
+
 .telefon-eintrag {
   display: flex;
   flex-direction: column;
