@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://justolgay.github.io/speuzer-website-prototyp/datenschutz/</loc></url>
+  <url><loc>https://justolgay.github.io/speuzer-website-prototyp/impressum/</loc></url>
   <url><loc>https://justolgay.github.io/speuzer-website-prototyp/</loc></url>
+  <url><loc>https://justolgay.github.io/speuzer-website-prototyp/kontakt/</loc></url>
   <url><loc>https://justolgay.github.io/speuzer-website-prototyp/mannschaften/</loc></url>
   <url><loc>https://justolgay.github.io/speuzer-website-prototyp/mannschaften/herren/</loc></url>
   <url><loc>https://justolgay.github.io/speuzer-website-prototyp/mannschaften/a-jugend/</loc></url>
@@ -21,6 +24,7 @@
   <url><loc>https://justolgay.github.io/speuzer-website-prototyp/news/2026-08-11-vereins-app/</loc></url>
   <url><loc>https://justolgay.github.io/speuzer-website-prototyp/news/2026-07-21-grossbaustelle-parkplatz/</loc></url>
   <url><loc>https://justolgay.github.io/speuzer-website-prototyp/news/</loc></url>
+  <url><loc>https://justolgay.github.io/speuzer-website-prototyp/shop/</loc></url>
   <url><loc>https://justolgay.github.io/speuzer-website-prototyp/spielplan/</loc></url>
   <url><loc>https://justolgay.github.io/speuzer-website-prototyp/spielplan/herren/</loc></url>
   <url><loc>https://justolgay.github.io/speuzer-website-prototyp/spielplan/a-jugend/</loc></url>

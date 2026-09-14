@@ -153,6 +153,28 @@ async function pruefeSeite(browser, seitenPfad, axeSkript, bericht) {
       const istFliesstextLink =
         el.tagName === "A" && (el.closest("p") || el.closest("li"));
       if (istFliesstextLink) continue;
+
+      // P8-Korrektur A2: Checkbox-Kästen sind bewusst nur noch 24×24px groß
+      // (siehe .formular__checkzeile input[type="checkbox"] in
+      // komponenten.css) – das tatsächliche Tippziel ist die umschließende
+      // Beschriftung: entweder das <label>, das Eingabe und Text umschließt
+      // (checkboxFeld() bzw. die Abteilungs-Checkboxen in
+      // mitglied-werden.mjs), oder – wenn die Beschriftung einen
+      // Fließtext-Link enthält (checkboxFeldMitLink()) – das per
+      // aria-labelledby verknüpfte <p> (siehe Kommentar dort, warum dort
+      // bewusst kein <label> verwendet wird). Ist diese Beschriftung
+      // mindestens 44px hoch, gilt das Tippziel als erreicht, auch wenn das
+      // <input> selbst kleiner ist.
+      if (el.tagName === "INPUT" && el.type === "checkbox") {
+        let beschriftung = el.labels && el.labels.length ? el.labels[0] : null;
+        if (!beschriftung) {
+          const labelledby = el.getAttribute("aria-labelledby");
+          const ersteId = labelledby ? labelledby.split(/\s+/)[0] : null;
+          beschriftung = ersteId ? document.getElementById(ersteId) : null;
+        }
+        if (beschriftung && beschriftung.getBoundingClientRect().height >= 44) continue;
+      }
+
       if (rect.height < 44 || rect.width < 44) {
         fehler.push(
           `${el.tagName.toLowerCase()} "${(el.textContent || el.getAttribute("aria-label") || "").trim().slice(0, 40)}" ist ${Math.round(rect.width)}×${Math.round(rect.height)}px`

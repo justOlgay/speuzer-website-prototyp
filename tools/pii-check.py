@@ -28,6 +28,9 @@ WHITELIST_TELEFON = {
     "069 732193",
     "+4969736868",
     "+4969732193",
+    # P8: dieselbe Platzwart-Nummer, wörtlich so in der App-Datenschutzerklärung
+    # (data/datenschutz.json) geschrieben – "(0)" nach der Landesvorwahl.
+    "+49 (0) 69 732193",
 }
 
 MUSTER_TELEFON_1 = re.compile(r"\+49[\d /()\-]{6,}")
@@ -37,7 +40,13 @@ MUSTER_GEBURTSDATUM = re.compile(r"\b\d{2}\.\d{2}\.(19\d{2}|20[01]\d|202[0-4])\b
 MUSTER_EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
 
 ERLAUBTE_EMAIL_DOMAINS = ("sportfreunde04.de",)
-ERLAUBTE_EMAIL_ADRESSEN = {"info@vmapit.de"}
+# "ffvsportfreunde04@t-online.de" (P8): die eigene, alte Kontaktadresse des
+# Vereins aus der App-Datenschutzerklärung (data/datenschutz.json, Abschnitt
+# "1. Begrifflichkeiten" – "Für die Verarbeitung Verantwortliche Stelle").
+# Wörtlich übernommen wie im Original, siehe Plan-Abschnitt B2: keine private
+# Adresse, sondern die Vereinsadresse (nur auf einer anderen Domain als
+# @sportfreunde04.de).
+ERLAUBTE_EMAIL_ADRESSEN = {"info@vmapit.de", "ffvsportfreunde04@t-online.de"}
 
 VERBOTENE_DATEINAMEN_TEILE = ["WhatsApp", "IMG-2026", "IMG-2025", "IMG-2024"]
 # "Mannheim" stand hier ursprünglich als generischer Demodaten-Marker; P5

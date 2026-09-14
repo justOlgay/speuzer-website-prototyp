@@ -519,6 +519,9 @@ function seiteBausteine(daten) {
   // P7: Formular (.formular) – /mitglied-werden/: zwei Felder, eine
   // Checkbox, ein Fehlerzustand (PLZ-Feld mit sichtbarer Fehlermeldung, wie
   // sie assets/js/formular.js nach einem ungültigen Absenden einblendet).
+  // Checkbox ab P8-Korrektur A2: 24×24px-Kasten, .formular__checkzeile ist
+  // das <label> selbst (Eingabe und Text darin) und damit das ≥44px hohe
+  // Tippziel (siehe komponenten.css und mitglied-werden.mjs).
   const formularBeispiel = `<form class="formular inhalt" novalidate style="max-width:420px;">
     <div class="formular__feld">
       <label for="sg-vorname">Vorname <span class="formular__pflicht">*</span></label>
@@ -531,12 +534,27 @@ function seiteBausteine(daten) {
       <p class="formular__fehler" id="sg-plz-fehler">Bitte eine gültige Postleitzahl eingeben (5 Ziffern)</p>
     </div>
     <div class="formular__checkzeile-block">
-      <div class="formular__checkzeile">
+      <label class="formular__checkzeile">
         <input type="checkbox" id="sg-check" name="sg-check" required>
-        <label for="sg-check">Ich erteile das SEPA-Lastschriftmandat. <span class="formular__pflicht">*</span></label>
-      </div>
+        <span>Ich erteile das SEPA-Lastschriftmandat. <span class="formular__pflicht">*</span></span>
+      </label>
     </div>
   </form>`;
+
+  // P8: Angaben-Liste (.angaben) – /impressum/: Definitionsliste mit
+  // Beschriftung (dt) und Wert (dd), hier mit echten Daten aus verein.json.
+  const angabenBeispiel = `<dl class="angaben" style="max-width:420px;">
+    <dt>Anbieter</dt>
+    <dd>${escapeHtml(verein.name_register ?? "")}</dd>
+    <dt>Vertretungsberechtigter Vorstand</dt>
+    <dd>
+      <ul>
+        ${(verein.vertretung ?? []).map((v) => `<li>${escapeHtml(v)}</li>`).join("\n        ")}
+      </ul>
+    </dd>
+    <dt>Registergericht / Registernummer</dt>
+    <dd>${escapeHtml(verein.register ?? "")}</dd>
+  </dl>`;
 
   return `<h2>Bausteine</h2>
 <p class="inhalt">Alle Bausteine mit echten Daten aus data/, wie sie später auf den Inhaltsseiten verwendet werden. Ziele, deren Seite im aktuellen Paket noch nicht existiert, sind als Karten mit &lt;span&gt; statt &lt;a&gt; ausgegeben.</p>
@@ -635,8 +653,12 @@ ${faktenBeispiel}
 ${ergebnisBeispiel}
 
 <h3>Formular (.formular)</h3>
-<p class="inhalt">/mitglied-werden/ (P7): Aufnahmeantrag-Entwurf. Eingabefelder 48px hoch, Checkboxen auf 44×44px vergrößert (Tippziel), Fehlertext in --warn unter dem Feld (hier am PLZ-Feld sichtbar, wie assets/js/formular.js ihn nach einem ungültigen Absenden einblendet).</p>
-${formularBeispiel}`;
+<p class="inhalt">/mitglied-werden/ (P7; Checkbox ab P8-Korrektur A2): Eingabefelder 48px hoch, Fehlertext in --warn unter dem Feld (hier am PLZ-Feld sichtbar, wie assets/js/formular.js ihn nach einem ungültigen Absenden einblendet). Checkbox nur noch 24×24px, das Tippziel ist die umschließende Beschriftungszeile (.formular__checkzeile als <label>, mindestens 44px hoch).</p>
+${formularBeispiel}
+
+<h3>Angaben-Liste (.angaben)</h3>
+<p class="inhalt">/impressum/ (P8): Definitionsliste mit Beschriftung (dt, --fs-sm/600/--ink-3) und Wert (dd, --fs-md).</p>
+${angabenBeispiel}`;
 }
 
 export function seite(daten) {

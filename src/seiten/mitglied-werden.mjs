@@ -17,6 +17,16 @@ function escapeHtml(text) {
     .replaceAll('"', "&quot;");
 }
 
+// P8-Korrektur A1: Schlusspunkt in den drei Meta-Sätzen unter den
+// Beitragshinweisen im Template setzen statt in den Daten – und nur, wenn
+// der Wert nicht schon selbst mit einem Satzzeichen endet (der Datenwert
+// "doppelmitgliedschaft" endet im Original bereits mit einem Punkt).
+function mitSchlusspunkt(text) {
+  const t = String(text ?? "").trim();
+  if (t === "") return t;
+  return /[.!?]$/.test(t) ? t : `${t}.`;
+}
+
 // Download-Eintrag per Titel-Teilstring finden (data/downloads.json), wie in
 // src/seiten/verein/index.mjs.
 function downloadEintrag(daten, titelTeil) {
@@ -106,7 +116,7 @@ function beitraegeAbschnitt(daten) {
     <h2>Beiträge</h2>
     ${karten}
     ${hinweise}
-    <p class="meta">${escapeHtml(beitraege.kuendigung ?? "")} · ${escapeHtml(beitraege.doppelmitgliedschaft ?? "")} · Quelle: ${escapeHtml(beitraege.quelle ?? "")}</p>
+    <p class="meta">Kündigung: ${escapeHtml(mitSchlusspunkt(beitraege.kuendigung))} · Doppelmitgliedschaft: ${escapeHtml(mitSchlusspunkt(beitraege.doppelmitgliedschaft))} · Quelle: ${escapeHtml(mitSchlusspunkt(beitraege.quelle))}</p>
     <p class="knopfzeile">
       ${downloadKnopf(beitragsuebersicht, "Beitragsübersicht (PDF)")}
     </p>
@@ -218,15 +228,20 @@ function textFeld({ id, label, type = "text", required = false, pattern, inputmo
 
 // Einzelne Pflicht-/Freiwilligkeits-Checkbox mit eigener Fehlerzeile.
 // labelHtml wird nicht escaped (kann z. B. das Sternchen-Span enthalten).
+// P8-Korrektur A2: .formular__checkzeile ist jetzt selbst das <label> (statt
+// eines <div> mit separatem <label for>) – Eingabe und Text liegen darin,
+// das <label> ist damit die ganze, mindestens 44px hohe Zeile und zugleich
+// das Tippziel, obwohl der sichtbare Kasten selbst nur noch 24×24px groß ist
+// (siehe komponenten.css).
 function checkboxFeld({ id, labelHtml, required = false, meta }) {
   const pflichtHtml = required ? ` <span class="formular__pflicht">*</span>` : "";
   const metaHtml = meta ? `<p class="meta">${escapeHtml(meta)}</p>` : "";
 
   return `<div class="formular__checkzeile-block">
-      <div class="formular__checkzeile">
+      <label class="formular__checkzeile">
         <input type="checkbox" id="${id}" name="${id}"${required ? " required" : ""} aria-describedby="${id}-fehler">
-        <label for="${id}">${labelHtml}${pflichtHtml}</label>
-      </div>
+        <span>${labelHtml}${pflichtHtml}</span>
+      </label>
       ${metaHtml}
       <p class="formular__fehler" id="${id}-fehler" hidden></p>
     </div>`;
@@ -275,14 +290,14 @@ function formularAbschnitt(daten) {
       <fieldset>
         <legend>Mitgliedschaft</legend>
         <div class="formular__checkgruppe">
-          <div class="formular__checkzeile">
+          <label class="formular__checkzeile">
             <input type="checkbox" id="mw-abt-fussball" name="abteilung-fussball" aria-describedby="mw-abteilung-fehler">
-            <label for="mw-abt-fussball">Fußballabteilung</label>
-          </div>
-          <div class="formular__checkzeile">
+            <span>Fußballabteilung</span>
+          </label>
+          <label class="formular__checkzeile">
             <input type="checkbox" id="mw-abt-karneval" name="abteilung-karneval" aria-describedby="mw-abteilung-fehler">
-            <label for="mw-abt-karneval">Karnevalabteilung</label>
-          </div>
+            <span>Karnevalabteilung</span>
+          </label>
           <p class="formular__fehler" id="mw-abteilung-fehler" hidden>Bitte mindestens eine Abteilung wählen.</p>
         </div>
         <div class="formular__feld">
@@ -331,7 +346,9 @@ function formularAbschnitt(daten) {
         <legend>Einwilligungen</legend>
         ${checkboxFeldMitLink({
           id: "mw-einwilligung-satzung",
-          textHtml: `Ich habe die <a href="${satzungHref}" rel="noopener" target="_blank">Satzung (PDF)</a> und die Datenschutzerklärung gelesen und erkenne die Satzung, Ordnungen und Beiträge an.`,
+          // P8, Abschnitt F: "Datenschutzerklärung" ist jetzt ein echter Link
+          // auf /datenschutz/ statt reinem Text.
+          textHtml: `Ich habe die <a href="${satzungHref}" rel="noopener" target="_blank">Satzung (PDF)</a> und die <a href="${PFAD}datenschutz/">Datenschutzerklärung</a> gelesen und erkenne die Satzung, Ordnungen und Beiträge an.`,
           required: true,
         })}
         ${checkboxFeld({

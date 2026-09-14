@@ -166,7 +166,8 @@ function mehrAbschnitt() {
     linkKarte("Mach mit", "Trainer, Betreuer, Vorstand, Ehrenamt – wir suchen Verstärkung.", `${PFAD}verein/mach-mit/`),
     linkKarte("Karnevalabteilung", "Die Schnauzer: fünf Gruppen, eine Bühne.", `${PFAD}verein/karneval/`),
     linkKarte("Downloads", "Satzung, Beiträge, Anmeldung, Schutzkonzept.", `${PFAD}verein/downloads/`),
-    baldKarte("Kontakt & Anfahrt", "So erreichen Sie uns."),
+    // P8: /kontakt/ existiert jetzt – echter Link statt baldKarte().
+    linkKarte("Kontakt & Anfahrt", "So erreichen Sie uns.", `${PFAD}kontakt/`),
   ].join("\n    ");
 
   return `<section class="abschnitt">

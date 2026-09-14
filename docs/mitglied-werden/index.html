@@ -155,7 +155,7 @@
         <p style="margin:0;">Fälligkeit: jährlich zum 1. Januar im Voraus, Abbuchung im ersten Quartal; bei Eintritt im Jahr anteilig mit der Aufnahme</p>
       </div>
     </div>
-    <p class="meta">nur zum Ende eines Kalenderjahres, per Einschreiben an die Postanschrift · Bei einer Doppelmitgliedschaft in der Fußball- und der Karnevalabteilung kann ein gesonderter Beitrag erfragt werden. · Quelle: Beitragsübersicht und Aufnahmeantrag, Stand 9/2026</p>
+    <p class="meta">Kündigung: nur zum Ende eines Kalenderjahres, per Einschreiben an die Postanschrift. · Doppelmitgliedschaft: Bei einer Doppelmitgliedschaft in der Fußball- und der Karnevalabteilung kann ein gesonderter Beitrag erfragt werden. · Quelle: Beitragsübersicht und Aufnahmeantrag, Stand 9/2026.</p>
     <p class="knopfzeile">
       <a class="knopf knopf--sekundaer" href="https://cdn.appack.de/sportfreunde04/pdf/Beitrags%C3%BCbersicht%20F.F.V.%20Sportfreunde%2004%20e.V._.pdf" rel="noopener" target="_blank">Beitragsübersicht (PDF)</a>
     </p>
@@ -233,14 +233,14 @@
       <fieldset>
         <legend>Mitgliedschaft</legend>
         <div class="formular__checkgruppe">
-          <div class="formular__checkzeile">
+          <label class="formular__checkzeile">
             <input type="checkbox" id="mw-abt-fussball" name="abteilung-fussball" aria-describedby="mw-abteilung-fehler">
-            <label for="mw-abt-fussball">Fußballabteilung</label>
-          </div>
-          <div class="formular__checkzeile">
+            <span>Fußballabteilung</span>
+          </label>
+          <label class="formular__checkzeile">
             <input type="checkbox" id="mw-abt-karneval" name="abteilung-karneval" aria-describedby="mw-abteilung-fehler">
-            <label for="mw-abt-karneval">Karnevalabteilung</label>
-          </div>
+            <span>Karnevalabteilung</span>
+          </label>
           <p class="formular__fehler" id="mw-abteilung-fehler" hidden>Bitte mindestens eine Abteilung wählen.</p>
         </div>
         <div class="formular__feld">
@@ -322,10 +322,10 @@
         <p class="formular__fehler" id="mw-vertreter-email-fehler" hidden></p>
       </div>
         <div class="formular__checkzeile-block">
-      <div class="formular__checkzeile">
+      <label class="formular__checkzeile">
         <input type="checkbox" id="mw-volljaehrig" name="mw-volljaehrig" required aria-describedby="mw-volljaehrig-fehler">
-        <label for="mw-volljaehrig">Ich bin volljährig und zur Anmeldung berechtigt. <span class="formular__pflicht">*</span></label>
-      </div>
+        <span>Ich bin volljährig und zur Anmeldung berechtigt. <span class="formular__pflicht">*</span></span>
+      </label>
       
       <p class="formular__fehler" id="mw-volljaehrig-fehler" hidden></p>
     </div>
@@ -358,10 +358,10 @@
       </div>
         <p class="meta">Ich ermächtige den Frankfurter Fußballverein Sportfreunde 1904 e.V. (Gläubiger-ID DE51FFV00000338939, Mandatsreferenz „Beitrag Sportfreunde 04“), Zahlungen von meinem Konto mittels Lastschrift einzuziehen. Zugleich weise ich mein Kreditinstitut an, die vom Verein auf mein Konto gezogenen Lastschriften einzulösen. Ich kann innerhalb von acht Wochen, beginnend mit dem Belastungsdatum, die Erstattung des belasteten Betrages verlangen. Es gelten dabei die mit meinem Kreditinstitut vereinbarten Bedingungen.</p>
         <div class="formular__checkzeile-block">
-      <div class="formular__checkzeile">
+      <label class="formular__checkzeile">
         <input type="checkbox" id="mw-sepa-mandat" name="mw-sepa-mandat" required aria-describedby="mw-sepa-mandat-fehler">
-        <label for="mw-sepa-mandat">Ich erteile das SEPA-Lastschriftmandat. <span class="formular__pflicht">*</span></label>
-      </div>
+        <span>Ich erteile das SEPA-Lastschriftmandat. <span class="formular__pflicht">*</span></span>
+      </label>
       
       <p class="formular__fehler" id="mw-sepa-mandat-fehler" hidden></p>
     </div>
@@ -372,15 +372,15 @@
         <div class="formular__checkzeile-block">
       <div class="formular__checkzeile">
         <input type="checkbox" id="mw-einwilligung-satzung" name="mw-einwilligung-satzung" required aria-describedby="mw-einwilligung-satzung-fehler" aria-labelledby="mw-einwilligung-satzung-text">
-        <p id="mw-einwilligung-satzung-text">Ich habe die <a href="https://cdn.appack.de/sportfreunde04/pdf/Satzung_Aktuell_2025%20(1).pdf" rel="noopener" target="_blank">Satzung (PDF)</a> und die Datenschutzerklärung gelesen und erkenne die Satzung, Ordnungen und Beiträge an. <span class="formular__pflicht">*</span></p>
+        <p id="mw-einwilligung-satzung-text">Ich habe die <a href="https://cdn.appack.de/sportfreunde04/pdf/Satzung_Aktuell_2025%20(1).pdf" rel="noopener" target="_blank">Satzung (PDF)</a> und die <a href="../datenschutz/">Datenschutzerklärung</a> gelesen und erkenne die Satzung, Ordnungen und Beiträge an. <span class="formular__pflicht">*</span></p>
       </div>
       <p class="formular__fehler" id="mw-einwilligung-satzung-fehler" hidden></p>
     </div>
         <div class="formular__checkzeile-block">
-      <div class="formular__checkzeile">
+      <label class="formular__checkzeile">
         <input type="checkbox" id="mw-einwilligung-fotos" name="mw-einwilligung-fotos" aria-describedby="mw-einwilligung-fotos-fehler">
-        <label for="mw-einwilligung-fotos">Ich bin damit einverstanden, dass Fotos vom Vereinsleben, auf denen ich bzw. mein Kind zu sehen ist, in Vereinsmedien veröffentlicht werden. Diese Einwilligung ist freiwillig und jederzeit widerrufbar.</label>
-      </div>
+        <span>Ich bin damit einverstanden, dass Fotos vom Vereinsleben, auf denen ich bzw. mein Kind zu sehen ist, in Vereinsmedien veröffentlicht werden. Diese Einwilligung ist freiwillig und jederzeit widerrufbar.</span>
+      </label>
       <p class="meta">Die Foto-Einwilligung steht auch im Aufnahmeantrag (Seite 2).</p>
       <p class="formular__fehler" id="mw-einwilligung-fotos-fehler" hidden></p>
     </div>
@@ -450,11 +450,11 @@
       <div class="fuss__gruppe">
         <h2>Service</h2>
         <ul>
-        <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">Kontakt &amp; Anfahrt</span></li>
-        <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">Shop</span></li>
+        <li><a href="../kontakt/">Kontakt &amp; Anfahrt</a></li>
+        <li><a href="../shop/">Shop</a></li>
         <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">App-Ansicht</span></li>
-        <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">Impressum</span></li>
-        <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">Datenschutz</span></li>
+        <li><a href="../impressum/">Impressum</a></li>
+        <li><a href="../datenschutz/">Datenschutz</a></li>
         </ul>
       </div>
   </div>

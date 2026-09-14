@@ -53,6 +53,11 @@ h1, h2, h3, h4 {
   line-height: var(--lh-head);
   color: var(--blau-900);
   text-transform: uppercase;
+  /* P8: einzelne sehr lange, nicht trennbare Wörter (z. B.
+     "Datenschutzerklärung", "Registrierungsmöglichkeiten" auf
+     /datenschutz/) dürfen bei 320/360px nicht zu horizontalem Scrollen
+     führen – Wortlaut bleibt unverändert, nur die Umbruch-Erlaubnis ist neu. */
+  overflow-wrap: anywhere;
 }
 
 h1 { font-size: var(--fs-3xl); }
