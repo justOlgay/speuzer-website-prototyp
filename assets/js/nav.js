@@ -2,6 +2,37 @@
 // Navigation eine einfache, immer sichtbare Liste unterhalb der Kopfzeile.
 document.documentElement.classList.add("js");
 
+// App-Modus (P9, Plan-Abschnitt B1): ?ansicht=app auf einer beliebigen Seite
+// schaltet die Klasse .ansicht-app auf <html>. Zusätzlich zu diesem Skript
+// setzt ein 2-zeiliges Inline-Skript im <head> von basis.html (vor den
+// Stylesheets) dieselbe Klasse so früh wie möglich, damit die App-Kopfzeile/
+// Tab-Leiste nicht erst sichtbar umspringt, nachdem dieses (defer-geladene)
+// Skript ausgeführt hat.
+const istAppAnsicht = /(?:^|[?&])ansicht=app(?:&|$)/.test(location.search);
+if (istAppAnsicht) {
+  document.documentElement.classList.add("ansicht-app");
+
+  // Alle internen Links (kein http/https, kein mailto:/tel:, kein reiner
+  // Anker) um ?ansicht=app ergänzen, damit die Navigation im App-Modus
+  // bleibt. Ein vorhandener Hash (#…) bleibt erhalten.
+  for (const link of document.querySelectorAll("a[href]")) {
+    const href = link.getAttribute("href");
+    if (!href) continue;
+    if (
+      href.startsWith("http://") || href.startsWith("https://") ||
+      href.startsWith("mailto:") || href.startsWith("tel:") ||
+      href.startsWith("#")
+    ) continue;
+    if (/(?:^|[?&])ansicht=app(?:&|$)/.test(href)) continue;
+
+    const trennstelle = href.indexOf("#");
+    const ohneHash = trennstelle === -1 ? href : href.slice(0, trennstelle);
+    const hash = trennstelle === -1 ? "" : href.slice(trennstelle);
+    const trenner = ohneHash.includes("?") ? "&" : "?";
+    link.setAttribute("href", `${ohneHash}${trenner}ansicht=app${hash}`);
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const burger = document.querySelector(".kopf__burger");
   const nav = document.getElementById("hauptmenue");

@@ -48,39 +48,73 @@ function seitenkopfAbschnitt() {
 
 // ---------- Ansprechpartner nach Anliegen ----------
 
-// Reihenfolge und Inhalte exakt wie im Plan (Abschnitt C) vorgegeben. "text"
-// (ein erläuternder Satz) und "betreff" sind nur dort gesetzt, wo der Plan
-// sie ausdrücklich nennt – für die übrigen Karten wurde nichts erfunden
-// (siehe Abschlussbericht, offene Frage).
+// Reihenfolge und Inhalte exakt wie im Plan (Abschnitt C, ursprünglich; Sätze
+// und Betreffs ab P9-Korrektur A1) vorgegeben – wörtlich übernommen, nichts
+// erfunden. Alle acht Karten haben jetzt einen Satz (P8-Abnahme: ungleiche
+// Kartenhöhen/leere Flächen, weil einige Karten keinen Satz hatten).
 function ansprechpartner(daten) {
   const verein = daten.verein ?? {};
   const mails = verein.mails ?? {};
   return [
-    { titel: "Allgemeine Fragen", mail: verein.mail, betreff: "Anfrage über die Website" },
+    {
+      titel: "Allgemeine Fragen",
+      mail: verein.mail,
+      text: "Alles, was sonst nirgends passt – die Geschäftsstelle leitet weiter.",
+      betreff: "Anfrage über die Website",
+    },
     {
       titel: "Probetraining & Jugend",
       mail: mails.jugendleitung,
       text: "Für Kinder und Jugendliche von der G- bis zur A-Jugend.",
       betreff: "Probetraining",
     },
-    { titel: "Herren & Senioren", mail: mails.senioren },
-    { titel: "Karnevalabteilung", mail: mails.karneval },
-    { titel: "Beiträge & Rechnungen", mail: mails.kassierer },
+    {
+      titel: "Herren & Senioren",
+      mail: mails.senioren,
+      text: "Fragen zur 1. Herrenmannschaft, Spielausschuss und Seniorenfußball.",
+      betreff: "Herren",
+    },
+    {
+      titel: "Karnevalabteilung",
+      mail: mails.karneval,
+      text: "Die Schnauzer: Gruppen, Übungsstunden, Auftritte.",
+      betreff: "Karnevalabteilung",
+    },
+    {
+      titel: "Beiträge & Rechnungen",
+      mail: mails.kassierer,
+      text: "Beiträge, Lastschrift, Bescheinigungen für Bildung und Teilhabe.",
+      betreff: "Beiträge",
+    },
     {
       titel: "Kinderschutz",
       mail: mails.kinderschutz,
       text: "Vertraulicher Kontakt zum Kinderschutzbeauftragten.",
+      // Bewusst kein Betreff (vertraulich, Plan-Abschnitt A1).
     },
-    { titel: "Sponsoring & Partner", mail: verein.mail, betreff: "Sponsoring" },
-    { titel: "Trainer- und Ehrenamt", mail: verein.mail, betreff: "Ich helfe gern" },
+    {
+      titel: "Sponsoring & Partner",
+      mail: verein.mail,
+      text: "Trikot- und Bandenwerbung, Partnerschaften mit der Jugendabteilung.",
+      betreff: "Sponsoring",
+    },
+    {
+      titel: "Trainer- und Ehrenamt",
+      mail: verein.mail,
+      text: "Mitmachen als Trainer, Betreuer oder im Vorstand.",
+      betreff: "Ich helfe gern",
+    },
   ];
 }
 
+// P9-Korrektur A1: Karte als Flex-Spalte (.karte--anliegen in
+// komponenten.css), Knopfzeile mit margin-top:auto unten ausgerichtet –
+// dadurch sind alle acht Karten im Raster gleich hoch, unabhängig von der
+// Satzlänge.
 function ansprechpartnerKarte(eintrag) {
-  const textHtml = eintrag.text ? `<p>${escapeHtml(eintrag.text)}</p>` : "";
-  return `<div class="karte fluss">
+  return `<div class="karte karte--anliegen fluss">
       <span class="karte__titel">${escapeHtml(eintrag.titel)}</span>
-      ${textHtml}
+      <p>${escapeHtml(eintrag.text)}</p>
       <p class="knopfzeile">
         ${mailKnopf({ adresse: eintrag.mail, betreff: eintrag.betreff })}
       </p>
@@ -101,6 +135,12 @@ function ansprechpartnerAbschnitt(daten) {
 
 // ---------- Geschäftsstelle ----------
 
+// P9-Korrektur A2: Adresszeilen und Links klebten aneinander (Zeilenhöhe wie
+// Fließtext ohne Abstände), Beschriftungen "Sportstätte"/"Postanschrift"
+// gingen darin unter – jetzt als <dl class="angaben"> (Baustein aus P8, siehe
+// komponenten.css und /impressum/). Der Hinweiskasten rechts bekommt über
+// align-items:start (statt des Grid-Standards stretch) nur noch die Höhe
+// seines eigenen Inhalts (siehe .anfahrt__raster in komponenten.css).
 function geschaeftsstelleAbschnitt(daten) {
   const verein = daten.verein ?? {};
   const sportstaette = verein.sportstaette ?? {};
@@ -111,18 +151,29 @@ function geschaeftsstelleAbschnitt(daten) {
     <h2>Geschäftsstelle</h2>
     <div class="anfahrt__raster">
       <div>
-        <address>
-          <p>${escapeHtml(verein.name_register ?? "")}</p>
-          <p class="meta">Sportstätte</p>
-          <p>${escapeHtml(sportstaette.strasse ?? "")}<br>${escapeHtml(sportstaette.plz ?? "")} ${escapeHtml(sportstaette.ort ?? "")}</p>
-          <p class="meta">Postanschrift</p>
-          <p>${escapeHtml(post.postfach ?? "")}<br>${escapeHtml(post.plz ?? "")} ${escapeHtml(post.ort ?? "")}</p>
-        </address>
-        <p>${mailLink(verein.mail ?? "geschaeftsstelle@sportfreunde04.de")}</p>
-        <p><a href="${telHref(verein.tel_geschaeftsstelle)}">Geschäftsstelle ${escapeHtml(verein.tel_geschaeftsstelle ?? "")}</a></p>
-        <p><a href="${telHref(verein.tel_platzwart)}">Platzwart ${escapeHtml(verein.tel_platzwart ?? "")}</a></p>
-        <p><a href="${escapeHtml(verein.instagram ?? "")}" rel="noopener" target="_blank">Instagram @speuzer_ffm</a></p>
-        <p><a href="${escapeHtml(verein.facebook ?? "")}" rel="noopener" target="_blank">Facebook</a></p>
+        <p>${escapeHtml(verein.name_register ?? "")}</p>
+        <dl class="angaben">
+          <dt>Sportstätte</dt>
+          <dd>${escapeHtml(sportstaette.strasse ?? "")}<br>${escapeHtml(sportstaette.plz ?? "")} ${escapeHtml(sportstaette.ort ?? "")}</dd>
+
+          <dt>Postanschrift</dt>
+          <dd>${escapeHtml(post.postfach ?? "")}<br>${escapeHtml(post.plz ?? "")} ${escapeHtml(post.ort ?? "")}</dd>
+
+          <dt>E-Mail</dt>
+          <dd><p style="margin:0;">${mailLink(verein.mail ?? "geschaeftsstelle@sportfreunde04.de")}</p></dd>
+
+          <dt>Telefon</dt>
+          <dd>
+            <p style="margin:0;"><a href="${telHref(verein.tel_geschaeftsstelle)}">Geschäftsstelle ${escapeHtml(verein.tel_geschaeftsstelle ?? "")}</a></p>
+            <p style="margin:0;"><a href="${telHref(verein.tel_platzwart)}">Platzwart ${escapeHtml(verein.tel_platzwart ?? "")}</a></p>
+          </dd>
+
+          <dt>Social</dt>
+          <dd>
+            <p style="margin:0;"><a href="${escapeHtml(verein.instagram ?? "")}" rel="noopener" target="_blank">Instagram @speuzer_ffm</a></p>
+            <p style="margin:0;"><a href="${escapeHtml(verein.facebook ?? "")}" rel="noopener" target="_blank">Facebook</a></p>
+          </dd>
+        </dl>
       </div>
       <div class="hinweis hinweis--offen">
         <p style="margin:0;">Öffnungszeiten der Geschäftsstelle: Angabe folgt.</p>
@@ -134,6 +185,9 @@ function geschaeftsstelleAbschnitt(daten) {
 
 // ---------- Anfahrt ----------
 
+// P9-Korrektur A2: Adresse ebenfalls als <dl class="angaben"> (gleiche
+// Korrektur wie im Abschnitt Geschäftsstelle) statt als <address> ohne
+// Zeilenabstände.
 function anfahrtAbschnitt(daten) {
   const verein = daten.verein ?? {};
   const sportstaette = verein.sportstaette ?? {};
@@ -144,11 +198,11 @@ function anfahrtAbschnitt(daten) {
   return `<section class="abschnitt">
   <div class="container fluss">
     <h2>Anfahrt</h2>
-    <address>
-      <p>${escapeHtml(verein.name_register ?? "")}</p>
-      <p>${escapeHtml(sportstaette.strasse ?? "")}</p>
-      <p>${escapeHtml(sportstaette.plz ?? "")} ${escapeHtml(sportstaette.ort ?? "")}</p>
-    </address>
+    <p>${escapeHtml(verein.name_register ?? "")}</p>
+    <dl class="angaben">
+      <dt>Sportstätte</dt>
+      <dd>${escapeHtml(sportstaette.strasse ?? "")}<br>${escapeHtml(sportstaette.plz ?? "")} ${escapeHtml(sportstaette.ort ?? "")}</dd>
+    </dl>
     <p class="knopfzeile">
       <a class="knopf knopf--sekundaer" href="${escapeHtml(karten.apple ?? "")}" rel="noopener" target="_blank">Route in Apple Karten</a>
       <a class="knopf knopf--sekundaer" href="${escapeHtml(karten.google ?? "")}" rel="noopener" target="_blank">Route in Google Maps</a>

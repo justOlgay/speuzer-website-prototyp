@@ -1,5 +1,10 @@
 // Shop /shop/ (P8) – zwei externe Partnershops (Fanshop, Teamshop), keine
-// eigene Bestellstrecke.
+// eigene Bestellstrecke. Ab P9-Korrektur A5 zusätzlich ein Hinweisabschnitt
+// zur Mannschafts-Vereinskleidung (Bestellung über das Trainerteam).
+
+// Diese Seite liegt immer unter "/shop/" (Tiefe 1), daher immer "../"
+// (siehe pfadZurWurzel() in tools/build.mjs).
+const PFAD = "../";
 
 function escapeHtml(text) {
   return String(text ?? "")
@@ -41,8 +46,22 @@ function shopsAbschnitt(daten) {
 </section>`;
 }
 
+// P9-Korrektur A5: Seite war sehr kurz (Fußbereich ab 650px) – Ergänzung
+// unter den beiden Shop-Karten, Wortlaut wörtlich aus dem Plan.
+function vereinskleidungAbschnitt() {
+  return `<section class="abschnitt--hell abschnitt">
+  <div class="container fluss">
+    <h2>Vereinskleidung für Mannschaften</h2>
+    <p>Trikots und Trainingsanzüge der Mannschaften werden über das Trainerteam gesammelt bestellt – Fragen dazu an das Trainerteam der jeweiligen Mannschaft oder an die Geschäftsstelle.</p>
+    <p class="knopfzeile">
+      <a class="knopf knopf--sekundaer" href="${PFAD}mannschaften/">Zu den Mannschaften</a>
+    </p>
+  </div>
+</section>`;
+}
+
 export function seite(daten) {
-  const inhalt = [seitenkopfAbschnitt(), shopsAbschnitt(daten)].join("\n");
+  const inhalt = [seitenkopfAbschnitt(), shopsAbschnitt(daten), vereinskleidungAbschnitt()].join("\n");
 
   return {
     url: "/shop/",

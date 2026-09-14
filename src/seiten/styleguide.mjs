@@ -8,6 +8,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { mailLink, datumLang } from "../vorlagen/hilfen.mjs";
 import { bild } from "../vorlagen/bild.mjs";
+import { tabbar } from "../vorlagen/header.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -556,6 +557,28 @@ function seiteBausteine(daten) {
     <dd>${escapeHtml(verein.register ?? "")}</dd>
   </dl>`;
 
+  // P9: Tab-Leiste (.tabbar) – App-Modus (?ansicht=app, siehe assets/js/nav.js
+  // und assets/css/app-modus.css). Dieselbe tabbar()-Funktion wie im
+  // Header-Modul (src/vorlagen/header.mjs), hier nur statisch dargestellt:
+  // position:static statt fixed und display erzwungen, weil .tabbar
+  // außerhalb von .ansicht-app per Default verborgen ist (siehe
+  // komponenten.css).
+  const tabbarBeispiel = `<div style="max-width:420px;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;">
+    ${tabbar({ pfad: PFAD, aktuelleUrl: "/" }).replace(
+      '<nav class="tabbar" aria-label="App-Navigation">',
+      '<nav class="tabbar" aria-label="App-Navigation" style="display:block;position:static;">'
+    )}
+  </div>`;
+
+  // P9: Telefonrahmen (.telefon) – /app/, hier verkleinert (transform:scale)
+  // und ohne iframe: eine Platzhalterfläche in --blau-50 statt der echten
+  // Seite, damit das Beispiel ohne zusätzliche Netzwerklast auskommt.
+  const telefonBeispiel = `<div style="width:${Math.round(414 * 0.5)}px;height:${Math.round(868 * 0.5)}px;overflow:hidden;">
+    <div class="telefon" style="transform:scale(.5);transform-origin:top left;">
+      <div style="width:100%;height:100%;border-radius:32px;background:var(--blau-50);display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:var(--fs-sm);text-align:center;padding:var(--sp-4);box-sizing:border-box;">Platzhalter statt &lt;iframe&gt;</div>
+    </div>
+  </div>`;
+
   return `<h2>Bausteine</h2>
 <p class="inhalt">Alle Bausteine mit echten Daten aus data/, wie sie später auf den Inhaltsseiten verwendet werden. Ziele, deren Seite im aktuellen Paket noch nicht existiert, sind als Karten mit &lt;span&gt; statt &lt;a&gt; ausgegeben.</p>
 
@@ -658,7 +681,15 @@ ${formularBeispiel}
 
 <h3>Angaben-Liste (.angaben)</h3>
 <p class="inhalt">/impressum/ (P8): Definitionsliste mit Beschriftung (dt, --fs-sm/600/--ink-3) und Wert (dd, --fs-md).</p>
-${angabenBeispiel}`;
+${angabenBeispiel}
+
+<h3>Tab-Leiste (.tabbar)</h3>
+<p class="inhalt">App-Modus (P9, ?ansicht=app): untere Navigation mit fünf Zielen (Start, Teams, Spiele, News, Verein), eigenen Strich-Icons und aktivem Zustand in --blau-700. Auf echten Seiten position:fixed am unteren Bildschirmrand und nur unter der Klasse .ansicht-app sichtbar – hier zur Anschauung statisch dargestellt (position:static).</p>
+${tabbarBeispiel}
+
+<h3>Telefonrahmen (.telefon)</h3>
+<p class="inhalt">/app/ (P9): gezeichnetes Gerätefenster (390×844 Innenmaß, 12px Rand, Notch) für die drei Vorschau-Rahmen; dort mit echtem &lt;iframe src="…?ansicht=app"&gt;. Hier zur Anschauung verkleinert (transform:scale(.5)) und mit einer Platzhalterfläche statt des iframes.</p>
+${telefonBeispiel}`;
 }
 
 export function seite(daten) {

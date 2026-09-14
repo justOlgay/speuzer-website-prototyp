@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Impressum – FFV Sportfreunde 04</title>
-<meta name="description" content="Impressum des Frankfurter Fußballvereins Sportfreunde 1904 e.V.: Anschrift, Vertretung, Registergericht und Kontakt der Geschäftsstelle.">
-<link rel="canonical" href="https://justolgay.github.io/speuzer-website-prototyp/impressum/">
+<title>App-Ansicht – FFV Sportfreunde 04</title>
+<meta name="description" content="So sieht der Prototyp der Sportfreunde 04 im schmalen Format der Vereins-App aus: Start, Mannschaft und Spielplan in drei Telefonrahmen – Website und App als ein Auftritt">
+<link rel="canonical" href="https://justolgay.github.io/speuzer-website-prototyp/app/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="FFV Sportfreunde 04">
-<meta property="og:title" content="Impressum – FFV Sportfreunde 04">
-<meta property="og:description" content="Impressum des Frankfurter Fußballvereins Sportfreunde 1904 e.V.: Anschrift, Vertretung, Registergericht und Kontakt der Geschäftsstelle.">
-<meta property="og:url" content="https://justolgay.github.io/speuzer-website-prototyp/impressum/">
+<meta property="og:title" content="App-Ansicht – FFV Sportfreunde 04">
+<meta property="og:description" content="So sieht der Prototyp der Sportfreunde 04 im schmalen Format der Vereins-App aus: Start, Mannschaft und Spielplan in drei Telefonrahmen – Website und App als ein Auftritt">
+<meta property="og:url" content="https://justolgay.github.io/speuzer-website-prototyp/app/">
 <meta property="og:image" content="https://justolgay.github.io/speuzer-website-prototyp/assets/og/standard.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#151A7A">
@@ -33,7 +33,7 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
 <link rel="stylesheet" href="../assets/css/app-modus.css">
 <script src="../assets/js/nav.js" defer></script>
 </head>
-<body class="impressum">
+<body class="app">
 <a class="sprungmarke" href="#inhalt">Zum Inhalt</a>
 <header class="kopf">
   <div class="container kopf__zeile">
@@ -75,58 +75,64 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
 <main id="inhalt">
 <section class="abschnitt seitenkopf">
   <div class="container">
-    <h1>Impressum</h1>
-    <p class="seitenkopf__lead">Angaben gemäß § 5 DDG</p>
+    <h1>Website und App – ein Auftritt</h1>
+    <p class="seitenkopf__lead">Dieselben Inhalte, dieselben Farben, dieselbe Schrift: So sieht der Prototyp im schmalen Format der Vereins-App aus.</p>
   </div>
 </section>
 <section class="abschnitt">
-  <div class="container inhalt">
-    <dl class="angaben">
-      <dt>Anbieter</dt>
-      <dd>Frankfurter Fußballverein Sportfreunde 1904 e.V.</dd>
-
-      <dt>Sportstätte</dt>
-      <dd>Mainzer Landstraße 480<br>60326 Frankfurt am Main</dd>
-
-      <dt>Postanschrift</dt>
-      <dd>Postfach 190442<br>60091 Frankfurt am Main</dd>
-
-      <dt>Telefon</dt>
-      <dd>
-        <p style="margin:0;"><a href="tel:+4969736868">Geschäftsstelle +49 69 736868</a></p>
-        <p style="margin:0;"><a href="tel:+4969732193">Platzwart +49 69 732193</a></p>
-      </dd>
-
-      <dt>E-Mail</dt>
-      <dd><p style="margin:0;"><a class="mail" href="mailto:geschaeftsstelle@sportfreunde04.de">geschaeftsstelle<wbr>@sportfreunde04.de</a></p></dd>
-
-      <dt>Webseite</dt>
-      <dd>www.sportfreunde04.de<br><span class="meta">derzeit Weiterleitung auf die Vereins-App</span></dd>
-
-      <dt>Vertretungsberechtigter Vorstand</dt>
-      <dd>
-        <ul>
-          <li>Melanie Seipp (1. Vorsitzende)</li>
-          <li>Uwe Korndörfer (2. Vorsitzender)</li>
-        </ul>
-      </dd>
-
-      <dt>Registergericht / Registernummer</dt>
-      <dd>Amtsgericht Frankfurt am Main, VR 4727</dd>
-    </dl>
+  <div class="telefone">
+    <div class="telefon-eintrag">
+      <div class="telefon-skaliert">
+        <div class="telefon">
+          <iframe loading="lazy" title="Startseite im App-Format" src="../?ansicht=app" width="390" height="844" style="border:0;"></iframe>
+        </div>
+      </div>
+      <p class="meta">Start</p>
+    </div>
+    <div class="telefon-eintrag">
+      <div class="telefon-skaliert">
+        <div class="telefon">
+          <iframe loading="lazy" title="Mannschaft D2 im App-Format" src="../mannschaften/d2/?ansicht=app" width="390" height="844" style="border:0;"></iframe>
+        </div>
+      </div>
+      <p class="meta">Mannschaft D2</p>
+    </div>
+    <div class="telefon-eintrag">
+      <div class="telefon-skaliert">
+        <div class="telefon">
+          <iframe loading="lazy" title="Spielplan und Tabellen im App-Format" src="../spielplan/?ansicht=app" width="390" height="844" style="border:0;"></iframe>
+        </div>
+      </div>
+      <p class="meta">Spielplan &amp; Tabellen</p>
+    </div>
   </div>
 </section>
 <section class="abschnitt--hell abschnitt">
-  <div class="container inhalt fluss">
-    <h2>Haftungshinweis</h2>
-    <p>Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich.</p>
+  <div class="container fluss">
+    <h2>Was gleich ist</h2>
+    <div class="raster raster--3">
+    <div class="karte fluss">
+      <span class="karte__titel">Ein Gestaltungssystem</span>
+      <p>Farben, Schrift, Abstände und Bausteine sind dieselben – im Browser wie in der App.</p>
+    </div>
+    <div class="karte fluss">
+      <span class="karte__titel">Eine Datenquelle</span>
+      <p>Spiele, Tabellen, Trainingszeiten und Meldungen kommen aus denselben Dateien. Nichts wird doppelt gepflegt.</p>
+    </div>
+    <div class="karte fluss">
+      <span class="karte__titel">Eine Adresse pro Inhalt</span>
+      <p>Jede Seite hat einen Link, der auch im App-Format funktioniert – teilbar per WhatsApp.</p>
+    </div>
+    </div>
   </div>
 </section>
 <section class="abschnitt">
-  <div class="container inhalt fluss">
-    <h2>Hinweis zum Prototyp</h2>
+  <div class="container fluss">
     <div class="hinweis hinweis--info">
-      <p style="margin:0;">Diese Seite ist ein Prototyp und keine veröffentlichte Vereinswebsite. Sie dient der internen Abstimmung des Vorstands. Verbindliche Angaben stehen unter www.sportfreunde04.de.</p>
+      <p style="margin:0;">Die echte Vereins-App läuft auf der Plattform appack. Diese Ansicht zeigt, wie die Inhalte des Prototyps dort aussehen würden – sie ersetzt die App nicht.</p>
+      <p class="knopfzeile" style="margin-top:var(--sp-3);">
+        <a class="knopf knopf--sekundaer" href="../?ansicht=app" target="_blank" rel="noopener">App-Ansicht in voller Größe öffnen</a>
+      </p>
     </div>
   </div>
 </section>

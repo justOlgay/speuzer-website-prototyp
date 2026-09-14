@@ -17,12 +17,20 @@
 <link rel="icon" href="../../assets/logo/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="../../assets/logo/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="../../assets/logo/apple-touch-icon.png">
+<!-- App-Modus (P9, Plan-Abschnitt B1): Klasse so früh wie möglich setzen,
+     vor den Stylesheets, damit die App-Kopfzeile/Tab-Leiste beim Laden nicht
+     erst sichtbar umspringt (assets/js/nav.js setzt dieselbe Klasse
+     zusätzlich, siehe dort). -->
+<script>
+if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentElement.classList.add("ansicht-app");
+</script>
 <link rel="preload" href="../../assets/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../../assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../../assets/css/tokens.css">
 <link rel="stylesheet" href="../../assets/css/fonts.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/komponenten.css">
+<link rel="stylesheet" href="../../assets/css/app-modus.css">
 <script src="../../assets/js/nav.js" defer></script>
 </head>
 <body class="">
@@ -55,6 +63,15 @@
     </nav>
   </div>
 </header>
+<nav class="tabbar" aria-label="App-Navigation">
+  <ul>
+      <li><a class="tabbar__tab" href="../../"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/></svg><span class="tabbar__label">Start</span></a></li>
+      <li><a class="tabbar__tab" href="../../mannschaften/"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="12" r="5"/><circle cx="15" cy="12" r="5"/></svg><span class="tabbar__label">Teams</span></a></li>
+      <li><a class="tabbar__tab" href="../../spielplan/"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7l4.8 3.5-1.8 5.6H9l-1.8-5.6z"/></svg><span class="tabbar__label">Spiele</span></a></li>
+      <li><a class="tabbar__tab" href="../../news/"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="1"/><path d="M7 9h10M7 12.5h10M7 16h6"/></svg><span class="tabbar__label">News</span></a></li>
+      <li><a class="tabbar__tab tabbar__tab--aktiv" href="../../verein/" aria-current="page"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 20 12 12 21 4 12z"/></svg><span class="tabbar__label">Verein</span></a></li>
+  </ul>
+</nav>
 <main id="inhalt">
 <section class="abschnitt seitenkopf">
   <div class="container">
@@ -109,6 +126,7 @@
         <li><a href="https://www.instagram.com/speuzer_ffm/" rel="noopener" target="_blank">Instagram @speuzer_ffm</a></li>
       </ul>
     </div>
+    <div class="fuss__spalten">
     <div class="fuss__gruppe">
         <h2>Verein</h2>
         <ul>
@@ -134,11 +152,22 @@
         <ul>
         <li><a href="../../kontakt/">Kontakt &amp; Anfahrt</a></li>
         <li><a href="../../shop/">Shop</a></li>
-        <li><span class="nav__bald" aria-disabled="true" title="Seite folgt">App-Ansicht</span></li>
+        <li><a href="../../app/">App-Ansicht</a></li>
         <li><a href="../../impressum/">Impressum</a></li>
         <li><a href="../../datenschutz/">Datenschutz</a></li>
         </ul>
       </div>
+    </div>
+  </div>
+  <div class="container fuss__app">
+    <ul class="fuss__app-kontakt" role="list">
+      <li><a class="mail" href="mailto:geschaeftsstelle@sportfreunde04.de">geschaeftsstelle<wbr>@sportfreunde04.de</a></li>
+      <li><a href="tel:+4969736868">Geschäftsstelle +49 69 736868</a></li>
+    </ul>
+    <ul class="fuss__app-links" role="list">
+      <li><a href="../../impressum/">Impressum</a></li>
+      <li><a href="../../datenschutz/">Datenschutz</a></li>
+    </ul>
   </div>
   <div class="container fuss__schluss">
     <p>© 2026 Frankfurter Fußballverein Sportfreunde 1904 e.V.</p>

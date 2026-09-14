@@ -1,6 +1,16 @@
 // Fußbereich (P1) – Kontakt, Adresse, drei Linkgruppen, Schlusszeile.
 // Einträge, deren Ziel-URL im aktuellen Build noch nicht existiert, werden
 // als <span class="nav__bald"> statt als Link ausgegeben (siehe navigation.mjs).
+//
+// App-Modus (P9, Plan-Abschnitt B2): die drei Linkgruppen stecken jetzt in
+// einem Wrapper <div class="fuss__spalten"> (display:contents in
+// komponenten.css – ändert am normalen Grid-Layout nichts, siehe dort), damit
+// sie sich unter .ansicht-app mit einer Regel ausblenden lassen. Zusätzlich
+// ein kompakter Block <div class="fuss__app"> (Kontaktzeile + Impressum/
+// Datenschutz), der immer mitgerendert, aber nur unter .ansicht-app sichtbar
+// ist (Basis-CSS blendet ihn aus, siehe .fuss__app in komponenten.css) – so
+// bleibt im App-Modus "nur Kontaktzeile (Mail, Telefon) und Impressum/
+// Datenschutz-Links" übrig, ohne die drei Linkspalten.
 
 import { FUSS } from "./navigation.mjs";
 import { mailLink } from "./hilfen.mjs";
@@ -63,7 +73,19 @@ export function footer({ pfad, daten, seitenUrls }) {
         <li><a href="${escapeHtml(verein.instagram ?? "https://www.instagram.com/speuzer_ffm/")}" rel="noopener" target="_blank">Instagram @speuzer_ffm</a></li>
       </ul>
     </div>
+    <div class="fuss__spalten">
     ${gruppen}
+    </div>
+  </div>
+  <div class="container fuss__app">
+    <ul class="fuss__app-kontakt" role="list">
+      <li>${mailLink(verein.mail ?? "geschaeftsstelle@sportfreunde04.de")}</li>
+      <li><a href="${telHref(verein.tel_geschaeftsstelle)}">Geschäftsstelle ${escapeHtml(verein.tel_geschaeftsstelle ?? "")}</a></li>
+    </ul>
+    <ul class="fuss__app-links" role="list">
+      <li><a href="${pfad}impressum/">Impressum</a></li>
+      <li><a href="${pfad}datenschutz/">Datenschutz</a></li>
+    </ul>
   </div>
   <div class="container fuss__schluss">
     <p>© ${jahr} Frankfurter Fußballverein Sportfreunde 1904 e.V.</p>
