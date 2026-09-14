@@ -246,10 +246,44 @@ async function main() {
     const title = "Seite nicht gefunden";
     const description = "Diese Seite gibt es im Prototyp nicht. Zurück zur Startseite.";
     const og = baueOgBlock({ title, description, canonical, ogImageAbs: BASIS_URL + "assets/og/standard.png" });
-    const inhalt = `<section class="container">
-<h1>Seite nicht gefunden</h1>
-<p>Diese Seite gibt es im Prototyp nicht.</p>
-<p><a class="knopf" href="${pfad}">Zur Startseite</a></p>
+    const inhalt = `<section class="abschnitt seitenkopf">
+  <div class="container">
+    <p class="seitenkopf__kicker">Fehler 404</p>
+    <h1>Seite nicht gefunden</h1>
+    <p class="seitenkopf__lead">Diese Adresse gibt es im Prototyp nicht. Vielleicht steckt ein Tippfehler im Link, oder die Seite ist umgezogen.</p>
+  </div>
+</section>
+<section class="abschnitt">
+  <div class="container fluss">
+    <p><a class="knopf" href="${pfad}">Zur Startseite</a></p>
+    <h2>Wohin möchtest du?</h2>
+    <div class="raster raster--3">
+    <a class="karte karte--link" href="${pfad}mannschaften/">
+      <span class="karte__titel">Mannschaften</span>
+      <span class="karte__meta">Training, Ansprechpartner, Spielplan je Team</span>
+    </a>
+    <a class="karte karte--link" href="${pfad}spielplan/">
+      <span class="karte__titel">Spielplan &amp; Tabellen</span>
+      <span class="karte__meta">Alle Spiele und Tabellen</span>
+    </a>
+    <a class="karte karte--link" href="${pfad}news/">
+      <span class="karte__titel">News</span>
+      <span class="karte__meta">Meldungen aus dem Verein</span>
+    </a>
+    <a class="karte karte--link" href="${pfad}verein/">
+      <span class="karte__titel">Verein</span>
+      <span class="karte__meta">Wer wir sind, Vorstand, Sponsoren</span>
+    </a>
+    <a class="karte karte--link" href="${pfad}mitglied-werden/">
+      <span class="karte__titel">Mitglied werden</span>
+      <span class="karte__meta">Beiträge, Ablauf, Antrag</span>
+    </a>
+    <a class="karte karte--link" href="${pfad}kontakt/">
+      <span class="karte__titel">Kontakt &amp; Anfahrt</span>
+      <span class="karte__meta">Adressen, Platz, Anfahrt</span>
+    </a>
+    </div>
+  </div>
 </section>`;
     let html = fuelleVorlage(basisVorlage, {
       lang: "de",
