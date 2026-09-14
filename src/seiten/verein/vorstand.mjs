@@ -29,15 +29,18 @@ function escapeHtml(text) {
 // Personen-Karte – mit Foto oder Wappen-Platzhalter bei --blau-100 (siehe
 // .person__bild--platzhalter in komponenten.css). Der Eintrag "Schriftführer"
 // hat name: null – dann steht "derzeit nicht besetzt" statt des Namens.
-function personKarte(person, daten) {
+// prioritaet (P11, Plan-Abschnitt B3): für die ersten vier Personen-Karten
+// dieser Seite gesetzt (siehe seite() unten, prioritaetsSet).
+function personKarte(person, daten, { prioritaet = false } = {}) {
   const bildHtml = person?.foto
     ? bild({
         pfad: PFAD,
         daten,
         name: person.foto.quelle,
         alt: person.name ? `Porträt ${person.name}` : "",
-        sizes: "(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw",
+        sizes: "(min-width: 640px) 260px, 50vw",
         klasse: "person__bild",
+        prioritaet,
       })
     : `<span class="person__bild person__bild--platzhalter" aria-hidden="true">${liesWappenBlau()}</span>`;
   const nameHtml = person?.name ? escapeHtml(person.name) : "derzeit nicht besetzt";
@@ -60,9 +63,11 @@ function gruppierenNachFunktion(vorstand) {
   return map;
 }
 
-function gruppenAbschnitt({ titel, funktionen, nachFunktion, daten, hell }) {
+function gruppenAbschnitt({ titel, funktionen, nachFunktion, daten, hell, prioritaetsSet }) {
   const personen = funktionen.flatMap((f) => nachFunktion[f] ?? []);
-  const karten = personen.map((p) => personKarte(p, daten)).join("\n      ");
+  const karten = personen
+    .map((p) => personKarte(p, daten, { prioritaet: prioritaetsSet.has(p) }))
+    .join("\n      ");
   const hellKlasse = hell ? " abschnitt--hell" : "";
 
   return `<section class="abschnitt${hellKlasse}">
@@ -97,7 +102,7 @@ function hinweisAbschnitt() {
 export function seite(daten) {
   const nachFunktion = gruppierenNachFunktion(daten.vorstand);
 
-  const gruppen = [
+  const GRUPPEN_DEFINITION = [
     {
       titel: "Geschäftsführender Vorstand",
       funktionen: ["1. Vorsitzende", "2. Vorsitzender", "1. Kassierer", "2. Kassierer", "Schriftführer"],
@@ -118,7 +123,16 @@ export function seite(daten) {
       funktionen: ["Abteilungsleiter Karneval", "Kassiererin Abteilung Karneval", "Schriftführerin Abteilung Karneval"],
       hell: true,
     },
-  ].map((g) => gruppenAbschnitt({ ...g, nachFunktion, daten }));
+  ];
+
+  // P11, Plan-Abschnitt B3: "die ersten vier Personen-Karten auf
+  // /verein/vorstand/" bekommen prioritaet:true – in derselben Reihenfolge,
+  // in der die Karten später gerendert werden (Gruppen- und
+  // Funktionsreihenfolge wie oben).
+  const alleInReihenfolge = GRUPPEN_DEFINITION.flatMap((g) => g.funktionen.flatMap((f) => nachFunktion[f] ?? []));
+  const prioritaetsSet = new Set(alleInReihenfolge.slice(0, 4));
+
+  const gruppen = GRUPPEN_DEFINITION.map((g) => gruppenAbschnitt({ ...g, nachFunktion, daten, prioritaetsSet }));
 
   const inhalt = [seitenkopfAbschnitt(), ...gruppen, hinweisAbschnitt()].join("\n");
 

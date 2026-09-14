@@ -146,7 +146,7 @@ export function seite(daten) {
   const seitenkopf = `<section class="abschnitt seitenkopf">
   <div class="container">
     <h1>Mannschaften</h1>
-    <p class="seitenkopf__lead">Elf Fußballmannschaften von der G-Jugend bis zu den Herren. Für jedes Team findest du hier Jahrgang, Trainingszeiten, Ansprechpartner und den Weg zum Spielplan.</p>
+    <p class="seitenkopf__lead">Elf Fußballmannschaften von den Herren bis zur G-Jugend. Für jedes Team findest du hier Jahrgang, Trainingszeiten, Ansprechpartner und den Weg zum Spielplan.</p>
   </div>
 </section>`;
 
@@ -187,7 +187,7 @@ export function seite(daten) {
     url: "/mannschaften/",
     title: "Mannschaften",
     description:
-      "Alle elf Fußballmannschaften des FFV Sportfreunde 04 in Frankfurt-Gallus: Jahrgänge, Trainingszeiten, Ansprechpartner und Spielpläne von der G-Jugend bis zu den Herren.",
+      "Alle elf Fußballmannschaften des FFV Sportfreunde 04 in Frankfurt-Gallus: Jahrgänge, Trainingszeiten, Ansprechpartner und Spielpläne von den Herren bis zur G-Jugend.",
     inhalt,
   };
 }

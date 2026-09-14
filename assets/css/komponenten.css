@@ -163,15 +163,24 @@
   text-decoration: none;
 }
 
-.kopf__nav ul a {
+/* P11-Korrektur (außerhalb des eigentlichen P11-Auftrags, siehe
+   Abschlussbericht "Abweichungen"): ":not(.knopf)" ergänzt – ohne das
+   gewann diese Regel (Spezifität 0,1,2) gegen ".knopf { color: var(--weiss)
+   }" (Spezifität 0,1,0) und machte den Kopfzeilen-Knopf "Mitglied werden"
+   dunkel auf --blau-700 (Kontrast < 2:1, von axe-core auf /app/ gefunden –
+   vorbestehender Fehler, siehe Git-Historie vor P11, unabhängig von den
+   P11-Änderungen). Gleiches Muster wie ".kopf__nav ul a:not(.knopf)" weiter
+   unten (≥1024px-Regel), hier auf die Basis-, Hover- und
+   aria-current-Regel ausgeweitet. */
+.kopf__nav ul a:not(.knopf) {
   color: var(--ink);
 }
 
-.kopf__nav ul a:hover {
+.kopf__nav ul a:not(.knopf):hover {
   color: var(--blau-700);
 }
 
-.kopf__nav ul a[aria-current="page"] {
+.kopf__nav ul a:not(.knopf)[aria-current="page"] {
   color: var(--blau-900);
 }
 

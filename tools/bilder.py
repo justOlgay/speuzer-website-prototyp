@@ -32,7 +32,7 @@ CWEBP = "/opt/homebrew/bin/cwebp"
 AVIFENC = "/opt/homebrew/bin/avifenc"
 
 STANDARD_BREITEN = [480, 960, 1440]
-MAX_BYTES = 200 * 1024
+MAX_BYTES = 200_000  # P11, Plan-Abschnitt B3: 200.000 Byte, nicht 200 KiB (vorher 200 * 1024)
 QUELL_ENDUNGEN = {".jpg", ".jpeg", ".png"}
 
 # Startqualität und Minimum je Format (Schritt 6 des Plans). "notfall_min":
@@ -58,7 +58,13 @@ def muss_neu_erzeugt_werden(quelle_pfad, ziel_dateien):
     if not all(p.exists() for p in ziel_dateien):
         return True
     quelle_mtime = quelle_pfad.stat().st_mtime
-    return any(p.stat().st_mtime < quelle_mtime for p in ziel_dateien)
+    if any(p.stat().st_mtime < quelle_mtime for p in ziel_dateien):
+        return True
+    # P11, Plan-Abschnitt B3: die Bildgrenze wurde von 200 KiB (204.800 Byte)
+    # auf 200.000 Byte gesenkt – vorhandene Varianten, die über der neuen
+    # (niedrigeren) Grenze liegen, aber vom mtime-Vergleich sonst als
+    # "unverändert" durchgehen würden, müssen trotzdem neu erzeugt werden.
+    return any(p.stat().st_size > MAX_BYTES for p in ziel_dateien)
 
 
 def speichere_jpeg(bild_rgb, ziel, qualitaet):

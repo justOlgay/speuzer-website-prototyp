@@ -73,7 +73,15 @@ const server = createServer(async (req, res) => {
 
   try {
     const inhalt = await readFile(gefunden);
-    res.writeHead(200, { "Content-Type": mimeFuer(gefunden) });
+    const kopfzeilen = { "Content-Type": mimeFuer(gefunden) };
+    // P11, Plan-Abschnitt B5: Cache-Control für Dateien unter /assets/ – nur
+    // hier lokal wirksam (dieser Server dient nur npm run serve/pruefen/
+    // screenshots/lighthouse), GitHub Pages setzt beim echten Hosting eigene
+    // Header.
+    if (path.relative(DOCS, gefunden).split(path.sep)[0] === "assets") {
+      kopfzeilen["Cache-Control"] = "public, max-age=3600";
+    }
+    res.writeHead(200, kopfzeilen);
     res.end(inhalt);
   } catch (err) {
     res.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });

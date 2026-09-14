@@ -24,13 +24,14 @@
 <script>
 if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentElement.classList.add("ansicht-app");
 </script>
-<link rel="preload" href="../assets/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../assets/css/tokens.css">
-<link rel="stylesheet" href="../assets/css/fonts.css">
-<link rel="stylesheet" href="../assets/css/base.css">
-<link rel="stylesheet" href="../assets/css/komponenten.css">
-<link rel="stylesheet" href="../assets/css/app-modus.css">
+<!-- P11, Plan-Abschnitt B2: ein gebündeltes, minifiziertes Stylesheet statt
+     fünf einzelner Requests (weniger render-blockierende Anfragen). Die
+     Einzeldateien liegen weiterhin unter assets/css/ (siehe tools/build.mjs,
+     baueCssBuendel()) – der Styleguide verweist auf sie als Quelltext. -->
+<link rel="stylesheet" href="../assets/css/site.css">
 <script src="../assets/js/nav.js" defer></script>
 </head>
 <body class="">
@@ -82,7 +83,7 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
 <section class="abschnitt">
   <div class="container fluss">
     <p class="inhalt">Gegründet wurde der Verein am 15. Mai 1904 als Frankfurter FC Britannia. Nach dem Ersten Weltkrieg erhielt er 1919 seinen heutigen Namen. Der sportliche Höhepunkt war die Saison 1955/56 in der 1. Amateurliga Hessen; seit den 1960er Jahren spielen die Sportfreunde in den Klassen des Fußballkreises Frankfurt.</p>
-    <p class="inhalt">Heute stellt der Verein elf Fußballmannschaften – von der G-Jugend bis zur 1. Herrenmannschaft – und die Karnevalabteilung „Die Schnauzer“ mit fünf Gruppen. Trainiert und gespielt wird auf dem eigenen Platz an der Mainzer Landstraße 480; die Herren tragen ihre Heimspiele auf der Anlage am Rebstock aus.</p>
+    <p class="inhalt">Heute stellt der Verein elf Fußballmannschaften – von der 1. Herrenmannschaft bis zur G-Jugend – und die Karnevalabteilung „Die Schnauzer“ mit fünf Gruppen. Trainiert und gespielt wird auf dem eigenen Platz an der Mainzer Landstraße 480; die Herren tragen ihre Heimspiele auf der Anlage am Rebstock aus.</p>
     <p class="inhalt">Unser Leitsatz aus der Vereinsphilosophie: „Wir wollen nicht nur erfolgreiche Mannschaften entwickeln, sondern erfolgreiche Menschen und einen starken Verein für kommende Generationen.“ Unsere Werte sind Gemeinschaft, Respekt, Wertschätzung, Verantwortung, Fairness, Entwicklung und Kinderschutz.</p>
     <p class="knopfzeile">
       <a class="knopf knopf--sekundaer" href="../assets/downloads/vereinsphilosophie-und-zukunftskonzept.pdf">Vereinsphilosophie lesen (PDF, 50 Seiten)</a>
@@ -119,9 +120,9 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
     <p class="inhalt">Das Wohl von Kindern und Jugendlichen steht für uns über allem. Unser Präventions- und Schutzkonzept sowie die Vorgaben von HFV und DFB bilden den verbindlichen Rahmen.</p>
     <div class="person" style="max-width:260px;">
       <picture class="person__bild">
-  <source type="image/avif" srcset="../assets/bilder/erzeugt/vorstand-florian-muller-480.avif 480w, ../assets/bilder/erzeugt/vorstand-florian-muller-683.avif 683w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <source type="image/webp" srcset="../assets/bilder/erzeugt/vorstand-florian-muller-480.webp 480w, ../assets/bilder/erzeugt/vorstand-florian-muller-683.webp 683w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <img src="../assets/bilder/erzeugt/vorstand-florian-muller-683.jpg" srcset="../assets/bilder/erzeugt/vorstand-florian-muller-480.jpg 480w, ../assets/bilder/erzeugt/vorstand-florian-muller-683.jpg 683w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw" width="683" height="1024" alt="Porträt Florian Müller" loading="lazy" decoding="async">
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/vorstand-florian-muller-480.avif 480w, ../assets/bilder/erzeugt/vorstand-florian-muller-683.avif 683w" sizes="(min-width: 640px) 260px, 50vw">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/vorstand-florian-muller-480.webp 480w, ../assets/bilder/erzeugt/vorstand-florian-muller-683.webp 683w" sizes="(min-width: 640px) 260px, 50vw">
+  <img src="../assets/bilder/erzeugt/vorstand-florian-muller-683.jpg" srcset="../assets/bilder/erzeugt/vorstand-florian-muller-480.jpg 480w, ../assets/bilder/erzeugt/vorstand-florian-muller-683.jpg 683w" sizes="(min-width: 640px) 260px, 50vw" width="683" height="1024" alt="Porträt Florian Müller" fetchpriority="high" loading="eager" decoding="sync">
 </picture>
       <p class="person__name">Florian Müller</p>
       <p class="person__funktion">Kinderschutzbeauftragter</p>

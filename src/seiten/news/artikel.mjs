@@ -59,7 +59,7 @@ function bildAbschnitt(eintrag, daten) {
     name: eintrag.bild.replace(/\.[^./]+$/, ""),
     alt: eintrag.alt ?? "",
     sizes: "(min-width: 720px) 720px, 100vw",
-    eager: true,
+    prioritaet: true,
   });
   return `<figure class="artikel__bild${passungKlasse}">
     ${bildHtml}

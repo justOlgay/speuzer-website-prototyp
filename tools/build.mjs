@@ -141,6 +141,35 @@ function stelleOgStandardbildSicher() {
   console.log("  assets/og/standard.png erzeugt (1200×630)");
 }
 
+// ---------- CSS-Bündel (P11, Plan-Abschnitt B2) ----------
+// tokens.css + fonts.css + base.css + komponenten.css + app-modus.css in
+// dieser Reihenfolge zu docs/assets/css/site.css zusammenfügen und einfach
+// minifizieren (Kommentare entfernen, Zeilenumbrüche/Mehrfach-Leerzeichen
+// zusammenziehen, Leerzeichen um { } : ; , entfernen – keine
+// Wert-Umschreibung). basis.html lädt nur noch site.css als render-blockendes
+// Stylesheet; die Einzeldateien liegen unverändert weiter unter
+// docs/assets/css/ (kopiereAssets() kopiert den ganzen assets/-Ordner), der
+// Styleguide verweist weiterhin auf sie als Quelltext. url("../fonts/…")
+// bleibt gültig, weil site.css im selben Ordner liegt wie die Einzeldateien.
+const CSS_BUENDEL_DATEIEN = ["tokens.css", "fonts.css", "base.css", "komponenten.css", "app-modus.css"];
+
+function minifiziereCss(css) {
+  return css
+    .replace(/\/\*[\s\S]*?\*\//g, "") // Kommentare entfernen
+    .replace(/\s+/g, " ") // Zeilenumbrüche/Mehrfach-Leerzeichen zusammenziehen
+    .replace(/\s*([{}:;,])\s*/g, "$1") // Leerzeichen um { } : ; , entfernen
+    .trim();
+}
+
+function baueCssBuendel() {
+  const teile = CSS_BUENDEL_DATEIEN.map((datei) =>
+    minifiziereCss(readFileSync(path.join(ASSETS, "css", datei), "utf8"))
+  );
+  const zielDir = path.join(DOCS, "assets", "css");
+  mkdirSync(zielDir, { recursive: true });
+  writeFileSync(path.join(zielDir, "site.css"), teile.join("\n"), "utf8");
+}
+
 // ---------- Assets kopieren ----------
 
 function kopiereAssets() {
@@ -238,9 +267,17 @@ async function main() {
   }
 
   kopiereAssets();
+  baueCssBuendel();
 
   writeFileSync(path.join(DOCS, ".nojekyll"), "", "utf8");
-  writeFileSync(path.join(DOCS, "robots.txt"), "User-agent: *\nDisallow: /\n", "utf8");
+  // P11, Plan-Abschnitt B4: indexierbar statt komplett gesperrt, damit die
+  // Lighthouse-SEO-Prüfung (is-crawlable) besteht – der Prototyp kennzeichnet
+  // sich stattdessen auf jeder Seite als Testumgebung (siehe README.md).
+  writeFileSync(
+    path.join(DOCS, "robots.txt"),
+    `User-agent: *\nAllow: /\nSitemap: ${BASIS_URL.replace(/\/$/, "")}/sitemap.xml\n`,
+    "utf8"
+  );
 
   const sitemapEintraege = geschrieben
     .map((url) => `  <url><loc>${BASIS_URL.replace(/\/$/, "") + url}</loc></url>`)

@@ -1,2 +1,3 @@
 User-agent: *
-Disallow: /
+Allow: /
+Sitemap: https://justolgay.github.io/speuzer-website-prototyp/sitemap.xml

@@ -12,8 +12,20 @@ Bezogen am 11.09.2026 über die Google-Fonts-css2-API
 mit einem aktuellen Chrome-User-Agent, um woff2-Dateien zu erhalten; hier selbst
 gehostet (kein Aufruf von fonts.googleapis.com/fonts.gstatic.com zur Laufzeit).
 
-Hinweis: inter-400.woff2 und inter-600.woff2 sind bytegleich, weil Google Fonts
-Inter aktuellen Chrome-Versionen als eine Variable-Font-Datei (Achse wght 100–900)
-ausliefert; beide @font-face-Regeln in fonts.css referenzieren diese Datei mit
-unterschiedlichem font-weight, der Browser stellt daraus die passende Schnittstärke
-dar. Barlow Condensed 600/700 sind zwei eigenständige statische Dateien.
+Hinweis (P11, Plan-Abschnitt B1): inter-400.woff2 und inter-600.woff2 waren
+bytegleich, weil Google Fonts Inter aktuellen Chrome-Versionen als eine
+Variable-Font-Datei (Achse wght 100–900) ausliefert. Statt zweier identischer
+47-KB-Dateien liegt hier seit P11 nur noch eine Datei, inter.woff2 (vormals
+inter-400.woff2; inter-600.woff2 gelöscht) – eine einzelne @font-face-Regel in
+fonts.css referenziert sie mit font-weight: 400 600, der Browser stellt daraus
+weiterhin die passende Schnittstärke dar. Barlow Condensed 600/700 sind zwei
+eigenständige statische Dateien und bleiben unverändert.
+
+Zusätzlich seit P11: zwei Fallback-Schriften ("Inter Fallback" auf Arial,
+"Barlow Condensed Fallback" auf Arial Narrow/Helvetica Neue Condensed
+Bold/Arial) mit an die Webfonts angepassten Metriken (size-adjust,
+ascent-/descent-/line-gap-override) in fonts.css, damit der Schriftwechsel
+keinen Layoutsprung (CLS) mehr erzeugt – siehe tokens.css (--font-text/
+--font-head). Diese Fallback-Regeln laden keine eigene Schriftdatei (nur
+lokal installierte Systemschriften), fallen also nicht unter die oben
+genannte Lizenz.

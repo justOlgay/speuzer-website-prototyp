@@ -10,6 +10,9 @@
 // und "/spielplan/" – Tab-Leiste sichtbar, fünf Tabs ≥ 44px hoch, kein
 // horizontales Scrollen, genau ein aria-current in der Tab-Leiste, alle
 // internen Links mit ansicht=app.
+// P11 zusätzlich: "nav__bald" im gebauten HTML nur noch auf /styleguide/
+// erlaubt (Plan-Abschnitt A1); Bildgrenze 200.000 Byte statt 200 KiB
+// (Plan-Abschnitt B3).
 
 import puppeteer from "puppeteer-core";
 import { readFileSync, existsSync, statSync, mkdirSync, writeFileSync, readdirSync } from "node:fs";
@@ -37,7 +40,7 @@ const AXE_REGELN = [
   "button-name", "landmark-one-main", "page-has-heading-one",
 ];
 const BILD_ENDUNGEN = new Set([".png", ".jpg", ".jpeg", ".webp", ".avif", ".gif", ".svg"]);
-const MAX_BILD_BYTES = 200 * 1024;
+const MAX_BILD_BYTES = 200_000; // P11, Plan-Abschnitt B3: 200.000 Byte, nicht 200 KiB (vorher 200 * 1024)
 
 function warte(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -150,6 +153,17 @@ async function pruefeSeite(browser, seitenPfad, axeSkript, bericht) {
     }
   }
   await page.setViewport({ width: 1440, height: 900 });
+  // P11-Korrektur (außerhalb des eigentlichen P11-Auftrags, siehe
+  // Abschlussbericht "Abweichungen"): kurz auf CSS-Übergänge warten, bevor
+  // Tippziele/axe-core gemessen werden. Der Breiten-Zyklus oben springt über
+  // die 1024px-Grenze, an der .knopf seinen Hintergrund wechselt
+  // (transparent im Menü-Panel <1024px vs. --blau-700 ab 1024px, ".knopf {
+  // transition: background var(--t-kurz) }" in base.css, vorbestehend/
+  // unverändert) – ohne Wartezeit hat axe-core diesen Übergang schon beim
+  // ersten Lauf nach P11 gelegentlich mitten in der Animation gemessen
+  // (halbtransparenter Zwischenwert, schlechter Kontrast). Gleiches Muster
+  // wie die Wartezeit nach dem Burger-Menü-Klick weiter unten.
+  await warte(200);
 
   // --- Tippziele ≥ 44×44 (Ausnahme: Links im Fließtext von p/li) ---
   const tippzieleFehler = await page.evaluate(() => {
@@ -217,6 +231,17 @@ async function pruefeSeite(browser, seitenPfad, axeSkript, bericht) {
     ) continue;
     if (!pruefeDateiExistiertFuerLink(seitenPfad, href)) {
       ergebnisSeite.fehler.push(`interner Link ohne Ziel: '${href}'`);
+    }
+  }
+
+  // --- P11, Plan-Abschnitt A1: "nav__bald" darf im gebauten HTML nur noch auf
+  // /styleguide/ vorkommen (dort nur als Text in einem <code>-Element, das
+  // die Konvention beschreibt) – alle anderen Seiten haben inzwischen echte
+  // Ziel-Seiten für jeden ehemaligen Platzhalter. ---
+  if (seitenPfad !== "/styleguide/") {
+    const enthaeltNavBald = await page.evaluate(() => document.documentElement.outerHTML.includes("nav__bald"));
+    if (enthaeltNavBald) {
+      ergebnisSeite.fehler.push(`"nav__bald" im gebauten HTML gefunden (erlaubt nur auf /styleguide/)`);
     }
   }
 

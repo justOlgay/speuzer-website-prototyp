@@ -40,7 +40,7 @@ function personKarte(person, daten) {
         daten,
         name: person.foto.quelle,
         alt: person.name ? `Porträt ${person.name}` : "",
-        sizes: "(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw",
+        sizes: "(min-width: 640px) 260px, 50vw",
         klasse: "person__bild",
       })
     : `<span class="person__bild person__bild--platzhalter" aria-hidden="true">${liesWappenBlau()}</span>`;
