@@ -155,6 +155,46 @@ function seiteKopfFuss() {
 <p class="inhalt">Die Kopfzeile mit Hauptnavigation (sechs Punkte, ab 1024px als Leiste, darunter als Burger-Menü) und der Fußbereich sind auf dieser Seite bereits live zu sehen – oben und unten. Ziele, deren Seite im aktuellen Paket noch nicht existiert, erscheinen gedämpft und ohne Link (<code>.nav__bald</code>); sobald die Seite gebaut ist, wird automatisch ein Link daraus.</p>`;
 }
 
+// ---------- Prüfung (P11, Plan-Abschnitt D) ----------
+// Nur, wenn data/lighthouse.json existiert (tools/lighthouse.mjs schreibt sie
+// – ladeDaten() in tools/build.mjs liest data/*.json automatisch ein, hier
+// also daten.lighthouse). Gleiches "Zahlen"-Baustein-Muster wie
+// verein/index.mjs#zahlenAbschnitt (.raster.raster--4 mit .zahl/.zahl__wert/
+// .zahl__label).
+function seitePruefung(daten) {
+  const lh = daten.lighthouse;
+  if (!lh) return "";
+
+  const zahlen = [
+    [String(lh.minimum.performance), "Performance"],
+    [String(lh.minimum.accessibility), "Accessibility"],
+    [String(lh.minimum.bestPractices), "Best Practices"],
+    [String(lh.minimum.seo), "SEO"],
+  ];
+  const kacheln = zahlen
+    .map(
+      ([wert, label]) => `<div class="zahl">
+        <span class="zahl__wert">${escapeHtml(wert)}</span>
+        <span class="zahl__label">${escapeHtml(label)}</span>
+      </div>`
+    )
+    .join("\n      ");
+
+  // .zahl__wert/.zahl__label sind für den dunkelblauen Hintergrund von
+  // .abschnitt--blau ausgelegt (Weiß/--blau-100, siehe komponenten.css) – wie
+  // im echten Einsatz (verein/index.mjs#zahlenAbschnitt) hier in denselben
+  // Hintergrund gepackt, sonst reicht der Kontrast auf der sonst weißen
+  // Styleguide-Fläche nicht (axe-core color-contrast). Gleiches Muster wie
+  // heroBeispiel/heroFaktenBeispiel weiter unten in dieser Datei.
+  return `<h2>Prüfung</h2>
+<p class="inhalt">Lighthouse mobil, Minimum über alle ${lh.seiten.length} Seiten, Stand ${datumLang(lh.stand)}</p>
+<div class="abschnitt--blau" style="border-radius:var(--r-lg);padding:var(--sp-5);">
+  <div class="raster raster--4">
+    ${kacheln}
+  </div>
+</div>`;
+}
+
 function seiteBausteine(daten) {
   const teams = daten.teams ?? [];
   const teamNachSlug = Object.fromEntries(teams.map((t) => [t.slug, t]));
@@ -291,7 +331,7 @@ function seiteBausteine(daten) {
   const heroBeispiel = `<div class="abschnitt--blau" style="border-radius:var(--r-lg);padding:var(--sp-6);">
     <p class="hero__kicker">Frankfurter Fußballverein Sportfreunde 1904 e.V. · Gallus</p>
     <p class="hero__titel">Fußball im Gallus – seit 1904.</p>
-    <p class="hero__lead">Elf Fußballmannschaften von der G-Jugend bis zu den Herren, eine Karnevalabteilung und ein eigener Platz an der Mainzer Landstraße. Wir sind ein Verein für Menschen: Gemeinschaft, Respekt und Freude am Spiel.</p>
+    <p class="hero__lead">Elf Fußballmannschaften von den Herren bis zur G-Jugend, eine Karnevalabteilung und ein eigener Platz an der Mainzer Landstraße. Wir sind ein Verein für Menschen: Gemeinschaft, Respekt und Freude am Spiel.</p>
   </div>`;
 
   const heroFaktenBeispiel = `<div class="abschnitt--blau" style="border-radius:var(--r-lg);padding:var(--sp-5);">
@@ -728,6 +768,7 @@ export function seite(daten) {
   ${seiteWappen()}
   ${seiteKopfFuss()}
   ${seiteBausteine(daten)}
+  ${seitePruefung(daten)}
   </div>
 </section>
 <style>

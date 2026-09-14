@@ -29,7 +29,9 @@ function escapeHtml(text) {
 // src/seiten/index.mjs#aktuellesAbschnitt): bild_passung "contain" auf
 // --blau-900, sonst zugeschnitten. Ohne Bild: Kopfzeile in --blau-100 mit
 // zentriertem Wappen (.karte__bild--leer, P6-Ergänzung in komponenten.css).
-function newsBildHtml(eintrag, daten) {
+// prioritaet (P11, Plan-Abschnitt B3): nur beim ersten Bild dieser Seite
+// gesetzt (siehe listeAbschnitt() unten).
+function newsBildHtml(eintrag, daten, { prioritaet = false } = {}) {
   if (eintrag.bild) {
     const passungKlasse = eintrag.bild_passung === "contain" ? " karte__bild--contain" : "";
     return bild({
@@ -37,17 +39,18 @@ function newsBildHtml(eintrag, daten) {
       daten,
       name: eintrag.bild.replace(/\.[^./]+$/, ""),
       alt: eintrag.alt ?? "",
-      sizes: "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw",
+      sizes: "(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw",
       klasse: `karte__bild${passungKlasse}`,
+      prioritaet,
     });
   }
   return `<span class="karte__bild--leer" aria-hidden="true">${liesWappenBlau()}</span>`;
 }
 
-function newsKarte(eintrag, daten) {
+function newsKarte(eintrag, daten, { prioritaet = false } = {}) {
   const ziel = `${PFAD}news/${String(eintrag.datum).slice(0, 10)}-${eintrag.slug}/`;
   return `<a class="karte karte--link" href="${ziel}">
-      ${newsBildHtml(eintrag, daten)}
+      ${newsBildHtml(eintrag, daten, { prioritaet })}
       <p class="karte__meta">${datumLang(eintrag.datum)} · ${escapeHtml(eintrag.quelle)}</p>
       <h2 class="karte__titel">${escapeHtml(eintrag.titel)}</h2>
       <p>${escapeHtml(teaser(eintrag.text))}</p>
@@ -70,7 +73,7 @@ function listeAbschnitt(daten) {
     .slice()
     .sort((a, b) => String(b.datum).localeCompare(String(a.datum)));
 
-  const karten = eintraege.map((n) => newsKarte(n, daten)).join("\n    ");
+  const karten = eintraege.map((n, i) => newsKarte(n, daten, { prioritaet: i === 0 })).join("\n    ");
 
   return `<section class="abschnitt">
   <div class="container fluss">

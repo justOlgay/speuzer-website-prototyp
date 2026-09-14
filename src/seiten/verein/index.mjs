@@ -44,6 +44,8 @@ function linkKarte(titel, meta, ziel) {
 
 // Personen-Karte (Kinderschutzbeauftragter) – mit Foto oder Wappen-Platzhalter
 // bei --blau-100 (siehe .person__bild--platzhalter in komponenten.css).
+// prioritaet:true fest (P11, Plan-Abschnitt B3: "die Personen-Karte
+// Kinderschutz auf /verein/" – die einzige Personen-Karte dieser Seite).
 function personKarte(person, daten) {
   const bildHtml = person?.foto
     ? bild({
@@ -51,8 +53,9 @@ function personKarte(person, daten) {
         daten,
         name: person.foto.quelle,
         alt: person.name ? `Porträt ${person.name}` : "",
-        sizes: "(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw",
+        sizes: "(min-width: 640px) 260px, 50vw",
         klasse: "person__bild",
+        prioritaet: true,
       })
     : `<span class="person__bild person__bild--platzhalter" aria-hidden="true">${liesWappenBlau()}</span>`;
   const nameHtml = person?.name ? escapeHtml(person.name) : "derzeit nicht besetzt";
@@ -101,7 +104,7 @@ function geschichteAbschnitt(daten) {
   return `<section class="abschnitt">
   <div class="container fluss">
     <p class="inhalt">Gegründet wurde der Verein am 15. Mai 1904 als Frankfurter FC Britannia. Nach dem Ersten Weltkrieg erhielt er 1919 seinen heutigen Namen. Der sportliche Höhepunkt war die Saison 1955/56 in der 1. Amateurliga Hessen; seit den 1960er Jahren spielen die Sportfreunde in den Klassen des Fußballkreises Frankfurt.</p>
-    <p class="inhalt">Heute stellt der Verein elf Fußballmannschaften – von der G-Jugend bis zur 1. Herrenmannschaft – und die Karnevalabteilung „Die Schnauzer“ mit fünf Gruppen. Trainiert und gespielt wird auf dem eigenen Platz an der Mainzer Landstraße 480; die Herren tragen ihre Heimspiele auf der Anlage am Rebstock aus.</p>
+    <p class="inhalt">Heute stellt der Verein elf Fußballmannschaften – von der 1. Herrenmannschaft bis zur G-Jugend – und die Karnevalabteilung „Die Schnauzer“ mit fünf Gruppen. Trainiert und gespielt wird auf dem eigenen Platz an der Mainzer Landstraße 480; die Herren tragen ihre Heimspiele auf der Anlage am Rebstock aus.</p>
     <p class="inhalt">Unser Leitsatz aus der Vereinsphilosophie: „Wir wollen nicht nur erfolgreiche Mannschaften entwickeln, sondern erfolgreiche Menschen und einen starken Verein für kommende Generationen.“ Unsere Werte sind Gemeinschaft, Respekt, Wertschätzung, Verantwortung, Fairness, Entwicklung und Kinderschutz.</p>
     <p class="knopfzeile">
       ${downloadKnopf(philosophie, "Vereinsphilosophie lesen (PDF, 50 Seiten)")}

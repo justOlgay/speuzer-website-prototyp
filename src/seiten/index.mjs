@@ -30,13 +30,6 @@ function telHref(nummer) {
   return "tel:" + String(nummer ?? "").replace(/[^\d+]/g, "");
 }
 
-// Platzhalter für Seiten, die im aktuellen Paket noch nicht existieren –
-// gleiches Muster wie header.mjs/footer.mjs (siehe navigation.mjs).
-function baldSpan(titel, { knopf = false } = {}) {
-  const klassen = ["nav__bald", knopf ? "knopf" : null].filter(Boolean).join(" ");
-  return `<span class="${klassen}" aria-disabled="true" title="Seite folgt">${escapeHtml(titel)}</span>`;
-}
-
 // ---------- D1: Hero (K1: Anordnung < 1024px geändert) ----------
 
 // P7: /mitglied-werden/ existiert jetzt – echter Link statt baldSpan(). Anders
@@ -55,7 +48,7 @@ function heroAbschnitt(daten) {
     </div>
     <div class="hero__inhalt">
       <h1 class="hero__titel">Fußball im Gallus – seit 1904.</h1>
-      <p class="hero__lead">Elf Fußballmannschaften von der G-Jugend bis zu den Herren, eine Karnevalabteilung und ein eigener Platz an der Mainzer Landstraße. Wir sind ein Verein für Menschen: Gemeinschaft, Respekt und Freude am Spiel.</p>
+      <p class="hero__lead">Elf Fußballmannschaften von den Herren bis zur G-Jugend, eine Karnevalabteilung und ein eigener Platz an der Mainzer Landstraße. Wir sind ein Verein für Menschen: Gemeinschaft, Respekt und Freude am Spiel.</p>
       <p class="knopfzeile">
         <a class="knopf knopf--weiss knopf--gross" href="${escapeHtml(PROBETRAINING_MAILTO)}">Probetraining vereinbaren</a>
         <a class="knopf" href="${PFAD}mitglied-werden/">Mitglied werden</a>
@@ -106,7 +99,7 @@ function trainingszeitenAbschnitt(daten) {
         .map((t) => `<span>${escapeHtml(TAG_KUERZEL[t.tag] ?? t.tag)} ${escapeHtml(t.von)}–${escapeHtml(t.bis)}</span>`)
         .join("\n        ");
       return `<li class="trainingsraster__zeile">
-        <span class="trainingsraster__name">${baldSpan(team.name)}</span>
+        <a class="trainingsraster__name" href="${PFAD}mannschaften/${team.slug}/">${escapeHtml(team.name)}</a>
         <span class="trainingsraster__jahrgang meta">${escapeHtml(jahrgangText(team))}</span>
         <span class="trainingsraster__einheiten">
         ${einheiten}
@@ -129,7 +122,7 @@ function trainingszeitenAbschnitt(daten) {
       <p style="margin:0;">${escapeHtml(verein.hinweise?.ferien ?? "")}</p>
     </div>
     <p class="knopfzeile">
-      ${baldSpan("Zu den Mannschaften", { knopf: true })}
+      <a class="knopf" href="${PFAD}mannschaften/">Zu den Mannschaften</a>
     </p>
   </div>
 </section>`;
@@ -144,7 +137,7 @@ function aktuellesAbschnitt(daten) {
     .slice(0, 2);
 
   const karten = neueste
-    .map((n) => {
+    .map((n, i) => {
       const passungKlasse = n.bild_passung === "contain" ? " karte__bild--contain" : "";
       const bildHtml = n.bild
         ? bild({
@@ -154,6 +147,8 @@ function aktuellesAbschnitt(daten) {
             alt: n.alt ?? "",
             sizes: "(min-width: 1024px) 50vw, 100vw",
             klasse: `karte__bild${passungKlasse}`,
+            // P11, Plan-Abschnitt B3: "die erste 'Aktuelles'-Karte auf /".
+            prioritaet: i === 0,
           })
         : "";
       const teaserText = teaser(n.text);
@@ -174,7 +169,7 @@ function aktuellesAbschnitt(daten) {
     ${karten}
     </div>
     <p class="knopfzeile">
-      ${baldSpan("Alle Meldungen", { knopf: true })}
+      <a class="knopf" href="${PFAD}news/">Alle Meldungen</a>
     </p>
   </div>
 </section>`;

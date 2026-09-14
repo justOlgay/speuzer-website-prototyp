@@ -24,13 +24,14 @@
 <script>
 if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentElement.classList.add("ansicht-app");
 </script>
-<link rel="preload" href="../../assets/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../assets/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../../assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../../assets/css/tokens.css">
-<link rel="stylesheet" href="../../assets/css/fonts.css">
-<link rel="stylesheet" href="../../assets/css/base.css">
-<link rel="stylesheet" href="../../assets/css/komponenten.css">
-<link rel="stylesheet" href="../../assets/css/app-modus.css">
+<!-- P11, Plan-Abschnitt B2: ein gebündeltes, minifiziertes Stylesheet statt
+     fünf einzelner Requests (weniger render-blockierende Anfragen). Die
+     Einzeldateien liegen weiterhin unter assets/css/ (siehe tools/build.mjs,
+     baueCssBuendel()) – der Styleguide verweist auf sie als Quelltext. -->
+<link rel="stylesheet" href="../../assets/css/site.css">
 <script src="../../assets/js/nav.js" defer></script>
 </head>
 <body class="">
@@ -82,7 +83,7 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
     <picture>
   <source type="image/avif" srcset="../../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-480.avif 480w, ../../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-960.avif 960w, ../../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-1080.avif 1080w" sizes="(min-width: 720px) 720px, 100vw">
   <source type="image/webp" srcset="../../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-480.webp 480w, ../../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-960.webp 960w, ../../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-1080.webp 1080w" sizes="(min-width: 720px) 720px, 100vw">
-  <img src="../../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-960.jpg" srcset="../../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-480.jpg 480w, ../../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-960.jpg 960w, ../../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-1080.jpg 1080w" sizes="(min-width: 720px) 720px, 100vw" width="1080" height="720" alt="Grafik der Aktion Scheine für Vereine mit dem Wappen der Sportfreunde und REWE-Vereinsscheinen" loading="eager" decoding="async">
+  <img src="../../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-960.jpg" srcset="../../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-480.jpg 480w, ../../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-960.jpg 960w, ../../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-1080.jpg 1080w" sizes="(min-width: 720px) 720px, 100vw" width="1080" height="720" alt="Grafik der Aktion Scheine für Vereine mit dem Wappen der Sportfreunde und REWE-Vereinsscheinen" fetchpriority="high" loading="eager" decoding="sync">
 </picture>
     <figcaption class="meta">Grafik der Aktion Scheine für Vereine mit dem Wappen der Sportfreunde und REWE-Vereinsscheinen</figcaption>
   </figure>

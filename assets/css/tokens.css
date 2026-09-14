@@ -27,9 +27,13 @@
   --warn-bg: #FBF4EA;
   --wappen: #0300FD;
 
-  /* Schrift: zwei Familien, Skala modular 1,25 auf fluider Basis 16→17px */
-  --font-head: "Barlow Condensed", "Arial Narrow", sans-serif;
-  --font-text: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Schrift: zwei Familien, Skala modular 1,25 auf fluider Basis 16→17px.
+     P11, Plan-Abschnitt B1: je eine Fallback-Schrift mit an den Webfont
+     angepassten Metriken (fonts.css) zwischen Webfont und generischem
+     Stapel, damit der Schriftwechsel beim Laden keinen Layoutsprung (CLS)
+     mehr erzeugt. */
+  --font-head: "Barlow Condensed", "Barlow Condensed Fallback", "Arial Narrow", sans-serif;
+  --font-text: "Inter", "Inter Fallback", system-ui, sans-serif;
   --fs-xs: .8rem;
   --fs-sm: .9rem;
   --fs-md: 1rem;

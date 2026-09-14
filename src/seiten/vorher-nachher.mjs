@@ -55,7 +55,7 @@ function seitenkopfAbschnitt(daten) {
 // ---------- Ein Vergleichspaar ----------
 
 function vergleichPaar(daten, { titel, handy, vorher, nachher, satz }) {
-  const sizes = handy ? "390px" : "(min-width: 768px) 50vw, 100vw";
+  const sizes = handy ? "390px" : "(min-width: 768px) 560px, 100vw";
   const vorherHtml = bild({ pfad: PFAD, daten, name: vorher.name, alt: vorher.alt, sizes });
   const nachherHtml = bild({ pfad: PFAD, daten, name: nachher.name, alt: nachher.alt, sizes });
 

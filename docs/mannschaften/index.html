@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mannschaften – FFV Sportfreunde 04</title>
-<meta name="description" content="Alle elf Fußballmannschaften des FFV Sportfreunde 04 in Frankfurt-Gallus: Jahrgänge, Trainingszeiten, Ansprechpartner und Spielpläne von der G-Jugend bis zu den Herren.">
+<meta name="description" content="Alle elf Fußballmannschaften des FFV Sportfreunde 04 in Frankfurt-Gallus: Jahrgänge, Trainingszeiten, Ansprechpartner und Spielpläne von den Herren bis zur G-Jugend.">
 <link rel="canonical" href="https://justolgay.github.io/speuzer-website-prototyp/mannschaften/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="FFV Sportfreunde 04">
 <meta property="og:title" content="Mannschaften – FFV Sportfreunde 04">
-<meta property="og:description" content="Alle elf Fußballmannschaften des FFV Sportfreunde 04 in Frankfurt-Gallus: Jahrgänge, Trainingszeiten, Ansprechpartner und Spielpläne von der G-Jugend bis zu den Herren.">
+<meta property="og:description" content="Alle elf Fußballmannschaften des FFV Sportfreunde 04 in Frankfurt-Gallus: Jahrgänge, Trainingszeiten, Ansprechpartner und Spielpläne von den Herren bis zur G-Jugend.">
 <meta property="og:url" content="https://justolgay.github.io/speuzer-website-prototyp/mannschaften/">
 <meta property="og:image" content="https://justolgay.github.io/speuzer-website-prototyp/assets/og/standard.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -24,13 +24,14 @@
 <script>
 if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentElement.classList.add("ansicht-app");
 </script>
-<link rel="preload" href="../assets/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../assets/css/tokens.css">
-<link rel="stylesheet" href="../assets/css/fonts.css">
-<link rel="stylesheet" href="../assets/css/base.css">
-<link rel="stylesheet" href="../assets/css/komponenten.css">
-<link rel="stylesheet" href="../assets/css/app-modus.css">
+<!-- P11, Plan-Abschnitt B2: ein gebündeltes, minifiziertes Stylesheet statt
+     fünf einzelner Requests (weniger render-blockierende Anfragen). Die
+     Einzeldateien liegen weiterhin unter assets/css/ (siehe tools/build.mjs,
+     baueCssBuendel()) – der Styleguide verweist auf sie als Quelltext. -->
+<link rel="stylesheet" href="../assets/css/site.css">
 <script src="../assets/js/nav.js" defer></script>
 </head>
 <body class="">
@@ -76,7 +77,7 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
 <section class="abschnitt seitenkopf">
   <div class="container">
     <h1>Mannschaften</h1>
-    <p class="seitenkopf__lead">Elf Fußballmannschaften von der G-Jugend bis zu den Herren. Für jedes Team findest du hier Jahrgang, Trainingszeiten, Ansprechpartner und den Weg zum Spielplan.</p>
+    <p class="seitenkopf__lead">Elf Fußballmannschaften von den Herren bis zur G-Jugend. Für jedes Team findest du hier Jahrgang, Trainingszeiten, Ansprechpartner und den Weg zum Spielplan.</p>
   </div>
 </section>
 <section class="abschnitt">

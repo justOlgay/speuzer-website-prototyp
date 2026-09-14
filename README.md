@@ -7,6 +7,9 @@ auf sportfreunde04.de oder in appack übernommen.
 Die Inhalte stammen von der Live-Seite sportfreunde04.de sowie aus den öffentlichen
 appack- und fussball.de-Schnittstellen, **Stand 11.09.2026**.
 
+Der Prototyp ist indexierbar, damit die Lighthouse-SEO-Prüfung (is-crawlable) bestanden
+wird; er kennzeichnet sich auf jeder Seite als Testumgebung.
+
 ## Aufbau der Ordner
 
 ```
@@ -40,4 +43,11 @@ npm run vergleich
                   Bedarf selbst wie oben). Die neun "vorher"-Screenshots der Live-Seite
                   liegen dort bereits fertig und anonymisiert; anschließend npm run
                   bilder ausführen.
+npm run lighthouse
+                  Prüft alle Seiten aus docs/sitemap.xml mit Lighthouse (lokal, mobil,
+                  `npx --no-install lighthouse` je Seite, startet den lokalen Server bei
+                  Bedarf selbst). Bei einer Kategorie unter 90 bis zu zwei Wiederholungen,
+                  der beste Lauf zählt. Schreibt data/lighthouse.json und
+                  tools/cache/lighthouse.md, bricht mit Exit 1 ab, wenn eine Kategorie im
+                  Minimum über alle Seiten unter 90 bleibt. Dauer: 20–40 Minuten.
 ```

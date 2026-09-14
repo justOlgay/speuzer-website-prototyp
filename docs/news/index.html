@@ -24,13 +24,14 @@
 <script>
 if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentElement.classList.add("ansicht-app");
 </script>
-<link rel="preload" href="../assets/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../assets/css/tokens.css">
-<link rel="stylesheet" href="../assets/css/fonts.css">
-<link rel="stylesheet" href="../assets/css/base.css">
-<link rel="stylesheet" href="../assets/css/komponenten.css">
-<link rel="stylesheet" href="../assets/css/app-modus.css">
+<!-- P11, Plan-Abschnitt B2: ein gebündeltes, minifiziertes Stylesheet statt
+     fünf einzelner Requests (weniger render-blockierende Anfragen). Die
+     Einzeldateien liegen weiterhin unter assets/css/ (siehe tools/build.mjs,
+     baueCssBuendel()) – der Styleguide verweist auf sie als Quelltext. -->
+<link rel="stylesheet" href="../assets/css/site.css">
 <script src="../assets/js/nav.js" defer></script>
 </head>
 <body class="">
@@ -85,9 +86,9 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
     <div class="raster raster--3">
     <a class="karte karte--link" href="../news/2026-09-10-heimsieg-am-rebstock/">
       <picture class="karte__bild karte__bild--contain">
-  <source type="image/avif" srcset="../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-480.avif 480w, ../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-960.avif 960w, ../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-1254.avif 1254w" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw">
-  <source type="image/webp" srcset="../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-480.webp 480w, ../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-960.webp 960w, ../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-1254.webp 1254w" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw">
-  <img src="../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-960.jpg" srcset="../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-480.jpg 480w, ../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-960.jpg 960w, ../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-1254.jpg 1254w" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" width="1254" height="1254" alt="Spielgrafik: Jubelnde Spieler der Sportfreunde in Blau, Endstand 4:1 gegen die TSG Niederrad 1898" loading="lazy" decoding="async">
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-480.avif 480w, ../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-960.avif 960w, ../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-1254.avif 1254w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-480.webp 480w, ../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-960.webp 960w, ../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-1254.webp 1254w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw">
+  <img src="../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-960.jpg" srcset="../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-480.jpg 480w, ../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-960.jpg 960w, ../assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-1254.jpg 1254w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw" width="1254" height="1254" alt="Spielgrafik: Jubelnde Spieler der Sportfreunde in Blau, Endstand 4:1 gegen die TSG Niederrad 1898" fetchpriority="high" loading="eager" decoding="sync">
 </picture>
       <p class="karte__meta">Donnerstag, 10. September 2026 · App-News</p>
       <h2 class="karte__titel">Heimsieg am Rebstock: 4:1 gegen die TSG Niederrad</h2>
@@ -96,9 +97,9 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
     </a>
     <a class="karte karte--link" href="../news/2026-09-07-arbeitstag-19-september/">
       <picture class="karte__bild karte__bild--contain">
-  <source type="image/avif" srcset="../assets/bilder/erzeugt/news-arbeitstag-2026-09-19-480.avif 480w, ../assets/bilder/erzeugt/news-arbeitstag-2026-09-19-960.avif 960w, ../assets/bilder/erzeugt/news-arbeitstag-2026-09-19-1024.avif 1024w" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw">
-  <source type="image/webp" srcset="../assets/bilder/erzeugt/news-arbeitstag-2026-09-19-480.webp 480w, ../assets/bilder/erzeugt/news-arbeitstag-2026-09-19-960.webp 960w, ../assets/bilder/erzeugt/news-arbeitstag-2026-09-19-1024.webp 1024w" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw">
-  <img src="../assets/bilder/erzeugt/news-arbeitstag-2026-09-19-960.jpg" srcset="../assets/bilder/erzeugt/news-arbeitstag-2026-09-19-480.jpg 480w, ../assets/bilder/erzeugt/news-arbeitstag-2026-09-19-960.jpg 960w, ../assets/bilder/erzeugt/news-arbeitstag-2026-09-19-1024.jpg 1024w" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" width="1024" height="1536" alt="Plakat zum Arbeitstag am 19.09.2026 ab 10 Uhr mit Schubkarre und Gartenwerkzeug auf dem Sportplatz" loading="lazy" decoding="async">
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/news-arbeitstag-2026-09-19-480.avif 480w, ../assets/bilder/erzeugt/news-arbeitstag-2026-09-19-960.avif 960w, ../assets/bilder/erzeugt/news-arbeitstag-2026-09-19-1024.avif 1024w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/news-arbeitstag-2026-09-19-480.webp 480w, ../assets/bilder/erzeugt/news-arbeitstag-2026-09-19-960.webp 960w, ../assets/bilder/erzeugt/news-arbeitstag-2026-09-19-1024.webp 1024w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw">
+  <img src="../assets/bilder/erzeugt/news-arbeitstag-2026-09-19-960.jpg" srcset="../assets/bilder/erzeugt/news-arbeitstag-2026-09-19-480.jpg 480w, ../assets/bilder/erzeugt/news-arbeitstag-2026-09-19-960.jpg 960w, ../assets/bilder/erzeugt/news-arbeitstag-2026-09-19-1024.jpg 1024w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw" width="1024" height="1536" alt="Plakat zum Arbeitstag am 19.09.2026 ab 10 Uhr mit Schubkarre und Gartenwerkzeug auf dem Sportplatz" loading="lazy" decoding="async">
 </picture>
       <p class="karte__meta">Montag, 7. September 2026 · App-News</p>
       <h2 class="karte__titel">Arbeitstag am 19. September: Viele Hände für unseren Platz</h2>
@@ -107,9 +108,9 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
     </a>
     <a class="karte karte--link" href="../news/2026-09-07-rewe-scheine-fuer-vereine/">
       <picture class="karte__bild karte__bild--contain">
-  <source type="image/avif" srcset="../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-480.avif 480w, ../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-960.avif 960w, ../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-1080.avif 1080w" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw">
-  <source type="image/webp" srcset="../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-480.webp 480w, ../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-960.webp 960w, ../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-1080.webp 1080w" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw">
-  <img src="../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-960.jpg" srcset="../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-480.jpg 480w, ../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-960.jpg 960w, ../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-1080.jpg 1080w" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" width="1080" height="720" alt="Grafik der Aktion Scheine für Vereine mit dem Wappen der Sportfreunde und REWE-Vereinsscheinen" loading="lazy" decoding="async">
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-480.avif 480w, ../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-960.avif 960w, ../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-1080.avif 1080w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-480.webp 480w, ../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-960.webp 960w, ../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-1080.webp 1080w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw">
+  <img src="../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-960.jpg" srcset="../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-480.jpg 480w, ../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-960.jpg 960w, ../assets/bilder/erzeugt/news-rewe-scheine-fuer-vereine-1080.jpg 1080w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw" width="1080" height="720" alt="Grafik der Aktion Scheine für Vereine mit dem Wappen der Sportfreunde und REWE-Vereinsscheinen" loading="lazy" decoding="async">
 </picture>
       <p class="karte__meta">Montag, 7. September 2026 · App-News</p>
       <h2 class="karte__titel">REWE „Scheine für Vereine“: Wir sind wieder dabei</h2>
@@ -118,9 +119,9 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
     </a>
     <a class="karte karte--link" href="../news/2026-09-06-heimsieg-gegen-sw-griesheim/">
       <picture class="karte__bild karte__bild--contain">
-  <source type="image/avif" srcset="../assets/bilder/erzeugt/news-heimsieg-sw-griesheim-2026-09-06-480.avif 480w, ../assets/bilder/erzeugt/news-heimsieg-sw-griesheim-2026-09-06-960.avif 960w, ../assets/bilder/erzeugt/news-heimsieg-sw-griesheim-2026-09-06-1024.avif 1024w" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw">
-  <source type="image/webp" srcset="../assets/bilder/erzeugt/news-heimsieg-sw-griesheim-2026-09-06-480.webp 480w, ../assets/bilder/erzeugt/news-heimsieg-sw-griesheim-2026-09-06-960.webp 960w, ../assets/bilder/erzeugt/news-heimsieg-sw-griesheim-2026-09-06-1024.webp 1024w" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw">
-  <img src="../assets/bilder/erzeugt/news-heimsieg-sw-griesheim-2026-09-06-960.jpg" srcset="../assets/bilder/erzeugt/news-heimsieg-sw-griesheim-2026-09-06-480.jpg 480w, ../assets/bilder/erzeugt/news-heimsieg-sw-griesheim-2026-09-06-960.jpg 960w, ../assets/bilder/erzeugt/news-heimsieg-sw-griesheim-2026-09-06-1024.jpg 1024w" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" width="1024" height="1536" alt="Spielgrafik: Spieler der ersten Mannschaft im Kreis, Endstand 3:2 gegen DJK SW Griesheim" loading="lazy" decoding="async">
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/news-heimsieg-sw-griesheim-2026-09-06-480.avif 480w, ../assets/bilder/erzeugt/news-heimsieg-sw-griesheim-2026-09-06-960.avif 960w, ../assets/bilder/erzeugt/news-heimsieg-sw-griesheim-2026-09-06-1024.avif 1024w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/news-heimsieg-sw-griesheim-2026-09-06-480.webp 480w, ../assets/bilder/erzeugt/news-heimsieg-sw-griesheim-2026-09-06-960.webp 960w, ../assets/bilder/erzeugt/news-heimsieg-sw-griesheim-2026-09-06-1024.webp 1024w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw">
+  <img src="../assets/bilder/erzeugt/news-heimsieg-sw-griesheim-2026-09-06-960.jpg" srcset="../assets/bilder/erzeugt/news-heimsieg-sw-griesheim-2026-09-06-480.jpg 480w, ../assets/bilder/erzeugt/news-heimsieg-sw-griesheim-2026-09-06-960.jpg 960w, ../assets/bilder/erzeugt/news-heimsieg-sw-griesheim-2026-09-06-1024.jpg 1024w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw" width="1024" height="1536" alt="Spielgrafik: Spieler der ersten Mannschaft im Kreis, Endstand 3:2 gegen DJK SW Griesheim" loading="lazy" decoding="async">
 </picture>
       <p class="karte__meta">Sonntag, 6. September 2026 · App-News</p>
       <h2 class="karte__titel">Der Knoten ist geplatzt: 3:2-Heimsieg gegen DJK SW Griesheim</h2>
@@ -169,9 +170,9 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
     </a>
     <a class="karte karte--link" href="../news/2026-07-21-grossbaustelle-parkplatz/">
       <picture class="karte__bild">
-  <source type="image/avif" srcset="../assets/bilder/erzeugt/news-baustelle-parkplatz-2026-07-480.avif 480w, ../assets/bilder/erzeugt/news-baustelle-parkplatz-2026-07-960.avif 960w, ../assets/bilder/erzeugt/news-baustelle-parkplatz-2026-07-1440.avif 1440w" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw">
-  <source type="image/webp" srcset="../assets/bilder/erzeugt/news-baustelle-parkplatz-2026-07-480.webp 480w, ../assets/bilder/erzeugt/news-baustelle-parkplatz-2026-07-960.webp 960w, ../assets/bilder/erzeugt/news-baustelle-parkplatz-2026-07-1440.webp 1440w" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw">
-  <img src="../assets/bilder/erzeugt/news-baustelle-parkplatz-2026-07-960.jpg" srcset="../assets/bilder/erzeugt/news-baustelle-parkplatz-2026-07-480.jpg 480w, ../assets/bilder/erzeugt/news-baustelle-parkplatz-2026-07-960.jpg 960w, ../assets/bilder/erzeugt/news-baustelle-parkplatz-2026-07-1440.jpg 1440w" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" width="1600" height="1200" alt="Bauzaun vor dem gesperrten Parkplatz am Vereinsgelände" loading="lazy" decoding="async">
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/news-baustelle-parkplatz-2026-07-480.avif 480w, ../assets/bilder/erzeugt/news-baustelle-parkplatz-2026-07-960.avif 960w, ../assets/bilder/erzeugt/news-baustelle-parkplatz-2026-07-1440.avif 1440w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/news-baustelle-parkplatz-2026-07-480.webp 480w, ../assets/bilder/erzeugt/news-baustelle-parkplatz-2026-07-960.webp 960w, ../assets/bilder/erzeugt/news-baustelle-parkplatz-2026-07-1440.webp 1440w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw">
+  <img src="../assets/bilder/erzeugt/news-baustelle-parkplatz-2026-07-960.jpg" srcset="../assets/bilder/erzeugt/news-baustelle-parkplatz-2026-07-480.jpg 480w, ../assets/bilder/erzeugt/news-baustelle-parkplatz-2026-07-960.jpg 960w, ../assets/bilder/erzeugt/news-baustelle-parkplatz-2026-07-1440.jpg 1440w" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw" width="1600" height="1200" alt="Bauzaun vor dem gesperrten Parkplatz am Vereinsgelände" loading="lazy" decoding="async">
 </picture>
       <p class="karte__meta">Dienstag, 21. Juli 2026 · App-News</p>
       <h2 class="karte__titel">Großbaustelle: Parkplatz bis Ende Januar 2027 gesperrt</h2>

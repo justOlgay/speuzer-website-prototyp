@@ -24,13 +24,14 @@
 <script>
 if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentElement.classList.add("ansicht-app");
 </script>
-<link rel="preload" href="../../assets/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../assets/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../../assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../../assets/css/tokens.css">
-<link rel="stylesheet" href="../../assets/css/fonts.css">
-<link rel="stylesheet" href="../../assets/css/base.css">
-<link rel="stylesheet" href="../../assets/css/komponenten.css">
-<link rel="stylesheet" href="../../assets/css/app-modus.css">
+<!-- P11, Plan-Abschnitt B2: ein gebündeltes, minifiziertes Stylesheet statt
+     fünf einzelner Requests (weniger render-blockierende Anfragen). Die
+     Einzeldateien liegen weiterhin unter assets/css/ (siehe tools/build.mjs,
+     baueCssBuendel()) – der Styleguide verweist auf sie als Quelltext. -->
+<link rel="stylesheet" href="../../assets/css/site.css">
 <script src="../../assets/js/nav.js" defer></script>
 </head>
 <body class="">
@@ -85,9 +86,9 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
     <div class="raster raster--personen">
       <div class="person">
       <picture class="person__bild">
-  <source type="image/avif" srcset="../../assets/bilder/erzeugt/vorstand-melanie-seipp-480.avif 480w, ../../assets/bilder/erzeugt/vorstand-melanie-seipp-750.avif 750w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <source type="image/webp" srcset="../../assets/bilder/erzeugt/vorstand-melanie-seipp-480.webp 480w, ../../assets/bilder/erzeugt/vorstand-melanie-seipp-750.webp 750w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <img src="../../assets/bilder/erzeugt/vorstand-melanie-seipp-750.jpg" srcset="../../assets/bilder/erzeugt/vorstand-melanie-seipp-480.jpg 480w, ../../assets/bilder/erzeugt/vorstand-melanie-seipp-750.jpg 750w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw" width="750" height="1000" alt="Porträt Melanie Seipp" loading="lazy" decoding="async">
+  <source type="image/avif" srcset="../../assets/bilder/erzeugt/vorstand-melanie-seipp-480.avif 480w, ../../assets/bilder/erzeugt/vorstand-melanie-seipp-750.avif 750w" sizes="(min-width: 640px) 260px, 50vw">
+  <source type="image/webp" srcset="../../assets/bilder/erzeugt/vorstand-melanie-seipp-480.webp 480w, ../../assets/bilder/erzeugt/vorstand-melanie-seipp-750.webp 750w" sizes="(min-width: 640px) 260px, 50vw">
+  <img src="../../assets/bilder/erzeugt/vorstand-melanie-seipp-750.jpg" srcset="../../assets/bilder/erzeugt/vorstand-melanie-seipp-480.jpg 480w, ../../assets/bilder/erzeugt/vorstand-melanie-seipp-750.jpg 750w" sizes="(min-width: 640px) 260px, 50vw" width="750" height="1000" alt="Porträt Melanie Seipp" fetchpriority="high" loading="eager" decoding="sync">
 </picture>
       <p class="person__name">Melanie Seipp</p>
       <p class="person__funktion">1. Vorsitzende</p>
@@ -95,9 +96,9 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
     </div>
       <div class="person">
       <picture class="person__bild">
-  <source type="image/avif" srcset="../../assets/bilder/erzeugt/vorstand-uwe-korndorfer-480.avif 480w, ../../assets/bilder/erzeugt/vorstand-uwe-korndorfer-749.avif 749w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <source type="image/webp" srcset="../../assets/bilder/erzeugt/vorstand-uwe-korndorfer-480.webp 480w, ../../assets/bilder/erzeugt/vorstand-uwe-korndorfer-749.webp 749w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <img src="../../assets/bilder/erzeugt/vorstand-uwe-korndorfer-749.jpg" srcset="../../assets/bilder/erzeugt/vorstand-uwe-korndorfer-480.jpg 480w, ../../assets/bilder/erzeugt/vorstand-uwe-korndorfer-749.jpg 749w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw" width="749" height="1000" alt="Porträt Uwe Korndörfer" loading="lazy" decoding="async">
+  <source type="image/avif" srcset="../../assets/bilder/erzeugt/vorstand-uwe-korndorfer-480.avif 480w, ../../assets/bilder/erzeugt/vorstand-uwe-korndorfer-749.avif 749w" sizes="(min-width: 640px) 260px, 50vw">
+  <source type="image/webp" srcset="../../assets/bilder/erzeugt/vorstand-uwe-korndorfer-480.webp 480w, ../../assets/bilder/erzeugt/vorstand-uwe-korndorfer-749.webp 749w" sizes="(min-width: 640px) 260px, 50vw">
+  <img src="../../assets/bilder/erzeugt/vorstand-uwe-korndorfer-749.jpg" srcset="../../assets/bilder/erzeugt/vorstand-uwe-korndorfer-480.jpg 480w, ../../assets/bilder/erzeugt/vorstand-uwe-korndorfer-749.jpg 749w" sizes="(min-width: 640px) 260px, 50vw" width="749" height="1000" alt="Porträt Uwe Korndörfer" fetchpriority="high" loading="eager" decoding="sync">
 </picture>
       <p class="person__name">Uwe Korndörfer</p>
       <p class="person__funktion">2. Vorsitzender</p>
@@ -105,9 +106,9 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
     </div>
       <div class="person">
       <picture class="person__bild">
-  <source type="image/avif" srcset="../../assets/bilder/erzeugt/vorstand-wolfgang-schirmer-480.avif 480w, ../../assets/bilder/erzeugt/vorstand-wolfgang-schirmer-750.avif 750w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <source type="image/webp" srcset="../../assets/bilder/erzeugt/vorstand-wolfgang-schirmer-480.webp 480w, ../../assets/bilder/erzeugt/vorstand-wolfgang-schirmer-750.webp 750w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <img src="../../assets/bilder/erzeugt/vorstand-wolfgang-schirmer-750.jpg" srcset="../../assets/bilder/erzeugt/vorstand-wolfgang-schirmer-480.jpg 480w, ../../assets/bilder/erzeugt/vorstand-wolfgang-schirmer-750.jpg 750w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw" width="750" height="1000" alt="Porträt Wolfgang Schirmer" loading="lazy" decoding="async">
+  <source type="image/avif" srcset="../../assets/bilder/erzeugt/vorstand-wolfgang-schirmer-480.avif 480w, ../../assets/bilder/erzeugt/vorstand-wolfgang-schirmer-750.avif 750w" sizes="(min-width: 640px) 260px, 50vw">
+  <source type="image/webp" srcset="../../assets/bilder/erzeugt/vorstand-wolfgang-schirmer-480.webp 480w, ../../assets/bilder/erzeugt/vorstand-wolfgang-schirmer-750.webp 750w" sizes="(min-width: 640px) 260px, 50vw">
+  <img src="../../assets/bilder/erzeugt/vorstand-wolfgang-schirmer-750.jpg" srcset="../../assets/bilder/erzeugt/vorstand-wolfgang-schirmer-480.jpg 480w, ../../assets/bilder/erzeugt/vorstand-wolfgang-schirmer-750.jpg 750w" sizes="(min-width: 640px) 260px, 50vw" width="750" height="1000" alt="Porträt Wolfgang Schirmer" fetchpriority="high" loading="eager" decoding="sync">
 </picture>
       <p class="person__name">Wolfgang Schirmer</p>
       <p class="person__funktion">1. Kassierer</p>
@@ -115,9 +116,9 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
     </div>
       <div class="person">
       <picture class="person__bild">
-  <source type="image/avif" srcset="../../assets/bilder/erzeugt/vorstand-bernhard-henrich-480.avif 480w, ../../assets/bilder/erzeugt/vorstand-bernhard-henrich-960.avif 960w, ../../assets/bilder/erzeugt/vorstand-bernhard-henrich-1125.avif 1125w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <source type="image/webp" srcset="../../assets/bilder/erzeugt/vorstand-bernhard-henrich-480.webp 480w, ../../assets/bilder/erzeugt/vorstand-bernhard-henrich-960.webp 960w, ../../assets/bilder/erzeugt/vorstand-bernhard-henrich-1125.webp 1125w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <img src="../../assets/bilder/erzeugt/vorstand-bernhard-henrich-960.jpg" srcset="../../assets/bilder/erzeugt/vorstand-bernhard-henrich-480.jpg 480w, ../../assets/bilder/erzeugt/vorstand-bernhard-henrich-960.jpg 960w, ../../assets/bilder/erzeugt/vorstand-bernhard-henrich-1125.jpg 1125w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw" width="1125" height="1500" alt="Porträt Bernhard Henrich" loading="lazy" decoding="async">
+  <source type="image/avif" srcset="../../assets/bilder/erzeugt/vorstand-bernhard-henrich-480.avif 480w, ../../assets/bilder/erzeugt/vorstand-bernhard-henrich-960.avif 960w, ../../assets/bilder/erzeugt/vorstand-bernhard-henrich-1125.avif 1125w" sizes="(min-width: 640px) 260px, 50vw">
+  <source type="image/webp" srcset="../../assets/bilder/erzeugt/vorstand-bernhard-henrich-480.webp 480w, ../../assets/bilder/erzeugt/vorstand-bernhard-henrich-960.webp 960w, ../../assets/bilder/erzeugt/vorstand-bernhard-henrich-1125.webp 1125w" sizes="(min-width: 640px) 260px, 50vw">
+  <img src="../../assets/bilder/erzeugt/vorstand-bernhard-henrich-960.jpg" srcset="../../assets/bilder/erzeugt/vorstand-bernhard-henrich-480.jpg 480w, ../../assets/bilder/erzeugt/vorstand-bernhard-henrich-960.jpg 960w, ../../assets/bilder/erzeugt/vorstand-bernhard-henrich-1125.jpg 1125w" sizes="(min-width: 640px) 260px, 50vw" width="1125" height="1500" alt="Porträt Bernhard Henrich" fetchpriority="high" loading="eager" decoding="sync">
 </picture>
       <p class="person__name">Bernhard Henrich</p>
       <p class="person__funktion">2. Kassierer</p>
@@ -171,9 +172,9 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
     <div class="raster raster--personen">
       <div class="person">
       <picture class="person__bild">
-  <source type="image/avif" srcset="../../assets/bilder/erzeugt/vorstand-ralf-schwager-480.avif 480w, ../../assets/bilder/erzeugt/vorstand-ralf-schwager-960.avif 960w, ../../assets/bilder/erzeugt/vorstand-ralf-schwager-1125.avif 1125w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <source type="image/webp" srcset="../../assets/bilder/erzeugt/vorstand-ralf-schwager-480.webp 480w, ../../assets/bilder/erzeugt/vorstand-ralf-schwager-960.webp 960w, ../../assets/bilder/erzeugt/vorstand-ralf-schwager-1125.webp 1125w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <img src="../../assets/bilder/erzeugt/vorstand-ralf-schwager-960.jpg" srcset="../../assets/bilder/erzeugt/vorstand-ralf-schwager-480.jpg 480w, ../../assets/bilder/erzeugt/vorstand-ralf-schwager-960.jpg 960w, ../../assets/bilder/erzeugt/vorstand-ralf-schwager-1125.jpg 1125w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw" width="1125" height="1500" alt="Porträt Ralf Schwager" loading="lazy" decoding="async">
+  <source type="image/avif" srcset="../../assets/bilder/erzeugt/vorstand-ralf-schwager-480.avif 480w, ../../assets/bilder/erzeugt/vorstand-ralf-schwager-960.avif 960w, ../../assets/bilder/erzeugt/vorstand-ralf-schwager-1125.avif 1125w" sizes="(min-width: 640px) 260px, 50vw">
+  <source type="image/webp" srcset="../../assets/bilder/erzeugt/vorstand-ralf-schwager-480.webp 480w, ../../assets/bilder/erzeugt/vorstand-ralf-schwager-960.webp 960w, ../../assets/bilder/erzeugt/vorstand-ralf-schwager-1125.webp 1125w" sizes="(min-width: 640px) 260px, 50vw">
+  <img src="../../assets/bilder/erzeugt/vorstand-ralf-schwager-960.jpg" srcset="../../assets/bilder/erzeugt/vorstand-ralf-schwager-480.jpg 480w, ../../assets/bilder/erzeugt/vorstand-ralf-schwager-960.jpg 960w, ../../assets/bilder/erzeugt/vorstand-ralf-schwager-1125.jpg 1125w" sizes="(min-width: 640px) 260px, 50vw" width="1125" height="1500" alt="Porträt Ralf Schwager" loading="lazy" decoding="async">
 </picture>
       <p class="person__name">Ralf Schwager</p>
       <p class="person__funktion">1. Jugendleiter</p>
@@ -181,9 +182,9 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
     </div>
       <div class="person">
       <picture class="person__bild">
-  <source type="image/avif" srcset="../../assets/bilder/erzeugt/vorstand-olgay-ozkan-480.avif 480w, ../../assets/bilder/erzeugt/vorstand-olgay-ozkan-683.avif 683w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <source type="image/webp" srcset="../../assets/bilder/erzeugt/vorstand-olgay-ozkan-480.webp 480w, ../../assets/bilder/erzeugt/vorstand-olgay-ozkan-683.webp 683w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <img src="../../assets/bilder/erzeugt/vorstand-olgay-ozkan-683.jpg" srcset="../../assets/bilder/erzeugt/vorstand-olgay-ozkan-480.jpg 480w, ../../assets/bilder/erzeugt/vorstand-olgay-ozkan-683.jpg 683w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw" width="683" height="1024" alt="Porträt Olgay Özkan" loading="lazy" decoding="async">
+  <source type="image/avif" srcset="../../assets/bilder/erzeugt/vorstand-olgay-ozkan-480.avif 480w, ../../assets/bilder/erzeugt/vorstand-olgay-ozkan-683.avif 683w" sizes="(min-width: 640px) 260px, 50vw">
+  <source type="image/webp" srcset="../../assets/bilder/erzeugt/vorstand-olgay-ozkan-480.webp 480w, ../../assets/bilder/erzeugt/vorstand-olgay-ozkan-683.webp 683w" sizes="(min-width: 640px) 260px, 50vw">
+  <img src="../../assets/bilder/erzeugt/vorstand-olgay-ozkan-683.jpg" srcset="../../assets/bilder/erzeugt/vorstand-olgay-ozkan-480.jpg 480w, ../../assets/bilder/erzeugt/vorstand-olgay-ozkan-683.jpg 683w" sizes="(min-width: 640px) 260px, 50vw" width="683" height="1024" alt="Porträt Olgay Özkan" loading="lazy" decoding="async">
 </picture>
       <p class="person__name">Olgay Özkan</p>
       <p class="person__funktion">2. Jugendleiter</p>
@@ -191,9 +192,9 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
     </div>
       <div class="person">
       <picture class="person__bild">
-  <source type="image/avif" srcset="../../assets/bilder/erzeugt/vorstand-marcel-hogg-480.avif 480w, ../../assets/bilder/erzeugt/vorstand-marcel-hogg-960.avif 960w, ../../assets/bilder/erzeugt/vorstand-marcel-hogg-1125.avif 1125w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <source type="image/webp" srcset="../../assets/bilder/erzeugt/vorstand-marcel-hogg-480.webp 480w, ../../assets/bilder/erzeugt/vorstand-marcel-hogg-960.webp 960w, ../../assets/bilder/erzeugt/vorstand-marcel-hogg-1125.webp 1125w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <img src="../../assets/bilder/erzeugt/vorstand-marcel-hogg-960.jpg" srcset="../../assets/bilder/erzeugt/vorstand-marcel-hogg-480.jpg 480w, ../../assets/bilder/erzeugt/vorstand-marcel-hogg-960.jpg 960w, ../../assets/bilder/erzeugt/vorstand-marcel-hogg-1125.jpg 1125w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw" width="1125" height="1500" alt="Porträt Marcel Hogg" loading="lazy" decoding="async">
+  <source type="image/avif" srcset="../../assets/bilder/erzeugt/vorstand-marcel-hogg-480.avif 480w, ../../assets/bilder/erzeugt/vorstand-marcel-hogg-960.avif 960w, ../../assets/bilder/erzeugt/vorstand-marcel-hogg-1125.avif 1125w" sizes="(min-width: 640px) 260px, 50vw">
+  <source type="image/webp" srcset="../../assets/bilder/erzeugt/vorstand-marcel-hogg-480.webp 480w, ../../assets/bilder/erzeugt/vorstand-marcel-hogg-960.webp 960w, ../../assets/bilder/erzeugt/vorstand-marcel-hogg-1125.webp 1125w" sizes="(min-width: 640px) 260px, 50vw">
+  <img src="../../assets/bilder/erzeugt/vorstand-marcel-hogg-960.jpg" srcset="../../assets/bilder/erzeugt/vorstand-marcel-hogg-480.jpg 480w, ../../assets/bilder/erzeugt/vorstand-marcel-hogg-960.jpg 960w, ../../assets/bilder/erzeugt/vorstand-marcel-hogg-1125.jpg 1125w" sizes="(min-width: 640px) 260px, 50vw" width="1125" height="1500" alt="Porträt Marcel Hogg" loading="lazy" decoding="async">
 </picture>
       <p class="person__name">Marcel Hogg</p>
       <p class="person__funktion">Team Jugendleitung</p>
@@ -201,9 +202,9 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
     </div>
       <div class="person">
       <picture class="person__bild">
-  <source type="image/avif" srcset="../../assets/bilder/erzeugt/vorstand-vassilios-miamis-480.avif 480w, ../../assets/bilder/erzeugt/vorstand-vassilios-miamis-960.avif 960w, ../../assets/bilder/erzeugt/vorstand-vassilios-miamis-1125.avif 1125w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <source type="image/webp" srcset="../../assets/bilder/erzeugt/vorstand-vassilios-miamis-480.webp 480w, ../../assets/bilder/erzeugt/vorstand-vassilios-miamis-960.webp 960w, ../../assets/bilder/erzeugt/vorstand-vassilios-miamis-1125.webp 1125w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <img src="../../assets/bilder/erzeugt/vorstand-vassilios-miamis-960.jpg" srcset="../../assets/bilder/erzeugt/vorstand-vassilios-miamis-480.jpg 480w, ../../assets/bilder/erzeugt/vorstand-vassilios-miamis-960.jpg 960w, ../../assets/bilder/erzeugt/vorstand-vassilios-miamis-1125.jpg 1125w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw" width="1125" height="1500" alt="Porträt Vassilios Miamis" loading="lazy" decoding="async">
+  <source type="image/avif" srcset="../../assets/bilder/erzeugt/vorstand-vassilios-miamis-480.avif 480w, ../../assets/bilder/erzeugt/vorstand-vassilios-miamis-960.avif 960w, ../../assets/bilder/erzeugt/vorstand-vassilios-miamis-1125.avif 1125w" sizes="(min-width: 640px) 260px, 50vw">
+  <source type="image/webp" srcset="../../assets/bilder/erzeugt/vorstand-vassilios-miamis-480.webp 480w, ../../assets/bilder/erzeugt/vorstand-vassilios-miamis-960.webp 960w, ../../assets/bilder/erzeugt/vorstand-vassilios-miamis-1125.webp 1125w" sizes="(min-width: 640px) 260px, 50vw">
+  <img src="../../assets/bilder/erzeugt/vorstand-vassilios-miamis-960.jpg" srcset="../../assets/bilder/erzeugt/vorstand-vassilios-miamis-480.jpg 480w, ../../assets/bilder/erzeugt/vorstand-vassilios-miamis-960.jpg 960w, ../../assets/bilder/erzeugt/vorstand-vassilios-miamis-1125.jpg 1125w" sizes="(min-width: 640px) 260px, 50vw" width="1125" height="1500" alt="Porträt Vassilios Miamis" loading="lazy" decoding="async">
 </picture>
       <p class="person__name">Vassilios Miamis</p>
       <p class="person__funktion">Team Jugendleitung</p>
@@ -211,9 +212,9 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
     </div>
       <div class="person">
       <picture class="person__bild">
-  <source type="image/avif" srcset="../../assets/bilder/erzeugt/vorstand-florian-muller-480.avif 480w, ../../assets/bilder/erzeugt/vorstand-florian-muller-683.avif 683w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <source type="image/webp" srcset="../../assets/bilder/erzeugt/vorstand-florian-muller-480.webp 480w, ../../assets/bilder/erzeugt/vorstand-florian-muller-683.webp 683w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <img src="../../assets/bilder/erzeugt/vorstand-florian-muller-683.jpg" srcset="../../assets/bilder/erzeugt/vorstand-florian-muller-480.jpg 480w, ../../assets/bilder/erzeugt/vorstand-florian-muller-683.jpg 683w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw" width="683" height="1024" alt="Porträt Florian Müller" loading="lazy" decoding="async">
+  <source type="image/avif" srcset="../../assets/bilder/erzeugt/vorstand-florian-muller-480.avif 480w, ../../assets/bilder/erzeugt/vorstand-florian-muller-683.avif 683w" sizes="(min-width: 640px) 260px, 50vw">
+  <source type="image/webp" srcset="../../assets/bilder/erzeugt/vorstand-florian-muller-480.webp 480w, ../../assets/bilder/erzeugt/vorstand-florian-muller-683.webp 683w" sizes="(min-width: 640px) 260px, 50vw">
+  <img src="../../assets/bilder/erzeugt/vorstand-florian-muller-683.jpg" srcset="../../assets/bilder/erzeugt/vorstand-florian-muller-480.jpg 480w, ../../assets/bilder/erzeugt/vorstand-florian-muller-683.jpg 683w" sizes="(min-width: 640px) 260px, 50vw" width="683" height="1024" alt="Porträt Florian Müller" loading="lazy" decoding="async">
 </picture>
       <p class="person__name">Florian Müller</p>
       <p class="person__funktion">Kinderschutzbeauftragter</p>
@@ -313,9 +314,9 @@ if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentEleme
     <div class="raster raster--personen">
       <div class="person">
       <picture class="person__bild">
-  <source type="image/avif" srcset="../../assets/bilder/erzeugt/vorstand-patrick-krosche-480.avif 480w, ../../assets/bilder/erzeugt/vorstand-patrick-krosche-960.avif 960w, ../../assets/bilder/erzeugt/vorstand-patrick-krosche-999.avif 999w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <source type="image/webp" srcset="../../assets/bilder/erzeugt/vorstand-patrick-krosche-480.webp 480w, ../../assets/bilder/erzeugt/vorstand-patrick-krosche-960.webp 960w, ../../assets/bilder/erzeugt/vorstand-patrick-krosche-999.webp 999w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw">
-  <img src="../../assets/bilder/erzeugt/vorstand-patrick-krosche-960.jpg" srcset="../../assets/bilder/erzeugt/vorstand-patrick-krosche-480.jpg 480w, ../../assets/bilder/erzeugt/vorstand-patrick-krosche-960.jpg 960w, ../../assets/bilder/erzeugt/vorstand-patrick-krosche-999.jpg 999w" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw" width="999" height="1500" alt="Porträt Patrick Krösche" loading="lazy" decoding="async">
+  <source type="image/avif" srcset="../../assets/bilder/erzeugt/vorstand-patrick-krosche-480.avif 480w, ../../assets/bilder/erzeugt/vorstand-patrick-krosche-960.avif 960w, ../../assets/bilder/erzeugt/vorstand-patrick-krosche-999.avif 999w" sizes="(min-width: 640px) 260px, 50vw">
+  <source type="image/webp" srcset="../../assets/bilder/erzeugt/vorstand-patrick-krosche-480.webp 480w, ../../assets/bilder/erzeugt/vorstand-patrick-krosche-960.webp 960w, ../../assets/bilder/erzeugt/vorstand-patrick-krosche-999.webp 999w" sizes="(min-width: 640px) 260px, 50vw">
+  <img src="../../assets/bilder/erzeugt/vorstand-patrick-krosche-960.jpg" srcset="../../assets/bilder/erzeugt/vorstand-patrick-krosche-480.jpg 480w, ../../assets/bilder/erzeugt/vorstand-patrick-krosche-960.jpg 960w, ../../assets/bilder/erzeugt/vorstand-patrick-krosche-999.jpg 999w" sizes="(min-width: 640px) 260px, 50vw" width="999" height="1500" alt="Porträt Patrick Krösche" loading="lazy" decoding="async">
 </picture>
       <p class="person__name">Patrick Krösche</p>
       <p class="person__funktion">Abteilungsleiter Karneval</p>

@@ -65,7 +65,7 @@ function ansprechpartner(daten) {
     {
       titel: "Probetraining & Jugend",
       mail: mails.jugendleitung,
-      text: "Für Kinder und Jugendliche von der G- bis zur A-Jugend.",
+      text: "Für Kinder und Jugendliche von der A- bis zur G-Jugend.",
       betreff: "Probetraining",
     },
     {
