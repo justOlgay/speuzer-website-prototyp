@@ -86,7 +86,9 @@ function dekodiereEntities(text) {
 }
 
 function formatSekunden(ms, nachkomma = 1) {
-  return (ms / 1000).toFixed(nachkomma).replace(".", ",") + " s";
+  // Geschütztes Leerzeichen zwischen Zahl und Einheit (P14b Punkt 7), damit
+  // die Zahlenspalten (z. B. Anhang A) nicht zwischen "1,2" und "s" umbrechen.
+  return (ms / 1000).toFixed(nachkomma).replace(".", ",") + " s";
 }
 
 function formatDatumLang(iso) {
@@ -147,6 +149,53 @@ function verkleinereFallsNoetig(datei, maxBreite = 1200) {
   const breite = bildBreite(datei);
   if (breite && breite > maxBreite) {
     execFileSync("sips", ["--resampleWidth", String(maxBreite), datei], { stdio: "ignore" });
+  }
+}
+
+// P14b Punkt 3: Handy-Screenshots auf das erste Sichtfenster (390 : 844) und
+// Rechner-Screenshots auf 16 : 10 beschneiden (von oben, d. h. der obere
+// Bildausschnitt bleibt erhalten), bevor sie verkleinert werden. Bei den
+// vorhandenen Bildern entspricht das Seitenverhältnis bereits der Vorgabe
+// (Screenshots wurden im jeweiligen Sichtfenster aufgenommen, nicht als
+// vollständige Seite) – die Funktion ist damit in der Regel ein No-Op, greift
+// aber zuverlässig, sobald ein Bild von der Vorgabe abweicht.
+function schneideAufVerhaeltnisZu(datei, zielBreite, zielHoehe) {
+  const script = `
+from PIL import Image
+pfad = ${JSON.stringify(datei)}
+img = Image.open(pfad)
+w, h = img.size
+ziel = ${zielBreite} / ${zielHoehe}
+ist = w / h
+if abs(ist - ziel) > 0.002:
+    if ist > ziel:
+        neue_breite = round(h * ziel)
+        img = img.crop((0, 0, neue_breite, h))
+    else:
+        neue_hoehe = round(w / ziel)
+        img = img.crop((0, 0, w, neue_hoehe))
+    img.save(pfad)
+`;
+  execFileSync("python3", ["-c", script], { stdio: "inherit" });
+}
+
+function istHandyBild(datei) {
+  return /-handy\.png$/.test(datei) || /-390\.png$/.test(datei);
+}
+
+function istRechnerBild(datei) {
+  return /-desktop\.png$/.test(datei) || /-1440\.png$/.test(datei);
+}
+
+function beschneideAlleBilder() {
+  for (const datei of readdirSync(BILDER)) {
+    if (!datei.endsWith(".png") || datei === "standard.png") continue;
+    const voller = path.join(BILDER, datei);
+    if (istHandyBild(datei)) {
+      schneideAufVerhaeltnisZu(voller, 390, 844);
+    } else if (istRechnerBild(datei)) {
+      schneideAufVerhaeltnisZu(voller, 16, 10);
+    }
   }
 }
 
@@ -268,7 +317,7 @@ function tabelle({ kopf, zeilen, klasse = "" }) {
 // Trennspalte), damit die Tabelle wie jede normale Tabelle über mehrere
 // Seiten bricht (mit wiederholter Kopfzeile) – siehe vergleich.css für den
 // Hintergrund, warum kein CSS-Mehrspalten-Container verwendet wird.
-function tabelleZweispaltigVerbunden({ kopf, zeilen, klasse = "" }) {
+function tabelleZweispaltigVerbunden({ kopf, zeilen, klasse = "", spaltenbreiten = null }) {
   const half = Math.ceil(zeilen.length / 2);
   const links = zeilen.slice(0, half);
   const rechts = zeilen.slice(half);
@@ -290,7 +339,15 @@ function tabelleZweispaltigVerbunden({ kopf, zeilen, klasse = "" }) {
     rows.push(`<tr>${cells}</tr>`);
   }
 
+  // Feste Spaltenbreiten (P14b Punkt 7: Pfad-/Seitenspalte schmaler) über
+  // <colgroup>, damit table-layout: fixed die restlichen Spalten gleichmäßig
+  // aufteilt, statt sich am Inhalt zu orientieren.
+  const colgroup = spaltenbreiten
+    ? `<colgroup>${spaltenbreiten.map((b) => `<col style="width:${b}">`).join("")}<col class="spalte-luecke">${spaltenbreiten.map((b) => `<col style="width:${b}">`).join("")}</colgroup>`
+    : "";
+
   return `<table class="tabelle ${klasse}">
+    ${colgroup}
     <thead><tr>${kopfHtml}</tr></thead>
     <tbody>${rows.join("\n")}</tbody>
   </table>`;
@@ -421,14 +478,18 @@ function baueKapitel1() {
   <p>${escapeHtml(T.K1_TEXT)}</p>
   <h3>Was daraus folgt</h3>
   <ul class="liste">${folgen}</ul>
-  <figure class="figur-einzeln figur-einzeln--gross">
-    ${bild("vorher-vorstand-rahmen-desktop", "Live-Unterseite am Rechner: schmaler Inhaltsrahmen in der Seitenmitte mit eigenem Scrollbalken, daneben leere Fläche")}
-    <figcaption>${escapeHtml(T.K1_BILD_VORHER)}</figcaption>
-  </figure>
-  <figure class="figur-einzeln figur-einzeln--gross">
-    ${bild("nachher-vorstand-desktop", "Prototyp-Unterseite am Rechner: Inhalt über die volle Seitenbreite, ein Scrollbalken")}
-    <figcaption>${escapeHtml(T.K1_BILD_NACHHER)}</figcaption>
-  </figure>
+  <div class="kapitel1-bilder">
+    <figure class="kapitel1-bild">
+      <span class="etikett etikett--warn">Live-Seite</span>
+      ${bild("vorher-vorstand-rahmen-desktop", "Live-Unterseite am Rechner: schmaler Inhaltsrahmen in der Seitenmitte mit eigenem Scrollbalken, daneben leere Fläche")}
+      <figcaption>${escapeHtml(T.K1_BILD_VORHER)}</figcaption>
+    </figure>
+    <figure class="kapitel1-bild">
+      <span class="etikett etikett--ok">Prototyp</span>
+      ${bild("nachher-vorstand-desktop", "Prototyp-Unterseite am Rechner: Inhalt über die volle Seitenbreite, ein Scrollbalken")}
+      <figcaption>${escapeHtml(T.K1_BILD_NACHHER)}</figcaption>
+    </figure>
+  </div>
   <p>${escapeHtml(T.K1_SCHLUSS)}</p>
 </section>`;
 }
@@ -449,42 +510,55 @@ function baueWhatsappVorschau(situation) {
 function baueSituation(situation, index) {
   const nr = index + 1;
   if (situation.kastenAdresse) {
-    // Situation 4: Sonderfall ohne Vorher-Bild
+    // Situation 4: Sonderfall ohne Vorher-Bild. Kein zweites Bildpaar, daher
+    // bleibt der gesamte Inhalt ein einziger, nicht trennbarer Block.
     return `<div class="situation">
-      <h3>${nr}. „${escapeHtml(situation.titel)}“</h3>
-      <div class="adresse-kasten">${escapeHtml(situation.kastenAdresse)}</div>
-      <p>${escapeHtml(situation.kastenSatz)}</p>
-      <div class="situation__spalten">
-        <div>
-          <div class="situation__spalte-titel">Neuer Screenshot – /mannschaften/d3/ am Handy</div>
-          ${bild("neu-mannschaften-d3-390", "Prototyp-Mannschaftsseite D3 am Handy (neu aufgenommen am 14.09.2026)")}
+      <div class="situation-block">
+        <h3>${nr}. „${escapeHtml(situation.titel)}“</h3>
+        <div class="adresse-kasten">${escapeHtml(situation.kastenAdresse)}</div>
+        <p>${escapeHtml(situation.kastenSatz)}</p>
+        <div class="situation__spalten">
+          <div>
+            <div class="situation__spalte-titel">Neuer Screenshot – /mannschaften/d3/ am Handy</div>
+            ${bild("neu-mannschaften-d3-390", "Prototyp-Mannschaftsseite D3 am Handy (neu aufgenommen am 14.09.2026)")}
+          </div>
+          <div>
+            <div class="situation__spalte-titel">Schematische Link-Vorschau</div>
+            ${baueWhatsappVorschau(situation)}
+            <figcaption>${escapeHtml(situation.vorschauUnterschrift)}</figcaption>
+          </div>
         </div>
-        <div>
-          <div class="situation__spalte-titel">Schematische Link-Vorschau</div>
-          ${baueWhatsappVorschau(situation)}
-          <figcaption>${escapeHtml(situation.vorschauUnterschrift)}</figcaption>
-        </div>
+        <p>${escapeHtml(situation.satz)}</p>
       </div>
-      <p>${escapeHtml(situation.satz)}</p>
     </div>`;
   }
 
-  const paare = [situation.paarKey, situation.zweitesPaarKey].filter(Boolean);
-  const figuren = paare.map((k) => paarFigur(k)).join("\n");
+  // P14b Punkt 3: Überschrift, die zwei Textspalten und das ERSTE Bildpaar
+  // (mit Unterschrift) bilden einen Block, der nicht getrennt wird
+  // (break-inside: avoid auf .situation-block). Ein zweites Bildpaar (nur
+  // Situation 2 und 3) folgt danach als eigenes, für sich nicht trennbares
+  // Element (.paar hat bereits break-inside: avoid) – es darf auf die
+  // nächste Seite rutschen, ohne dass zwischen seinen beiden Bildern
+  // umbrochen wird.
+  const ersteFigur = paarFigur(situation.paarKey);
+  const zweiteFigur = situation.zweitesPaarKey ? paarFigur(situation.zweitesPaarKey) : "";
 
   return `<div class="situation">
-    <h3>${nr}. „${escapeHtml(situation.titel)}“</h3>
-    <div class="situation__spalten">
-      <div>
-        <div class="situation__spalte-titel">Heute</div>
-        <p>${escapeHtml(situation.heute)}</p>
+    <div class="situation-block">
+      <h3>${nr}. „${escapeHtml(situation.titel)}“</h3>
+      <div class="situation__spalten">
+        <div>
+          <div class="situation__spalte-titel">Heute</div>
+          <p>${escapeHtml(situation.heute)}</p>
+        </div>
+        <div>
+          <div class="situation__spalte-titel">Im Prototyp</div>
+          <p>${escapeHtml(situation.prototyp)}</p>
+        </div>
       </div>
-      <div>
-        <div class="situation__spalte-titel">Im Prototyp</div>
-        <p>${escapeHtml(situation.prototyp)}</p>
-      </div>
+      ${ersteFigur}
     </div>
-    ${figuren}
+    ${zweiteFigur}
   </div>`;
 }
 
@@ -517,17 +591,18 @@ function baueKapitel3(lh, lcpStartSekunden) {
   const table = tabelle({
     kopf: ["Merkmal", "Live-Seite", "Prototyp"],
     zeilen: alleZeilen,
+    klasse: "tabelle--messbar",
   });
 
   return `<section class="kapitel">
   <div class="kapitelnummer">Kapitel 3</div>
   <h2>${escapeHtml(T.KAPITEL_NAMEN[2])}</h2>
-  ${table}
-  <p class="meta">${escapeHtml(T.MESSBAR_FUSSNOTE)}</p>
   <div class="kasten">
     <div class="kasten__titel">${escapeHtml(T.MESSBAR_ERKLAERKASTEN_TITEL)}</div>
     <p>${escapeHtml(T.MESSBAR_ERKLAERKASTEN)}</p>
   </div>
+  ${table}
+  <p class="meta">${escapeHtml(T.MESSBAR_FUSSNOTE)}</p>
 </section>`;
 }
 
@@ -624,16 +699,65 @@ function baueKapitel7() {
 
 // ---------- Kapitel 8 ----------
 
+// P14b Punkt 5: leeres Ankreuzkästchen (CSS-Rahmen 4×4mm) vor jedem Punkt,
+// damit die Liste als Beschlussvorlage in der Sitzung dient. Bei Punkt 2
+// (Index 1) zusätzlich "☐ ja ☐ nein", bei Punkt 6 (Index 5) "☐ Weg 1 ☐ Weg 2"
+// als je zwei Kästchen mit Text am Zeilenende.
+function ankreuzOption(text) {
+  return `<span class="ankreuz-inline"><span class="ankreuz"></span>${escapeHtml(text)}</span>`;
+}
+
 function baueKapitel8() {
-  const items = T.K8_ENTSCHEIDUNGEN.map((t) => `<li>${escapeHtml(t)}</li>`).join("\n");
+  const zusatzJeIndex = {
+    1: [ankreuzOption("ja"), ankreuzOption("nein")].join(""),
+    5: [ankreuzOption("Weg 1"), ankreuzOption("Weg 2")].join(""),
+  };
+  const items = T.K8_ENTSCHEIDUNGEN.map(
+    (t, i) =>
+      `<li><span class="ankreuz"></span>${escapeHtml(t)}${zusatzJeIndex[i] ?? ""}</li>`
+  ).join("\n");
   return `<section class="kapitel">
   <div class="kapitelnummer">Kapitel 8</div>
   <h2>${escapeHtml(T.KAPITEL_NAMEN[7])}</h2>
-  <ol class="liste">${items}</ol>
+  <ol class="liste liste--beschluss">${items}</ol>
 </section>`;
 }
 
 // ---------- Kapitel 9 ----------
+
+// P14b Punkt 6: Bildergalerie "Der Prototyp in Bildern" nach der Liste der
+// sechs Menüpunkte – ausschließlich Prototyp-Screenshots, sechs Rechner-
+// Bilder im Raster 2×3, darunter eine Reihe mit vier Handy-Bildern.
+const K9_GALERIE_RECHNER = [
+  { datei: "neu-start-1440", beschriftung: "Startseite, 1 440 px", alt: "Prototyp-Startseite am Rechner, 1 440 px" },
+  { datei: "neu-mannschaften-1440", beschriftung: "Mannschaften, 1 440 px", alt: "Prototyp-Mannschaftsübersicht am Rechner, 1 440 px" },
+  { datei: "neu-spielplan-herren-1440", beschriftung: "Spielplan 1. Herrenmannschaft, 1 440 px", alt: "Prototyp-Spielplan der 1. Herrenmannschaft am Rechner, 1 440 px" },
+  { datei: "neu-tabellen-1440", beschriftung: "Tabellen, 1 440 px", alt: "Prototyp-Tabellenübersicht am Rechner, 1 440 px" },
+  { datei: "neu-news-1440", beschriftung: "News, 1 440 px", alt: "Prototyp-Newsübersicht am Rechner, 1 440 px" },
+  { datei: "neu-mitglied-werden-1440", beschriftung: "Mitglied werden, 1 440 px", alt: "Prototyp-Seite Mitglied werden am Rechner, 1 440 px" },
+];
+
+const K9_GALERIE_HANDY = [
+  { datei: "neu-start-390", beschriftung: "Startseite, 390 px", alt: "Prototyp-Startseite am Handy, 390 px" },
+  { datei: "neu-start-menue-390", beschriftung: "Startseite mit geöffnetem Menü, 390 px", alt: "Prototyp-Startseite mit geöffnetem Menü am Handy, 390 px" },
+  { datei: "neu-mitglied-werden-390", beschriftung: "Mitglied werden, 390 px", alt: "Prototyp-Seite Mitglied werden am Handy, 390 px" },
+  { datei: "neu-kontakt-390", beschriftung: "Kontakt & Anfahrt, 390 px", alt: "Prototyp-Seite Kontakt und Anfahrt am Handy, 390 px" },
+];
+
+function galerieElement(eintrag) {
+  return `<figure class="galerie-element">
+    ${bild(eintrag.datei, eintrag.alt)}
+    <figcaption>${escapeHtml(eintrag.beschriftung)}</figcaption>
+  </figure>`;
+}
+
+function baueGalerie() {
+  const rechner = K9_GALERIE_RECHNER.map(galerieElement).join("\n");
+  const handy = K9_GALERIE_HANDY.map(galerieElement).join("\n");
+  return `<h3>Der Prototyp in Bildern</h3>
+  <div class="galerie-raster galerie-raster--rechner">${rechner}</div>
+  <div class="galerie-raster galerie-raster--handy">${handy}</div>`;
+}
 
 async function baueKapitel9() {
   const qr = await qrSvg(PUBLIC_URL, "titelseite__qr");
@@ -651,10 +775,23 @@ async function baueKapitel9() {
     </div>
   </div>
   <ul class="liste">${menue}</ul>
+  ${baueGalerie()}
 </section>`;
 }
 
 // ---------- Anhang ----------
+
+// P14b Punkt 7: Spaltenkopf "Barr." zu "Barriere-freiheit" ausschreiben, wenn
+// Platz ist, sonst auf "Barrierefr." zurückfallen. Bei der schmalen Spalte
+// (14 mm, siehe ANHANG_A_SPALTENBREITEN) bricht "Barriere-freiheit" mitten im
+// Wort auf vier Zeilen um – daher hier die kürzere Fassung.
+const ANHANG_A_BARR_KOPF = "Barrierefr.";
+
+// Spaltenbreiten für die Anhang-A-Tabelle (7 Spalten je Seite, Summe je
+// Seitenhälfte ≈ (Satzbreite 174 mm − 6 mm Trennspalte) / 2 ≈ 84 mm): die
+// Pfadspalte "Seite" schmaler als zuvor, die übrigen Spalten gleichmäßig für
+// die (dank white-space: nowrap + geschütztem Leerzeichen) einzeiligen Werte.
+const ANHANG_A_SPALTENBREITEN = ["28mm", "8mm", "14mm", "7mm", "8mm", "10mm", "9mm"];
 
 function baueAnhangA(lh) {
   const zeilen = lh.seiten.map((s) => [
@@ -667,9 +804,10 @@ function baueAnhangA(lh) {
     `<span class="zahl">${s.cls.toFixed(2).replace(".", ",")}</span>`,
   ]);
   const table = tabelleZweispaltigVerbunden({
-    kopf: ["Seite", "Perf.", "Barr.", "BP", "SEO", "LCP", "CLS"],
+    kopf: ["Seite", "Perf.", ANHANG_A_BARR_KOPF, "BP", "SEO", "LCP", "CLS"],
     zeilen,
-    klasse: "tabelle--klein",
+    klasse: "tabelle--klein tabelle--anhangA",
+    spaltenbreiten: ANHANG_A_SPALTENBREITEN,
   });
   return `<section class="kapitel">
   <div class="kapitelnummer">Anhang A</div>
@@ -679,9 +817,12 @@ function baueAnhangA(lh) {
 </section>`;
 }
 
+// P14b Punkt 8: Anhang B folgt direkt unter Anhang A (kein Seitenumbruch, 12
+// mm Abstand) – daher kein eigener .kapitel-Seitenumbruch, sondern die
+// Fortsetzungs-Variante (.kapitel--fortlaufend, siehe vergleich.css).
 function baueAnhangB() {
   const absaetze = T.ANHANG_B_ABSAETZE.map((a) => `<p>${escapeHtml(a)}</p>`).join("\n");
-  return `<section class="kapitel">
+  return `<section class="kapitel kapitel--fortlaufend">
   <div class="kapitelnummer">Anhang B</div>
   <h2>${escapeHtml(T.ANHANG_NAMEN[1])}</h2>
   ${absaetze}
@@ -693,7 +834,7 @@ function baueAnhangC(sitemapSeiten) {
   const table = tabelleZweispaltigVerbunden({
     kopf: ["Pfad", "Titel"],
     zeilen,
-    klasse: "tabelle--klein",
+    klasse: "tabelle--klein tabelle--anhangC",
   });
   return `<section class="kapitel">
   <div class="kapitelnummer">Anhang C</div>
@@ -702,9 +843,12 @@ function baueAnhangC(sitemapSeiten) {
 </section>`;
 }
 
+// P14b Punkt 8: Anhang D folgt direkt unter Anhang C (kein Seitenumbruch, 12
+// mm Abstand) – auch wenn Anhang C mit Überlauf auf einer neuen Seite endet
+// (Punkt 9), schließt Anhang D unmittelbar dort an.
 function baueAnhangD() {
   const items = T.ANHANG_D_QUELLEN.map((q) => `<li>${escapeHtml(q)}</li>`).join("\n");
-  return `<section class="kapitel">
+  return `<section class="kapitel kapitel--fortlaufend">
   <div class="kapitelnummer">Anhang D</div>
   <h2>${escapeHtml(T.ANHANG_NAMEN[3])}</h2>
   <ul class="liste">${items}</ul>
@@ -816,6 +960,9 @@ async function main() {
   try {
     console.log("Neue Screenshots der öffentlichen Prototyp-Adresse aufnehmen …");
     await nimmNeueScreenshotsAuf(browser);
+
+    console.log("Handy-Bilder auf 390 : 844, Rechner-Bilder auf 16 : 10 beschneiden (von oben) …");
+    beschneideAlleBilder();
 
     console.log("Bilder auf höchstens 1200 px Breite verkleinern …");
     verkleinereAlleBilder();

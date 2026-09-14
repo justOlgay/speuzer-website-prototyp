@@ -72,6 +72,13 @@ a {
   break-before: auto;
 }
 
+/* P14b Punkt 8: Anhang B/D folgen ohne Seitenumbruch direkt unter Anhang A/C
+   (Anhang A/C selbst behalten den normalen .kapitel-Seitenumbruch). */
+.kapitel.kapitel--fortlaufend {
+  break-before: auto;
+  margin-top: 12mm;
+}
+
 .kapitelnummer {
   font-family: var(--font-text);
   font-size: 8pt;
@@ -275,6 +282,33 @@ ul.liste li, ol.liste li {
   break-inside: avoid;
 }
 
+/* ---------- Kapitel 8: Beschlussvorlage mit Ankreuzkästchen (P14b Punkt 5) ---------- */
+
+ol.liste--beschluss li {
+  margin-bottom: 8px;
+}
+
+.ankreuz {
+  display: inline-block;
+  width: 4mm;
+  height: 4mm;
+  border: 1px solid #191793;
+  margin-right: 2mm;
+  vertical-align: middle;
+}
+
+.ankreuz-inline {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6mm;
+  font-size: 9.5pt;
+  white-space: nowrap;
+}
+
+.ankreuz-inline .ankreuz {
+  margin-right: 1.5mm;
+}
+
 /* ---------- Bilder / Screenshots ---------- */
 
 figure {
@@ -344,6 +378,28 @@ figcaption {
   grid-template-columns: 1fr;
 }
 
+/* P14b Punkt 3: Bildhöhe eines Handy-Paares im Satz höchstens 150 mm, damit
+   Überschrift + Textspalten + erstes Bildpaar als Block auf einer Seite
+   Platz finden. Rechner-Paare (Situation 3, zwei Bildpaare je Situation)
+   entsprechend begrenzt, damit Überschrift + Text + erstes Paar zusammen auf
+   eine Seite passen (kein expliziter mm-Wert in der Spezifikation vorgegeben
+   – Wert so gewählt, dass Block 1 von Situation 3 auf einer Seite bleibt). */
+.paar__raster--handy .bild-rahmen {
+  width: auto;
+  max-width: 100%;
+  max-height: 150mm;
+  margin: 0 auto;
+  display: block;
+}
+
+.paar__raster--desktop .bild-rahmen {
+  width: auto;
+  max-width: 100%;
+  max-height: 75mm;
+  margin: 0 auto;
+  display: block;
+}
+
 .paar figcaption.paar__satz {
   margin-top: 6px;
   font-size: 9pt;
@@ -357,6 +413,27 @@ figcaption {
 
 .figur-einzeln--gross img {
   width: 100%;
+}
+
+/* ---------- Kapitel 1: Bilder nebeneinander (P14b Punkt 2) ---------- */
+
+.kapitel1-bilder {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8mm;
+  margin: 10px 0 14px 0;
+}
+
+.kapitel1-bild {
+  margin: 0;
+  break-inside: avoid;
+}
+
+.kapitel1-bild .bild-rahmen {
+  width: 100%;
+  height: auto;
+  max-height: 90mm;
+  object-fit: contain;
 }
 
 /* ---------- Tabellen ---------- */
@@ -390,7 +467,8 @@ table.tabelle tbody tr:nth-child(even) {
 }
 
 table.tabelle td.zahl,
-table.tabelle th.zahl {
+table.tabelle th.zahl,
+table.tabelle .zahl {
   text-align: right;
   white-space: nowrap;
 }
@@ -408,6 +486,37 @@ table.tabelle--klein td {
   padding: 2px 4px;
 }
 
+/* P14b Punkt 4: Erklärkasten "Was Lighthouse ist" steht jetzt vor der
+   Kapitel-3-Tabelle; minimal engeres Zeilenpolster, damit die Fußnote nach
+   der Tabelle nicht allein auf einer neuen (fast leeren) Seite landet. */
+table.tabelle--messbar th,
+table.tabelle--messbar td {
+  padding: 3px 6px;
+}
+
+/* P14b Punkt 7: Anhang A – 8,5 pt, feste (schmalere) Spaltenbreiten über
+   <colgroup> (siehe tabelleZweispaltigVerbunden), damit Zahlenspalten nicht
+   umbrechen und die Pfadspalte "Seite" etwas schmaler ist. */
+table.tabelle--anhangA {
+  font-size: 8.5pt;
+  table-layout: fixed;
+}
+
+table.tabelle--anhangA th,
+table.tabelle--anhangA td {
+  overflow-wrap: break-word;
+}
+
+/* P14b Punkt 9: Anhang C – 8,5 pt, 1,5 mm Zellenpolster. */
+table.tabelle--anhangC {
+  font-size: 8.5pt;
+}
+
+table.tabelle--anhangC th,
+table.tabelle--anhangC td {
+  padding: 1.5mm;
+}
+
 /* Zweispaltiger Satz für lange Listen (Anhang A, C): keine CSS-Mehrspalten-
    Container (brechen in Chrome/Puppeteer beim Druck unzuverlässig, siehe
    Abschlussbericht P14 – erzeugten leere Seiten), sondern eine einzige
@@ -415,7 +524,8 @@ table.tabelle--klein td {
    tabelleZweispaltigVerbunden() in bauen.mjs). Dadurch bricht die Tabelle wie
    jede normale Tabelle über Seiten hinweg, mit wiederholter Kopfzeile. */
 td.spalte-luecke,
-th.spalte-luecke {
+th.spalte-luecke,
+col.spalte-luecke {
   width: 6mm;
   border: none !important;
   background: transparent !important;
@@ -494,6 +604,13 @@ th.spalte-luecke {
   margin-bottom: 14px;
 }
 
+/* P14b Punkt 3: Überschrift, Textspalten und erstes Bildpaar bleiben ein
+   nicht trennbarer Block; ein zweites Bildpaar (Situation 2 und 3) steht
+   außerhalb davon und darf auf die nächste Seite rutschen. */
+.situation-block {
+  break-inside: avoid;
+}
+
 .situation h3 {
   margin-bottom: 6px;
   break-after: avoid;
@@ -567,4 +684,36 @@ th.spalte-luecke {
 .meta {
   color: var(--ink-2);
   font-size: 8.5pt;
+}
+
+/* ---------- Kapitel 9: Bildergalerie (P14b Punkt 6) ---------- */
+
+.galerie-raster {
+  display: grid;
+  gap: 6mm;
+  margin: 8px 0 12px 0;
+}
+
+.galerie-raster--rechner {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.galerie-raster--handy {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.galerie-element {
+  margin: 0;
+  break-inside: avoid;
+}
+
+.galerie-element .bild-rahmen {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.galerie-element figcaption {
+  text-align: center;
+  margin-top: 3px;
 }

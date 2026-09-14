@@ -23,7 +23,7 @@ export const BLICK_ABSATZ =
   "Unsere Website ist heute keine Website, sondern die Vereins-App in einem festen Browserfenster von 592 × 834 Pixeln. Daraus folgen die Probleme, die Besucher spüren: eine einzige Adresse für alles, Menüpunkte ohne Links, zwei Scrollbalken, abgeschnittene Inhalte und eine Startseite ohne Inhalt. Der Prototyp zeigt mit denselben Inhalten, wie der Auftritt aussieht, wenn diese Grenze wegfällt.";
 
 export const BLICK_EMPFEHLUNG =
-  "Die Struktur des Prototyps wird zum Zielbild für den Webauftritt: sechs Menüpunkte, eine eigene Adresse je Seite, Inhalte statt Rahmen, Vereinsadressen statt privater Nummern. Der Vorstand entscheidet über den Weg dahin (Kapitel 8) und über die vier offenen Punkte (Kapitel 9).";
+  "Die Struktur des Prototyps wird zum Zielbild für den Webauftritt: sechs Menüpunkte, eine eigene Adresse je Seite, Inhalte statt Rahmen, Vereinsadressen statt privater Nummern. Der Vorstand entscheidet über den Weg dahin (Kapitel 7) und über die Punkte in Kapitel 8.";
 
 export const KAPITEL_NAMEN = [
   "Das Kernproblem",
@@ -410,7 +410,8 @@ export const PAARE_BILDER = {
 // ---------- Anhang D – Quellen ----------
 
 export const ANHANG_D_QUELLEN = [
-  "Speuzer Website - Qualitaetspruefung 04.09.2026.md",
-  "Speuzer Website - Uebernahme nach appack.md",
-  "Repository: github.com/justOlgay/speuzer-website-prototyp",
+  "Speuzer Website – Qualitätsprüfung 04.09.2026 (internes Dokument, Ordner Verein)",
+  "Speuzer Website – Übernahme nach appack, Stand 14.09.2026 (internes Dokument, Ordner Verein)",
+  "Lighthouse-Messung der Live-Startseite am 14.09.2026, mobil und Desktop, Lighthouse 13",
+  "Repository und Prototyp: github.com/justOlgay/speuzer-website-prototyp, Stand 14.09.2026",
 ];
