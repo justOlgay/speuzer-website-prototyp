@@ -578,6 +578,13 @@ col.spalte-luecke {
   padding: 0 !important;
 }
 
+/* P18: Block C ("Beim Anbieter anfragen") und der Empfehlung-Kasten bilden am
+   Ende von Kapitel 7 einen nicht trennbaren Block, damit der Kasten nicht
+   allein auf einer fast leeren Folgeseite landet. */
+.k7-schluss {
+  break-inside: avoid;
+}
+
 /* ---------- Zwei-Spalten-Kästen (Kapitel 4, Kapitel 7 "Zwei Wege") ---------- */
 
 .zwei-kaesten {

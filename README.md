@@ -4,6 +4,19 @@ Dies ist ein **Prototyp / eine Testumgebung** für den Vorstand des F.F.V. Sport
 („Speuzer“). Es handelt sich **nicht um die Live-Seite** – nichts hier wird automatisch
 auf sportfreunde04.de oder in appack übernommen.
 
+## Zweck
+
+Der Prototyp zeigt seit P18 die **appack-Fassung**: dieselbe appack-Vorlage
+„Microwebseite“ wie die Live-Seite (Hülle, nachgebildet in `docs/index.html`),
+aber so gut gebaut, wie die Plattform es zulässt – sechs Menüpunkte,
+Inhalt in voller Breite, alle Inhalte des Vereins als Workspace-Seiten
+(`docs/ws/`), dazu zwei Begleitseiten (`/vorher-nachher/`, `/app/`) als
+Begleitmaterial für den Vorstand. Der Tag `zielbild-2026-09-14` markiert die
+frühere Fassung (Stand vor P18): dort war das Zielbild noch eine eigenständige
+Website ohne appack-Hülle, mit eigener Adresse je Seite – diese Fassung wurde
+mit P18 durch die appack-Fassung ersetzt, weil eine eigenständige Website
+ohne den Anbieter nicht das ist, was appack tatsächlich ausliefert.
+
 Die Inhalte stammen von der Live-Seite sportfreunde04.de sowie aus den öffentlichen
 appack- und fussball.de-Schnittstellen, **Stand 11.09.2026**.
 
@@ -89,10 +102,31 @@ npm run vergleich
                   liegen dort bereits fertig und anonymisiert; anschließend npm run
                   bilder ausführen.
 npm run lighthouse
-                  Prüft alle Seiten aus docs/sitemap.xml mit Lighthouse (lokal, mobil,
-                  `npx --no-install lighthouse` je Seite, startet den lokalen Server bei
-                  Bedarf selbst). Bei einer Kategorie unter 90 bis zu zwei Wiederholungen,
-                  der beste Lauf zählt. Schreibt data/lighthouse.json und
-                  tools/cache/lighthouse.md, bricht mit Exit 1 ab, wenn eine Kategorie im
-                  Minimum über alle Seiten unter 90 bleibt. Dauer: 20–40 Minuten.
+                  Prüft alle Seiten aus docs/sitemap.xml mit Lighthouse (mobil,
+                  `npx --no-install lighthouse` je Seite; ohne `--basis` gegen den
+                  lokalen Server, mit `--basis <url>` z. B. gegen die öffentliche
+                  GitHub-Pages-Adresse). Bei einer Kategorie unter 90 bis zu zwei
+                  Wiederholungen, der Median über die Läufe zählt. Schreibt
+                  data/lighthouse.json und tools/cache/lighthouse.md, bricht mit Exit 1
+                  ab, wenn eine Kategorie im Minimum über alle Seiten unter 90 bleibt.
+                  Dauer: 20–40 Minuten.
+npm run vorstand-pdf
+                  Baut das Vorstandsdokument „Website-Vergleich Live-Seite und
+                  appack-Fassung“ als A4-PDF (tools/vorstand-pdf/bauen.mjs, Texte aus
+                  tools/vorstand-pdf/texte.mjs). Nimmt zwölf neue Screenshots auf – die
+                  meisten über die Hülle des lokalen Servers (tools/huelle-aufnahme.mjs,
+                  startet den Server bei Bedarf selbst), zwei direkt von den
+                  Begleitseiten –, kombiniert sie mit den neun vorhandenen
+                  Vorher/Nachher-Bildpaaren aus assets/bilder/quelle/ und den Daten aus
+                  data/*.json (u. a. data/lighthouse.json). Ergebnis:
+                  tools/cache/vorstand-pdf/Speuzer Website - Vergleich Live-Seite und
+                  appack-Fassung <Datum>.pdf, zusätzlich als Kopie im Verein-Ordner
+                  (ältere Stände bleiben dort erhalten).
 ```
+
+## Übernahmedokument
+
+Der ausführliche Umbauplan für die Umsetzung der appack-Fassung im appack-CMS
+(Menü, Farben, Startbild, Fußbereich, Workspace-Upload, Anfrage an den
+Anbieter) liegt außerhalb dieses Repositories im Verein-Ordner:
+„Speuzer Website – Umbauplan appack-Fassung 15.09.2026“.

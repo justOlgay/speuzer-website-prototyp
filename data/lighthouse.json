@@ -1,36 +1,36 @@
 {
-  "stand": "2026-09-15T09:24:49.318Z",
-  "basis": "lokal, Workspace-Seiten per Direktlink, mobil, Lighthouse 13",
+  "stand": "2026-09-15T09:46:33.010Z",
+  "basis": "öffentlich (GitHub Pages), Workspace-Seiten per Direktlink, mobil, Lighthouse 13",
   "seiten": [
     {
       "url": "/app/",
-      "performance": 99,
+      "performance": 100,
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 2102,
+      "lcp_ms": 1310,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
     },
     {
       "url": "/vorher-nachher/",
-      "performance": 99,
+      "performance": 100,
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 2028,
+      "lcp_ms": 1297,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
     },
     {
       "url": "/ws/datenschutz.html",
-      "performance": 99,
+      "performance": 100,
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1952,
+      "lcp_ms": 1214,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -41,7 +41,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1653,
+      "lcp_ms": 1306,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -52,7 +52,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1653,
+      "lcp_ms": 1204,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -63,7 +63,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1801,
+      "lcp_ms": 1204,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -74,7 +74,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1651,
+      "lcp_ms": 1207,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -85,7 +85,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1501,
+      "lcp_ms": 1205,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -96,7 +96,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1651,
+      "lcp_ms": 1204,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -107,7 +107,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1651,
+      "lcp_ms": 1310,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -118,7 +118,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1651,
+      "lcp_ms": 1210,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -129,18 +129,18 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1651,
+      "lcp_ms": 1206,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
     },
     {
       "url": "/ws/mannschaften-e2.html",
-      "performance": 100,
+      "performance": 99,
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1651,
+      "lcp_ms": 1311,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -151,7 +151,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1651,
+      "lcp_ms": 1200,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -162,7 +162,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1651,
+      "lcp_ms": 1210,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -173,7 +173,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1651,
+      "lcp_ms": 1210,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -184,18 +184,18 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1652,
+      "lcp_ms": 1202,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
     },
     {
       "url": "/ws/mitglied-werden.html",
-      "performance": 99,
+      "performance": 100,
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1951,
+      "lcp_ms": 1283,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -206,7 +206,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1652,
+      "lcp_ms": 1215,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -217,7 +217,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1802,
+      "lcp_ms": 1212,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -228,7 +228,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1651,
+      "lcp_ms": 1210,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -239,7 +239,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1801,
+      "lcp_ms": 1213,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -250,7 +250,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1802,
+      "lcp_ms": 1208,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -261,7 +261,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1652,
+      "lcp_ms": 1209,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -272,7 +272,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1802,
+      "lcp_ms": 1209,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -283,7 +283,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1651,
+      "lcp_ms": 1205,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -294,7 +294,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1651,
+      "lcp_ms": 1211,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -305,7 +305,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1502,
+      "lcp_ms": 1203,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -316,7 +316,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1652,
+      "lcp_ms": 1202,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -327,7 +327,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1652,
+      "lcp_ms": 1208,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -338,29 +338,29 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1652,
+      "lcp_ms": 1206,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
     },
     {
       "url": "/ws/styleguide.html",
-      "performance": 98,
+      "performance": 100,
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 2252,
+      "lcp_ms": 1358,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
     },
     {
       "url": "/ws/tabellen.html",
-      "performance": 99,
+      "performance": 100,
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1952,
+      "lcp_ms": 1216,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -371,29 +371,29 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1651,
+      "lcp_ms": 1216,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
     },
     {
       "url": "/ws/verein.html",
-      "performance": 99,
+      "performance": 100,
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1952,
+      "lcp_ms": 1207,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
     },
     {
       "url": "/ws/verein-karneval.html",
-      "performance": 99,
+      "performance": 100,
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1951,
+      "lcp_ms": 1222,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -404,7 +404,7 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1652,
+      "lcp_ms": 1220,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
@@ -415,25 +415,25 @@
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 1730,
+      "lcp_ms": 1300,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
     },
     {
       "url": "/ws/verein-vorstand.html",
-      "performance": 96,
+      "performance": 100,
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 100,
-      "lcp_ms": 2702,
+      "lcp_ms": 1617,
       "cls": 0,
       "tbt_ms": 0,
       "laeufe": 1
     }
   ],
   "minimum": {
-    "performance": 96,
+    "performance": 99,
     "accessibility": 100,
     "bestPractices": 100,
     "seo": 100
