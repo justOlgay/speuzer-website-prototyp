@@ -1,0 +1,46 @@
+<!doctype html>
+<!--
+  Speuzer Website Prototyp – Vorlage für Begleitseiten (P17)
+  Wie src/vorlagen/workspace.html (lang="de", Meta, OG, site.css), aber mit
+  einer eigenen schmalen Kopfleiste vor <main> und Pfaden über {{pfad}} statt
+  fest "../" – Begleitseiten liegen zwar wie Workspace-Seiten in Tiefe 1
+  (/vorher-nachher/, /app/), 404.html aber in Tiefe 0 (docs/404.html), siehe
+  tools/build.mjs. Begleitseiten sind NICHT Teil der nachgebildeten
+  appack-Website (docs/index.html): eigene Kopfleiste statt Hülle, eigene
+  Fußzeile (ws-fuss, wie Workspace-Seiten) mit dem Hinweis, dass es sich um
+  Begleitmaterial für den Vorstand handelt.
+-->
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{title}}</title>
+<meta name="description" content="{{description}}">
+<link rel="canonical" href="{{canonical}}">
+{{og}}
+<meta name="theme-color" content="#191793">
+<link rel="icon" href="{{pfad}}assets/logo/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="{{pfad}}assets/logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="{{pfad}}assets/logo/apple-touch-icon.png">
+<link rel="preload" href="{{pfad}}assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{pfad}}assets/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{pfad}}assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{pfad}}assets/css/site.css">
+</head>
+<body class="ws">
+<header class="begleit-kopf">
+  <div class="container begleit-kopf__zeile">
+    <p class="begleit-kopf__marke">Begleitseite zum Prototyp · FFV Sportfreunde 04</p>
+    <nav aria-label="Begleitseiten"><ul>
+      <li><a href="{{pfad}}">appack-Fassung</a></li>
+      <li><a href="{{pfad}}vorher-nachher/"{{navAktuellVorherNachher}}>Vorher / Nachher</a></li>
+      <li><a href="{{pfad}}app/"{{navAktuellApp}}>In der App</a></li>
+    </ul></nav>
+  </div>
+</header>
+<main id="inhalt">
+{{inhalt}}
+</main>
+<footer class="ws-fuss"><p>Begleitmaterial für den Vorstand, nicht Teil der Website · Stand {{stand}}</p></footer>
+</body>
+</html>

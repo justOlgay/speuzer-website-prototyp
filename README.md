@@ -22,8 +22,9 @@ src/vorlagen/   Workspace-Vorlage (workspace.html) sowie gemeinsame Bausteine
                 (bausteine.mjs, hilfen.mjs, bild.mjs)
 src/seiten/     Seitenmodule (*.mjs), erzeugen die Workspace-Seiten
 src/huelle/     Quelldateien der Hülle (huelle.html/.css/.js), siehe unten
-src/begleit/    Begleitseiten (app.mjs, vorher-nachher.mjs) – nicht Teil des
-                Builds; P17 baut daraus eigene Begleitseiten
+src/begleit/    Begleitseiten (app.mjs, vorher-nachher.mjs), siehe eigener
+                Abschnitt unten – Begleitmaterial für den Vorstand, nicht
+                Teil der nachgebildeten appack-Website
 data/           Feste und importierte Daten als JSON, inkl. appack-*.json
                 (Worksheet-Werte der Hülle, siehe unten)
 assets/         Gestaltungs-Tokens (CSS), Schriften (Barlow Condensed/Inter
@@ -31,7 +32,9 @@ assets/         Gestaltungs-Tokens (CSS), Schriften (Barlow Condensed/Inter
                 assets/huelle/ (Startbild, Wappen der Hülle, siehe unten)
 tools/          Build-, Import- und Prüfwerkzeuge
 docs/           Build-Ausgabe (wird committet, Quelle für GitHub Pages):
-                docs/ws/ = Workspace-Seiten, docs/index.html = die Hülle
+                docs/ws/ = Workspace-Seiten, docs/index.html = die Hülle,
+                docs/vorher-nachher/, docs/app/ und docs/404.html = die
+                Begleitseiten
 ```
 
 ## Hülle
@@ -45,6 +48,14 @@ und SIDEBAR entsprechen; Quelldateien liegen unter `src/huelle/`. Sie bildet
 die Vorlage bewusst einschließlich ihrer Schwächen nach (Ladeanimation,
 Menüpunkte ohne echte Links, Titel/Favicon erst per JavaScript, kein
 `lang`-Attribut) – nichts davon ist hier „verbessert“.
+
+## Begleitseiten
+
+`/vorher-nachher/`, `/app/` und `404.html` sind Begleitmaterial für den
+Vorstand außerhalb der nachgebildeten appack-Website und der
+Workspace-Seiten, mit eigener schmaler Kopfleiste statt der Hülle. Die
+Module liegen unter `src/begleit/` (Vorlage `src/vorlagen/begleit.html`) und
+werden nach `docs/vorher-nachher/`, `docs/app/` sowie `docs/404.html` gebaut.
 
 ## Befehle
 
@@ -69,7 +80,10 @@ npm run screenshots
                   390px unbrauchbar – daher ein echter Browser-Viewport statt eines
                   Shell-Skripts.
 npm run vergleich
-                  Erzeugt die neun "nachher"-Screenshots für /vorher-nachher/ nach
+                  Erzeugt die neun "nachher"-Screenshots für /vorher-nachher/ aus der
+                  Hülle (docs/index.html): lädt sie im jeweiligen Viewport, klickt sich
+                  wie eine Besucherin durch Leisten-/Burger-Menü und Links im
+                  Inhaltsrahmen und schreibt Screenshots des Viewports nach
                   assets/bilder/quelle/ (puppeteer-core, startet den lokalen Server bei
                   Bedarf selbst wie oben). Die neun "vorher"-Screenshots der Live-Seite
                   liegen dort bereits fertig und anonymisiert; anschließend npm run

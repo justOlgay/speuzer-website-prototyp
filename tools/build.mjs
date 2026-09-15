@@ -324,6 +324,11 @@ async function main() {
   const workspaceVorlage = readFileSync(path.join(SRC, "vorlagen", "workspace.html"), "utf8");
   const standLang = datumLang(daten.stand);
 
+  // P17: Begleitseiten (src/begleit/*.mjs) – Begleitmaterial für den Vorstand
+  // außerhalb der Hülle UND außerhalb der Workspace-Seiten, eigene Vorlage
+  // (begleit.html, mit {{pfad}} statt fest "../assets/…", siehe dort).
+  const begleitVorlage = readFileSync(path.join(SRC, "vorlagen", "begleit.html"), "utf8");
+
   const seiten = await sammleSeiten(daten);
   const seitenUrls = new Set(seiten.map((seite) => normUrl(seite.url)));
 
@@ -367,13 +372,66 @@ async function main() {
     geschrieben.push({ url, name, title: seite.title });
   }
 
+  // P17: Begleitseiten (/vorher-nachher/, /app/) – docs/<url>/index.html,
+  // eigene Vorlage (begleit.html), pfad = pfadZurWurzel(url) (hier immer "../",
+  // beide Seiten liegen in Tiefe 1). Anders als bei den Workspace-Seiten oben
+  // KEINE relativiereFuerWorkspace(): die Begleitseiten liegen selbst in der
+  // alten (unverschachtelten, aber weiterhin "echten") Verzeichnisstruktur,
+  // ihre Module schreiben Verweise auf Workspace-Seiten bereits direkt als
+  // "${pfad}ws/<name>.html" (siehe dort). aria-current="page" am jeweils
+  // passenden Kopfleisten-Link (begleit.html: {{navAktuellVorherNachher}} /
+  // {{navAktuellApp}}) – die Hülle selbst nutzt diese Vorlage nicht, deshalb
+  // gibt es dafür keinen dritten Platzhalter.
+  const begleitModule = existsSync(path.join(SRC, "begleit")) ? findeSeitenModule(path.join(SRC, "begleit")) : [];
+  const begleitGeschrieben = []; // { url, title } je Begleitseite
+
+  for (const modulPfad of begleitModule) {
+    const modul = await import(pathToFileURL(modulPfad).href);
+    if (typeof modul.seite !== "function") {
+      console.warn(`  Warnung: ${path.relative(ROOT, modulPfad)} exportiert kein seite()`);
+      continue;
+    }
+    const seite = modul.seite(daten);
+    const url = normUrl(seite.url);
+    const pfad = pfadZurWurzel(url);
+    const canonical = BASIS_URL.replace(/\/$/, "") + url;
+    const ogImageAbs = seite.ogImage
+      ? (seite.ogImage.startsWith("http") ? seite.ogImage : BASIS_URL.replace(/\/$/, "") + "/" + seite.ogImage.replace(/^\//, ""))
+      : BASIS_URL + "assets/og/standard.png";
+
+    const titelVoll = `${seite.title} – ${VEREINSNAME}`;
+    const og = baueOgBlock({ title: seite.title, description: seite.description, canonical, ogImageAbs, ogType: seite.ogType });
+
+    const html = fuelleVorlage(begleitVorlage, {
+      title: escapeHtml(titelVoll),
+      description: escapeHtml(seite.description),
+      canonical,
+      og,
+      pfad,
+      inhalt: seite.inhalt,
+      stand: standLang,
+      navAktuellVorherNachher: url === "/vorher-nachher/" ? ' aria-current="page"' : "",
+      navAktuellApp: url === "/app/" ? ' aria-current="page"' : "",
+    });
+
+    mkdirSync(path.join(DOCS, url), { recursive: true });
+    writeFileSync(path.join(DOCS, url, "index.html"), html, "utf8");
+    begleitGeschrieben.push({ url, title: seite.title });
+  }
+
   // docs/index.html – die Hülle (P16): Nachbildung der appack-Vorlage
   // "Microwebseite", siehe baueHuelle() oben. Erster Eintrag der Sitemap
   // (unten).
   baueHuelle();
 
-  // 404-Seite (kein Verzeichnis, liegt direkt in docs/) – Schritt 6: jetzt aus
-  // der Workspace-Vorlage, ohne die sechs Einstiegskarten.
+  // 404-Seite (kein Verzeichnis, liegt direkt in docs/) – P17, Schritt 2: jetzt
+  // aus der Begleit-Vorlage (begleit.html) statt der Workspace-Vorlage; pfad =
+  // "./" (404.html liegt wie index.html direkt in docs/, Tiefe 0), dadurch
+  // erzeugt fuelleVorlage() bereits "./assets/…" – die frühere Nachbehandlung
+  // ("../assets/" -> "./assets/", nötig wegen der in workspace.html fest
+  // codierten "../"-Pfade) entfällt. Keiner der drei Kopfleisten-Links ist auf
+  // 404.html "aktuell" (die Seite ist selbst kein Navigationsziel) – beide
+  // {{navAktuell…}}-Platzhalter bleiben leer.
   {
     const pfad = "./";
     const canonical = BASIS_URL.replace(/\/$/, "") + "/404.html";
@@ -382,30 +440,29 @@ async function main() {
     const og = baueOgBlock({ title, description, canonical, ogImageAbs: BASIS_URL + "assets/og/standard.png" });
     const inhalt = `<section class="abschnitt seitenkopf">
   <div class="container">
-    <p class="seitenkopf__kicker">Fehler 404</p>
     <h1>Seite nicht gefunden</h1>
-    <p class="seitenkopf__lead">Diese Adresse gibt es im Prototyp nicht. Vielleicht steckt ein Tippfehler im Link, oder die Seite ist umgezogen.</p>
+    <p class="seitenkopf__lead">Diese Adresse gibt es im Prototyp nicht.</p>
   </div>
 </section>
 <section class="abschnitt">
   <div class="container fluss">
-    <p><a class="knopf" href="${pfad}">Zur Startseite</a></p>
+    <p class="knopfzeile">
+      <a class="knopf" href="${pfad}">Zur appack-Fassung</a>
+      <a class="knopf knopf--sekundaer" href="${pfad}vorher-nachher/">Vorher / Nachher</a>
+    </p>
   </div>
 </section>`;
-    let html = fuelleVorlage(workspaceVorlage, {
+    let html = fuelleVorlage(begleitVorlage, {
       title: escapeHtml(`${title} – ${VEREINSNAME}`),
       description: escapeHtml(description),
       canonical,
       og,
+      pfad,
       inhalt,
-      bodyclass: "",
       stand: standLang,
+      navAktuellVorherNachher: "",
+      navAktuellApp: "",
     });
-
-    // Die Vorlage nutzt "../assets/…" (für docs/ws/*.html); 404.html liegt
-    // wie index.html direkt in docs/ – vor der Absolut-Umschreibung unten auf
-    // "./assets/…" normalisieren (Schritt 6).
-    html = html.replaceAll("../assets/", "./assets/");
 
     // Befund 1 (P13, Sichtprüfung): GitHub Pages liefert docs/404.html für
     // JEDEN nicht existierenden Pfad aus, auch verschachtelte (z. B.
@@ -444,20 +501,26 @@ async function main() {
     "utf8"
   );
 
-  // Schritt 7 (P16, Schritt 4): Sitemap listet zuerst die Hülle
-  // (docs/index.html, BASIS_URL), danach alle ws/<name>.html (absolute
-  // BASIS_URL) – tools/pruefen.mjs und tools/lighthouse.mjs behandeln den
-  // ersten Eintrag gesondert (siehe dort); tools/screenshots.mjs nimmt ihn in
-  // der allgemeinen Schleife einfach mit und screenshottet die Hülle
-  // zusätzlich gezielt (siehe screenshotHuelle() dort).
+  // Schritt 7 (P16, Schritt 4), erweitert in P17: Sitemap listet zuerst die
+  // Hülle (docs/index.html, BASIS_URL), danach die Begleitseiten
+  // (/vorher-nachher/, /app/), danach alle ws/<name>.html (absolute
+  // BASIS_URL) – tools/pruefen.mjs und tools/lighthouse.mjs behandeln nur den
+  // ersten Eintrag (die Hülle) gesondert (siehe dort), Begleit- und
+  // Workspace-Seiten laufen in derselben allgemeinen Schleife durch dieselben
+  // Prüfungen bzw. Messungen; tools/screenshots.mjs nimmt beide ebenso in der
+  // allgemeinen Schleife mit und screenshottet die Hülle zusätzlich gezielt
+  // (siehe screenshotHuelle() dort).
   const sitemapEintraege = [
     `  <url><loc>${BASIS_URL}</loc></url>`,
+    ...begleitGeschrieben.map((s) => `  <url><loc>${BASIS_URL.replace(/\/$/, "")}${s.url}</loc></url>`),
     ...geschrieben.map((s) => `  <url><loc>${BASIS_URL.replace(/\/$/, "")}/ws/${s.name}.html</loc></url>`),
   ].join("\n");
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEintraege}\n</urlset>\n`;
   writeFileSync(path.join(DOCS, "sitemap.xml"), sitemap, "utf8");
 
   const dauer = ((Date.now() - startZeit) / 1000).toFixed(2);
+  console.log(`Gebaute Begleitseiten (${begleitGeschrieben.length}):`);
+  for (const s of begleitGeschrieben) console.log(`  ${s.url}  (${s.title})`);
   console.log(`Gebaute Workspace-Seiten (${geschrieben.length}):`);
   for (const s of geschrieben) console.log(`  ws/${s.name}.html  (${s.url})`);
   console.log(`docs/index.html, 404.html, robots.txt, sitemap.xml, .nojekyll geschrieben.`);

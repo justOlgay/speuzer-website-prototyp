@@ -15,22 +15,6 @@
       }
     }
   },
-  "nachher-mannschaft-d3-handy": {
-    "breite": 780,
-    "hoehe": 1688,
-    "varianten": {
-      "480": {
-        "avif": "nachher-mannschaft-d3-handy-480.avif",
-        "webp": "nachher-mannschaft-d3-handy-480.webp",
-        "jpg": "nachher-mannschaft-d3-handy-480.jpg"
-      },
-      "780": {
-        "avif": "nachher-mannschaft-d3-handy-780.avif",
-        "webp": "nachher-mannschaft-d3-handy-780.webp",
-        "jpg": "nachher-mannschaft-d3-handy-780.jpg"
-      }
-    }
-  },
   "nachher-mannschaften-desktop": {
     "breite": 1440,
     "hoehe": 900,
@@ -49,6 +33,22 @@
         "avif": "nachher-mannschaften-desktop-1440.avif",
         "webp": "nachher-mannschaften-desktop-1440.webp",
         "jpg": "nachher-mannschaften-desktop-1440.jpg"
+      }
+    }
+  },
+  "nachher-mannschaften-handy": {
+    "breite": 780,
+    "hoehe": 1688,
+    "varianten": {
+      "480": {
+        "avif": "nachher-mannschaften-handy-480.avif",
+        "webp": "nachher-mannschaften-handy-480.webp",
+        "jpg": "nachher-mannschaften-handy-480.jpg"
+      },
+      "780": {
+        "avif": "nachher-mannschaften-handy-780.avif",
+        "webp": "nachher-mannschaften-handy-780.webp",
+        "jpg": "nachher-mannschaften-handy-780.jpg"
       }
     }
   },

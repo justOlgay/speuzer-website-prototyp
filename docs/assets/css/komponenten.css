@@ -1582,3 +1582,122 @@ body.datenschutz h2 {
 .vergleich figcaption {
   margin-top: var(--sp-1);
 }
+
+/* ==========================================================================
+   Begleitseiten (P17)
+   Eigene Kopfleiste für /vorher-nachher/, /app/ und 404.html
+   (src/vorlagen/begleit.html) – diese Seiten sind nicht Teil der
+   nachgebildeten appack-Website (docs/index.html) und kennzeichnen sich
+   deshalb mit einer eigenen, schmalen Leiste statt der Hülle. Fußzeile nutzt
+   weiterhin .ws-fuss (siehe oben). Dazu: Kopfzeile der Telefon-Vorschau auf
+   /app/ (.telefon-leiste) und der Zwei-Telefonrahmen-Container
+   (.telefone-paar) – der einzelne Rahmen selbst (.telefon, .telefon-eintrag,
+   .telefon-skaliert, P9) bleibt unverändert.
+   ========================================================================== */
+
+.begleit-kopf {
+  background: var(--blau-800);
+  color: var(--weiss);
+}
+
+.begleit-kopf__zeile {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-5);
+  min-height: 56px;
+  padding-block: var(--sp-2);
+}
+
+.begleit-kopf__marke {
+  margin: 0;
+  font-size: var(--fs-sm);
+}
+
+.begleit-kopf nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.begleit-kopf nav a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--weiss);
+  text-decoration: none;
+  font-size: var(--fs-sm);
+}
+
+.begleit-kopf nav a:hover,
+.begleit-kopf nav a:focus-visible,
+.begleit-kopf nav a[aria-current="page"] {
+  text-decoration: underline;
+}
+
+.begleit-kopf nav a[aria-current="page"] {
+  font-weight: 700;
+}
+
+/* Kontrastreicher Fokusring auf dem blauen Kopfleisten-Hintergrund (wie
+   .abschnitt--blau :focus-visible, siehe oben). */
+.begleit-kopf :focus-visible {
+  outline-color: var(--weiss);
+}
+
+/* Unter 640px: Marke und Navigation untereinander statt in einer Zeile. */
+@media (max-width: 639.98px) {
+  .begleit-kopf__zeile {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Kopfleiste im Telefonrahmen (/app/): deutet die App-eigene Kopfzeile mit
+   Zurück-Pfeil an, darunter die eingebettete Workspace-Seite als iframe fester
+   Größe (390 × 780) statt wie bisher 100%/100% (.telefon selbst bleibt
+   unverändert: 390 × 844 Innenmaß, die verbleibenden 20px unten zeigen den
+   Telefonhintergrund, kein Zuschneiden nötig). */
+.telefon-leiste {
+  height: 44px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding-inline: var(--sp-3);
+  background: var(--blau-50);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  border-radius: 32px 32px 0 0;
+}
+
+.telefon iframe.telefon-bildschirm {
+  width: 390px;
+  height: 780px;
+  border-radius: 0 0 32px 32px;
+}
+
+/* Zwei Telefonrahmen nebeneinander ab 900px, darunter untereinander; eigenes
+   overflow-x:auto als Sicherheitsnetz wie .telefone (P9) oben – ein einzelner
+   skalierter Rahmen (< 480px, siehe .telefon-skaliert) kann minimal breiter
+   sein als sehr schmale Viewports, das wird hier lokal aufgefangen statt die
+   Seite scrollen zu lassen. */
+.telefone-paar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-6);
+  overflow-x: auto;
+  padding-bottom: var(--sp-1);
+}
+
+@media (min-width: 900px) {
+  .telefone-paar {
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+  }
+}
