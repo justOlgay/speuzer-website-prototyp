@@ -109,16 +109,16 @@ function zusatzangeboteAbschnitt(daten) {
 </section>`;
 }
 
-// Ferienhinweis + Karneval-Karte wie auf der Startseite (gleicher Text,
-// siehe src/seiten/index.mjs#karnevalAbschnitt). P5: /verein/karneval/
-// existiert jetzt – echter Link statt baldSpan().
-function ferienUndKarnevalAbschnitt(daten) {
+// Karneval-Karte wie auf der Startseite (gleicher Text, siehe
+// src/seiten/index.mjs#karnevalAbschnitt). P5: /verein/karneval/ existiert
+// jetzt – echter Link statt baldSpan(). P16, Schritt 0: der Ferienhinweis
+// stand hier zusätzlich zum Trainingszeiten-Abschnitt (Dopplung aus der
+// Sichtprüfung von P15) und ist hier entfallen – er bleibt nur noch im
+// Trainingszeiten-Abschnitt oben.
+function karnevalAbschnitt(daten) {
   const verein = daten.verein ?? {};
   return `<section class="abschnitt">
   <div class="container fluss">
-    <div class="hinweis hinweis--info">
-      <p style="margin:0;">${escapeHtml(verein.hinweise?.ferien ?? "")}</p>
-    </div>
     <article class="karte fluss">
       <h2 class="karte__titel">Karnevalabteilung „Die Schnauzer"</h2>
       <p>Fünf Gruppen von den Little Fruities bis zu den Dreamboys – die zweite Abteilung des Vereins.</p>
@@ -166,18 +166,23 @@ export function seite(daten) {
     },
   ].map((g) => gruppenAbschnitt({ ...g, teamNachSlug }));
 
+  // P16, Schritt 0: Reihenfolge korrigiert – Mannschaftsübersicht →
+  // Trainingszeiten → Probetraining → Karneval-Karte → Zusatzangebote
+  // (externe Angebote zuletzt).
   const inhalt = [
     seitenkopf,
     ...gruppen,
     // P15: Trainingszeiten-Baustein (ursprünglich Startseite) nach der
-    // Mannschaftsübersicht eingefügt (siehe src/vorlagen/bausteine.mjs).
-    trainingszeitenAbschnitt(daten, PFAD),
-    zusatzangeboteAbschnitt(daten),
-    ferienUndKarnevalAbschnitt(daten),
+    // Mannschaftsübersicht eingefügt (siehe src/vorlagen/bausteine.mjs). Der
+    // Knopf „Zu den Mannschaften“ entfällt hier (mitKnopf=false) – er würde
+    // auf diese Seite selbst verweisen.
+    trainingszeitenAbschnitt(daten, PFAD, false),
     // P15: ersetzt den vorherigen eigenen Aufruf ("Lust mitzuspielen?") durch
     // denselben Probetraining-Baustein wie auf den anderen Seiten (siehe
     // src/vorlagen/bausteine.mjs).
     probetrainingAbschnitt(PFAD),
+    karnevalAbschnitt(daten),
+    zusatzangeboteAbschnitt(daten),
   ].join("\n");
 
   return {

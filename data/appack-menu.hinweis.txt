@@ -1,0 +1,1 @@
+Worksheet MENU der Vorlage Microwebseite. Im CMS lauten die menuLink-Werte https://cdn.appack.de/sportfreunde04/workspace/<datei>.html; News zeigt wie heute auf den Newsfeed der App. menuActive=true blendet einen Eintrag aus. menuFullscreen=true ergibt den Rahmen 100 vw × 92 vh.

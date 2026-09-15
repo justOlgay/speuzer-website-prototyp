@@ -1,0 +1,74 @@
+<!--
+  Speuzer Website Prototyp – Hülle (P16)
+  Nachbildung des von appack ausgelieferten Markups (Vorlage "Microwebseite",
+  siehe drender.html), ohne lang-Attribut und mit leerem <title> – die
+  Vorlage setzt beides erst per JavaScript (initializePage() in huelle.js).
+  Wird von tools/build.mjs (baueHuelle()) zu docs/index.html zusammengesetzt:
+  die drei Platzhalter unten im Kopf (Stil, eingebettete Daten, Skript)
+  werden dort durch vollständige style-/script-Blöcke ersetzt.
+-->
+<!doctype html>
+<html>
+<head>
+<title></title>
+<meta charset="utf-8">
+<meta name="language" content="de">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link id="favicon" rel="shortcut icon" type="image/png">
+{{css}}
+{{daten}}
+{{js}}
+</head>
+
+<body>
+<div id="pageLoader">
+  <div class="loaderSpinner"></div>
+  <div class="loaderText">Seite wird geladen...</div>
+</div>
+
+<div class="headerBar">
+  <div class="burger"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></div>
+  <div class="burgerMenu">
+    <div class="menuElement menuSelected" id="menuStart">
+    Start
+    </div>
+  </div>
+  <div class="barMenu">
+    <div class="menuBarElement menuBarSelected" id="menuBarStart">
+      Start
+    </div>
+  </div>
+  <div class="headerLogo">
+    <img class="logoImage" alt="">
+  </div>
+</div>
+<div class="wide">
+  <iframe id="showFrame" title="Inhalt"></iframe>
+  <iframe id="sideFrame" title="Seitenleiste"></iframe>
+  <div style="clear: both;"></div>
+</div>
+<div class="footer">
+  <div class="footerLogo">
+    <img class="footerlogoImage" alt="">
+    <div class="footerCopy"></div>
+  </div>
+  <div class="socialMedia">
+    <div class="footerFacebook socialElement"></div>
+    <div class="footerInsta socialElement"></div>
+    <div class="footerTiktok socialElement"></div>
+    <div class="footerX socialElement"></div>
+    <div class="footerYoutube socialElement"></div>
+    <div style="clear: both;"></div>
+  </div>
+  <div class="appBanner">
+    Jetzt unsere App laden!
+  </div>
+  <div class="footerTextfield">
+    <div class="footerText"></div>
+    <div class="footerMail"></div>
+    <div class="footerTel"></div>
+    <div class="footerImprint"></div>
+  </div>
+</div>
+</body>
+</html>

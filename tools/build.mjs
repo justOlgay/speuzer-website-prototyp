@@ -248,6 +248,46 @@ function bereinigeDocs() {
   }
 }
 
+// ---------- Hülle (P16) ----------
+// Nachbildung der appack-Vorlage "Microwebseite" (docs/index.html): liest
+// src/huelle/{huelle.html,huelle.css,huelle.js} und die fünf appack-*.json-
+// Dateien (siehe data/), entfernt jeweils den Schlüssel "_hinweis" und setzt
+// {{css}}/{{daten}}/{{js}} in der Vorlage ein. assets/huelle/ wird von
+// kopiereAssets() automatisch mitkopiert (Teil von assets/).
+
+const APPACK_DATEIEN = {
+  start: "appack-start.json",
+  menu: "appack-menu.json",
+  footer: "appack-footer.json",
+  sidebar: "appack-sidebar.json",
+  appColor: "appack-app-color.json",
+};
+
+function ladeAppackDaten(dateiname) {
+  const daten = JSON.parse(readFileSync(path.join(DATA_DIR, dateiname), "utf8"));
+  if (Array.isArray(daten)) return daten;
+  const { _hinweis, ...rest } = daten;
+  return rest;
+}
+
+function baueHuelle() {
+  const html = readFileSync(path.join(SRC, "huelle", "huelle.html"), "utf8");
+  const css = readFileSync(path.join(SRC, "huelle", "huelle.css"), "utf8");
+  const js = readFileSync(path.join(SRC, "huelle", "huelle.js"), "utf8");
+
+  const appack = {};
+  for (const [schluessel, dateiname] of Object.entries(APPACK_DATEIEN)) {
+    appack[schluessel] = ladeAppackDaten(dateiname);
+  }
+
+  const datenBlock = `<script>\nwindow.APPACK = ${JSON.stringify(appack)};\n</script>`;
+  const cssBlock = `<style>\n${css}\n</style>`;
+  const jsBlock = `<script>\n${js}\n</script>`;
+
+  const ausgabe = fuelleVorlage(html, { css: cssBlock, daten: datenBlock, js: jsBlock });
+  writeFileSync(path.join(DOCS, "index.html"), ausgabe, "utf8");
+}
+
 // ---------- Assets kopieren ----------
 
 function kopiereAssets() {
@@ -327,52 +367,10 @@ async function main() {
     geschrieben.push({ url, name, title: seite.title });
   }
 
-  // docs/index.html – vorläufiger Platzhalter (Schritt 6): aus der
-  // Workspace-Vorlage gebaut, aber direkt in docs/ (Tiefe 0) statt in
-  // docs/ws/ – die Vorlage nutzt "../assets/…" (für docs/ws/*.html), hier
-  // deshalb auf "./assets/…" normalisiert. Nicht Teil der Sitemap (Schritt 7,
-  // die Hülle kommt erst in P16).
-  {
-    const title = "Prototyp – appack-Fassung im Umbau";
-    const lead =
-      "Die Hülle (Kopfleiste, Menü, Startbild, Fußbereich) folgt im nächsten Paket. Bis dahin sind die Inhaltsseiten hier direkt erreichbar.";
-    const canonical = BASIS_URL;
-    const og = baueOgBlock({ title, description: lead, canonical, ogImageAbs: BASIS_URL + "assets/og/standard.png" });
-
-    const seitenSortiert = geschrieben
-      .slice()
-      .sort((a, b) => a.title.localeCompare(b.title, "de"));
-    const listeHtml = seitenSortiert
-      .map((s) => `      <li><a href="ws/${s.name}.html">${escapeHtml(s.title)}</a></li>`)
-      .join("\n");
-
-    const inhalt = `<section class="abschnitt seitenkopf">
-  <div class="container">
-    <h1>appack-Fassung im Umbau</h1>
-    <p class="seitenkopf__lead">${escapeHtml(lead)}</p>
-  </div>
-</section>
-<section class="abschnitt">
-  <div class="container fluss">
-    <ul>
-${listeHtml}
-    </ul>
-  </div>
-</section>`;
-
-    let html = fuelleVorlage(workspaceVorlage, {
-      title: escapeHtml(title),
-      description: escapeHtml(lead),
-      canonical,
-      og,
-      inhalt,
-      bodyclass: "",
-      stand: standLang,
-    });
-    html = html.replaceAll("../assets/", "./assets/");
-
-    writeFileSync(path.join(DOCS, "index.html"), html, "utf8");
-  }
+  // docs/index.html – die Hülle (P16): Nachbildung der appack-Vorlage
+  // "Microwebseite", siehe baueHuelle() oben. Erster Eintrag der Sitemap
+  // (unten).
+  baueHuelle();
 
   // 404-Seite (kein Verzeichnis, liegt direkt in docs/) – Schritt 6: jetzt aus
   // der Workspace-Vorlage, ohne die sechs Einstiegskarten.
@@ -446,11 +444,16 @@ ${listeHtml}
     "utf8"
   );
 
-  // Schritt 7: Sitemap listet alle ws/<name>.html (absolute BASIS_URL);
-  // docs/index.html ist nicht Teil der Sitemap (kommt mit P16).
-  const sitemapEintraege = geschrieben
-    .map((s) => `  <url><loc>${BASIS_URL.replace(/\/$/, "")}/ws/${s.name}.html</loc></url>`)
-    .join("\n");
+  // Schritt 7 (P16, Schritt 4): Sitemap listet zuerst die Hülle
+  // (docs/index.html, BASIS_URL), danach alle ws/<name>.html (absolute
+  // BASIS_URL) – tools/pruefen.mjs und tools/lighthouse.mjs behandeln den
+  // ersten Eintrag gesondert (siehe dort); tools/screenshots.mjs nimmt ihn in
+  // der allgemeinen Schleife einfach mit und screenshottet die Hülle
+  // zusätzlich gezielt (siehe screenshotHuelle() dort).
+  const sitemapEintraege = [
+    `  <url><loc>${BASIS_URL}</loc></url>`,
+    ...geschrieben.map((s) => `  <url><loc>${BASIS_URL.replace(/\/$/, "")}/ws/${s.name}.html</loc></url>`),
+  ].join("\n");
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEintraege}\n</urlset>\n`;
   writeFileSync(path.join(DOCS, "sitemap.xml"), sitemap, "utf8");
 

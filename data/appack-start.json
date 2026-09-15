@@ -1,0 +1,17 @@
+{
+  "_hinweis": "Worksheet START der Vorlage Microwebseite. startBackground/startLogo sind im CMS Mediathek-Adressen; hier Repo-Pfade relativ zu docs/.",
+  "startBarMenu": true,
+  "startAppcolor": false,
+  "startBackground": "assets/huelle/startbild.jpg",
+  "startTextoverlay": "Fußball im Gallus – seit 1904.",
+  "startOverlayColor": "",
+  "startVideo": null,
+  "startVidsound": false,
+  "startLogo": "assets/huelle/wappen-512.png",
+  "startHeadcolor": "#191793",
+  "startText": "#ffffff",
+  "startActive": "#ffffff",
+  "startTextactive": "#191793",
+  "startHighlightcolor": "#e4e7fa",
+  "startBgColor": "#191793"
+}

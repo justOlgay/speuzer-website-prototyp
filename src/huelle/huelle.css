@@ -1,0 +1,542 @@
+/*
+  Speuzer Website Prototyp – Hülle (P16)
+  Nachbildung der appack-Vorlage "Microwebseite" (drender.html, CSS ab
+  Zeile 830) – dieselben Selektoren und Werte, Video-Regeln (.video-js,
+  .vjs-tech, .player, .vidframe, .mutetoggle) entfallen, weil die Hülle
+  keine Video-Wiedergabe nachbildet (siehe huelle.js, loadStartSettings()).
+  Font-Awesome-Icons sind hier Inline-SVG (huelle.html/huelle.js); dafür
+  zusätzliche Regeln ganz unten ("SVG-Icons"), die es in der Vorlage nicht
+  gibt. Für #pageLoader.hide/.burgerMenu-Aufklappen zusätzlich Übergänge,
+  wo die Vorlage jQuery-Animationen (.slideToggle/.slideUp) einsetzt.
+  Pfade in url(...) sind relativ zu docs/index.html (assets/fonts/…), nicht
+  zu assets/css/ wie im übrigen Prototyp.
+*/
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("assets/fonts/open-sans-400.woff2") format('woff2');
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("assets/fonts/open-sans-700.woff2") format('woff2');
+}
+
+body {
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+  font-family: 'Open Sans', Arial, sans-serif;
+  color: white;
+  background-color: #eeeeee;
+}
+
+iframe {
+  border: 0;
+}
+
+#showFrame {
+  height: 87vh;
+  display: none;
+  float: left;
+  border-radius: 20px;
+}
+
+#sideFrame {
+  height: 93vh;
+  display: none;
+  background-size: cover;
+  background-repeat: no-repeat;
+  width: 20vw;
+  float: right;
+}
+
+.wide {
+  background-size: cover;
+  background-repeat: no-repeat;
+  min-height: 92vh;
+  padding-top: 8vh;
+  width: 100vw;
+}
+
+.footer {
+  min-height: 30vh;
+  background-color: black;
+  position: relative;
+  color: white;
+}
+
+.footer a {
+  text-decoration: none;
+  color: white;
+}
+
+.headerBar {
+  height: 7vh;
+  width: 100vw;
+  background-color: transparent;
+  position: fixed;
+  top: 1vh;
+  left: 0;
+  z-index: 1000;
+}
+
+.headerBar:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 7vh;
+  background-color: #333333;
+  box-shadow: 0 4px 22px rgba(0,0,0,0.22);
+  z-index: -1;
+}
+
+.burger {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 15px;
+  font-size: 150%;
+}
+
+.burger:active, .burger:hover {
+  color: black;
+}
+
+.burgerMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 20vw;
+  font-size: 100%;
+  background-color: rgba(51, 51, 51, 0.6);
+  display: none;
+  border-bottom-right-radius: 15px;
+  text-align: center;
+  font-weight: bold;
+  overflow: hidden;
+  box-shadow: 0 6px 22px rgba(0,0,0,0.22);
+  max-height: 0;
+  transition: max-height 150ms ease;
+}
+
+.menuElement {
+  padding: 12px;
+  font-size: 130%;
+}
+
+.burgerMenu .menuElement:last-child {
+  border-bottom-right-radius: 15px;
+}
+
+.menuSelected {
+  background-color: #dddddd;
+  color: black;
+}
+
+.menuElement:active, .menuElement:hover {
+  background-color: #dddddd;
+  color: black;
+}
+
+.barMenu {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0.6vw;
+  right: calc(10.5vh + 2vw);
+  height: 7vh;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 6px;
+  min-width: 20vw;
+  font-size: 100%;
+  text-align: center;
+  font-weight: bold;
+  display: none;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+.menuBarElement {
+  font-size: 115%;
+  height: auto;
+  min-height: 4.9vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 14px;
+  margin: 0 1px;
+  border-radius: 999px;
+  line-height: 1;
+  flex: 0 0 auto;
+  transition:
+    background-color 220ms ease,
+    color 220ms ease,
+    transform 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.menuBarSelected {
+  background-color: #dddddd;
+  color: black;
+  border-radius: 999px;
+}
+
+.menuBarElement:active, .menuBarElement:hover {
+  background-color: #dddddd;
+  color: black;
+  transform: translateY(-1px);
+}
+
+.menuMore {
+  position: relative;
+  flex: 0 0 auto;
+  min-height: 4.9vh;
+  padding: 0 14px;
+  margin: 0 1px;
+  border-radius: 999px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background-color 220ms ease, color 220ms ease, box-shadow 220ms ease;
+}
+
+.menuMore svg {
+  font-size: 80%;
+  transition: transform 180ms ease;
+}
+
+.menuMore.open svg {
+  transform: rotate(180deg);
+}
+
+.menuMore:hover,
+.menuMore:active,
+.menuMore.open {
+  background-color: #dddddd;
+  color: black;
+  box-shadow: 0 6px 18px rgba(0,0,0,.18);
+}
+
+.menuMoreDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 210px;
+  max-width: min(320px, 80vw);
+  padding: 7px;
+  background: rgba(35,35,35,.97);
+  border-radius: 14px;
+  box-shadow: 0 14px 34px rgba(0,0,0,.28);
+  display: none;
+  overflow: hidden;
+  z-index: 1002;
+}
+
+.menuMore.open .menuMoreDropdown {
+  display: block;
+}
+
+.menuMoreDropdown .menuBarElement {
+  width: 100%;
+  min-height: auto;
+  box-sizing: border-box;
+  justify-content: flex-start;
+  text-align: left;
+  padding: 12px 14px;
+  margin: 0;
+  border-radius: 9px;
+  font-size: 100%;
+  line-height: 1.25;
+}
+
+.menuMoreDropdown .menuBarElement + .menuBarElement {
+  margin-top: 2px;
+}
+
+.headerLogo {
+  position: absolute;
+  top: calc(50% + 1vh);
+  transform: translateY(-50%);
+  right: 1.1vw;
+  height: 10.5vh;
+  width: 10.5vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.logoImage {
+  height: 10.5vh;
+  width: 10.5vh;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,0.35));
+}
+
+.footerLogo {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 40px;
+  width: 10vw;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footerlogoImage {
+  width: 100%;
+}
+
+.footerCopy {
+  width: 100%;
+  text-align: center;
+}
+
+.footerTextfield {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 40px;
+}
+
+.socialMedia {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30vw;
+  font-size: 220%;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+}
+
+.socialElement {
+  float: left;
+  margin: 2.5%;
+}
+
+.appBanner {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 25vw;
+  text-align: center;
+  border: 1px solid #ffffff;
+  border-radius: 25px;
+  font-size: 125%;
+  font-weight: bold;
+  padding: 12px 6px;
+}
+
+.appBanner:hover, .appBanner:active {
+  background-color: white;
+  color: black;
+}
+
+.textOverlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, calc(-50% + 40px));
+  color: white;
+  font-size: 500%;
+  font-weight: bold;
+  text-align: center;
+  opacity: 0;
+  padding: 30px 45px;
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 24px;
+  transition: opacity 1200ms ease,
+              transform 1200ms ease;
+}
+
+.textOverlay:before {
+  content: "";
+  display: block;
+  width: 80px;
+  height: 4px;
+  margin: 0 auto 20px auto;
+  border-radius: 4px;
+  background: currentColor;
+}
+
+.footerImprint,
+.DSGVO {
+  cursor: pointer !important;
+  border: 1px solid #ffffff;
+  border-radius: 25px;
+  display: flex;
+  justify-content: center;
+  padding: 2%;
+  margin: 2% 0;
+}
+
+.nomediaBanner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 25vw;
+  text-align: center;
+  border: 1px solid #ffffff;
+  border-radius: 25px;
+  font-size: 125%;
+  font-weight: bold;
+  padding: 12px 6px;
+  cursor: pointer;
+}
+
+.menuElement,
+.menuBarElement,
+.burger,
+.appBanner,
+.nomediaBanner,
+.footerImprint,
+.DSGVO {
+  cursor: pointer;
+}
+
+/* Mobiltelefon */
+@media only screen and (max-width: 768px) {
+
+  .footerLogo {
+    position: relative;
+    text-align: center;
+    width: 100vw;
+    display: block;
+    top: 0;
+    left: 0;
+    transform: none;
+    margin-bottom: 20px;
+    padding-top: 35px;
+  }
+
+  .footerTextfield {
+    position: relative;
+    display: block;
+    top: 0;
+    left: 0;
+    transform: none;
+    padding: 5%;
+    text-align: center;
+  }
+
+  .socialMedia {
+    position: relative;
+    font-size: 220%;
+    text-align: center;
+    width: 100vw;
+    display: block;
+    top: 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .appBanner {
+    position: relative;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60vw;
+    text-align: center;
+    border: 1px solid #ffffff;
+    border-radius: 25px;
+    font-size: 125%;
+    font-weight: bold;
+    padding: 12px 6px;
+    margin-top: 20px;
+  }
+
+  .footerlogoImage {
+    width: 25%;
+  }
+
+  .textOverlay {
+    font-size: 300%;
+    width: 80vw;
+    padding: 20px;
+  }
+
+  #showFrame {
+    height: 93vh !important;
+    width: 100vw !important;
+    display: none;
+    margin: 0 !important;
+  }
+
+  #sideFrame {
+    display: none !important;
+  }
+
+}
+
+#pageLoader {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #000000;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 18px;
+  transition: opacity 350ms ease, visibility 350ms ease;
+}
+
+#pageLoader.hide {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loaderSpinner {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  animation: loaderSpin 0.9s linear infinite;
+}
+
+.loaderText {
+  font-size: 120%;
+  font-weight: bold;
+  letter-spacing: 0.03em;
+}
+
+@keyframes loaderSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* SVG-Icons (P16, ersetzen Font Awesome der Vorlage – gibt es in
+   drender.html nicht) */
+.burger svg, .menuMore svg, .socialElement svg, .footerMail svg, .footerTel svg {
+  display: inline-block;
+  vertical-align: -0.15em;
+}
+
+.socialElement svg {
+  fill: currentColor;
+}

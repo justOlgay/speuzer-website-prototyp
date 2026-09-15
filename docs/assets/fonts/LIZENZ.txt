@@ -1,4 +1,5 @@
-Schriften in diesem Ordner: Barlow Condensed (600, 700) und Inter (400, 600)
+Schriften in diesem Ordner: Barlow Condensed (600, 700), Inter (400, 600) und
+Open Sans (400, 700)
 
 Lizenz: SIL Open Font License, Version 1.1
 https://scripts.sil.org/OFL
@@ -29,3 +30,21 @@ keinen Layoutsprung (CLS) mehr erzeugt – siehe tokens.css (--font-text/
 --font-head). Diese Fallback-Regeln laden keine eigene Schriftdatei (nur
 lokal installierte Systemschriften), fallen also nicht unter die oben
 genannte Lizenz.
+
+Open Sans (P16): Schrift der Hülle (docs/index.html, Nachbildung der
+appack-Vorlage „Microwebseite" – die Live-Seite bindet sie über
+cdn.appack.de/modules/fonts/open-sans.min.css ein), nicht des übrigen
+Prototyps (dort weiterhin Barlow Condensed/Inter, siehe oben).
+Quelle: https://fonts.google.com/specimen/Open+Sans, bezogen am 15.09.2026
+über die Google-Fonts-css2-API
+(https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap)
+mit einem aktuellen Chrome-User-Agent, Subset „latin", selbst gehostet als
+open-sans-400.woff2/open-sans-700.woff2 (kein Aufruf von
+fonts.googleapis.com/fonts.gstatic.com zur Laufzeit). Lizenz ebenfalls SIL
+Open Font License, Version 1.1 (siehe oben). Hinweis: open-sans-400.woff2 und
+open-sans-700.woff2 sind bytegleich – Google liefert Open Sans dieser
+Chrome-Version ebenfalls als eine Variable-Font-Datei aus (gleiches Muster
+wie bei Inter, siehe Hinweis oben); anders als bei Inter liegen hier trotzdem
+zwei gleichnamige Dateien und zwei @font-face-Regeln (font-weight 400 bzw.
+700) in huelle.css, weil die Hülle die Vorlage 1:1 nachbildet, nicht das
+Gestaltungssystem des übrigen Prototyps.

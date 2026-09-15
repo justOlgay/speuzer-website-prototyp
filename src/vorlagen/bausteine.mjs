@@ -28,7 +28,7 @@ function escapeHtml(text) {
 
 // ---------- Trainingszeiten (ursprünglich Startseite D3, P2-K/K7) ----------
 
-export function trainingszeitenAbschnitt(daten, pfad) {
+export function trainingszeitenAbschnitt(daten, pfad, mitKnopf = true) {
   const verein = daten.verein ?? {};
   const zeilen = (daten.teams ?? [])
     .map((team) => {
@@ -58,9 +58,9 @@ export function trainingszeitenAbschnitt(daten, pfad) {
     <div class="hinweis hinweis--info">
       <p style="margin:0;">${escapeHtml(verein.hinweise?.ferien ?? "")}</p>
     </div>
-    <p class="knopfzeile">
+    ${mitKnopf ? `<p class="knopfzeile">
       <a class="knopf" href="${pfad}mannschaften/">Zu den Mannschaften</a>
-    </p>
+    </p>` : ""}
   </div>
 </section>`;
 }

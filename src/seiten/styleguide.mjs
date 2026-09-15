@@ -610,7 +610,7 @@ export function seite(daten) {
   <h1>Gestaltungssystem „Speuzer Blau-Weiß“</h1>
   <div class="fluss">
   <p class="inhalt">Die Bausteine gelten für die Inhaltsseiten (Workspace-Seiten) im appack-Rahmen. Kopfleiste, Menü und Fußbereich stellt die appack-Vorlage; ihre Gestaltung ist im CMS nur über Farben, Logo, Startbild und Texte beeinflussbar.</p>
-  <p class="inhalt">Interner Anhang für das Übernahmepaket: alle Tokens aus assets/css/tokens.css und alle Bausteine aus assets/css/komponenten.css, sichtbar gemacht. Stand des Builds: ${daten.stand}.</p>
+  <p class="inhalt">Interner Anhang für das Übernahmepaket: alle Tokens aus assets/css/tokens.css und alle Bausteine aus assets/css/komponenten.css, sichtbar gemacht. Stand des Builds: ${datumLang(daten.stand)}.</p>
   ${seiteFarben()}
   ${seiteSchrift()}
   ${seiteAbstaendeRadienSchatten()}
