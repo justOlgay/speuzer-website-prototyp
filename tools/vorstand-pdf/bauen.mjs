@@ -175,10 +175,12 @@ function leseSitemapSeiten() {
   const locs = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((m) => m[1]);
   return locs.map((loc) => {
     const pfad = loc.replace(basis, "") || "/";
-    const dateiPfad =
-      pfad === "/"
-        ? path.join(DOCS, "index.html")
-        : path.join(DOCS, pfad.replace(/^\//, "").replace(/\/$/, ""), "index.html");
+    // P18b: Pfade, die auf ".html" enden (z. B. "/ws/datenschutz.html"),
+    // zeigen direkt auf die Datei; nur Verzeichnispfade ("/…/", auch "/")
+    // bekommen "index.html" angehängt.
+    const dateiPfad = pfad.endsWith(".html")
+      ? path.join(DOCS, pfad.replace(/^\//, ""))
+      : path.join(DOCS, pfad.replace(/^\//, "").replace(/\/$/, ""), "index.html");
     let titel = "";
     if (existsSync(dateiPfad)) {
       const html = readFileSync(dateiPfad, "utf8");
@@ -836,7 +838,10 @@ function baueKapitel8() {
     (t, i) =>
       `<li><span class="ankreuz"></span>${escapeHtml(t)}${zusatzJeIndex[i] ?? ""}</li>`
   ).join("\n");
-  return `<section class="kapitel">
+  // P18b: kein erzwungener Seitenumbruch vor Kapitel 8 (wie Anhang B/D) –
+  // Block C samt Empfehlung aus Kapitel 7 und die acht Ankreuzpunkte bilden
+  // zusammen eine gut gefüllte Seite statt einer fast leeren Folgeseite.
+  return `<section class="kapitel kapitel--fortlaufend">
   <div class="kapitelnummer">Kapitel 8</div>
   <h2>${escapeHtml(T.KAPITEL_NAMEN[7])}</h2>
   <ol class="liste liste--beschluss">${items}</ol>
