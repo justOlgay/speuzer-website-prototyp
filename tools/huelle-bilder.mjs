@@ -83,7 +83,7 @@ async function baueStartbild(browser) {
 }
 
 async function baueWappen512(browser) {
-  const wappenFarbig = readFileSync(path.join(ASSETS, "logo", "wappen.svg"), "utf8");
+  const wappenFarbig = readFileSync(path.join(ASSETS, "logo", "wappen-weiss.svg"), "utf8");
   const html = seite(
     "width:512px;height:512px;padding:8px;display:flex;align-items:center;justify-content:center;" +
       `color:${WAPPEN_FARBE};`,
