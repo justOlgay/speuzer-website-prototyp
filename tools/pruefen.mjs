@@ -10,6 +10,12 @@
 // P1/P9-Prüfungen (Burger-Menü, Header/Footer-Links, aria-current im Header,
 // App-Modus) entfallen deshalb. "nav__bald" im gebauten HTML nur noch auf
 // /ws/styleguide.html erlaubt (Plan-Abschnitt A1, P11).
+// P16: sitemap.xml führt jetzt zuerst die Hülle (docs/index.html, "/")
+// und danach die Workspace-Seiten (siehe tools/build.mjs). pruefeSeite()
+// prüft h1/lang/description/axe – Eigenschaften der appack-Vorlage, nicht
+// des Vereins – deshalb durchläuft die Hülle diese Prüfung NICHT; sie wird
+// stattdessen unten aus der Schleife ausgenommen und von der eigenen
+// pruefeHuelle() geprüft.
 
 import puppeteer from "puppeteer-core";
 import { readFileSync, existsSync, statSync, mkdirSync, writeFileSync, readdirSync } from "node:fs";
@@ -284,6 +290,289 @@ async function pruefeSeite(browser, seitenPfad, axeSkript, bericht) {
   return ergebnisSeite.bestanden;
 }
 
+// ---------- Hülle (P16, Schritt 5) ----------
+// Prüft docs/index.html (die Nachbildung der appack-Vorlage "Microwebseite")
+// gesondert von den Workspace-Seiten: Ladeanimation, Leisten-/Burger-Menü,
+// Textüberlagerung, Rahmenmaße bei Klicks, Fußbereich, kein horizontales
+// Scrollen bei mehreren Breiten sowie die Existenz aller internen
+// Menü-/Fußbereich-Ziele unter docs/. Absichtlich NICHT geprüft: h1, lang,
+// description, axe-core – das sind Eigenschaften der appack-Vorlage, nicht
+// des Vereins (siehe pruefeSeite()), die Hülle bildet sie 1:1 nach.
+
+async function istSichtbar(page, selector) {
+  return page.evaluate((sel) => {
+    const el = document.querySelector(sel);
+    if (!el) return false;
+    const stil = getComputedStyle(el);
+    if (stil.display === "none" || stil.visibility === "hidden") return false;
+    const rect = el.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  }, selector);
+}
+
+async function warteBisLoaderWeg(page) {
+  return page
+    .waitForFunction(() => !document.getElementById("pageLoader"), { timeout: 4000 })
+    .then(() => true)
+    .catch(() => false);
+}
+
+async function pruefeHuelle(browser) {
+  const fehler = [];
+  const push = (text) => fehler.push(text);
+  const page = await browser.newPage();
+
+  // --- 1440 × 900 ---
+  await page.setViewport({ width: 1440, height: 900 });
+  await page.goto(BASIS + "/index.html", { waitUntil: "domcontentloaded", timeout: 30000 });
+
+  if (!(await warteBisLoaderWeg(page))) {
+    push("1440px: #pageLoader nicht innerhalb von 4s entfernt");
+  }
+
+  const titel = await page.title();
+  if (titel !== "FFV Sportfreunde 04") {
+    push(`1440px: document.title ist '${titel}', erwartet 'FFV Sportfreunde 04'`);
+  }
+
+  if (!(await istSichtbar(page, ".barMenu"))) {
+    push("1440px: .barMenu nicht sichtbar");
+  }
+  const anzahlBarElemente = await page.evaluate(() => document.querySelectorAll(".menuBarElement").length);
+  if (anzahlBarElemente !== 6) {
+    push(`1440px: ${anzahlBarElemente} .menuBarElement, erwartet 6 (Start + 5)`);
+  }
+  if (await istSichtbar(page, ".menuMore")) {
+    push("1440px: .menuMore sichtbar, erwartet unsichtbar (6 Punkte passen in die Leiste)");
+  }
+
+  await warte(1600);
+  const overlay = await page.evaluate(() => {
+    const el = document.querySelector(".textOverlay");
+    if (!el) return null;
+    return { text: el.textContent.trim(), opacity: getComputedStyle(el).opacity };
+  });
+  if (!overlay) {
+    push("1440px: .textOverlay nicht gefunden");
+  } else {
+    if (overlay.text !== "Fußball im Gallus – seit 1904.") {
+      push(`1440px: .textOverlay-Text ist '${overlay.text}', erwartet 'Fußball im Gallus – seit 1904.'`);
+    }
+    if (overlay.opacity !== "1") {
+      push(`1440px: .textOverlay-opacity ist '${overlay.opacity}', erwartet '1' (nach 1,6s)`);
+    }
+  }
+
+  if (await istSichtbar(page, "#showFrame")) {
+    push("1440px: #showFrame sichtbar vor jedem Klick, erwartet unsichtbar");
+  }
+
+  // Klick auf "Mannschaften" (.barMenu)
+  const geklicktMannschaften = await page.evaluate(() => {
+    const el = Array.from(document.querySelectorAll(".menuBarElement")).find((e) => e.textContent.trim() === "Mannschaften");
+    if (!el) return false;
+    el.click();
+    return true;
+  });
+  if (!geklicktMannschaften) {
+    push("1440px: Menüpunkt 'Mannschaften' in .barMenu nicht gefunden");
+  } else {
+    await warte(300);
+    const frame = await page.evaluate(() => {
+      const f = document.getElementById("showFrame");
+      const r = f.getBoundingClientRect();
+      return { src: f.getAttribute("src"), x: r.x, y: r.y, width: r.width, height: r.height };
+    });
+    if (!frame.src || !frame.src.endsWith("ws/mannschaften.html")) {
+      push(`1440px: #showFrame.src ist '${frame.src}', erwartet Ende 'ws/mannschaften.html'`);
+    }
+    if (Math.abs(frame.width - 1440) > 2) push(`1440px (Mannschaften): Breite ${frame.width}, erwartet 1440±2`);
+    if (Math.abs(frame.height - 828) > 2) push(`1440px (Mannschaften): Höhe ${frame.height}, erwartet 828±2 (92vh)`);
+    if (Math.abs(frame.y - 72) > 2) push(`1440px (Mannschaften): y ${frame.y}, erwartet 72±2 (8vh)`);
+  }
+
+  // Klick auf "Start" (.barMenu)
+  await page.evaluate(() => {
+    const el = document.getElementById("menuBarStart");
+    if (el) el.click();
+  });
+  await warte(300);
+  const nachStart = await page.evaluate(() => {
+    const f = document.getElementById("showFrame");
+    const overlayEl = document.querySelector(".textOverlay");
+    return {
+      showFrameSichtbar: getComputedStyle(f).display !== "none",
+      overlaySichtbar: overlayEl ? getComputedStyle(overlayEl).display !== "none" : false,
+    };
+  });
+  if (nachStart.showFrameSichtbar) {
+    push("1440px: #showFrame nach Klick auf 'Start' sichtbar, erwartet unsichtbar");
+  }
+  if (!nachStart.overlaySichtbar) {
+    push("1440px: .textOverlay nach Klick auf 'Start' unsichtbar, erwartet sichtbar");
+  }
+
+  // Klick auf .footerImprint
+  const geklicktImprint = await page.evaluate(() => {
+    const el = document.querySelector(".footerImprint");
+    if (!el) return false;
+    el.click();
+    return true;
+  });
+  if (!geklicktImprint) {
+    push("1440px: .footerImprint nicht gefunden");
+  } else {
+    await warte(300);
+    const frame = await page.evaluate(() => {
+      const f = document.getElementById("showFrame");
+      const r = f.getBoundingClientRect();
+      return { src: f.getAttribute("src"), x: r.x, width: r.width };
+    });
+    if (!frame.src || !frame.src.endsWith("ws/impressum.html")) {
+      push(`1440px: #showFrame.src nach Klick auf Impressum ist '${frame.src}', erwartet Ende 'ws/impressum.html'`);
+    }
+    if (Math.abs(frame.width - 576) > 2) push(`1440px (Impressum): Breite ${frame.width}, erwartet 576±2`);
+    if (Math.abs(frame.x - 432) > 2) push(`1440px (Impressum): x ${frame.x}, erwartet 432±2`);
+  }
+
+  // Fußbereich
+  const fussbereich = await page.evaluate(() => {
+    const socialSelectors = [".footerFacebook a", ".footerInsta a", ".footerTiktok a", ".footerX a", ".footerYoutube a"];
+    let socialLinks = 0;
+    for (const sel of socialSelectors) socialLinks += document.querySelectorAll(sel).length;
+    const bannerEl = document.querySelector(".appBanner, .nomediaBanner");
+    return {
+      mailLinks: document.querySelectorAll('a[href^="mailto:"]').length,
+      telLinks: document.querySelectorAll('a[href^="tel:"]').length,
+      socialLinks,
+      bannerText: bannerEl ? bannerEl.textContent.trim() : null,
+    };
+  });
+  if (fussbereich.mailLinks < 1) push("1440px: kein a[href^=\"mailto:\"] im Fußbereich");
+  if (fussbereich.telLinks < 1) push("1440px: kein a[href^=\"tel:\"] im Fußbereich");
+  if (fussbereich.socialLinks !== 2) push(`1440px: ${fussbereich.socialLinks} Social-Links im Fußbereich, erwartet genau 2`);
+  if (fussbereich.bannerText !== "Jetzt unsere App laden!") {
+    push(`1440px: .appBanner-Text ist '${fussbereich.bannerText}', erwartet 'Jetzt unsere App laden!'`);
+  }
+
+  // --- 390 × 844 ---
+  // Kein erneutes goto(): dieselbe geladene Seite nur auf schmal skaliert
+  // (wie ein Nutzer, der das Fenster schmaler zieht) – applyBarMenuMode() in
+  // huelle.js reagiert selbst per resize-Ereignis (siehe dort).
+  await page.setViewport({ width: 390, height: 844 });
+  await warte(300); // resize-Handler/requestAnimationFrame abwarten
+
+  if (!(await istSichtbar(page, ".burger"))) push("390px: .burger nicht sichtbar");
+  if (await istSichtbar(page, ".barMenu")) push("390px: .barMenu sichtbar, erwartet unsichtbar");
+
+  await page.evaluate(() => document.querySelector(".burger").click());
+  await warte(300);
+  if (!(await istSichtbar(page, ".burgerMenu"))) {
+    push("390px: .burgerMenu nach Klick auf den Burger nicht sichtbar");
+  }
+  const anzahlMenuElemente = await page.evaluate(() => document.querySelectorAll(".menuElement").length);
+  if (anzahlMenuElemente !== 6) {
+    push(`390px: ${anzahlMenuElemente} .menuElement, erwartet 6 (Start + 5)`);
+  }
+
+  const geklicktVerein = await page.evaluate(() => {
+    const el = Array.from(document.querySelectorAll(".menuElement")).find((e) => e.textContent.trim() === "Verein");
+    if (!el) return false;
+    el.click();
+    return true;
+  });
+  if (!geklicktVerein) {
+    push("390px: Menüpunkt 'Verein' in .burgerMenu nicht gefunden");
+  } else {
+    await warte(300);
+    const frame = await page.evaluate(() => {
+      const f = document.getElementById("showFrame");
+      const r = f.getBoundingClientRect();
+      return { src: f.getAttribute("src"), width: r.width, height: r.height, y: r.y };
+    });
+    if (!frame.src || !frame.src.endsWith("ws/verein.html")) {
+      push(`390px: #showFrame.src ist '${frame.src}', erwartet Ende 'ws/verein.html'`);
+    }
+    if (Math.abs(frame.width - 390) > 2) push(`390px (Verein): Breite ${frame.width}, erwartet 390±2`);
+    if (Math.abs(frame.height - 785) > 2) push(`390px (Verein): Höhe ${frame.height}, erwartet 785±2`);
+    if (Math.abs(frame.y - 68) > 2) push(`390px (Verein): y ${frame.y}, erwartet 68±2`);
+
+    // burgerMenu schließt sich 150ms nach dem Klick (siehe setFrame() in huelle.js)
+    await warte(300);
+    if (await istSichtbar(page, ".burgerMenu")) {
+      push("390px: .burgerMenu nach Klick auf 'Verein' noch sichtbar, erwartet unsichtbar");
+    }
+  }
+
+  // --- 840 × 900: Leisten-Überlauf ("Mehr") ---
+  // Wieder kein erneutes goto() (siehe 390px-Abschnitt oben).
+  await page.setViewport({ width: 840, height: 900 });
+  await warte(300); // resize-Handler/updateBarMenuOverflow() per requestAnimationFrame
+
+  if (!(await istSichtbar(page, ".barMenu"))) push("840px: .barMenu nicht sichtbar");
+
+  const ueberlauf = await page.evaluate(() => {
+    const barMenu = document.querySelector(".barMenu");
+    const items = Array.from(document.querySelectorAll(".barMenu .menuBarElement"));
+    const sichtbareBreite = items.reduce((summe, el) => summe + el.getBoundingClientRect().width, 0);
+    const sichtbareAnzahl = items.filter((el) => el.getBoundingClientRect().width > 0).length;
+    const more = barMenu.querySelector(".menuMore");
+    const moreSichtbar = !!more && getComputedStyle(more).display !== "none";
+    const dropdownEintraege = more ? more.querySelectorAll(".menuMoreDropdown .menuBarElement").length : 0;
+    return {
+      gesamtAnzahl: items.length,
+      sichtbareAnzahl,
+      sichtbareBreite,
+      moreSichtbar,
+      dropdownEintraege,
+      barMenuBreite: barMenu.clientWidth,
+    };
+  });
+  if (ueberlauf.gesamtAnzahl !== 6) {
+    push(`840px: ${ueberlauf.gesamtAnzahl} .menuBarElement insgesamt (Leiste + Dropdown), erwartet 6`);
+  }
+  const alleSechsSichtbar = ueberlauf.sichtbareAnzahl === 6 && !ueberlauf.moreSichtbar;
+  const mehrMitEintraegen = ueberlauf.moreSichtbar && ueberlauf.dropdownEintraege >= 1;
+  if (!alleSechsSichtbar && !mehrMitEintraegen) {
+    push(
+      `840px: weder alle 6 Punkte sichtbar (${ueberlauf.sichtbareAnzahl}/6, .menuMore sichtbar: ${ueberlauf.moreSichtbar}) noch .menuMore mit ≥1 Dropdown-Eintrag (${ueberlauf.dropdownEintraege})`
+    );
+  }
+  if (ueberlauf.sichtbareBreite > ueberlauf.barMenuBreite + 2) {
+    push(`840px: Summe sichtbarer Punktbreiten ${Math.round(ueberlauf.sichtbareBreite)} > Leistenbreite ${ueberlauf.barMenuBreite}`);
+  }
+
+  // --- kein horizontales Scrollen der Hülle bei mehreren Breiten ---
+  for (const breite of [320, 360, 390, 768, 1024, 1440, 1920]) {
+    await page.setViewport({ width: breite, height: 900 });
+    const scroll = await page.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      innerWidth: window.innerWidth,
+    }));
+    if (scroll.scrollWidth > scroll.innerWidth + 1) {
+      push(`horizontales Scrollen bei ${breite}px (scrollWidth ${scroll.scrollWidth} > innerWidth ${scroll.innerWidth})`);
+    }
+  }
+
+  // --- alle internen Menü-/Fußbereich-Ziele existieren unter docs/ ---
+  const appackDaten = await page.evaluate(() => window.APPACK);
+  const ziele = [
+    ...(appackDaten.menu ?? []).map((m) => m.menuLink),
+    appackDaten.footer?.footerImprint,
+    appackDaten.footer?.footerDatenschutz,
+  ];
+  for (const ziel of ziele) {
+    if (!ziel || ziel.startsWith("http")) continue;
+    const dateiPfad = path.join(DOCS, ziel.split("?")[0].split("#")[0]);
+    if (!existsSync(dateiPfad)) {
+      push(`Ziel '${ziel}' existiert nicht unter docs/`);
+    }
+  }
+
+  await page.close();
+  return { fehler, bestanden: fehler.length === 0 };
+}
+
 async function main() {
   mkdirSync(CACHE, { recursive: true });
 
@@ -300,12 +589,19 @@ async function main() {
   try {
     const browser = await puppeteer.launch({ executablePath: CHROME, headless: true });
     try {
-      const pfade = leseSitemapPfade();
+      // P16: erster Sitemap-Eintrag ("/") ist die Hülle, nicht geprüft von
+      // pruefeSeite() (siehe Kommentar oben) – stattdessen unten pruefeHuelle().
+      const pfade = leseSitemapPfade().filter((p) => p !== "/");
       for (const seitenPfad of pfade) {
         console.log(`Prüfe ${seitenPfad} …`);
         const ok = await pruefeSeite(browser, seitenPfad, axeSkript, bericht);
         if (!ok) allesOk = false;
       }
+
+      console.log("Prüfe Hülle (/) …");
+      const huelleErgebnis = await pruefeHuelle(browser);
+      bericht.huelle = huelleErgebnis;
+      if (!huelleErgebnis.bestanden) allesOk = false;
     } finally {
       await browser.close();
     }
@@ -338,6 +634,8 @@ async function main() {
     console.log(`${s.bestanden ? "OK  " : "FEHLER"} ${s.seite} (${s.fehler.length} Fehler)`);
     for (const f of s.fehler) console.log(`  - ${f}`);
   }
+  console.log(`${bericht.huelle.bestanden ? "OK  " : "FEHLER"} / (Hülle) (${bericht.huelle.fehler.length} Fehler)`);
+  for (const f of bericht.huelle.fehler) console.log(`  - ${f}`);
   if (bericht.bilder.verstoesse.length) {
     console.log("Bildgrößen-Verstöße:");
     for (const v of bericht.bilder.verstoesse) console.log(`  - ${v}`);

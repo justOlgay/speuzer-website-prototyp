@@ -10,6 +10,7 @@
   },
   "scripts": {
     "build": "node tools/build.mjs",
+    "huelle-bilder": "node tools/huelle-bilder.mjs",
     "pruefen": "node tools/pruefen.mjs",
     "pii": "python3 tools/pii-check.py",
     "daten": "python3 tools/daten.py",

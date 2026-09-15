@@ -1,0 +1,17 @@
+{
+  "_hinweis": "Worksheet FOOTER der Vorlage Microwebseite. footerImprint/footerDatenschutz sind im CMS die cdn.appack.de-Adressen der Workspace-Seiten.",
+  "footerLogo": "assets/huelle/wappen-512.png",
+  "footerCopy": "F.F.V. Sportfreunde 04, 2026",
+  "footerText": "Frankfurter Fußballverein Sportfreunde 1904 e.V.<br>\nMainzer Landstraße 480<br>\n60326 Frankfurt am Main<br>\nPostfach 190442, 60091 Frankfurt am Main",
+  "footerMail": "geschaeftsstelle@sportfreunde04.de",
+  "footerTel": "+49 69 736868",
+  "footerImprint": "ws/impressum.html",
+  "footerDatenschutz": "ws/datenschutz.html",
+  "footerFacebook": "https://www.facebook.com/groups/223133414377924/",
+  "footerInsta": "https://www.instagram.com/speuzer_ffm/",
+  "footerTiktok": "",
+  "footerX": "",
+  "footerYoutube": "",
+  "footerBG": "#191793",
+  "footerTC": "#ffffff"
+}

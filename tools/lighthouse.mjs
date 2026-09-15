@@ -218,9 +218,15 @@ async function main() {
   const seiten = [];
 
   try {
-    const pfade = leseSitemapPfade();
+    // P16: erster Sitemap-Eintrag ("/") ist die Hülle (docs/index.html,
+    // Nachbildung der appack-Vorlage "Microwebseite") – die wird hier nicht
+    // gemessen, weil ihre echten Lighthouse-Werte die vmapit-Vorlage selbst
+    // bestimmt, nicht der Prototyp (Live-Messung 14.09.2026: 33/50/78/82).
+    // Gemessen werden nur die Workspace-Seiten (Sitemap ohne den ersten
+    // Eintrag), die der Verein tatsächlich beeinflussen kann.
+    const pfade = leseSitemapPfade().slice(1);
     console.log(
-      `Lighthouse (mobil) für ${pfade.length} Seiten gegen ${zielBasis} – das kann 20–40 Minuten dauern.\n`
+      `Lighthouse (mobil) für ${pfade.length} Workspace-Seiten gegen ${zielBasis} – das kann 20–40 Minuten dauern.\n`
     );
     for (const seitenPfad of pfade) {
       const ergebnis = await pruefeSeite(seitenPfad, zielBasis);
@@ -240,9 +246,12 @@ async function main() {
   const stand = new Date().toISOString();
   const bericht = {
     stand,
+    // P16: Workspace-Seiten per Direktlink – die Hülle (appack-Vorlage)
+    // liefert diese Seiten sonst im eigenen Rahmen (iframe) aus, hier direkt
+    // ohne Rahmen gemessen (siehe Kommentar oben).
     basis: istOeffentlich
-      ? `öffentlich (GitHub Pages), mobil, Lighthouse ${LIGHTHOUSE_VERSION}`
-      : `lokal, mobil, Lighthouse ${LIGHTHOUSE_VERSION}`,
+      ? `öffentlich (GitHub Pages), Workspace-Seiten per Direktlink, mobil, Lighthouse ${LIGHTHOUSE_VERSION}`
+      : `lokal, Workspace-Seiten per Direktlink, mobil, Lighthouse ${LIGHTHOUSE_VERSION}`,
     seiten,
     minimum,
   };

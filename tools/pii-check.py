@@ -81,6 +81,14 @@ def pruefe_zeile(pfad_rel, zeilennr, zeile, treffer):
 
     for m in MUSTER_TELEFON_2.finditer(zeile):
         text = m.group().strip()
+        # P16: CSS-Hex-Farbwerte wie "#000000" (u. a. mehrere 1:1 aus der
+        # appack-Vorlage übernommene Vorgabewerte in huelle.js/huelle.css,
+        # siehe drender.html) sehen mit \b0\d{2,5}[ /\-]?\d{3,}\b wie eine
+        # Ortsnetz-Rufnummer aus (0 gefolgt von weiteren Ziffern) – kein
+        # Telefonmuster, wenn dem Treffer unmittelbar ein "#" vorausgeht.
+        vorheriges_zeichen = zeile[m.start() - 1] if m.start() > 0 else ""
+        if vorheriges_zeichen == "#":
+            continue
         if text not in WHITELIST_TELEFON:
             treffer.append((pfad_rel, zeilennr, f"Telefonmuster (0…): '{text}'"))
 

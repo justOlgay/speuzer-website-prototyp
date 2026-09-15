@@ -68,6 +68,93 @@ function pfadname(seitenPfad) {
   return seitenPfad.replace(/^\//, "").replace(/\/$/, "").replaceAll("/", "-") || "start";
 }
 
+// ---------- Hülle (P16, Schritt 5) ----------
+// Zusätzlich zu den Workspace-Seiten-Screenshots oben: die Hülle
+// (docs/index.html) selbst, bei 390 und 1440 je Zustand (Start, danach
+// jeder Menüpunkt, Impressum, bei 390 zusätzlich das offene Burger-Menü).
+// "/" steht zwar als erster Eintrag in der Sitemap (siehe oben), wird von
+// der allgemeinen Schleife oben aber weiterhin mitgenommen (ohne extra
+// Behandlung, anders als in tools/pruefen.mjs/tools/lighthouse.mjs) – das
+// ergibt dort lediglich einen zusätzlichen, nicht besonders aussagekräftigen
+// Schnappschuss (meist die Ladeanimation, da networkidle0 hier fast sofort
+// erreicht ist), die eigentlichen Hüllen-Screenshots kommen aus dieser
+// Funktion.
+
+// { zustand, klick } – klick liefert (bei Bedarf) den anzuklickenden Text im
+// jeweiligen Menü; "start" und "impressum" haben eine eigene Sonderbehandlung
+// unten.
+const HUELLE_MENUPUNKTE = [
+  { zustand: "mannschaften", text: "Mannschaften" },
+  { zustand: "spielplan", text: "Spielplan & Tabellen" },
+  { zustand: "news", text: "News" },
+  { zustand: "verein", text: "Verein" },
+  { zustand: "mitglied-werden", text: "Mitglied werden" },
+];
+
+async function wartetBisLoaderWeg(page) {
+  await page.waitForFunction(() => !document.getElementById("pageLoader"), { timeout: 4000 }).catch(() => {});
+}
+
+async function screenshotHuelle(browser) {
+  for (const { breite, hoehe } of ANSICHTEN) {
+    const page = await browser.newPage();
+    await page.setViewport({ width: breite, height: hoehe });
+    await page.goto(BASIS + "/index.html", { waitUntil: "domcontentloaded", timeout: 30000 });
+    await wartetBisLoaderWeg(page);
+
+    // --- start ---
+    await page.screenshot({ path: path.join(ZIEL, `huelle-start-${breite}.png`) });
+    await page.screenshot({ path: path.join(ZIEL, `huelle-start-full-${breite}.png`), fullPage: true });
+    console.log(`Hülle-Screenshot: start @ ${breite}px`);
+
+    // --- Burger-Menü offen (nur 390) ---
+    if (breite === 390) {
+      await page.evaluate(() => document.querySelector(".burger").click());
+      await warte(400);
+      await page.screenshot({ path: path.join(ZIEL, `huelle-burger-${breite}.png`) });
+      console.log(`Hülle-Screenshot: burger @ ${breite}px`);
+    }
+
+    // --- je Menüpunkt ---
+    const menuSelektor = breite === 390 ? ".menuElement" : ".menuBarElement";
+    for (const { zustand, text } of HUELLE_MENUPUNKTE) {
+      const geklickt = await page.evaluate((sel, text) => {
+        const el = Array.from(document.querySelectorAll(sel)).find((e) => e.textContent.trim() === text);
+        if (!el) return false;
+        el.click();
+        return true;
+      }, menuSelektor, text);
+      if (!geklickt) {
+        console.warn(`  (Hülle-Screenshot: Menüpunkt '${text}' bei ${breite}px nicht gefunden)`);
+        continue;
+      }
+      await warte(2500);
+      await page.screenshot({ path: path.join(ZIEL, `huelle-${zustand}-${breite}.png`) });
+      if (zustand === "verein") {
+        await page.screenshot({ path: path.join(ZIEL, `huelle-verein-full-${breite}.png`), fullPage: true });
+      }
+      console.log(`Hülle-Screenshot: ${zustand} @ ${breite}px`);
+    }
+
+    // --- Impressum (Klick im Fuß) ---
+    const impressumGeklickt = await page.evaluate(() => {
+      const el = document.querySelector(".footerImprint");
+      if (!el) return false;
+      el.click();
+      return true;
+    });
+    if (impressumGeklickt) {
+      await warte(2500);
+      await page.screenshot({ path: path.join(ZIEL, `huelle-impressum-${breite}.png`) });
+      console.log(`Hülle-Screenshot: impressum @ ${breite}px`);
+    } else {
+      console.warn(`  (Hülle-Screenshot: .footerImprint bei ${breite}px nicht gefunden)`);
+    }
+
+    await page.close();
+  }
+}
+
 async function main() {
   mkdirSync(ZIEL, { recursive: true });
 
@@ -88,6 +175,8 @@ async function main() {
           console.log(`Screenshot: ${seitenPfad} @ ${breite}px -> ${path.relative(ROOT, ziel)}`);
         }
       }
+
+      await screenshotHuelle(browser);
     } finally {
       await browser.close();
     }
