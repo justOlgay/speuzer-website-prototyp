@@ -8,7 +8,6 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { mailLink, datumLang } from "../vorlagen/hilfen.mjs";
 import { bild } from "../vorlagen/bild.mjs";
-import { tabbar } from "../vorlagen/header.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -150,11 +149,6 @@ function seiteWappen() {
 </div>`;
 }
 
-function seiteKopfFuss() {
-  return `<h2>Kopf und Fuß</h2>
-<p class="inhalt">Die Kopfzeile mit Hauptnavigation (sechs Punkte, ab 1024px als Leiste, darunter als Burger-Menü) und der Fußbereich sind auf dieser Seite bereits live zu sehen – oben und unten. Ziele, deren Seite im aktuellen Paket noch nicht existiert, erscheinen gedämpft und ohne Link (<code>.nav__bald</code>); sobald die Seite gebaut ist, wird automatisch ein Link daraus.</p>`;
-}
-
 // ---------- Prüfung (P11, Plan-Abschnitt D) ----------
 // Nur, wenn data/lighthouse.json existiert (tools/lighthouse.mjs schreibt sie
 // – ladeDaten() in tools/build.mjs liest data/*.json automatisch ein, hier
@@ -185,9 +179,10 @@ function seitePruefung(daten) {
   // im echten Einsatz (verein/index.mjs#zahlenAbschnitt) hier in denselben
   // Hintergrund gepackt, sonst reicht der Kontrast auf der sonst weißen
   // Styleguide-Fläche nicht (axe-core color-contrast). Gleiches Muster wie
-  // heroBeispiel/heroFaktenBeispiel weiter unten in dieser Datei.
-  return `<h2>Prüfung</h2>
+  // zahlenBeispiel in seiteBausteine() weiter unten in dieser Datei.
+  return `<h2>Prüfung der Workspace-Seiten</h2>
 <p class="inhalt">Lighthouse mobil, Minimum über alle ${lh.seiten.length} Seiten, Stand ${datumLang(lh.stand)}</p>
+<p class="inhalt">Die Werte gelten für die Workspace-Seiten per Direktlink. Die Werte der Adresse sportfreunde04.de bestimmt die appack-Vorlage.</p>
 <div class="abschnitt--blau" style="border-radius:var(--r-lg);padding:var(--sp-5);">
   <div class="raster raster--4">
     ${kacheln}
@@ -328,20 +323,6 @@ function seiteBausteine(daten) {
 
   const verein = daten.verein ?? {};
 
-  const heroBeispiel = `<div class="abschnitt--blau" style="border-radius:var(--r-lg);padding:var(--sp-6);">
-    <p class="hero__kicker">Frankfurter Fußballverein Sportfreunde 1904 e.V. · Gallus</p>
-    <p class="hero__titel">Fußball im Gallus – seit 1904.</p>
-    <p class="hero__lead">Elf Fußballmannschaften von den Herren bis zur G-Jugend, eine Karnevalabteilung und ein eigener Platz an der Mainzer Landstraße. Wir sind ein Verein für Menschen: Gemeinschaft, Respekt und Freude am Spiel.</p>
-  </div>`;
-
-  const heroFaktenBeispiel = `<div class="abschnitt--blau" style="border-radius:var(--r-lg);padding:var(--sp-5);">
-    <ul class="hero__fakten" role="list">
-      <li>Gegründet ${escapeHtml(String(verein.gruendung_jahr ?? ""))}</li>
-      <li>${escapeHtml(String(verein.anzahl_mannschaften ?? ""))} Mannschaften</li>
-      <li>${escapeHtml(verein.sportstaette?.strasse ?? "")}</li>
-    </ul>
-  </div>`;
-
   const schritteBeispiel = `<ol class="schritte">
     <li><p>E-Mail an die Jugendleitung mit Jahrgang und Vorerfahrung</p></li>
     <li><p>Termin fürs Probetraining bekommen und ein- bis zweimal mitmachen</p></li>
@@ -477,33 +458,10 @@ function seiteBausteine(daten) {
   </ul>`
     : `<p class="meta">Kein Eintrag in data/downloads.json gefunden.</p>`;
 
-  const beispielNewsContain = (daten.news ?? []).find((n) => n.bild_passung === "contain" && n.bild);
-  const karteContainBeispiel = beispielNewsContain
-    ? `<article class="karte" style="max-width:320px;">
-    ${bild({
-      pfad: PFAD,
-      daten,
-      name: beispielNewsContain.bild.replace(/\.[^./]+$/, ""),
-      alt: beispielNewsContain.alt ?? "",
-      sizes: "320px",
-      klasse: "karte__bild karte__bild--contain",
-    })}
-    <p class="karte__meta">${escapeHtml(beispielNewsContain.quelle)}</p>
-    <h4 class="karte__titel" style="font-size:var(--fs-lg);">${escapeHtml(beispielNewsContain.titel)}</h4>
-  </article>`
-    : `<p class="meta">Kein Eintrag mit bild_passung "contain" in data/news.json gefunden.</p>`;
-
-  // P6: News-Karte ohne Bild (.karte__bild--leer) – /news/, wenn "bild" in
-  // data/news.json fehlt (z. B. der App-Start-Eintrag).
+  // P15: wird noch vom Personen-Raster (unten) als Platzhalter verwendet –
+  // die Bausteine, die diesen Wappen-Platzhalter sonst zeigten
+  // (News-Karte/„contain"-Karte, News-Modul in P15 entfernt), sind entfallen.
   const wappenBlauFuerKarte = liesWappen("wappen-blau.svg");
-  const beispielNewsOhneBild = (daten.news ?? []).find((n) => !n.bild);
-  const karteLeerBeispiel = beispielNewsOhneBild
-    ? `<a class="karte karte--link" href="${PFAD}news/" style="max-width:280px;">
-    <span class="karte__bild--leer" aria-hidden="true">${wappenBlauFuerKarte}</span>
-    <p class="karte__meta">${escapeHtml(beispielNewsOhneBild.quelle)}</p>
-    <h4 class="karte__titel" style="font-size:var(--fs-lg);">${escapeHtml(beispielNewsOhneBild.titel)}</h4>
-  </a>`
-    : `<p class="meta">Kein Eintrag ohne Bild in data/news.json gefunden.</p>`;
 
   // P6-Korrektur A1: Personen-Raster (.raster--personen) – ersetzt
   // raster--3/raster--4 bei Personen-Karten (Vorstand, Karnevalabteilung).
@@ -525,37 +483,6 @@ function seiteBausteine(daten) {
       .join("\n    ")}
   </div>`
     : `<p class="meta">Keine Senioren-Funktionen in data/vorstand.json gefunden.</p>`;
-
-  // P6: Tore-Liste (.tore) – Artikelseiten /news/<slug>/.
-  const beispielTore = (daten.news ?? []).find((n) => n.tore?.length);
-  const toreBeispiel = beispielTore
-    ? `<ul class="tore" role="list">
-    ${beispielTore.tore
-      .map(
-        (t) =>
-          `<li><span class="tore__minute">${escapeHtml(String(t.minute))}'</span> ${escapeHtml(t.name)}${t.stand ? ` · ${escapeHtml(t.stand)}` : ""}</li>`
-      )
-      .join("\n    ")}
-  </ul>`
-    : `<p class="meta">Kein Eintrag mit Toren in data/news.json gefunden.</p>`;
-
-  // P6: Fakten-Liste (.fakten) – Artikelseiten /news/<slug>/.
-  const beispielFakten = (daten.news ?? []).find((n) => n.fakten?.length);
-  const faktenBeispiel = beispielFakten
-    ? `<ul class="fakten" role="list">
-    ${beispielFakten.fakten.map((f) => `<li>${escapeHtml(f)}</li>`).join("\n    ")}
-  </ul>`
-    : `<p class="meta">Kein Eintrag mit Fakten in data/news.json gefunden.</p>`;
-
-  // P7-Korrektur A2: Ergebniszeile (.ergebnis) – Artikelseiten /news/<slug>/.
-  const beispielErgebnis = (daten.news ?? []).find((n) => n.ergebnis);
-  const ergebnisBeispiel = beispielErgebnis
-    ? `<div class="ergebnis" aria-label="Endstand" style="max-width:480px;">
-    <span class="ergebnis__team">FFV Sportfreunde 04</span>
-    <span class="ergebnis__resultat">${escapeHtml(beispielErgebnis.ergebnis)}</span>
-    <span class="ergebnis__team">${escapeHtml(beispielErgebnis.gegner ?? "")}</span>
-  </div>`
-    : `<p class="meta">Kein Eintrag mit Ergebnis in data/news.json gefunden.</p>`;
 
   // P7: Formular (.formular) – /mitglied-werden/: zwei Felder, eine
   // Checkbox, ein Fehlerzustand (PLZ-Feld mit sichtbarer Fehlermeldung, wie
@@ -597,47 +524,6 @@ function seiteBausteine(daten) {
     <dd>${escapeHtml(verein.register ?? "")}</dd>
   </dl>`;
 
-  // P9: Tab-Leiste (.tabbar) – App-Modus (?ansicht=app, siehe assets/js/nav.js
-  // und assets/css/app-modus.css). Dieselbe tabbar()-Funktion wie im
-  // Header-Modul (src/vorlagen/header.mjs), hier nur statisch dargestellt:
-  // position:static statt fixed und display erzwungen, weil .tabbar
-  // außerhalb von .ansicht-app per Default verborgen ist (siehe
-  // komponenten.css).
-  const tabbarBeispiel = `<div style="max-width:420px;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;">
-    ${tabbar({ pfad: PFAD, aktuelleUrl: "/" }).replace(
-      '<nav class="tabbar" aria-label="App-Navigation">',
-      '<nav class="tabbar" aria-label="App-Navigation" style="display:block;position:static;">'
-    )}
-  </div>`;
-
-  // P9: Telefonrahmen (.telefon) – /app/, hier verkleinert (transform:scale)
-  // und ohne iframe: eine Platzhalterfläche in --blau-50 statt der echten
-  // Seite, damit das Beispiel ohne zusätzliche Netzwerklast auskommt.
-  const telefonBeispiel = `<div style="width:${Math.round(414 * 0.5)}px;height:${Math.round(868 * 0.5)}px;overflow:hidden;">
-    <div class="telefon" style="transform:scale(.5);transform-origin:top left;">
-      <div style="width:100%;height:100%;border-radius:32px;background:var(--blau-50);display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:var(--fs-sm);text-align:center;padding:var(--sp-4);box-sizing:border-box;">Platzhalter statt &lt;iframe&gt;</div>
-    </div>
-  </div>`;
-
-  // P10: Vorher/Nachher-Paar (.vergleich) – /vorher-nachher/, hier ohne echte
-  // Bilder (Platzhalterflächen in --blau-50 statt bild()): zeigt nur die
-  // Struktur (Titel, zweispaltiges Raster ab 768px, Beschriftung über jedem
-  // Bild, Bildunterschrift als Fazit-Satz).
-  const vergleichBeispiel = `<figure class="vergleich vergleich--handy" style="max-width:420px;">
-    <h2>Beispiel-Paar</h2>
-    <div class="vergleich__raster">
-      <div class="vergleich__seite">
-        <span class="tag tag--warn">Vorher</span>
-        <div style="width:100%;max-width:390px;aspect-ratio:390/844;border-radius:var(--r-md);border:1px solid var(--line);background:var(--blau-50);"></div>
-      </div>
-      <div class="vergleich__seite">
-        <span class="tag tag--ok">Nachher</span>
-        <div style="width:100%;max-width:390px;aspect-ratio:390/844;border-radius:var(--r-md);border:1px solid var(--line);background:var(--blau-50);"></div>
-      </div>
-    </div>
-    <figcaption class="meta">Fazit-Satz zum gelösten Problem.</figcaption>
-  </figure>`;
-
   return `<h2>Bausteine</h2>
 <p class="inhalt">Alle Bausteine mit echten Daten aus data/, wie sie später auf den Inhaltsseiten verwendet werden. Ziele, deren Seite im aktuellen Paket noch nicht existiert, sind als Karten mit &lt;span&gt; statt &lt;a&gt; ausgegeben.</p>
 
@@ -668,12 +554,6 @@ ${tabelleBeispiel}
 <h3>Knöpfe</h3>
 ${knoepfeBeispiel}
 
-<h3>Hero</h3>
-${heroBeispiel}
-
-<h3>Fakten-Zeile (.hero__fakten)</h3>
-${heroFaktenBeispiel}
-
 <h3>Schritte</h3>
 ${schritteBeispiel}
 
@@ -682,9 +562,6 @@ ${addressBeispiel}
 
 <h3>Trainingsraster</h3>
 ${trainingsrasterBeispiel}
-
-<h3>Karte mit Bild „contain” (.karte__bild--contain)</h3>
-${karteContainBeispiel}
 
 <h3>Team-Karte (.karte__training, .karte__mehr)</h3>
 <p class=”inhalt”>Mannschaften-Übersicht (P3): kompakte Trainingsliste und Pfeil-Hinweis unten rechts, die ganze Karte ist der Link.</p>
@@ -714,25 +591,9 @@ ${zahlenBeispiel}
 <p class="inhalt">/verein/downloads/ (P5): Titel als Link, darunter Format/Umfang und Hinweis auf das externe Ziel als .meta-Zeilen.</p>
 ${downloadBeispiel}
 
-<h3>News-Karte ohne Bild (.karte__bild--leer)</h3>
-<p class="inhalt">/news/ (P6): Kopfzeile in --blau-100 mit zentriertem Wappen (64px) statt Foto, wenn das Feld "bild" in data/news.json fehlt.</p>
-${karteLeerBeispiel}
-
 <h3>Personen-Raster (.raster--personen)</h3>
 <p class="inhalt">Vorstand und Karnevalabteilung (P5-Korrektur A1): ersetzt raster--3/raster--4 bei Personen-Karten. Ab 640px maximal 260px Kartenbreite (auto-fill statt auto-fit, dadurch kein Strecken auf halbe Containerbreite bei wenigen Einträgen), darunter zwei bzw. eine Spalte.</p>
 ${rasterPersonenBeispiel}
-
-<h3>Tore (.tore)</h3>
-<p class="inhalt">Artikelseiten /news/&lt;slug&gt;/ (P6): je Tor Minute (tabular-nums, in var(--font-head)), Torschütze und optional der Spielstand.</p>
-${toreBeispiel}
-
-<h3>Fakten (.fakten)</h3>
-<p class="inhalt">Artikelseiten /news/&lt;slug&gt;/ (P6): Eckdaten (Termin, Uhrzeit, Ort) als Tags/Zeilen vor dem Fließtext.</p>
-${faktenBeispiel}
-
-<h3>Ergebniszeile (.ergebnis)</h3>
-<p class="inhalt">Artikelseiten /news/&lt;slug&gt;/ (P7-Korrektur A2): dreiteilige Zeile statt Überschrift – Vereinsname links, Ergebnis mittig auf --blau-50-Fläche, Gegner rechts. Grid 1fr auto 1fr, unter 480px untereinander (Ergebnis mittig). Kein h2 (das Ergebnis ist keine Überschrift), stattdessen aria-label="Endstand" auf dem Container.</p>
-${ergebnisBeispiel}
 
 <h3>Formular (.formular)</h3>
 <p class="inhalt">/mitglied-werden/ (P7; Checkbox ab P8-Korrektur A2): Eingabefelder 48px hoch, Fehlertext in --warn unter dem Feld (hier am PLZ-Feld sichtbar, wie assets/js/formular.js ihn nach einem ungültigen Absenden einblendet). Checkbox nur noch 24×24px, das Tippziel ist die umschließende Beschriftungszeile (.formular__checkzeile als <label>, mindestens 44px hoch).</p>
@@ -740,19 +601,7 @@ ${formularBeispiel}
 
 <h3>Angaben-Liste (.angaben)</h3>
 <p class="inhalt">/impressum/ (P8): Definitionsliste mit Beschriftung (dt, --fs-sm/600/--ink-3) und Wert (dd, --fs-md).</p>
-${angabenBeispiel}
-
-<h3>Tab-Leiste (.tabbar)</h3>
-<p class="inhalt">App-Modus (P9, ?ansicht=app): untere Navigation mit fünf Zielen (Start, Teams, Spiele, News, Verein), eigenen Strich-Icons und aktivem Zustand in --blau-700. Auf echten Seiten position:fixed am unteren Bildschirmrand und nur unter der Klasse .ansicht-app sichtbar – hier zur Anschauung statisch dargestellt (position:static).</p>
-${tabbarBeispiel}
-
-<h3>Telefonrahmen (.telefon)</h3>
-<p class="inhalt">/app/ (P9): gezeichnetes Gerätefenster (390×844 Innenmaß, 12px Rand, Notch) für die drei Vorschau-Rahmen; dort mit echtem &lt;iframe src="…?ansicht=app"&gt;. Hier zur Anschauung verkleinert (transform:scale(.5)) und mit einer Platzhalterfläche statt des iframes.</p>
-${telefonBeispiel}
-
-<h3>Vorher/Nachher-Paar (.vergleich)</h3>
-<p class="inhalt">/vorher-nachher/ (P10): Titel, darunter ein zweispaltiges Bildraster ab 768px (darunter untereinander), Beschriftung (.tag--warn „Vorher" links, .tag--ok „Nachher" rechts) über jedem Bild, Bildunterschrift als Fazit-Satz. Bei Handy-Paaren (.vergleich--handy) bleibt das Bild auf 390px begrenzt und zentriert, statt auf volle Spaltenbreite gestreckt zu werden. Hier ohne echte Bilder, nur die Struktur.</p>
-${vergleichBeispiel}`;
+${angabenBeispiel}`;
 }
 
 export function seite(daten) {
@@ -760,13 +609,13 @@ export function seite(daten) {
 <section class="container abschnitt sg">
   <h1>Gestaltungssystem „Speuzer Blau-Weiß“</h1>
   <div class="fluss">
+  <p class="inhalt">Die Bausteine gelten für die Inhaltsseiten (Workspace-Seiten) im appack-Rahmen. Kopfleiste, Menü und Fußbereich stellt die appack-Vorlage; ihre Gestaltung ist im CMS nur über Farben, Logo, Startbild und Texte beeinflussbar.</p>
   <p class="inhalt">Interner Anhang für das Übernahmepaket: alle Tokens aus assets/css/tokens.css und alle Bausteine aus assets/css/komponenten.css, sichtbar gemacht. Stand des Builds: ${daten.stand}.</p>
   ${seiteFarben()}
   ${seiteSchrift()}
   ${seiteAbstaendeRadienSchatten()}
   ${seiteKnoepfeFokus()}
   ${seiteWappen()}
-  ${seiteKopfFuss()}
   ${seiteBausteine(daten)}
   ${seitePruefung(daten)}
   </div>

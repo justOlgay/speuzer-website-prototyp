@@ -3,7 +3,10 @@
 // Zusatzangebote, Ferienhinweis + Karneval (wie auf der Startseite) und ein
 // Aufruf zum Probetraining.
 
-import { mailLink, jahrgangText, PROBETRAINING_MAILTO } from "../../vorlagen/hilfen.mjs";
+import { mailLink, jahrgangText } from "../../vorlagen/hilfen.mjs";
+// P15: gemeinsame Bausteine (ursprünglich Startseite, dort gelöscht – siehe
+// src/vorlagen/bausteine.mjs).
+import { trainingszeitenAbschnitt, probetrainingAbschnitt } from "../../vorlagen/bausteine.mjs";
 
 // Diese Seite liegt immer unter "/mannschaften/" (Tiefe 1), daher immer "../"
 // (siehe pfadZurWurzel() in tools/build.mjs).
@@ -128,18 +131,6 @@ function ferienUndKarnevalAbschnitt(daten) {
 </section>`;
 }
 
-function aufrufAbschnitt() {
-  return `<section class="abschnitt--blau abschnitt abschnitt--eng">
-  <div class="container fluss">
-    <h2>Lust mitzuspielen?</h2>
-    <p>Ein- bis zweimal mittrainieren geht ohne Anmeldung. Schreib der Jugendleitung, in welchem Jahrgang dein Kind spielt.</p>
-    <p class="knopfzeile">
-      <a class="knopf knopf--weiss" href="${escapeHtml(PROBETRAINING_MAILTO)}">Probetraining vereinbaren</a>
-    </p>
-  </div>
-</section>`;
-}
-
 export function seite(daten) {
   const teamNachSlug = Object.fromEntries((daten.teams ?? []).map((t) => [t.slug, t]));
 
@@ -178,9 +169,15 @@ export function seite(daten) {
   const inhalt = [
     seitenkopf,
     ...gruppen,
+    // P15: Trainingszeiten-Baustein (ursprünglich Startseite) nach der
+    // Mannschaftsübersicht eingefügt (siehe src/vorlagen/bausteine.mjs).
+    trainingszeitenAbschnitt(daten, PFAD),
     zusatzangeboteAbschnitt(daten),
     ferienUndKarnevalAbschnitt(daten),
-    aufrufAbschnitt(),
+    // P15: ersetzt den vorherigen eigenen Aufruf ("Lust mitzuspielen?") durch
+    // denselben Probetraining-Baustein wie auf den anderen Seiten (siehe
+    // src/vorlagen/bausteine.mjs).
+    probetrainingAbschnitt(PFAD),
   ].join("\n");
 
   return {

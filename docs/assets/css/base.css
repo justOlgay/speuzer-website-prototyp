@@ -89,23 +89,6 @@ a:hover {
   outline-offset: 2px;
 }
 
-/* Sprungmarke „Zum Inhalt“ */
-.sprungmarke {
-  position: absolute;
-  left: -9999px;
-  top: 0;
-  background: var(--surface);
-  color: var(--blau-900);
-  padding: var(--sp-3) var(--sp-4);
-  border-radius: var(--r-md);
-  z-index: 100;
-}
-
-.sprungmarke:focus {
-  left: var(--sp-3);
-  top: var(--sp-3);
-}
-
 /* Layout-Helfer */
 .container {
   max-width: var(--container);

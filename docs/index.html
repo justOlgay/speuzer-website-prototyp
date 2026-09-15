@@ -3,423 +3,79 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Start – FFV Sportfreunde 04</title>
-<meta name="description" content="F.F.V. Sportfreunde 04 im Frankfurter Gallus: Trainingszeiten, nächste Spiele und Aktuelles unserer elf Fußballmannschaften. Probetraining vereinbaren und Mitglied werden">
+<title>Prototyp – appack-Fassung im Umbau</title>
+<meta name="description" content="Die Hülle (Kopfleiste, Menü, Startbild, Fußbereich) folgt im nächsten Paket. Bis dahin sind die Inhaltsseiten hier direkt erreichbar.">
 <link rel="canonical" href="https://justolgay.github.io/speuzer-website-prototyp/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="FFV Sportfreunde 04">
-<meta property="og:title" content="Start – FFV Sportfreunde 04">
-<meta property="og:description" content="F.F.V. Sportfreunde 04 im Frankfurter Gallus: Trainingszeiten, nächste Spiele und Aktuelles unserer elf Fußballmannschaften. Probetraining vereinbaren und Mitglied werden">
+<meta property="og:title" content="Prototyp – appack-Fassung im Umbau – FFV Sportfreunde 04">
+<meta property="og:description" content="Die Hülle (Kopfleiste, Menü, Startbild, Fußbereich) folgt im nächsten Paket. Bis dahin sind die Inhaltsseiten hier direkt erreichbar.">
 <meta property="og:url" content="https://justolgay.github.io/speuzer-website-prototyp/">
 <meta property="og:image" content="https://justolgay.github.io/speuzer-website-prototyp/assets/og/standard.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#151A7A">
+<meta name="theme-color" content="#191793">
 <link rel="icon" href="./assets/logo/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="./assets/logo/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="./assets/logo/apple-touch-icon.png">
-<!-- App-Modus (P9, Plan-Abschnitt B1): Klasse so früh wie möglich setzen,
-     vor den Stylesheets, damit die App-Kopfzeile/Tab-Leiste beim Laden nicht
-     erst sichtbar umspringt (assets/js/nav.js setzt dieselbe Klasse
-     zusätzlich, siehe dort). -->
-<script>
-document.documentElement.classList.add("js");
-if (/(?:^|[?&])ansicht=app(?:&|$)/.test(location.search)) document.documentElement.classList.add("ansicht-app");
-</script>
 <link rel="preload" href="./assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="./assets/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="./assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
-<!-- P11, Plan-Abschnitt B2: ein gebündeltes, minifiziertes Stylesheet statt
-     fünf einzelner Requests (weniger render-blockierende Anfragen). Die
-     Einzeldateien liegen weiterhin unter assets/css/ (siehe tools/build.mjs,
-     baueCssBuendel()) – der Styleguide verweist auf sie als Quelltext. -->
 <link rel="stylesheet" href="./assets/css/site.css">
-<script src="./assets/js/nav.js" defer></script>
 </head>
-<body class="">
-<a class="sprungmarke" href="#inhalt">Zum Inhalt</a>
-<header class="kopf">
-  <div class="container kopf__zeile">
-    <a class="kopf__marke" href="./">
-      <img class="kopf__wappen" src="./assets/logo/wappen-blau.svg" width="44" height="44" alt="" aria-hidden="true">
-      <span class="kopf__name">
-        <span class="kopf__name-lang">FFV Sportfreunde 04</span>
-        <span class="kopf__name-kurz">Sportfreunde 04</span>
-      </span>
-    </a>
-    <button type="button" class="kopf__burger" aria-expanded="false" aria-controls="hauptmenue" aria-label="Menü öffnen">
-      <span class="kopf__burger-balken" aria-hidden="true"></span>
-      <span class="kopf__burger-text">Menü</span>
-    </button>
-    <nav class="kopf__nav" id="hauptmenue" aria-label="Hauptnavigation">
-      <button type="button" class="kopf__schliessen" aria-label="Menü schließen">
-        <span aria-hidden="true">&times;</span>
-      </button>
-      <ul>
-      <li><a href="./" aria-current="page">Start</a></li>
-      <li><a href="./mannschaften/">Mannschaften</a></li>
-      <li><a href="./spielplan/">Spielplan &amp; Tabellen</a></li>
-      <li><a href="./news/">News</a></li>
-      <li><a href="./verein/">Verein</a></li>
-      <li><a href="./mitglied-werden/" class="knopf">Mitglied werden</a></li>
-      </ul>
-    </nav>
-  </div>
-</header>
-<nav class="tabbar" aria-label="App-Navigation">
-  <ul>
-      <li><a class="tabbar__tab tabbar__tab--aktiv" href="./" aria-current="page"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/></svg><span class="tabbar__label">Start</span></a></li>
-      <li><a class="tabbar__tab" href="./mannschaften/"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="12" r="5"/><circle cx="15" cy="12" r="5"/></svg><span class="tabbar__label">Teams</span></a></li>
-      <li><a class="tabbar__tab" href="./spielplan/"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7l4.8 3.5-1.8 5.6H9l-1.8-5.6z"/></svg><span class="tabbar__label">Spiele</span></a></li>
-      <li><a class="tabbar__tab" href="./news/"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="1"/><path d="M7 9h10M7 12.5h10M7 16h6"/></svg><span class="tabbar__label">News</span></a></li>
-      <li><a class="tabbar__tab" href="./verein/"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 20 12 12 21 4 12z"/></svg><span class="tabbar__label">Verein</span></a></li>
-  </ul>
-</nav>
+<body class="ws ">
 <main id="inhalt">
-<section class="hero abschnitt--blau">
-  <div class="container hero__raster">
-    <p class="hero__kicker">Frankfurter Fußballverein Sportfreunde 1904 e.V. · Gallus</p>
-    <div class="hero__wappen-block">
-      <span class="hero__wappen-ring" aria-hidden="true"></span>
-      <img class="hero__wappen" src="./assets/logo/wappen-weiss.svg" width="219" height="213" alt="" aria-hidden="true">
-    </div>
-    <div class="hero__inhalt">
-      <h1 class="hero__titel">Fußball im Gallus – seit 1904.</h1>
-      <p class="hero__lead">Elf Fußballmannschaften von den Herren bis zur G-Jugend, eine Karnevalabteilung und ein eigener Platz an der Mainzer Landstraße. Wir sind ein Verein für Menschen: Gemeinschaft, Respekt und Freude am Spiel.</p>
-      <p class="knopfzeile">
-        <a class="knopf knopf--weiss knopf--gross" href="mailto:jugendleitung@sportfreunde04.de?subject=Probetraining%20beim%20FFV%20Sportfreunde%2004&amp;body=Hallo%2C%0A%0Awir%20interessieren%20uns%20f%C3%BCr%20ein%20Probetraining.%0AJahrgang%20des%20Kindes%3A%20%0AVorerfahrung%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe">Probetraining vereinbaren</a>
-        <a class="knopf" href="./mitglied-werden/">Mitglied werden</a>
-      </p>
-      <ul class="hero__fakten" role="list">
-        <li>Gegründet 1904</li>
-        <li>11 Mannschaften</li>
-        <li>Mainzer Landstraße 480</li>
-      </ul>
-    </div>
+<section class="abschnitt seitenkopf">
+  <div class="container">
+    <h1>appack-Fassung im Umbau</h1>
+    <p class="seitenkopf__lead">Die Hülle (Kopfleiste, Menü, Startbild, Fußbereich) folgt im nächsten Paket. Bis dahin sind die Inhaltsseiten hier direkt erreichbar.</p>
   </div>
 </section>
 <section class="abschnitt">
   <div class="container fluss">
-    <h2>Nächste Spiele</h2>
-    <p class="meta">Alle Mannschaften · Stand Montag, 14. September 2026</p>
-    <ul class="spiele" role="list">
-    <li class="spiel spiel--naechstes">
-      <span class="spiel__datum">Sa 19.09. · 09:00 Uhr</span>
-      <span class="tag tag--auswaerts">Auswärts</span>
-      <span class="spiel__gegner-block">
-        <span class="spiel__gegner"><span class="tag">F1</span> FV 09 Eschersheim I</span>
-        <span class="spiel__ort meta">Berkersheimer Weg 120, 60433 Frankfurt am Main</span>
-        <span class="meta spiel__wettbewerb">Kinderfestival</span>
-      </span>
-      <span class="spiel__ergebnis"></span>
-    </li>
-    <li class="spiel">
-      <span class="spiel__datum">Sa 19.09. · 09:00 Uhr</span>
-      <span class="tag tag--auswaerts">Auswärts</span>
-      <span class="spiel__gegner-block">
-        <span class="spiel__gegner"><span class="tag">G-Jugend</span> SV Bonames</span>
-        <span class="spiel__ort meta">Harheimer Weg 44, 60437 Frankfurt am Main</span>
-        <span class="meta spiel__wettbewerb">Kinderfestival</span>
-      </span>
-      <span class="spiel__ergebnis"></span>
-    </li>
-    <li class="spiel">
-      <span class="spiel__datum">Sa 19.09. · 11:00 Uhr</span>
-      <span class="tag tag--auswaerts">Auswärts</span>
-      <span class="spiel__gegner-block">
-        <span class="spiel__gegner"><span class="tag">F2</span> TSG 1888 Nieder-Erlenbach 2</span>
-        <span class="spiel__ort meta">Am Riedsteg 125, 60437 Frankfurt am Main</span>
-        <span class="meta spiel__wettbewerb">Kinderfestival</span>
-      </span>
-      <span class="spiel__ergebnis"></span>
-    </li>
-    <li class="spiel">
-      <span class="spiel__datum">Sa 19.09. · 16:00 Uhr</span>
-      <span class="tag tag--heim">Heim</span>
-      <span class="spiel__gegner-block">
-        <span class="spiel__gegner"><span class="tag">A-Jugend</span> TuS Makkabi Frankfurt 1</span>
-        <span class="spiel__ort meta">Am Römerhof 9, 60486 Frankfurt am Main</span>
-        
-      </span>
-      <span class="spiel__ergebnis"></span>
-    </li>
-    <li class="spiel">
-      <span class="spiel__datum">So 20.09. · 11:00 Uhr</span>
-      <span class="tag tag--auswaerts">Auswärts</span>
-      <span class="spiel__gegner-block">
-        <span class="spiel__gegner"><span class="tag">D2</span> SG Harheim 2</span>
-        <span class="spiel__ort meta">Riedhalsstr., 60437 Frankfurt am Main</span>
-        
-      </span>
-      <span class="spiel__ergebnis"></span>
-    </li>
-  </ul>
-    <p class="knopfzeile">
-      <a class="knopf" href="./spielplan/">Alle Spiele und Tabellen</a>
-      <a href="https://justolgay.github.io/speuzer-spielplan/" rel="noopener" target="_blank">Spielplan im Handy-Kalender abonnieren</a>
-    </p>
-  </div>
-</section>
-<section class="abschnitt--hell abschnitt">
-  <div class="container fluss">
-    <h2>Trainingszeiten</h2>
-    <p class="inhalt">Alle Mannschaften trainieren auf dem Vereinsplatz an der Mainzer Landstraße 480 – nur die Herren auf der Anlage von SW Griesheim am Rebstock.</p>
-    <ul class="trainingsraster" role="list">
-      <li class="trainingsraster__kopf" aria-hidden="true">
-        <span>Mannschaft</span><span>Jahrgang</span><span>Training</span>
-      </li>
-      <li class="trainingsraster__zeile">
-        <a class="trainingsraster__name" href="./mannschaften/herren/">1. Herrenmannschaft</a>
-        <span class="trainingsraster__jahrgang meta">Senioren</span>
-        <span class="trainingsraster__einheiten">
-        <span>Mi 19:30–21:00</span>
-        <span>Fr 19:30–21:00</span>
-        </span>
-      </li>
-      <li class="trainingsraster__zeile">
-        <a class="trainingsraster__name" href="./mannschaften/a-jugend/">A-Jugend</a>
-        <span class="trainingsraster__jahrgang meta">2008/2009</span>
-        <span class="trainingsraster__einheiten">
-        <span>Mo 19:00–21:00</span>
-        <span>Mi 19:00–20:30</span>
-        </span>
-      </li>
-      <li class="trainingsraster__zeile">
-        <a class="trainingsraster__name" href="./mannschaften/d1/">D1-Jugend</a>
-        <span class="trainingsraster__jahrgang meta">2014</span>
-        <span class="trainingsraster__einheiten">
-        <span>Di 17:30–19:30</span>
-        <span>Mi 17:30–19:00</span>
-        <span>Fr 17:30–19:30</span>
-        </span>
-      </li>
-      <li class="trainingsraster__zeile">
-        <a class="trainingsraster__name" href="./mannschaften/d2/">D2-Jugend</a>
-        <span class="trainingsraster__jahrgang meta">2015</span>
-        <span class="trainingsraster__einheiten">
-        <span>Di 17:30–19:30</span>
-        <span>Mi 17:30–19:00</span>
-        <span>Fr 17:30–19:30</span>
-        </span>
-      </li>
-      <li class="trainingsraster__zeile">
-        <a class="trainingsraster__name" href="./mannschaften/d3/">D3-Jugend</a>
-        <span class="trainingsraster__jahrgang meta">2014/2015</span>
-        <span class="trainingsraster__einheiten">
-        <span>Di 17:30–19:30</span>
-        <span>Fr 17:30–19:30</span>
-        </span>
-      </li>
-      <li class="trainingsraster__zeile">
-        <a class="trainingsraster__name" href="./mannschaften/e1/">E1-Jugend</a>
-        <span class="trainingsraster__jahrgang meta">2016</span>
-        <span class="trainingsraster__einheiten">
-        <span>Mo 17:30–19:00</span>
-        <span>Mi 17:30–19:00</span>
-        <span>Do 17:30–19:00</span>
-        </span>
-      </li>
-      <li class="trainingsraster__zeile">
-        <a class="trainingsraster__name" href="./mannschaften/e2/">E2-Jugend</a>
-        <span class="trainingsraster__jahrgang meta">2017</span>
-        <span class="trainingsraster__einheiten">
-        <span>Mo 17:30–19:00</span>
-        <span>Di 16:30–18:00</span>
-        <span>Do 17:30–19:00</span>
-        </span>
-      </li>
-      <li class="trainingsraster__zeile">
-        <a class="trainingsraster__name" href="./mannschaften/e3/">E3-Jugend</a>
-        <span class="trainingsraster__jahrgang meta">2016/2017</span>
-        <span class="trainingsraster__einheiten">
-        <span>Mo 16:00–17:30</span>
-        <span>Mi 16:00–17:30</span>
-        </span>
-      </li>
-      <li class="trainingsraster__zeile">
-        <a class="trainingsraster__name" href="./mannschaften/f1/">F1-Jugend</a>
-        <span class="trainingsraster__jahrgang meta">2018</span>
-        <span class="trainingsraster__einheiten">
-        <span>Mo 17:30–19:00</span>
-        <span>Mi 17:30–19:00</span>
-        </span>
-      </li>
-      <li class="trainingsraster__zeile">
-        <a class="trainingsraster__name" href="./mannschaften/f2/">F2-Jugend</a>
-        <span class="trainingsraster__jahrgang meta">2019/2020</span>
-        <span class="trainingsraster__einheiten">
-        <span>Di 17:30–19:00</span>
-        <span>Do 17:30–19:00</span>
-        </span>
-      </li>
-      <li class="trainingsraster__zeile">
-        <a class="trainingsraster__name" href="./mannschaften/g-jugend/">G-Jugend (Bambinis)</a>
-        <span class="trainingsraster__jahrgang meta">2021 und jünger</span>
-        <span class="trainingsraster__einheiten">
-        <span>Mo 17:30–19:00</span>
-        </span>
-      </li>
+    <ul>
+      <li><a href="ws/mannschaften-herren.html">1. Herrenmannschaft</a></li>
+      <li><a href="ws/mannschaften-a-jugend.html">A-Jugend</a></li>
+      <li><a href="ws/mannschaften-d1.html">D1-Jugend</a></li>
+      <li><a href="ws/mannschaften-d2.html">D2-Jugend</a></li>
+      <li><a href="ws/mannschaften-d3.html">D3-Jugend</a></li>
+      <li><a href="ws/datenschutz.html">Datenschutz</a></li>
+      <li><a href="ws/verein-downloads.html">Downloads</a></li>
+      <li><a href="ws/mannschaften-e1.html">E1-Jugend</a></li>
+      <li><a href="ws/mannschaften-e2.html">E2-Jugend</a></li>
+      <li><a href="ws/mannschaften-e3.html">E3-Jugend</a></li>
+      <li><a href="ws/mannschaften-f1.html">F1-Jugend</a></li>
+      <li><a href="ws/mannschaften-f2.html">F2-Jugend</a></li>
+      <li><a href="ws/mannschaften-g-jugend.html">G-Jugend (Bambinis)</a></li>
+      <li><a href="ws/styleguide.html">Gestaltungssystem</a></li>
+      <li><a href="ws/impressum.html">Impressum</a></li>
+      <li><a href="ws/verein-karneval.html">Karnevalabteilung</a></li>
+      <li><a href="ws/kontakt.html">Kontakt &amp; Anfahrt</a></li>
+      <li><a href="ws/verein-mach-mit.html">Mach mit</a></li>
+      <li><a href="ws/mannschaften.html">Mannschaften</a></li>
+      <li><a href="ws/mitglied-werden.html">Mitglied werden</a></li>
+      <li><a href="ws/shop.html">Shop</a></li>
+      <li><a href="ws/spielplan.html">Spielplan &amp; Tabellen</a></li>
+      <li><a href="ws/spielplan-herren.html">Spielplan 1. Herrenmannschaft</a></li>
+      <li><a href="ws/spielplan-a-jugend.html">Spielplan A-Jugend</a></li>
+      <li><a href="ws/spielplan-d1.html">Spielplan D1-Jugend</a></li>
+      <li><a href="ws/spielplan-d2.html">Spielplan D2-Jugend</a></li>
+      <li><a href="ws/spielplan-d3.html">Spielplan D3-Jugend</a></li>
+      <li><a href="ws/spielplan-e1.html">Spielplan E1-Jugend</a></li>
+      <li><a href="ws/spielplan-e2.html">Spielplan E2-Jugend</a></li>
+      <li><a href="ws/spielplan-e3.html">Spielplan E3-Jugend</a></li>
+      <li><a href="ws/spielplan-f1.html">Spielplan F1-Jugend</a></li>
+      <li><a href="ws/spielplan-f2.html">Spielplan F2-Jugend</a></li>
+      <li><a href="ws/spielplan-g-jugend.html">Spielplan G-Jugend (Bambinis)</a></li>
+      <li><a href="ws/verein-sponsoren.html">Sponsoren &amp; Partner</a></li>
+      <li><a href="ws/tabellen.html">Tabellen</a></li>
+      <li><a href="ws/verein.html">Verein</a></li>
+      <li><a href="ws/verein-vorstand.html">Vorstand</a></li>
     </ul>
-    <div class="hinweis hinweis--info">
-      <p style="margin:0;">In den hessischen Schulferien und an Feiertagen findet in der Regel kein Training statt. Ausnahmen sagt das Trainerteam an.</p>
-    </div>
-    <p class="knopfzeile">
-      <a class="knopf" href="./mannschaften/">Zu den Mannschaften</a>
-    </p>
-  </div>
-</section>
-<section class="abschnitt">
-  <div class="container fluss">
-    <h2>Aktuelles</h2>
-    <div class="raster raster--2">
-    <a class="karte karte--link" href="./news/2026-09-10-heimsieg-am-rebstock/">
-      <picture class="karte__bild karte__bild--contain">
-  <source type="image/avif" srcset="./assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-480.avif 480w, ./assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-960.avif 960w, ./assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-1254.avif 1254w" sizes="(min-width: 1024px) 50vw, 100vw">
-  <source type="image/webp" srcset="./assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-480.webp 480w, ./assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-960.webp 960w, ./assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-1254.webp 1254w" sizes="(min-width: 1024px) 50vw, 100vw">
-  <img src="./assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-960.jpg" srcset="./assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-480.jpg 480w, ./assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-960.jpg 960w, ./assets/bilder/erzeugt/news-heimsieg-rebstock-2026-09-10-1254.jpg 1254w" sizes="(min-width: 1024px) 50vw, 100vw" width="1254" height="1254" alt="Spielgrafik: Jubelnde Spieler der Sportfreunde in Blau, Endstand 4:1 gegen die TSG Niederrad 1898" fetchpriority="high" loading="eager" decoding="sync">
-</picture>
-      <p class="karte__meta">Donnerstag, 10. September 2026 · App-News</p>
-      <h3 class="karte__titel">Heimsieg am Rebstock: 4:1 gegen die TSG Niederrad</h3>
-      <p>Die Sportfreunde 04 Frankfurt setzen sich in einer spannenden Partie mit 4:1 gegen die TSG Niederrad 1898 durch!</p>
-    </a>
-    <a class="karte karte--link" href="./news/2026-09-07-arbeitstag-19-september/">
-      <picture class="karte__bild karte__bild--contain">
-  <source type="image/avif" srcset="./assets/bilder/erzeugt/news-arbeitstag-2026-09-19-480.avif 480w, ./assets/bilder/erzeugt/news-arbeitstag-2026-09-19-960.avif 960w, ./assets/bilder/erzeugt/news-arbeitstag-2026-09-19-1024.avif 1024w" sizes="(min-width: 1024px) 50vw, 100vw">
-  <source type="image/webp" srcset="./assets/bilder/erzeugt/news-arbeitstag-2026-09-19-480.webp 480w, ./assets/bilder/erzeugt/news-arbeitstag-2026-09-19-960.webp 960w, ./assets/bilder/erzeugt/news-arbeitstag-2026-09-19-1024.webp 1024w" sizes="(min-width: 1024px) 50vw, 100vw">
-  <img src="./assets/bilder/erzeugt/news-arbeitstag-2026-09-19-960.jpg" srcset="./assets/bilder/erzeugt/news-arbeitstag-2026-09-19-480.jpg 480w, ./assets/bilder/erzeugt/news-arbeitstag-2026-09-19-960.jpg 960w, ./assets/bilder/erzeugt/news-arbeitstag-2026-09-19-1024.jpg 1024w" sizes="(min-width: 1024px) 50vw, 100vw" width="1024" height="1536" alt="Plakat zum Arbeitstag am 19.09.2026 ab 10 Uhr mit Schubkarre und Gartenwerkzeug auf dem Sportplatz" loading="lazy" decoding="async">
-</picture>
-      <p class="karte__meta">Montag, 7. September 2026 · App-News</p>
-      <h3 class="karte__titel">Arbeitstag am 19. September: Viele Hände für unseren Platz</h3>
-      <p>Am Samstag, den 19.09.2026, ist es wieder soweit: Unser großer Arbeitstag mit Aufräumaktion steht an!</p>
-    </a>
-    </div>
-    <p class="knopfzeile">
-      <a class="knopf" href="./news/">Alle Meldungen</a>
-    </p>
-  </div>
-</section>
-<section class="abschnitt--hell abschnitt">
-  <div class="container fluss">
-    <h2>Einfach vorbeikommen und mittrainieren</h2>
-    <p class="inhalt">Kinder und Jugendliche können ein- oder zweimal ohne Anmeldung mittrainieren. Vorher klären wir, ob in der passenden Mannschaft Platz ist – am einfachsten per E-Mail an die Jugendleitung mit dem Jahrgang des Kindes. Danach ist der Aufnahmeantrag Pflicht.</p>
-    <ol class="schritte">
-      <li><p>E-Mail an die Jugendleitung mit Jahrgang und Vorerfahrung</p></li>
-      <li><p>Termin fürs Probetraining bekommen und ein- bis zweimal mitmachen</p></li>
-      <li><p>Aufnahmeantrag ausfüllen – Beiträge und Unterlagen stehen unter „Mitglied werden“</p></li>
-    </ol>
-    <p class="knopfzeile">
-      <a class="knopf" href="mailto:jugendleitung@sportfreunde04.de?subject=Probetraining%20beim%20FFV%20Sportfreunde%2004&amp;body=Hallo%2C%0A%0Awir%20interessieren%20uns%20f%C3%BCr%20ein%20Probetraining.%0AJahrgang%20des%20Kindes%3A%20%0AVorerfahrung%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe">Probetraining vereinbaren</a>
-    </p>
-  </div>
-</section>
-<section class="abschnitt">
-  <div class="container fluss">
-    <h2>Sportplatz Mainzer Landstraße</h2>
-    <div class="anfahrt__raster">
-      <div>
-        <address>
-          <p>Frankfurter Fußballverein Sportfreunde 1904 e.V.</p>
-          <p>Mainzer Landstraße 480</p>
-          <p>60326 Frankfurt am Main</p>
-        </address>
-        <p><a class="mail" href="mailto:geschaeftsstelle@sportfreunde04.de">geschaeftsstelle<wbr>@sportfreunde04.de</a></p>
-        <p><a href="tel:+4969736868">Geschäftsstelle +49 69 736868</a></p>
-        <p><a href="tel:+4969732193">Platzwart +49 69 732193</a></p>
-        <p class="knopfzeile">
-          <a class="knopf knopf--sekundaer" href="https://maps.apple.com/?q=Mainzer+Landstra%C3%9Fe+480,+60326+Frankfurt+am+Main" rel="noopener" target="_blank">Route in Apple Karten</a>
-          <a class="knopf knopf--sekundaer" href="https://www.google.com/maps/search/?api=1&amp;query=Mainzer+Landstra%C3%9Fe+480%2C+60326+Frankfurt+am+Main" rel="noopener" target="_blank">Route in Google Maps</a>
-        </p>
-      </div>
-      <div>
-        <div class="hinweis hinweis--info">
-          <h3 style="margin:0 0 var(--sp-2);">Parken</h3>
-          <p style="margin:0;">Der Parkplatz am Vereinsgelände ist wegen des Neubaus des Funktionsgebäudes voraussichtlich bis Ende Januar 2027 gesperrt. Der Zugang zum Gelände ist über den Hintereingang am „Haus der Jugend“ (Pavillon) möglich.</p>
-          <p class="meta" style="margin-top:var(--sp-2);">Quelle: App-News vom 21.07.2026</p>
-        </div>
-        <div class="hinweis hinweis--offen" style="margin-top:var(--sp-4);">
-          <p style="margin:0;">ÖPNV: Haltestelle und Fußweg folgen.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-<section class="abschnitt--hell abschnitt abschnitt--eng">
-  <div class="container fluss">
-    <article class="karte fluss">
-      <h2 class="karte__titel">Karnevalabteilung „Die Schnauzer“</h2>
-      <p>Fünf Gruppen von den Little Fruities bis zu den Dreamboys – die zweite Abteilung des Vereins.</p>
-      <p class="knopfzeile">
-        <a class="knopf" href="./verein/karneval/">Zur Karnevalabteilung</a>
-        <a class="mail" href="mailto:karnevalabteilung@sportfreunde04.de">karnevalabteilung<wbr>@sportfreunde04.de</a>
-      </p>
-    </article>
   </div>
 </section>
 </main>
-<footer class="fuss">
-  <div class="container fuss__raster">
-    <div class="fuss__gruppe fuss__marke">
-      <img class="fuss__wappen" src="./assets/logo/wappen-weiss.svg" width="56" height="56" alt="" aria-hidden="true">
-      <p class="fuss__registername">Frankfurter Fußballverein Sportfreunde 1904 e.V.</p>
-      <address class="fuss__adresse">
-        <p>Mainzer Landstraße 480</p>
-        <p>60326 Frankfurt am Main</p>
-        <p>Postfach 190442, 60091 Frankfurt am Main</p>
-      </address>
-      <ul class="fuss__kontakt" role="list">
-        <li><a class="mail" href="mailto:geschaeftsstelle@sportfreunde04.de">geschaeftsstelle<wbr>@sportfreunde04.de</a></li>
-        <li><a href="tel:+4969736868">Geschäftsstelle +49 69 736868</a></li>
-        <li><a href="tel:+4969732193">Platzwart +49 69 732193</a></li>
-        <li><a href="https://www.instagram.com/speuzer_ffm/" rel="noopener" target="_blank">Instagram @speuzer_ffm</a></li>
-      </ul>
-    </div>
-    <div class="fuss__spalten">
-    <div class="fuss__gruppe">
-        <h2>Verein</h2>
-        <ul>
-        <li><a href="./verein/">Wer wir sind</a></li>
-        <li><a href="./verein/vorstand/">Vorstand</a></li>
-        <li><a href="./verein/sponsoren/">Sponsoren &amp; Partner</a></li>
-        <li><a href="./verein/mach-mit/">Mach mit</a></li>
-        <li><a href="./verein/downloads/">Downloads</a></li>
-        </ul>
-      </div>
-      <div class="fuss__gruppe">
-        <h2>Sport</h2>
-        <ul>
-        <li><a href="./mannschaften/">Mannschaften &amp; Training</a></li>
-        <li><a href="./spielplan/">Spielplan</a></li>
-        <li><a href="./tabellen/">Tabellen</a></li>
-        <li><a href="./news/">News</a></li>
-        <li><a href="./mitglied-werden/">Mitglied werden</a></li>
-        </ul>
-      </div>
-      <div class="fuss__gruppe">
-        <h2>Service</h2>
-        <ul>
-        <li><a href="./kontakt/">Kontakt &amp; Anfahrt</a></li>
-        <li><a href="./shop/">Shop</a></li>
-        <li><a href="./app/">App-Ansicht</a></li>
-        <li><a href="./vorher-nachher/">Vorher / Nachher</a></li>
-        <li><a href="./impressum/">Impressum</a></li>
-        <li><a href="./datenschutz/">Datenschutz</a></li>
-        </ul>
-      </div>
-    </div>
-  </div>
-  <div class="container fuss__app">
-    <ul class="fuss__app-kontakt" role="list">
-      <li><a class="mail" href="mailto:geschaeftsstelle@sportfreunde04.de">geschaeftsstelle<wbr>@sportfreunde04.de</a></li>
-      <li><a href="tel:+4969736868">Geschäftsstelle +49 69 736868</a></li>
-    </ul>
-    <ul class="fuss__app-links" role="list">
-      <li><a href="./impressum/">Impressum</a></li>
-      <li><a href="./datenschutz/">Datenschutz</a></li>
-    </ul>
-  </div>
-  <div class="container fuss__schluss">
-    <p>© 2026 Frankfurter Fußballverein Sportfreunde 1904 e.V.</p>
-    <p>Prototyp · Testumgebung, keine Live-Seite</p>
-  </div>
+<footer class="ws-fuss">
+  <p>Prototyp · Testumgebung, keine Live-Seite · Inhalte Stand Dienstag, 15. September 2026</p>
 </footer>
 </body>
 </html>
