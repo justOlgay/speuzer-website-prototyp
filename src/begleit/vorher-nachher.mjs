@@ -205,7 +205,9 @@ function vergleicheAbschnitt(daten) {
 // ladeDaten() in tools/build.mjs) – Minimum der vier Kategorien als
 // "P / A / BP / SEO" und Seitenzahl (P17, Schritt 4). Gleiches Datenfeld wie
 // src/seiten/styleguide.mjs#seitePruefung().
-const MESSBAR_ZEILEN = [
+// P18: exportiert, damit tools/vorstand-pdf/texte.mjs dieselbe Messtabelle
+// importieren kann (Kapitel 3 des Vorstandsdokuments).
+export const MESSBAR_ZEILEN = [
   { merkmal: "Menüpunkte", live: "12, dazu „Mehr“", appack: "6", wer: "Verein im CMS (MENU)" },
   {
     merkmal: "Trainingszeiten",
@@ -263,7 +265,7 @@ const MESSBAR_ZEILEN = [
     wer: "nur vmapit",
   },
   {
-    merkmal: "Lighthouse mobil Workspace-Seiten per Direktlink",
+    merkmal: "Lighthouse mobil Workspace- und Begleitseiten per Direktlink",
     live: "keine eigenen Seiten",
     appackFn: (daten) => {
       const lh = daten.lighthouse;

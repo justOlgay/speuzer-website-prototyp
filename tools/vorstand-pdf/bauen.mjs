@@ -1,16 +1,18 @@
 #!/usr/bin/env node
-// Speuzer Website Prototyp – P14 Vorstandsdokument „Website-Vergleich“
+// Speuzer Website Prototyp – Vorstandsdokument „Website-Vergleich“ (P14,
+// appack-Fassung seit P18)
 //
 // Erzeugt aus den Daten des Repositories (data/*.json), den wörtlichen Texten
 // aus tools/vorstand-pdf/texte.mjs und den Bildern in assets/bilder/quelle/
-// sowie neuen Screenshots der öffentlichen Prototyp-Adresse ein gedrucktes
-// A4-PDF für den Vorstand. Ablauf:
-//   1. Daten laden (teams/spiele/tabellen/news/downloads/lighthouse), Sitemap
-//      lesen (Titel je Seite für Anhang C).
-//   2. 13 neue Screenshots der öffentlichen Adresse
-//      https://justolgay.github.io/speuzer-website-prototyp/ aufnehmen
-//      (puppeteer-core, deviceScaleFactor 2) nach tools/cache/vorstand-pdf/bilder/.
-//      Die Live-Website/appack wird dabei NICHT aufgerufen.
+// sowie neuen Screenshots aus der appack-Hülle (docs/index.html) und den
+// Begleitseiten ein gedrucktes A4-PDF für den Vorstand. Ablauf:
+//   1. Daten laden (teams/spiele/tabellen/news/downloads/lighthouse/
+//      appack-*), Sitemap lesen (Titel je Seite für Anhang C).
+//   2. Zwölf neue Screenshots aufnehmen (puppeteer-core) nach
+//      tools/cache/vorstand-pdf/bilder/: die meisten über die Hülle des
+//      lokalen Servers (tools/huelle-aufnahme.mjs, wie tools/vergleich.mjs),
+//      zwei direkt von den Begleitseiten /app/ und /vorher-nachher/ des
+//      lokalen Servers. Die Live-Website/appack wird dabei NICHT aufgerufen.
 //   3. Die neun vorhandenen Vorher/Nachher-Bildpaare aus
 //      assets/bilder/quelle/ dorthin kopieren.
 //   4. Alle Bilder auf höchstens 1200 px Breite verkleinern (sips).
@@ -20,10 +22,11 @@
 //      getrennt rendern (Titelseite ohne Fußzeile, Hauptinhalt mit
 //      Fußzeile über displayHeaderFooter) und mit pdfunite zusammenführen.
 //   7. PDF-Metadaten setzen (Titel, Autor).
-//   8. Kopie in den Verein-Ordner ablegen.
+//   8. Kopie in den Verein-Ordner ablegen (die alte PDF-Datei dort bleibt
+//      zusätzlich stehen, Stand 14.09.2026).
 //
 // Nichts an appack, der Live-Website oder der App wird verändert; die
-// Live-Seite wird nicht neu aufgerufen.
+// Live-Seite (sportfreunde04.de) wird nicht aufgerufen.
 
 import puppeteer from "puppeteer-core";
 import QRCode from "qrcode";
@@ -39,8 +42,10 @@ import {
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
+import { spawn } from "node:child_process";
 
 import * as T from "./texte.mjs";
+import { aufnahmeAusHuelle } from "../huelle-aufnahme.mjs";
 
 const HIER = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HIER, "..", "..");
@@ -52,18 +57,44 @@ const DOCS = path.join(ROOT, "docs");
 
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const PUBLIC_URL = "https://justolgay.github.io/speuzer-website-prototyp/";
+const PORT = 4173;
+const LOKAL_BASIS = `http://localhost:${PORT}`;
 
-const DATEINAME = "Speuzer Website - Vergleich Live-Seite und Prototyp 14.09.2026.pdf";
+const DATEINAME = "Speuzer Website - Vergleich Live-Seite und appack-Fassung 15.09.2026.pdf";
 const PDF_PFAD = path.join(CACHE, DATEINAME);
 const VEREIN_ORDNER =
   "/Users/olgayozkan/Library/CloudStorage/SynologyDrive-Drive/Eigene Dokumente/08_Privat & Familie/Personen/Ilay Özkan/Speuzer/Verein";
 const VEREIN_PDF_PFAD = path.join(VEREIN_ORDNER, DATEINAME);
 
-const PDF_TITEL = "Website-Vergleich Live-Seite und Prototyp – FFV Sportfreunde 04";
+const PDF_TITEL = "Website-Vergleich Live-Seite und appack-Fassung – FFV Sportfreunde 04";
 const PDF_AUTOR = "Olgay Özkan";
 
 function warte(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// ---------- Lokaler Server (wie tools/vergleich.mjs) ----------
+
+async function serverErreichbar() {
+  try {
+    const resp = await fetch(LOKAL_BASIS + "/");
+    return resp.ok || resp.status === 404;
+  } catch {
+    return false;
+  }
+}
+
+async function starteServerFallsNoetig() {
+  if (await serverErreichbar()) return null;
+
+  const proc = spawn(process.execPath, [path.join(ROOT, "tools", "server.mjs")], {
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  for (let i = 0; i < 50; i++) {
+    if (await serverErreichbar()) return proc;
+    await warte(100);
+  }
+  throw new Error("Server ist nach 5s nicht erreichbar");
 }
 
 function escapeHtml(text) {
@@ -100,6 +131,25 @@ function formatDatumLang(iso) {
   return `${d.getDate()}. ${MONATE[d.getMonth()]} ${d.getFullYear()}`;
 }
 
+// P18 Anhang B: Datum im selben kurzen Format wie die übrigen Prüfdaten des
+// Absatzes ("04.09.2026").
+function formatDatumKurz(iso) {
+  const d = new Date(iso);
+  const tag = String(d.getDate()).padStart(2, "0");
+  const monat = String(d.getMonth() + 1).padStart(2, "0");
+  return `${tag}.${monat}.${d.getFullYear()}`;
+}
+
+// Median einer Zahlenliste (P18 Kapitel 3: Median Performance über alle
+// gemessenen Seiten aus data/lighthouse.json).
+function median(zahlen) {
+  const sortiert = [...zahlen].sort((a, b) => a - b);
+  const mitte = Math.floor(sortiert.length / 2);
+  return sortiert.length % 2 === 0
+    ? (sortiert[mitte - 1] + sortiert[mitte]) / 2
+    : sortiert[mitte];
+}
+
 // ---------- 1. Daten laden ----------
 
 function ladeJSON(name) {
@@ -111,9 +161,11 @@ function ladeDaten() {
     teams: ladeJSON("teams"),
     spiele: ladeJSON("spiele"),
     tabellen: ladeJSON("tabellen"),
-    news: ladeJSON("news"),
     downloads: ladeJSON("downloads"),
     lighthouse: ladeJSON("lighthouse"),
+    appackStart: ladeJSON("appack-start"),
+    appackMenu: ladeJSON("appack-menu"),
+    appackFooter: ladeJSON("appack-footer"),
   };
 }
 
@@ -135,6 +187,14 @@ function leseSitemapSeiten() {
     }
     return { pfad, titel };
   });
+}
+
+// P18 Anhang C: Titel der 404-Seite (eigene Vorlage begleit.html, aber nicht
+// Teil der Sitemap, siehe tools/build.mjs).
+function leseTitel404() {
+  const html = readFileSync(path.join(DOCS, "404.html"), "utf8");
+  const m = html.match(/<title>(.*?)<\/title>/);
+  return m ? dekodiereEntities(m[1]) : "";
 }
 
 // ---------- 2.–4. Bilder vorbereiten ----------
@@ -203,51 +263,68 @@ async function bereitMachen(page) {
   await page.evaluate(() => document.fonts.ready);
 }
 
-// Die 13 laut Spezifikation neu aufzunehmenden Screenshots der öffentlichen
-// Prototyp-Adresse (nicht die Live-Website/appack).
-const NEUE_SCREENSHOTS = [
-  { datei: "neu-start-1440.png", pfad: "/", breite: 1440, hoehe: 900 },
-  { datei: "neu-mannschaften-1440.png", pfad: "/mannschaften/", breite: 1440, hoehe: 900 },
-  { datei: "neu-spielplan-herren-1440.png", pfad: "/spielplan/herren/", breite: 1440, hoehe: 900 },
-  { datei: "neu-tabellen-1440.png", pfad: "/tabellen/", breite: 1440, hoehe: 900 },
-  { datei: "neu-news-1440.png", pfad: "/news/", breite: 1440, hoehe: 900 },
-  { datei: "neu-mitglied-werden-1440.png", pfad: "/mitglied-werden/", breite: 1440, hoehe: 900 },
-  { datei: "neu-app-1440.png", pfad: "/app/", breite: 1440, hoehe: 900 },
-  { datei: "neu-start-390.png", pfad: "/", breite: 390, hoehe: 844 },
-  { datei: "neu-mannschaften-d3-390.png", pfad: "/mannschaften/d3/", breite: 390, hoehe: 844 },
+// Die zwölf laut Spezifikation (P18, Schritt 2) neu aufzunehmenden
+// Screenshots. Die meisten kommen aus der Hülle des lokalen Servers
+// (tools/huelle-aufnahme.mjs, wie tools/vergleich.mjs); zwei (App,
+// Vorher/Nachher) sind Begleitseiten, die ohne Hülle direkt aufgerufen
+// werden (kein Menüklick nötig).
+const NEUE_SCREENSHOTS_HUELLE = [
+  { datei: "neu-start-1440.png", opts: { breite: 1440, hoehe: 900 } },
+  { datei: "neu-mannschaften-1440.png", opts: { breite: 1440, hoehe: 900, menue: "Mannschaften" } },
   {
-    datei: "neu-news-arbeitstag-390.png",
-    pfad: "/news/2026-09-07-arbeitstag-19-september/",
-    breite: 390,
-    hoehe: 844,
+    datei: "neu-spielplan-herren-1440.png",
+    opts: { breite: 1440, hoehe: 900, menue: "Spielplan & Tabellen", imRahmen: "spielplan-herren.html" },
   },
-  { datei: "neu-mitglied-werden-390.png", pfad: "/mitglied-werden/", breite: 390, hoehe: 844 },
-  { datei: "neu-kontakt-390.png", pfad: "/kontakt/", breite: 390, hoehe: 844 },
-  { datei: "neu-start-menue-390.png", pfad: "/", breite: 390, hoehe: 844, menue: true },
+  {
+    datei: "neu-tabellen-1440.png",
+    opts: { breite: 1440, hoehe: 900, menue: "Spielplan & Tabellen", imRahmen: "tabellen.html" },
+  },
+  {
+    datei: "neu-mitglied-werden-1440.png",
+    opts: { breite: 1440, hoehe: 900, menue: "Mitglied werden" },
+  },
+  { datei: "neu-start-390.png", opts: { breite: 390, hoehe: 844 } },
+  { datei: "neu-start-menue-390.png", opts: { breite: 390, hoehe: 844, burger: true } },
+  {
+    datei: "neu-mannschaften-d3-390.png",
+    opts: { breite: 390, hoehe: 844, burger: true, menue: "Mannschaften", imRahmen: "mannschaften-d3.html" },
+  },
+  {
+    datei: "neu-mitglied-werden-390.png",
+    opts: { breite: 390, hoehe: 844, burger: true, menue: "Mitglied werden" },
+  },
+  {
+    datei: "neu-kontakt-390.png",
+    opts: { breite: 390, hoehe: 844, burger: true, menue: "Verein", imRahmen: "kontakt.html" },
+  },
+];
+
+// Begleitseiten: direkter Aufruf ohne Hülle, ein Screenshot bei 1440×900.
+const NEUE_SCREENSHOTS_BEGLEIT = [
+  { datei: "neu-app-1440.png", pfad: "/app/" },
+  { datei: "neu-vorher-nachher-1440.png", pfad: "/vorher-nachher/" },
 ];
 
 async function nimmNeueScreenshotsAuf(browser) {
-  for (const a of NEUE_SCREENSHOTS) {
+  for (const a of NEUE_SCREENSHOTS_HUELLE) {
     const ziel = path.join(BILDER, a.datei);
     const page = await browser.newPage();
-    await page.setViewport({ width: a.breite, height: a.hoehe, deviceScaleFactor: 2 });
-    await page.goto(PUBLIC_URL.replace(/\/$/, "") + a.pfad, {
-      waitUntil: "networkidle0",
-      timeout: 45000,
-    });
+    await aufnahmeAusHuelle(page, a.opts);
     await bereitMachen(page);
-    // bis zum Seitenende scrollen und zurück (Lazy-Bilder), 400ms warten
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await warte(400);
-    await page.evaluate(() => window.scrollTo(0, 0));
-    await warte(400);
-    if (a.menue) {
-      await page.click(".kopf__burger");
-      await warte(300);
-    }
     await page.screenshot({ path: ziel });
     await page.close();
-    console.log(`Screenshot: ${a.pfad} @ ${a.breite}×${a.hoehe} (DPR 2) -> ${path.relative(ROOT, ziel)}`);
+    console.log(`Screenshot (Hülle): ${a.datei} @ ${a.opts.breite}×${a.opts.hoehe} -> ${path.relative(ROOT, ziel)}`);
+  }
+
+  for (const a of NEUE_SCREENSHOTS_BEGLEIT) {
+    const ziel = path.join(BILDER, a.datei);
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
+    await page.goto(LOKAL_BASIS + a.pfad, { waitUntil: "networkidle0", timeout: 30000 });
+    await bereitMachen(page);
+    await page.screenshot({ path: ziel });
+    await page.close();
+    console.log(`Screenshot (Begleitseite): ${a.datei} @ 1440×900 -> ${path.relative(ROOT, ziel)}`);
   }
 }
 
@@ -443,43 +520,38 @@ async function baueTitelHtml() {
 
 // ---------- Seite 2 – Auf einen Blick ----------
 
-function baueBlickAbschnitt(lh, lcpStartSekunden) {
+function baueBlickAbschnitt() {
   const kacheln = [
+    kachel({ wert: "6", label: "Menüpunkte", vorher: "12", jetzt: "6" }),
     kachel({
-      wert: String(lh.minimum.performance),
-      label: "Lighthouse Performance, mobil",
-      vorher: "33",
-      jetzt: `${lh.minimum.performance} auf allen 47 Seiten`,
+      wert: "11",
+      label: "Mannschaften mit Trainingszeiten",
+      vorher: "0",
+      jetzt: "11",
     }),
     kachel({
-      wert: "100",
-      label: "Lighthouse Barrierefreiheit",
-      vorher: "50",
-      jetzt: "100",
+      wert: "100 %",
+      label: "Inhaltsbreite am Rechner",
+      vorher: "40 %",
+      jetzt: "100 %",
     }),
     kachel({
-      wert: "47",
-      label: "Seiten mit eigener Adresse",
-      vorher: "1",
-      jetzt: "47",
-    }),
-    kachel({
-      wert: "11 von 11",
-      label: "Mannschaften mit Trainingszeiten online",
-      vorher: "0 von 11",
-      jetzt: "11 von 11",
+      wert: "0",
+      label: "Private Telefonnummern",
+      vorher: "19",
+      jetzt: "0",
     }),
     kachel({
       wert: "44 × 44 px",
-      label: "Kleinste Tippfläche",
+      label: "Kleinste Tippziele",
       vorher: "26 × 17 px",
-      jetzt: "mindestens 44 × 44 px",
+      jetzt: "44 × 44 px",
     }),
     kachel({
-      wert: lcpStartSekunden,
-      label: "Zeit bis zum Hauptinhalt am Handy (Lighthouse, simuliertes Mobilfunknetz)",
-      vorher: "26,0 s",
-      jetzt: lcpStartSekunden,
+      wert: "12,3:1",
+      label: "Kontrast aktiver Menüpunkt",
+      vorher: "2,3:1",
+      jetzt: "12,3:1",
     }),
   ];
 
@@ -521,8 +593,8 @@ function baueKapitel1() {
       <figcaption>${escapeHtml(T.K1_BILD_VORHER)}</figcaption>
     </figure>
     <figure class="kapitel1-bild">
-      <span class="etikett etikett--ok">Prototyp</span>
-      ${bild("nachher-vorstand-desktop", "Prototyp-Unterseite am Rechner: Inhalt über die volle Seitenbreite, ein Scrollbalken")}
+      <span class="etikett etikett--ok">appack-Fassung</span>
+      ${bild("nachher-mannschaften-desktop", "appack-Fassung, Mannschaften am Rechner: Menüpunkt mit Vollbild-Einstellung, Inhalt über die Fensterbreite")}
       <figcaption>${escapeHtml(T.K1_BILD_NACHHER)}</figcaption>
     </figure>
   </div>
@@ -555,8 +627,8 @@ function baueSituation(situation, index) {
         <p>${escapeHtml(situation.kastenSatz)}</p>
         <div class="situation__spalten">
           <div>
-            <div class="situation__spalte-titel">Neuer Screenshot – /mannschaften/d3/ am Handy</div>
-            ${bild("neu-mannschaften-d3-390", "Prototyp-Mannschaftsseite D3 am Handy (neu aufgenommen am 14.09.2026)")}
+            <div class="situation__spalte-titel">Neuer Screenshot – Workspace-Seite mannschaften-d3.html im Rahmen (Handy)</div>
+            ${bild("neu-mannschaften-d3-390", "appack-Fassung, Mannschaftsseite D3 im Inhaltsrahmen am Handy (neu aufgenommen am 15.09.2026)")}
           </div>
           <div>
             <div class="situation__spalte-titel">Schematische Link-Vorschau</div>
@@ -565,6 +637,7 @@ function baueSituation(situation, index) {
           </div>
         </div>
         <p>${escapeHtml(situation.satz)}</p>
+        <p><strong>Bleibt:</strong> ${escapeHtml(situation.bleibt)}</p>
       </div>
     </div>`;
   }
@@ -588,10 +661,11 @@ function baueSituation(situation, index) {
           <p>${escapeHtml(situation.heute)}</p>
         </div>
         <div>
-          <div class="situation__spalte-titel">Im Prototyp</div>
+          <div class="situation__spalte-titel">appack-Fassung</div>
           <p>${escapeHtml(situation.prototyp)}</p>
         </div>
       </div>
+      <p><strong>Bleibt:</strong> ${escapeHtml(situation.bleibt)}</p>
       ${ersteFigur}
     </div>
     ${zweiteFigur}
@@ -609,23 +683,34 @@ function baueKapitel2() {
 
 // ---------- Kapitel 3 – Messbar ----------
 
-function baueKapitel3(lh, lcpStartSekunden) {
-  const kopfzeilen = [
-    ["Lighthouse Performance mobil", "33", `Minimum ${lh.minimum.performance} · Median 100`],
-    ["Lighthouse Barrierefreiheit", "50", "100"],
-    ["Lighthouse Best Practices", "78", "100"],
-    ["Lighthouse SEO", "82", "100"],
-    ["Zeit bis Hauptinhalt, mobil simuliert", "26,0 s", lcpStartSekunden],
-  ];
-  const messbarZeilen = T.K3_MESSBAR_ZEILEN.map((z) => [z.merkmal, z.vorher, z.nachher]);
-  const zusatzZeilen = T.K3_ZUSATZ_ZEILEN.map((z) => [z.merkmal, z.vorher, z.nachher]);
+// P18: Lighthouse-Block mit genau zwei Zeilen (Spezifikation Schritt 3) statt
+// der bisherigen fünf Kopfzeilen der Tabelle – die sportfreunde04.de-Werte
+// bleiben fest (Vorlage des Anbieters, siehe MESSBAR_FUSSNOTE), die
+// Workspace-/Begleitseiten-Werte kommen aus data/lighthouse.json (Schritt 1).
+function baueLighthouseBlock(lh) {
+  const min = lh.minimum;
+  const medianPerformance = median(lh.seiten.map((s) => s.performance));
+  return `<div class="kasten">
+    <p>sportfreunde04.de (Vorlage des Anbieters): 33 / 50 / 78 / 82, bleibt unverändert</p>
+    <p>Workspace-Seiten per Direktlink: Minimum ${min.performance} / ${min.accessibility} / ${min.bestPractices} / ${min.seo}, Median Performance ${medianPerformance}</p>
+  </div>`;
+}
 
-  const alleZeilen = [...kopfzeilen, ...messbarZeilen, ...zusatzZeilen].map(
-    ([merkmal, live, proto]) => [escapeHtml(merkmal), escapeHtml(live), escapeHtml(proto)]
+function baueKapitel3(lh) {
+  const messbarZeilen = T.K3_MESSBAR_ZEILEN.map((z) => [
+    z.merkmal,
+    z.live,
+    z.appackFn ? z.appackFn({ lighthouse: lh }) : z.appack,
+    z.wer,
+  ]);
+  const zusatzZeilen = T.K3_ZUSATZ_ZEILEN.map((z) => [z.merkmal, z.live, z.appack, z.wer]);
+
+  const alleZeilen = [...messbarZeilen, ...zusatzZeilen].map(
+    ([merkmal, live, appack, wer]) => [escapeHtml(merkmal), escapeHtml(live), escapeHtml(appack), escapeHtml(wer)]
   );
 
   const table = tabelle({
-    kopf: ["Merkmal", "Live-Seite", "Prototyp"],
+    kopf: ["Merkmal", "Live heute", "appack-Fassung", "Wer kann es ändern"],
     zeilen: alleZeilen,
     klasse: "tabelle--messbar",
   });
@@ -637,6 +722,7 @@ function baueKapitel3(lh, lcpStartSekunden) {
     <div class="kasten__titel">${escapeHtml(T.MESSBAR_ERKLAERKASTEN_TITEL)}</div>
     <p>${escapeHtml(T.MESSBAR_ERKLAERKASTEN)}</p>
   </div>
+  ${baueLighthouseBlock(lh)}
   ${table}
   <p class="meta">${escapeHtml(T.MESSBAR_FUSSNOTE)}</p>
 </section>`;
@@ -670,40 +756,45 @@ function baueKapitel4() {
 
 function baueKapitel5() {
   const offen = T.K5_OFFEN.map((o) => `<li>${escapeHtml(o)}</li>`).join("\n");
+  const nichtPunkte = T.K6_PUNKTE.map((p) => `<li>${escapeHtml(p)}</li>`).join("\n");
   return `<section class="kapitel">
   <div class="kapitelnummer">Kapitel 5</div>
   <h2>${escapeHtml(T.KAPITEL_NAMEN[4])}</h2>
   <p>${escapeHtml(T.K5_ABSATZ)}</p>
   <ul class="liste">${offen}</ul>
   <figure class="figur-einzeln figur-einzeln--gross">
-    ${bild("neu-app-1440", "Prototyp: App-Ansicht bei 1440 px (neu aufgenommen am 14.09.2026)")}
+    ${bild("neu-app-1440", "appack-Fassung: App-Ansicht bei 1440 px (neu aufgenommen am 15.09.2026)")}
     <figcaption>${escapeHtml(T.K5_BILD_UNTERSCHRIFT)}</figcaption>
   </figure>
+  <div class="kasten">
+    <div class="kasten__titel">Was der Prototyp nicht ist</div>
+    <ul class="liste">${nichtPunkte}</ul>
+  </div>
 </section>`;
 }
 
-// ---------- Kapitel 6 ----------
+// ---------- Kapitel 6 – Was nur der Anbieter ändern kann ----------
 
 function baueKapitel6() {
-  const punkte = T.K6_PUNKTE.map((p) => `<li>${escapeHtml(p)}</li>`).join("\n");
-  return `<section class="kapitel">
-  <div class="kapitelnummer">Kapitel 6</div>
-  <h2>${escapeHtml(T.KAPITEL_NAMEN[5])}</h2>
-  <ul class="liste">${punkte}</ul>
-</section>`;
-}
-
-// ---------- Kapitel 7 ----------
-
-function baueKapitel7() {
-  const a = T.K7_BLOCK_A.map((t) => `<li>${escapeHtml(t)}</li>`).join("\n");
-  const b = T.K7_BLOCK_B.map((t) => `<li>${escapeHtml(t)}</li>`).join("\n");
-  const cZeilen = T.K7_BLOCK_C_ZEILEN.map((z) => [
+  const zeilen = T.K6_TABELLE_ZEILEN.map((z) => [
     escapeHtml(z.punkt),
     escapeHtml(z.problem),
     escapeHtml(z.wunsch),
   ]);
-  const cTabelle = tabelle({ kopf: ["Punkt", "Problem heute", "Wunsch"], zeilen: cZeilen });
+  const table = tabelle({ kopf: ["Punkt", "Problem heute", "Wunsch"], zeilen });
+  return `<section class="kapitel">
+  <div class="kapitelnummer">Kapitel 6</div>
+  <h2>${escapeHtml(T.KAPITEL_NAMEN[5])}</h2>
+  ${table}
+  <p>${escapeHtml(T.K6_SATZ)}</p>
+</section>`;
+}
+
+// ---------- Kapitel 7 – Der Weg: in appack umsetzen ----------
+
+function baueKapitel7() {
+  const a = T.K7_BLOCK_A.map((t) => `<li>${escapeHtml(t)}</li>`).join("\n");
+  const b = T.K7_BLOCK_B.map((t) => `<li>${escapeHtml(t)}</li>`).join("\n");
 
   return `<section class="kapitel">
   <div class="kapitelnummer">Kapitel 7</div>
@@ -712,23 +803,13 @@ function baueKapitel7() {
   <ul class="liste">${a}</ul>
   <h3>B. ${escapeHtml(T.K7_BLOCK_B_TITEL)}</h3>
   <ul class="liste">${b}</ul>
-  <h3>C. ${escapeHtml(T.K7_BLOCK_C_TITEL)}</h3>
-  ${cTabelle}
-  <p>${escapeHtml(T.K7_BLOCK_C_SATZ)}</p>
-  <h3>Zwei Wege</h3>
-  <div class="zwei-kaesten">
-    <div class="kasten">
-      <div class="kasten__titel">${escapeHtml(T.K7_WEG1_TITEL)}</div>
-      <p>${escapeHtml(T.K7_WEG1_TEXT)}</p>
+  <div class="k7-schluss">
+    <h3>C. ${escapeHtml(T.K7_BLOCK_C_TITEL)}</h3>
+    <p>${escapeHtml(T.K7_BLOCK_C_SATZ)}</p>
+    <div class="kasten kasten--empfehlung">
+      <div class="kasten__titel">Empfehlung</div>
+      <p>${escapeHtml(T.K7_EMPFEHLUNG)}</p>
     </div>
-    <div class="kasten">
-      <div class="kasten__titel">${escapeHtml(T.K7_WEG2_TITEL)}</div>
-      <p>${escapeHtml(T.K7_WEG2_TEXT)}</p>
-    </div>
-  </div>
-  <div class="kasten kasten--empfehlung">
-    <div class="kasten__titel">Empfehlung</div>
-    <p>${escapeHtml(T.K7_EMPFEHLUNG)}</p>
   </div>
 </section>`;
 }
@@ -737,8 +818,8 @@ function baueKapitel7() {
 
 // P14b Punkt 5: leeres Ankreuzkästchen (CSS-Rahmen 4×4mm) vor jedem Punkt,
 // damit die Liste als Beschlussvorlage in der Sitzung dient. Bei Punkt 2
-// (Index 1) zusätzlich "☐ ja ☐ nein", bei Punkt 6 (Index 5) "☐ Weg 1 ☐ Weg 2"
-// als je zwei Kästchen mit Text am Zeilenende.
+// (Index 1) zusätzlich "☐ ja ☐ nein" als zwei Kästchen unter dem Text (P18:
+// der frühere Sonderfall "☐ Weg 1 ☐ Weg 2" bei Punkt 6 entfällt mit K8_ENTSCHEIDUNGEN).
 function ankreuzOption(text) {
   return `<span class="ankreuz-inline"><span class="ankreuz"></span>${escapeHtml(text)}</span>`;
 }
@@ -750,7 +831,6 @@ function baueKapitel8() {
   // um.
   const zusatzJeIndex = {
     1: `<div class="beschluss-antwort">${ankreuzOption("ja")}${ankreuzOption("nein")}</div>`,
-    5: `<div class="beschluss-antwort">${ankreuzOption("Weg 1")}${ankreuzOption("Weg 2")}</div>`,
   };
   const items = T.K8_ENTSCHEIDUNGEN.map(
     (t, i) =>
@@ -769,19 +849,19 @@ function baueKapitel8() {
 // sechs Menüpunkte – ausschließlich Prototyp-Screenshots, sechs Rechner-
 // Bilder im Raster 2×3, darunter eine Reihe mit vier Handy-Bildern.
 const K9_GALERIE_RECHNER = [
-  { datei: "neu-start-1440", beschriftung: "Startseite, 1 440 px", alt: "Prototyp-Startseite am Rechner, 1 440 px" },
-  { datei: "neu-mannschaften-1440", beschriftung: "Mannschaften, 1 440 px", alt: "Prototyp-Mannschaftsübersicht am Rechner, 1 440 px" },
-  { datei: "neu-spielplan-herren-1440", beschriftung: "Spielplan 1. Herrenmannschaft, 1 440 px", alt: "Prototyp-Spielplan der 1. Herrenmannschaft am Rechner, 1 440 px" },
-  { datei: "neu-tabellen-1440", beschriftung: "Tabellen, 1 440 px", alt: "Prototyp-Tabellenübersicht am Rechner, 1 440 px" },
-  { datei: "neu-news-1440", beschriftung: "News, 1 440 px", alt: "Prototyp-Newsübersicht am Rechner, 1 440 px" },
-  { datei: "neu-mitglied-werden-1440", beschriftung: "Mitglied werden, 1 440 px", alt: "Prototyp-Seite Mitglied werden am Rechner, 1 440 px" },
+  { datei: "neu-start-1440", beschriftung: "Startseite, 1 440 px", alt: "appack-Fassung, Startseite am Rechner, 1 440 px" },
+  { datei: "neu-mannschaften-1440", beschriftung: "Mannschaften, 1 440 px", alt: "appack-Fassung, Mannschaftsübersicht am Rechner, 1 440 px" },
+  { datei: "neu-spielplan-herren-1440", beschriftung: "Spielplan 1. Herrenmannschaft, 1 440 px", alt: "appack-Fassung, Spielplan der 1. Herrenmannschaft am Rechner, 1 440 px" },
+  { datei: "neu-tabellen-1440", beschriftung: "Tabellen, 1 440 px", alt: "appack-Fassung, Tabellenübersicht am Rechner, 1 440 px" },
+  { datei: "neu-mitglied-werden-1440", beschriftung: "Mitglied werden, 1 440 px", alt: "appack-Fassung, Seite Mitglied werden am Rechner, 1 440 px" },
+  { datei: "neu-vorher-nachher-1440", beschriftung: "Begleitseite Vorher / Nachher, 1 440 px", alt: "Begleitseite Vorher / Nachher am Rechner, 1 440 px" },
 ];
 
 const K9_GALERIE_HANDY = [
-  { datei: "neu-start-390", beschriftung: "Startseite, 390 px", alt: "Prototyp-Startseite am Handy, 390 px" },
-  { datei: "neu-start-menue-390", beschriftung: "Startseite mit geöffnetem Menü, 390 px", alt: "Prototyp-Startseite mit geöffnetem Menü am Handy, 390 px" },
-  { datei: "neu-mitglied-werden-390", beschriftung: "Mitglied werden, 390 px", alt: "Prototyp-Seite Mitglied werden am Handy, 390 px" },
-  { datei: "neu-kontakt-390", beschriftung: "Kontakt & Anfahrt, 390 px", alt: "Prototyp-Seite Kontakt und Anfahrt am Handy, 390 px" },
+  { datei: "neu-start-390", beschriftung: "Startseite, 390 px", alt: "appack-Fassung, Startseite am Handy, 390 px" },
+  { datei: "neu-start-menue-390", beschriftung: "Startseite mit geöffnetem Menü, 390 px", alt: "appack-Fassung, Startseite mit geöffnetem Menü am Handy, 390 px" },
+  { datei: "neu-mannschaften-d3-390", beschriftung: "Mannschaft D3, 390 px", alt: "appack-Fassung, Mannschaftsseite D3 am Handy, 390 px" },
+  { datei: "neu-kontakt-390", beschriftung: "Kontakt & Anfahrt, 390 px", alt: "appack-Fassung, Seite Kontakt und Anfahrt am Handy, 390 px" },
 ];
 
 function galerieElement(eintrag) {
@@ -869,8 +949,12 @@ function baueAnhangA(lh) {
 // P14b Punkt 8: Anhang B folgt direkt unter Anhang A (kein Seitenumbruch, 12
 // mm Abstand) – daher kein eigener .kapitel-Seitenumbruch, sondern die
 // Fortsetzungs-Variante (.kapitel--fortlaufend, siehe vergleich.css).
-function baueAnhangB() {
-  const absaetze = T.ANHANG_B_ABSAETZE.map((a) => `<p>${escapeHtml(a)}</p>`).join("\n");
+function baueAnhangB(lh) {
+  const absaetze = T.ANHANG_B_ABSAETZE.map((a) =>
+    a.replace("<Datum aus data/lighthouse.json>", formatDatumKurz(lh.stand))
+  )
+    .map((a) => `<p>${escapeHtml(a)}</p>`)
+    .join("\n");
   return `<section class="kapitel kapitel--fortlaufend">
   <div class="kapitelnummer">Anhang B</div>
   <h2>${escapeHtml(T.ANHANG_NAMEN[1])}</h2>
@@ -878,17 +962,74 @@ function baueAnhangB() {
 </section>`;
 }
 
-function baueAnhangC(sitemapSeiten) {
-  const zeilen = sitemapSeiten.map((s) => [escapeHtml(s.pfad), escapeHtml(s.titel)]);
-  const table = tabelleZweispaltigVerbunden({
+// P18 Anhang C: kurze Tabelle der Hülle (Worksheets START, MENU, FOOTER aus
+// data/appack-*.json, ohne _hinweis – siehe ANHANG_D_QUELLEN). SIDEBAR bleibt
+// außen vor (laut data/appack-sidebar.json ungenutzt), APP_COLOR ebenso (kein
+// CMS-Worksheet, sondern app-color.css des Workspace).
+function formatWert(wert) {
+  if (wert === true) return "ja";
+  if (wert === false) return "nein";
+  if (wert === null || wert === undefined || wert === "") return "–";
+  return String(wert).replaceAll("<br>\n", ", ");
+}
+
+function baueHuelleZeilen(daten) {
+  const zeilen = [];
+  const { _hinweis: _s, ...startFelder } = daten.appackStart;
+  for (const [feld, wert] of Object.entries(startFelder)) {
+    zeilen.push(["START", feld, formatWert(wert)]);
+  }
+  daten.appackMenu.forEach((eintrag, i) => {
+    zeilen.push([
+      "MENU",
+      `Menüpunkt ${i + 1}`,
+      `${eintrag.menuTitle} → ${eintrag.menuLink}${eintrag.menuFullscreen ? " (Vollbild)" : ""}`,
+    ]);
+  });
+  const { _hinweis: _f, ...footerFelder } = daten.appackFooter;
+  for (const [feld, wert] of Object.entries(footerFelder)) {
+    zeilen.push(["FOOTER", feld, formatWert(wert)]);
+  }
+  return zeilen;
+}
+
+function baueAnhangC(daten, sitemapSeiten, seite404Titel) {
+  const huelleZeilen = baueHuelleZeilen(daten).map((z) => z.map((c) => escapeHtml(c)));
+  const huelleTabelle = tabelle({ kopf: ["Worksheet", "Feld", "Wert"], zeilen: huelleZeilen, klasse: "tabelle--klein tabelle--anhangC" });
+
+  // 36 Inhaltsseiten: alle Workspace-Seiten außer der Gestaltungsreferenz
+  // styleguide.html (siehe K7_BLOCK_B: „36 Inhaltsseiten“).
+  const wsSeiten = sitemapSeiten.filter(
+    (s) => s.pfad.startsWith("/ws/") && s.pfad !== "/ws/styleguide.html"
+  );
+  const wsZeilen = wsSeiten.map((s) => [escapeHtml(s.pfad), escapeHtml(s.titel)]);
+  const wsTabelle = tabelleZweispaltigVerbunden({
     kopf: ["Pfad", "Titel"],
-    zeilen,
+    zeilen: wsZeilen,
     klasse: "tabelle--klein tabelle--anhangC",
   });
+
+  // Drei Begleitseiten: /app/, /vorher-nachher/ (aus der Sitemap) und 404.html
+  // (eigene Vorlage begleit.html, aber nicht in der Sitemap – siehe
+  // tools/build.mjs).
+  const appSeite = sitemapSeiten.find((s) => s.pfad === "/app/");
+  const vorherNachherSeite = sitemapSeiten.find((s) => s.pfad === "/vorher-nachher/");
+  const begleitZeilen = [
+    [appSeite.pfad, appSeite.titel],
+    [vorherNachherSeite.pfad, vorherNachherSeite.titel],
+    ["/404.html", seite404Titel],
+  ].map(([pfad, titel]) => [escapeHtml(pfad), escapeHtml(titel)]);
+  const begleitTabelle = tabelle({ kopf: ["Pfad", "Titel"], zeilen: begleitZeilen, klasse: "tabelle--klein tabelle--anhangC" });
+
   return `<section class="kapitel">
   <div class="kapitelnummer">Anhang C</div>
   <h2>${escapeHtml(T.ANHANG_NAMEN[2])}</h2>
-  ${table}
+  <h3>Hülle</h3>
+  ${huelleTabelle}
+  <h3>Workspace-Seiten</h3>
+  ${wsTabelle}
+  <h3>Begleitseiten</h3>
+  ${begleitTabelle}
 </section>`;
 }
 
@@ -906,16 +1047,14 @@ function baueAnhangD() {
 
 // ---------- Hauptinhalt (alles außer Titelseite) ----------
 
-async function baueInhaltHtml(daten, sitemapSeiten) {
+async function baueInhaltHtml(daten, sitemapSeiten, seite404Titel) {
   const lh = daten.lighthouse;
-  const startseite = lh.seiten.find((s) => s.url === "/");
-  const lcpStartSekunden = formatSekunden(startseite.lcp_ms);
 
   const teile = [
-    baueBlickAbschnitt(lh, lcpStartSekunden),
+    baueBlickAbschnitt(),
     baueKapitel1(),
     baueKapitel2(),
-    baueKapitel3(lh, lcpStartSekunden),
+    baueKapitel3(lh),
     baueKapitel4(),
     baueKapitel5(),
     baueKapitel6(),
@@ -923,8 +1062,8 @@ async function baueInhaltHtml(daten, sitemapSeiten) {
     baueKapitel8(),
     await baueKapitel9(),
     baueAnhangA(lh),
-    baueAnhangB(),
-    baueAnhangC(sitemapSeiten),
+    baueAnhangB(lh),
+    baueAnhangC(daten, sitemapSeiten, seite404Titel),
     baueAnhangD(),
   ];
 
@@ -961,7 +1100,7 @@ async function renderPdf(browser, htmlDateiPfad, ausgabePdf, { footer = false } 
     optionen.displayHeaderFooter = true;
     optionen.headerTemplate = `<span></span>`;
     optionen.footerTemplate = `<div style="width:100%; font-size:8pt; color:#5B6079; font-family:Arial, Helvetica, sans-serif; padding:0 18mm; display:flex; justify-content:space-between; -webkit-box-sizing:border-box; box-sizing:border-box;">
-      <span>Website-Vergleich · FFV Sportfreunde 04 · 14. September 2026</span>
+      <span>Website-Vergleich · FFV Sportfreunde 04 · 15. September 2026</span>
       <span>Seite <span class="pageNumber"></span> von <span class="totalPages"></span></span>
     </div>`;
   } else {
@@ -1003,11 +1142,14 @@ async function main() {
   console.log("Vorhandene Vorher/Nachher-Bilder kopieren …");
   kopiereVorhandeneBilder();
 
+  console.log("Lokalen Server starten, falls nötig …");
+  const serverProc = await starteServerFallsNoetig();
+
   console.log("Browser starten (puppeteer-core, lokales Chrome) …");
   const browser = await puppeteer.launch({ executablePath: CHROME, headless: true });
 
   try {
-    console.log("Neue Screenshots der öffentlichen Prototyp-Adresse aufnehmen …");
+    console.log("Neue Screenshots aus der Hülle und den Begleitseiten des lokalen Servers aufnehmen …");
     await nimmNeueScreenshotsAuf(browser);
 
     console.log("Handy-Bilder auf 390 : 844, Rechner-Bilder auf 16 : 10 beschneiden (von oben) …");
@@ -1017,8 +1159,9 @@ async function main() {
     verkleinereAlleBilder();
 
     console.log("HTML bauen …");
+    const seite404Titel = leseTitel404();
     const titelHtml = await baueTitelHtml();
-    const inhaltHtml = await baueInhaltHtml(daten, sitemapSeiten);
+    const inhaltHtml = await baueInhaltHtml(daten, sitemapSeiten, seite404Titel);
 
     const titelHtmlPfad = path.join(CACHE, "titelseite.html");
     const inhaltHtmlPfad = path.join(CACHE, "vergleich.html");
@@ -1046,6 +1189,7 @@ async function main() {
     console.log(`\nFertig. PDF: ${PDF_PFAD} (${(groesse / 1024 / 1024).toFixed(2)} MB)`);
   } finally {
     await browser.close();
+    if (serverProc) serverProc.kill();
   }
 }
 
