@@ -6,15 +6,15 @@ auf sportfreunde04.de oder in appack übernommen.
 
 ## Zweck
 
-Der Prototyp zeigt seit P18 die **appack-Fassung**: dieselbe appack-Vorlage
+Der Prototyp zeigt seit P15–P17 (Workspace-Seiten P15, Hülle P16, Begleitseiten P17) die **appack-Fassung**: dieselbe appack-Vorlage
 „Microwebseite“ wie die Live-Seite (Hülle, nachgebildet in `docs/index.html`),
 aber so gut gebaut, wie die Plattform es zulässt – sechs Menüpunkte,
 Inhalt in voller Breite, alle Inhalte des Vereins als Workspace-Seiten
 (`docs/ws/`), dazu zwei Begleitseiten (`/vorher-nachher/`, `/app/`) als
 Begleitmaterial für den Vorstand. Der Tag `zielbild-2026-09-14` markiert die
-frühere Fassung (Stand vor P18): dort war das Zielbild noch eine eigenständige
+frühere Fassung (Stand P14d, vor P15): dort war das Zielbild noch eine eigenständige
 Website ohne appack-Hülle, mit eigener Adresse je Seite – diese Fassung wurde
-mit P18 durch die appack-Fassung ersetzt, weil eine eigenständige Website
+ab P15 durch die appack-Fassung ersetzt, weil eine eigenständige Website
 ohne den Anbieter nicht das ist, was appack tatsächlich ausliefert.
 
 Die Inhalte stammen von der Live-Seite sportfreunde04.de sowie aus den öffentlichen
