@@ -4,22 +4,18 @@
 // Prüft pro Seite aus docs/sitemap.xml: Layout (kein horizontales Scrollen),
 // Semantik (lang, genau eine h1), Meta (title, description, og:*), Tippziele,
 // axe-core (Kontrast, Alt-Texte, Labels, Landmarken), interne Links, Bildgrößen.
-// P1 zusätzlich: Burger-Menü (öffnen, Fokus, ESC schließt), Header/Footer-Links
-// mit href oder .nav__bald, aria-current="page" genau einmal im Header.
-// P9 zusätzlich: App-Modus (?ansicht=app) bei 390px für "/", "/mannschaften/d2/"
-// und "/spielplan/" – Tab-Leiste sichtbar, fünf Tabs ≥ 44px hoch, kein
-// horizontales Scrollen, genau ein aria-current in der Tab-Leiste, alle
-// internen Links mit ansicht=app.
-// P11 zusätzlich: "nav__bald" im gebauten HTML nur noch auf /styleguide/
-// erlaubt (Plan-Abschnitt A1); Bildgrenze 200.000 Byte statt 200 KiB
-// (Plan-Abschnitt B3).
+// P11 zusätzlich: Bildgrenze 200.000 Byte statt 200 KiB (Plan-Abschnitt B3).
+// P15: Inhaltsseiten sind Workspace-Seiten (docs/ws/<name>.html) ohne Kopf,
+// Menü und Fußbereich (appack liefert die Hülle, siehe P16) – die früheren
+// P1/P9-Prüfungen (Burger-Menü, Header/Footer-Links, aria-current im Header,
+// App-Modus) entfallen deshalb. "nav__bald" im gebauten HTML nur noch auf
+// /ws/styleguide.html erlaubt (Plan-Abschnitt A1, P11).
 
 import puppeteer from "puppeteer-core";
 import { readFileSync, existsSync, statSync, mkdirSync, writeFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
-import { HAUPT } from "../src/vorlagen/navigation.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = path.join(ROOT, "docs");
@@ -30,11 +26,9 @@ const PORT = 4173;
 const BASIS = `http://localhost:${PORT}`;
 const BASIS_URL = "https://justolgay.github.io/speuzer-website-prototyp/";
 
-const BREITEN = [320, 360, 390, 768, 1024, 1280, 1440, 1920]; // P13, Schritt 3a: 1280 ergänzt (App-Ansicht /app/, Befund 2)
-// P9, Plan-Abschnitt B3: App-Modus (?ansicht=app) zusätzlich bei 390px prüfen
-// – nur für diese drei Seiten (Startseite, eine Team- und die
-// Spielplan-Seite).
-const APP_MODUS_SEITEN = ["/", "/mannschaften/d2/", "/spielplan/"];
+// P15: 576 ergänzt (40vw bei 1440px, der schmale appack-Rahmen für
+// Impressum/Datenschutz).
+const BREITEN = [320, 360, 390, 576, 768, 1024, 1280, 1440, 1920];
 const AXE_REGELN = [
   "color-contrast", "image-alt", "label", "link-name",
   "button-name", "landmark-one-main", "page-has-heading-one",
@@ -72,9 +66,12 @@ function leseSitemapPfade() {
   });
 }
 
+// P15: Workspace-Seiten liegen flach als Dateien in docs/ws/ (kein
+// index.html mehr in einem Unterverzeichnis je Seite) – interne Verweise
+// zeigen jetzt auf ".html"-Dateien in docs/ws/ oder auf "../assets/…".
+// aktuellerSeitenPfad z. B. "/ws/mannschaften.html" -> Verzeichnis docs/ws/.
 function pruefeDateiExistiertFuerLink(aktuellerSeitenPfad, href) {
-  // aktuellerSeitenPfad z.B. "/styleguide/" -> Verzeichnis docs/styleguide/
-  const aktuellesVerzeichnis = path.join(DOCS, aktuellerSeitenPfad.replace(/^\//, ""));
+  const aktuellesVerzeichnis = path.join(DOCS, path.dirname(aktuellerSeitenPfad.replace(/^\//, "")));
   let ziel;
   if (href.startsWith("/")) {
     ziel = path.join(DOCS, href.replace(/^\//, ""));
@@ -82,9 +79,6 @@ function pruefeDateiExistiertFuerLink(aktuellerSeitenPfad, href) {
     ziel = path.join(aktuellesVerzeichnis, href);
   }
   ziel = ziel.split("?")[0].split("#")[0];
-  if (existsSync(ziel) && statSync(ziel).isDirectory()) {
-    ziel = path.join(ziel, "index.html");
-  }
   return existsSync(ziel);
 }
 
@@ -102,10 +96,14 @@ function sammleBilddateien(dir, treffer = []) {
 }
 
 // --- P13, Schritt 3b: 404-Seite (Befund 1) – docs/404.html darf keine
-// relative Referenz "./…" mehr enthalten; site.css, nav.js und mindestens
-// ein Wappen-Bild müssen absolut (BASIS_URL) eingebunden sein. Liest die
-// Datei direkt, ohne den lokalen Server/Puppeteer (404.html steht nicht in
-// der sitemap.xml und wird sonst nicht als eigene Seite geprüft). ---
+// relative Referenz "./…" mehr enthalten; site.css muss absolut (BASIS_URL)
+// eingebunden sein. Liest die Datei direkt, ohne den lokalen
+// Server/Puppeteer (404.html steht nicht in der sitemap.xml und wird sonst
+// nicht als eigene Seite geprüft).
+// P15: kein nav.js mehr (Datei gelöscht) – die Prüfung darauf entfällt. Die
+// Workspace-Vorlage (workspace.html) bindet kein Wappen-Bild mehr ein (kein
+// Kopf-/Fußbereich) – die Wappen-Prüfung ist daher optional: nur wenn ein
+// Wappen-Bild gefunden wird, muss es absolut sein. ---
 function pruefe404Seite() {
   const fehler = [];
   const pfad404 = path.join(DOCS, "404.html");
@@ -117,17 +115,16 @@ function pruefe404Seite() {
   if (html.includes('="./')) {
     fehler.push(`404.html enthält noch relative Referenzen ('="./' gefunden)`);
   }
-  const pruefeAbsolut = (bezeichnung, regex) => {
+  const pruefeAbsolut = (bezeichnung, regex, { optional = false } = {}) => {
     const treffer = html.match(regex);
     if (!treffer) {
-      fehler.push(`404.html: ${bezeichnung} nicht gefunden`);
+      if (!optional) fehler.push(`404.html: ${bezeichnung} nicht gefunden`);
     } else if (!treffer[1].startsWith(BASIS_URL)) {
       fehler.push(`404.html: ${bezeichnung} ist nicht absolut ('${treffer[1]}')`);
     }
   };
   pruefeAbsolut("site.css", /href="([^"]*site\.css)"/);
-  pruefeAbsolut("nav.js", /src="([^"]*nav\.js)"/);
-  pruefeAbsolut("Wappen-Bild", /src="([^"]*wappen[^"]*\.(?:svg|png))"/);
+  pruefeAbsolut("Wappen-Bild", /src="([^"]*wappen[^"]*\.(?:svg|png))"/, { optional: true });
   return fehler;
 }
 
@@ -264,151 +261,22 @@ async function pruefeSeite(browser, seitenPfad, axeSkript, bericht) {
     }
   }
 
-  // --- P11, Plan-Abschnitt A1: "nav__bald" darf im gebauten HTML nur noch auf
-  // /styleguide/ vorkommen (dort nur als Text in einem <code>-Element, das
-  // die Konvention beschreibt) – alle anderen Seiten haben inzwischen echte
-  // Ziel-Seiten für jeden ehemaligen Platzhalter. ---
-  if (seitenPfad !== "/styleguide/") {
+  // --- P11, Plan-Abschnitt A1 (P15: Ziel-Seite jetzt /ws/styleguide.html):
+  // "nav__bald" darf im gebauten HTML nur noch auf der Styleguide-Seite
+  // vorkommen (dort nur als Text in einem <code>-Element, das die Konvention
+  // beschreibt) – alle anderen Seiten haben inzwischen echte Ziel-Seiten für
+  // jeden ehemaligen Platzhalter. ---
+  if (seitenPfad !== "/ws/styleguide.html") {
     const enthaeltNavBald = await page.evaluate(() => document.documentElement.outerHTML.includes("nav__bald"));
     if (enthaeltNavBald) {
-      ergebnisSeite.fehler.push(`"nav__bald" im gebauten HTML gefunden (erlaubt nur auf /styleguide/)`);
+      ergebnisSeite.fehler.push(`"nav__bald" im gebauten HTML gefunden (erlaubt nur auf /ws/styleguide.html)`);
     }
   }
 
-  // --- Header/Footer: jeder <a> hat href oder trägt .nav__bald ---
-  const kaputteNavLinks = await page.evaluate(() => {
-    const treffer = [];
-    for (const el of document.querySelectorAll("header a, footer a")) {
-      const hatHref = !!el.getAttribute("href");
-      const istBald = el.classList.contains("nav__bald");
-      if (!hatHref && !istBald) {
-        treffer.push((el.textContent || "").trim().slice(0, 40));
-      }
-    }
-    return treffer;
-  });
-  for (const text of kaputteNavLinks) {
-    ergebnisSeite.fehler.push(`Header/Footer: <a> ohne href und ohne .nav__bald: "${text}"`);
-  }
-
-  // --- aria-current="page" genau einmal im Header, sofern die Seite in HAUPT vorkommt ---
-  const inHauptnav = HAUPT.some((eintrag) => eintrag.url === seitenPfad);
-  if (inHauptnav) {
-    const anzahlAriaCurrent = await page.evaluate(() => {
-      const header = document.querySelector("header");
-      return header ? header.querySelectorAll('[aria-current="page"]').length : 0;
-    });
-    if (anzahlAriaCurrent !== 1) {
-      ergebnisSeite.fehler.push(
-        `aria-current="page" im Header: ${anzahlAriaCurrent}×, erwartet genau 1× (Seite ist Teil von HAUPT)`
-      );
-    }
-  }
-
-  // --- Burger-Menü bei 390px: öffnen, Fokus im Panel, ESC schließt ---
-  await page.setViewport({ width: 390, height: 844 });
-  const hatBurger = (await page.$(".kopf__burger")) !== null;
-  if (!hatBurger) {
-    ergebnisSeite.fehler.push("Burger-Menü: .kopf__burger nicht gefunden");
-  } else {
-    await page.click(".kopf__burger");
-    await warte(300); // Übergang 240ms abwarten
-    const nachOeffnen = await page.evaluate(() => {
-      const nav = document.getElementById("hauptmenue");
-      if (!nav) return { vorhanden: false };
-      const stil = getComputedStyle(nav);
-      const aktiv = document.activeElement;
-      return {
-        vorhanden: true,
-        istOffen: nav.classList.contains("ist-offen"),
-        sichtbar: stil.visibility !== "hidden" && stil.display !== "none",
-        fokusImPanel: !!aktiv && aktiv !== document.body && nav.contains(aktiv),
-      };
-    });
-    if (!nachOeffnen.vorhanden) {
-      ergebnisSeite.fehler.push("Burger-Menü: #hauptmenue nicht im DOM gefunden");
-    } else {
-      if (!nachOeffnen.istOffen || !nachOeffnen.sichtbar) {
-        ergebnisSeite.fehler.push("Burger-Menü: #hauptmenue öffnet sich nach Klick auf .kopf__burger nicht sichtbar");
-      }
-      if (!nachOeffnen.fokusImPanel) {
-        ergebnisSeite.fehler.push("Burger-Menü: Fokus liegt nach dem Öffnen nicht innerhalb von #hauptmenue");
-      }
-
-      await page.keyboard.press("Escape");
-      await warte(300);
-      const nachEsc = await page.evaluate(() => {
-        const nav = document.getElementById("hauptmenue");
-        return !nav || !nav.classList.contains("ist-offen");
-      });
-      if (!nachEsc) {
-        ergebnisSeite.fehler.push("Burger-Menü: ESC schließt #hauptmenue nicht");
-      }
-    }
-  }
-  await page.setViewport({ width: 1440, height: 900 });
-
-  // --- App-Modus (?ansicht=app, P9 Plan-Abschnitt B3): Tab-Leiste, Tippziele,
-  // kein horizontales Scrollen, genau ein aria-current, interne Links mit
-  // ansicht=app – bei 390px, nur für die drei genannten Seiten ---
-  if (APP_MODUS_SEITEN.includes(seitenPfad)) {
-    await page.goto(url + "?ansicht=app", { waitUntil: "networkidle0", timeout: 30000 });
-    await page.setViewport({ width: 390, height: 844 });
-
-    const appErgebnis = await page.evaluate(() => {
-      const tabbar = document.querySelector(".tabbar");
-      const stilTabbar = tabbar ? getComputedStyle(tabbar) : null;
-      const tabbarSichtbar = !!tabbar && stilTabbar.display !== "none" && stilTabbar.visibility !== "hidden";
-      const tabs = tabbar ? [...tabbar.querySelectorAll(".tabbar__tab")] : [];
-      const tabHoehen = tabs.map((t) => t.getBoundingClientRect().height);
-      const anzahlAriaCurrent = tabbar ? tabbar.querySelectorAll('[aria-current="page"]').length : 0;
-      const links = [...document.querySelectorAll("a[href]")].map((a) => a.getAttribute("href"));
-      return {
-        tabbarSichtbar,
-        anzahlTabs: tabs.length,
-        tabHoehen,
-        anzahlAriaCurrent,
-        scrollWidth: document.documentElement.scrollWidth,
-        innerWidth: window.innerWidth,
-        links,
-      };
-    });
-
-    if (!appErgebnis.tabbarSichtbar) {
-      ergebnisSeite.fehler.push("App-Modus: Tab-Leiste (.tabbar) bei ?ansicht=app nicht sichtbar");
-    }
-    if (appErgebnis.anzahlTabs !== 5) {
-      ergebnisSeite.fehler.push(`App-Modus: ${appErgebnis.anzahlTabs} Tabs in der Tab-Leiste gefunden, erwartet 5`);
-    }
-    appErgebnis.tabHoehen.forEach((hoehe, i) => {
-      if (hoehe < 44) {
-        ergebnisSeite.fehler.push(`App-Modus: Tab ${i + 1} ist ${Math.round(hoehe)}px hoch, erwartet ≥ 44px`);
-      }
-    });
-    if (appErgebnis.scrollWidth > appErgebnis.innerWidth + 1) {
-      ergebnisSeite.fehler.push(
-        `App-Modus: horizontales Scrollen bei 390px (scrollWidth ${appErgebnis.scrollWidth} > innerWidth ${appErgebnis.innerWidth})`
-      );
-    }
-    if (appErgebnis.anzahlAriaCurrent !== 1) {
-      ergebnisSeite.fehler.push(
-        `App-Modus: aria-current="page" in der Tab-Leiste ${appErgebnis.anzahlAriaCurrent}×, erwartet genau 1×`
-      );
-    }
-    for (const href of appErgebnis.links) {
-      if (!href) continue;
-      if (
-        href.startsWith("http://") || href.startsWith("https://") ||
-        href.startsWith("mailto:") || href.startsWith("tel:") ||
-        href.startsWith("#")
-      ) continue;
-      if (!href.includes("ansicht=app")) {
-        ergebnisSeite.fehler.push(`App-Modus: interner Link ohne ansicht=app: '${href}'`);
-      }
-    }
-
-    await page.setViewport({ width: 1440, height: 900 });
-  }
+  // P15: Kopfzeile, Hauptnavigation und Fußbereich entfallen auf den
+  // Workspace-Seiten (appack liefert die Hülle, siehe P16) – damit entfallen
+  // auch die Prüfungen auf Burger-Menü, Header/Footer-Links, aria-current im
+  // Header sowie den App-Modus (?ansicht=app, Tab-Leiste).
 
   await page.close();
   ergebnisSeite.bestanden = ergebnisSeite.fehler.length === 0;

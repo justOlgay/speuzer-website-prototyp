@@ -85,9 +85,13 @@ function leseSitemapPfade() {
   });
 }
 
+// P15: Sitemap-Pfade sind jetzt "/ws/<wsName>.html" – Dateiname direkt aus
+// wsName ableiten statt aus den (jetzt nicht mehr vorhandenen) Segmenten der
+// alten, verschachtelten URL.
 function pfadname(seitenPfad) {
-  const bereinigt = seitenPfad.replace(/^\//, "").replace(/\/$/, "").replaceAll("/", "-");
-  return bereinigt || "start";
+  const treffer = seitenPfad.match(/^\/ws\/(.+)\.html$/);
+  if (treffer) return treffer[1];
+  return seitenPfad.replace(/^\//, "").replace(/\/$/, "").replaceAll("/", "-") || "start";
 }
 
 // ---------- Ein Lighthouse-Lauf ----------

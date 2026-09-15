@@ -6,6 +6,7 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync, statSy
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
+import { datumLang } from "../src/vorlagen/hilfen.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = path.join(ROOT, "src");
@@ -83,6 +84,16 @@ function pfadZurWurzel(url) {
   return tiefe === 0 ? "./" : "../".repeat(tiefe);
 }
 
+// ---------- Workspace-Dateiname (P15) ----------
+// Baut aus einer normalisierten URL (führender und abschließender
+// Schrägstrich, siehe normUrl()) den Dateinamen einer Workspace-Seite: die
+// Segmente mit "-" verbunden. "/mannschaften/" -> "mannschaften",
+// "/mannschaften/d2/" -> "mannschaften-d2", "/verein/vorstand/" ->
+// "verein-vorstand". Die Ausgabedatei liegt unter docs/ws/<wsName>.html.
+function wsName(url) {
+  return url.split("/").filter(Boolean).join("-");
+}
+
 function escapeHtml(text) {
   return String(text ?? "")
     .replaceAll("&", "&amp;")
@@ -110,6 +121,59 @@ function fuelleVorlage(basis, werte) {
     html = html.replaceAll(`{{${schluessel}}}`, wert ?? "");
   }
   return html;
+}
+
+// ---------- Link- und Pfad-Umschreibung für Workspace-Seiten (P15) ----------
+// Die Seitenmodule bauen ihre Verweise weiterhin relativ zur alten,
+// verschachtelten URL (pfad = pfadZurWurzel(url), z. B. "../../assets/…" oder
+// "${pfad}spielplan/d2/") – diese Funktion schreibt sie nach dem Rendern auf
+// die flache Workspace-Struktur (docs/ws/<wsName>.html) um. Betroffen sind die
+// Attribute href/src/poster/data-src sowie jeder Eintrag in srcset, sofern der
+// Wert mit "./" oder "../" beginnt (alles andere – http(s):, mailto:, tel:,
+// "#…", data:, webcal: – bleibt unangetastet, weil es nie mit "./"/"../"
+// beginnt). Der Wert wird gegen die alte Seiten-URL aufgelöst: führt er auf
+// eine andere Seiten-URL aus `seitenUrls`, wird er zu "<wsName>.html" plus
+// ?…/#…; führt er auf "/assets/…", wird er zu "../assets/…"; alles andere ist
+// ein verwaister Verweis und bricht den Bau ab (exit 1).
+function zielFuerWorkspaceVerweis(wert, aktuelleUrl, seitenUrls) {
+  const aufgeloest = new URL(wert, "https://x.invalid" + aktuelleUrl);
+  const pathname = aufgeloest.pathname;
+  const rest = aufgeloest.search + aufgeloest.hash;
+  const pathnameMitSchraegstrich = pathname.endsWith("/") ? pathname : pathname + "/";
+
+  if (seitenUrls.has(pathnameMitSchraegstrich)) {
+    return wsName(pathnameMitSchraegstrich) + ".html" + rest;
+  }
+  if (pathname.startsWith("/assets/")) {
+    return "../" + pathname.slice(1) + rest;
+  }
+
+  console.error(`Verweis ohne Ziel in ${aktuelleUrl}: ${wert}`);
+  process.exit(1);
+  return wert; // unerreichbar, nur damit die Funktion einen Rückgabetyp hat
+}
+
+function relativiereFuerWorkspace(html, url, seitenUrls) {
+  let ergebnis = html.replace(
+    /(href|src|poster|data-src)="(\.\.?\/[^"]*)"/g,
+    (_treffer, attribut, wert) => `${attribut}="${zielFuerWorkspaceVerweis(wert, url, seitenUrls)}"`
+  );
+
+  ergebnis = ergebnis.replace(/srcset="([^"]*)"/g, (_treffer, wert) => {
+    const neu = wert
+      .split(",")
+      .map((teil) => {
+        const t = teil.trim();
+        if (!/^\.\.?\//.test(t)) return t;
+        const [pfadTeil, ...deskriptor] = t.split(/\s+/);
+        const neuerPfad = zielFuerWorkspaceVerweis(pfadTeil, url, seitenUrls);
+        return deskriptor.length ? `${neuerPfad} ${deskriptor.join(" ")}` : neuerPfad;
+      })
+      .join(", ");
+    return `srcset="${neu}"`;
+  });
+
+  return ergebnis;
 }
 
 // ---------- OG-Standardbild erzeugen (nur wenn nötig) ----------
@@ -142,16 +206,17 @@ function stelleOgStandardbildSicher() {
 }
 
 // ---------- CSS-Bündel (P11, Plan-Abschnitt B2) ----------
-// tokens.css + fonts.css + base.css + komponenten.css + app-modus.css in
-// dieser Reihenfolge zu docs/assets/css/site.css zusammenfügen und einfach
-// minifizieren (Kommentare entfernen, Zeilenumbrüche/Mehrfach-Leerzeichen
-// zusammenziehen, Leerzeichen um { } : ; , entfernen – keine
-// Wert-Umschreibung). basis.html lädt nur noch site.css als render-blockendes
-// Stylesheet; die Einzeldateien liegen unverändert weiter unter
-// docs/assets/css/ (kopiereAssets() kopiert den ganzen assets/-Ordner), der
-// Styleguide verweist weiterhin auf sie als Quelltext. url("../fonts/…")
+// tokens.css + fonts.css + base.css + komponenten.css in dieser Reihenfolge
+// zu docs/assets/css/site.css zusammenfügen und einfach minifizieren
+// (Kommentare entfernen, Zeilenumbrüche/Mehrfach-Leerzeichen zusammenziehen,
+// Leerzeichen um { } : ; , entfernen – keine Wert-Umschreibung).
+// workspace.html (P15, ersetzt basis.html) lädt nur noch site.css als
+// render-blockendes Stylesheet; die Einzeldateien liegen unverändert weiter
+// unter docs/assets/css/ (kopiereAssets() kopiert den ganzen assets/-Ordner),
+// der Styleguide verweist weiterhin auf sie als Quelltext. url("../fonts/…")
 // bleibt gültig, weil site.css im selben Ordner liegt wie die Einzeldateien.
-const CSS_BUENDEL_DATEIEN = ["tokens.css", "fonts.css", "base.css", "komponenten.css", "app-modus.css"];
+// P15: "app-modus.css" entfällt (Datei gelöscht, siehe Abschlussbericht).
+const CSS_BUENDEL_DATEIEN = ["tokens.css", "fonts.css", "base.css", "komponenten.css"];
 
 function minifiziereCss(css) {
   return css
@@ -168,6 +233,19 @@ function baueCssBuendel() {
   const zielDir = path.join(DOCS, "assets", "css");
   mkdirSync(zielDir, { recursive: true });
   writeFileSync(path.join(zielDir, "site.css"), teile.join("\n"), "utf8");
+}
+
+// ---------- docs/ bereinigen (P15) ----------
+// Vor dem Schreiben alles in docs/ außer assets/ (wird von kopiereAssets()
+// ohnehin neu geschrieben) und .nojekyll löschen – so bleiben keine alten
+// Ausgabeverzeichnisse (docs/mannschaften/, docs/news/, …) aus früheren
+// Bau-Läufen zurück.
+function bereinigeDocs() {
+  if (!existsSync(DOCS)) return;
+  for (const eintrag of readdirSync(DOCS)) {
+    if (eintrag === "assets" || eintrag === ".nojekyll") continue;
+    rmSync(path.join(DOCS, eintrag), { recursive: true, force: true });
+  }
 }
 
 // ---------- Assets kopieren ----------
@@ -199,20 +277,27 @@ async function main() {
 
   stelleOgStandardbildSicher();
 
-  const basisVorlage = readFileSync(path.join(SRC, "vorlagen", "basis.html"), "utf8");
-  const { header } = await import(pathToFileURL(path.join(SRC, "vorlagen", "header.mjs")).href);
-  const { footer } = await import(pathToFileURL(path.join(SRC, "vorlagen", "footer.mjs")).href);
+  // P15: appack-Fassung – Inhaltsseiten sind eigenständige Workspace-Seiten
+  // (docs/ws/<wsName>.html) ohne Kopf, Menü und Fußbereich; die Hülle kommt
+  // in P16 als docs/index.html. workspace.html ersetzt basis.html, es gibt
+  // kein header()/footer()-Modul mehr.
+  const workspaceVorlage = readFileSync(path.join(SRC, "vorlagen", "workspace.html"), "utf8");
+  const standLang = datumLang(daten.stand);
 
   const seiten = await sammleSeiten(daten);
   const seitenUrls = new Set(seiten.map((seite) => normUrl(seite.url)));
 
+  // docs/ bereinigen, bevor neu geschrieben wird (Schritt 9.2).
+  bereinigeDocs();
   mkdirSync(DOCS, { recursive: true });
-  const geschrieben = [];
+  mkdirSync(path.join(DOCS, "ws"), { recursive: true });
+
+  const geschrieben = []; // { url (alt), name (wsName), title } je Workspace-Seite
 
   for (const seite of seiten) {
     const url = normUrl(seite.url);
-    const pfad = pfadZurWurzel(url);
-    const canonical = BASIS_URL.replace(/\/$/, "") + url;
+    const name = wsName(url);
+    const canonical = `${BASIS_URL.replace(/\/$/, "")}/ws/${name}.html`;
     const ogImageAbs = seite.ogImage
       ? (seite.ogImage.startsWith("http") ? seite.ogImage : BASIS_URL.replace(/\/$/, "") + "/" + seite.ogImage.replace(/^\//, ""))
       : BASIS_URL + "assets/og/standard.png";
@@ -220,26 +305,77 @@ async function main() {
     const titelVoll = `${seite.title} – ${VEREINSNAME}`;
     const og = baueOgBlock({ title: seite.title, description: seite.description, canonical, ogImageAbs, ogType: seite.ogType });
 
-    const html = fuelleVorlage(basisVorlage, {
-      lang: "de",
+    // Schritt 3: die vom Seitenmodul relativ zur alten (verschachtelten) URL
+    // gebauten Verweise (pfad = pfadZurWurzel(url)) auf die flache
+    // Workspace-Struktur umschreiben – nur der Inhalt, nicht die Vorlage: die
+    // Kopf-Referenzen der Vorlage (favicon, Preloads, site.css) sind bereits
+    // korrekt fest auf "../assets/…" gesetzt (siehe workspace.html) und
+    // dürfen nicht nochmals gegen die alte URL aufgelöst werden.
+    const inhaltUmgeschrieben = relativiereFuerWorkspace(seite.inhalt, url, seitenUrls);
+
+    const html = fuelleVorlage(workspaceVorlage, {
       title: escapeHtml(titelVoll),
       description: escapeHtml(seite.description),
       canonical,
       og,
-      pfad,
-      header: header({ pfad, daten, aktuelleUrl: url, seitenUrls }),
-      inhalt: seite.inhalt,
-      footer: footer({ pfad, daten, seitenUrls }),
+      inhalt: inhaltUmgeschrieben,
       bodyclass: seite.bodyclass ?? "",
+      stand: standLang,
     });
 
-    const zielDatei = path.join(DOCS, url.slice(1), "index.html");
-    mkdirSync(path.dirname(zielDatei), { recursive: true });
-    writeFileSync(zielDatei, html, "utf8");
-    geschrieben.push(url);
+    writeFileSync(path.join(DOCS, "ws", `${name}.html`), html, "utf8");
+    geschrieben.push({ url, name, title: seite.title });
   }
 
-  // 404-Seite (kein Verzeichnis, liegt direkt in docs/)
+  // docs/index.html – vorläufiger Platzhalter (Schritt 6): aus der
+  // Workspace-Vorlage gebaut, aber direkt in docs/ (Tiefe 0) statt in
+  // docs/ws/ – die Vorlage nutzt "../assets/…" (für docs/ws/*.html), hier
+  // deshalb auf "./assets/…" normalisiert. Nicht Teil der Sitemap (Schritt 7,
+  // die Hülle kommt erst in P16).
+  {
+    const title = "Prototyp – appack-Fassung im Umbau";
+    const lead =
+      "Die Hülle (Kopfleiste, Menü, Startbild, Fußbereich) folgt im nächsten Paket. Bis dahin sind die Inhaltsseiten hier direkt erreichbar.";
+    const canonical = BASIS_URL;
+    const og = baueOgBlock({ title, description: lead, canonical, ogImageAbs: BASIS_URL + "assets/og/standard.png" });
+
+    const seitenSortiert = geschrieben
+      .slice()
+      .sort((a, b) => a.title.localeCompare(b.title, "de"));
+    const listeHtml = seitenSortiert
+      .map((s) => `      <li><a href="ws/${s.name}.html">${escapeHtml(s.title)}</a></li>`)
+      .join("\n");
+
+    const inhalt = `<section class="abschnitt seitenkopf">
+  <div class="container">
+    <h1>appack-Fassung im Umbau</h1>
+    <p class="seitenkopf__lead">${escapeHtml(lead)}</p>
+  </div>
+</section>
+<section class="abschnitt">
+  <div class="container fluss">
+    <ul>
+${listeHtml}
+    </ul>
+  </div>
+</section>`;
+
+    let html = fuelleVorlage(workspaceVorlage, {
+      title: escapeHtml(title),
+      description: escapeHtml(lead),
+      canonical,
+      og,
+      inhalt,
+      bodyclass: "",
+      stand: standLang,
+    });
+    html = html.replaceAll("../assets/", "./assets/");
+
+    writeFileSync(path.join(DOCS, "index.html"), html, "utf8");
+  }
+
+  // 404-Seite (kein Verzeichnis, liegt direkt in docs/) – Schritt 6: jetzt aus
+  // der Workspace-Vorlage, ohne die sechs Einstiegskarten.
   {
     const pfad = "./";
     const canonical = BASIS_URL.replace(/\/$/, "") + "/404.html";
@@ -256,58 +392,30 @@ async function main() {
 <section class="abschnitt">
   <div class="container fluss">
     <p><a class="knopf" href="${pfad}">Zur Startseite</a></p>
-    <h2>Wohin möchtest du?</h2>
-    <div class="raster raster--3">
-    <a class="karte karte--link" href="${pfad}mannschaften/">
-      <span class="karte__titel">Mannschaften</span>
-      <span class="karte__meta">Training, Ansprechpartner, Spielplan je Team</span>
-    </a>
-    <a class="karte karte--link" href="${pfad}spielplan/">
-      <span class="karte__titel">Spielplan &amp; Tabellen</span>
-      <span class="karte__meta">Alle Spiele und Tabellen</span>
-    </a>
-    <a class="karte karte--link" href="${pfad}news/">
-      <span class="karte__titel">News</span>
-      <span class="karte__meta">Meldungen aus dem Verein</span>
-    </a>
-    <a class="karte karte--link" href="${pfad}verein/">
-      <span class="karte__titel">Verein</span>
-      <span class="karte__meta">Wer wir sind, Vorstand, Sponsoren</span>
-    </a>
-    <a class="karte karte--link" href="${pfad}mitglied-werden/">
-      <span class="karte__titel">Mitglied werden</span>
-      <span class="karte__meta">Beiträge, Ablauf, Antrag</span>
-    </a>
-    <a class="karte karte--link" href="${pfad}kontakt/">
-      <span class="karte__titel">Kontakt &amp; Anfahrt</span>
-      <span class="karte__meta">Adressen, Platz, Anfahrt</span>
-    </a>
-    </div>
   </div>
 </section>`;
-    let html = fuelleVorlage(basisVorlage, {
-      lang: "de",
+    let html = fuelleVorlage(workspaceVorlage, {
       title: escapeHtml(`${title} – ${VEREINSNAME}`),
       description: escapeHtml(description),
       canonical,
       og,
-      pfad,
-      header: header({ pfad, daten, aktuelleUrl: null, seitenUrls }),
       inhalt,
-      footer: footer({ pfad, daten, seitenUrls }),
       bodyclass: "",
+      stand: standLang,
     });
+
+    // Die Vorlage nutzt "../assets/…" (für docs/ws/*.html); 404.html liegt
+    // wie index.html direkt in docs/ – vor der Absolut-Umschreibung unten auf
+    // "./assets/…" normalisieren (Schritt 6).
+    html = html.replaceAll("../assets/", "./assets/");
 
     // Befund 1 (P13, Sichtprüfung): GitHub Pages liefert docs/404.html für
     // JEDEN nicht existierenden Pfad aus, auch verschachtelte (z. B.
-    // /gibt-es-nicht/x/). Die relativen "./"-Referenzen der Seite (aus
-    // pfadZurWurzel(), hier "./") lösen dann falsch relativ zum
-    // nicht-existierenden Verzeichnis auf. Deshalb hier – nur für 404.html,
-    // pfadZurWurzel/die allgemeine Pfadlogik bleibt unangetastet – jede
-    // href="./…", src="./…" sowie jeden srcset-Eintrag auf eine absolute
-    // BASIS_URL-Adresse umschreiben. <link rel="canonical"> ist bereits
-    // absolut, der Skip-Link href="#inhalt" beginnt nicht mit "./" und bleibt
-    // unverändert.
+    // /gibt-es-nicht/x/). Die relativen "./"-Referenzen der Seite lösen dann
+    // falsch relativ zum nicht-existierenden Verzeichnis auf. Deshalb hier –
+    // nur für 404.html – jede href="./…", src="./…" sowie jeden
+    // srcset-Eintrag auf eine absolute BASIS_URL-Adresse umschreiben. <link
+    // rel="canonical"> ist bereits absolut.
     html = html.replace(/(href|src)="\.\//g, `$1="${BASIS_URL}`);
     html = html.replace(/srcset="([^"]*)"/g, (_treffer, wert) => {
       const neu = wert
@@ -338,16 +446,18 @@ async function main() {
     "utf8"
   );
 
+  // Schritt 7: Sitemap listet alle ws/<name>.html (absolute BASIS_URL);
+  // docs/index.html ist nicht Teil der Sitemap (kommt mit P16).
   const sitemapEintraege = geschrieben
-    .map((url) => `  <url><loc>${BASIS_URL.replace(/\/$/, "") + url}</loc></url>`)
+    .map((s) => `  <url><loc>${BASIS_URL.replace(/\/$/, "")}/ws/${s.name}.html</loc></url>`)
     .join("\n");
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEintraege}\n</urlset>\n`;
   writeFileSync(path.join(DOCS, "sitemap.xml"), sitemap, "utf8");
 
   const dauer = ((Date.now() - startZeit) / 1000).toFixed(2);
-  console.log(`Gebaute Seiten (${geschrieben.length}):`);
-  for (const url of geschrieben) console.log(`  ${url}`);
-  console.log(`404.html, robots.txt, sitemap.xml, .nojekyll geschrieben.`);
+  console.log(`Gebaute Workspace-Seiten (${geschrieben.length}):`);
+  for (const s of geschrieben) console.log(`  ws/${s.name}.html  (${s.url})`);
+  console.log(`docs/index.html, 404.html, robots.txt, sitemap.xml, .nojekyll geschrieben.`);
   console.log(`Fertig in ${dauer}s.`);
 }
 

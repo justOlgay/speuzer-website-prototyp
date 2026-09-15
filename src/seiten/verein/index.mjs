@@ -170,7 +170,10 @@ function mehrAbschnitt() {
     linkKarte("Karnevalabteilung", "Die Schnauzer: fünf Gruppen, eine Bühne.", `${PFAD}verein/karneval/`),
     linkKarte("Downloads", "Satzung, Beiträge, Anmeldung, Schutzkonzept.", `${PFAD}verein/downloads/`),
     // P8: /kontakt/ existiert jetzt – echter Link statt baldKarte().
-    linkKarte("Kontakt & Anfahrt", "So erreichen Sie uns.", `${PFAD}kontakt/`),
+    // P15: Meta-Text wörtlich aus der Spezifikation ersetzt.
+    linkKarte("Kontakt & Anfahrt", "Adressen nach Anliegen, Platz, Anfahrt", `${PFAD}kontakt/`),
+    // P15: Shop-Karte ergänzt, damit die Seite Karten zu allen Unterseiten hat.
+    linkKarte("Shop", "Fanshop und Teamshop", `${PFAD}shop/`),
   ].join("\n    ");
 
   return `<section class="abschnitt">

@@ -12,13 +12,23 @@ wird; er kennzeichnet sich auf jeder Seite als Testumgebung.
 
 ## Aufbau der Ordner
 
+Seit P15 ist der Prototyp auf die appack-Fassung umgebaut: Inhaltsseiten sind
+eigenständige Workspace-Seiten ohne Kopf, Menü und Fußbereich (die Hülle mit
+Kopfleiste, Menü, Startbild und Fußbereich liefert appack selbst – kommt als
+docs/index.html mit P16).
+
 ```
-src/vorlagen/   Grundgerüst (basis.html) sowie Kopf- und Fußzeile (header.mjs, footer.mjs)
-src/seiten/     Seitenmodule (*.mjs), erzeugen die einzelnen Seiten
+src/vorlagen/   Workspace-Vorlage (workspace.html) sowie gemeinsame Bausteine
+                (bausteine.mjs, hilfen.mjs, bild.mjs)
+src/seiten/     Seitenmodule (*.mjs), erzeugen die Workspace-Seiten
+src/begleit/    Begleitseiten (app.mjs, vorher-nachher.mjs) – nicht Teil des
+                Builds; P17 baut daraus eigene Begleitseiten
 data/           Feste und importierte Daten als JSON
 assets/         Gestaltungs-Tokens (CSS), Schriften, Logo, Bilder
 tools/          Build-, Import- und Prüfwerkzeuge
-docs/           Build-Ausgabe (wird committet, Quelle für GitHub Pages)
+docs/           Build-Ausgabe (wird committet, Quelle für GitHub Pages):
+                docs/ws/ = Workspace-Seiten, docs/index.html = vorläufiger
+                Platzhalter (die Hülle folgt in P16)
 ```
 
 ## Befehle
