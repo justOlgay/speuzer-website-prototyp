@@ -1,13 +1,19 @@
-// Vorher/Nachher /vorher-nachher/ (P10) – neun Bildpaare Live-Seite/Prototyp
-// mit je einem Satz zum gelösten Problem, dazu eine Messtabelle aus der
-// Qualitätsprüfung vom 04.09.2026 gegen die automatische Prüfung des
-// Prototyps (npm run pruefen).
+// Vorher/Nachher /vorher-nachher/ (P17, aus dem Modul von P10 umgebaut) –
+// Begleitseite für den Vorstand: neun Bildpaare Live-Seite/Prototyp in
+// appack-Fassung, je mit zwei Zeilen ("Besser:"/"Bleibt:"), dazu eine
+// Messtabelle mit vier Spalten (Merkmal, Live heute, appack-Fassung, wer kann
+// es ändern) und ein Abschnitt, was nur der Anbieter (appack/vmapit) noch
+// ändern kann. Liegt außerhalb der Hülle (docs/index.html) und außerhalb der
+// Workspace-Seiten (docs/ws/) – eigene Vorlage src/vorlagen/begleit.html
+// (siehe tools/build.mjs), keine Workspace-Umschreibung der Verweise.
 
 import { bild } from "../vorlagen/bild.mjs";
 import { datumLang } from "../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/vorher-nachher/" (Tiefe 1), daher immer
-// "../" (siehe pfadZurWurzel() in tools/build.mjs).
+// "../" (siehe pfadZurWurzel() in tools/build.mjs). Verweise auf
+// Workspace-Seiten schreibt dieses Modul direkt als "${PFAD}ws/<name>.html"
+// (P17, Schritt 2) – hier ungenutzt, die Seite verlinkt keine Workspace-Seite.
 const PFAD = "../";
 
 function escapeHtml(text) {
@@ -18,49 +24,29 @@ function escapeHtml(text) {
     .replaceAll('"', "&quot;");
 }
 
-// ---------- Seitenanzahl für die Messbar-Tabelle ("Adressen") ----------
-//
-// Analog zu tools/build.mjs (sammleSeiten()): jedes Seitenmodul unter
-// src/seiten liefert genau eine Seite, außer den drei datengetriebenen
-// Modulen mit variabler Seitenzahl. EINZELSEITEN_MODULE zählt die Module mit
-// genau einer Seite (Stand P10, diese Seite eingeschlossen): app, datenschutz,
-// impressum, index, kontakt, mitglied-werden, shop, spielplan/index,
-// styleguide, tabellen, mannschaften/index, verein/downloads, verein/index,
-// verein/karneval, verein/mach-mit, verein/sponsoren, verein/vorstand,
-// news/index, vorher-nachher (diese Seite selbst) = 19. Dazu je eine Seite
-// pro Team (daten.teams) in mannschaften/team.mjs UND spielplan/team.mjs
-// (also × 2) sowie eine Seite je Meldung (daten.news) in news/artikel.mjs.
-// Ergibt zum Build-Zeitpunkt dieses Pakets 19 + 11×2 + 6 = 47, siehe
-// Abschlussbericht (Gegenprobe: docs/sitemap.xml nach dem Build).
-const EINZELSEITEN_MODULE = 19;
-
-function seitenAnzahl(daten) {
-  const teams = daten.teams?.length ?? 0;
-  const news = daten.news?.length ?? 0;
-  return EINZELSEITEN_MODULE + teams * 2 + news;
-}
-
 // ---------- Seitenkopf ----------
 
 function seitenkopfAbschnitt(daten) {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
     <h1>Vorher / Nachher</h1>
-    <p class="seitenkopf__lead">Links die Website, wie sie heute ist. Rechts der Prototyp. Zu jedem Paar ein Satz, welches Problem gelöst wird.</p>
+    <p class="seitenkopf__lead">Links die Website, wie sie heute ist. Rechts der Prototyp in appack-Fassung: dieselbe Vorlage, dieselben Rahmen, aber sechs Menüpunkte, Vollbild-Inhalt und alle Inhalte des Vereins. Zu jedem Paar steht, was besser wird und was gleich bleibt, weil nur der Anbieter es ändern kann.</p>
     <p class="meta">Vorher-Bilder: sportfreunde04.de am 11.09.2026, Fotos mit Kindern unkenntlich gemacht. Nachher-Bilder: Prototyp, Stand ${datumLang(daten.stand)}.</p>
   </div>
 </section>`;
 }
 
 // ---------- Ein Vergleichspaar ----------
-
-function vergleichPaar(daten, { titel, handy, vorher, nachher, satz }) {
+// Bildpaar (Baustein .vergleich, P10, unverändert) und darunter zwei Zeilen
+// mit fett gesetztem Vorsatz "Besser:"/"Bleibt:" statt (wie bisher) einem
+// einzelnen Fazit-Satz – kein eigener Titel je Paar mehr (P17, Schritt 4
+// zählt für jedes Paar nur Bildpaar + zwei Zeilen auf).
+function vergleichPaar(daten, { handy, vorher, nachher, besser, bleibt }) {
   const sizes = handy ? "390px" : "(min-width: 768px) 560px, 100vw";
   const vorherHtml = bild({ pfad: PFAD, daten, name: vorher.name, alt: vorher.alt, sizes });
   const nachherHtml = bild({ pfad: PFAD, daten, name: nachher.name, alt: nachher.alt, sizes });
 
   return `<figure class="vergleich${handy ? " vergleich--handy" : ""}">
-  <h2>${escapeHtml(titel)}</h2>
   <div class="vergleich__raster">
     <div class="vergleich__seite">
       <span class="tag tag--warn">Vorher</span>
@@ -71,13 +57,15 @@ function vergleichPaar(daten, { titel, handy, vorher, nachher, satz }) {
       ${nachherHtml}
     </div>
   </div>
-  <figcaption>${satz}</figcaption>
+  <figcaption class="fluss">
+    <p><strong>Besser:</strong> ${escapeHtml(besser)}</p>
+    <p><strong>Bleibt:</strong> ${escapeHtml(bleibt)}</p>
+  </figcaption>
 </figure>`;
 }
 
 const PAARE = [
   {
-    titel: "Startseite am Rechner",
     handy: false,
     vorher: {
       name: "vorher-start-desktop",
@@ -85,12 +73,13 @@ const PAARE = [
     },
     nachher: {
       name: "nachher-start-desktop",
-      alt: "Prototyp-Startseite am Rechner: Wappen, Claim und Vereinsdaten oben, darunter die nächsten Spiele",
+      alt: "Prototyp-Startseite am Rechner in appack-Fassung: Kopfleiste mit Wappen und sechs Menüpunkten über dem Startbild mit dem Satz „Fußball im Gallus – seit 1904.“",
     },
-    satz: "Vorher füllt ein Foto den Bildschirm und beantwortet keine Frage; nachher stehen Wappen, Claim, Probetraining und die nächsten Spiele auf dem ersten Bildschirm.",
+    besser:
+      "Sechs Menüpunkte statt zwölf, kein „Mehr“-Ausklapper, Startbild ohne Kinderfotos, aktiver Menüpunkt mit lesbarem Kontrast.",
+    bleibt: "Landeansicht aus Bild und Text ohne Inhalt, Ladeanimation vor jedem Aufruf.",
   },
   {
-    titel: "Startseite am Handy",
     handy: true,
     vorher: {
       name: "vorher-start-handy",
@@ -98,12 +87,12 @@ const PAARE = [
     },
     nachher: {
       name: "nachher-start-handy",
-      alt: "Prototyp-Startseite am Handy: Wappen, Vereinsname und Knöpfe für Probetraining und Mitgliedschaft auf dem ersten Bildschirm",
+      alt: "Prototyp-Startseite am Handy in appack-Fassung: Kopfleiste mit Wappen und Burger-Symbol über dem Startbild mit dem Satz „Fußball im Gallus – seit 1904.“",
     },
-    satz: "Vorher ist der erste Bildschirm ein Bild ohne Text; nachher sieht man sofort, wer der Verein ist und was man tun kann.",
+    besser: "Ruhiges Startbild, kürzerer Text, Menü mit sechs Punkten hinter dem Burger.",
+    bleibt: "Inhalt erst nach einem Klick, keine eigene Adresse.",
   },
   {
-    titel: "Menü am Handy",
     handy: true,
     vorher: {
       name: "vorher-menue-handy",
@@ -111,77 +100,13 @@ const PAARE = [
     },
     nachher: {
       name: "nachher-menue-handy",
-      alt: "Aufgeklapptes Prototyp-Menü am Handy: sechs Punkte vollflächig auf Blau, oben ein Schließen-Kreuz",
+      alt: "Aufgeklapptes Prototyp-Menü am Handy in appack-Fassung: sechs Punkte in Weiß und Blau unterhalb der Kopfleiste, „Start“ weiß hervorgehoben",
     },
-    satz: "Vorher 13 gleichrangige Punkte mit Doppelungen, der Hintergrund blitzt durch; nachher sechs Punkte, vollflächig, mit Schließen-Kreuz und Tastaturbedienung.",
+    besser:
+      "Sechs Punkte statt zwölf, keine Doppelungen (Fanshop, Teamshop, Sponsoren, Vorstand, Mach mit, Service werden Unterseiten).",
+    bleibt: "Menüpunkte sind keine Links, keine Tastaturbedienung.",
   },
   {
-    titel: "Inhaltsrahmen am Rechner",
-    handy: false,
-    vorher: {
-      name: "vorher-vorstand-rahmen-desktop",
-      alt: "Live-Unterseite am Rechner: schmaler Inhaltsrahmen in der Seitenmitte mit eigenem Scrollbalken, daneben leere Fläche",
-    },
-    nachher: {
-      name: "nachher-vorstand-desktop",
-      alt: "Prototyp-Unterseite am Rechner: Inhalt über die volle Seitenbreite, ein Scrollbalken",
-    },
-    satz: "Vorher läuft der Inhalt durch ein 592 Pixel breites Guckloch mit zwei Scrollbalken; nachher nutzt er die Seitenbreite mit einem Scrollbalken.",
-  },
-  {
-    titel: "Mannschaftsseite am Handy",
-    handy: true,
-    vorher: {
-      name: "vorher-mannschaften-handy",
-      alt: "Live-Mannschaftsliste am Handy: Kacheln mit Trainerfoto und kurzem Text, ohne Trainingszeiten",
-    },
-    nachher: {
-      name: "nachher-mannschaft-d3-handy",
-      alt: "Prototyp-Mannschaftsseite D3 am Handy: Trainingszeiten, nächste Spiele und Vereinsmail auf einer eigenen Seite",
-    },
-    satz: "Vorher fehlen Wochentag, Uhrzeit und Platz, Kontakt läuft über 26 × 17 Pixel kleine Symbole; nachher stehen Training, nächste Spiele und die Vereinsmail auf einer eigenen Seite je Mannschaft.",
-  },
-  {
-    titel: "Sponsoren am Handy",
-    handy: true,
-    vorher: {
-      name: "vorher-sponsoren-handy",
-      alt: "Live-Sponsorenseite am Handy: oberste Kategorie zeigt ein Platzhalterbild, „App-Projektpartner“ erscheint zweimal",
-    },
-    nachher: {
-      name: "nachher-sponsoren-handy",
-      alt: "Prototyp-Sponsorenseite am Handy: zwei Kategorien mit echten Logos und ein Satz zum Sponsor werden",
-    },
-    satz: "Vorher zeigt die oberste Kategorie einen Platzhalter und eine Kategorie gibt es doppelt; nachher zwei Kategorien und ein Satz, wie man Sponsor wird.",
-  },
-  {
-    titel: "Mitglied werden am Handy",
-    handy: true,
-    vorher: {
-      name: "vorher-mitglied-werden-handy",
-      alt: "Live-Formular am Handy: Antragsformular beginnt direkt mit den persönlichen Angaben, keine Beitragsangaben sichtbar",
-    },
-    nachher: {
-      name: "nachher-mitglied-werden-handy",
-      alt: "Prototyp-Seite Mitglied werden am Handy: Beitragstabelle für Fußball und Karneval vor dem Formular",
-    },
-    satz: "Vorher beginnt die Seite mit dem Formular und nennt keine Beiträge; nachher stehen Beiträge, Ablauf und Unterlagen vor dem Antrag.",
-  },
-  {
-    titel: "Service & Anträge am Handy",
-    handy: true,
-    vorher: {
-      name: "vorher-service-handy",
-      alt: "Live-Serviceseite am Handy: drei unterschiedlich gestaltete Kacheln, eine mit KI-Wasserzeichen und dem Tippfehler „Mitgliedsbescheinigugen“",
-    },
-    nachher: {
-      name: "nachher-downloads-handy",
-      alt: "Prototyp-Downloadseite am Handy: einheitliche Liste mit Dateiformat, Größe und Seitenzahl je Dokument",
-    },
-    satz: "Vorher drei unterschiedlich gestaltete Kacheln, ein KI-Bild mit Wasserzeichen und ein Tippfehler; nachher eine Downloadliste mit Dateigröße und Seitenzahl.",
-  },
-  {
-    titel: "Sportangebote am Rechner",
     handy: false,
     vorher: {
       name: "vorher-sportangebote-desktop",
@@ -189,9 +114,80 @@ const PAARE = [
     },
     nachher: {
       name: "nachher-mannschaften-desktop",
-      alt: "Prototyp-Mannschaftsübersicht am Rechner: elf Mannschaften in drei Gruppen mit Trainingszeiten",
+      alt: "Prototyp-Mannschaftsübersicht am Rechner im Inhaltsrahmen der appack-Fassung: Gruppe Senioren mit der 1. Herrenmannschaft und Trainingszeiten, darunter der Beginn der Gruppe Jugend",
     },
-    satz: "Vorher zwei Kacheln und darunter rund 450 Pixel Leere; nachher elf Mannschaften in drei Gruppen mit Trainingszeiten.",
+    besser:
+      "Inhalt in voller Breite statt in einem 40-Prozent-Rahmen; Trainingszeiten, Jahrgänge und Ansprechpartner auf einer Seite.",
+    bleibt: "Feste Rahmenhöhe, die Seite scrollt innen und außen.",
+  },
+  {
+    handy: true,
+    vorher: {
+      name: "vorher-mannschaften-handy",
+      alt: "Live-Mannschaftsliste am Handy: Kacheln mit Trainerfoto und kurzem Text, ohne Trainingszeiten",
+    },
+    nachher: {
+      name: "nachher-mannschaften-handy",
+      alt: "Prototyp-Mannschaftsübersicht am Handy im Inhaltsrahmen der appack-Fassung: Gruppe Senioren mit der 1. Herrenmannschaft und Trainingszeiten, darunter der Beginn der Gruppe Jugend",
+    },
+    besser:
+      "Elf Mannschaften absteigend nach Alter, jede mit Trainingstag, Uhrzeit und Platz; keine privaten Telefonnummern.",
+    bleibt: "Rahmen 93 Prozent der Bildschirmhöhe, darunter der Fußbereich.",
+  },
+  {
+    handy: false,
+    vorher: {
+      name: "vorher-vorstand-rahmen-desktop",
+      alt: "Live-Unterseite am Rechner: schmaler Inhaltsrahmen in der Seitenmitte mit eigenem Scrollbalken, daneben leere Fläche",
+    },
+    nachher: {
+      name: "nachher-vorstand-desktop",
+      alt: "Prototyp-Vorstandsseite am Rechner im Inhaltsrahmen der appack-Fassung: Personenkarten mit Funktion und Vereinsmail",
+    },
+    besser: "Vorstand mit Funktion und Vereinsmail, Porträts in passender Größe, keine Mobilnummern.",
+    bleibt:
+      "Menüpunkt bleibt auf „Verein“ stehen, weil die Vorlage Unterseiten nicht kennt; kein Zurück-Knopf.",
+  },
+  {
+    handy: true,
+    vorher: {
+      name: "vorher-sponsoren-handy",
+      alt: "Live-Sponsorenseite am Handy: oberste Kategorie zeigt ein Platzhalterbild, „App-Projektpartner“ erscheint zweimal",
+    },
+    nachher: {
+      name: "nachher-sponsoren-handy",
+      alt: "Prototyp-Sponsorenseite am Handy im Inhaltsrahmen der appack-Fassung: Kategorie Partner mit Logos, darunter der Beginn der Kategorie App-Projektpartner",
+    },
+    besser:
+      "Zwei Kategorien statt drei, kein Platzhalter „Hier könnte Ihre Werbung stehen“, Logos verkleinert, „Sponsor werden“ mit Vereinsmail.",
+    bleibt: "Erreichbar nur über Verein, nicht über einen eigenen Menüpunkt oder Link.",
+  },
+  {
+    handy: true,
+    vorher: {
+      name: "vorher-mitglied-werden-handy",
+      alt: "Live-Formular am Handy: Antragsformular beginnt direkt mit den persönlichen Angaben, keine Beitragsangaben sichtbar",
+    },
+    nachher: {
+      name: "nachher-mitglied-werden-handy",
+      alt: "Prototyp-Seite Mitglied werden am Handy im Inhaltsrahmen der appack-Fassung: Beitragstabelle der Fußballabteilung vor dem Formular",
+    },
+    besser:
+      "Beiträge und Ablauf vor dem Formular, richtige Feldtypen, Datenschutzhinweis, SEPA-Text, Erziehungsberechtigte.",
+    bleibt: "Das Formular des Prototyps versendet nichts; das echte Formular bleibt das appack-Modul.",
+  },
+  {
+    handy: true,
+    vorher: {
+      name: "vorher-service-handy",
+      alt: "Live-Serviceseite am Handy: drei unterschiedlich gestaltete Kacheln, eine mit KI-Wasserzeichen und dem Tippfehler „Mitgliedsbescheinigugen“",
+    },
+    nachher: {
+      name: "nachher-downloads-handy",
+      alt: "Prototyp-Downloadseite am Handy im Inhaltsrahmen der appack-Fassung: einheitliche Liste mit Dateiformat, Größe und Seitenzahl je Dokument",
+    },
+    besser: "Downloads mit Größe und Seitenzahl, kein KI-Bild, kein Tippfehler.",
+    bleibt: "Impressum und Datenschutz öffnen weiterhin im schmalen Rahmen der Vorlage.",
   },
 ];
 
@@ -204,42 +200,115 @@ function vergleicheAbschnitt(daten) {
 </section>`;
 }
 
-// ---------- Messbar ----------
-
+// ---------- Was messbar ist ----------
+// {{LH_MIN}}/{{LH_N}} aus data/lighthouse.json (daten.lighthouse, siehe
+// ladeDaten() in tools/build.mjs) – Minimum der vier Kategorien als
+// "P / A / BP / SEO" und Seitenzahl (P17, Schritt 4). Gleiches Datenfeld wie
+// src/seiten/styleguide.mjs#seitePruefung().
 const MESSBAR_ZEILEN = [
-  { merkmal: "Menüpunkte", vorher: "12", nachher: "6" },
-  { merkmal: "Adressen", vorher: "1 für alle Seiten", nachherFn: (n) => `${n} eigene Adressen` },
-  { merkmal: "Inhaltsrahmen", vorher: "fest 592 × 834 px", nachher: "volle Breite, 320–1920 px" },
-  { merkmal: "Scrollbalken", vorher: "2", nachher: "1" },
-  { merkmal: "Tippziele", vorher: "26 × 17 px", nachher: "mindestens 44 × 44 px" },
-  { merkmal: "Überschriftenstruktur", vorher: "keine h1", nachher: "genau eine h1 je Seite" },
-  { merkmal: "Sprachangabe", vorher: "fehlt", nachher: "lang=de" },
-  { merkmal: "Alternativtexte", vorher: "alle leer", nachher: "alle Bilder beschrieben" },
-  { merkmal: "Startbild", vorher: "296 KB, WhatsApp-Export", nachher: "kein Bild über 200 KB, sprechende Namen" },
-  { merkmal: "Private Telefonlinks", vorher: "19", nachher: "0" },
-  { merkmal: "Trainingszeiten auf Mannschaftsseiten", vorher: "keine", nachher: "alle elf Mannschaften" },
+  { merkmal: "Menüpunkte", live: "12, dazu „Mehr“", appack: "6", wer: "Verein im CMS (MENU)" },
+  {
+    merkmal: "Trainingszeiten",
+    live: "0 Mannschaften",
+    appack: "11 Mannschaften",
+    wer: "Verein (Workspace-Seiten)",
+  },
+  {
+    merkmal: "Inhaltsbreite Desktop",
+    live: "40 % der Fensterbreite (576 px bei 1440 px)",
+    appack: "100 %",
+    wer: "Verein im CMS (menuFullscreen)",
+  },
+  {
+    merkmal: "Rahmenhöhe",
+    live: "fest 87 % der Fensterhöhe, zwei Scrollbereiche",
+    appack: "fest 92 %, zwei Scrollbereiche",
+    wer: "nur vmapit",
+  },
+  {
+    merkmal: "Eigene Adresse je Seite, Zurück-Knopf, Lesezeichen",
+    live: "nein",
+    appack: "nein (Direktlinks ohne Menü)",
+    wer: "nur vmapit",
+  },
+  { merkmal: "Landeansicht mit Inhalt", live: "nein", appack: "nein", wer: "nur vmapit" },
+  {
+    merkmal: "Kontrast aktiver Menüpunkt",
+    live: "2,3:1 (weiß auf #9e9cf0)",
+    appack: "12,3:1 (#191793 auf weiß)",
+    wer: "Verein im CMS (START)",
+  },
+  {
+    merkmal: "Tippziele im Inhalt",
+    live: "26 × 17 px",
+    appack: "mindestens 44 × 44 px",
+    wer: "Verein (Workspace-Seiten)",
+  },
+  {
+    merkmal: "Bilder",
+    live: "bis 1500 px für 150 px Anzeige",
+    appack: "höchstens 200 KB, passende Größen",
+    wer: "Verein (Mediathek/Workspace)",
+  },
+  {
+    merkmal: "lang, Überschrift, Meta an sportfreunde04.de",
+    live: "nein",
+    appack: "nein",
+    wer: "nur vmapit",
+  },
+  {
+    merkmal: "Lighthouse mobil sportfreunde04.de",
+    live: "33 / 50 / 78 / 82 (14.09.2026)",
+    appack: "unverändert (Vorlage)",
+    wer: "nur vmapit",
+  },
+  {
+    merkmal: "Lighthouse mobil Workspace-Seiten per Direktlink",
+    live: "keine eigenen Seiten",
+    appackFn: (daten) => {
+      const lh = daten.lighthouse;
+      if (!lh) return "–";
+      const min = lh.minimum ?? {};
+      return `${min.performance} / ${min.accessibility} / ${min.bestPractices} / ${min.seo} (Minimum über ${lh.seiten?.length ?? 0} Seiten)`;
+    },
+    wer: "Verein",
+  },
+  {
+    merkmal: "Private Mobilnummern öffentlich",
+    live: "19 (Stand 11.09.2026)",
+    appack: "0",
+    wer: "Verein im CMS",
+  },
+  {
+    merkmal: "Fußzeile",
+    live: "„© appack 2026“",
+    appack: "„© F.F.V. Sportfreunde 04, 2026“",
+    wer: "Verein im CMS (FOOTER)",
+  },
 ];
 
 function messbarAbschnitt(daten) {
-  const anzahl = seitenAnzahl(daten);
-  const zeilen = MESSBAR_ZEILEN.map(
-    (z) => `<tr>
+  const zeilen = MESSBAR_ZEILEN.map((z) => {
+    const appackText = z.appackFn ? z.appackFn(daten) : z.appack;
+    return `<tr>
           <td>${escapeHtml(z.merkmal)}</td>
-          <td>${escapeHtml(z.vorher)}</td>
-          <td>${escapeHtml(z.nachherFn ? z.nachherFn(anzahl) : z.nachher)}</td>
-        </tr>`
-  ).join("\n        ");
+          <td>${escapeHtml(z.live)}</td>
+          <td>${escapeHtml(appackText)}</td>
+          <td>${escapeHtml(z.wer)}</td>
+        </tr>`;
+  }).join("\n        ");
 
   return `<section class="abschnitt--hell abschnitt">
   <div class="container fluss">
-    <h2>Messbar</h2>
+    <h2>Was messbar ist</h2>
     <div class="tabelle-wrap">
       <table>
         <thead>
           <tr>
             <th>Merkmal</th>
-            <th>Vorher (Prüfung 04.09.2026)</th>
-            <th>Nachher (Prototyp)</th>
+            <th>Live heute</th>
+            <th>appack-Fassung</th>
+            <th>Wer kann es ändern</th>
           </tr>
         </thead>
         <tbody>
@@ -247,20 +316,31 @@ function messbarAbschnitt(daten) {
         </tbody>
       </table>
     </div>
-    <p class="meta">Vorher-Werte aus der Qualitätsprüfung vom 04.09.2026, Nachher-Werte aus der automatischen Prüfung des Prototyps (npm run pruefen).</p>
+    <p class="meta">Die Werte der Adresse sportfreunde04.de bestimmt die appack-Vorlage. Der Prototyp verspricht dort nichts, was der Verein nicht selbst im CMS oder im Workspace anlegen kann.</p>
   </div>
 </section>`;
 }
 
-// ---------- Was der Prototyp nicht zeigen kann ----------
+// ---------- Was nur der Anbieter ändern kann ----------
 
-function grenzenAbschnitt() {
+const ANBIETER_PUNKTE = [
+  "Eigene Adresse je Seite und Zurück-Knopf",
+  "Landeansicht mit Inhalt",
+  "Rahmen, der mit dem Inhalt wächst",
+  "Menü als echte Links mit Tastaturbedienung",
+  "lang, Überschriften, Meta-Angaben und Vorschaubild an der Vereinsadresse",
+  "Impressum und Datenschutz als eigene Adressen",
+  "Suchmaschinen-Freigabe für Workspace-Seiten (cdn.appack.de/robots.txt sperrt sie)",
+];
+
+function anbieterAbschnitt() {
+  const punkte = ANBIETER_PUNKTE.map((p) => `<li>${escapeHtml(p)}</li>`).join("\n      ");
   return `<section class="abschnitt">
-  <div class="container inhalt fluss">
-    <h2>Was der Prototyp nicht zeigen kann</h2>
-    <div class="hinweis hinweis--info">
-      <p style="margin:0;">Zwei Punkte lassen sich nur mit dem Anbieter appack/vmapit lösen: eigene Adressen unter sportfreunde04.de und ein Inhaltsrahmen, der mit dem Inhalt wächst. Beides steht im Übernahmepaket.</p>
-    </div>
+  <div class="container fluss">
+    <h2>Was nur der Anbieter ändern kann</h2>
+    <ul role="list">
+      ${punkte}
+    </ul>
   </div>
 </section>`;
 }
@@ -270,19 +350,14 @@ export function seite(daten) {
     seitenkopfAbschnitt(daten),
     vergleicheAbschnitt(daten),
     messbarAbschnitt(daten),
-    grenzenAbschnitt(),
+    anbieterAbschnitt(),
   ].join("\n");
 
   return {
     url: "/vorher-nachher/",
     title: "Vorher / Nachher",
-    // Wörtlicher Text lt. Plan hat 178 Zeichen (hartes Gate in
-    // tools/pruefen.mjs bei > 170, wie schon bei der Startseite in P2, siehe
-    // dort) – kleinstmögliche Korrektur: "gelösten" gestrichen (169 Zeichen),
-    // Wortlaut sonst unverändert. Siehe Abschlussbericht, Abschnitt
-    // „Abweichungen".
     description:
-      "Website des FFV Sportfreunde 04 heute und als Prototyp im Vergleich: Startseite, Menü, Inhaltsrahmen, Mannschaften, Sponsoren, Mitgliedsantrag – je ein Satz zum Problem.",
+      "Neun Bildpaare Live-Seite gegen Prototyp in appack-Fassung, dazu eine Messtabelle: was besser wird, was gleich bleibt und was nur appack/vmapit noch ändern kann.",
     inhalt,
   };
 }

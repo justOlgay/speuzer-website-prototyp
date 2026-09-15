@@ -1,4 +1,15 @@
 <!doctype html>
+<!--
+  Speuzer Website Prototyp – Vorlage für Begleitseiten (P17)
+  Wie src/vorlagen/workspace.html (lang="de", Meta, OG, site.css), aber mit
+  einer eigenen schmalen Kopfleiste vor <main> und Pfaden über ./ statt
+  fest "../" – Begleitseiten liegen zwar wie Workspace-Seiten in Tiefe 1
+  (/vorher-nachher/, /app/), 404.html aber in Tiefe 0 (docs/404.html), siehe
+  tools/build.mjs. Begleitseiten sind NICHT Teil der nachgebildeten
+  appack-Website (docs/index.html): eigene Kopfleiste statt Hülle, eigene
+  Fußzeile (ws-fuss, wie Workspace-Seiten) mit dem Hinweis, dass es sich um
+  Begleitmaterial für den Vorstand handelt.
+-->
 <html lang="de">
 <head>
 <meta charset="utf-8">
@@ -22,23 +33,33 @@
 <link rel="preload" href="https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="https://justolgay.github.io/speuzer-website-prototyp/assets/css/site.css">
 </head>
-<body class="ws ">
+<body class="ws">
+<header class="begleit-kopf">
+  <div class="container begleit-kopf__zeile">
+    <p class="begleit-kopf__marke">Begleitseite zum Prototyp · FFV Sportfreunde 04</p>
+    <nav aria-label="Begleitseiten"><ul>
+      <li><a href="https://justolgay.github.io/speuzer-website-prototyp/">appack-Fassung</a></li>
+      <li><a href="https://justolgay.github.io/speuzer-website-prototyp/vorher-nachher/">Vorher / Nachher</a></li>
+      <li><a href="https://justolgay.github.io/speuzer-website-prototyp/app/">In der App</a></li>
+    </ul></nav>
+  </div>
+</header>
 <main id="inhalt">
 <section class="abschnitt seitenkopf">
   <div class="container">
-    <p class="seitenkopf__kicker">Fehler 404</p>
     <h1>Seite nicht gefunden</h1>
-    <p class="seitenkopf__lead">Diese Adresse gibt es im Prototyp nicht. Vielleicht steckt ein Tippfehler im Link, oder die Seite ist umgezogen.</p>
+    <p class="seitenkopf__lead">Diese Adresse gibt es im Prototyp nicht.</p>
   </div>
 </section>
 <section class="abschnitt">
   <div class="container fluss">
-    <p><a class="knopf" href="https://justolgay.github.io/speuzer-website-prototyp/">Zur Startseite</a></p>
+    <p class="knopfzeile">
+      <a class="knopf" href="https://justolgay.github.io/speuzer-website-prototyp/">Zur appack-Fassung</a>
+      <a class="knopf knopf--sekundaer" href="https://justolgay.github.io/speuzer-website-prototyp/vorher-nachher/">Vorher / Nachher</a>
+    </p>
   </div>
 </section>
 </main>
-<footer class="ws-fuss">
-  <p>Prototyp · Testumgebung, keine Live-Seite · Inhalte Stand Dienstag, 15. September 2026</p>
-</footer>
+<footer class="ws-fuss"><p>Begleitmaterial für den Vorstand, nicht Teil der Website · Stand Dienstag, 15. September 2026</p></footer>
 </body>
 </html>

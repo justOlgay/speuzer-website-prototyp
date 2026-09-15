@@ -16,6 +16,11 @@
 // des Vereins – deshalb durchläuft die Hülle diese Prüfung NICHT; sie wird
 // stattdessen unten aus der Schleife ausgenommen und von der eigenen
 // pruefeHuelle() geprüft.
+// P17: sitemap.xml führt zwischen Hülle und Workspace-Seiten zusätzlich die
+// Begleitseiten (/vorher-nachher/, /app/) – Verzeichnis-URLs statt Dateien.
+// Sie laufen durch dieselbe pruefeSeite() wie die Workspace-Seiten (keine
+// Sonderbehandlung nötig); pruefeDateiExistiertFuerLink() unten löst ihre
+// Verweise ("../ws/*.html", "../" zur Hülle) jetzt korrekt auf.
 
 import puppeteer from "puppeteer-core";
 import { readFileSync, existsSync, statSync, mkdirSync, writeFileSync, readdirSync } from "node:fs";
@@ -76,15 +81,24 @@ function leseSitemapPfade() {
 // index.html mehr in einem Unterverzeichnis je Seite) – interne Verweise
 // zeigen jetzt auf ".html"-Dateien in docs/ws/ oder auf "../assets/…".
 // aktuellerSeitenPfad z. B. "/ws/mannschaften.html" -> Verzeichnis docs/ws/.
+// P17: Begleitseiten haben dagegen einen Verzeichnis-Pfad ("/vorher-nachher/",
+// "/app/", jeweils mit abschließendem "/") – path.dirname() eines solchen
+// Pfads springt eine Ebene zu hoch (path.dirname("/app/") ist "/", nicht
+// "/app"), das hätte Verweise wie "../ws/mannschaften-d2.html" oder "../"
+// (Hülle) falsch (eine Ebene zu weit nach oben) aufgelöst. Endet der
+// Seiten-Pfad selbst auf "/", ist er bereits das Verzeichnis. Ebenso für das
+// Linkziel: endet href auf "/" (z. B. "../", "../app/"), ist das eigentliche
+// Ziel dessen index.html.
 function pruefeDateiExistiertFuerLink(aktuellerSeitenPfad, href) {
-  const aktuellesVerzeichnis = path.join(DOCS, path.dirname(aktuellerSeitenPfad.replace(/^\//, "")));
-  let ziel;
-  if (href.startsWith("/")) {
-    ziel = path.join(DOCS, href.replace(/^\//, ""));
-  } else {
-    ziel = path.join(aktuellesVerzeichnis, href);
-  }
-  ziel = ziel.split("?")[0].split("#")[0];
+  const seitenVerzeichnis = aktuellerSeitenPfad.endsWith("/")
+    ? aktuellerSeitenPfad
+    : path.dirname(aktuellerSeitenPfad);
+  const aktuellesVerzeichnis = path.join(DOCS, seitenVerzeichnis.replace(/^\//, ""));
+  const hrefOhneRest = href.split("?")[0].split("#")[0];
+  let ziel = hrefOhneRest.startsWith("/")
+    ? path.join(DOCS, hrefOhneRest.replace(/^\//, ""))
+    : path.join(aktuellesVerzeichnis, hrefOhneRest);
+  if (hrefOhneRest.endsWith("/")) ziel = path.join(ziel, "index.html");
   return existsSync(ziel);
 }
 

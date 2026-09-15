@@ -1,0 +1,86 @@
+<!doctype html>
+<!--
+  Speuzer Website Prototyp – Vorlage für Begleitseiten (P17)
+  Wie src/vorlagen/workspace.html (lang="de", Meta, OG, site.css), aber mit
+  einer eigenen schmalen Kopfleiste vor <main> und Pfaden über ../ statt
+  fest "../" – Begleitseiten liegen zwar wie Workspace-Seiten in Tiefe 1
+  (/vorher-nachher/, /app/), 404.html aber in Tiefe 0 (docs/404.html), siehe
+  tools/build.mjs. Begleitseiten sind NICHT Teil der nachgebildeten
+  appack-Website (docs/index.html): eigene Kopfleiste statt Hülle, eigene
+  Fußzeile (ws-fuss, wie Workspace-Seiten) mit dem Hinweis, dass es sich um
+  Begleitmaterial für den Vorstand handelt.
+-->
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>In der App – FFV Sportfreunde 04</title>
+<meta name="description" content="Zwei Workspace-Seiten im Telefonrahmen, wie sie in der nativen Vereins-App von appack erscheinen: eingebettetes Browserfenster ohne Website-Kopf.">
+<link rel="canonical" href="https://justolgay.github.io/speuzer-website-prototyp/app/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FFV Sportfreunde 04">
+<meta property="og:title" content="In der App – FFV Sportfreunde 04">
+<meta property="og:description" content="Zwei Workspace-Seiten im Telefonrahmen, wie sie in der nativen Vereins-App von appack erscheinen: eingebettetes Browserfenster ohne Website-Kopf.">
+<meta property="og:url" content="https://justolgay.github.io/speuzer-website-prototyp/app/">
+<meta property="og:image" content="https://justolgay.github.io/speuzer-website-prototyp/assets/og/standard.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#191793">
+<link rel="icon" href="../assets/logo/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/logo/apple-touch-icon.png">
+<link rel="preload" href="../assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body class="ws">
+<header class="begleit-kopf">
+  <div class="container begleit-kopf__zeile">
+    <p class="begleit-kopf__marke">Begleitseite zum Prototyp · FFV Sportfreunde 04</p>
+    <nav aria-label="Begleitseiten"><ul>
+      <li><a href="../">appack-Fassung</a></li>
+      <li><a href="../vorher-nachher/">Vorher / Nachher</a></li>
+      <li><a href="../app/" aria-current="page">In der App</a></li>
+    </ul></nav>
+  </div>
+</header>
+<main id="inhalt">
+<section class="abschnitt seitenkopf">
+  <div class="container">
+    <h1>In der App</h1>
+    <p class="seitenkopf__lead">Die Vereins-App ist eine native App von appack mit eigener Startseite, eigenen Modulen (News, Kalender, Chat) und eigener Navigation. Workspace-Seiten erscheinen dort in einem eingebetteten Browserfenster ohne Website-Kopf, so wie hier. Die Kopfzeile der App mit Zurück-Pfeil ist nur angedeutet.</p>
+  </div>
+</section>
+<section class="abschnitt">
+  <div class="container">
+    <div class="telefone-paar">
+      <div class="telefon-eintrag">
+      <div class="telefon-skaliert">
+        <div class="telefon">
+          <div class="telefon-leiste">‹ Mannschaften</div>
+          <iframe class="telefon-bildschirm" loading="lazy" title="Mannschaft D2 als Workspace-Seite in der App" src="../ws/mannschaften-d2.html" width="390" height="780"></iframe>
+        </div>
+      </div>
+      <p class="meta">Mannschaft D2 als Workspace-Seite in der App</p>
+    </div>
+      <div class="telefon-eintrag">
+      <div class="telefon-skaliert">
+        <div class="telefon">
+          <div class="telefon-leiste">‹ Spielplan</div>
+          <iframe class="telefon-bildschirm" loading="lazy" title="Spielplan als Workspace-Seite in der App" src="../ws/spielplan.html" width="390" height="780"></iframe>
+        </div>
+      </div>
+      <p class="meta">Spielplan als Workspace-Seite in der App</p>
+    </div>
+    </div>
+  </div>
+</section>
+<section class="abschnitt">
+  <div class="container fluss">
+    <p>Ob und an welcher Stelle die App diese Seiten einbindet, legt der Verein im CMS fest. Die Startseite der App (Kacheln) und die Module bleiben unverändert.</p>
+  </div>
+</section>
+</main>
+<footer class="ws-fuss"><p>Begleitmaterial für den Vorstand, nicht Teil der Website · Stand Dienstag, 15. September 2026</p></footer>
+</body>
+</html>

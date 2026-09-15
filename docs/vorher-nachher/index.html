@@ -1,0 +1,396 @@
+<!doctype html>
+<!--
+  Speuzer Website Prototyp – Vorlage für Begleitseiten (P17)
+  Wie src/vorlagen/workspace.html (lang="de", Meta, OG, site.css), aber mit
+  einer eigenen schmalen Kopfleiste vor <main> und Pfaden über ../ statt
+  fest "../" – Begleitseiten liegen zwar wie Workspace-Seiten in Tiefe 1
+  (/vorher-nachher/, /app/), 404.html aber in Tiefe 0 (docs/404.html), siehe
+  tools/build.mjs. Begleitseiten sind NICHT Teil der nachgebildeten
+  appack-Website (docs/index.html): eigene Kopfleiste statt Hülle, eigene
+  Fußzeile (ws-fuss, wie Workspace-Seiten) mit dem Hinweis, dass es sich um
+  Begleitmaterial für den Vorstand handelt.
+-->
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vorher / Nachher – FFV Sportfreunde 04</title>
+<meta name="description" content="Neun Bildpaare Live-Seite gegen Prototyp in appack-Fassung, dazu eine Messtabelle: was besser wird, was gleich bleibt und was nur appack/vmapit noch ändern kann.">
+<link rel="canonical" href="https://justolgay.github.io/speuzer-website-prototyp/vorher-nachher/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FFV Sportfreunde 04">
+<meta property="og:title" content="Vorher / Nachher – FFV Sportfreunde 04">
+<meta property="og:description" content="Neun Bildpaare Live-Seite gegen Prototyp in appack-Fassung, dazu eine Messtabelle: was besser wird, was gleich bleibt und was nur appack/vmapit noch ändern kann.">
+<meta property="og:url" content="https://justolgay.github.io/speuzer-website-prototyp/vorher-nachher/">
+<meta property="og:image" content="https://justolgay.github.io/speuzer-website-prototyp/assets/og/standard.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#191793">
+<link rel="icon" href="../assets/logo/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/logo/apple-touch-icon.png">
+<link rel="preload" href="../assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body class="ws">
+<header class="begleit-kopf">
+  <div class="container begleit-kopf__zeile">
+    <p class="begleit-kopf__marke">Begleitseite zum Prototyp · FFV Sportfreunde 04</p>
+    <nav aria-label="Begleitseiten"><ul>
+      <li><a href="../">appack-Fassung</a></li>
+      <li><a href="../vorher-nachher/" aria-current="page">Vorher / Nachher</a></li>
+      <li><a href="../app/">In der App</a></li>
+    </ul></nav>
+  </div>
+</header>
+<main id="inhalt">
+<section class="abschnitt seitenkopf">
+  <div class="container">
+    <h1>Vorher / Nachher</h1>
+    <p class="seitenkopf__lead">Links die Website, wie sie heute ist. Rechts der Prototyp in appack-Fassung: dieselbe Vorlage, dieselben Rahmen, aber sechs Menüpunkte, Vollbild-Inhalt und alle Inhalte des Vereins. Zu jedem Paar steht, was besser wird und was gleich bleibt, weil nur der Anbieter es ändern kann.</p>
+    <p class="meta">Vorher-Bilder: sportfreunde04.de am 11.09.2026, Fotos mit Kindern unkenntlich gemacht. Nachher-Bilder: Prototyp, Stand Dienstag, 15. September 2026.</p>
+  </div>
+</section>
+<section class="abschnitt">
+  <div class="container fluss">
+    <figure class="vergleich">
+  <div class="vergleich__raster">
+    <div class="vergleich__seite">
+      <span class="tag tag--warn">Vorher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/vorher-start-desktop-480.avif 480w, ../assets/bilder/erzeugt/vorher-start-desktop-960.avif 960w, ../assets/bilder/erzeugt/vorher-start-desktop-1440.avif 1440w" sizes="(min-width: 768px) 560px, 100vw">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/vorher-start-desktop-480.webp 480w, ../assets/bilder/erzeugt/vorher-start-desktop-960.webp 960w, ../assets/bilder/erzeugt/vorher-start-desktop-1440.webp 1440w" sizes="(min-width: 768px) 560px, 100vw">
+  <img src="../assets/bilder/erzeugt/vorher-start-desktop-960.jpg" srcset="../assets/bilder/erzeugt/vorher-start-desktop-480.jpg 480w, ../assets/bilder/erzeugt/vorher-start-desktop-960.jpg 960w, ../assets/bilder/erzeugt/vorher-start-desktop-1440.jpg 1440w" sizes="(min-width: 768px) 560px, 100vw" width="1440" height="900" alt="Live-Startseite am Rechner: Foto über die gesamte Breite, Menüleiste mit zwölf Punkten" loading="lazy" decoding="async">
+</picture>
+    </div>
+    <div class="vergleich__seite">
+      <span class="tag tag--ok">Nachher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/nachher-start-desktop-480.avif 480w, ../assets/bilder/erzeugt/nachher-start-desktop-960.avif 960w, ../assets/bilder/erzeugt/nachher-start-desktop-1440.avif 1440w" sizes="(min-width: 768px) 560px, 100vw">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/nachher-start-desktop-480.webp 480w, ../assets/bilder/erzeugt/nachher-start-desktop-960.webp 960w, ../assets/bilder/erzeugt/nachher-start-desktop-1440.webp 1440w" sizes="(min-width: 768px) 560px, 100vw">
+  <img src="../assets/bilder/erzeugt/nachher-start-desktop-960.jpg" srcset="../assets/bilder/erzeugt/nachher-start-desktop-480.jpg 480w, ../assets/bilder/erzeugt/nachher-start-desktop-960.jpg 960w, ../assets/bilder/erzeugt/nachher-start-desktop-1440.jpg 1440w" sizes="(min-width: 768px) 560px, 100vw" width="1440" height="900" alt="Prototyp-Startseite am Rechner in appack-Fassung: Kopfleiste mit Wappen und sechs Menüpunkten über dem Startbild mit dem Satz „Fußball im Gallus – seit 1904.“" loading="lazy" decoding="async">
+</picture>
+    </div>
+  </div>
+  <figcaption class="fluss">
+    <p><strong>Besser:</strong> Sechs Menüpunkte statt zwölf, kein „Mehr“-Ausklapper, Startbild ohne Kinderfotos, aktiver Menüpunkt mit lesbarem Kontrast.</p>
+    <p><strong>Bleibt:</strong> Landeansicht aus Bild und Text ohne Inhalt, Ladeanimation vor jedem Aufruf.</p>
+  </figcaption>
+</figure>
+  <figure class="vergleich vergleich--handy">
+  <div class="vergleich__raster">
+    <div class="vergleich__seite">
+      <span class="tag tag--warn">Vorher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/vorher-start-handy-480.avif 480w, ../assets/bilder/erzeugt/vorher-start-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/vorher-start-handy-480.webp 480w, ../assets/bilder/erzeugt/vorher-start-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/vorher-start-handy-780.jpg" srcset="../assets/bilder/erzeugt/vorher-start-handy-480.jpg 480w, ../assets/bilder/erzeugt/vorher-start-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Live-Startseite am Handy: ganzseitiges Foto ohne Text, nur Burger-Menü und Wappen oben" loading="lazy" decoding="async">
+</picture>
+    </div>
+    <div class="vergleich__seite">
+      <span class="tag tag--ok">Nachher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/nachher-start-handy-480.avif 480w, ../assets/bilder/erzeugt/nachher-start-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/nachher-start-handy-480.webp 480w, ../assets/bilder/erzeugt/nachher-start-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/nachher-start-handy-780.jpg" srcset="../assets/bilder/erzeugt/nachher-start-handy-480.jpg 480w, ../assets/bilder/erzeugt/nachher-start-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Prototyp-Startseite am Handy in appack-Fassung: Kopfleiste mit Wappen und Burger-Symbol über dem Startbild mit dem Satz „Fußball im Gallus – seit 1904.“" loading="lazy" decoding="async">
+</picture>
+    </div>
+  </div>
+  <figcaption class="fluss">
+    <p><strong>Besser:</strong> Ruhiges Startbild, kürzerer Text, Menü mit sechs Punkten hinter dem Burger.</p>
+    <p><strong>Bleibt:</strong> Inhalt erst nach einem Klick, keine eigene Adresse.</p>
+  </figcaption>
+</figure>
+  <figure class="vergleich vergleich--handy">
+  <div class="vergleich__raster">
+    <div class="vergleich__seite">
+      <span class="tag tag--warn">Vorher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/vorher-menue-handy-480.avif 480w, ../assets/bilder/erzeugt/vorher-menue-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/vorher-menue-handy-480.webp 480w, ../assets/bilder/erzeugt/vorher-menue-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/vorher-menue-handy-780.jpg" srcset="../assets/bilder/erzeugt/vorher-menue-handy-480.jpg 480w, ../assets/bilder/erzeugt/vorher-menue-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Aufgeklapptes Live-Menü am Handy: 13 gleich gestaltete Punkte übereinander, im Hintergrund scheint das Seitenfoto durch" loading="lazy" decoding="async">
+</picture>
+    </div>
+    <div class="vergleich__seite">
+      <span class="tag tag--ok">Nachher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/nachher-menue-handy-480.avif 480w, ../assets/bilder/erzeugt/nachher-menue-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/nachher-menue-handy-480.webp 480w, ../assets/bilder/erzeugt/nachher-menue-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/nachher-menue-handy-780.jpg" srcset="../assets/bilder/erzeugt/nachher-menue-handy-480.jpg 480w, ../assets/bilder/erzeugt/nachher-menue-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Aufgeklapptes Prototyp-Menü am Handy in appack-Fassung: sechs Punkte in Weiß und Blau unterhalb der Kopfleiste, „Start“ weiß hervorgehoben" loading="lazy" decoding="async">
+</picture>
+    </div>
+  </div>
+  <figcaption class="fluss">
+    <p><strong>Besser:</strong> Sechs Punkte statt zwölf, keine Doppelungen (Fanshop, Teamshop, Sponsoren, Vorstand, Mach mit, Service werden Unterseiten).</p>
+    <p><strong>Bleibt:</strong> Menüpunkte sind keine Links, keine Tastaturbedienung.</p>
+  </figcaption>
+</figure>
+  <figure class="vergleich">
+  <div class="vergleich__raster">
+    <div class="vergleich__seite">
+      <span class="tag tag--warn">Vorher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/vorher-sportangebote-desktop-480.avif 480w, ../assets/bilder/erzeugt/vorher-sportangebote-desktop-960.avif 960w, ../assets/bilder/erzeugt/vorher-sportangebote-desktop-1440.avif 1440w" sizes="(min-width: 768px) 560px, 100vw">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/vorher-sportangebote-desktop-480.webp 480w, ../assets/bilder/erzeugt/vorher-sportangebote-desktop-960.webp 960w, ../assets/bilder/erzeugt/vorher-sportangebote-desktop-1440.webp 1440w" sizes="(min-width: 768px) 560px, 100vw">
+  <img src="../assets/bilder/erzeugt/vorher-sportangebote-desktop-960.jpg" srcset="../assets/bilder/erzeugt/vorher-sportangebote-desktop-480.jpg 480w, ../assets/bilder/erzeugt/vorher-sportangebote-desktop-960.jpg 960w, ../assets/bilder/erzeugt/vorher-sportangebote-desktop-1440.jpg 1440w" sizes="(min-width: 768px) 560px, 100vw" width="1440" height="900" alt="Live-Sportangebote am Rechner: zwei Kacheln (Fußball, Karneval), darunter eine große leere Fläche" loading="lazy" decoding="async">
+</picture>
+    </div>
+    <div class="vergleich__seite">
+      <span class="tag tag--ok">Nachher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/nachher-mannschaften-desktop-480.avif 480w, ../assets/bilder/erzeugt/nachher-mannschaften-desktop-960.avif 960w, ../assets/bilder/erzeugt/nachher-mannschaften-desktop-1440.avif 1440w" sizes="(min-width: 768px) 560px, 100vw">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/nachher-mannschaften-desktop-480.webp 480w, ../assets/bilder/erzeugt/nachher-mannschaften-desktop-960.webp 960w, ../assets/bilder/erzeugt/nachher-mannschaften-desktop-1440.webp 1440w" sizes="(min-width: 768px) 560px, 100vw">
+  <img src="../assets/bilder/erzeugt/nachher-mannschaften-desktop-960.jpg" srcset="../assets/bilder/erzeugt/nachher-mannschaften-desktop-480.jpg 480w, ../assets/bilder/erzeugt/nachher-mannschaften-desktop-960.jpg 960w, ../assets/bilder/erzeugt/nachher-mannschaften-desktop-1440.jpg 1440w" sizes="(min-width: 768px) 560px, 100vw" width="1440" height="900" alt="Prototyp-Mannschaftsübersicht am Rechner im Inhaltsrahmen der appack-Fassung: Gruppe Senioren mit der 1. Herrenmannschaft und Trainingszeiten, darunter der Beginn der Gruppe Jugend" loading="lazy" decoding="async">
+</picture>
+    </div>
+  </div>
+  <figcaption class="fluss">
+    <p><strong>Besser:</strong> Inhalt in voller Breite statt in einem 40-Prozent-Rahmen; Trainingszeiten, Jahrgänge und Ansprechpartner auf einer Seite.</p>
+    <p><strong>Bleibt:</strong> Feste Rahmenhöhe, die Seite scrollt innen und außen.</p>
+  </figcaption>
+</figure>
+  <figure class="vergleich vergleich--handy">
+  <div class="vergleich__raster">
+    <div class="vergleich__seite">
+      <span class="tag tag--warn">Vorher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/vorher-mannschaften-handy-480.avif 480w, ../assets/bilder/erzeugt/vorher-mannschaften-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/vorher-mannschaften-handy-480.webp 480w, ../assets/bilder/erzeugt/vorher-mannschaften-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/vorher-mannschaften-handy-780.jpg" srcset="../assets/bilder/erzeugt/vorher-mannschaften-handy-480.jpg 480w, ../assets/bilder/erzeugt/vorher-mannschaften-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Live-Mannschaftsliste am Handy: Kacheln mit Trainerfoto und kurzem Text, ohne Trainingszeiten" loading="lazy" decoding="async">
+</picture>
+    </div>
+    <div class="vergleich__seite">
+      <span class="tag tag--ok">Nachher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/nachher-mannschaften-handy-480.avif 480w, ../assets/bilder/erzeugt/nachher-mannschaften-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/nachher-mannschaften-handy-480.webp 480w, ../assets/bilder/erzeugt/nachher-mannschaften-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/nachher-mannschaften-handy-780.jpg" srcset="../assets/bilder/erzeugt/nachher-mannschaften-handy-480.jpg 480w, ../assets/bilder/erzeugt/nachher-mannschaften-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Prototyp-Mannschaftsübersicht am Handy im Inhaltsrahmen der appack-Fassung: Gruppe Senioren mit der 1. Herrenmannschaft und Trainingszeiten, darunter der Beginn der Gruppe Jugend" loading="lazy" decoding="async">
+</picture>
+    </div>
+  </div>
+  <figcaption class="fluss">
+    <p><strong>Besser:</strong> Elf Mannschaften absteigend nach Alter, jede mit Trainingstag, Uhrzeit und Platz; keine privaten Telefonnummern.</p>
+    <p><strong>Bleibt:</strong> Rahmen 93 Prozent der Bildschirmhöhe, darunter der Fußbereich.</p>
+  </figcaption>
+</figure>
+  <figure class="vergleich">
+  <div class="vergleich__raster">
+    <div class="vergleich__seite">
+      <span class="tag tag--warn">Vorher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/vorher-vorstand-rahmen-desktop-480.avif 480w, ../assets/bilder/erzeugt/vorher-vorstand-rahmen-desktop-960.avif 960w, ../assets/bilder/erzeugt/vorher-vorstand-rahmen-desktop-1440.avif 1440w" sizes="(min-width: 768px) 560px, 100vw">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/vorher-vorstand-rahmen-desktop-480.webp 480w, ../assets/bilder/erzeugt/vorher-vorstand-rahmen-desktop-960.webp 960w, ../assets/bilder/erzeugt/vorher-vorstand-rahmen-desktop-1440.webp 1440w" sizes="(min-width: 768px) 560px, 100vw">
+  <img src="../assets/bilder/erzeugt/vorher-vorstand-rahmen-desktop-960.jpg" srcset="../assets/bilder/erzeugt/vorher-vorstand-rahmen-desktop-480.jpg 480w, ../assets/bilder/erzeugt/vorher-vorstand-rahmen-desktop-960.jpg 960w, ../assets/bilder/erzeugt/vorher-vorstand-rahmen-desktop-1440.jpg 1440w" sizes="(min-width: 768px) 560px, 100vw" width="1440" height="900" alt="Live-Unterseite am Rechner: schmaler Inhaltsrahmen in der Seitenmitte mit eigenem Scrollbalken, daneben leere Fläche" loading="lazy" decoding="async">
+</picture>
+    </div>
+    <div class="vergleich__seite">
+      <span class="tag tag--ok">Nachher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/nachher-vorstand-desktop-480.avif 480w, ../assets/bilder/erzeugt/nachher-vorstand-desktop-960.avif 960w, ../assets/bilder/erzeugt/nachher-vorstand-desktop-1440.avif 1440w" sizes="(min-width: 768px) 560px, 100vw">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/nachher-vorstand-desktop-480.webp 480w, ../assets/bilder/erzeugt/nachher-vorstand-desktop-960.webp 960w, ../assets/bilder/erzeugt/nachher-vorstand-desktop-1440.webp 1440w" sizes="(min-width: 768px) 560px, 100vw">
+  <img src="../assets/bilder/erzeugt/nachher-vorstand-desktop-960.jpg" srcset="../assets/bilder/erzeugt/nachher-vorstand-desktop-480.jpg 480w, ../assets/bilder/erzeugt/nachher-vorstand-desktop-960.jpg 960w, ../assets/bilder/erzeugt/nachher-vorstand-desktop-1440.jpg 1440w" sizes="(min-width: 768px) 560px, 100vw" width="1440" height="900" alt="Prototyp-Vorstandsseite am Rechner im Inhaltsrahmen der appack-Fassung: Personenkarten mit Funktion und Vereinsmail" loading="lazy" decoding="async">
+</picture>
+    </div>
+  </div>
+  <figcaption class="fluss">
+    <p><strong>Besser:</strong> Vorstand mit Funktion und Vereinsmail, Porträts in passender Größe, keine Mobilnummern.</p>
+    <p><strong>Bleibt:</strong> Menüpunkt bleibt auf „Verein“ stehen, weil die Vorlage Unterseiten nicht kennt; kein Zurück-Knopf.</p>
+  </figcaption>
+</figure>
+  <figure class="vergleich vergleich--handy">
+  <div class="vergleich__raster">
+    <div class="vergleich__seite">
+      <span class="tag tag--warn">Vorher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/vorher-sponsoren-handy-480.avif 480w, ../assets/bilder/erzeugt/vorher-sponsoren-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/vorher-sponsoren-handy-480.webp 480w, ../assets/bilder/erzeugt/vorher-sponsoren-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/vorher-sponsoren-handy-780.jpg" srcset="../assets/bilder/erzeugt/vorher-sponsoren-handy-480.jpg 480w, ../assets/bilder/erzeugt/vorher-sponsoren-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Live-Sponsorenseite am Handy: oberste Kategorie zeigt ein Platzhalterbild, „App-Projektpartner“ erscheint zweimal" loading="lazy" decoding="async">
+</picture>
+    </div>
+    <div class="vergleich__seite">
+      <span class="tag tag--ok">Nachher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/nachher-sponsoren-handy-480.avif 480w, ../assets/bilder/erzeugt/nachher-sponsoren-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/nachher-sponsoren-handy-480.webp 480w, ../assets/bilder/erzeugt/nachher-sponsoren-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/nachher-sponsoren-handy-780.jpg" srcset="../assets/bilder/erzeugt/nachher-sponsoren-handy-480.jpg 480w, ../assets/bilder/erzeugt/nachher-sponsoren-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Prototyp-Sponsorenseite am Handy im Inhaltsrahmen der appack-Fassung: Kategorie Partner mit Logos, darunter der Beginn der Kategorie App-Projektpartner" loading="lazy" decoding="async">
+</picture>
+    </div>
+  </div>
+  <figcaption class="fluss">
+    <p><strong>Besser:</strong> Zwei Kategorien statt drei, kein Platzhalter „Hier könnte Ihre Werbung stehen“, Logos verkleinert, „Sponsor werden“ mit Vereinsmail.</p>
+    <p><strong>Bleibt:</strong> Erreichbar nur über Verein, nicht über einen eigenen Menüpunkt oder Link.</p>
+  </figcaption>
+</figure>
+  <figure class="vergleich vergleich--handy">
+  <div class="vergleich__raster">
+    <div class="vergleich__seite">
+      <span class="tag tag--warn">Vorher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/vorher-mitglied-werden-handy-480.avif 480w, ../assets/bilder/erzeugt/vorher-mitglied-werden-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/vorher-mitglied-werden-handy-480.webp 480w, ../assets/bilder/erzeugt/vorher-mitglied-werden-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/vorher-mitglied-werden-handy-780.jpg" srcset="../assets/bilder/erzeugt/vorher-mitglied-werden-handy-480.jpg 480w, ../assets/bilder/erzeugt/vorher-mitglied-werden-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Live-Formular am Handy: Antragsformular beginnt direkt mit den persönlichen Angaben, keine Beitragsangaben sichtbar" loading="lazy" decoding="async">
+</picture>
+    </div>
+    <div class="vergleich__seite">
+      <span class="tag tag--ok">Nachher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/nachher-mitglied-werden-handy-480.avif 480w, ../assets/bilder/erzeugt/nachher-mitglied-werden-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/nachher-mitglied-werden-handy-480.webp 480w, ../assets/bilder/erzeugt/nachher-mitglied-werden-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/nachher-mitglied-werden-handy-780.jpg" srcset="../assets/bilder/erzeugt/nachher-mitglied-werden-handy-480.jpg 480w, ../assets/bilder/erzeugt/nachher-mitglied-werden-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Prototyp-Seite Mitglied werden am Handy im Inhaltsrahmen der appack-Fassung: Beitragstabelle der Fußballabteilung vor dem Formular" loading="lazy" decoding="async">
+</picture>
+    </div>
+  </div>
+  <figcaption class="fluss">
+    <p><strong>Besser:</strong> Beiträge und Ablauf vor dem Formular, richtige Feldtypen, Datenschutzhinweis, SEPA-Text, Erziehungsberechtigte.</p>
+    <p><strong>Bleibt:</strong> Das Formular des Prototyps versendet nichts; das echte Formular bleibt das appack-Modul.</p>
+  </figcaption>
+</figure>
+  <figure class="vergleich vergleich--handy">
+  <div class="vergleich__raster">
+    <div class="vergleich__seite">
+      <span class="tag tag--warn">Vorher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/vorher-service-handy-480.avif 480w, ../assets/bilder/erzeugt/vorher-service-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/vorher-service-handy-480.webp 480w, ../assets/bilder/erzeugt/vorher-service-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/vorher-service-handy-780.jpg" srcset="../assets/bilder/erzeugt/vorher-service-handy-480.jpg 480w, ../assets/bilder/erzeugt/vorher-service-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Live-Serviceseite am Handy: drei unterschiedlich gestaltete Kacheln, eine mit KI-Wasserzeichen und dem Tippfehler „Mitgliedsbescheinigugen“" loading="lazy" decoding="async">
+</picture>
+    </div>
+    <div class="vergleich__seite">
+      <span class="tag tag--ok">Nachher</span>
+      <picture>
+  <source type="image/avif" srcset="../assets/bilder/erzeugt/nachher-downloads-handy-480.avif 480w, ../assets/bilder/erzeugt/nachher-downloads-handy-780.avif 780w" sizes="390px">
+  <source type="image/webp" srcset="../assets/bilder/erzeugt/nachher-downloads-handy-480.webp 480w, ../assets/bilder/erzeugt/nachher-downloads-handy-780.webp 780w" sizes="390px">
+  <img src="../assets/bilder/erzeugt/nachher-downloads-handy-780.jpg" srcset="../assets/bilder/erzeugt/nachher-downloads-handy-480.jpg 480w, ../assets/bilder/erzeugt/nachher-downloads-handy-780.jpg 780w" sizes="390px" width="780" height="1688" alt="Prototyp-Downloadseite am Handy im Inhaltsrahmen der appack-Fassung: einheitliche Liste mit Dateiformat, Größe und Seitenzahl je Dokument" loading="lazy" decoding="async">
+</picture>
+    </div>
+  </div>
+  <figcaption class="fluss">
+    <p><strong>Besser:</strong> Downloads mit Größe und Seitenzahl, kein KI-Bild, kein Tippfehler.</p>
+    <p><strong>Bleibt:</strong> Impressum und Datenschutz öffnen weiterhin im schmalen Rahmen der Vorlage.</p>
+  </figcaption>
+</figure>
+  </div>
+</section>
+<section class="abschnitt--hell abschnitt">
+  <div class="container fluss">
+    <h2>Was messbar ist</h2>
+    <div class="tabelle-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Merkmal</th>
+            <th>Live heute</th>
+            <th>appack-Fassung</th>
+            <th>Wer kann es ändern</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>Menüpunkte</td>
+          <td>12, dazu „Mehr“</td>
+          <td>6</td>
+          <td>Verein im CMS (MENU)</td>
+        </tr>
+        <tr>
+          <td>Trainingszeiten</td>
+          <td>0 Mannschaften</td>
+          <td>11 Mannschaften</td>
+          <td>Verein (Workspace-Seiten)</td>
+        </tr>
+        <tr>
+          <td>Inhaltsbreite Desktop</td>
+          <td>40 % der Fensterbreite (576 px bei 1440 px)</td>
+          <td>100 %</td>
+          <td>Verein im CMS (menuFullscreen)</td>
+        </tr>
+        <tr>
+          <td>Rahmenhöhe</td>
+          <td>fest 87 % der Fensterhöhe, zwei Scrollbereiche</td>
+          <td>fest 92 %, zwei Scrollbereiche</td>
+          <td>nur vmapit</td>
+        </tr>
+        <tr>
+          <td>Eigene Adresse je Seite, Zurück-Knopf, Lesezeichen</td>
+          <td>nein</td>
+          <td>nein (Direktlinks ohne Menü)</td>
+          <td>nur vmapit</td>
+        </tr>
+        <tr>
+          <td>Landeansicht mit Inhalt</td>
+          <td>nein</td>
+          <td>nein</td>
+          <td>nur vmapit</td>
+        </tr>
+        <tr>
+          <td>Kontrast aktiver Menüpunkt</td>
+          <td>2,3:1 (weiß auf #9e9cf0)</td>
+          <td>12,3:1 (#191793 auf weiß)</td>
+          <td>Verein im CMS (START)</td>
+        </tr>
+        <tr>
+          <td>Tippziele im Inhalt</td>
+          <td>26 × 17 px</td>
+          <td>mindestens 44 × 44 px</td>
+          <td>Verein (Workspace-Seiten)</td>
+        </tr>
+        <tr>
+          <td>Bilder</td>
+          <td>bis 1500 px für 150 px Anzeige</td>
+          <td>höchstens 200 KB, passende Größen</td>
+          <td>Verein (Mediathek/Workspace)</td>
+        </tr>
+        <tr>
+          <td>lang, Überschrift, Meta an sportfreunde04.de</td>
+          <td>nein</td>
+          <td>nein</td>
+          <td>nur vmapit</td>
+        </tr>
+        <tr>
+          <td>Lighthouse mobil sportfreunde04.de</td>
+          <td>33 / 50 / 78 / 82 (14.09.2026)</td>
+          <td>unverändert (Vorlage)</td>
+          <td>nur vmapit</td>
+        </tr>
+        <tr>
+          <td>Lighthouse mobil Workspace-Seiten per Direktlink</td>
+          <td>keine eigenen Seiten</td>
+          <td>96 / 100 / 100 / 100 (Minimum über 39 Seiten)</td>
+          <td>Verein</td>
+        </tr>
+        <tr>
+          <td>Private Mobilnummern öffentlich</td>
+          <td>19 (Stand 11.09.2026)</td>
+          <td>0</td>
+          <td>Verein im CMS</td>
+        </tr>
+        <tr>
+          <td>Fußzeile</td>
+          <td>„© appack 2026“</td>
+          <td>„© F.F.V. Sportfreunde 04, 2026“</td>
+          <td>Verein im CMS (FOOTER)</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="meta">Die Werte der Adresse sportfreunde04.de bestimmt die appack-Vorlage. Der Prototyp verspricht dort nichts, was der Verein nicht selbst im CMS oder im Workspace anlegen kann.</p>
+  </div>
+</section>
+<section class="abschnitt">
+  <div class="container fluss">
+    <h2>Was nur der Anbieter ändern kann</h2>
+    <ul role="list">
+      <li>Eigene Adresse je Seite und Zurück-Knopf</li>
+      <li>Landeansicht mit Inhalt</li>
+      <li>Rahmen, der mit dem Inhalt wächst</li>
+      <li>Menü als echte Links mit Tastaturbedienung</li>
+      <li>lang, Überschriften, Meta-Angaben und Vorschaubild an der Vereinsadresse</li>
+      <li>Impressum und Datenschutz als eigene Adressen</li>
+      <li>Suchmaschinen-Freigabe für Workspace-Seiten (cdn.appack.de/robots.txt sperrt sie)</li>
+    </ul>
+  </div>
+</section>
+</main>
+<footer class="ws-fuss"><p>Begleitmaterial für den Vorstand, nicht Teil der Website · Stand Dienstag, 15. September 2026</p></footer>
+</body>
+</html>

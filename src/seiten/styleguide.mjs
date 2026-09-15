@@ -313,7 +313,7 @@ function seiteBausteine(daten) {
       </tbody>
     </table>
   </div>
-  <p class="meta">Staffel D3: ${escapeHtml(d3Tabelle?.staffel ?? "")} · Momentaufnahme vom ${escapeHtml(daten.tabellen?.stand ?? "")} · unter 640px werden G/U/V/Tore (Klasse <code>tabelle__optional</code>) und Diff (Klasse <code>tabelle__optional-2</code>) ausgeblendet und Mannschaft (Klasse <code>tabelle__mannschaft</code>) gekürzt</p>`;
+  <p class="meta">Staffel D3: ${escapeHtml(d3Tabelle?.staffel ?? "")} · Momentaufnahme vom ${escapeHtml(daten.tabellen?.stand ? datumLang(daten.tabellen.stand) : "")} · unter 640px werden G/U/V/Tore (Klasse <code>tabelle__optional</code>) und Diff (Klasse <code>tabelle__optional-2</code>) ausgeblendet und Mannschaft (Klasse <code>tabelle__mannschaft</code>) gekürzt</p>`;
 
   const knoepfeBeispiel = `<p class="knopfzeile">
     <a class="knopf" href="#inhalt">Primärknopf</a>

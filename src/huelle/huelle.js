@@ -426,7 +426,8 @@
     var wide = document.querySelector(".wide");
     if (wide) {
       wide.style.backgroundImage = cssBackgroundImage(
-        fallback(data.startBackground, "https://cdn.appack.de/00_Appack_TEMPLATE/images/transparentwall.png")
+        // Rückfallwert der Vorlage, hier ohne fremden Host (P17, Schritt 0).
+        fallback(data.startBackground, "assets/huelle/startbild.jpg")
       );
     }
 
