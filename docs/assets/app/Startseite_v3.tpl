@@ -504,7 +504,7 @@ svg { display: block; flex: 0 0 auto; }
   function terminZeile(termin) {
     var start = new Date(termin.dateStart);
     var wochentag = new Intl.DateTimeFormat("de-DE", { weekday: "long" }).format(start);
-    var datumText = new Intl.DateTimeFormat("de-DE").format(start);
+    var datumText = new Intl.DateTimeFormat("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }).format(start);
     if (termin.allDay) {
       return wochentag + ", " + datumText + " · ganztags";
     }
