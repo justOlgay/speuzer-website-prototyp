@@ -94,22 +94,17 @@ function gruppenAbschnitt(karneval) {
 </section>`;
 }
 
-// W3, Abschnitt 7 (verbindliche Entscheidung): ein ruhiger Satz statt vier
-// "Übungszeit: Angabe folgt."-Kästen, mit dem bestehenden Mail-Knopf.
-function uebungszeitHinweisAbschnitt() {
-  return `<section class="abschnitt">
-  <div class="container fluss">
-    <p class="meta">Übungszeiten der übrigen Gruppen nennt die Abteilung auf Anfrage.</p>
-    <p class="knopfzeile">
-      <a class="knopf knopf--sekundaer" href="mailto:karnevalabteilung@sportfreunde04.de">E-Mail an die Karnevalabteilung</a>
-    </p>
-  </div>
-</section>`;
-}
-
 // Die drei Karneval-Funktionen aus data/vorstand.json: Abteilungsleiter (mit
 // Foto), Kassiererin und Schriftführerin (mit Platzhalter).
+//
+// W3b, Prüfer-Befund "klein": der frühere eigene
+// "Übungszeiten"-Hinweisabschnitt hatte einen zweiten, gleichlautenden
+// Knopf "E-Mail an die Karnevalabteilung" direkt über diesem Abschnitt und
+// die Mailadresse fest kodiert. Der Satz (W3, Abschnitt 7: kein
+// "Übungszeit: Angabe folgt."-Kasten) ist jetzt hier eingezogen, ein Knopf,
+// Adresse aus daten.karneval.mail.
 function ansprechpartnerAbschnitt(daten) {
+  const karneval = daten.karneval ?? {};
   const funktionen = ["Abteilungsleiter Karneval", "Kassiererin Abteilung Karneval", "Schriftführerin Abteilung Karneval"];
   const personen = funktionen
     .map((f) => (daten.vorstand ?? []).find((p) => p.funktion === f))
@@ -122,8 +117,9 @@ function ansprechpartnerAbschnitt(daten) {
     <div class="raster raster--personen">
       ${karten}
     </div>
+    <p class="meta">Übungszeiten der übrigen Gruppen nennt die Abteilung auf Anfrage.</p>
     <p class="knopfzeile">
-      <a class="knopf" href="mailto:karnevalabteilung@sportfreunde04.de">E-Mail an die Karnevalabteilung</a>
+      <a class="knopf" href="${escapeHtml(`mailto:${karneval.mail ?? "karnevalabteilung@sportfreunde04.de"}`)}">E-Mail an die Karnevalabteilung</a>
     </p>
   </div>
 </section>`;
@@ -145,7 +141,6 @@ export function seite(daten) {
   const inhalt = [
     seitenkopfAbschnitt(),
     gruppenAbschnitt(karneval),
-    uebungszeitHinweisAbschnitt(),
     ansprechpartnerAbschnitt(daten),
     hinweisAbschnitt(),
     ruecklinkAbschnitt(`${PFAD}verein/`, "Verein"),
@@ -153,7 +148,9 @@ export function seite(daten) {
 
   return {
     url: "/verein/karneval/",
-    title: "Karnevalabteilung",
+    // W3b, Prüfer-Befund "klein": title an H1 ("Karneval – Die Schnauzer")
+    // angeglichen, wie überall sonst einheitlich "Karneval" genannt.
+    title: "Karneval",
     // Wörtlicher Plan-Text hat 173 Zeichen (Gate in tools/pruefen.mjs: max.
     // 170) – kleinstmögliche Korrektur nach dem Muster von P2 (siehe
     // src/seiten/index.mjs): "Karnevalabteilung des FFV" zu

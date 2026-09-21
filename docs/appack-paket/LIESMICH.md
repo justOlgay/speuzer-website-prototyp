@@ -49,18 +49,31 @@ markieren Inhalt, der nur in einem der beiden Ausgabemodi erscheinen soll:
   entfernt den ganzen Block.
 
 Damit enthält `web/` ausschließlich Live-Inhalt: FUSSBALL.DE-Widgets für die
-Vereinsspiele (`spielplan.html`, Typ `club-matches`) und die Tabellen
-(`spielplan-<team>.html`, `tabellen.html`, je Typ `table`, IDs aus
-`data/widgets.json`) sowie `<iframe>`-Einbettungen der Gruppen-Seiten des
+Vereinsspiele (`spielplan.html`, Typ `club-matches`), das nächste Spiel und
+die Spiele der Saison je Team (`spielplan-<team>.html` UND
+`mannschaften-<team>.html`, Typen `next-match`/`team-matches`, IDs aus
+`data/widgets.json`) sowie die Tabellen (`spielplan-<team>.html`,
+`tabellen.html`, Typ `table`). Das betrifft acht der elf Mannschaften; nur
+die drei Teams ohne FUSSBALL.DE-Widget (F1, F2, G-Jugend – Kinderfußball,
+kein Ligabetrieb) behalten die `<iframe>`-Einbettung der Gruppen-Seite des
 Spielplan-Generators (`https://justolgay.github.io/speuzer-spielplan/
-app-<gruppe>.html`, `<gruppe>` ∈ herren, a-jugend, d-jugend, e-jugend,
-f-jugend, g-jugend) auf jeder `spielplan-<team>.html`. Das FUSSBALL.DE-Skript
-`widgets.js` wird clientseitig nur nachgeladen, wenn ein sichtbares
-Tabellen-Widget im Dokument steht (siehe `FUSSBALLDE_WIDGET_LADER` in
-`src/vorlagen/hilfen.mjs`). Die FUSSBALL.DE-Widgets sind bei FUSSBALL.DE nur
-für die Domain `cdn.appack.de` freigegeben – lokal oder auf GitHub Pages
-zeigen sie eine Fehlermeldung von FUSSBALL.DE, das ist kein Seitenfehler
-(siehe `tools/appack-paket-pruefen.mjs`).
+app-<gruppe>.html`) auch im Live-Paket, auf `spielplan-<team>.html` wie
+bisher. Das FUSSBALL.DE-Skript `widgets.js` wird clientseitig nur
+nachgeladen, wenn ein sichtbares FUSSBALL.DE-Widget – gleich welchen Typs
+(`next-match`, `team-matches`, `table`, `club-matches`) – im Dokument
+steht (siehe `FUSSBALLDE_WIDGET_LADER` in `src/vorlagen/hilfen.mjs`). Die
+FUSSBALL.DE-Widgets sind bei FUSSBALL.DE nur für die Domain `cdn.appack.de`
+freigegeben – lokal oder auf GitHub Pages zeigen sie eine Fehlermeldung von
+FUSSBALL.DE, das ist kein Seitenfehler (siehe
+`tools/appack-paket-pruefen.mjs`).
+
+## Datenschutz
+
+`datenschutz.html` nennt seit W3b die FUSSBALL.DE-Widgets als Drittanbieter
+(eigener Absatz, Rechtsgrundlage Art. 6 Abs. 1 lit. f DSGVO). Der Wortlaut
+ist redaktionell übernommen (W3-Spezifikation Abschnitt 7) – eine
+juristische Prüfung des Datenschutztexts ist offen, bevor die Seite live
+geht.
 
 ## Rückweg
 

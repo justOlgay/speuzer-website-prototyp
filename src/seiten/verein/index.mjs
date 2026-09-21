@@ -7,15 +7,9 @@
 // /verein/ueber-uns/ umgezogen (src/seiten/verein/ueber-uns.mjs) – hier
 // nichts gelöscht, nur verschoben.
 
-import { readFileSync } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
 // Diese Seite liegt immer unter "/verein/" (Tiefe 1), daher immer "../"
 // (siehe pfadZurWurzel() in tools/build.mjs).
 const PFAD = "../";
-
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 
 function liesVereinIcon() {
   // Verein-Icon wie im Klick-Prototyp (src/appkonzept/bildschirme.mjs,
@@ -52,10 +46,14 @@ function abteilungKarte(titel, untertitel, ziel) {
     </a>`;
 }
 
-function abteilungenAbschnitt() {
+// W3b, Prüfer-Befund "klein": Untertitel aus den Daten statt fest kodiert
+// (daten.teams.length bzw. daten.karneval.gruppen.length).
+function abteilungenAbschnitt(daten) {
+  const teamAnzahl = daten.teams?.length ?? 0;
+  const gruppenAnzahl = daten.karneval?.gruppen?.length ?? 0;
   const karten = [
-    abteilungKarte("Fußball", "11 Mannschaften, Herren bis G-Jugend", `${PFAD}mannschaften/`),
-    abteilungKarte("Karneval", "Die Schnauzer · 5 Gruppen", `${PFAD}verein/karneval/`),
+    abteilungKarte("Fußball", `${teamAnzahl} Mannschaften, Herren bis G-Jugend`, `${PFAD}mannschaften/`),
+    abteilungKarte("Karneval", `Die Schnauzer · ${gruppenAnzahl} Gruppen`, `${PFAD}verein/karneval/`),
   ].join("\n    ");
 
   return `<section class="abschnitt">
@@ -107,8 +105,8 @@ function derVereinAbschnitt() {
 </section>`;
 }
 
-export function seite() {
-  const inhalt = [seitenkopfAbschnitt(), abteilungenAbschnitt(), derVereinAbschnitt()].join("\n");
+export function seite(daten) {
+  const inhalt = [seitenkopfAbschnitt(), abteilungenAbschnitt(daten), derVereinAbschnitt()].join("\n");
 
   return {
     url: "/verein/",

@@ -72,11 +72,19 @@ function oeffnungszeitenZeilen(oeffnungszeiten) {
     .join("\n          ");
 }
 
-// Ist das Worksheet leer (keine Zeile geladen, alle Felder fehlen), zeigt der
-// Kasten stattdessen den Ausweichsatz aus der Spezifikation.
+// Ist das Worksheet leer (keine Zeile geladen, alle Felder fehlen) ODER hat
+// die Geschäftsstelle die Anzeige im Einstellungen-Worksheet deaktiviert
+// (oeffnungszeitenAktiv === false – dasselbe Feld "openingActive", mit dem
+// auch die App die Öffnungszeiten ausblendet, src/app/Geschaeftsstelle_v3.html;
+// W3b, Prüfer-Befund "wichtig"), zeigt der Kasten stattdessen den
+// Ausweichsatz aus der Spezifikation.
 function oeffnungszeitenHtml(geschaeftsstelle) {
   const oeffnungszeiten = geschaeftsstelle?.oeffnungszeiten;
-  if (!oeffnungszeiten || Object.keys(oeffnungszeiten).length === 0) {
+  if (
+    geschaeftsstelle?.oeffnungszeitenAktiv === false ||
+    !oeffnungszeiten ||
+    Object.keys(oeffnungszeiten).length === 0
+  ) {
     return `<p style="margin:0;">Die Geschäftsstelle ist per E-Mail erreichbar, telefonisch nach Vereinbarung.</p>`;
   }
   const zeilen = oeffnungszeitenZeilen(oeffnungszeiten);
@@ -197,11 +205,31 @@ function ansprechpartnerAbschnitt(daten) {
 // komponenten.css und /impressum/). Der Hinweiskasten rechts bekommt über
 // align-items:start (statt des Grid-Standards stretch) nur noch die Höhe
 // seines eigenen Inhalts (siehe .anfahrt__raster in komponenten.css).
+// Kontaktzeile (Telefon, E-Mail, Website, Instagram): W3-Spezifikation
+// Abschnitt 7 verlangt, dass kontakt.html aus data/geschaeftsstelle.json
+// "die Öffnungszeiten … und die Kontaktzeile" rendert (W3b, Prüfer-Befund
+// "wichtig" – bislang kamen diese vier Felder nur aus data/verein.json).
+// data/verein.json bleibt Fallback, falls das appack-Worksheet ein Feld
+// nicht liefert. Facebook bleibt bewusst aus data/verein.json (der Befund
+// nennt nur Telefon/E-Mail/Website/Instagram als Kontaktzeile; der
+// abweichende Facebook-Wert im Worksheet – eine Gruppe statt der
+// Vereinsseite – ist ungeklärt, siehe Abschlussbericht).
+function ausWorksheetOderVerein(wert, fallback) {
+  const text = String(wert ?? "").trim();
+  return text || fallback;
+}
+
 function geschaeftsstelleAbschnitt(daten) {
   const verein = daten.verein ?? {};
   const sportstaette = verein.sportstaette ?? {};
   const post = verein.post ?? {};
   const geschaeftsstelle = daten.geschaeftsstelle ?? {};
+  const kontakt = geschaeftsstelle.kontakt ?? {};
+
+  const telefonGeschaeftsstelle = ausWorksheetOderVerein(kontakt.phoneNumber, verein.tel_geschaeftsstelle);
+  const email = ausWorksheetOderVerein(kontakt.email, verein.mail ?? "geschaeftsstelle@sportfreunde04.de");
+  const website = ausWorksheetOderVerein(kontakt.website, "");
+  const instagram = ausWorksheetOderVerein(kontakt.insta, verein.instagram);
 
   return `<section class="abschnitt--hell abschnitt">
   <div class="container fluss">
@@ -217,17 +245,24 @@ function geschaeftsstelleAbschnitt(daten) {
           <dd>${escapeHtml(post.postfach ?? "")}<br>${escapeHtml(post.plz ?? "")} ${escapeHtml(post.ort ?? "")}</dd>
 
           <dt>E-Mail</dt>
-          <dd><p style="margin:0;">${mailLink(verein.mail ?? "geschaeftsstelle@sportfreunde04.de")}</p></dd>
+          <dd><p style="margin:0;">${mailLink(email)}</p></dd>
 
           <dt>Telefon</dt>
           <dd>
-            <p style="margin:0;"><a href="${telHref(verein.tel_geschaeftsstelle)}">Geschäftsstelle ${escapeHtml(verein.tel_geschaeftsstelle ?? "")}</a></p>
+            <p style="margin:0;"><a href="${telHref(telefonGeschaeftsstelle)}">Geschäftsstelle ${escapeHtml(telefonGeschaeftsstelle ?? "")}</a></p>
             <p style="margin:0;"><a href="${telHref(verein.tel_platzwart)}">Platzwart ${escapeHtml(verein.tel_platzwart ?? "")}</a></p>
           </dd>
 
+          ${
+            website
+              ? `<dt>Website</dt>
+          <dd><p style="margin:0;"><a href="${escapeHtml(website)}" rel="noopener" target="_blank">${escapeHtml(website.replace(/^https?:\/\//, ""))}</a></p></dd>`
+              : ""
+          }
+
           <dt>Social</dt>
           <dd>
-            <p style="margin:0;"><a href="${escapeHtml(verein.instagram ?? "")}" rel="noopener" target="_blank">Instagram @speuzer_ffm</a></p>
+            <p style="margin:0;"><a href="${escapeHtml(instagram ?? "")}" rel="noopener" target="_blank">Instagram @speuzer_ffm</a></p>
             <p style="margin:0;"><a href="${escapeHtml(verein.facebook ?? "")}" rel="noopener" target="_blank">Facebook</a></p>
           </dd>
         </dl>

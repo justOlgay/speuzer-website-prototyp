@@ -35,6 +35,12 @@ WHITELIST_TELEFON = {
     # liefert (data/geschaeftsstelle.json, tools/appack-daten.mjs) – mit
     # Bindestrich statt Leerzeichen.
     "069-736868",
+    # W3b: dieselbe Nummer in der kompakten Schreibweise ohne Trennzeichen, wie
+    # sie im tel:-Link (href) steht, seitdem kontakt.mjs die Geschäftsstellen-
+    # Telefonnummer aus data/geschaeftsstelle.json (Worksheet-Schreibweise
+    # "069-736868") statt aus data/verein.json rendert – telHref() entfernt
+    # dafür alle Nicht-Ziffern.
+    "069736868",
 }
 
 MUSTER_TELEFON_1 = re.compile(r"\+49[\d /()\-]{6,}")

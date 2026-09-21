@@ -159,6 +159,16 @@
     <p><a href="mannschaften.html">‹ Zurück zu Mannschaften</a></p>
   </div>
 </section>
+<script>
+(function () {
+  if (document.querySelector('[data-nur-appack]:not([hidden]) .fussballde_widget')) {
+    var s = document.createElement('script');
+    s.src = 'https://www.fussball.de/widgets.js';
+    s.defer = true;
+    document.head.appendChild(s);
+  }
+})();
+</script>
 </main>
 <footer class="ws-fuss">
   <div data-nur-prototyp>

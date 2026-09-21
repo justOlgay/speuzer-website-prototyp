@@ -12,6 +12,13 @@
 //     saturdayhider, sundayhider, openingtext
 //   Kontakt: 6a1ec5fcf68a05bf129cdb9b
 //     Felder: address, postalCode, city, phoneNumber, email, website, insta, face
+//   Einstellungen (W3b, Prüfer-Befund "wichtig"): 6a1ec5fcf68a05bf129cdba2
+//     Feld: openingActive – dasselbe Worksheet/Feld, mit dem die App
+//     (src/app/Geschaeftsstelle_v3.html, EINSTELLUNGEN_ID) entscheidet, ob
+//     die Öffnungszeiten überhaupt angezeigt werden. Live am 2026-09-21:
+//     openingActive=false, d. h. die Geschäftsstelle hat die
+//     Öffnungszeiten-Anzeige bewusst deaktiviert. Nur dieses eine Feld wird
+//     übernommen, keine der Button-/Farbfelder dieses Worksheets.
 //
 // Aufruf: POST https://appack.de/rest-api/public/workbook/worksheet/<id>?sortBy=_id&sortDirection=1&skip=0&limit=50
 // Body: {} (leer)
@@ -27,6 +34,7 @@ const ZIEL = path.join(ROOT, "data", "geschaeftsstelle.json");
 
 const WORKSHEET_OEFFNUNGSZEITEN = "6a1ec5fcf68a05bf129cdb9d";
 const WORKSHEET_KONTAKT = "6a1ec5fcf68a05bf129cdb9b";
+const WORKSHEET_EINSTELLUNGEN = "6a1ec5fcf68a05bf129cdba2";
 
 const OEFFNUNGSZEITEN_FELDER = [
   "mondayopen", "mondayclose", "mondaymidstart", "mondaymidend",
@@ -75,6 +83,10 @@ async function main() {
   const kontaktZeilen = await holeWorksheet(WORKSHEET_KONTAKT);
   console.log(`  ${kontaktZeilen.length} Zeile(n).`);
 
+  console.log("Hole Einstellungen (Worksheet " + WORKSHEET_EINSTELLUNGEN + ") …");
+  const einstellungenZeilen = await holeWorksheet(WORKSHEET_EINSTELLUNGEN);
+  console.log(`  ${einstellungenZeilen.length} Zeile(n).`);
+
   // Erste Zeile je Worksheet (sortBy=_id, aufsteigend) – bei mehreren Zeilen
   // im Kontakt-Worksheet (hier: zwei, eine für die Postanschrift, eine für
   // die Sportstätte) ist unklar, welche für "die Kontaktzeile" auf
@@ -82,9 +94,15 @@ async function main() {
   // Abschlussbericht, Abschnitt "Offene Fragen").
   const oeffnungszeiten = nurFelder(oeffnungszeitenZeilen[0], OEFFNUNGSZEITEN_FELDER);
   const kontakt = nurFelder(kontaktZeilen[0], KONTAKT_FELDER);
+  // Einstellungen-Worksheet: erste Zeile, nur das Feld "openingActive"
+  // (gleiche Bedeutung wie in der App – dort blendet
+  // "if (einstellungen.openingActive !== true) return;" die
+  // Öffnungszeiten-Anzeige aus).
+  const oeffnungszeitenAktiv = einstellungenZeilen[0]?.openingActive === true;
 
   const ausgabe = {
-    _quelle: `appack public workbook API, Worksheets ${WORKSHEET_OEFFNUNGSZEITEN} (Öffnungszeiten) und ${WORKSHEET_KONTAKT} (Kontakt), geholt am ${new Date().toISOString().slice(0, 10)} mit tools/appack-daten.mjs. Nur die in der W3-Spezifikation genannten Felder; keine Personendaten, "mobileNumber" bewusst nicht übernommen.`,
+    _quelle: `appack public workbook API, Worksheets ${WORKSHEET_OEFFNUNGSZEITEN} (Öffnungszeiten), ${WORKSHEET_KONTAKT} (Kontakt) und ${WORKSHEET_EINSTELLUNGEN} (Einstellungen, nur Feld openingActive), geholt am ${new Date().toISOString().slice(0, 10)} mit tools/appack-daten.mjs. Nur die in der W3-Spezifikation genannten Felder; keine Personendaten, "mobileNumber" bewusst nicht übernommen.`,
+    oeffnungszeitenAktiv,
     oeffnungszeiten,
     kontakt,
   };

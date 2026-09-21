@@ -1,5 +1,6 @@
 {
-  "_quelle": "appack public workbook API, Worksheets 6a1ec5fcf68a05bf129cdb9d (Öffnungszeiten) und 6a1ec5fcf68a05bf129cdb9b (Kontakt), geholt am 2026-09-21 mit tools/appack-daten.mjs. Nur die in der W3-Spezifikation genannten Felder; keine Personendaten, \"mobileNumber\" bewusst nicht übernommen.",
+  "_quelle": "appack public workbook API, Worksheets 6a1ec5fcf68a05bf129cdb9d (Öffnungszeiten), 6a1ec5fcf68a05bf129cdb9b (Kontakt) und 6a1ec5fcf68a05bf129cdba2 (Einstellungen, nur Feld openingActive), geholt am 2026-09-21 mit tools/appack-daten.mjs. Nur die in der W3-Spezifikation genannten Felder; keine Personendaten, \"mobileNumber\" bewusst nicht übernommen.",
+  "oeffnungszeitenAktiv": false,
   "oeffnungszeiten": {
     "mondayopen": "09:30",
     "mondayclose": "16:00",

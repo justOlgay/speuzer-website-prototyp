@@ -48,7 +48,7 @@ function teamKarte(team) {
   return `<a class="karte karte--link" href="${PFAD}mannschaften/${team.slug}/">
       <span class="karte__titel">${escapeHtml(team.name)}</span>
       <span class="karte__meta">${escapeHtml(jahrgangPraefix(team))} · ${escapeHtml(team.staffel ?? "")}</span>
-      <span class="karte__mehr">Zur Mannschaft →</span>
+      <span class="karte__mehr">Zur Mannschaft ›</span>
     </a>`;
 }
 
@@ -74,7 +74,10 @@ function gruppenAbschnitt({ titel, satz, slugs, teamNachSlug, id }) {
 // Karneval-Karte rückt in den Kopfbereich, als zweite "Abteilung" neben
 // einem Verweis auf die Fußball-Mannschaften weiter unten auf derselben
 // Seite – kürzerer Weg zu den Schnauzern.
-function abteilungenKopfAbschnitt() {
+// W3b, Prüfer-Befund "klein": Untertitel aus den Daten statt fest kodiert
+// (daten.karneval.gruppen.length statt "5").
+function abteilungenKopfAbschnitt(daten) {
+  const gruppenAnzahl = daten.karneval?.gruppen?.length ?? 0;
   return `<section class="abschnitt">
   <div class="container fluss">
     <div class="raster raster--2">
@@ -86,7 +89,7 @@ function abteilungenKopfAbschnitt() {
       <a class="karte karte--link karte--abteilung" href="${PFAD}verein/karneval/">
         ${liesVereinIcon()}
         <span class="karte__titel">Karneval</span>
-        <span class="karte__meta">Die Schnauzer · 5 Gruppen</span>
+        <span class="karte__meta">Die Schnauzer · ${gruppenAnzahl} Gruppen</span>
       </a>
     </div>
   </div>
@@ -148,7 +151,7 @@ export function seite(daten) {
     },
     {
       titel: "Jugend",
-      satz: "Ligabetrieb im Kreis Frankfurt, Spielpläne und Tabellen aus dem DFBnet.",
+      satz: "Ligabetrieb im Kreis Frankfurt, Spielplan & Tabellen aus dem DFBnet.",
       slugs: ["a-jugend", "d1", "d2", "d3", "e1", "e2", "e3"],
     },
     {
@@ -165,7 +168,7 @@ export function seite(daten) {
   // Trainingszeiten → Probetraining → Zusatzangebote.
   const inhalt = [
     seitenkopf,
-    abteilungenKopfAbschnitt(),
+    abteilungenKopfAbschnitt(daten),
     ...gruppen,
     // P15: Trainingszeiten-Baustein (ursprünglich Startseite) nach der
     // Mannschaftsübersicht eingefügt (siehe src/vorlagen/bausteine.mjs). Der
@@ -182,8 +185,14 @@ export function seite(daten) {
   return {
     url: "/mannschaften/",
     title: "Mannschaften",
+    // W3b, Prüfer-Befund "klein": "Spielpläne" -> "Spielplan & Tabellen"
+    // (einheitlicher Begriff) machte den Satz mit 175 Zeichen zu lang (Gate
+    // in tools/pruefen.mjs: max. 170) – kleinstmögliche Korrektur nach dem
+    // Muster von P2/verein/karneval.mjs: "von den Herren bis zur G-Jugend"
+    // zu "von Herren bis G-Jugend" gekürzt (167 Zeichen), Wortlaut sonst
+    // unverändert.
     description:
-      "Alle elf Fußballmannschaften des FFV Sportfreunde 04 in Frankfurt-Gallus: Jahrgänge, Trainingszeiten, Ansprechpartner und Spielpläne von den Herren bis zur G-Jugend.",
+      "Alle elf Fußballmannschaften des FFV Sportfreunde 04 in Frankfurt-Gallus: Jahrgänge, Trainingszeiten, Ansprechpartner und Spielplan & Tabellen von Herren bis G-Jugend.",
     inhalt,
   };
 }
