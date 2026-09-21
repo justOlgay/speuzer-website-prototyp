@@ -10,6 +10,8 @@
   },
   "scripts": {
     "build": "node tools/build.mjs",
+    "appack-paket": "node tools/appack-paket.mjs",
+    "appack-paket-pruefen": "node tools/appack-paket-pruefen.mjs",
     "huelle-bilder": "node tools/huelle-bilder.mjs",
     "pruefen": "node tools/pruefen.mjs",
     "pii": "python3 tools/pii-check.py",

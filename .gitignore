@@ -3,3 +3,4 @@ node_modules/
 tools/cache/
 scratch/
 *.log
+dist/
