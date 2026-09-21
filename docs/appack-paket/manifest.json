@@ -1,5 +1,5 @@
 {
-  "erzeugt": "2026-09-21T15:39:43.170Z",
+  "erzeugt": "2026-09-21T16:19:48.787Z",
   "zielOrdner": "web",
   "quelle": {
     "build": "npm run build",
@@ -183,8 +183,8 @@
     },
     {
       "datei": "web/verein-vorstand.html",
-      "bytes": 90063,
-      "sha256": "05b45605d3439f9c4223f7bc6049c8b79cf797eba363d242ff022acbfa283f09"
+      "bytes": 90402,
+      "sha256": "852512a5b8cde89bf06258fbe0418c483964b63d7565d974b2515a3b1256b5cf"
     },
     {
       "datei": "web/verein.html",

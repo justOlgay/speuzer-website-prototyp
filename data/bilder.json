@@ -158,6 +158,22 @@
       }
     }
   },
+  "olgay-2026-09": {
+    "breite": 900,
+    "hoehe": 1200,
+    "varianten": {
+      "480": {
+        "avif": "olgay-2026-09-480.avif",
+        "webp": "olgay-2026-09-480.webp",
+        "jpg": "olgay-2026-09-480.jpg"
+      },
+      "900": {
+        "avif": "olgay-2026-09-900.avif",
+        "webp": "olgay-2026-09-900.webp",
+        "jpg": "olgay-2026-09-900.jpg"
+      }
+    }
+  },
   "sponsor-11teamsports": {
     "breite": 1500,
     "hoehe": 224,
@@ -497,18 +513,23 @@
     }
   },
   "vorstand-olgay-ozkan": {
-    "breite": 683,
-    "hoehe": 1024,
+    "breite": 1000,
+    "hoehe": 1500,
     "varianten": {
       "480": {
         "avif": "vorstand-olgay-ozkan-480.avif",
         "webp": "vorstand-olgay-ozkan-480.webp",
         "jpg": "vorstand-olgay-ozkan-480.jpg"
       },
-      "683": {
-        "avif": "vorstand-olgay-ozkan-683.avif",
-        "webp": "vorstand-olgay-ozkan-683.webp",
-        "jpg": "vorstand-olgay-ozkan-683.jpg"
+      "960": {
+        "avif": "vorstand-olgay-ozkan-960.avif",
+        "webp": "vorstand-olgay-ozkan-960.webp",
+        "jpg": "vorstand-olgay-ozkan-960.jpg"
+      },
+      "1000": {
+        "avif": "vorstand-olgay-ozkan-1000.avif",
+        "webp": "vorstand-olgay-ozkan-1000.webp",
+        "jpg": "vorstand-olgay-ozkan-1000.jpg"
       }
     }
   },
