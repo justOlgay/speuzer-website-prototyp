@@ -268,6 +268,52 @@ laufen über `textContent`.
    Test in der echten App (iOS und Android) den jeweiligen Seitenlink in
    der Modulverwaltung umstellen.
 
+### Stand 21.09.2026: angelegt, umgeschaltet, Tab-Leiste umgebaut
+
+Alle fünf Seiten sind im CMS als dynamische Seiten angelegt und
+byteidentisch mit `assets/app/*_v3.tpl` (Stand C1c):
+
+| Seite | CMS-Id | Datenquelle im CMS |
+|---|---|---|
+| `Verein_v3.tpl` | `6ab12e907c926dc3ed235ed4` | Verein |
+| `Mannschaften_v3.tpl` | `6ab130532c5834b857aedb76` | Mannschaften |
+| `Karneval_v3.tpl` | `6ab1309a8db70284fa135c83` | Sportangebote (heute „Karneval") |
+| `Vorstand_v3.tpl` | `6ab130c82c5834b857aedbe9` | Ansprechpartner (heute „Vorstand & Kontakt") |
+| `Sponsoren_v3.tpl` | `6ab130f57c926dc3ed23b683` | Sponsoren |
+
+**Datenquelle ist doch nötig:** ohne Datenquelle meldet das CMS „nicht
+vollständig konfiguriert" und `rest-api/drender/<Id>` antwortet mit
+HTTP 500. Die Seiten lesen daraus nichts, die Zuordnung ist nur formal.
+Öffentlich abrufbar unter `https://appack.de/rest-api/drender/<CMS-Id>`
+(Prüfung mit echten Worksheet-Daten in Chrome: keine Skriptfehler, kein
+horizontales Scrollen bei 390 px).
+
+**Module umgestellt (Seitenlink):** alle fünf Module aus der Tabelle
+oben zeigen seit 21.09.2026 auf die `_v3`-Seiten. Zwei Module wurden
+dabei umbenannt (Modulverwaltung → Zeile bearbeiten → Titel): „Sportangebote"
+→ „Karneval", „Ansprechpartner" → „Vorstand & Kontakt". Rückweg für den
+Titel: derselbe Weg.
+
+**App-Menü (Tab-Leiste) umgebaut:** Modulverwaltung → App Menü. Neu
+hinzugefügt über „Modul hinzufügen" + „+": Termine (Terminmodul), News,
+Verein – neue Einträge sind zunächst „Nach Rolle: App-Administrator",
+also für Mitglieder unsichtbar; danach Sichtbarkeit auf „Öffentlich"
+gestellt und Icons gesetzt (Zeile bearbeiten → Stift in der Icon-Spalte →
+Reiter „Fontawesome - light": `calendar-alt`, `newspaper`; Verein hatte
+`futbol`). Reihenfolge per Ziehen am ≡-Griff; aus dem Menü entfernt
+(Zeile markieren → „Aus dem Menü entfernen", entfernt nur den Eintrag,
+nicht das Modul): Karneval (ehem. Sportangebote) und Mannschaften – beide
+sind über den Verteiler „Verein" erreichbar.
+
+Menü seit 21.09.2026: **Start · Termine · News · Verein** · Mehr (Allgemeine
+Infos, Medien, Profil, Impressum, Push-Versand nur für Rollen). Die App
+zeigt die neue Tab-Leiste nach einem Neustart.
+
+**Rückweg Tab-Leiste:** App Menü → „Modul hinzufügen" Sportangebote/Karneval
+und Mannschaften wieder hinzufügen, Sichtbarkeit „Öffentlich", per ≡ an
+Position 2 und 3 ziehen; Termine, News, Verein markieren und „Aus dem Menü
+entfernen". Nichts davon löscht Inhalte.
+
 ### Umschalten je Modul / Rückweg
 
 Modulverwaltung → jeweiliges Modul (Tabelle oben) → Seitenlink (Stift →
