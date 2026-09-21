@@ -2,7 +2,15 @@
 // data/teams.json: Training, nächste Spiele, Ansprechpartner, Heimspiele,
 // Kalender-Abos, Verweis auf weitere Mannschaften derselben Gruppe.
 
-import { mailLink, jahrgangText, naechsteSpiele, spielZeile, trainingsZeilen, brotkrume } from "../../vorlagen/hilfen.mjs";
+import {
+  mailLink,
+  jahrgangText,
+  naechsteSpiele,
+  spielZeile,
+  trainingsZeilen,
+  brotkrume,
+  FUSSBALLDE_WIDGET_LADER,
+} from "../../vorlagen/hilfen.mjs";
 
 // Diese Seiten liegen immer unter "/mannschaften/<slug>/" (Tiefe 2), daher
 // immer "../../" (siehe pfadZurWurzel() in tools/build.mjs).
@@ -141,8 +149,10 @@ function hauptspalte(team, daten) {
       <h2>Nächste Spiele</h2>
       ${spieleHtml}
     </div>`
-    : `<h2>Nächste Spiele</h2>
-    ${spieleHtml}`;
+    : `<div data-nur-prototyp>
+      <h2>Nächste Spiele</h2>
+      ${spieleHtml}
+    </div>`;
 
   return `<div class="fluss">
     <h2>Training</h2>
@@ -256,6 +266,7 @@ function seiteFuerTeam(team, daten) {
   </div>
 </section>`,
     weitereMannschaftenAbschnitt(team, daten),
+    daten.widgets?.[team.slug]?.spiele ? FUSSBALLDE_WIDGET_LADER : "",
   ].join("\n");
 
   return {

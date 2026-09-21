@@ -199,6 +199,12 @@
   color: var(--ink-3);
   text-decoration: underline;
   text-decoration-color: var(--line);
+  /* W3b, Prüfer-Befund "klein": Brotkrumen-Links waren nur 23-24px hoch
+     (die Fließtext-Ausnahme im Tippziel-Gate, tools/pruefen.mjs, ließ das
+     durch) – Abschnitt 6 verlangt ≥44px Tippziel für geänderte Seiten. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 
 .brotkrumen a:hover,

@@ -230,6 +230,26 @@ function antragOnlineAbschnitt(daten) {
 </section>`;
 }
 
+// ---------- Mach mit (W3b, Prüfer-Befund "wichtig") ----------
+
+// Spezifikation Abschnitt 1: am Ende der Seite auf verein-mach-mit.html
+// verweisen, Baustein wie ".zeile" in src/seiten/verein/index.mjs.
+function machMitAbschnitt() {
+  return `<section class="abschnitt">
+  <div class="container fluss">
+    <div class="zeilen-liste">
+      <a class="zeile" href="${PFAD}verein/mach-mit/">
+        <span class="zeile__text">
+          <span class="zeile__titel">Mach mit: Trainer, Betreuer, Helfer</span>
+          <span class="zeile__untertitel">So kannst du den Verein unterstützen</span>
+        </span>
+        <svg class="zeile__pfeil" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>`;
+}
+
 // ---------- Abschluss ----------
 
 function abschlussAbschnitt() {
@@ -252,6 +272,7 @@ export function seite(daten) {
     unterlagenAbschnitt(daten),
     antragOnlineAbschnitt(daten),
     abschlussAbschnitt(),
+    machMitAbschnitt(),
   ].join("\n");
 
   return {

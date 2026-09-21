@@ -126,14 +126,14 @@ function spielplaeneAbschnitt(daten) {
       <span class="karte__meta">${escapeHtml(team.staffel ?? "")}</span>
       <div data-nur-appack hidden><span class="meta">Termine live aus dem DFBnet</span></div>
       <div data-nur-prototyp><span class="meta">${naechstesSpielText(daten, team)}</span></div>
-      <span class="karte__mehr">Zum Spielplan →</span>
+      <span class="karte__mehr">Zum Spielplan ›</span>
     </a>`
     )
     .join("\n    ");
 
   return `<section class="abschnitt--hell abschnitt">
   <div class="container fluss">
-    <h2>Spielpläne je Mannschaft</h2>
+    <h2>Spielplan je Mannschaft</h2>
     <div class="raster raster--3">
     ${karten}
     </div>
@@ -205,7 +205,7 @@ export function seite(daten) {
     url: "/spielplan/",
     title: "Spielplan & Tabellen",
     description:
-      "Spielpläne und Tabellen aller Mannschaften des FFV Sportfreunde 04: nächste Spiele, ganze Saison je Team und Kalender-Abo – direkt aus dem DFBnet, täglich aktualisiert.",
+      "Spielplan & Tabellen aller Mannschaften des FFV Sportfreunde 04: nächste Spiele, ganze Saison je Team und Kalender-Abo – direkt aus dem DFBnet, täglich aktualisiert.",
     inhalt,
   };
 }
