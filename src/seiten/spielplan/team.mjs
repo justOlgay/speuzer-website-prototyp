@@ -121,19 +121,17 @@ function naechstesSpielAbschnitt(team, daten) {
     </div>`;
   }
 
-  return `<section class="abschnitt">
+  // W2c: Auf der Live-Website entfällt der Abschnitt ganz – der Generator
+  // unten hebt das nächste Spiel selbst hervor; ein Hinweiskasten allein
+  // ließe nur eine leere Fläche. Im Prototyp bleibt die eingefrorene Karte.
+  return `<div data-nur-prototyp>
+<section class="abschnitt">
   <div class="container fluss">
     <h2>Nächstes Spiel</h2>
-    <div data-nur-appack hidden>
-      <div class="hinweis hinweis--info">
-        <p style="margin:0;">Das nächste Spiel steht live im Spielplan unten (Quelle: DFBnet).</p>
-      </div>
-    </div>
-    <div data-nur-prototyp>
-      ${prototypInhalt}
-    </div>
+    ${prototypInhalt}
   </div>
-</section>`;
+</section>
+</div>`;
 }
 
 // ---------- Hauptspalte: Ganze Saison (W2: Generator-iframe, beide Modi) ----------
@@ -172,13 +170,13 @@ function ganzeSaisonAbschnitt(team, daten) {
   const gruppenTeams = (daten.teams ?? []).filter((t) => GRUPPE_JE_TEAM[t.slug] === gruppe);
   const geschwisterHinweis =
     gruppenTeams.length > 1
-      ? `<p class="meta">Diese Übersicht zeigt die ganze Gruppe: ${escapeHtml(
+      ? `<p class="meta">Die Übersicht zeigt die ganze Gruppe (${escapeHtml(
           gruppenTeams.map((t) => t.kurz).join(", ")
-        )}.</p>`
-      : "";
+        )}); das nächste Spiel ist hervorgehoben.</p>`
+      : `<p class="meta">Das nächste Spiel ist hervorgehoben.</p>`;
 
   return `<div class="fluss">
-    <h2>Ganze Saison</h2>
+    <h2>Spielplan der Saison</h2>
     <iframe src="${escapeHtml(generatorUrl)}" title="${escapeHtml(`Spielplan ${team.name} (Generator, DFBnet)`)}" loading="lazy" data-generator-iframe style="width:100%;height:640px;border:0;border-radius:var(--r-lg);display:block;"></iframe>
     ${geschwisterHinweis}
     <p class="meta">Quelle: DFBnet, täglich aktualisiert. Tippen auf ein Spiel öffnet FUSSBALL.DE.</p>

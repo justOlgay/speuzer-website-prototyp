@@ -1,5 +1,5 @@
 {
-  "erzeugt": "2026-09-21T17:01:04.296Z",
+  "erzeugt": "2026-09-21T17:29:44.985Z",
   "zielOrdner": "web",
   "quelle": {
     "build": "npm run build",
@@ -93,58 +93,58 @@
     },
     {
       "datei": "web/spielplan-a-jugend.html",
-      "bytes": 5259,
-      "sha256": "06e1498c22d4b08de9b956db23836c669758dddb4f4fda1b5cd9615bda4889b8"
+      "bytes": 5019,
+      "sha256": "0af50dafd9a6b44fbe83f4d397673a956fb0085d90cfd693b0bcc615fe9c30d0"
     },
     {
       "datei": "web/spielplan-d1.html",
-      "bytes": 5403,
-      "sha256": "d33db66e7e3e3e4e0afe070da274184ce1a68afdbaccd4162183873d9e46d5b1"
+      "bytes": 5143,
+      "sha256": "e2e736705063770dd3b4974837c75f77ed6e43270bac847cca5d48bd22964f61"
     },
     {
       "datei": "web/spielplan-d2.html",
-      "bytes": 5338,
-      "sha256": "18b62c360374d98cd85b4ed5cbfd844db3db196824d675ce6f4e7ce1122f82be"
+      "bytes": 5078,
+      "sha256": "41f02c012d8f95e30c11877c6dd95f129de6bc96b279ef01f299254580b6dad2"
     },
     {
       "datei": "web/spielplan-d3.html",
-      "bytes": 5306,
-      "sha256": "45bd83eb1e7416d1fb433e0a7bbbf98b5c193e61cdbd86e7bd312871639024d0"
+      "bytes": 5046,
+      "sha256": "cd1fc7b859d4e493ce49e2af0e24de51721f43d5e18810677aa2abca4fc0542e"
     },
     {
       "datei": "web/spielplan-e1.html",
-      "bytes": 5382,
-      "sha256": "d2c633ffb38815953ca005b35b00b9f9ef70de5953acce98ceeebd92143d1bc3"
+      "bytes": 5122,
+      "sha256": "089922fc52cfa052b249048bf157b9ed967d43f04be50999c0c692b33081b9ff"
     },
     {
       "datei": "web/spielplan-e2.html",
-      "bytes": 5370,
-      "sha256": "1a29fe55fe491108694e04d3cebcc29b101aa98e7edd709011cd6fcd9218479b"
+      "bytes": 5110,
+      "sha256": "832adfaea8c6ea57965f27bce0472d1a93a760709e0b028849b6470034852689"
     },
     {
       "datei": "web/spielplan-e3.html",
-      "bytes": 5338,
-      "sha256": "c92a6a0f6c06abed03f7fc407c61e9ba427ba7efde237003e05beead87cb9784"
+      "bytes": 5078,
+      "sha256": "8ac63a3d829a144dd13d093fabd99ed2583afe49b9e031aa27bbd54f5f46ff3a"
     },
     {
       "datei": "web/spielplan-f1.html",
-      "bytes": 4968,
-      "sha256": "af54ab7bb35a222abad0dc186e33856064205d56edad97c8d7cd316de68d4177"
+      "bytes": 4708,
+      "sha256": "a2ac154ac6112b67ac413ff2d665e199669a7133337f33b589bf65caa35c59e3"
     },
     {
       "datei": "web/spielplan-f2.html",
-      "bytes": 4971,
-      "sha256": "73ee3c263d64d1e90830f1ce17580d3275973c1b997f0cb0ad8a7ea9819c783c"
+      "bytes": 4711,
+      "sha256": "2ab8b158018472275b1146993ec525dd041d6ba001b0604a44346ffa6c5c61a8"
     },
     {
       "datei": "web/spielplan-g-jugend.html",
-      "bytes": 4961,
-      "sha256": "ec741b32d1bea371bdf9ebe079fc8c4ea2048cf92914e04190b4a7a5e953c12c"
+      "bytes": 4721,
+      "sha256": "6c04867dca3d8304c05e68ed16d9f6754f85716eeeb42b5e6b180fbcaee6a518"
     },
     {
       "datei": "web/spielplan-herren.html",
-      "bytes": 5338,
-      "sha256": "22478b7b6aef991c13762288f2a18f9710504db3df8e854c1e4d73150c67cf11"
+      "bytes": 5098,
+      "sha256": "ecbfcfc62959a6a543b472b0e6314586463e7fc5a6abb09570dd2b1e5ad56073"
     },
     {
       "datei": "web/spielplan.html",
