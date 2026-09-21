@@ -573,6 +573,14 @@ svg { display: block; flex: 0 0 auto; }
     var knoepfe = document.createElement("div");
     knoepfe.className = "termin-karte__knoepfe";
 
+    // Zu-/Absage bewusst nicht auf der Startseite (Entscheidung 21.09.2026);
+    // "Details" öffnet den Termin im Kalendermodul, dort ist die Rückmeldung.
+    var details = document.createElement("button");
+    details.type = "button";
+    details.className = "knopf knopf--leise";
+    details.textContent = "Details";
+    details.addEventListener("click", function () { oeffneTermin(termin.id); });
+
     knoepfe.appendChild(details);
     inhalt.appendChild(knoepfe);
 
