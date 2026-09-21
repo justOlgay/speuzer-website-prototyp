@@ -323,6 +323,24 @@ Seitenlink. Die alten Vorlagen (`Verein.tpl`, `Abteilungen.tpl`,
 `Abteilungsliste.tpl`, `Ansprechpartnerliste.tpl`, `Sponsoren.tpl`) bleiben
 dafür unverändert im CMS bestehen und müssen nicht gelöscht werden.
 
+### Stand 21.09.2026, 22:55 Uhr: C2 live
+
+Alle drei Seiten sind im CMS angelegt, byteidentisch mit `assets/app/`
+(Stand C2b/C2c) und die Module umgestellt:
+
+| Datei | CMS-Id / Adresse | Datenquelle im CMS | Modul zeigt jetzt auf |
+|---|---|---|---|
+| `Geschaeftsstelle_v3.tpl` | `6ab1974d7c926dc3ed2a3021` (`appack.de/rest-api/drender/…`) | Geschäftsstelle | `Geschaeftsstelle_v3.tpl` |
+| `Ueber-uns_v3.tpl` | `6ab197527c926dc3ed2a3022` | Über uns | `Ueber-uns_v3.tpl` |
+| `Spielplan-App.html` | statisch an der Workspace-Wurzel, `cdn.appack.de/sportfreunde04/workspace/Spielplan-App.html` | – (HTML) | `Spielplan-App.html` |
+
+Das Modul „Übersicht aller Spiele" (`sportfreunde04_TextImage_1783345459688`)
+heißt seit 21.09.2026 **„Spielplan & Tabellen"** (Modulverwaltung → Zeile
+bearbeiten → Titel). Rückweg für den Titel: derselbe Weg. Die sechs
+Stufe-C-Seiten (`Startseite_v3` … `Sponsoren_v3`) wurden am selben Abend
+mit dem C2-Stand neu eingespielt (u. a. Fußballschulen als eigener
+Abschnitt, Verein-Verteiler mit „Spielplan & Tabellen", Gast-Fix Startseite).
+
 ### Bauweise
 
 Gemeinsame Grundlage `src/app/v3-basis.css` (Schriften, Tokens,
