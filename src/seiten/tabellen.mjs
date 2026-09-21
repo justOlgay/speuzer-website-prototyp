@@ -15,6 +15,12 @@ function escapeHtml(text) {
     .replaceAll('"', "&quot;");
 }
 
+// W2b (Prüfer-Befund, wichtig): die Kopfzeile "Momentaufnahme vom …" stand
+// unconditional über den Live-Widgets. appack-Modus zeigt jetzt einen
+// neutralen Hinweis ohne Stand-Datum, der Prototyp weiterhin die
+// Momentaufnahme mit Stand-Angabe – dort ergänzt um den Satz, dass Spielplan
+// und Tabellen auf der Vereinswebsite live aus dem DFBnet kommen (Kleiner
+// Befund, einmal im Seitenkopf statt je Team).
 function seitenkopfAbschnitt(daten) {
   const stand = daten.tabellen?.stand ?? daten.stand;
   const uhrzeit = String(stand).slice(11, 16);
@@ -22,7 +28,13 @@ function seitenkopfAbschnitt(daten) {
   <div class="container">
     <h1>Tabellen</h1>
     <p class="seitenkopf__lead">Die aktuellen Tabellen unserer Mannschaften mit Ligabetrieb.</p>
-    <p class="meta">Momentaufnahme vom ${datumLang(stand)}, ${zeit(uhrzeit)} · live auf FUSSBALL.DE</p>
+    <div data-nur-appack hidden>
+      <p class="meta">Live-Tabellen aus dem DFBnet, laufend aktualisiert von FUSSBALL.DE.</p>
+    </div>
+    <div data-nur-prototyp>
+      <p class="meta">Momentaufnahme vom ${datumLang(stand)}, ${zeit(uhrzeit)} · live auf FUSSBALL.DE</p>
+      <p class="meta">Auf der Vereinswebsite kommen Spielplan und Tabellen live aus dem DFBnet.</p>
+    </div>
   </div>
 </section>`;
 }
@@ -149,7 +161,7 @@ export function seite(daten) {
     url: "/tabellen/",
     title: "Tabellen",
     description:
-      "Aktuelle Tabellen der Herren, A-Jugend, D- und E-Jugend des FFV Sportfreunde 04 – Momentaufnahme aus FUSSBALL.DE mit Platz, Spielen, Toren und Punkten.",
+      "Aktuelle Tabellen der Herren, A-Jugend, D- und E-Jugend des FFV Sportfreunde 04 – Platz, Spiele, Tore und Punkte live aus dem DFBnet.",
     inhalt,
     bodyclass: "tabellen",
   };

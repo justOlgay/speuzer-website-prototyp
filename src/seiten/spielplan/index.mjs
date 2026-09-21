@@ -101,6 +101,10 @@ function naechstesSpielText(daten, team) {
   return `Nächstes Spiel: ${datumKurz(spiel.datum)} ${zeit(spiel.zeit)} · ${escapeHtml(gegnerText)} (${heimAuswaerts})`;
 }
 
+// W2b (Prüfer-Befund, wichtig): die "Nächstes Spiel:"-Zeile je Team-Karte war
+// eingefroren und ohne Ausgabemodus-Split. appack-Modus zeigt jetzt einen
+// neutralen Hinweis ohne Datum/Gegner, der Prototyp weiterhin die
+// eingefrorene Kurzangabe.
 function spielplaeneAbschnitt(daten) {
   const teams = daten.teams ?? [];
   const karten = teams
@@ -108,7 +112,8 @@ function spielplaeneAbschnitt(daten) {
       (team) => `<a class="karte karte--link" href="${PFAD}spielplan/${team.slug}/">
       <span class="karte__titel">${escapeHtml(team.name)}</span>
       <span class="karte__meta">${escapeHtml(team.staffel ?? "")}</span>
-      <span class="meta">${naechstesSpielText(daten, team)}</span>
+      <div data-nur-appack hidden><span class="meta">Termine live aus dem DFBnet</span></div>
+      <div data-nur-prototyp><span class="meta">${naechstesSpielText(daten, team)}</span></div>
       <span class="karte__mehr">Zum Spielplan →</span>
     </a>`
     )
@@ -126,18 +131,23 @@ function spielplaeneAbschnitt(daten) {
 
 // ---------- Tabellen (Kurzübersicht) ----------
 
+// W2b (Prüfer-Befund, wichtig): die Tabellen-Kurzübersicht zeigte den
+// eingefrorenen Tabellenplatz ohne Ausgabemodus-Split. appack-Modus zeigt
+// jetzt einen neutralen Hinweis ohne Platzangabe, der Prototyp weiterhin die
+// eingefrorene Platzangabe.
 function tabellenAbschnitt(daten) {
   const teams = (daten.teams ?? []).filter((t) => t.tabelle);
   const karten = teams
     .map((team) => {
       const eintrag = daten.tabellen?.teams?.[team.slug];
       const eigene = eintrag?.zeilen?.find((z) => z.eigene);
-      const zeile = eigene
+      const zeilePrototyp = eigene
         ? `<span class="meta">Platz ${eigene.platz} von ${eintrag.zeilen.length} · ${eigene.punkte} Punkte</span>`
         : `<span class="meta">Tabelle ansehen</span>`;
       return `<a class="karte karte--link" href="${PFAD}tabellen/#${team.slug}">
       <span class="karte__titel">${escapeHtml(team.kurz)}</span>
-      ${zeile}
+      <div data-nur-appack hidden><span class="meta">Live-Tabelle ansehen</span></div>
+      <div data-nur-prototyp>${zeilePrototyp}</div>
     </a>`;
     })
     .join("\n    ");

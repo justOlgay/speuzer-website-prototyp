@@ -34,7 +34,13 @@
 <section class="abschnitt">
   <div class="container fluss">
     <h2>Nächstes Spiel</h2>
-    <div class="karte karte--spiel">
+    <div data-nur-appack hidden>
+      <div class="hinweis hinweis--info">
+        <p style="margin:0;">Das nächste Spiel steht live im Spielplan unten (Quelle: DFBnet).</p>
+      </div>
+    </div>
+    <div data-nur-prototyp>
+      <div class="karte karte--spiel">
       <p class="karte__spiel-datum">Sonntag, 27. September 2026 · 10:30 Uhr</p>
       <p class="knopfzeile" style="margin:0;">
         <span class="tag tag--auswaerts">Auswärts</span>
@@ -46,6 +52,7 @@
         <a class="knopf knopf--sekundaer" href="https://www.google.com/maps/search/?api=1&amp;query=Gerberm%C3%BChlstr.%20109%2C%2060594%20Frankfurt%20am%20Main" rel="noopener" target="_blank">Route</a>
       </p>
       <p><a href="https://www.fussball.de/spiel/x/-/spiel/031I71UTNC000000VS5489BUVVKNMR0J" rel="noopener" target="_blank">Spiel auf FUSSBALL.DE</a></p>
+    </div>
     </div>
   </div>
 </section>
@@ -88,6 +95,7 @@
         <p class="knopfzeile">
           <a class="knopf knopf--sekundaer" href="tabellen.html#d2">Zur Tabelle</a>
         </p>
+        <p class="meta">Auf der Vereinswebsite kommen Spielplan und Tabellen live aus dem DFBnet.</p>
       </div>
     </div>
     <div class="karte fluss">
@@ -122,7 +130,9 @@
 </script>
 </main>
 <footer class="ws-fuss">
+  <div data-nur-prototyp>
   <p>Prototyp · Testumgebung, keine Live-Seite · Inhalte Stand Montag, 21. September 2026</p>
+  </div>
 </footer>
 </body>
 </html>

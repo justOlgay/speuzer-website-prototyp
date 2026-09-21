@@ -69,47 +69,44 @@ function seitenkopfAbschnitt(team) {
 
 // ---------- Nächstes Spiel ----------
 
+// W2b (Prüfer-Befund, wichtig): die Karte "Nächstes Spiel" zeigte
+// eingefrorenes Datum/Gegner ohne Ausgabemodus-Split. appack-Modus zeigt
+// jetzt einen neutralen Hinweis (das Generator-iframe "Ganze Saison" weiter
+// unten auf derselben Seite zeigt das nächste Spiel live), der Prototyp
+// weiterhin die eingefrorene Spielkarte wie bisher.
 function naechstesSpielAbschnitt(team, daten) {
   const [spiel] = naechsteSpiele(daten, { team: team.slug, anzahl: 1 });
 
+  let prototypInhalt;
   if (!spiel) {
     const qualiHinweis = ["e1", "e2", "e3"].includes(team.slug)
       ? `<p style="margin:var(--sp-2) 0 0;">Die Hauptrunde wird vom Kreis nach der Qualifikationsrunde eingeteilt.</p>`
       : "";
-    return `<section class="abschnitt">
-  <div class="container fluss">
-    <h2>Nächstes Spiel</h2>
-    <div class="hinweis hinweis--info">
+    prototypInhalt = `<div class="hinweis hinweis--info">
       <p style="margin:0;">Zurzeit ist kein Spiel angesetzt.</p>
       ${qualiHinweis}
-    </div>
-  </div>
-</section>`;
-  }
+    </div>`;
+  } else {
+    const istKinderfestivalOhneGegner = !spiel.gegner && spiel.wettbewerb === "Kinderfestival";
+    const gegnerText = istKinderfestivalOhneGegner
+      ? spiel.heimspiel
+        ? "Kinderfestival – Heimspieltag"
+        : `Kinderfestival bei ${spiel.heim ?? ""}`
+      : spiel.gegner ?? "";
 
-  const istKinderfestivalOhneGegner = !spiel.gegner && spiel.wettbewerb === "Kinderfestival";
-  const gegnerText = istKinderfestivalOhneGegner
-    ? spiel.heimspiel
-      ? "Kinderfestival – Heimspieltag"
-      : `Kinderfestival bei ${spiel.heim ?? ""}`
-    : spiel.gegner ?? "";
+    const tagKlasse = spiel.heimspiel ? "tag--heim" : "tag--auswaerts";
+    const tagText = spiel.heimspiel ? "Heim" : "Auswärts";
+    const wtag = wettbewerbTag(spiel);
 
-  const tagKlasse = spiel.heimspiel ? "tag--heim" : "tag--auswaerts";
-  const tagText = spiel.heimspiel ? "Heim" : "Auswärts";
-  const wtag = wettbewerbTag(spiel);
+    const routeTeil = spiel.spielstaette
+      ? `<a class="knopf knopf--sekundaer" href="${escapeHtml(googleMapsUrl(spiel.spielstaette))}" rel="noopener" target="_blank">Route</a>`
+      : "";
 
-  const routeTeil = spiel.spielstaette
-    ? `<a class="knopf knopf--sekundaer" href="${escapeHtml(googleMapsUrl(spiel.spielstaette))}" rel="noopener" target="_blank">Route</a>`
-    : "";
+    const fussballdeTeil = spiel.fussballde_link
+      ? `<p><a href="${escapeHtml(spiel.fussballde_link)}" rel="noopener" target="_blank">Spiel auf FUSSBALL.DE</a></p>`
+      : "";
 
-  const fussballdeTeil = spiel.fussballde_link
-    ? `<p><a href="${escapeHtml(spiel.fussballde_link)}" rel="noopener" target="_blank">Spiel auf FUSSBALL.DE</a></p>`
-    : "";
-
-  return `<section class="abschnitt">
-  <div class="container fluss">
-    <h2>Nächstes Spiel</h2>
-    <div class="karte karte--spiel">
+    prototypInhalt = `<div class="karte karte--spiel">
       <p class="karte__spiel-datum">${datumLang(spiel.datum)} · ${zeit(spiel.zeit)}</p>
       <p class="knopfzeile" style="margin:0;">
         <span class="tag ${tagKlasse}">${tagText}</span>
@@ -121,6 +118,19 @@ function naechstesSpielAbschnitt(team, daten) {
         ${routeTeil}
       </p>
       ${fussballdeTeil}
+    </div>`;
+  }
+
+  return `<section class="abschnitt">
+  <div class="container fluss">
+    <h2>Nächstes Spiel</h2>
+    <div data-nur-appack hidden>
+      <div class="hinweis hinweis--info">
+        <p style="margin:0;">Das nächste Spiel steht live im Spielplan unten (Quelle: DFBnet).</p>
+      </div>
+    </div>
+    <div data-nur-prototyp>
+      ${prototypInhalt}
     </div>
   </div>
 </section>`;
@@ -219,6 +229,7 @@ function seitenspalte(team, daten) {
         <p class="knopfzeile">
           <a class="knopf knopf--sekundaer" href="${PFAD}tabellen/#${team.slug}">Zur Tabelle</a>
         </p>
+        <p class="meta">Auf der Vereinswebsite kommen Spielplan und Tabellen live aus dem DFBnet.</p>
       </div>
     </div>`
     : `<div class="karte fluss">
