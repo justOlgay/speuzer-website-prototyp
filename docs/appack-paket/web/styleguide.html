@@ -1,0 +1,908 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gestaltungssystem – FFV Sportfreunde 04</title>
+<meta name="description" content="Interner Anhang: alle Gestaltungs-Tokens des Prototyps – Farben, Schrift, Abstände, Radien, Schatten, Knöpfe, Fokuszustand und Wappen.">
+<link rel="canonical" href="https://justolgay.github.io/speuzer-website-prototyp/ws/styleguide.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FFV Sportfreunde 04">
+<meta property="og:title" content="Gestaltungssystem – FFV Sportfreunde 04">
+<meta property="og:description" content="Interner Anhang: alle Gestaltungs-Tokens des Prototyps – Farben, Schrift, Abstände, Radien, Schatten, Knöpfe, Fokuszustand und Wappen.">
+<meta property="og:url" content="https://justolgay.github.io/speuzer-website-prototyp/ws/styleguide.html">
+<meta property="og:image" content="https://justolgay.github.io/speuzer-website-prototyp/assets/og/standard.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#191793">
+<link rel="icon" href="https://justolgay.github.io/speuzer-website-prototyp/assets/logo/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="https://justolgay.github.io/speuzer-website-prototyp/assets/logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="https://justolgay.github.io/speuzer-website-prototyp/assets/logo/apple-touch-icon.png">
+<link rel="preload" href="https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="site.css">
+</head>
+<body class="ws ">
+<main id="inhalt">
+
+<section class="container abschnitt sg">
+  <h1>Gestaltungssystem „Speuzer Blau-Weiß“</h1>
+  <div class="fluss">
+  <p class="inhalt">Die Bausteine gelten für die Inhaltsseiten (Workspace-Seiten) im appack-Rahmen. Kopfleiste, Menü und Fußbereich stellt die appack-Vorlage; ihre Gestaltung ist im CMS nur über Farben, Logo, Startbild und Texte beeinflussbar.</p>
+  <p class="inhalt">Interner Anhang für das Übernahmepaket: alle Tokens aus assets/css/tokens.css und alle Bausteine aus assets/css/komponenten.css, sichtbar gemacht. Stand des Builds: Montag, 21. September 2026.</p>
+  <h2>Farben</h2>
+<p class="inhalt">Ein Blauklang aus dem Wappen (Hue 240) plus neutrale Tinte. Kein Rot, kein Gelb, kein dekoratives Grau. Kontrastwerte nach WCAG-Formel, siehe Plan Abschnitt 2.1.</p>
+<div class="sg-farbraster" role="list">
+  <div class="sg-farbe" role="listitem" style="background:#0B0E4A;color:#FFFFFF">
+    <strong>--blau-950</strong>
+    <span>#0B0E4A</span>
+    <span class="sg-klein">Fußbereich, dunkle Flächen</span>
+    <span class="sg-klein">Weiß darauf 17,2:1</span>
+  </div>
+  <div class="sg-farbe" role="listitem" style="background:#151A7A;color:#FFFFFF">
+    <strong>--blau-900</strong>
+    <span>#151A7A</span>
+    <span class="sg-klein">Kopfleiste, Überschriften auf Weiß</span>
+    <span class="sg-klein">auf Weiß 14,4:1</span>
+  </div>
+  <div class="sg-farbe" role="listitem" style="background:#191793;color:#FFFFFF">
+    <strong>--blau-800</strong>
+    <span>#191793</span>
+    <span class="sg-klein">Primärflächen (App-Hauptfarbe)</span>
+    <span class="sg-klein">Weiß darauf 13,3:1</span>
+  </div>
+  <div class="sg-farbe" role="listitem" style="background:#1F2DBE;color:#FFFFFF">
+    <strong>--blau-700</strong>
+    <span>#1F2DBE</span>
+    <span class="sg-klein">Primärknopf, Links</span>
+    <span class="sg-klein">auf Weiß 9,7:1, auf --bg 8,9:1</span>
+  </div>
+  <div class="sg-farbe" role="listitem" style="background:#2A3BDD;color:#FFFFFF">
+    <strong>--blau-600</strong>
+    <span>#2A3BDD</span>
+    <span class="sg-klein">Hover Knopf/Link</span>
+    <span class="sg-klein">auf Weiß 7,6:1</span>
+  </div>
+  <div class="sg-farbe" role="listitem" style="background:#3D4FEA;color:#FFFFFF">
+    <strong>--blau-500</strong>
+    <span>#3D4FEA</span>
+    <span class="sg-klein">Fokusrahmen, Akzentlinien</span>
+    <span class="sg-klein">auf Weiß 6,0:1 (nur Rahmen/Grafik, nicht Fließtext)</span>
+  </div>
+  <div class="sg-farbe" role="listitem" style="background:#E4E7FA;color:#12142B">
+    <strong>--blau-100</strong>
+    <span>#E4E7FA</span>
+    <span class="sg-klein">helle Kacheln, Tags</span>
+    <span class="sg-klein">Tinte darauf 14,7:1</span>
+  </div>
+  <div class="sg-farbe" role="listitem" style="background:#F3F5FC;color:#12142B">
+    <strong>--blau-50</strong>
+    <span>#F3F5FC</span>
+    <span class="sg-klein">Sektionshintergrund</span>
+    <span class="sg-klein">–</span>
+  </div>
+  <div class="sg-farbe" role="listitem" style="background:#12142B;color:#FFFFFF">
+    <strong>--ink</strong>
+    <span>#12142B</span>
+    <span class="sg-klein">Fließtext</span>
+    <span class="sg-klein">auf Weiß 18,1:1</span>
+  </div>
+  <div class="sg-farbe" role="listitem" style="background:#3F4360;color:#FFFFFF">
+    <strong>--ink-2</strong>
+    <span>#3F4360</span>
+    <span class="sg-klein">Nebentext</span>
+    <span class="sg-klein">auf Weiß 9,6:1</span>
+  </div>
+  <div class="sg-farbe" role="listitem" style="background:#5B6079;color:#FFFFFF">
+    <strong>--ink-3</strong>
+    <span>#5B6079</span>
+    <span class="sg-klein">Meta (Datum, Quelle)</span>
+    <span class="sg-klein">auf Weiß 6,2:1, auf --bg 5,7:1</span>
+  </div>
+  <div class="sg-farbe" role="listitem" style="background:#D8DBEA;color:#12142B">
+    <strong>--line</strong>
+    <span>#D8DBEA</span>
+    <span class="sg-klein">Trennlinien, Tabellenlinien</span>
+    <span class="sg-klein">–</span>
+  </div>
+  <div class="sg-farbe" role="listitem" style="background:#F5F6FB;color:#12142B">
+    <strong>--bg</strong>
+    <span>#F5F6FB</span>
+    <span class="sg-klein">Seitenhintergrund</span>
+    <span class="sg-klein">–</span>
+  </div>
+  <div class="sg-farbe" role="listitem" style="background:#FFFFFF;color:#12142B">
+    <strong>--surface / --weiss</strong>
+    <span>#FFFFFF</span>
+    <span class="sg-klein">Karten / Text auf Blau</span>
+    <span class="sg-klein">–</span>
+  </div>
+  <div class="sg-farbe" role="listitem" style="background:#1E6B3A;color:#FFFFFF">
+    <strong>--ok</strong>
+    <span>#1E6B3A</span>
+    <span class="sg-klein">Heimspiel-Tag (nur Text)</span>
+    <span class="sg-klein">auf Weiß 6,5:1</span>
+  </div>
+  <div class="sg-farbe" role="listitem" style="background:#8A4B00;color:#FFFFFF">
+    <strong>--warn</strong>
+    <span>#8A4B00</span>
+    <span class="sg-klein">offene Angabe (nur Text)</span>
+    <span class="sg-klein">auf Weiß 6,9:1</span>
+  </div>
+  <div class="sg-farbe" role="listitem" style="background:#0300FD;color:#FFFFFF">
+    <strong>--wappen</strong>
+    <span>#0300FD</span>
+    <span class="sg-klein">nur im Logo selbst</span>
+    <span class="sg-klein">–</span>
+  </div>
+</div>
+  <h2>Schrift</h2>
+<p class="inhalt">Überschriften, Zahlen und Ergebnisse in Barlow Condensed (600/700), Fließtext und Bedienung in Inter (400/600). Beide Schriften selbst gehostet als woff2.</p>
+<div class="sg-schriftskala">
+  <p style="font-size:var(--fs-xs);font-family:var(--font-head);line-height:var(--lh-head);margin:0;">--fs-xs — .8rem</p>
+  <p style="font-size:var(--fs-sm);font-family:var(--font-head);line-height:var(--lh-head);margin:0;">--fs-sm — .9rem</p>
+  <p style="font-size:var(--fs-md);font-family:var(--font-head);line-height:var(--lh-head);margin:0;">--fs-md — 1rem</p>
+  <p style="font-size:var(--fs-lg);font-family:var(--font-head);line-height:var(--lh-head);margin:0;">--fs-lg — 1.25rem</p>
+  <p style="font-size:var(--fs-xl);font-family:var(--font-head);line-height:var(--lh-head);margin:0;">--fs-xl — 1.5625rem</p>
+  <p style="font-size:var(--fs-2xl);font-family:var(--font-head);line-height:var(--lh-head);margin:0;">--fs-2xl — 1.953rem</p>
+  <p style="font-size:var(--fs-3xl);font-family:var(--font-head);line-height:var(--lh-head);margin:0;">--fs-3xl — 2.441rem</p>
+  <p style="font-size:var(--fs-4xl);font-family:var(--font-head);line-height:var(--lh-head);margin:0;">--fs-4xl — clamp(2.4rem, 5vw, 3.6rem)</p>
+</div>
+<p style="font-family:var(--font-text);font-size:var(--fs-md);max-width:var(--measure);">Fließtext-Beispiel in Inter: Zeilenlänge maximal 65 Zeichen (--measure), Zeilenhöhe 1,55 für gute Lesbarkeit auf allen Bildschirmgrößen.</p>
+  <h2>Abstände, Radien, Schatten</h2>
+<div class="sg-abstaende">
+  <div class="sg-abstand"><div class="sg-abstand__balken" style="width:var(--sp-1)"></div><span>--sp-1 (4px)</span></div>
+  <div class="sg-abstand"><div class="sg-abstand__balken" style="width:var(--sp-2)"></div><span>--sp-2 (8px)</span></div>
+  <div class="sg-abstand"><div class="sg-abstand__balken" style="width:var(--sp-3)"></div><span>--sp-3 (12px)</span></div>
+  <div class="sg-abstand"><div class="sg-abstand__balken" style="width:var(--sp-4)"></div><span>--sp-4 (16px)</span></div>
+  <div class="sg-abstand"><div class="sg-abstand__balken" style="width:var(--sp-5)"></div><span>--sp-5 (24px)</span></div>
+  <div class="sg-abstand"><div class="sg-abstand__balken" style="width:var(--sp-6)"></div><span>--sp-6 (32px)</span></div>
+  <div class="sg-abstand"><div class="sg-abstand__balken" style="width:var(--sp-7)"></div><span>--sp-7 (48px)</span></div>
+  <div class="sg-abstand"><div class="sg-abstand__balken" style="width:var(--sp-8)"></div><span>--sp-8 (64px)</span></div>
+  <div class="sg-abstand"><div class="sg-abstand__balken" style="width:var(--sp-9)"></div><span>--sp-9 (96px)</span></div>
+</div>
+<div class="sg-radien">
+  <div class="sg-radius" style="border-radius:var(--r-sm)"><span>--r-sm 6px</span></div>
+  <div class="sg-radius" style="border-radius:var(--r-md)"><span>--r-md 12px</span></div>
+  <div class="sg-radius" style="border-radius:var(--r-lg)"><span>--r-lg 20px</span></div>
+  <div class="sg-radius" style="border-radius:var(--r-pill)"><span>--r-pill 999px</span></div>
+</div>
+<div class="sg-schatten">
+  <div class="sg-schatten__box" style="box-shadow:var(--sh-1)"><span>--sh-1</span></div>
+  <div class="sg-schatten__box" style="box-shadow:var(--sh-2)"><span>--sh-2</span></div>
+</div>
+  <h2>Knöpfe und Fokuszustand</h2>
+<p class="inhalt">Mindesthöhe 44 px. Mit der Tabulatortaste erreichbar; der sichtbare Fokusrahmen (3 px, --blau-500) erscheint beim Draufspringen.</p>
+<p>
+  <a class="knopf" href="#inhalt">Primärknopf</a>
+  <a class="knopf knopf--sekundaer" href="#inhalt">Sekundärknopf</a>
+</p>
+<p>Zum Testen des Fokusrahmens mit der Tabulatortaste zu diesem Link springen: <a href="#inhalt">Beispiellink</a></p>
+  <h2>Wappen</h2>
+<p class="inhalt">Aus der Vektorquelle (CorelDRAW-EPS) neu aufgerichtet: die Raute steht mit der Spitze nach oben, der Schriftzug „F.F.V. SPORTFREUNDE E.V. 1904“ ist waagerecht lesbar. Drei Varianten: einfärbbar (currentColor), fest Blau, fest Weiß.</p>
+<div class="sg-wappen-raster">
+  <div class="sg-wappen-zelle sg-wappen-zelle--hell" style="color:#0300FD">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="-146 -127 2139 2090">
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1585 1555 C 1356 1778 1084 1963 924 1963 C 763 1963 491 1778 262 1555 C 38 1336 -146 1078 -146 918 C -146 757 38 500 262 281 C 491 57 763 -127 924 -127 C 1084 -127 1356 57 1585 281 C 1809 500 1993 757 1993 918 C 1993 1078 1809 1336 1585 1555 Z M 924 1935 C 1079 1935 1343 1755 1567 1537 C 1786 1323 1965 1073 1965 918 C 1965 762 1786 512 1567 298 C 1343 80 1079 -99 924 -99 C 768 -99 504 80 280 298 C 62 512 -118 762 -118 918 C -118 1073 62 1323 280 1537 C 504 1755 768 1935 924 1935"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1093 115 C 1200 151 1336 224 1479 367 C 1553 441 1605 513 1642 579 L 1092 579 L 1093 115"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 755 115 C 648 151 511 224 369 367 C 294 441 242 513 205 579 L 756 579 L 755 115"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1093 1721 C 1200 1685 1336 1611 1479 1468 C 1553 1394 1605 1322 1642 1256 L 1092 1256 L 1093 1721"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 755 1721 C 648 1685 511 1611 369 1468 C 294 1394 242 1322 206 1256 L 756 1256 L 755 1721"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 305 676 L 305 731 L 462 731 C 462 731 468 714 477 714 C 486 714 549 792 549 792 C 549 792 552 802 544 802 C 536 802 520 785 508 785 L 305 785 L 305 861 C 305 874 335 880 335 880 L 335 909 L 214 909 L 214 883 C 214 883 245 877 245 863 L 245 669 C 245 655 214 649 214 649 L 214 622 L 542 622 L 591 673 C 591 673 593 685 580 682 C 568 679 555 675 555 675 L 305 676"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 587 902 C 608 902 625 884 625 863 C 625 842 608 824 587 824 C 565 824 548 842 548 863 C 548 884 565 902 587 902"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 815 676 L 815 731 L 972 731 C 972 731 978 714 987 714 C 997 714 1059 792 1059 792 C 1059 792 1062 802 1054 802 C 1047 802 1030 785 1018 785 L 815 785 L 815 861 C 815 874 845 880 845 880 L 845 909 L 725 909 L 725 883 C 725 883 755 877 755 863 L 755 669 C 755 655 725 649 725 649 L 725 622 L 1053 622 L 1101 673 C 1101 673 1103 685 1091 682 C 1079 679 1065 675 1065 675 L 815 676"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1097 902 C 1118 902 1135 884 1136 863 C 1135 842 1118 824 1097 824 C 1075 824 1058 842 1058 863 C 1058 884 1075 902 1097 902"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1592 902 C 1613 902 1631 884 1631 863 C 1631 842 1613 824 1592 824 C 1571 824 1553 842 1553 863 C 1553 884 1571 902 1592 902"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1390 918 L 1587 662 C 1587 662 1620 640 1631 635 C 1642 631 1643 618 1643 618 L 1472 618 L 1497 664 L 1390 796 L 1282 664 L 1308 618 L 1136 618 C 1136 618 1137 631 1148 635 C 1159 640 1192 662 1192 662 L 1390 918"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 197 1165 C 199 1173 202 1179 206 1184 C 210 1189 215 1192 221 1194 C 226 1196 232 1197 238 1197 C 242 1197 246 1196 250 1195 C 254 1193 258 1190 262 1186 C 266 1182 269 1178 271 1172 C 273 1166 275 1158 275 1150 C 275 1143 274 1138 272 1133 C 270 1128 268 1124 265 1121 C 263 1118 260 1115 256 1113 C 253 1111 250 1109 246 1108 L 216 1095 C 212 1093 208 1091 204 1089 C 200 1086 197 1083 194 1078 C 192 1074 189 1069 187 1062 C 186 1056 185 1048 185 1039 C 185 1034 186 1027 187 1019 C 188 1012 191 1005 194 998 C 198 991 202 985 209 981 C 215 976 223 974 232 974 C 239 974 245 975 252 978 C 258 981 263 986 268 992 C 272 998 276 1006 279 1015 C 282 1024 283 1034 283 1046 L 270 1046 C 270 1037 268 1029 266 1023 C 264 1016 261 1011 258 1006 C 255 1002 251 998 246 996 C 242 994 237 993 232 993 C 228 993 224 993 219 995 C 215 997 212 999 208 1003 C 205 1006 203 1011 201 1017 C 199 1023 198 1030 198 1039 C 198 1044 199 1049 200 1053 C 201 1057 202 1060 204 1063 C 206 1066 208 1068 211 1070 C 213 1072 216 1073 219 1074 L 252 1088 C 257 1091 262 1093 266 1096 C 270 1100 274 1103 277 1108 C 281 1113 283 1118 285 1125 C 287 1132 288 1140 288 1150 C 288 1152 288 1156 287 1160 C 287 1164 286 1169 285 1174 C 284 1179 282 1184 280 1189 C 277 1194 274 1198 271 1202 C 267 1206 262 1209 256 1212 C 250 1214 243 1216 235 1216 C 227 1216 220 1214 213 1211 C 206 1208 200 1203 195 1197 C 190 1190 186 1182 184 1171 C 181 1161 180 1149 180 1135 L 194 1135 C 193 1147 194 1157 197 1165"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 366 1093 C 376 1093 383 1089 389 1081 C 394 1073 397 1061 397 1045 C 397 1029 394 1017 389 1009 C 383 1001 376 998 366 998 L 322 998 L 322 1093 Z M 369 979 C 376 979 381 980 386 983 C 391 986 395 990 399 996 C 403 1002 405 1009 407 1017 C 409 1025 410 1035 410 1045 C 410 1055 409 1065 407 1073 C 405 1081 403 1088 399 1094 C 395 1100 391 1104 386 1107 C 381 1110 376 1111 369 1111 L 322 1112 L 322 1211 L 308 1211 L 308 979 L 369 979"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 438 1132 C 440 1144 443 1155 448 1165 C 452 1175 457 1183 464 1188 C 470 1194 478 1197 487 1197 C 496 1197 504 1194 510 1188 C 517 1183 522 1175 526 1165 C 530 1155 534 1144 535 1132 C 537 1120 538 1107 538 1095 C 538 1082 537 1070 535 1057 C 534 1045 530 1034 526 1025 C 522 1015 517 1007 510 1001 C 504 996 496 993 487 993 C 478 993 470 996 464 1001 C 457 1007 452 1015 448 1025 C 443 1034 440 1045 438 1057 C 436 1070 435 1082 435 1095 C 435 1107 436 1120 438 1132 Z M 426 1049 C 429 1034 433 1022 438 1010 C 444 999 450 990 459 984 C 467 977 476 974 487 974 C 498 974 507 977 515 984 C 523 990 530 999 535 1010 C 541 1022 545 1034 547 1049 C 550 1064 552 1079 552 1095 C 552 1111 550 1126 548 1141 C 545 1155 541 1168 535 1179 C 530 1190 523 1199 515 1206 C 507 1212 498 1216 487 1216 C 476 1216 467 1212 459 1206 C 450 1199 444 1190 438 1179 C 433 1168 429 1155 426 1141 C 424 1126 422 1111 422 1095 C 422 1079 424 1064 426 1049"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 634 1089 C 638 1089 642 1088 645 1086 C 649 1084 652 1081 655 1077 C 657 1073 659 1068 661 1063 C 663 1057 663 1051 663 1044 C 663 1029 661 1018 656 1010 C 651 1002 644 998 634 998 L 585 998 L 585 1089 Z M 635 979 C 640 979 646 980 651 982 C 656 985 660 988 664 993 C 668 998 671 1004 673 1012 C 675 1020 676 1029 676 1039 C 676 1054 674 1067 670 1078 C 665 1088 659 1095 650 1098 L 650 1099 C 654 1100 658 1102 661 1105 C 664 1108 666 1112 668 1116 C 670 1121 671 1126 672 1132 C 673 1138 673 1145 674 1152 C 674 1155 674 1160 674 1166 C 674 1172 675 1177 675 1183 C 675 1189 676 1194 677 1199 C 678 1204 679 1208 680 1211 L 666 1211 C 665 1209 664 1206 664 1203 C 663 1200 663 1197 663 1193 C 663 1190 663 1187 662 1184 C 662 1180 662 1177 662 1175 C 662 1167 661 1159 661 1150 C 660 1142 659 1135 657 1129 C 655 1122 653 1117 649 1113 C 646 1109 641 1107 635 1108 L 585 1108 L 585 1211 L 572 1211 L 572 979 L 635 979"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 794 979 L 794 998 L 746 998 L 746 1211 L 733 1211 L 733 998 L 685 998 L 685 979 L 794 979"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 894 979 L 894 998 L 820 998 L 820 1082 L 886 1082 L 886 1100 L 820 1100 L 820 1211 L 807 1211 L 807 979 L 894 979"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 972 1089 C 976 1089 980 1088 983 1086 C 987 1084 990 1081 993 1077 C 995 1073 998 1068 999 1063 C 1001 1057 1002 1051 1002 1044 C 1002 1029 999 1018 994 1010 C 989 1002 982 998 972 998 L 923 998 L 923 1089 Z M 973 979 C 979 979 984 980 989 982 C 994 985 998 988 1002 993 C 1006 998 1009 1004 1011 1012 C 1014 1020 1015 1029 1015 1039 C 1015 1054 1012 1067 1008 1078 C 1003 1088 997 1095 988 1098 L 988 1099 C 992 1100 996 1102 999 1105 C 1002 1108 1004 1112 1006 1116 C 1008 1121 1010 1126 1010 1132 C 1011 1138 1012 1145 1012 1152 C 1012 1155 1012 1160 1012 1166 C 1012 1172 1013 1177 1013 1183 C 1013 1189 1014 1194 1015 1199 C 1016 1204 1017 1208 1018 1211 L 1004 1211 C 1003 1209 1003 1206 1002 1203 C 1002 1200 1001 1197 1001 1193 C 1001 1190 1001 1187 1001 1184 C 1000 1180 1000 1177 1000 1175 C 1000 1167 1000 1159 999 1150 C 998 1142 997 1135 995 1129 C 993 1122 991 1117 987 1113 C 984 1109 979 1107 973 1108 L 923 1108 L 923 1211 L 910 1211 L 910 979 L 973 979"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1133 979 L 1133 998 L 1051 998 L 1051 1082 L 1128 1082 L 1128 1100 L 1051 1100 L 1051 1192 L 1134 1192 L 1134 1211 L 1038 1211 L 1038 979 L 1133 979"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1164 979 L 1164 1123 C 1164 1136 1165 1147 1167 1157 C 1168 1166 1171 1174 1175 1180 C 1178 1186 1182 1190 1187 1193 C 1192 1196 1198 1197 1204 1197 C 1211 1197 1216 1196 1221 1193 C 1226 1190 1230 1186 1234 1180 C 1237 1174 1240 1166 1242 1157 C 1244 1147 1244 1136 1244 1123 L 1244 979 L 1258 979 L 1258 1127 C 1258 1139 1257 1151 1255 1162 C 1253 1172 1249 1182 1245 1190 C 1241 1198 1235 1204 1229 1209 C 1222 1213 1214 1216 1204 1216 C 1195 1216 1187 1213 1180 1209 C 1173 1204 1168 1198 1163 1190 C 1159 1182 1156 1172 1154 1162 C 1152 1151 1151 1139 1151 1127 L 1151 979 L 1164 979"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1298 979 L 1378 1175 L 1379 1175 L 1379 979 L 1392 979 L 1392 1211 L 1377 1211 L 1297 1014 L 1297 1014 L 1297 1211 L 1284 1211 L 1284 979 L 1298 979"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1460 1192 C 1470 1192 1478 1190 1486 1187 C 1493 1183 1499 1178 1503 1170 C 1508 1162 1511 1152 1513 1140 C 1515 1127 1517 1112 1517 1095 C 1517 1078 1515 1063 1513 1050 C 1511 1038 1508 1028 1503 1020 C 1499 1012 1493 1006 1486 1003 C 1478 999 1470 998 1460 998 L 1432 998 L 1432 1192 Z M 1467 979 C 1487 979 1503 989 1514 1008 C 1524 1027 1530 1056 1530 1095 C 1530 1134 1524 1162 1514 1181 C 1503 1200 1487 1210 1467 1211 L 1419 1211 L 1419 979 L 1467 979"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1646 979 L 1646 998 L 1564 998 L 1564 1082 L 1640 1082 L 1640 1100 L 1564 1100 L 1564 1192 L 1646 1192 L 1646 1211 L 1551 1211 L 1551 979 L 1646 979"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 903 1258 L 903 1272 L 843 1272 L 843 1333 L 899 1333 L 899 1347 L 843 1347 L 843 1414 L 904 1414 L 904 1428 L 834 1428 L 834 1258 L 903 1258"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 938 1258 L 970 1410 L 971 1410 L 1003 1258 L 1013 1258 L 976 1428 L 965 1428 L 928 1258 L 938 1258"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1007 1427 L 1023 1427 L 1023 1402 L 1007 1402 L 1007 1427"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 921 1428 L 937 1428 L 937 1403 L 921 1403 L 921 1428"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 771 1586 C 775 1585 778 1584 780 1581 C 783 1579 785 1576 787 1571 C 788 1567 789 1560 790 1552 L 798 1552 L 798 1734 L 788 1734 L 788 1599 L 760 1599 L 760 1587 C 764 1587 768 1586 771 1586"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 883 1655 C 886 1653 889 1649 891 1645 C 893 1641 895 1636 896 1630 C 898 1624 898 1618 898 1611 C 898 1604 898 1598 897 1593 C 896 1587 894 1582 892 1578 C 890 1573 887 1570 883 1568 C 880 1565 876 1564 871 1564 C 867 1564 864 1565 861 1568 C 858 1570 855 1574 853 1578 C 850 1582 848 1587 847 1593 C 846 1599 845 1605 845 1611 C 845 1618 846 1624 847 1630 C 848 1636 850 1641 852 1645 C 854 1649 857 1653 860 1655 C 864 1658 867 1659 871 1659 C 876 1659 879 1658 883 1655 Z M 855 1715 C 859 1721 864 1724 871 1724 C 877 1724 882 1722 886 1716 C 890 1711 893 1704 895 1696 C 897 1688 898 1679 899 1669 C 900 1660 900 1651 900 1643 L 900 1643 C 897 1652 893 1659 888 1665 C 883 1670 877 1673 871 1673 C 866 1673 861 1671 857 1668 C 852 1665 848 1661 845 1656 C 842 1650 840 1644 838 1636 C 837 1629 836 1621 836 1612 C 836 1603 837 1595 838 1587 C 840 1580 843 1573 846 1568 C 849 1562 853 1558 857 1555 C 862 1552 867 1550 872 1550 C 879 1550 884 1552 889 1555 C 894 1559 898 1564 901 1572 C 904 1580 906 1590 908 1602 C 909 1614 910 1629 910 1647 C 910 1651 910 1656 909 1661 C 909 1667 909 1674 908 1680 C 907 1687 905 1694 904 1701 C 902 1708 900 1714 897 1719 C 894 1725 891 1729 886 1733 C 882 1736 877 1738 871 1738 C 862 1738 854 1734 848 1726 C 843 1719 839 1707 838 1690 L 848 1690 C 849 1700 851 1709 855 1715"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 944 1572 C 940 1577 937 1584 936 1592 C 934 1600 932 1609 932 1618 C 931 1628 931 1636 931 1644 C 931 1652 931 1661 932 1670 C 932 1679 934 1688 936 1696 C 937 1704 940 1711 944 1716 C 948 1722 953 1724 959 1724 C 965 1724 970 1722 974 1716 C 977 1711 980 1704 982 1696 C 984 1688 985 1679 986 1670 C 986 1661 987 1652 987 1644 C 987 1636 986 1628 986 1618 C 985 1609 984 1600 982 1592 C 980 1584 977 1577 974 1572 C 970 1567 965 1564 959 1564 C 953 1564 948 1567 944 1572 Z M 978 1559 C 983 1565 987 1572 989 1581 C 992 1590 994 1600 995 1611 C 996 1623 996 1633 996 1644 C 996 1655 996 1666 995 1677 C 994 1688 992 1698 989 1707 C 987 1716 983 1724 978 1729 C 973 1735 967 1738 959 1738 C 951 1738 945 1735 940 1729 C 935 1724 931 1716 928 1707 C 926 1698 924 1688 923 1677 C 922 1666 921 1655 921 1644 C 921 1634 922 1623 923 1611 C 924 1600 925 1590 928 1581 C 931 1572 935 1565 940 1559 C 945 1553 951 1550 959 1550 C 967 1550 973 1553 978 1559"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1056 1576 L 1055 1576 L 1015 1675 L 1056 1675 Z M 1056 1552 L 1065 1552 L 1065 1675 L 1081 1675 L 1081 1689 L 1065 1689 L 1065 1734 L 1056 1734 L 1056 1689 L 1006 1689 L 1006 1673 L 1056 1552"/>
+</svg>
+
+    <span>wappen.svg (currentColor) auf hell</span>
+  </div>
+  <div class="sg-wappen-zelle sg-wappen-zelle--dunkel" style="color:#FFFFFF">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="-146 -127 2139 2090">
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1585 1555 C 1356 1778 1084 1963 924 1963 C 763 1963 491 1778 262 1555 C 38 1336 -146 1078 -146 918 C -146 757 38 500 262 281 C 491 57 763 -127 924 -127 C 1084 -127 1356 57 1585 281 C 1809 500 1993 757 1993 918 C 1993 1078 1809 1336 1585 1555 Z M 924 1935 C 1079 1935 1343 1755 1567 1537 C 1786 1323 1965 1073 1965 918 C 1965 762 1786 512 1567 298 C 1343 80 1079 -99 924 -99 C 768 -99 504 80 280 298 C 62 512 -118 762 -118 918 C -118 1073 62 1323 280 1537 C 504 1755 768 1935 924 1935"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1093 115 C 1200 151 1336 224 1479 367 C 1553 441 1605 513 1642 579 L 1092 579 L 1093 115"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 755 115 C 648 151 511 224 369 367 C 294 441 242 513 205 579 L 756 579 L 755 115"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1093 1721 C 1200 1685 1336 1611 1479 1468 C 1553 1394 1605 1322 1642 1256 L 1092 1256 L 1093 1721"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 755 1721 C 648 1685 511 1611 369 1468 C 294 1394 242 1322 206 1256 L 756 1256 L 755 1721"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 305 676 L 305 731 L 462 731 C 462 731 468 714 477 714 C 486 714 549 792 549 792 C 549 792 552 802 544 802 C 536 802 520 785 508 785 L 305 785 L 305 861 C 305 874 335 880 335 880 L 335 909 L 214 909 L 214 883 C 214 883 245 877 245 863 L 245 669 C 245 655 214 649 214 649 L 214 622 L 542 622 L 591 673 C 591 673 593 685 580 682 C 568 679 555 675 555 675 L 305 676"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 587 902 C 608 902 625 884 625 863 C 625 842 608 824 587 824 C 565 824 548 842 548 863 C 548 884 565 902 587 902"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 815 676 L 815 731 L 972 731 C 972 731 978 714 987 714 C 997 714 1059 792 1059 792 C 1059 792 1062 802 1054 802 C 1047 802 1030 785 1018 785 L 815 785 L 815 861 C 815 874 845 880 845 880 L 845 909 L 725 909 L 725 883 C 725 883 755 877 755 863 L 755 669 C 755 655 725 649 725 649 L 725 622 L 1053 622 L 1101 673 C 1101 673 1103 685 1091 682 C 1079 679 1065 675 1065 675 L 815 676"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1097 902 C 1118 902 1135 884 1136 863 C 1135 842 1118 824 1097 824 C 1075 824 1058 842 1058 863 C 1058 884 1075 902 1097 902"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1592 902 C 1613 902 1631 884 1631 863 C 1631 842 1613 824 1592 824 C 1571 824 1553 842 1553 863 C 1553 884 1571 902 1592 902"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1390 918 L 1587 662 C 1587 662 1620 640 1631 635 C 1642 631 1643 618 1643 618 L 1472 618 L 1497 664 L 1390 796 L 1282 664 L 1308 618 L 1136 618 C 1136 618 1137 631 1148 635 C 1159 640 1192 662 1192 662 L 1390 918"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 197 1165 C 199 1173 202 1179 206 1184 C 210 1189 215 1192 221 1194 C 226 1196 232 1197 238 1197 C 242 1197 246 1196 250 1195 C 254 1193 258 1190 262 1186 C 266 1182 269 1178 271 1172 C 273 1166 275 1158 275 1150 C 275 1143 274 1138 272 1133 C 270 1128 268 1124 265 1121 C 263 1118 260 1115 256 1113 C 253 1111 250 1109 246 1108 L 216 1095 C 212 1093 208 1091 204 1089 C 200 1086 197 1083 194 1078 C 192 1074 189 1069 187 1062 C 186 1056 185 1048 185 1039 C 185 1034 186 1027 187 1019 C 188 1012 191 1005 194 998 C 198 991 202 985 209 981 C 215 976 223 974 232 974 C 239 974 245 975 252 978 C 258 981 263 986 268 992 C 272 998 276 1006 279 1015 C 282 1024 283 1034 283 1046 L 270 1046 C 270 1037 268 1029 266 1023 C 264 1016 261 1011 258 1006 C 255 1002 251 998 246 996 C 242 994 237 993 232 993 C 228 993 224 993 219 995 C 215 997 212 999 208 1003 C 205 1006 203 1011 201 1017 C 199 1023 198 1030 198 1039 C 198 1044 199 1049 200 1053 C 201 1057 202 1060 204 1063 C 206 1066 208 1068 211 1070 C 213 1072 216 1073 219 1074 L 252 1088 C 257 1091 262 1093 266 1096 C 270 1100 274 1103 277 1108 C 281 1113 283 1118 285 1125 C 287 1132 288 1140 288 1150 C 288 1152 288 1156 287 1160 C 287 1164 286 1169 285 1174 C 284 1179 282 1184 280 1189 C 277 1194 274 1198 271 1202 C 267 1206 262 1209 256 1212 C 250 1214 243 1216 235 1216 C 227 1216 220 1214 213 1211 C 206 1208 200 1203 195 1197 C 190 1190 186 1182 184 1171 C 181 1161 180 1149 180 1135 L 194 1135 C 193 1147 194 1157 197 1165"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 366 1093 C 376 1093 383 1089 389 1081 C 394 1073 397 1061 397 1045 C 397 1029 394 1017 389 1009 C 383 1001 376 998 366 998 L 322 998 L 322 1093 Z M 369 979 C 376 979 381 980 386 983 C 391 986 395 990 399 996 C 403 1002 405 1009 407 1017 C 409 1025 410 1035 410 1045 C 410 1055 409 1065 407 1073 C 405 1081 403 1088 399 1094 C 395 1100 391 1104 386 1107 C 381 1110 376 1111 369 1111 L 322 1112 L 322 1211 L 308 1211 L 308 979 L 369 979"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 438 1132 C 440 1144 443 1155 448 1165 C 452 1175 457 1183 464 1188 C 470 1194 478 1197 487 1197 C 496 1197 504 1194 510 1188 C 517 1183 522 1175 526 1165 C 530 1155 534 1144 535 1132 C 537 1120 538 1107 538 1095 C 538 1082 537 1070 535 1057 C 534 1045 530 1034 526 1025 C 522 1015 517 1007 510 1001 C 504 996 496 993 487 993 C 478 993 470 996 464 1001 C 457 1007 452 1015 448 1025 C 443 1034 440 1045 438 1057 C 436 1070 435 1082 435 1095 C 435 1107 436 1120 438 1132 Z M 426 1049 C 429 1034 433 1022 438 1010 C 444 999 450 990 459 984 C 467 977 476 974 487 974 C 498 974 507 977 515 984 C 523 990 530 999 535 1010 C 541 1022 545 1034 547 1049 C 550 1064 552 1079 552 1095 C 552 1111 550 1126 548 1141 C 545 1155 541 1168 535 1179 C 530 1190 523 1199 515 1206 C 507 1212 498 1216 487 1216 C 476 1216 467 1212 459 1206 C 450 1199 444 1190 438 1179 C 433 1168 429 1155 426 1141 C 424 1126 422 1111 422 1095 C 422 1079 424 1064 426 1049"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 634 1089 C 638 1089 642 1088 645 1086 C 649 1084 652 1081 655 1077 C 657 1073 659 1068 661 1063 C 663 1057 663 1051 663 1044 C 663 1029 661 1018 656 1010 C 651 1002 644 998 634 998 L 585 998 L 585 1089 Z M 635 979 C 640 979 646 980 651 982 C 656 985 660 988 664 993 C 668 998 671 1004 673 1012 C 675 1020 676 1029 676 1039 C 676 1054 674 1067 670 1078 C 665 1088 659 1095 650 1098 L 650 1099 C 654 1100 658 1102 661 1105 C 664 1108 666 1112 668 1116 C 670 1121 671 1126 672 1132 C 673 1138 673 1145 674 1152 C 674 1155 674 1160 674 1166 C 674 1172 675 1177 675 1183 C 675 1189 676 1194 677 1199 C 678 1204 679 1208 680 1211 L 666 1211 C 665 1209 664 1206 664 1203 C 663 1200 663 1197 663 1193 C 663 1190 663 1187 662 1184 C 662 1180 662 1177 662 1175 C 662 1167 661 1159 661 1150 C 660 1142 659 1135 657 1129 C 655 1122 653 1117 649 1113 C 646 1109 641 1107 635 1108 L 585 1108 L 585 1211 L 572 1211 L 572 979 L 635 979"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 794 979 L 794 998 L 746 998 L 746 1211 L 733 1211 L 733 998 L 685 998 L 685 979 L 794 979"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 894 979 L 894 998 L 820 998 L 820 1082 L 886 1082 L 886 1100 L 820 1100 L 820 1211 L 807 1211 L 807 979 L 894 979"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 972 1089 C 976 1089 980 1088 983 1086 C 987 1084 990 1081 993 1077 C 995 1073 998 1068 999 1063 C 1001 1057 1002 1051 1002 1044 C 1002 1029 999 1018 994 1010 C 989 1002 982 998 972 998 L 923 998 L 923 1089 Z M 973 979 C 979 979 984 980 989 982 C 994 985 998 988 1002 993 C 1006 998 1009 1004 1011 1012 C 1014 1020 1015 1029 1015 1039 C 1015 1054 1012 1067 1008 1078 C 1003 1088 997 1095 988 1098 L 988 1099 C 992 1100 996 1102 999 1105 C 1002 1108 1004 1112 1006 1116 C 1008 1121 1010 1126 1010 1132 C 1011 1138 1012 1145 1012 1152 C 1012 1155 1012 1160 1012 1166 C 1012 1172 1013 1177 1013 1183 C 1013 1189 1014 1194 1015 1199 C 1016 1204 1017 1208 1018 1211 L 1004 1211 C 1003 1209 1003 1206 1002 1203 C 1002 1200 1001 1197 1001 1193 C 1001 1190 1001 1187 1001 1184 C 1000 1180 1000 1177 1000 1175 C 1000 1167 1000 1159 999 1150 C 998 1142 997 1135 995 1129 C 993 1122 991 1117 987 1113 C 984 1109 979 1107 973 1108 L 923 1108 L 923 1211 L 910 1211 L 910 979 L 973 979"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1133 979 L 1133 998 L 1051 998 L 1051 1082 L 1128 1082 L 1128 1100 L 1051 1100 L 1051 1192 L 1134 1192 L 1134 1211 L 1038 1211 L 1038 979 L 1133 979"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1164 979 L 1164 1123 C 1164 1136 1165 1147 1167 1157 C 1168 1166 1171 1174 1175 1180 C 1178 1186 1182 1190 1187 1193 C 1192 1196 1198 1197 1204 1197 C 1211 1197 1216 1196 1221 1193 C 1226 1190 1230 1186 1234 1180 C 1237 1174 1240 1166 1242 1157 C 1244 1147 1244 1136 1244 1123 L 1244 979 L 1258 979 L 1258 1127 C 1258 1139 1257 1151 1255 1162 C 1253 1172 1249 1182 1245 1190 C 1241 1198 1235 1204 1229 1209 C 1222 1213 1214 1216 1204 1216 C 1195 1216 1187 1213 1180 1209 C 1173 1204 1168 1198 1163 1190 C 1159 1182 1156 1172 1154 1162 C 1152 1151 1151 1139 1151 1127 L 1151 979 L 1164 979"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1298 979 L 1378 1175 L 1379 1175 L 1379 979 L 1392 979 L 1392 1211 L 1377 1211 L 1297 1014 L 1297 1014 L 1297 1211 L 1284 1211 L 1284 979 L 1298 979"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1460 1192 C 1470 1192 1478 1190 1486 1187 C 1493 1183 1499 1178 1503 1170 C 1508 1162 1511 1152 1513 1140 C 1515 1127 1517 1112 1517 1095 C 1517 1078 1515 1063 1513 1050 C 1511 1038 1508 1028 1503 1020 C 1499 1012 1493 1006 1486 1003 C 1478 999 1470 998 1460 998 L 1432 998 L 1432 1192 Z M 1467 979 C 1487 979 1503 989 1514 1008 C 1524 1027 1530 1056 1530 1095 C 1530 1134 1524 1162 1514 1181 C 1503 1200 1487 1210 1467 1211 L 1419 1211 L 1419 979 L 1467 979"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1646 979 L 1646 998 L 1564 998 L 1564 1082 L 1640 1082 L 1640 1100 L 1564 1100 L 1564 1192 L 1646 1192 L 1646 1211 L 1551 1211 L 1551 979 L 1646 979"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 903 1258 L 903 1272 L 843 1272 L 843 1333 L 899 1333 L 899 1347 L 843 1347 L 843 1414 L 904 1414 L 904 1428 L 834 1428 L 834 1258 L 903 1258"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 938 1258 L 970 1410 L 971 1410 L 1003 1258 L 1013 1258 L 976 1428 L 965 1428 L 928 1258 L 938 1258"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1007 1427 L 1023 1427 L 1023 1402 L 1007 1402 L 1007 1427"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 921 1428 L 937 1428 L 937 1403 L 921 1403 L 921 1428"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 771 1586 C 775 1585 778 1584 780 1581 C 783 1579 785 1576 787 1571 C 788 1567 789 1560 790 1552 L 798 1552 L 798 1734 L 788 1734 L 788 1599 L 760 1599 L 760 1587 C 764 1587 768 1586 771 1586"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 883 1655 C 886 1653 889 1649 891 1645 C 893 1641 895 1636 896 1630 C 898 1624 898 1618 898 1611 C 898 1604 898 1598 897 1593 C 896 1587 894 1582 892 1578 C 890 1573 887 1570 883 1568 C 880 1565 876 1564 871 1564 C 867 1564 864 1565 861 1568 C 858 1570 855 1574 853 1578 C 850 1582 848 1587 847 1593 C 846 1599 845 1605 845 1611 C 845 1618 846 1624 847 1630 C 848 1636 850 1641 852 1645 C 854 1649 857 1653 860 1655 C 864 1658 867 1659 871 1659 C 876 1659 879 1658 883 1655 Z M 855 1715 C 859 1721 864 1724 871 1724 C 877 1724 882 1722 886 1716 C 890 1711 893 1704 895 1696 C 897 1688 898 1679 899 1669 C 900 1660 900 1651 900 1643 L 900 1643 C 897 1652 893 1659 888 1665 C 883 1670 877 1673 871 1673 C 866 1673 861 1671 857 1668 C 852 1665 848 1661 845 1656 C 842 1650 840 1644 838 1636 C 837 1629 836 1621 836 1612 C 836 1603 837 1595 838 1587 C 840 1580 843 1573 846 1568 C 849 1562 853 1558 857 1555 C 862 1552 867 1550 872 1550 C 879 1550 884 1552 889 1555 C 894 1559 898 1564 901 1572 C 904 1580 906 1590 908 1602 C 909 1614 910 1629 910 1647 C 910 1651 910 1656 909 1661 C 909 1667 909 1674 908 1680 C 907 1687 905 1694 904 1701 C 902 1708 900 1714 897 1719 C 894 1725 891 1729 886 1733 C 882 1736 877 1738 871 1738 C 862 1738 854 1734 848 1726 C 843 1719 839 1707 838 1690 L 848 1690 C 849 1700 851 1709 855 1715"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 944 1572 C 940 1577 937 1584 936 1592 C 934 1600 932 1609 932 1618 C 931 1628 931 1636 931 1644 C 931 1652 931 1661 932 1670 C 932 1679 934 1688 936 1696 C 937 1704 940 1711 944 1716 C 948 1722 953 1724 959 1724 C 965 1724 970 1722 974 1716 C 977 1711 980 1704 982 1696 C 984 1688 985 1679 986 1670 C 986 1661 987 1652 987 1644 C 987 1636 986 1628 986 1618 C 985 1609 984 1600 982 1592 C 980 1584 977 1577 974 1572 C 970 1567 965 1564 959 1564 C 953 1564 948 1567 944 1572 Z M 978 1559 C 983 1565 987 1572 989 1581 C 992 1590 994 1600 995 1611 C 996 1623 996 1633 996 1644 C 996 1655 996 1666 995 1677 C 994 1688 992 1698 989 1707 C 987 1716 983 1724 978 1729 C 973 1735 967 1738 959 1738 C 951 1738 945 1735 940 1729 C 935 1724 931 1716 928 1707 C 926 1698 924 1688 923 1677 C 922 1666 921 1655 921 1644 C 921 1634 922 1623 923 1611 C 924 1600 925 1590 928 1581 C 931 1572 935 1565 940 1559 C 945 1553 951 1550 959 1550 C 967 1550 973 1553 978 1559"/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 1056 1576 L 1055 1576 L 1015 1675 L 1056 1675 Z M 1056 1552 L 1065 1552 L 1065 1675 L 1081 1675 L 1081 1689 L 1065 1689 L 1065 1734 L 1056 1734 L 1056 1689 L 1006 1689 L 1006 1673 L 1056 1552"/>
+</svg>
+
+    <span>wappen.svg (currentColor) auf dunkel</span>
+  </div>
+  <div class="sg-wappen-zelle sg-wappen-zelle--hell">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="-146 -127 2139 2090">
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1585 1555 C 1356 1778 1084 1963 924 1963 C 763 1963 491 1778 262 1555 C 38 1336 -146 1078 -146 918 C -146 757 38 500 262 281 C 491 57 763 -127 924 -127 C 1084 -127 1356 57 1585 281 C 1809 500 1993 757 1993 918 C 1993 1078 1809 1336 1585 1555 Z M 924 1935 C 1079 1935 1343 1755 1567 1537 C 1786 1323 1965 1073 1965 918 C 1965 762 1786 512 1567 298 C 1343 80 1079 -99 924 -99 C 768 -99 504 80 280 298 C 62 512 -118 762 -118 918 C -118 1073 62 1323 280 1537 C 504 1755 768 1935 924 1935"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1093 115 C 1200 151 1336 224 1479 367 C 1553 441 1605 513 1642 579 L 1092 579 L 1093 115"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 755 115 C 648 151 511 224 369 367 C 294 441 242 513 205 579 L 756 579 L 755 115"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1093 1721 C 1200 1685 1336 1611 1479 1468 C 1553 1394 1605 1322 1642 1256 L 1092 1256 L 1093 1721"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 755 1721 C 648 1685 511 1611 369 1468 C 294 1394 242 1322 206 1256 L 756 1256 L 755 1721"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 305 676 L 305 731 L 462 731 C 462 731 468 714 477 714 C 486 714 549 792 549 792 C 549 792 552 802 544 802 C 536 802 520 785 508 785 L 305 785 L 305 861 C 305 874 335 880 335 880 L 335 909 L 214 909 L 214 883 C 214 883 245 877 245 863 L 245 669 C 245 655 214 649 214 649 L 214 622 L 542 622 L 591 673 C 591 673 593 685 580 682 C 568 679 555 675 555 675 L 305 676"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 587 902 C 608 902 625 884 625 863 C 625 842 608 824 587 824 C 565 824 548 842 548 863 C 548 884 565 902 587 902"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 815 676 L 815 731 L 972 731 C 972 731 978 714 987 714 C 997 714 1059 792 1059 792 C 1059 792 1062 802 1054 802 C 1047 802 1030 785 1018 785 L 815 785 L 815 861 C 815 874 845 880 845 880 L 845 909 L 725 909 L 725 883 C 725 883 755 877 755 863 L 755 669 C 755 655 725 649 725 649 L 725 622 L 1053 622 L 1101 673 C 1101 673 1103 685 1091 682 C 1079 679 1065 675 1065 675 L 815 676"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1097 902 C 1118 902 1135 884 1136 863 C 1135 842 1118 824 1097 824 C 1075 824 1058 842 1058 863 C 1058 884 1075 902 1097 902"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1592 902 C 1613 902 1631 884 1631 863 C 1631 842 1613 824 1592 824 C 1571 824 1553 842 1553 863 C 1553 884 1571 902 1592 902"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1390 918 L 1587 662 C 1587 662 1620 640 1631 635 C 1642 631 1643 618 1643 618 L 1472 618 L 1497 664 L 1390 796 L 1282 664 L 1308 618 L 1136 618 C 1136 618 1137 631 1148 635 C 1159 640 1192 662 1192 662 L 1390 918"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 197 1165 C 199 1173 202 1179 206 1184 C 210 1189 215 1192 221 1194 C 226 1196 232 1197 238 1197 C 242 1197 246 1196 250 1195 C 254 1193 258 1190 262 1186 C 266 1182 269 1178 271 1172 C 273 1166 275 1158 275 1150 C 275 1143 274 1138 272 1133 C 270 1128 268 1124 265 1121 C 263 1118 260 1115 256 1113 C 253 1111 250 1109 246 1108 L 216 1095 C 212 1093 208 1091 204 1089 C 200 1086 197 1083 194 1078 C 192 1074 189 1069 187 1062 C 186 1056 185 1048 185 1039 C 185 1034 186 1027 187 1019 C 188 1012 191 1005 194 998 C 198 991 202 985 209 981 C 215 976 223 974 232 974 C 239 974 245 975 252 978 C 258 981 263 986 268 992 C 272 998 276 1006 279 1015 C 282 1024 283 1034 283 1046 L 270 1046 C 270 1037 268 1029 266 1023 C 264 1016 261 1011 258 1006 C 255 1002 251 998 246 996 C 242 994 237 993 232 993 C 228 993 224 993 219 995 C 215 997 212 999 208 1003 C 205 1006 203 1011 201 1017 C 199 1023 198 1030 198 1039 C 198 1044 199 1049 200 1053 C 201 1057 202 1060 204 1063 C 206 1066 208 1068 211 1070 C 213 1072 216 1073 219 1074 L 252 1088 C 257 1091 262 1093 266 1096 C 270 1100 274 1103 277 1108 C 281 1113 283 1118 285 1125 C 287 1132 288 1140 288 1150 C 288 1152 288 1156 287 1160 C 287 1164 286 1169 285 1174 C 284 1179 282 1184 280 1189 C 277 1194 274 1198 271 1202 C 267 1206 262 1209 256 1212 C 250 1214 243 1216 235 1216 C 227 1216 220 1214 213 1211 C 206 1208 200 1203 195 1197 C 190 1190 186 1182 184 1171 C 181 1161 180 1149 180 1135 L 194 1135 C 193 1147 194 1157 197 1165"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 366 1093 C 376 1093 383 1089 389 1081 C 394 1073 397 1061 397 1045 C 397 1029 394 1017 389 1009 C 383 1001 376 998 366 998 L 322 998 L 322 1093 Z M 369 979 C 376 979 381 980 386 983 C 391 986 395 990 399 996 C 403 1002 405 1009 407 1017 C 409 1025 410 1035 410 1045 C 410 1055 409 1065 407 1073 C 405 1081 403 1088 399 1094 C 395 1100 391 1104 386 1107 C 381 1110 376 1111 369 1111 L 322 1112 L 322 1211 L 308 1211 L 308 979 L 369 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 438 1132 C 440 1144 443 1155 448 1165 C 452 1175 457 1183 464 1188 C 470 1194 478 1197 487 1197 C 496 1197 504 1194 510 1188 C 517 1183 522 1175 526 1165 C 530 1155 534 1144 535 1132 C 537 1120 538 1107 538 1095 C 538 1082 537 1070 535 1057 C 534 1045 530 1034 526 1025 C 522 1015 517 1007 510 1001 C 504 996 496 993 487 993 C 478 993 470 996 464 1001 C 457 1007 452 1015 448 1025 C 443 1034 440 1045 438 1057 C 436 1070 435 1082 435 1095 C 435 1107 436 1120 438 1132 Z M 426 1049 C 429 1034 433 1022 438 1010 C 444 999 450 990 459 984 C 467 977 476 974 487 974 C 498 974 507 977 515 984 C 523 990 530 999 535 1010 C 541 1022 545 1034 547 1049 C 550 1064 552 1079 552 1095 C 552 1111 550 1126 548 1141 C 545 1155 541 1168 535 1179 C 530 1190 523 1199 515 1206 C 507 1212 498 1216 487 1216 C 476 1216 467 1212 459 1206 C 450 1199 444 1190 438 1179 C 433 1168 429 1155 426 1141 C 424 1126 422 1111 422 1095 C 422 1079 424 1064 426 1049"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 634 1089 C 638 1089 642 1088 645 1086 C 649 1084 652 1081 655 1077 C 657 1073 659 1068 661 1063 C 663 1057 663 1051 663 1044 C 663 1029 661 1018 656 1010 C 651 1002 644 998 634 998 L 585 998 L 585 1089 Z M 635 979 C 640 979 646 980 651 982 C 656 985 660 988 664 993 C 668 998 671 1004 673 1012 C 675 1020 676 1029 676 1039 C 676 1054 674 1067 670 1078 C 665 1088 659 1095 650 1098 L 650 1099 C 654 1100 658 1102 661 1105 C 664 1108 666 1112 668 1116 C 670 1121 671 1126 672 1132 C 673 1138 673 1145 674 1152 C 674 1155 674 1160 674 1166 C 674 1172 675 1177 675 1183 C 675 1189 676 1194 677 1199 C 678 1204 679 1208 680 1211 L 666 1211 C 665 1209 664 1206 664 1203 C 663 1200 663 1197 663 1193 C 663 1190 663 1187 662 1184 C 662 1180 662 1177 662 1175 C 662 1167 661 1159 661 1150 C 660 1142 659 1135 657 1129 C 655 1122 653 1117 649 1113 C 646 1109 641 1107 635 1108 L 585 1108 L 585 1211 L 572 1211 L 572 979 L 635 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 794 979 L 794 998 L 746 998 L 746 1211 L 733 1211 L 733 998 L 685 998 L 685 979 L 794 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 894 979 L 894 998 L 820 998 L 820 1082 L 886 1082 L 886 1100 L 820 1100 L 820 1211 L 807 1211 L 807 979 L 894 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 972 1089 C 976 1089 980 1088 983 1086 C 987 1084 990 1081 993 1077 C 995 1073 998 1068 999 1063 C 1001 1057 1002 1051 1002 1044 C 1002 1029 999 1018 994 1010 C 989 1002 982 998 972 998 L 923 998 L 923 1089 Z M 973 979 C 979 979 984 980 989 982 C 994 985 998 988 1002 993 C 1006 998 1009 1004 1011 1012 C 1014 1020 1015 1029 1015 1039 C 1015 1054 1012 1067 1008 1078 C 1003 1088 997 1095 988 1098 L 988 1099 C 992 1100 996 1102 999 1105 C 1002 1108 1004 1112 1006 1116 C 1008 1121 1010 1126 1010 1132 C 1011 1138 1012 1145 1012 1152 C 1012 1155 1012 1160 1012 1166 C 1012 1172 1013 1177 1013 1183 C 1013 1189 1014 1194 1015 1199 C 1016 1204 1017 1208 1018 1211 L 1004 1211 C 1003 1209 1003 1206 1002 1203 C 1002 1200 1001 1197 1001 1193 C 1001 1190 1001 1187 1001 1184 C 1000 1180 1000 1177 1000 1175 C 1000 1167 1000 1159 999 1150 C 998 1142 997 1135 995 1129 C 993 1122 991 1117 987 1113 C 984 1109 979 1107 973 1108 L 923 1108 L 923 1211 L 910 1211 L 910 979 L 973 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1133 979 L 1133 998 L 1051 998 L 1051 1082 L 1128 1082 L 1128 1100 L 1051 1100 L 1051 1192 L 1134 1192 L 1134 1211 L 1038 1211 L 1038 979 L 1133 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1164 979 L 1164 1123 C 1164 1136 1165 1147 1167 1157 C 1168 1166 1171 1174 1175 1180 C 1178 1186 1182 1190 1187 1193 C 1192 1196 1198 1197 1204 1197 C 1211 1197 1216 1196 1221 1193 C 1226 1190 1230 1186 1234 1180 C 1237 1174 1240 1166 1242 1157 C 1244 1147 1244 1136 1244 1123 L 1244 979 L 1258 979 L 1258 1127 C 1258 1139 1257 1151 1255 1162 C 1253 1172 1249 1182 1245 1190 C 1241 1198 1235 1204 1229 1209 C 1222 1213 1214 1216 1204 1216 C 1195 1216 1187 1213 1180 1209 C 1173 1204 1168 1198 1163 1190 C 1159 1182 1156 1172 1154 1162 C 1152 1151 1151 1139 1151 1127 L 1151 979 L 1164 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1298 979 L 1378 1175 L 1379 1175 L 1379 979 L 1392 979 L 1392 1211 L 1377 1211 L 1297 1014 L 1297 1014 L 1297 1211 L 1284 1211 L 1284 979 L 1298 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1460 1192 C 1470 1192 1478 1190 1486 1187 C 1493 1183 1499 1178 1503 1170 C 1508 1162 1511 1152 1513 1140 C 1515 1127 1517 1112 1517 1095 C 1517 1078 1515 1063 1513 1050 C 1511 1038 1508 1028 1503 1020 C 1499 1012 1493 1006 1486 1003 C 1478 999 1470 998 1460 998 L 1432 998 L 1432 1192 Z M 1467 979 C 1487 979 1503 989 1514 1008 C 1524 1027 1530 1056 1530 1095 C 1530 1134 1524 1162 1514 1181 C 1503 1200 1487 1210 1467 1211 L 1419 1211 L 1419 979 L 1467 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1646 979 L 1646 998 L 1564 998 L 1564 1082 L 1640 1082 L 1640 1100 L 1564 1100 L 1564 1192 L 1646 1192 L 1646 1211 L 1551 1211 L 1551 979 L 1646 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 903 1258 L 903 1272 L 843 1272 L 843 1333 L 899 1333 L 899 1347 L 843 1347 L 843 1414 L 904 1414 L 904 1428 L 834 1428 L 834 1258 L 903 1258"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 938 1258 L 970 1410 L 971 1410 L 1003 1258 L 1013 1258 L 976 1428 L 965 1428 L 928 1258 L 938 1258"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1007 1427 L 1023 1427 L 1023 1402 L 1007 1402 L 1007 1427"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 921 1428 L 937 1428 L 937 1403 L 921 1403 L 921 1428"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 771 1586 C 775 1585 778 1584 780 1581 C 783 1579 785 1576 787 1571 C 788 1567 789 1560 790 1552 L 798 1552 L 798 1734 L 788 1734 L 788 1599 L 760 1599 L 760 1587 C 764 1587 768 1586 771 1586"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 883 1655 C 886 1653 889 1649 891 1645 C 893 1641 895 1636 896 1630 C 898 1624 898 1618 898 1611 C 898 1604 898 1598 897 1593 C 896 1587 894 1582 892 1578 C 890 1573 887 1570 883 1568 C 880 1565 876 1564 871 1564 C 867 1564 864 1565 861 1568 C 858 1570 855 1574 853 1578 C 850 1582 848 1587 847 1593 C 846 1599 845 1605 845 1611 C 845 1618 846 1624 847 1630 C 848 1636 850 1641 852 1645 C 854 1649 857 1653 860 1655 C 864 1658 867 1659 871 1659 C 876 1659 879 1658 883 1655 Z M 855 1715 C 859 1721 864 1724 871 1724 C 877 1724 882 1722 886 1716 C 890 1711 893 1704 895 1696 C 897 1688 898 1679 899 1669 C 900 1660 900 1651 900 1643 L 900 1643 C 897 1652 893 1659 888 1665 C 883 1670 877 1673 871 1673 C 866 1673 861 1671 857 1668 C 852 1665 848 1661 845 1656 C 842 1650 840 1644 838 1636 C 837 1629 836 1621 836 1612 C 836 1603 837 1595 838 1587 C 840 1580 843 1573 846 1568 C 849 1562 853 1558 857 1555 C 862 1552 867 1550 872 1550 C 879 1550 884 1552 889 1555 C 894 1559 898 1564 901 1572 C 904 1580 906 1590 908 1602 C 909 1614 910 1629 910 1647 C 910 1651 910 1656 909 1661 C 909 1667 909 1674 908 1680 C 907 1687 905 1694 904 1701 C 902 1708 900 1714 897 1719 C 894 1725 891 1729 886 1733 C 882 1736 877 1738 871 1738 C 862 1738 854 1734 848 1726 C 843 1719 839 1707 838 1690 L 848 1690 C 849 1700 851 1709 855 1715"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 944 1572 C 940 1577 937 1584 936 1592 C 934 1600 932 1609 932 1618 C 931 1628 931 1636 931 1644 C 931 1652 931 1661 932 1670 C 932 1679 934 1688 936 1696 C 937 1704 940 1711 944 1716 C 948 1722 953 1724 959 1724 C 965 1724 970 1722 974 1716 C 977 1711 980 1704 982 1696 C 984 1688 985 1679 986 1670 C 986 1661 987 1652 987 1644 C 987 1636 986 1628 986 1618 C 985 1609 984 1600 982 1592 C 980 1584 977 1577 974 1572 C 970 1567 965 1564 959 1564 C 953 1564 948 1567 944 1572 Z M 978 1559 C 983 1565 987 1572 989 1581 C 992 1590 994 1600 995 1611 C 996 1623 996 1633 996 1644 C 996 1655 996 1666 995 1677 C 994 1688 992 1698 989 1707 C 987 1716 983 1724 978 1729 C 973 1735 967 1738 959 1738 C 951 1738 945 1735 940 1729 C 935 1724 931 1716 928 1707 C 926 1698 924 1688 923 1677 C 922 1666 921 1655 921 1644 C 921 1634 922 1623 923 1611 C 924 1600 925 1590 928 1581 C 931 1572 935 1565 940 1559 C 945 1553 951 1550 959 1550 C 967 1550 973 1553 978 1559"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1056 1576 L 1055 1576 L 1015 1675 L 1056 1675 Z M 1056 1552 L 1065 1552 L 1065 1675 L 1081 1675 L 1081 1689 L 1065 1689 L 1065 1734 L 1056 1734 L 1056 1689 L 1006 1689 L 1006 1673 L 1056 1552"/>
+</svg>
+
+    <span>wappen-blau.svg</span>
+  </div>
+  <div class="sg-wappen-zelle sg-wappen-zelle--dunkel">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="-146 -127 2139 2090">
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 1585 1555 C 1356 1778 1084 1963 924 1963 C 763 1963 491 1778 262 1555 C 38 1336 -146 1078 -146 918 C -146 757 38 500 262 281 C 491 57 763 -127 924 -127 C 1084 -127 1356 57 1585 281 C 1809 500 1993 757 1993 918 C 1993 1078 1809 1336 1585 1555 Z M 924 1935 C 1079 1935 1343 1755 1567 1537 C 1786 1323 1965 1073 1965 918 C 1965 762 1786 512 1567 298 C 1343 80 1079 -99 924 -99 C 768 -99 504 80 280 298 C 62 512 -118 762 -118 918 C -118 1073 62 1323 280 1537 C 504 1755 768 1935 924 1935"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 1093 115 C 1200 151 1336 224 1479 367 C 1553 441 1605 513 1642 579 L 1092 579 L 1093 115"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 755 115 C 648 151 511 224 369 367 C 294 441 242 513 205 579 L 756 579 L 755 115"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 1093 1721 C 1200 1685 1336 1611 1479 1468 C 1553 1394 1605 1322 1642 1256 L 1092 1256 L 1093 1721"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 755 1721 C 648 1685 511 1611 369 1468 C 294 1394 242 1322 206 1256 L 756 1256 L 755 1721"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 305 676 L 305 731 L 462 731 C 462 731 468 714 477 714 C 486 714 549 792 549 792 C 549 792 552 802 544 802 C 536 802 520 785 508 785 L 305 785 L 305 861 C 305 874 335 880 335 880 L 335 909 L 214 909 L 214 883 C 214 883 245 877 245 863 L 245 669 C 245 655 214 649 214 649 L 214 622 L 542 622 L 591 673 C 591 673 593 685 580 682 C 568 679 555 675 555 675 L 305 676"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 587 902 C 608 902 625 884 625 863 C 625 842 608 824 587 824 C 565 824 548 842 548 863 C 548 884 565 902 587 902"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 815 676 L 815 731 L 972 731 C 972 731 978 714 987 714 C 997 714 1059 792 1059 792 C 1059 792 1062 802 1054 802 C 1047 802 1030 785 1018 785 L 815 785 L 815 861 C 815 874 845 880 845 880 L 845 909 L 725 909 L 725 883 C 725 883 755 877 755 863 L 755 669 C 755 655 725 649 725 649 L 725 622 L 1053 622 L 1101 673 C 1101 673 1103 685 1091 682 C 1079 679 1065 675 1065 675 L 815 676"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 1097 902 C 1118 902 1135 884 1136 863 C 1135 842 1118 824 1097 824 C 1075 824 1058 842 1058 863 C 1058 884 1075 902 1097 902"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 1592 902 C 1613 902 1631 884 1631 863 C 1631 842 1613 824 1592 824 C 1571 824 1553 842 1553 863 C 1553 884 1571 902 1592 902"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 1390 918 L 1587 662 C 1587 662 1620 640 1631 635 C 1642 631 1643 618 1643 618 L 1472 618 L 1497 664 L 1390 796 L 1282 664 L 1308 618 L 1136 618 C 1136 618 1137 631 1148 635 C 1159 640 1192 662 1192 662 L 1390 918"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 197 1165 C 199 1173 202 1179 206 1184 C 210 1189 215 1192 221 1194 C 226 1196 232 1197 238 1197 C 242 1197 246 1196 250 1195 C 254 1193 258 1190 262 1186 C 266 1182 269 1178 271 1172 C 273 1166 275 1158 275 1150 C 275 1143 274 1138 272 1133 C 270 1128 268 1124 265 1121 C 263 1118 260 1115 256 1113 C 253 1111 250 1109 246 1108 L 216 1095 C 212 1093 208 1091 204 1089 C 200 1086 197 1083 194 1078 C 192 1074 189 1069 187 1062 C 186 1056 185 1048 185 1039 C 185 1034 186 1027 187 1019 C 188 1012 191 1005 194 998 C 198 991 202 985 209 981 C 215 976 223 974 232 974 C 239 974 245 975 252 978 C 258 981 263 986 268 992 C 272 998 276 1006 279 1015 C 282 1024 283 1034 283 1046 L 270 1046 C 270 1037 268 1029 266 1023 C 264 1016 261 1011 258 1006 C 255 1002 251 998 246 996 C 242 994 237 993 232 993 C 228 993 224 993 219 995 C 215 997 212 999 208 1003 C 205 1006 203 1011 201 1017 C 199 1023 198 1030 198 1039 C 198 1044 199 1049 200 1053 C 201 1057 202 1060 204 1063 C 206 1066 208 1068 211 1070 C 213 1072 216 1073 219 1074 L 252 1088 C 257 1091 262 1093 266 1096 C 270 1100 274 1103 277 1108 C 281 1113 283 1118 285 1125 C 287 1132 288 1140 288 1150 C 288 1152 288 1156 287 1160 C 287 1164 286 1169 285 1174 C 284 1179 282 1184 280 1189 C 277 1194 274 1198 271 1202 C 267 1206 262 1209 256 1212 C 250 1214 243 1216 235 1216 C 227 1216 220 1214 213 1211 C 206 1208 200 1203 195 1197 C 190 1190 186 1182 184 1171 C 181 1161 180 1149 180 1135 L 194 1135 C 193 1147 194 1157 197 1165"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 366 1093 C 376 1093 383 1089 389 1081 C 394 1073 397 1061 397 1045 C 397 1029 394 1017 389 1009 C 383 1001 376 998 366 998 L 322 998 L 322 1093 Z M 369 979 C 376 979 381 980 386 983 C 391 986 395 990 399 996 C 403 1002 405 1009 407 1017 C 409 1025 410 1035 410 1045 C 410 1055 409 1065 407 1073 C 405 1081 403 1088 399 1094 C 395 1100 391 1104 386 1107 C 381 1110 376 1111 369 1111 L 322 1112 L 322 1211 L 308 1211 L 308 979 L 369 979"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 438 1132 C 440 1144 443 1155 448 1165 C 452 1175 457 1183 464 1188 C 470 1194 478 1197 487 1197 C 496 1197 504 1194 510 1188 C 517 1183 522 1175 526 1165 C 530 1155 534 1144 535 1132 C 537 1120 538 1107 538 1095 C 538 1082 537 1070 535 1057 C 534 1045 530 1034 526 1025 C 522 1015 517 1007 510 1001 C 504 996 496 993 487 993 C 478 993 470 996 464 1001 C 457 1007 452 1015 448 1025 C 443 1034 440 1045 438 1057 C 436 1070 435 1082 435 1095 C 435 1107 436 1120 438 1132 Z M 426 1049 C 429 1034 433 1022 438 1010 C 444 999 450 990 459 984 C 467 977 476 974 487 974 C 498 974 507 977 515 984 C 523 990 530 999 535 1010 C 541 1022 545 1034 547 1049 C 550 1064 552 1079 552 1095 C 552 1111 550 1126 548 1141 C 545 1155 541 1168 535 1179 C 530 1190 523 1199 515 1206 C 507 1212 498 1216 487 1216 C 476 1216 467 1212 459 1206 C 450 1199 444 1190 438 1179 C 433 1168 429 1155 426 1141 C 424 1126 422 1111 422 1095 C 422 1079 424 1064 426 1049"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 634 1089 C 638 1089 642 1088 645 1086 C 649 1084 652 1081 655 1077 C 657 1073 659 1068 661 1063 C 663 1057 663 1051 663 1044 C 663 1029 661 1018 656 1010 C 651 1002 644 998 634 998 L 585 998 L 585 1089 Z M 635 979 C 640 979 646 980 651 982 C 656 985 660 988 664 993 C 668 998 671 1004 673 1012 C 675 1020 676 1029 676 1039 C 676 1054 674 1067 670 1078 C 665 1088 659 1095 650 1098 L 650 1099 C 654 1100 658 1102 661 1105 C 664 1108 666 1112 668 1116 C 670 1121 671 1126 672 1132 C 673 1138 673 1145 674 1152 C 674 1155 674 1160 674 1166 C 674 1172 675 1177 675 1183 C 675 1189 676 1194 677 1199 C 678 1204 679 1208 680 1211 L 666 1211 C 665 1209 664 1206 664 1203 C 663 1200 663 1197 663 1193 C 663 1190 663 1187 662 1184 C 662 1180 662 1177 662 1175 C 662 1167 661 1159 661 1150 C 660 1142 659 1135 657 1129 C 655 1122 653 1117 649 1113 C 646 1109 641 1107 635 1108 L 585 1108 L 585 1211 L 572 1211 L 572 979 L 635 979"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 794 979 L 794 998 L 746 998 L 746 1211 L 733 1211 L 733 998 L 685 998 L 685 979 L 794 979"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 894 979 L 894 998 L 820 998 L 820 1082 L 886 1082 L 886 1100 L 820 1100 L 820 1211 L 807 1211 L 807 979 L 894 979"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 972 1089 C 976 1089 980 1088 983 1086 C 987 1084 990 1081 993 1077 C 995 1073 998 1068 999 1063 C 1001 1057 1002 1051 1002 1044 C 1002 1029 999 1018 994 1010 C 989 1002 982 998 972 998 L 923 998 L 923 1089 Z M 973 979 C 979 979 984 980 989 982 C 994 985 998 988 1002 993 C 1006 998 1009 1004 1011 1012 C 1014 1020 1015 1029 1015 1039 C 1015 1054 1012 1067 1008 1078 C 1003 1088 997 1095 988 1098 L 988 1099 C 992 1100 996 1102 999 1105 C 1002 1108 1004 1112 1006 1116 C 1008 1121 1010 1126 1010 1132 C 1011 1138 1012 1145 1012 1152 C 1012 1155 1012 1160 1012 1166 C 1012 1172 1013 1177 1013 1183 C 1013 1189 1014 1194 1015 1199 C 1016 1204 1017 1208 1018 1211 L 1004 1211 C 1003 1209 1003 1206 1002 1203 C 1002 1200 1001 1197 1001 1193 C 1001 1190 1001 1187 1001 1184 C 1000 1180 1000 1177 1000 1175 C 1000 1167 1000 1159 999 1150 C 998 1142 997 1135 995 1129 C 993 1122 991 1117 987 1113 C 984 1109 979 1107 973 1108 L 923 1108 L 923 1211 L 910 1211 L 910 979 L 973 979"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 1133 979 L 1133 998 L 1051 998 L 1051 1082 L 1128 1082 L 1128 1100 L 1051 1100 L 1051 1192 L 1134 1192 L 1134 1211 L 1038 1211 L 1038 979 L 1133 979"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 1164 979 L 1164 1123 C 1164 1136 1165 1147 1167 1157 C 1168 1166 1171 1174 1175 1180 C 1178 1186 1182 1190 1187 1193 C 1192 1196 1198 1197 1204 1197 C 1211 1197 1216 1196 1221 1193 C 1226 1190 1230 1186 1234 1180 C 1237 1174 1240 1166 1242 1157 C 1244 1147 1244 1136 1244 1123 L 1244 979 L 1258 979 L 1258 1127 C 1258 1139 1257 1151 1255 1162 C 1253 1172 1249 1182 1245 1190 C 1241 1198 1235 1204 1229 1209 C 1222 1213 1214 1216 1204 1216 C 1195 1216 1187 1213 1180 1209 C 1173 1204 1168 1198 1163 1190 C 1159 1182 1156 1172 1154 1162 C 1152 1151 1151 1139 1151 1127 L 1151 979 L 1164 979"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 1298 979 L 1378 1175 L 1379 1175 L 1379 979 L 1392 979 L 1392 1211 L 1377 1211 L 1297 1014 L 1297 1014 L 1297 1211 L 1284 1211 L 1284 979 L 1298 979"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 1460 1192 C 1470 1192 1478 1190 1486 1187 C 1493 1183 1499 1178 1503 1170 C 1508 1162 1511 1152 1513 1140 C 1515 1127 1517 1112 1517 1095 C 1517 1078 1515 1063 1513 1050 C 1511 1038 1508 1028 1503 1020 C 1499 1012 1493 1006 1486 1003 C 1478 999 1470 998 1460 998 L 1432 998 L 1432 1192 Z M 1467 979 C 1487 979 1503 989 1514 1008 C 1524 1027 1530 1056 1530 1095 C 1530 1134 1524 1162 1514 1181 C 1503 1200 1487 1210 1467 1211 L 1419 1211 L 1419 979 L 1467 979"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 1646 979 L 1646 998 L 1564 998 L 1564 1082 L 1640 1082 L 1640 1100 L 1564 1100 L 1564 1192 L 1646 1192 L 1646 1211 L 1551 1211 L 1551 979 L 1646 979"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 903 1258 L 903 1272 L 843 1272 L 843 1333 L 899 1333 L 899 1347 L 843 1347 L 843 1414 L 904 1414 L 904 1428 L 834 1428 L 834 1258 L 903 1258"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 938 1258 L 970 1410 L 971 1410 L 1003 1258 L 1013 1258 L 976 1428 L 965 1428 L 928 1258 L 938 1258"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 1007 1427 L 1023 1427 L 1023 1402 L 1007 1402 L 1007 1427"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 921 1428 L 937 1428 L 937 1403 L 921 1403 L 921 1428"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 771 1586 C 775 1585 778 1584 780 1581 C 783 1579 785 1576 787 1571 C 788 1567 789 1560 790 1552 L 798 1552 L 798 1734 L 788 1734 L 788 1599 L 760 1599 L 760 1587 C 764 1587 768 1586 771 1586"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 883 1655 C 886 1653 889 1649 891 1645 C 893 1641 895 1636 896 1630 C 898 1624 898 1618 898 1611 C 898 1604 898 1598 897 1593 C 896 1587 894 1582 892 1578 C 890 1573 887 1570 883 1568 C 880 1565 876 1564 871 1564 C 867 1564 864 1565 861 1568 C 858 1570 855 1574 853 1578 C 850 1582 848 1587 847 1593 C 846 1599 845 1605 845 1611 C 845 1618 846 1624 847 1630 C 848 1636 850 1641 852 1645 C 854 1649 857 1653 860 1655 C 864 1658 867 1659 871 1659 C 876 1659 879 1658 883 1655 Z M 855 1715 C 859 1721 864 1724 871 1724 C 877 1724 882 1722 886 1716 C 890 1711 893 1704 895 1696 C 897 1688 898 1679 899 1669 C 900 1660 900 1651 900 1643 L 900 1643 C 897 1652 893 1659 888 1665 C 883 1670 877 1673 871 1673 C 866 1673 861 1671 857 1668 C 852 1665 848 1661 845 1656 C 842 1650 840 1644 838 1636 C 837 1629 836 1621 836 1612 C 836 1603 837 1595 838 1587 C 840 1580 843 1573 846 1568 C 849 1562 853 1558 857 1555 C 862 1552 867 1550 872 1550 C 879 1550 884 1552 889 1555 C 894 1559 898 1564 901 1572 C 904 1580 906 1590 908 1602 C 909 1614 910 1629 910 1647 C 910 1651 910 1656 909 1661 C 909 1667 909 1674 908 1680 C 907 1687 905 1694 904 1701 C 902 1708 900 1714 897 1719 C 894 1725 891 1729 886 1733 C 882 1736 877 1738 871 1738 C 862 1738 854 1734 848 1726 C 843 1719 839 1707 838 1690 L 848 1690 C 849 1700 851 1709 855 1715"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 944 1572 C 940 1577 937 1584 936 1592 C 934 1600 932 1609 932 1618 C 931 1628 931 1636 931 1644 C 931 1652 931 1661 932 1670 C 932 1679 934 1688 936 1696 C 937 1704 940 1711 944 1716 C 948 1722 953 1724 959 1724 C 965 1724 970 1722 974 1716 C 977 1711 980 1704 982 1696 C 984 1688 985 1679 986 1670 C 986 1661 987 1652 987 1644 C 987 1636 986 1628 986 1618 C 985 1609 984 1600 982 1592 C 980 1584 977 1577 974 1572 C 970 1567 965 1564 959 1564 C 953 1564 948 1567 944 1572 Z M 978 1559 C 983 1565 987 1572 989 1581 C 992 1590 994 1600 995 1611 C 996 1623 996 1633 996 1644 C 996 1655 996 1666 995 1677 C 994 1688 992 1698 989 1707 C 987 1716 983 1724 978 1729 C 973 1735 967 1738 959 1738 C 951 1738 945 1735 940 1729 C 935 1724 931 1716 928 1707 C 926 1698 924 1688 923 1677 C 922 1666 921 1655 921 1644 C 921 1634 922 1623 923 1611 C 924 1600 925 1590 928 1581 C 931 1572 935 1565 940 1559 C 945 1553 951 1550 959 1550 C 967 1550 973 1553 978 1559"/>
+<path fill-rule="nonzero" fill="#FFFFFF" fill-opacity="1" d="M 1056 1576 L 1055 1576 L 1015 1675 L 1056 1675 Z M 1056 1552 L 1065 1552 L 1065 1675 L 1081 1675 L 1081 1689 L 1065 1689 L 1065 1734 L 1056 1734 L 1056 1689 L 1006 1689 L 1006 1673 L 1056 1552"/>
+</svg>
+
+    <span>wappen-weiss.svg</span>
+  </div>
+</div>
+  <h2>Bausteine</h2>
+<p class="inhalt">Alle Bausteine mit echten Daten aus data/, wie sie später auf den Inhaltsseiten verwendet werden. Ziele, deren Seite im aktuellen Paket noch nicht existiert, sind als Karten mit &lt;span&gt; statt &lt;a&gt; ausgegeben.</p>
+
+<h3>Seitenkopf</h3>
+<div class="seitenkopf">
+    <h2 style="font-family:var(--font-head);text-transform:uppercase;font-size:var(--fs-3xl);line-height:var(--lh-head);color:var(--blau-900);margin:0;">Mannschaften</h2>
+    <p class="seitenkopf__lead">Alle Fußballmannschaften des F.F.V. Sportfreunde 04 mit Training, Spielplan und Ansprechpartner.</p>
+  </div>
+
+<h3>Raster und Karte</h3>
+<div class="raster raster--3">
+    <span class="karte karte--link" aria-disabled="true" title="Seite folgt">
+      <span class="karte__titel">D1-Jugend</span>
+      <span class="karte__meta">2014 · Kreisliga A · DJKL F Gr. 1</span>
+    </span>
+    <span class="karte karte--link" aria-disabled="true" title="Seite folgt">
+      <span class="karte__titel">D2-Jugend</span>
+      <span class="karte__meta">2015 · 1. Kreisklasse · DJ KK F Gr. 05</span>
+    </span>
+    <span class="karte karte--link" aria-disabled="true" title="Seite folgt">
+      <span class="karte__titel">D3-Jugend</span>
+      <span class="karte__meta">2014/2015 · 1. Kreisklasse · DJ KK F Gr. 04</span>
+    </span>
+  </div>
+
+<h3>Spiel-Zeile</h3>
+<ul class="spiele" role="list">
+    <li class="spiel spiel--naechstes">
+      <span class="spiel__datum">Sa 26.09. · 09:00</span>
+      <span class="tag tag--auswaerts">Auswärts</span>
+      <span class="spiel__gegner-block">
+        <span class="spiel__gegner">DJK SW Griesheim 4 <span class="meta">(F2)</span></span>
+        <span class="spiel__ort">Am Römerhof 9, 60486 Frankfurt am Main</span>
+      </span>
+      <span class="spiel__ergebnis">–</span>
+    </li>
+    <li class="spiel">
+      <span class="spiel__datum">Sa 26.09. · 09:00</span>
+      <span class="tag tag--auswaerts">Auswärts</span>
+      <span class="spiel__gegner-block">
+        <span class="spiel__gegner">BSC SW 1919 Ffm. 2 <span class="meta">(G-Jugend)</span></span>
+        <span class="spiel__ort">Eschersheimer Landstr. 328, 60320 Frankfurt am Main</span>
+      </span>
+      <span class="spiel__ergebnis">–</span>
+    </li>
+    <li class="spiel">
+      <span class="spiel__datum">Sa 26.09. · 12:30</span>
+      <span class="tag tag--auswaerts">Auswärts</span>
+      <span class="spiel__gegner-block">
+        <span class="spiel__gegner">1. Rödelheimer FC 02 1 <span class="meta">(E1)</span></span>
+        <span class="spiel__ort">Bottenhorner Weg, 60489 Frankfurt am Main</span>
+      </span>
+      <span class="spiel__ergebnis">–</span>
+    </li>
+  </ul>
+
+<h3>Trainings-Zeile</h3>
+<ul class="trainings" role="list">
+    <li class="training">
+      <span class="training__tag">Dienstag</span>
+      <span class="training__zeit">17:30–19:30 Uhr</span>
+      <span class="training__platz">Vereinsplatz Mainzer Landstraße 480, rechte Hälfte Tor 1</span>
+    </li>
+    <li class="training">
+      <span class="training__tag">Freitag</span>
+      <span class="training__zeit">17:30–19:30 Uhr</span>
+      <span class="training__platz">Vereinsplatz Mainzer Landstraße 480, rechte Hälfte Tor 1</span>
+    </li>
+  </ul>
+
+<h3>Personen-Karte (mit Platzhalter ohne Foto)</h3>
+<div class="person" style="max-width:220px;">
+    <span class="person__bild person__bild--platzhalter" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-146 -127 2139 2090">
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1585 1555 C 1356 1778 1084 1963 924 1963 C 763 1963 491 1778 262 1555 C 38 1336 -146 1078 -146 918 C -146 757 38 500 262 281 C 491 57 763 -127 924 -127 C 1084 -127 1356 57 1585 281 C 1809 500 1993 757 1993 918 C 1993 1078 1809 1336 1585 1555 Z M 924 1935 C 1079 1935 1343 1755 1567 1537 C 1786 1323 1965 1073 1965 918 C 1965 762 1786 512 1567 298 C 1343 80 1079 -99 924 -99 C 768 -99 504 80 280 298 C 62 512 -118 762 -118 918 C -118 1073 62 1323 280 1537 C 504 1755 768 1935 924 1935"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1093 115 C 1200 151 1336 224 1479 367 C 1553 441 1605 513 1642 579 L 1092 579 L 1093 115"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 755 115 C 648 151 511 224 369 367 C 294 441 242 513 205 579 L 756 579 L 755 115"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1093 1721 C 1200 1685 1336 1611 1479 1468 C 1553 1394 1605 1322 1642 1256 L 1092 1256 L 1093 1721"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 755 1721 C 648 1685 511 1611 369 1468 C 294 1394 242 1322 206 1256 L 756 1256 L 755 1721"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 305 676 L 305 731 L 462 731 C 462 731 468 714 477 714 C 486 714 549 792 549 792 C 549 792 552 802 544 802 C 536 802 520 785 508 785 L 305 785 L 305 861 C 305 874 335 880 335 880 L 335 909 L 214 909 L 214 883 C 214 883 245 877 245 863 L 245 669 C 245 655 214 649 214 649 L 214 622 L 542 622 L 591 673 C 591 673 593 685 580 682 C 568 679 555 675 555 675 L 305 676"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 587 902 C 608 902 625 884 625 863 C 625 842 608 824 587 824 C 565 824 548 842 548 863 C 548 884 565 902 587 902"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 815 676 L 815 731 L 972 731 C 972 731 978 714 987 714 C 997 714 1059 792 1059 792 C 1059 792 1062 802 1054 802 C 1047 802 1030 785 1018 785 L 815 785 L 815 861 C 815 874 845 880 845 880 L 845 909 L 725 909 L 725 883 C 725 883 755 877 755 863 L 755 669 C 755 655 725 649 725 649 L 725 622 L 1053 622 L 1101 673 C 1101 673 1103 685 1091 682 C 1079 679 1065 675 1065 675 L 815 676"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1097 902 C 1118 902 1135 884 1136 863 C 1135 842 1118 824 1097 824 C 1075 824 1058 842 1058 863 C 1058 884 1075 902 1097 902"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1592 902 C 1613 902 1631 884 1631 863 C 1631 842 1613 824 1592 824 C 1571 824 1553 842 1553 863 C 1553 884 1571 902 1592 902"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1390 918 L 1587 662 C 1587 662 1620 640 1631 635 C 1642 631 1643 618 1643 618 L 1472 618 L 1497 664 L 1390 796 L 1282 664 L 1308 618 L 1136 618 C 1136 618 1137 631 1148 635 C 1159 640 1192 662 1192 662 L 1390 918"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 197 1165 C 199 1173 202 1179 206 1184 C 210 1189 215 1192 221 1194 C 226 1196 232 1197 238 1197 C 242 1197 246 1196 250 1195 C 254 1193 258 1190 262 1186 C 266 1182 269 1178 271 1172 C 273 1166 275 1158 275 1150 C 275 1143 274 1138 272 1133 C 270 1128 268 1124 265 1121 C 263 1118 260 1115 256 1113 C 253 1111 250 1109 246 1108 L 216 1095 C 212 1093 208 1091 204 1089 C 200 1086 197 1083 194 1078 C 192 1074 189 1069 187 1062 C 186 1056 185 1048 185 1039 C 185 1034 186 1027 187 1019 C 188 1012 191 1005 194 998 C 198 991 202 985 209 981 C 215 976 223 974 232 974 C 239 974 245 975 252 978 C 258 981 263 986 268 992 C 272 998 276 1006 279 1015 C 282 1024 283 1034 283 1046 L 270 1046 C 270 1037 268 1029 266 1023 C 264 1016 261 1011 258 1006 C 255 1002 251 998 246 996 C 242 994 237 993 232 993 C 228 993 224 993 219 995 C 215 997 212 999 208 1003 C 205 1006 203 1011 201 1017 C 199 1023 198 1030 198 1039 C 198 1044 199 1049 200 1053 C 201 1057 202 1060 204 1063 C 206 1066 208 1068 211 1070 C 213 1072 216 1073 219 1074 L 252 1088 C 257 1091 262 1093 266 1096 C 270 1100 274 1103 277 1108 C 281 1113 283 1118 285 1125 C 287 1132 288 1140 288 1150 C 288 1152 288 1156 287 1160 C 287 1164 286 1169 285 1174 C 284 1179 282 1184 280 1189 C 277 1194 274 1198 271 1202 C 267 1206 262 1209 256 1212 C 250 1214 243 1216 235 1216 C 227 1216 220 1214 213 1211 C 206 1208 200 1203 195 1197 C 190 1190 186 1182 184 1171 C 181 1161 180 1149 180 1135 L 194 1135 C 193 1147 194 1157 197 1165"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 366 1093 C 376 1093 383 1089 389 1081 C 394 1073 397 1061 397 1045 C 397 1029 394 1017 389 1009 C 383 1001 376 998 366 998 L 322 998 L 322 1093 Z M 369 979 C 376 979 381 980 386 983 C 391 986 395 990 399 996 C 403 1002 405 1009 407 1017 C 409 1025 410 1035 410 1045 C 410 1055 409 1065 407 1073 C 405 1081 403 1088 399 1094 C 395 1100 391 1104 386 1107 C 381 1110 376 1111 369 1111 L 322 1112 L 322 1211 L 308 1211 L 308 979 L 369 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 438 1132 C 440 1144 443 1155 448 1165 C 452 1175 457 1183 464 1188 C 470 1194 478 1197 487 1197 C 496 1197 504 1194 510 1188 C 517 1183 522 1175 526 1165 C 530 1155 534 1144 535 1132 C 537 1120 538 1107 538 1095 C 538 1082 537 1070 535 1057 C 534 1045 530 1034 526 1025 C 522 1015 517 1007 510 1001 C 504 996 496 993 487 993 C 478 993 470 996 464 1001 C 457 1007 452 1015 448 1025 C 443 1034 440 1045 438 1057 C 436 1070 435 1082 435 1095 C 435 1107 436 1120 438 1132 Z M 426 1049 C 429 1034 433 1022 438 1010 C 444 999 450 990 459 984 C 467 977 476 974 487 974 C 498 974 507 977 515 984 C 523 990 530 999 535 1010 C 541 1022 545 1034 547 1049 C 550 1064 552 1079 552 1095 C 552 1111 550 1126 548 1141 C 545 1155 541 1168 535 1179 C 530 1190 523 1199 515 1206 C 507 1212 498 1216 487 1216 C 476 1216 467 1212 459 1206 C 450 1199 444 1190 438 1179 C 433 1168 429 1155 426 1141 C 424 1126 422 1111 422 1095 C 422 1079 424 1064 426 1049"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 634 1089 C 638 1089 642 1088 645 1086 C 649 1084 652 1081 655 1077 C 657 1073 659 1068 661 1063 C 663 1057 663 1051 663 1044 C 663 1029 661 1018 656 1010 C 651 1002 644 998 634 998 L 585 998 L 585 1089 Z M 635 979 C 640 979 646 980 651 982 C 656 985 660 988 664 993 C 668 998 671 1004 673 1012 C 675 1020 676 1029 676 1039 C 676 1054 674 1067 670 1078 C 665 1088 659 1095 650 1098 L 650 1099 C 654 1100 658 1102 661 1105 C 664 1108 666 1112 668 1116 C 670 1121 671 1126 672 1132 C 673 1138 673 1145 674 1152 C 674 1155 674 1160 674 1166 C 674 1172 675 1177 675 1183 C 675 1189 676 1194 677 1199 C 678 1204 679 1208 680 1211 L 666 1211 C 665 1209 664 1206 664 1203 C 663 1200 663 1197 663 1193 C 663 1190 663 1187 662 1184 C 662 1180 662 1177 662 1175 C 662 1167 661 1159 661 1150 C 660 1142 659 1135 657 1129 C 655 1122 653 1117 649 1113 C 646 1109 641 1107 635 1108 L 585 1108 L 585 1211 L 572 1211 L 572 979 L 635 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 794 979 L 794 998 L 746 998 L 746 1211 L 733 1211 L 733 998 L 685 998 L 685 979 L 794 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 894 979 L 894 998 L 820 998 L 820 1082 L 886 1082 L 886 1100 L 820 1100 L 820 1211 L 807 1211 L 807 979 L 894 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 972 1089 C 976 1089 980 1088 983 1086 C 987 1084 990 1081 993 1077 C 995 1073 998 1068 999 1063 C 1001 1057 1002 1051 1002 1044 C 1002 1029 999 1018 994 1010 C 989 1002 982 998 972 998 L 923 998 L 923 1089 Z M 973 979 C 979 979 984 980 989 982 C 994 985 998 988 1002 993 C 1006 998 1009 1004 1011 1012 C 1014 1020 1015 1029 1015 1039 C 1015 1054 1012 1067 1008 1078 C 1003 1088 997 1095 988 1098 L 988 1099 C 992 1100 996 1102 999 1105 C 1002 1108 1004 1112 1006 1116 C 1008 1121 1010 1126 1010 1132 C 1011 1138 1012 1145 1012 1152 C 1012 1155 1012 1160 1012 1166 C 1012 1172 1013 1177 1013 1183 C 1013 1189 1014 1194 1015 1199 C 1016 1204 1017 1208 1018 1211 L 1004 1211 C 1003 1209 1003 1206 1002 1203 C 1002 1200 1001 1197 1001 1193 C 1001 1190 1001 1187 1001 1184 C 1000 1180 1000 1177 1000 1175 C 1000 1167 1000 1159 999 1150 C 998 1142 997 1135 995 1129 C 993 1122 991 1117 987 1113 C 984 1109 979 1107 973 1108 L 923 1108 L 923 1211 L 910 1211 L 910 979 L 973 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1133 979 L 1133 998 L 1051 998 L 1051 1082 L 1128 1082 L 1128 1100 L 1051 1100 L 1051 1192 L 1134 1192 L 1134 1211 L 1038 1211 L 1038 979 L 1133 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1164 979 L 1164 1123 C 1164 1136 1165 1147 1167 1157 C 1168 1166 1171 1174 1175 1180 C 1178 1186 1182 1190 1187 1193 C 1192 1196 1198 1197 1204 1197 C 1211 1197 1216 1196 1221 1193 C 1226 1190 1230 1186 1234 1180 C 1237 1174 1240 1166 1242 1157 C 1244 1147 1244 1136 1244 1123 L 1244 979 L 1258 979 L 1258 1127 C 1258 1139 1257 1151 1255 1162 C 1253 1172 1249 1182 1245 1190 C 1241 1198 1235 1204 1229 1209 C 1222 1213 1214 1216 1204 1216 C 1195 1216 1187 1213 1180 1209 C 1173 1204 1168 1198 1163 1190 C 1159 1182 1156 1172 1154 1162 C 1152 1151 1151 1139 1151 1127 L 1151 979 L 1164 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1298 979 L 1378 1175 L 1379 1175 L 1379 979 L 1392 979 L 1392 1211 L 1377 1211 L 1297 1014 L 1297 1014 L 1297 1211 L 1284 1211 L 1284 979 L 1298 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1460 1192 C 1470 1192 1478 1190 1486 1187 C 1493 1183 1499 1178 1503 1170 C 1508 1162 1511 1152 1513 1140 C 1515 1127 1517 1112 1517 1095 C 1517 1078 1515 1063 1513 1050 C 1511 1038 1508 1028 1503 1020 C 1499 1012 1493 1006 1486 1003 C 1478 999 1470 998 1460 998 L 1432 998 L 1432 1192 Z M 1467 979 C 1487 979 1503 989 1514 1008 C 1524 1027 1530 1056 1530 1095 C 1530 1134 1524 1162 1514 1181 C 1503 1200 1487 1210 1467 1211 L 1419 1211 L 1419 979 L 1467 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1646 979 L 1646 998 L 1564 998 L 1564 1082 L 1640 1082 L 1640 1100 L 1564 1100 L 1564 1192 L 1646 1192 L 1646 1211 L 1551 1211 L 1551 979 L 1646 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 903 1258 L 903 1272 L 843 1272 L 843 1333 L 899 1333 L 899 1347 L 843 1347 L 843 1414 L 904 1414 L 904 1428 L 834 1428 L 834 1258 L 903 1258"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 938 1258 L 970 1410 L 971 1410 L 1003 1258 L 1013 1258 L 976 1428 L 965 1428 L 928 1258 L 938 1258"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1007 1427 L 1023 1427 L 1023 1402 L 1007 1402 L 1007 1427"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 921 1428 L 937 1428 L 937 1403 L 921 1403 L 921 1428"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 771 1586 C 775 1585 778 1584 780 1581 C 783 1579 785 1576 787 1571 C 788 1567 789 1560 790 1552 L 798 1552 L 798 1734 L 788 1734 L 788 1599 L 760 1599 L 760 1587 C 764 1587 768 1586 771 1586"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 883 1655 C 886 1653 889 1649 891 1645 C 893 1641 895 1636 896 1630 C 898 1624 898 1618 898 1611 C 898 1604 898 1598 897 1593 C 896 1587 894 1582 892 1578 C 890 1573 887 1570 883 1568 C 880 1565 876 1564 871 1564 C 867 1564 864 1565 861 1568 C 858 1570 855 1574 853 1578 C 850 1582 848 1587 847 1593 C 846 1599 845 1605 845 1611 C 845 1618 846 1624 847 1630 C 848 1636 850 1641 852 1645 C 854 1649 857 1653 860 1655 C 864 1658 867 1659 871 1659 C 876 1659 879 1658 883 1655 Z M 855 1715 C 859 1721 864 1724 871 1724 C 877 1724 882 1722 886 1716 C 890 1711 893 1704 895 1696 C 897 1688 898 1679 899 1669 C 900 1660 900 1651 900 1643 L 900 1643 C 897 1652 893 1659 888 1665 C 883 1670 877 1673 871 1673 C 866 1673 861 1671 857 1668 C 852 1665 848 1661 845 1656 C 842 1650 840 1644 838 1636 C 837 1629 836 1621 836 1612 C 836 1603 837 1595 838 1587 C 840 1580 843 1573 846 1568 C 849 1562 853 1558 857 1555 C 862 1552 867 1550 872 1550 C 879 1550 884 1552 889 1555 C 894 1559 898 1564 901 1572 C 904 1580 906 1590 908 1602 C 909 1614 910 1629 910 1647 C 910 1651 910 1656 909 1661 C 909 1667 909 1674 908 1680 C 907 1687 905 1694 904 1701 C 902 1708 900 1714 897 1719 C 894 1725 891 1729 886 1733 C 882 1736 877 1738 871 1738 C 862 1738 854 1734 848 1726 C 843 1719 839 1707 838 1690 L 848 1690 C 849 1700 851 1709 855 1715"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 944 1572 C 940 1577 937 1584 936 1592 C 934 1600 932 1609 932 1618 C 931 1628 931 1636 931 1644 C 931 1652 931 1661 932 1670 C 932 1679 934 1688 936 1696 C 937 1704 940 1711 944 1716 C 948 1722 953 1724 959 1724 C 965 1724 970 1722 974 1716 C 977 1711 980 1704 982 1696 C 984 1688 985 1679 986 1670 C 986 1661 987 1652 987 1644 C 987 1636 986 1628 986 1618 C 985 1609 984 1600 982 1592 C 980 1584 977 1577 974 1572 C 970 1567 965 1564 959 1564 C 953 1564 948 1567 944 1572 Z M 978 1559 C 983 1565 987 1572 989 1581 C 992 1590 994 1600 995 1611 C 996 1623 996 1633 996 1644 C 996 1655 996 1666 995 1677 C 994 1688 992 1698 989 1707 C 987 1716 983 1724 978 1729 C 973 1735 967 1738 959 1738 C 951 1738 945 1735 940 1729 C 935 1724 931 1716 928 1707 C 926 1698 924 1688 923 1677 C 922 1666 921 1655 921 1644 C 921 1634 922 1623 923 1611 C 924 1600 925 1590 928 1581 C 931 1572 935 1565 940 1559 C 945 1553 951 1550 959 1550 C 967 1550 973 1553 978 1559"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1056 1576 L 1055 1576 L 1015 1675 L 1056 1675 Z M 1056 1552 L 1065 1552 L 1065 1675 L 1081 1675 L 1081 1689 L 1065 1689 L 1065 1734 L 1056 1734 L 1056 1689 L 1006 1689 L 1006 1673 L 1056 1552"/>
+</svg>
+</span>
+    <p class="person__name">Florian Müller</p>
+    <p class="person__funktion">Kinderschutzbeauftragter</p>
+    <p class="person__mail"><a class="mail" href="mailto:kinderschutzbeauftragter@sportfreunde04.de">kinderschutzbeauftragter<wbr>@sportfreunde04.de</a></p>
+  </div>
+
+<h3>Tags</h3>
+<p class="knopfzeile">
+    <span class="tag">Neutral</span>
+    <span class="tag tag--heim">Heim</span>
+    <span class="tag tag--auswaerts">Auswärts</span>
+    <span class="tag tag--ok">Bestätigt</span>
+    <span class="tag tag--warn">Offen</span>
+  </p>
+
+<h3>Hinweiskasten</h3>
+<div class="hinweis hinweis--offen">
+    <span class="tag tag--warn hinweis__label">Offen</span>
+    <p style="margin:0;">Anfahrt und Parken: Angabe folgt</p>
+  </div>
+
+<h3>Tabelle</h3>
+<div class="tabelle-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="zahl">Platz</th>
+          <th class="tabelle__mannschaft">Mannschaft</th>
+          <th class="zahl">Sp</th>
+          <th class="zahl tabelle__optional">G</th>
+          <th class="zahl tabelle__optional">U</th>
+          <th class="zahl tabelle__optional">V</th>
+          <th class="zahl tabelle__optional">Tore</th>
+          <th class="zahl tabelle__optional-2">Diff</th>
+          <th class="zahl">Punkte</th>
+        </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td class="zahl">1</td>
+        <td class="tabelle__mannschaft">SV Blau-Gelb FFM 2</td>
+        <td class="zahl">3</td>
+        <td class="zahl tabelle__optional">3</td>
+        <td class="zahl tabelle__optional">0</td>
+        <td class="zahl tabelle__optional">0</td>
+        <td class="zahl tabelle__optional">19 : 1</td>
+        <td class="zahl tabelle__optional-2">18</td>
+        <td class="zahl">9</td>
+      </tr>
+      <tr>
+        <td class="zahl">2</td>
+        <td class="tabelle__mannschaft">SV Griesheim Tarik</td>
+        <td class="zahl">3</td>
+        <td class="zahl tabelle__optional">3</td>
+        <td class="zahl tabelle__optional">0</td>
+        <td class="zahl tabelle__optional">0</td>
+        <td class="zahl tabelle__optional">14 : 1</td>
+        <td class="zahl tabelle__optional-2">13</td>
+        <td class="zahl">9</td>
+      </tr>
+      <tr>
+        <td class="zahl">3</td>
+        <td class="tabelle__mannschaft">TSG 51 Frankfurt II</td>
+        <td class="zahl">3</td>
+        <td class="zahl tabelle__optional">2</td>
+        <td class="zahl tabelle__optional">1</td>
+        <td class="zahl tabelle__optional">0</td>
+        <td class="zahl tabelle__optional">12 : 4</td>
+        <td class="zahl tabelle__optional-2">8</td>
+        <td class="zahl">7</td>
+      </tr>
+      <tr>
+        <td class="zahl">4</td>
+        <td class="tabelle__mannschaft">SG Bornheim/GW 2</td>
+        <td class="zahl">3</td>
+        <td class="zahl tabelle__optional">2</td>
+        <td class="zahl tabelle__optional">0</td>
+        <td class="zahl tabelle__optional">1</td>
+        <td class="zahl tabelle__optional">19 : 8</td>
+        <td class="zahl tabelle__optional-2">11</td>
+        <td class="zahl">6</td>
+      </tr>
+      <tr>
+        <td class="zahl">5</td>
+        <td class="tabelle__mannschaft">VfL Germania 1894 2</td>
+        <td class="zahl">2</td>
+        <td class="zahl tabelle__optional">2</td>
+        <td class="zahl tabelle__optional">0</td>
+        <td class="zahl tabelle__optional">0</td>
+        <td class="zahl tabelle__optional">14 : 4</td>
+        <td class="zahl tabelle__optional-2">10</td>
+        <td class="zahl">6</td>
+      </tr>
+      <tr>
+        <td class="zahl">6</td>
+        <td class="tabelle__mannschaft">FSV 1910 Bergen 3</td>
+        <td class="zahl">3</td>
+        <td class="zahl tabelle__optional">2</td>
+        <td class="zahl tabelle__optional">0</td>
+        <td class="zahl tabelle__optional">1</td>
+        <td class="zahl tabelle__optional">8 : 6</td>
+        <td class="zahl tabelle__optional-2">2</td>
+        <td class="zahl">6</td>
+      </tr>
+      <tr>
+        <td class="zahl">7</td>
+        <td class="tabelle__mannschaft">Spvgg. Oberrad IV</td>
+        <td class="zahl">3</td>
+        <td class="zahl tabelle__optional">1</td>
+        <td class="zahl tabelle__optional">0</td>
+        <td class="zahl tabelle__optional">2</td>
+        <td class="zahl tabelle__optional">6 : 6</td>
+        <td class="zahl tabelle__optional-2">0</td>
+        <td class="zahl">3</td>
+      </tr>
+      <tr>
+        <td class="zahl">8</td>
+        <td class="tabelle__mannschaft">TV Preungesheim 1</td>
+        <td class="zahl">3</td>
+        <td class="zahl tabelle__optional">0</td>
+        <td class="zahl tabelle__optional">1</td>
+        <td class="zahl tabelle__optional">2</td>
+        <td class="zahl tabelle__optional">0 : 11</td>
+        <td class="zahl tabelle__optional-2">-11</td>
+        <td class="zahl">1</td>
+      </tr>
+      <tr>
+        <td class="zahl">9</td>
+        <td class="tabelle__mannschaft">TuS Makkabi Frankfurt 6</td>
+        <td class="zahl">3</td>
+        <td class="zahl tabelle__optional">0</td>
+        <td class="zahl tabelle__optional">0</td>
+        <td class="zahl tabelle__optional">3</td>
+        <td class="zahl tabelle__optional">4 : 15</td>
+        <td class="zahl tabelle__optional-2">-11</td>
+        <td class="zahl">0</td>
+      </tr>
+      <tr class="eigene">
+        <td class="zahl">10</td>
+        <td class="tabelle__mannschaft">FFV Sportfreunde 04 III</td>
+        <td class="zahl">2</td>
+        <td class="zahl tabelle__optional">0</td>
+        <td class="zahl tabelle__optional">0</td>
+        <td class="zahl tabelle__optional">2</td>
+        <td class="zahl tabelle__optional">3 : 18</td>
+        <td class="zahl tabelle__optional-2">-15</td>
+        <td class="zahl">0</td>
+      </tr>
+      <tr>
+        <td class="zahl">11</td>
+        <td class="tabelle__mannschaft">DJK SW Griesheim 4</td>
+        <td class="zahl">3</td>
+        <td class="zahl tabelle__optional">0</td>
+        <td class="zahl tabelle__optional">0</td>
+        <td class="zahl tabelle__optional">3</td>
+        <td class="zahl tabelle__optional">3 : 25</td>
+        <td class="zahl tabelle__optional-2">-22</td>
+        <td class="zahl">0</td>
+      </tr>
+      <tr>
+        <td class="zahl">12</td>
+        <td class="tabelle__mannschaft">SC Weiss-Blau Frankfurt 3 zg.</td>
+        <td class="zahl">1</td>
+        <td class="zahl tabelle__optional">0</td>
+        <td class="zahl tabelle__optional">0</td>
+        <td class="zahl tabelle__optional">1</td>
+        <td class="zahl tabelle__optional">0 : 0</td>
+        <td class="zahl tabelle__optional-2">0</td>
+        <td class="zahl">0</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="meta">Staffel D3: 1. Kreisklasse · DJ KK F Gr. 04 · Momentaufnahme vom Freitag, 11. September 2026 · unter 640px werden G/U/V/Tore (Klasse <code>tabelle__optional</code>) und Diff (Klasse <code>tabelle__optional-2</code>) ausgeblendet und Mannschaft (Klasse <code>tabelle__mannschaft</code>) gekürzt</p>
+
+<h3>Knöpfe</h3>
+<p class="knopfzeile">
+    <a class="knopf" href="#inhalt">Primärknopf</a>
+    <a class="knopf knopf--sekundaer" href="#inhalt">Sekundärknopf</a>
+    <a class="knopf knopf--gross" href="#inhalt">Großer Knopf</a>
+  </p>
+
+<h3>Schritte</h3>
+<ol class="schritte">
+    <li><p>E-Mail an die Jugendleitung mit Jahrgang und Vorerfahrung</p></li>
+    <li><p>Termin fürs Probetraining bekommen und ein- bis zweimal mitmachen</p></li>
+    <li><p>Aufnahmeantrag ausfüllen – Beiträge und Unterlagen stehen unter „Mitglied werden“</p></li>
+  </ol>
+
+<h3>Adresse</h3>
+<address>
+    <p>Frankfurter Fußballverein Sportfreunde 1904 e.V.</p>
+    <p>Mainzer Landstraße 480</p>
+    <p>60326 Frankfurt am Main</p>
+  </address>
+
+<h3>Trainingsraster</h3>
+<ul class="trainingsraster" role="list">
+    <li class="trainingsraster__kopf" aria-hidden="true">
+      <span>Mannschaft</span><span>Jahrgang</span><span>Training</span>
+    </li>
+    <li class="trainingsraster__zeile">
+        <span class="trainingsraster__name">D1-Jugend</span>
+        <span class="trainingsraster__jahrgang meta">2014</span>
+        <span class="trainingsraster__einheiten">
+        <span>Di 17:30–19:30</span>
+        <span>Mi 17:30–19:00</span>
+        <span>Fr 17:30–19:30</span>
+        </span>
+      </li>
+      <li class="trainingsraster__zeile">
+        <span class="trainingsraster__name">D2-Jugend</span>
+        <span class="trainingsraster__jahrgang meta">2015</span>
+        <span class="trainingsraster__einheiten">
+        <span>Di 17:30–19:30</span>
+        <span>Mi 17:30–19:00</span>
+        <span>Fr 17:30–19:30</span>
+        </span>
+      </li>
+      <li class="trainingsraster__zeile">
+        <span class="trainingsraster__name">D3-Jugend</span>
+        <span class="trainingsraster__jahrgang meta">2014/2015</span>
+        <span class="trainingsraster__einheiten">
+        <span>Di 17:30–19:30</span>
+        <span>Fr 17:30–19:30</span>
+        </span>
+      </li>
+  </ul>
+
+<h3>Team-Karte (.karte__training, .karte__mehr)</h3>
+<p class=”inhalt”>Mannschaften-Übersicht (P3): kompakte Trainingsliste und Pfeil-Hinweis unten rechts, die ganze Karte ist der Link.</p>
+<a class="karte karte--link" href="mannschaften-d3.html" style="max-width:280px;">
+    <span class="karte__titel">D3-Jugend</span>
+    <span class="karte__meta">Jahrgang 2014/2015 · 1. Kreisklasse · DJ KK F Gr. 04</span>
+    <ul class="karte__training" role="list">
+      <li>Di 17:30–19:30</li>
+      <li>Fr 17:30–19:30</li>
+    </ul>
+    <span class="karte__mehr">Zur Mannschaft →</span>
+  </a>
+
+<h3>Zweispaltiges Layout (.zweispaltig)</h3>
+<p class=”inhalt”>Teamseiten (P3): Hauptspalte 7/12 + Seitenspalte 5/12 ab 1024px, darunter (< 1024px) beide Spalten untereinander, Hauptspalte zuerst.</p>
+<div class="zweispaltig">
+    <div class="karte">Hauptspalte (7/12 ab 1024px)</div>
+    <div class="karte">Seitenspalte (5/12 ab 1024px)</div>
+  </div>
+
+<h3>Karte „Nächstes Spiel" (.karte--spiel)</h3>
+<p class="inhalt">Team-Spielplanseiten (P4): große Einzelkarte für das nächste Spiel, Datum/Zeit groß in Barlow Condensed.</p>
+<div class="karte karte--spiel" style="max-width:360px;">
+    <p class="karte__spiel-datum">Samstag, 26. September 2026 · 09:00 Uhr</p>
+    <p class="knopfzeile" style="margin:0;">
+      <span class="tag tag--auswaerts">Auswärts</span>
+    </p>
+    <p class="karte__spiel-gegner">DJK SW Griesheim 4</p>
+    <p class="karte__spiel-ort">
+      <span>Am Römerhof 9, 60486 Frankfurt am Main</span>
+    </p>
+  </div>
+
+<h3>Sprunglink-Pille (.sprung)</h3>
+<p class="inhalt">Sprungliste auf /tabellen/ (P4): optisch wie .tag, aber mit Tippziel 44px.</p>
+<p class="knopfzeile">
+    <a class="sprung" href="#inhalt">D1</a>
+    <a class="sprung" href="#inhalt">D2</a>
+    <a class="sprung" href="#inhalt">D3</a>
+  </p>
+
+<h3>Vergangenes Spiel (.spiel--vergangen)</h3>
+<p class="inhalt">„Alle Spiele" auf den Team-Spielplanseiten (P4): gedämpfter Text statt der sonstigen Akzentfarben.</p>
+<ul class="spiele" role="list">
+    <li class="spiel spiel--vergangen">
+      <span class="spiel__datum">So 20.09. · 15:00</span>
+      <span class="tag tag--heim">Heim</span>
+      <span class="spiel__gegner-block">
+        <span class="spiel__gegner">SC Riedberg <span class="meta">(Herren)</span></span>
+        <span class="spiel__ort meta">Am Römerhof 9, 60486 Frankfurt am Main</span>
+      </span>
+      <span class="spiel__ergebnis"><a href="https://www.fussball.de/spiel/x/-/spiel/031D0TFA20000000VS5489BUVUR5FS5A" rel="noopener" target="_blank">Ergebnis auf FUSSBALL.DE</a></span>
+    </li>
+  </ul>
+
+<h3>Zahlen-Kachel (.zahl)</h3>
+<p class="inhalt">Abschnitt "Zahlen" auf /verein/ (P5): Wert groß in Barlow Condensed/Weiß, Beschriftung in --blau-100, im vierspaltigen Raster auf --abschnitt--blau.</p>
+<div class="abschnitt--blau" style="border-radius:var(--r-lg);padding:var(--sp-6);">
+    <div class="raster raster--4">
+      <div class="zahl"><span class="zahl__wert">1904</span><span class="zahl__label">gegründet</span></div>
+      <div class="zahl"><span class="zahl__wert">11</span><span class="zahl__label">Fußballmannschaften</span></div>
+      <div class="zahl"><span class="zahl__wert">5</span><span class="zahl__label">Karnevalgruppen</span></div>
+      <div class="zahl"><span class="zahl__wert">2</span><span class="zahl__label">Abteilungen</span></div>
+    </div>
+  </div>
+
+<h3>Download-Zeile (.download)</h3>
+<p class="inhalt">/verein/downloads/ (P5): Titel als Link, darunter Format/Umfang und Hinweis auf das externe Ziel als .meta-Zeilen.</p>
+<ul class="downloads" role="list">
+    <li class="download">
+      <a href="https://cdn.appack.de/sportfreunde04/pdf/Vereinsanmeldung%20allgemein_NEU_9-2026%20%20(1).pdf" rel="noopener" target="_blank">Aufnahmeantrag / Vereinsanmeldung (Stand 9/2026)</a>
+      <span class="meta">PDF · 4 Seiten · 213 KB</span>
+      <span class="meta">öffnet cdn.appack.de</span>
+    </li>
+  </ul>
+
+<h3>Personen-Raster (.raster--personen)</h3>
+<p class="inhalt">Vorstand und Karnevalabteilung (P5-Korrektur A1): ersetzt raster--3/raster--4 bei Personen-Karten. Ab 640px maximal 260px Kartenbreite (auto-fill statt auto-fit, dadurch kein Strecken auf halbe Containerbreite bei wenigen Einträgen), darunter zwei bzw. eine Spalte.</p>
+<div class="raster raster--personen">
+    <div class="person">
+      <span class="person__bild person__bild--platzhalter" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-146 -127 2139 2090">
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1585 1555 C 1356 1778 1084 1963 924 1963 C 763 1963 491 1778 262 1555 C 38 1336 -146 1078 -146 918 C -146 757 38 500 262 281 C 491 57 763 -127 924 -127 C 1084 -127 1356 57 1585 281 C 1809 500 1993 757 1993 918 C 1993 1078 1809 1336 1585 1555 Z M 924 1935 C 1079 1935 1343 1755 1567 1537 C 1786 1323 1965 1073 1965 918 C 1965 762 1786 512 1567 298 C 1343 80 1079 -99 924 -99 C 768 -99 504 80 280 298 C 62 512 -118 762 -118 918 C -118 1073 62 1323 280 1537 C 504 1755 768 1935 924 1935"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1093 115 C 1200 151 1336 224 1479 367 C 1553 441 1605 513 1642 579 L 1092 579 L 1093 115"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 755 115 C 648 151 511 224 369 367 C 294 441 242 513 205 579 L 756 579 L 755 115"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1093 1721 C 1200 1685 1336 1611 1479 1468 C 1553 1394 1605 1322 1642 1256 L 1092 1256 L 1093 1721"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 755 1721 C 648 1685 511 1611 369 1468 C 294 1394 242 1322 206 1256 L 756 1256 L 755 1721"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 305 676 L 305 731 L 462 731 C 462 731 468 714 477 714 C 486 714 549 792 549 792 C 549 792 552 802 544 802 C 536 802 520 785 508 785 L 305 785 L 305 861 C 305 874 335 880 335 880 L 335 909 L 214 909 L 214 883 C 214 883 245 877 245 863 L 245 669 C 245 655 214 649 214 649 L 214 622 L 542 622 L 591 673 C 591 673 593 685 580 682 C 568 679 555 675 555 675 L 305 676"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 587 902 C 608 902 625 884 625 863 C 625 842 608 824 587 824 C 565 824 548 842 548 863 C 548 884 565 902 587 902"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 815 676 L 815 731 L 972 731 C 972 731 978 714 987 714 C 997 714 1059 792 1059 792 C 1059 792 1062 802 1054 802 C 1047 802 1030 785 1018 785 L 815 785 L 815 861 C 815 874 845 880 845 880 L 845 909 L 725 909 L 725 883 C 725 883 755 877 755 863 L 755 669 C 755 655 725 649 725 649 L 725 622 L 1053 622 L 1101 673 C 1101 673 1103 685 1091 682 C 1079 679 1065 675 1065 675 L 815 676"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1097 902 C 1118 902 1135 884 1136 863 C 1135 842 1118 824 1097 824 C 1075 824 1058 842 1058 863 C 1058 884 1075 902 1097 902"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1592 902 C 1613 902 1631 884 1631 863 C 1631 842 1613 824 1592 824 C 1571 824 1553 842 1553 863 C 1553 884 1571 902 1592 902"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1390 918 L 1587 662 C 1587 662 1620 640 1631 635 C 1642 631 1643 618 1643 618 L 1472 618 L 1497 664 L 1390 796 L 1282 664 L 1308 618 L 1136 618 C 1136 618 1137 631 1148 635 C 1159 640 1192 662 1192 662 L 1390 918"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 197 1165 C 199 1173 202 1179 206 1184 C 210 1189 215 1192 221 1194 C 226 1196 232 1197 238 1197 C 242 1197 246 1196 250 1195 C 254 1193 258 1190 262 1186 C 266 1182 269 1178 271 1172 C 273 1166 275 1158 275 1150 C 275 1143 274 1138 272 1133 C 270 1128 268 1124 265 1121 C 263 1118 260 1115 256 1113 C 253 1111 250 1109 246 1108 L 216 1095 C 212 1093 208 1091 204 1089 C 200 1086 197 1083 194 1078 C 192 1074 189 1069 187 1062 C 186 1056 185 1048 185 1039 C 185 1034 186 1027 187 1019 C 188 1012 191 1005 194 998 C 198 991 202 985 209 981 C 215 976 223 974 232 974 C 239 974 245 975 252 978 C 258 981 263 986 268 992 C 272 998 276 1006 279 1015 C 282 1024 283 1034 283 1046 L 270 1046 C 270 1037 268 1029 266 1023 C 264 1016 261 1011 258 1006 C 255 1002 251 998 246 996 C 242 994 237 993 232 993 C 228 993 224 993 219 995 C 215 997 212 999 208 1003 C 205 1006 203 1011 201 1017 C 199 1023 198 1030 198 1039 C 198 1044 199 1049 200 1053 C 201 1057 202 1060 204 1063 C 206 1066 208 1068 211 1070 C 213 1072 216 1073 219 1074 L 252 1088 C 257 1091 262 1093 266 1096 C 270 1100 274 1103 277 1108 C 281 1113 283 1118 285 1125 C 287 1132 288 1140 288 1150 C 288 1152 288 1156 287 1160 C 287 1164 286 1169 285 1174 C 284 1179 282 1184 280 1189 C 277 1194 274 1198 271 1202 C 267 1206 262 1209 256 1212 C 250 1214 243 1216 235 1216 C 227 1216 220 1214 213 1211 C 206 1208 200 1203 195 1197 C 190 1190 186 1182 184 1171 C 181 1161 180 1149 180 1135 L 194 1135 C 193 1147 194 1157 197 1165"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 366 1093 C 376 1093 383 1089 389 1081 C 394 1073 397 1061 397 1045 C 397 1029 394 1017 389 1009 C 383 1001 376 998 366 998 L 322 998 L 322 1093 Z M 369 979 C 376 979 381 980 386 983 C 391 986 395 990 399 996 C 403 1002 405 1009 407 1017 C 409 1025 410 1035 410 1045 C 410 1055 409 1065 407 1073 C 405 1081 403 1088 399 1094 C 395 1100 391 1104 386 1107 C 381 1110 376 1111 369 1111 L 322 1112 L 322 1211 L 308 1211 L 308 979 L 369 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 438 1132 C 440 1144 443 1155 448 1165 C 452 1175 457 1183 464 1188 C 470 1194 478 1197 487 1197 C 496 1197 504 1194 510 1188 C 517 1183 522 1175 526 1165 C 530 1155 534 1144 535 1132 C 537 1120 538 1107 538 1095 C 538 1082 537 1070 535 1057 C 534 1045 530 1034 526 1025 C 522 1015 517 1007 510 1001 C 504 996 496 993 487 993 C 478 993 470 996 464 1001 C 457 1007 452 1015 448 1025 C 443 1034 440 1045 438 1057 C 436 1070 435 1082 435 1095 C 435 1107 436 1120 438 1132 Z M 426 1049 C 429 1034 433 1022 438 1010 C 444 999 450 990 459 984 C 467 977 476 974 487 974 C 498 974 507 977 515 984 C 523 990 530 999 535 1010 C 541 1022 545 1034 547 1049 C 550 1064 552 1079 552 1095 C 552 1111 550 1126 548 1141 C 545 1155 541 1168 535 1179 C 530 1190 523 1199 515 1206 C 507 1212 498 1216 487 1216 C 476 1216 467 1212 459 1206 C 450 1199 444 1190 438 1179 C 433 1168 429 1155 426 1141 C 424 1126 422 1111 422 1095 C 422 1079 424 1064 426 1049"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 634 1089 C 638 1089 642 1088 645 1086 C 649 1084 652 1081 655 1077 C 657 1073 659 1068 661 1063 C 663 1057 663 1051 663 1044 C 663 1029 661 1018 656 1010 C 651 1002 644 998 634 998 L 585 998 L 585 1089 Z M 635 979 C 640 979 646 980 651 982 C 656 985 660 988 664 993 C 668 998 671 1004 673 1012 C 675 1020 676 1029 676 1039 C 676 1054 674 1067 670 1078 C 665 1088 659 1095 650 1098 L 650 1099 C 654 1100 658 1102 661 1105 C 664 1108 666 1112 668 1116 C 670 1121 671 1126 672 1132 C 673 1138 673 1145 674 1152 C 674 1155 674 1160 674 1166 C 674 1172 675 1177 675 1183 C 675 1189 676 1194 677 1199 C 678 1204 679 1208 680 1211 L 666 1211 C 665 1209 664 1206 664 1203 C 663 1200 663 1197 663 1193 C 663 1190 663 1187 662 1184 C 662 1180 662 1177 662 1175 C 662 1167 661 1159 661 1150 C 660 1142 659 1135 657 1129 C 655 1122 653 1117 649 1113 C 646 1109 641 1107 635 1108 L 585 1108 L 585 1211 L 572 1211 L 572 979 L 635 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 794 979 L 794 998 L 746 998 L 746 1211 L 733 1211 L 733 998 L 685 998 L 685 979 L 794 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 894 979 L 894 998 L 820 998 L 820 1082 L 886 1082 L 886 1100 L 820 1100 L 820 1211 L 807 1211 L 807 979 L 894 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 972 1089 C 976 1089 980 1088 983 1086 C 987 1084 990 1081 993 1077 C 995 1073 998 1068 999 1063 C 1001 1057 1002 1051 1002 1044 C 1002 1029 999 1018 994 1010 C 989 1002 982 998 972 998 L 923 998 L 923 1089 Z M 973 979 C 979 979 984 980 989 982 C 994 985 998 988 1002 993 C 1006 998 1009 1004 1011 1012 C 1014 1020 1015 1029 1015 1039 C 1015 1054 1012 1067 1008 1078 C 1003 1088 997 1095 988 1098 L 988 1099 C 992 1100 996 1102 999 1105 C 1002 1108 1004 1112 1006 1116 C 1008 1121 1010 1126 1010 1132 C 1011 1138 1012 1145 1012 1152 C 1012 1155 1012 1160 1012 1166 C 1012 1172 1013 1177 1013 1183 C 1013 1189 1014 1194 1015 1199 C 1016 1204 1017 1208 1018 1211 L 1004 1211 C 1003 1209 1003 1206 1002 1203 C 1002 1200 1001 1197 1001 1193 C 1001 1190 1001 1187 1001 1184 C 1000 1180 1000 1177 1000 1175 C 1000 1167 1000 1159 999 1150 C 998 1142 997 1135 995 1129 C 993 1122 991 1117 987 1113 C 984 1109 979 1107 973 1108 L 923 1108 L 923 1211 L 910 1211 L 910 979 L 973 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1133 979 L 1133 998 L 1051 998 L 1051 1082 L 1128 1082 L 1128 1100 L 1051 1100 L 1051 1192 L 1134 1192 L 1134 1211 L 1038 1211 L 1038 979 L 1133 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1164 979 L 1164 1123 C 1164 1136 1165 1147 1167 1157 C 1168 1166 1171 1174 1175 1180 C 1178 1186 1182 1190 1187 1193 C 1192 1196 1198 1197 1204 1197 C 1211 1197 1216 1196 1221 1193 C 1226 1190 1230 1186 1234 1180 C 1237 1174 1240 1166 1242 1157 C 1244 1147 1244 1136 1244 1123 L 1244 979 L 1258 979 L 1258 1127 C 1258 1139 1257 1151 1255 1162 C 1253 1172 1249 1182 1245 1190 C 1241 1198 1235 1204 1229 1209 C 1222 1213 1214 1216 1204 1216 C 1195 1216 1187 1213 1180 1209 C 1173 1204 1168 1198 1163 1190 C 1159 1182 1156 1172 1154 1162 C 1152 1151 1151 1139 1151 1127 L 1151 979 L 1164 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1298 979 L 1378 1175 L 1379 1175 L 1379 979 L 1392 979 L 1392 1211 L 1377 1211 L 1297 1014 L 1297 1014 L 1297 1211 L 1284 1211 L 1284 979 L 1298 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1460 1192 C 1470 1192 1478 1190 1486 1187 C 1493 1183 1499 1178 1503 1170 C 1508 1162 1511 1152 1513 1140 C 1515 1127 1517 1112 1517 1095 C 1517 1078 1515 1063 1513 1050 C 1511 1038 1508 1028 1503 1020 C 1499 1012 1493 1006 1486 1003 C 1478 999 1470 998 1460 998 L 1432 998 L 1432 1192 Z M 1467 979 C 1487 979 1503 989 1514 1008 C 1524 1027 1530 1056 1530 1095 C 1530 1134 1524 1162 1514 1181 C 1503 1200 1487 1210 1467 1211 L 1419 1211 L 1419 979 L 1467 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1646 979 L 1646 998 L 1564 998 L 1564 1082 L 1640 1082 L 1640 1100 L 1564 1100 L 1564 1192 L 1646 1192 L 1646 1211 L 1551 1211 L 1551 979 L 1646 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 903 1258 L 903 1272 L 843 1272 L 843 1333 L 899 1333 L 899 1347 L 843 1347 L 843 1414 L 904 1414 L 904 1428 L 834 1428 L 834 1258 L 903 1258"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 938 1258 L 970 1410 L 971 1410 L 1003 1258 L 1013 1258 L 976 1428 L 965 1428 L 928 1258 L 938 1258"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1007 1427 L 1023 1427 L 1023 1402 L 1007 1402 L 1007 1427"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 921 1428 L 937 1428 L 937 1403 L 921 1403 L 921 1428"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 771 1586 C 775 1585 778 1584 780 1581 C 783 1579 785 1576 787 1571 C 788 1567 789 1560 790 1552 L 798 1552 L 798 1734 L 788 1734 L 788 1599 L 760 1599 L 760 1587 C 764 1587 768 1586 771 1586"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 883 1655 C 886 1653 889 1649 891 1645 C 893 1641 895 1636 896 1630 C 898 1624 898 1618 898 1611 C 898 1604 898 1598 897 1593 C 896 1587 894 1582 892 1578 C 890 1573 887 1570 883 1568 C 880 1565 876 1564 871 1564 C 867 1564 864 1565 861 1568 C 858 1570 855 1574 853 1578 C 850 1582 848 1587 847 1593 C 846 1599 845 1605 845 1611 C 845 1618 846 1624 847 1630 C 848 1636 850 1641 852 1645 C 854 1649 857 1653 860 1655 C 864 1658 867 1659 871 1659 C 876 1659 879 1658 883 1655 Z M 855 1715 C 859 1721 864 1724 871 1724 C 877 1724 882 1722 886 1716 C 890 1711 893 1704 895 1696 C 897 1688 898 1679 899 1669 C 900 1660 900 1651 900 1643 L 900 1643 C 897 1652 893 1659 888 1665 C 883 1670 877 1673 871 1673 C 866 1673 861 1671 857 1668 C 852 1665 848 1661 845 1656 C 842 1650 840 1644 838 1636 C 837 1629 836 1621 836 1612 C 836 1603 837 1595 838 1587 C 840 1580 843 1573 846 1568 C 849 1562 853 1558 857 1555 C 862 1552 867 1550 872 1550 C 879 1550 884 1552 889 1555 C 894 1559 898 1564 901 1572 C 904 1580 906 1590 908 1602 C 909 1614 910 1629 910 1647 C 910 1651 910 1656 909 1661 C 909 1667 909 1674 908 1680 C 907 1687 905 1694 904 1701 C 902 1708 900 1714 897 1719 C 894 1725 891 1729 886 1733 C 882 1736 877 1738 871 1738 C 862 1738 854 1734 848 1726 C 843 1719 839 1707 838 1690 L 848 1690 C 849 1700 851 1709 855 1715"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 944 1572 C 940 1577 937 1584 936 1592 C 934 1600 932 1609 932 1618 C 931 1628 931 1636 931 1644 C 931 1652 931 1661 932 1670 C 932 1679 934 1688 936 1696 C 937 1704 940 1711 944 1716 C 948 1722 953 1724 959 1724 C 965 1724 970 1722 974 1716 C 977 1711 980 1704 982 1696 C 984 1688 985 1679 986 1670 C 986 1661 987 1652 987 1644 C 987 1636 986 1628 986 1618 C 985 1609 984 1600 982 1592 C 980 1584 977 1577 974 1572 C 970 1567 965 1564 959 1564 C 953 1564 948 1567 944 1572 Z M 978 1559 C 983 1565 987 1572 989 1581 C 992 1590 994 1600 995 1611 C 996 1623 996 1633 996 1644 C 996 1655 996 1666 995 1677 C 994 1688 992 1698 989 1707 C 987 1716 983 1724 978 1729 C 973 1735 967 1738 959 1738 C 951 1738 945 1735 940 1729 C 935 1724 931 1716 928 1707 C 926 1698 924 1688 923 1677 C 922 1666 921 1655 921 1644 C 921 1634 922 1623 923 1611 C 924 1600 925 1590 928 1581 C 931 1572 935 1565 940 1559 C 945 1553 951 1550 959 1550 C 967 1550 973 1553 978 1559"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1056 1576 L 1055 1576 L 1015 1675 L 1056 1675 Z M 1056 1552 L 1065 1552 L 1065 1675 L 1081 1675 L 1081 1689 L 1065 1689 L 1065 1734 L 1056 1734 L 1056 1689 L 1006 1689 L 1006 1673 L 1056 1552"/>
+</svg>
+</span>
+      <p class="person__name">Wolfgang Krönung</p>
+      <p class="person__funktion">Sportliche Leitung Senioren</p>
+    </div>
+    <div class="person">
+      <span class="person__bild person__bild--platzhalter" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-146 -127 2139 2090">
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1585 1555 C 1356 1778 1084 1963 924 1963 C 763 1963 491 1778 262 1555 C 38 1336 -146 1078 -146 918 C -146 757 38 500 262 281 C 491 57 763 -127 924 -127 C 1084 -127 1356 57 1585 281 C 1809 500 1993 757 1993 918 C 1993 1078 1809 1336 1585 1555 Z M 924 1935 C 1079 1935 1343 1755 1567 1537 C 1786 1323 1965 1073 1965 918 C 1965 762 1786 512 1567 298 C 1343 80 1079 -99 924 -99 C 768 -99 504 80 280 298 C 62 512 -118 762 -118 918 C -118 1073 62 1323 280 1537 C 504 1755 768 1935 924 1935"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1093 115 C 1200 151 1336 224 1479 367 C 1553 441 1605 513 1642 579 L 1092 579 L 1093 115"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 755 115 C 648 151 511 224 369 367 C 294 441 242 513 205 579 L 756 579 L 755 115"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1093 1721 C 1200 1685 1336 1611 1479 1468 C 1553 1394 1605 1322 1642 1256 L 1092 1256 L 1093 1721"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 755 1721 C 648 1685 511 1611 369 1468 C 294 1394 242 1322 206 1256 L 756 1256 L 755 1721"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 305 676 L 305 731 L 462 731 C 462 731 468 714 477 714 C 486 714 549 792 549 792 C 549 792 552 802 544 802 C 536 802 520 785 508 785 L 305 785 L 305 861 C 305 874 335 880 335 880 L 335 909 L 214 909 L 214 883 C 214 883 245 877 245 863 L 245 669 C 245 655 214 649 214 649 L 214 622 L 542 622 L 591 673 C 591 673 593 685 580 682 C 568 679 555 675 555 675 L 305 676"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 587 902 C 608 902 625 884 625 863 C 625 842 608 824 587 824 C 565 824 548 842 548 863 C 548 884 565 902 587 902"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 815 676 L 815 731 L 972 731 C 972 731 978 714 987 714 C 997 714 1059 792 1059 792 C 1059 792 1062 802 1054 802 C 1047 802 1030 785 1018 785 L 815 785 L 815 861 C 815 874 845 880 845 880 L 845 909 L 725 909 L 725 883 C 725 883 755 877 755 863 L 755 669 C 755 655 725 649 725 649 L 725 622 L 1053 622 L 1101 673 C 1101 673 1103 685 1091 682 C 1079 679 1065 675 1065 675 L 815 676"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1097 902 C 1118 902 1135 884 1136 863 C 1135 842 1118 824 1097 824 C 1075 824 1058 842 1058 863 C 1058 884 1075 902 1097 902"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1592 902 C 1613 902 1631 884 1631 863 C 1631 842 1613 824 1592 824 C 1571 824 1553 842 1553 863 C 1553 884 1571 902 1592 902"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1390 918 L 1587 662 C 1587 662 1620 640 1631 635 C 1642 631 1643 618 1643 618 L 1472 618 L 1497 664 L 1390 796 L 1282 664 L 1308 618 L 1136 618 C 1136 618 1137 631 1148 635 C 1159 640 1192 662 1192 662 L 1390 918"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 197 1165 C 199 1173 202 1179 206 1184 C 210 1189 215 1192 221 1194 C 226 1196 232 1197 238 1197 C 242 1197 246 1196 250 1195 C 254 1193 258 1190 262 1186 C 266 1182 269 1178 271 1172 C 273 1166 275 1158 275 1150 C 275 1143 274 1138 272 1133 C 270 1128 268 1124 265 1121 C 263 1118 260 1115 256 1113 C 253 1111 250 1109 246 1108 L 216 1095 C 212 1093 208 1091 204 1089 C 200 1086 197 1083 194 1078 C 192 1074 189 1069 187 1062 C 186 1056 185 1048 185 1039 C 185 1034 186 1027 187 1019 C 188 1012 191 1005 194 998 C 198 991 202 985 209 981 C 215 976 223 974 232 974 C 239 974 245 975 252 978 C 258 981 263 986 268 992 C 272 998 276 1006 279 1015 C 282 1024 283 1034 283 1046 L 270 1046 C 270 1037 268 1029 266 1023 C 264 1016 261 1011 258 1006 C 255 1002 251 998 246 996 C 242 994 237 993 232 993 C 228 993 224 993 219 995 C 215 997 212 999 208 1003 C 205 1006 203 1011 201 1017 C 199 1023 198 1030 198 1039 C 198 1044 199 1049 200 1053 C 201 1057 202 1060 204 1063 C 206 1066 208 1068 211 1070 C 213 1072 216 1073 219 1074 L 252 1088 C 257 1091 262 1093 266 1096 C 270 1100 274 1103 277 1108 C 281 1113 283 1118 285 1125 C 287 1132 288 1140 288 1150 C 288 1152 288 1156 287 1160 C 287 1164 286 1169 285 1174 C 284 1179 282 1184 280 1189 C 277 1194 274 1198 271 1202 C 267 1206 262 1209 256 1212 C 250 1214 243 1216 235 1216 C 227 1216 220 1214 213 1211 C 206 1208 200 1203 195 1197 C 190 1190 186 1182 184 1171 C 181 1161 180 1149 180 1135 L 194 1135 C 193 1147 194 1157 197 1165"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 366 1093 C 376 1093 383 1089 389 1081 C 394 1073 397 1061 397 1045 C 397 1029 394 1017 389 1009 C 383 1001 376 998 366 998 L 322 998 L 322 1093 Z M 369 979 C 376 979 381 980 386 983 C 391 986 395 990 399 996 C 403 1002 405 1009 407 1017 C 409 1025 410 1035 410 1045 C 410 1055 409 1065 407 1073 C 405 1081 403 1088 399 1094 C 395 1100 391 1104 386 1107 C 381 1110 376 1111 369 1111 L 322 1112 L 322 1211 L 308 1211 L 308 979 L 369 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 438 1132 C 440 1144 443 1155 448 1165 C 452 1175 457 1183 464 1188 C 470 1194 478 1197 487 1197 C 496 1197 504 1194 510 1188 C 517 1183 522 1175 526 1165 C 530 1155 534 1144 535 1132 C 537 1120 538 1107 538 1095 C 538 1082 537 1070 535 1057 C 534 1045 530 1034 526 1025 C 522 1015 517 1007 510 1001 C 504 996 496 993 487 993 C 478 993 470 996 464 1001 C 457 1007 452 1015 448 1025 C 443 1034 440 1045 438 1057 C 436 1070 435 1082 435 1095 C 435 1107 436 1120 438 1132 Z M 426 1049 C 429 1034 433 1022 438 1010 C 444 999 450 990 459 984 C 467 977 476 974 487 974 C 498 974 507 977 515 984 C 523 990 530 999 535 1010 C 541 1022 545 1034 547 1049 C 550 1064 552 1079 552 1095 C 552 1111 550 1126 548 1141 C 545 1155 541 1168 535 1179 C 530 1190 523 1199 515 1206 C 507 1212 498 1216 487 1216 C 476 1216 467 1212 459 1206 C 450 1199 444 1190 438 1179 C 433 1168 429 1155 426 1141 C 424 1126 422 1111 422 1095 C 422 1079 424 1064 426 1049"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 634 1089 C 638 1089 642 1088 645 1086 C 649 1084 652 1081 655 1077 C 657 1073 659 1068 661 1063 C 663 1057 663 1051 663 1044 C 663 1029 661 1018 656 1010 C 651 1002 644 998 634 998 L 585 998 L 585 1089 Z M 635 979 C 640 979 646 980 651 982 C 656 985 660 988 664 993 C 668 998 671 1004 673 1012 C 675 1020 676 1029 676 1039 C 676 1054 674 1067 670 1078 C 665 1088 659 1095 650 1098 L 650 1099 C 654 1100 658 1102 661 1105 C 664 1108 666 1112 668 1116 C 670 1121 671 1126 672 1132 C 673 1138 673 1145 674 1152 C 674 1155 674 1160 674 1166 C 674 1172 675 1177 675 1183 C 675 1189 676 1194 677 1199 C 678 1204 679 1208 680 1211 L 666 1211 C 665 1209 664 1206 664 1203 C 663 1200 663 1197 663 1193 C 663 1190 663 1187 662 1184 C 662 1180 662 1177 662 1175 C 662 1167 661 1159 661 1150 C 660 1142 659 1135 657 1129 C 655 1122 653 1117 649 1113 C 646 1109 641 1107 635 1108 L 585 1108 L 585 1211 L 572 1211 L 572 979 L 635 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 794 979 L 794 998 L 746 998 L 746 1211 L 733 1211 L 733 998 L 685 998 L 685 979 L 794 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 894 979 L 894 998 L 820 998 L 820 1082 L 886 1082 L 886 1100 L 820 1100 L 820 1211 L 807 1211 L 807 979 L 894 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 972 1089 C 976 1089 980 1088 983 1086 C 987 1084 990 1081 993 1077 C 995 1073 998 1068 999 1063 C 1001 1057 1002 1051 1002 1044 C 1002 1029 999 1018 994 1010 C 989 1002 982 998 972 998 L 923 998 L 923 1089 Z M 973 979 C 979 979 984 980 989 982 C 994 985 998 988 1002 993 C 1006 998 1009 1004 1011 1012 C 1014 1020 1015 1029 1015 1039 C 1015 1054 1012 1067 1008 1078 C 1003 1088 997 1095 988 1098 L 988 1099 C 992 1100 996 1102 999 1105 C 1002 1108 1004 1112 1006 1116 C 1008 1121 1010 1126 1010 1132 C 1011 1138 1012 1145 1012 1152 C 1012 1155 1012 1160 1012 1166 C 1012 1172 1013 1177 1013 1183 C 1013 1189 1014 1194 1015 1199 C 1016 1204 1017 1208 1018 1211 L 1004 1211 C 1003 1209 1003 1206 1002 1203 C 1002 1200 1001 1197 1001 1193 C 1001 1190 1001 1187 1001 1184 C 1000 1180 1000 1177 1000 1175 C 1000 1167 1000 1159 999 1150 C 998 1142 997 1135 995 1129 C 993 1122 991 1117 987 1113 C 984 1109 979 1107 973 1108 L 923 1108 L 923 1211 L 910 1211 L 910 979 L 973 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1133 979 L 1133 998 L 1051 998 L 1051 1082 L 1128 1082 L 1128 1100 L 1051 1100 L 1051 1192 L 1134 1192 L 1134 1211 L 1038 1211 L 1038 979 L 1133 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1164 979 L 1164 1123 C 1164 1136 1165 1147 1167 1157 C 1168 1166 1171 1174 1175 1180 C 1178 1186 1182 1190 1187 1193 C 1192 1196 1198 1197 1204 1197 C 1211 1197 1216 1196 1221 1193 C 1226 1190 1230 1186 1234 1180 C 1237 1174 1240 1166 1242 1157 C 1244 1147 1244 1136 1244 1123 L 1244 979 L 1258 979 L 1258 1127 C 1258 1139 1257 1151 1255 1162 C 1253 1172 1249 1182 1245 1190 C 1241 1198 1235 1204 1229 1209 C 1222 1213 1214 1216 1204 1216 C 1195 1216 1187 1213 1180 1209 C 1173 1204 1168 1198 1163 1190 C 1159 1182 1156 1172 1154 1162 C 1152 1151 1151 1139 1151 1127 L 1151 979 L 1164 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1298 979 L 1378 1175 L 1379 1175 L 1379 979 L 1392 979 L 1392 1211 L 1377 1211 L 1297 1014 L 1297 1014 L 1297 1211 L 1284 1211 L 1284 979 L 1298 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1460 1192 C 1470 1192 1478 1190 1486 1187 C 1493 1183 1499 1178 1503 1170 C 1508 1162 1511 1152 1513 1140 C 1515 1127 1517 1112 1517 1095 C 1517 1078 1515 1063 1513 1050 C 1511 1038 1508 1028 1503 1020 C 1499 1012 1493 1006 1486 1003 C 1478 999 1470 998 1460 998 L 1432 998 L 1432 1192 Z M 1467 979 C 1487 979 1503 989 1514 1008 C 1524 1027 1530 1056 1530 1095 C 1530 1134 1524 1162 1514 1181 C 1503 1200 1487 1210 1467 1211 L 1419 1211 L 1419 979 L 1467 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1646 979 L 1646 998 L 1564 998 L 1564 1082 L 1640 1082 L 1640 1100 L 1564 1100 L 1564 1192 L 1646 1192 L 1646 1211 L 1551 1211 L 1551 979 L 1646 979"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 903 1258 L 903 1272 L 843 1272 L 843 1333 L 899 1333 L 899 1347 L 843 1347 L 843 1414 L 904 1414 L 904 1428 L 834 1428 L 834 1258 L 903 1258"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 938 1258 L 970 1410 L 971 1410 L 1003 1258 L 1013 1258 L 976 1428 L 965 1428 L 928 1258 L 938 1258"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1007 1427 L 1023 1427 L 1023 1402 L 1007 1402 L 1007 1427"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 921 1428 L 937 1428 L 937 1403 L 921 1403 L 921 1428"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 771 1586 C 775 1585 778 1584 780 1581 C 783 1579 785 1576 787 1571 C 788 1567 789 1560 790 1552 L 798 1552 L 798 1734 L 788 1734 L 788 1599 L 760 1599 L 760 1587 C 764 1587 768 1586 771 1586"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 883 1655 C 886 1653 889 1649 891 1645 C 893 1641 895 1636 896 1630 C 898 1624 898 1618 898 1611 C 898 1604 898 1598 897 1593 C 896 1587 894 1582 892 1578 C 890 1573 887 1570 883 1568 C 880 1565 876 1564 871 1564 C 867 1564 864 1565 861 1568 C 858 1570 855 1574 853 1578 C 850 1582 848 1587 847 1593 C 846 1599 845 1605 845 1611 C 845 1618 846 1624 847 1630 C 848 1636 850 1641 852 1645 C 854 1649 857 1653 860 1655 C 864 1658 867 1659 871 1659 C 876 1659 879 1658 883 1655 Z M 855 1715 C 859 1721 864 1724 871 1724 C 877 1724 882 1722 886 1716 C 890 1711 893 1704 895 1696 C 897 1688 898 1679 899 1669 C 900 1660 900 1651 900 1643 L 900 1643 C 897 1652 893 1659 888 1665 C 883 1670 877 1673 871 1673 C 866 1673 861 1671 857 1668 C 852 1665 848 1661 845 1656 C 842 1650 840 1644 838 1636 C 837 1629 836 1621 836 1612 C 836 1603 837 1595 838 1587 C 840 1580 843 1573 846 1568 C 849 1562 853 1558 857 1555 C 862 1552 867 1550 872 1550 C 879 1550 884 1552 889 1555 C 894 1559 898 1564 901 1572 C 904 1580 906 1590 908 1602 C 909 1614 910 1629 910 1647 C 910 1651 910 1656 909 1661 C 909 1667 909 1674 908 1680 C 907 1687 905 1694 904 1701 C 902 1708 900 1714 897 1719 C 894 1725 891 1729 886 1733 C 882 1736 877 1738 871 1738 C 862 1738 854 1734 848 1726 C 843 1719 839 1707 838 1690 L 848 1690 C 849 1700 851 1709 855 1715"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 944 1572 C 940 1577 937 1584 936 1592 C 934 1600 932 1609 932 1618 C 931 1628 931 1636 931 1644 C 931 1652 931 1661 932 1670 C 932 1679 934 1688 936 1696 C 937 1704 940 1711 944 1716 C 948 1722 953 1724 959 1724 C 965 1724 970 1722 974 1716 C 977 1711 980 1704 982 1696 C 984 1688 985 1679 986 1670 C 986 1661 987 1652 987 1644 C 987 1636 986 1628 986 1618 C 985 1609 984 1600 982 1592 C 980 1584 977 1577 974 1572 C 970 1567 965 1564 959 1564 C 953 1564 948 1567 944 1572 Z M 978 1559 C 983 1565 987 1572 989 1581 C 992 1590 994 1600 995 1611 C 996 1623 996 1633 996 1644 C 996 1655 996 1666 995 1677 C 994 1688 992 1698 989 1707 C 987 1716 983 1724 978 1729 C 973 1735 967 1738 959 1738 C 951 1738 945 1735 940 1729 C 935 1724 931 1716 928 1707 C 926 1698 924 1688 923 1677 C 922 1666 921 1655 921 1644 C 921 1634 922 1623 923 1611 C 924 1600 925 1590 928 1581 C 931 1572 935 1565 940 1559 C 945 1553 951 1550 959 1550 C 967 1550 973 1553 978 1559"/>
+<path fill-rule="nonzero" fill="#0300FD" fill-opacity="1" d="M 1056 1576 L 1055 1576 L 1015 1675 L 1056 1675 Z M 1056 1552 L 1065 1552 L 1065 1675 L 1081 1675 L 1081 1689 L 1065 1689 L 1065 1734 L 1056 1734 L 1056 1689 L 1006 1689 L 1006 1673 L 1056 1552"/>
+</svg>
+</span>
+      <p class="person__name">Christine Rothe</p>
+      <p class="person__funktion">Spielausschuss Senioren</p>
+    </div>
+  </div>
+
+<h3>Formular (.formular)</h3>
+<p class="inhalt">/mitglied-werden/ (P7; Checkbox ab P8-Korrektur A2): Eingabefelder 48px hoch, Fehlertext in --warn unter dem Feld (hier am PLZ-Feld sichtbar, wie assets/js/formular.js ihn nach einem ungültigen Absenden einblendet). Checkbox nur noch 24×24px, das Tippziel ist die umschließende Beschriftungszeile (.formular__checkzeile als <label>, mindestens 44px hoch).</p>
+<form class="formular inhalt" novalidate style="max-width:420px;">
+    <div class="formular__feld">
+      <label for="sg-vorname">Vorname <span class="formular__pflicht">*</span></label>
+      <input type="text" id="sg-vorname" name="sg-vorname" required aria-describedby="sg-vorname-fehler">
+      <p class="formular__fehler" id="sg-vorname-fehler" hidden></p>
+    </div>
+    <div class="formular__feld">
+      <label for="sg-plz">PLZ <span class="formular__pflicht">*</span></label>
+      <input type="text" id="sg-plz" name="sg-plz" inputmode="numeric" pattern="\d{5}" maxlength="5" required aria-describedby="sg-plz-fehler">
+      <p class="formular__fehler" id="sg-plz-fehler">Bitte eine gültige Postleitzahl eingeben (5 Ziffern)</p>
+    </div>
+    <div class="formular__checkzeile-block">
+      <label class="formular__checkzeile">
+        <input type="checkbox" id="sg-check" name="sg-check" required>
+        <span>Ich erteile das SEPA-Lastschriftmandat. <span class="formular__pflicht">*</span></span>
+      </label>
+    </div>
+  </form>
+
+<h3>Angaben-Liste (.angaben)</h3>
+<p class="inhalt">/impressum/ (P8): Definitionsliste mit Beschriftung (dt, --fs-sm/600/--ink-3) und Wert (dd, --fs-md).</p>
+<dl class="angaben" style="max-width:420px;">
+    <dt>Anbieter</dt>
+    <dd>Frankfurter Fußballverein Sportfreunde 1904 e.V.</dd>
+    <dt>Vertretungsberechtigter Vorstand</dt>
+    <dd>
+      <ul>
+        <li>Melanie Seipp (1. Vorsitzende)</li>
+        <li>Uwe Korndörfer (2. Vorsitzender)</li>
+      </ul>
+    </dd>
+    <dt>Registergericht / Registernummer</dt>
+    <dd>Amtsgericht Frankfurt am Main, VR 4727</dd>
+  </dl>
+  <h2>Prüfung der Workspace-Seiten</h2>
+<p class="inhalt">Lighthouse mobil, Minimum über alle 39 Seiten, Stand Dienstag, 15. September 2026</p>
+<p class="inhalt">Die Werte gelten für die Workspace-Seiten per Direktlink. Die Werte der Adresse sportfreunde04.de bestimmt die appack-Vorlage.</p>
+<div class="abschnitt--blau" style="border-radius:var(--r-lg);padding:var(--sp-5);">
+  <div class="raster raster--4">
+    <div class="zahl">
+        <span class="zahl__wert">99</span>
+        <span class="zahl__label">Performance</span>
+      </div>
+      <div class="zahl">
+        <span class="zahl__wert">100</span>
+        <span class="zahl__label">Accessibility</span>
+      </div>
+      <div class="zahl">
+        <span class="zahl__wert">100</span>
+        <span class="zahl__label">Best Practices</span>
+      </div>
+      <div class="zahl">
+        <span class="zahl__wert">100</span>
+        <span class="zahl__label">SEO</span>
+      </div>
+  </div>
+</div>
+  </div>
+</section>
+<style>
+  .sg-farbraster { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: var(--sp-3); margin-block: var(--sp-4); }
+  .sg-farbe { padding: var(--sp-4); border-radius: var(--r-md); display: flex; flex-direction: column; gap: var(--sp-1); }
+  .sg-klein { font-size: var(--fs-xs); opacity: .9; }
+  .sg-schriftskala { display: flex; flex-direction: column; gap: var(--sp-3); margin-block: var(--sp-4); }
+  .sg-abstaende { display: flex; flex-direction: column; gap: var(--sp-2); margin-block: var(--sp-4); }
+  .sg-abstand { display: flex; align-items: center; gap: var(--sp-3); }
+  .sg-abstand__balken { height: var(--sp-3); background: var(--blau-500); }
+  .sg-radien { display: flex; flex-wrap: wrap; gap: var(--sp-4); margin-block: var(--sp-4); }
+  .sg-radius { width: 96px; height: 64px; background: var(--blau-100); display: flex; align-items: center; justify-content: center; text-align: center; font-size: var(--fs-xs); }
+  .sg-schatten { display: flex; gap: var(--sp-6); margin-block: var(--sp-4); }
+  .sg-schatten__box { width: 140px; height: 90px; background: var(--surface); display: flex; align-items: center; justify-content: center; border-radius: var(--r-md); }
+  .sg-wappen-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: var(--sp-4); margin-block: var(--sp-4); }
+  .sg-wappen-zelle { padding: var(--sp-4); border-radius: var(--r-md); display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); text-align: center; font-size: var(--fs-xs); }
+  .sg-wappen-zelle svg { width: 96px; height: auto; }
+  .sg-wappen-zelle--hell { background: var(--surface); border: 1px solid var(--line); color: var(--ink); }
+  .sg-wappen-zelle--dunkel { background: var(--blau-900); color: var(--weiss); }
+</style>
+
+</main>
+<footer class="ws-fuss">
+  <p>Prototyp · Testumgebung, keine Live-Seite · Inhalte Stand Montag, 21. September 2026</p>
+</footer>
+</body>
+</html>
