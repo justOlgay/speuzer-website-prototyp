@@ -1,0 +1,434 @@
+/*
+  Speuzer Blau-Weiß – workspace/styles.css für die appack-Modulseiten
+  (Vereins-App iOS/Android + Microwebsite auf der Website). Stand: 21.09.2026.
+
+  Zweck: appack lädt diese Datei aus dem CMS-Workspace des Vereins
+  (https://cdn.appack.de/sportfreunde04/workspace/styles.css) auf jeder
+  vmapit-Modulseite als eines der LETZTEN Stylesheets, nach Bootstrap, Font
+  Awesome, Roboto/Open Sans und dem eigenen <style>-Block jeder Vorlage.
+  Damit lässt sich die Optik aller Modulseiten in App und Website von hier
+  aus steuern, ohne die appack-Vorlagen selbst anzufassen. Diese Kopie ist
+  Schritt A1 des Speuzer-Website-Prototyps: 1:1 als workspace/styles.css
+  hochladbar, siehe assets/app/LIESMICH.md.
+
+  Warum viel !important: Die vmapit-Vorlagen setzen Kategorie-Farben,
+  Panel-Radien und Formular-Knöpfe teils direkt als Inline-Style-Attribut
+  auf dem Element, teils mit !important im eigenen <style>-Block der
+  Vorlage (siehe z. B. .panel in Sponsoren.tpl). Ein Inline-Style-Attribut
+  gewinnt gegen jede externe Regel gleicher/höherer Spezifität, ein
+  !important im Dokument gewinnt gegen externes Nicht-!important
+  unabhängig von der Ladereihenfolge. Diese Datei setzt deshalb bei
+  Farbe/Rand/Radius/Schrift gezielt !important, nie bei
+  Layout-Eigenschaften (display, flex, position) – Struktur und
+  Sichtbarkeit der Vorlagen bleiben unangetastet.
+
+  Geltungsbereich: nur die appack-Modulseiten. Die Prototyp-Website
+  (assets/css/*.css) bleibt davon unberührt.
+*/
+
+/* === 1. Schriften (absolute Adressen, kein eigener woff2-Upload nötig;
+   GitHub Pages sendet access-control-allow-origin: *, siehe LIESMICH.md) === */
+
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/barlow-condensed-600.woff2") format('woff2');
+}
+
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/barlow-condensed-700.woff2") format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/inter.woff2") format('woff2');
+}
+
+/* === 2. Tokens aus assets/css/tokens.css (nur Farben/Schrift/Abstände/Radien, die diese Datei auch tatsächlich braucht; bestehende --appack-color-* aus app-color.css werden hier nicht angefasst) === */
+
+:root {
+  --blau-950: #0B0E4A;
+  --blau-900: #151A7A;
+  --blau-800: #191793;
+  --blau-700: #1F2DBE;
+  --blau-500: #3D4FEA;
+  --blau-100: #E4E7FA;
+  --blau-50: #F3F5FC;
+  --ink: #12142B;
+  --ink-2: #3F4360;
+  --ink-3: #5B6079;
+  --line: #D8DBEA;
+  --bg: #F5F6FB;
+  --surface: #FFFFFF;
+  --weiss: #FFFFFF;
+
+  --font-head: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-text: "Inter", system-ui, sans-serif;
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-lg: 20px;
+
+  --sh-1: 0 1px 2px rgba(11, 14, 74, .06), 0 1px 1px rgba(11, 14, 74, .04);
+  --sh-2: 0 8px 24px rgba(11, 14, 74, .10);
+}
+
+/* === 3. Grundregeln für den body jeder Vorlage === */
+
+body {
+  background: var(--bg) !important;
+  color: var(--ink) !important;
+  font-family: var(--font-text) !important;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* === 4. Überschriften: Barlow Condensed 700, Versalien, wie im Prototyp (assets/css/base.css: h1–h4 { font-family: var(--font-head); text-transform: uppercase; color: var(--blau-900); }) === */
+
+h1, h2, h3, h4,
+.entry-contacts-title,
+.kategorieGruppe_titel,
+.formular legend,
+.regForm h3,
+.regForm legend {
+  font-family: var(--font-head) !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: .01em;
+  color: var(--blau-950) !important;
+}
+
+/* === 5. Abteilungen.tpl (Mannschaften) Kopie: tools/cache/app-optik/module/abteilungen.html === */
+
+#entries-section .entry {
+  background: var(--surface) !important;
+  border-radius: var(--r-lg) !important;
+  box-shadow: var(--sh-1) !important;
+}
+
+#entries-section .entry-header {
+  padding: var(--sp-4) !important;
+}
+
+/* Kategorie-Tag ("Fussball" o. ä.): die Vorlage setzt Hintergrund/Rand
+   direkt als Inline-Style auf dem Element (dynamische Kategorie-Farbe aus
+   dem CMS) – ohne !important würde unser Prototyp-Tag-Look das nicht
+   erreichen. */
+#entries-section .category-item {
+  background: var(--blau-100) !important;
+  color: var(--blau-800) !important;
+  font-family: var(--font-text) !important;
+  font-size: .75rem !important;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  border-radius: 999px !important;
+}
+
+#entries-section .entry-header .title.subcat {
+  font-family: var(--font-head) !important;
+  text-transform: uppercase;
+  color: var(--blau-950) !important;
+}
+
+#entries-section .entry-image {
+  border-radius: var(--r-md) !important;
+}
+
+#entries-section .abteilungsBeschreibung {
+  color: var(--ink-2) !important;
+}
+
+#entries-section .entry-contacts {
+  border-top: 1px solid var(--line);
+  padding-top: var(--sp-3) !important;
+}
+
+#entries-section .contactTitle {
+  color: var(--ink-3) !important;
+}
+
+/* Kontakt-Icons (Telefon/Mail) als 44×44px-Tippziele – bleiben sichtbar,
+   werden nur vergrößert/zentriert, siehe Regel 3 der Spezifikation. */
+#entries-section .entry-field-icons a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+#entries-section .entry-field-icons i {
+  color: var(--blau-700) !important;
+}
+
+/* Suchfeld wie das Prototyp-Eingabefeld (assets/css/komponenten.css
+   .formular input): 48px hoch, Rahmen --line, Radius --r-md. Trifft sowohl
+   die Abteilungen- als auch die Vorstand-Suche (beide .searchbar). */
+#searchbar,
+.searchbar {
+  background: var(--surface) !important;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md) !important;
+  overflow: hidden;
+}
+
+#searchbar input[type="text"],
+.searchbar input[type="text"] {
+  height: 48px;
+  border: none !important;
+  border-radius: 0 !important;
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+  font-family: var(--font-text) !important;
+}
+
+/* === 6. Ansprechpartner.tpl (Vorstand) – gleiche Karten wie Abteilungen Kopie: tools/cache/app-optik/module/vorstand.html === */
+
+.panel.panel-default.noselect {
+  background: var(--surface) !important;
+  border-radius: var(--r-lg) !important;
+  box-shadow: var(--sh-1) !important;
+}
+
+.panel.panel-default .infoBox {
+  padding: var(--sp-4) !important;
+}
+
+h2.ansName {
+  font-family: var(--font-head) !important;
+  text-transform: uppercase;
+  color: var(--blau-950) !important;
+}
+
+.ansFunc {
+  color: var(--ink-3) !important;
+  font-family: var(--font-text) !important;
+}
+
+/* Porträt 96px, Rundung r-md (Vorlage liefert Standard 105px) */
+.panel-image img.panel-image-preview.ansImg {
+  width: 96px !important;
+  height: 96px !important;
+  border-radius: var(--r-md) !important;
+}
+
+/* Gleicher Kategorie-Tag-Look wie bei den Abteilungen (Schritt 4:
+   einheitliche Tags sind Teil des "ein System"-Ziels) – auch hier setzt
+   die Vorlage Hintergrund/Textfarbe inline auf dem Element. */
+.categoryDiv.showKat {
+  background: var(--blau-100) !important;
+  color: var(--blau-800) !important;
+  font-family: var(--font-text) !important;
+  font-size: .75rem !important;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  border-radius: 999px !important;
+}
+
+/* Kontakt-Icons: Vorlage setzt feste 30px-Breite (< 44px-Tippziel) */
+.social-media a {
+  min-width: 44px !important;
+  min-height: 44px !important;
+  width: 44px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.social-media .fa,
+.social-media i {
+  color: var(--blau-700) !important;
+}
+
+/* === 7. Sponsoren.tpl Kopie: tools/cache/app-optik/module/sponsoren.html === */
+
+/* Kategorie-Überschriften wie Prototyp-h2 (Abschnitt 4 deckt Farbe/Schrift
+   bereits über .kategorieGruppe_titel ab) */
+.kategorieGruppe_titel {
+  margin: var(--sp-5) 0 var(--sp-3);
+}
+
+/* Die Vorlage setzt .panel selbst mit !important auf Radius 0 / kein
+   Schatten (Sponsoren-Kacheln sollen dort bewusst randlos wirken) – wir
+   ziehen sie auf den gleichen Kachel-Look wie die anderen Karten. */
+#sponElement_container .panel,
+.sponElement .panel {
+  border-radius: var(--r-lg) !important;
+  box-shadow: var(--sh-1) !important;
+  border: 1px solid var(--line) !important;
+}
+
+/* Logo-Kachel: weiß mit Linie, gleiche Höhe, Logo object-fit: contain mit
+   Innenabstand statt randabschneidendem cover (Vorlagen-Default). Bewusst
+   max-height statt einer festen height: .sponElement selbst begrenzt die
+   ganze Kachel (Kontakt inklusive) auf 100px mit overflow:hidden (Vorlage,
+   nicht diese Datei) – eine feste, große Logo-Fläche würde diesen Platz
+   allein verbrauchen und Anschrift/Kontakt-Icons darunter zusätzlich
+   verdecken (Regel 3: CSS darf keine Inhalte verstecken). */
+.clickBox header#mainSection,
+.clickBox header section#mainSection {
+  background: var(--surface) !important;
+  max-height: 44px;
+  padding: var(--sp-2);
+}
+
+.clickBox header section#mainSection img,
+#sponImg {
+  max-width: 100% !important;
+  max-height: 44px !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  margin: auto;
+}
+
+/* Kontakt-Icons (Anruf/Mail/Insta/Link/Facebook) als 44×44px-Tippziele,
+   analog zu Abschnitt 5/6 – die Vorlage lässt die Größe sonst offen
+   (Icon-Schriftgröße ohne Klickfläche). */
+#SocialMedia a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+#SocialMedia .fa {
+  color: var(--blau-700) !important;
+}
+
+/* === 8. Mitglied werden_3.tpl (Formular) Kopie: tools/cache/app-optik/module/mitglied-werden.html === */
+
+.regForm label {
+  color: var(--ink-2) !important;
+  font-family: var(--font-text) !important;
+}
+
+.regForm .form-control,
+.regForm input[type="text"],
+.regForm input[type="date"],
+.regForm input[type="email"],
+.regForm input[type="tel"],
+.regForm input[type="number"] {
+  height: 48px;
+  border: 1px solid var(--line) !important;
+  border-radius: var(--r-md) !important;
+  color: var(--ink) !important;
+  background: var(--surface) !important;
+}
+
+.regForm .form-control:focus,
+.regForm input:focus {
+  outline: none;
+  border-color: var(--blau-500) !important;
+  box-shadow: 0 0 0 3px var(--blau-500);
+}
+
+/* Checkbox-Tippziele (Sparten Fußball/Karneval): natives Kästchen bleibt
+   sichtbar und bedienbar, nur die Klickfläche drumherum wächst auf 44px –
+   kein display:none, keine versteckten Inhalte. */
+.regForm fieldset .box {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Knöpfe wie .knopf des Prototyps: Grund blau-700, weiß, r-md (die
+   Vorlage nutzt bereits var(--appack-color-main) – wir vereinheitlichen
+   auf die Prototyp-Knopffarbe, konsistent mit assets/css/base.css) */
+.button,
+.button:hover,
+#sendButton_01 {
+  background: var(--blau-700) !important;
+  color: var(--weiss) !important;
+  border-radius: var(--r-md) !important;
+  font-family: var(--font-text) !important;
+  font-weight: 600;
+  min-height: 44px;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.button.secondary {
+  background: transparent !important;
+  border: 2px solid var(--blau-700) !important;
+  color: var(--blau-700) !important;
+}
+
+/* === 9. Tabelle-Spielplan-Uebersicht.tpl (Liste "Alle Mannschaften" / "Spielplan Herren" / …) Kopie: tools/cache/app-optik/module/spielplan-uebersicht.html === */
+
+.flex_container .Item_erste_Ebene:has(.Inhalt) {
+  background: var(--surface) !important;
+  border-bottom: 1px solid var(--line);
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+}
+
+.Item_erste_Ebene .Titel {
+  font-family: var(--font-head) !important;
+  text-transform: uppercase;
+  color: var(--blau-950) !important;
+}
+
+.Item_erste_Ebene .Snippet {
+  color: var(--ink-3) !important;
+  font-family: var(--font-text) !important;
+}
+
+.Item_erste_Ebene .arrow,
+.Item_erste_Ebene .arrow i {
+  color: var(--blau-700) !important;
+}
+
+/* === 10. Microwebsite-Kacheln (Service, Sportangebote, Über uns – nur Website, die Vorlagen selbst laden diese Datei nicht, siehe assets/app/LIESMICH.md; wirksam, sobald die Website-Hülle sie einbindet) Kopien: tools/cache/app-optik/module/service.html, sportangebote.html, ueber-uns.html === */
+
+.flex_container .Item_erste_Ebene:has(.buttoninner) {
+  border-radius: var(--r-lg) !important;
+  box-shadow: var(--sh-1) !important;
+}
+
+.flex_container .Item_erste_Ebene:has(.buttoninner) .Bild {
+  border-top-left-radius: var(--r-lg) !important;
+  border-top-right-radius: var(--r-lg) !important;
+}
+
+.buttoninner {
+  background: var(--blau-800) !important;
+}
+
+.buttoninner p {
+  font-family: var(--font-head) !important;
+  text-transform: uppercase;
+  letter-spacing: .01em;
+}
+
+/* === 11. Bootstrap-Reste neutralisieren (nur Farbe/Rand, kein Layout-Eingriff) === */
+
+.panel.panel-default {
+  border: none !important;
+}
+
+.form-control:focus {
+  box-shadow: none;
+}

@@ -19,7 +19,8 @@
     "screenshots": "node tools/screenshots.mjs",
     "vergleich": "node tools/vergleich.mjs",
     "lighthouse": "node tools/lighthouse.mjs",
-    "vorstand-pdf": "node tools/vorstand-pdf/bauen.mjs"
+    "vorstand-pdf": "node tools/vorstand-pdf/bauen.mjs",
+    "app-optik": "node tools/app-optik/vorschau.mjs"
   },
   "keywords": [],
   "author": "",
