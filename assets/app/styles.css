@@ -276,24 +276,30 @@ h2.ansName {
   border: 1px solid var(--line) !important;
 }
 
-/* Logo-Kachel: weiß mit Linie, gleiche Höhe, Logo object-fit: contain mit
-   Innenabstand statt randabschneidendem cover (Vorlagen-Default). Bewusst
-   max-height statt einer festen height: .sponElement selbst begrenzt die
-   ganze Kachel (Kontakt inklusive) auf 100px mit overflow:hidden (Vorlage,
-   nicht diese Datei) – eine feste, große Logo-Fläche würde diesen Platz
-   allein verbrauchen und Anschrift/Kontakt-Icons darunter zusätzlich
-   verdecken (Regel 3: CSS darf keine Inhalte verstecken). */
+/* Logo-Kachel: Die Vorlage nagelt .sponElement auf 100px Höhe mit
+   overflow:hidden fest (Regel ohne !important) – dadurch werden Logo und
+   Anschrift gegeneinander beschnitten. Hier wächst die Kachel mit dem
+   Inhalt, das Logo bekommt eine ruhige Fläche (max. 88px), Anschrift und
+   Kontakt-Icons bleiben vollständig sichtbar (Regel 3). */
+.sponElement {
+  height: auto !important;
+  min-height: 100px;
+  overflow: visible !important;
+  background: var(--surface) !important;
+}
+
 .clickBox header#mainSection,
 .clickBox header section#mainSection {
   background: var(--surface) !important;
-  max-height: 44px;
-  padding: var(--sp-2);
+  padding: var(--sp-3) var(--sp-3) var(--sp-2);
+  display: flex;
+  justify-content: center;
 }
 
 .clickBox header section#mainSection img,
 #sponImg {
-  max-width: 100% !important;
-  max-height: 44px !important;
+  max-width: 80% !important;
+  max-height: 88px !important;
   width: auto !important;
   height: auto !important;
   object-fit: contain !important;
