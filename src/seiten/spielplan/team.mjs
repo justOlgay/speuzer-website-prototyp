@@ -121,10 +121,13 @@ function naechstesSpielAbschnitt(team, daten) {
     </div>`;
   }
 
-  // W2c: Auf der Live-Website entfällt der Abschnitt ganz – der Generator
-  // unten hebt das nächste Spiel selbst hervor; ein Hinweiskasten allein
-  // ließe nur eine leere Fläche. Im Prototyp bleibt die eingefrorene Karte.
-  return `<div data-nur-prototyp>
+  // W2d: Auf der Live-Website zeigt das FUSSBALL.DE-Widget "next-match" des
+  // Teams das nächste Spiel live (Widget-IDs des Vereins in data/widgets.json,
+  // Freigabe cdn.appack.de). Teams ohne Widget (Kinderfußball F/G) haben den
+  // Abschnitt nur im Prototyp. Im Prototyp bleibt die eingefrorene Karte.
+  const spieleWidgetId = daten.widgets?.[team.slug]?.spiele ?? "";
+  if (!spieleWidgetId) {
+    return `<div data-nur-prototyp>
 <section class="abschnitt">
   <div class="container fluss">
     <h2>Nächstes Spiel</h2>
@@ -132,6 +135,19 @@ function naechstesSpielAbschnitt(team, daten) {
   </div>
 </section>
 </div>`;
+  }
+  return `<section class="abschnitt">
+  <div class="container fluss">
+    <h2>Nächstes Spiel</h2>
+    <div data-nur-appack hidden>
+      <div class="fussballde_widget" data-id="${escapeHtml(spieleWidgetId)}" data-type="next-match"></div>
+      <p class="meta">Live von FUSSBALL.DE (DFBnet). Tippen öffnet die Spielseite.</p>
+    </div>
+    <div data-nur-prototyp>
+      ${prototypInhalt}
+    </div>
+  </div>
+</section>`;
 }
 
 // ---------- Hauptspalte: Ganze Saison (W2: Generator-iframe, beide Modi) ----------
@@ -165,14 +181,16 @@ const GENERATOR_BASIS = "https://justolgay.github.io/speuzer-spielplan/";
 // wählen" zu schreiben.
 function ganzeSaisonAbschnitt(team, daten) {
   const gruppe = GRUPPE_JE_TEAM[team.slug];
-  const generatorUrl = `${GENERATOR_BASIS}app-${gruppe}.html`;
+  // Team-Vorauswahl des Generators (seit 21.09.2026): #<Reiter> öffnet den Reiter des Teams.
+  const reiter = daten.widgets?.[team.slug]?.reiter ?? "";
+  const generatorUrl = `${GENERATOR_BASIS}app-${gruppe}.html${reiter ? "#" + encodeURIComponent(reiter) : ""}`;
 
   const gruppenTeams = (daten.teams ?? []).filter((t) => GRUPPE_JE_TEAM[t.slug] === gruppe);
   const geschwisterHinweis =
     gruppenTeams.length > 1
-      ? `<p class="meta">Die Übersicht zeigt die ganze Gruppe (${escapeHtml(
+      ? `<p class="meta">Die Übersicht öffnet auf ${escapeHtml(team.kurz)}; die Reiter zeigen die ganze Gruppe (${escapeHtml(
           gruppenTeams.map((t) => t.kurz).join(", ")
-        )}); das nächste Spiel ist hervorgehoben.</p>`
+        )}). Das nächste Spiel ist hervorgehoben.</p>`
       : `<p class="meta">Das nächste Spiel ist hervorgehoben.</p>`;
 
   return `<div class="fluss">
@@ -275,7 +293,7 @@ function seiteFuerTeam(team, daten) {
   </div>
 </section>`,
     zurueckAbschnitt(),
-    team.tabelle ? FUSSBALLDE_WIDGET_LADER : "",
+    team.tabelle || daten.widgets?.[team.slug]?.spiele ? FUSSBALLDE_WIDGET_LADER : "",
   ].join("\n");
 
   return {
