@@ -1,0 +1,29 @@
+/*
+  Speuzer Blau-Weiß – Vorschlag für workspace/app-color.css
+  (appack-Modulseiten, Schritt A1 des Speuzer-Website-Prototyps)
+
+  Übernimmt die Live-Werte aus tools/cache/app-optik/app-color-live.css
+  unverändert, bis auf --appack-color-secondary und
+  --appack-color-secondary-highlighted: dort steht live ein neutrales Grau
+  (#333333) für "sekundäre"/aktive Zustände (z. B. aktiver Tab, ausgewählter
+  Filter) – nicht als CD-Vorgabe, sondern schlicht der appack-Standardwert.
+  Aktive Zustände sollten sich farblich von inaktiven abheben; hier daher
+  durch zwei Töne aus der Blau-Skala ersetzt (--blau-100 als heller
+  Sekundärgrund, --blau-800 als kräftiger Hervorhebungston, siehe
+  assets/css/tokens.css) statt Grau.
+
+  Unbelegt: welche appack-Bauteile der nativen Hülle --appack-color-secondary
+  bzw. -secondary-highlighted tatsächlich verwenden und wie stark sich die
+  Änderung dort auswirkt, ist aus den Modul-Kopien nicht ersichtlich – das
+  lässt sich nur in der echten App/nach Rücksprache mit appack/vmapit
+  verifizieren. Bis dahin ist dies ein Vorschlag, kein geprüftes Ergebnis
+  (siehe assets/app/LIESMICH.md).
+*/
+
+:root {
+  --appack-color-main: #191793;
+  --appack-color-title: #FFFFFF;
+  --appack-color-tint: #191793;
+  --appack-color-secondary: #E4E7FA;
+  --appack-color-secondary-highlighted: #191793;
+}
