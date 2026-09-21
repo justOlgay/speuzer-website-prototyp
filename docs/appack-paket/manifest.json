@@ -1,5 +1,5 @@
 {
-  "erzeugt": "2026-09-21T19:26:15.085Z",
+  "erzeugt": "2026-09-21T19:40:11.001Z",
   "zielOrdner": "web",
   "quelle": {
     "build": "npm run build",
@@ -8,13 +8,13 @@
   "dateien": [
     {
       "datei": "web/datenschutz.html",
-      "bytes": 48188,
-      "sha256": "afdb759485f0d9a3790b1b1c39ebb809979ff8539915f16e039ccd220f1ebd68"
+      "bytes": 47992,
+      "sha256": "c61bc5c36fb525a54efea70bb2e16122d15466a6c6b865731150e962683d037c"
     },
     {
       "datei": "web/impressum.html",
-      "bytes": 4357,
-      "sha256": "e14580b0d309118e326411c65efa1269e7e08cb1cced3ffbfece3c5c62fe29c0"
+      "bytes": 3942,
+      "sha256": "db158d631bd360865349e5b983cabb0ce16b34df82e2b93e70db64ed8183b7be"
     },
     {
       "datei": "web/kontakt.html",
@@ -163,8 +163,8 @@
     },
     {
       "datei": "web/verein-downloads.html",
-      "bytes": 6039,
-      "sha256": "795aaaec9dd3c762af2ffad77129d2b17298fccb8395bbf4737d376a31347393"
+      "bytes": 6014,
+      "sha256": "647c537484068437a75a7ab31e17865b85c7f83135057c201772a230f10837d3"
     },
     {
       "datei": "web/verein-karneval.html",

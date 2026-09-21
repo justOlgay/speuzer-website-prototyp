@@ -83,8 +83,11 @@ function haftungAbschnitt() {
 </section>`;
 }
 
+// Nur im Prototyp auf GitHub Pages; die Live-Website (appack) trägt diesen
+// Hinweis nicht (data-nur-prototyp, siehe tools/appack-paket.mjs).
 function prototypHinweisAbschnitt() {
-  return `<section class="abschnitt">
+  return `<div data-nur-prototyp>
+<section class="abschnitt">
   <div class="container fluss">
     <div class="inhalt fluss">
     <h2>Hinweis zum Prototyp</h2>
@@ -93,7 +96,8 @@ function prototypHinweisAbschnitt() {
     </div>
     </div>
   </div>
-</section>`;
+</section>
+</div>`;
 }
 
 export function seite(daten) {
