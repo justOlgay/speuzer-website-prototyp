@@ -147,13 +147,12 @@ function startBildschirm(daten) {
     <div class="app-termin-karte__inhalt">
       <span class="tag">Training</span>
       <p class="app-termin-karte__titel">D3-Jugend · Training</p>
-      <p class="app-termin-karte__zeile">Dienstag, 23.09.2026 · 17:30–19:30 Uhr</p>
+      <p class="app-termin-karte__zeile">Mittwoch, 23.09.2026 · 17:30–19:30 Uhr</p>
       <p class="app-termin-karte__zeile">Vereinsplatz Mainzer Landstraße 480</p>
       <div class="app-termin-karte__knoepfe">
-        <button type="button" class="knopf">Ich komme</button>
-        <button type="button" class="knopf knopf--leise">Absagen</button>
+        <button type="button" class="knopf knopf--leise">Details</button>
       </div>
-      <!-- Zu-/Absage: Kalendermodul -->
+      <!-- Details öffnet den Termin im Kalendermodul; Zu-/Absage kommt später, wenn Gruppen angelegt sind -->
     </div>
   </div>
   <div class="karte app-termin-karte">
@@ -164,7 +163,7 @@ function startBildschirm(daten) {
     <div class="app-termin-karte__inhalt">
       <span class="tag">Spiel · Auswärts</span>
       <p class="app-termin-karte__titel">D2-Jugend bei FC Fortuna Frankfurt</p>
-      <p class="app-termin-karte__zeile">Samstag, 27.09.2026 · 10:30 Uhr</p>
+      <p class="app-termin-karte__zeile">Sonntag, 27.09.2026 · 10:30 Uhr</p>
       <p class="app-termin-karte__zeile">${escapeHtml(spielstaette)}</p>
       <div class="app-termin-karte__knoepfe">
         <a class="knopf knopf--leise" href="${escapeHtml(routeLink)}" rel="noopener" target="_blank">Route</a>
@@ -221,7 +220,7 @@ function termineBildschirm() {
   <div class="zeile zeile--attrappe">
     <span class="zeile__text">
       <span class="zeile__titel">D3-Jugend · Training</span>
-      <span class="zeile__untertitel">Dienstag, 23.09.2026 · 17:30–19:30 Uhr</span>
+      <span class="zeile__untertitel">Mittwoch, 23.09.2026 · 17:30–19:30 Uhr</span>
     </span>
   </div>
   <div class="zeile zeile--attrappe">
@@ -233,7 +232,7 @@ function termineBildschirm() {
   <div class="zeile zeile--attrappe">
     <span class="zeile__text">
       <span class="zeile__titel">D2-Jugend bei FC Fortuna Frankfurt</span>
-      <span class="zeile__untertitel">Samstag, 27.09.2026 · 10:30 Uhr</span>
+      <span class="zeile__untertitel">Sonntag, 27.09.2026 · 10:30 Uhr</span>
     </span>
   </div>
 </div>`;
