@@ -6,7 +6,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { bild } from "../../vorlagen/bild.mjs";
-import { mailLink } from "../../vorlagen/hilfen.mjs";
+import { mailLink, brotkrume, ruecklinkAbschnitt } from "../../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/verein/vorstand/" (Tiefe 2), daher immer
 // "../../" (siehe pfadZurWurzel() in tools/build.mjs).
@@ -83,7 +83,8 @@ function gruppenAbschnitt({ titel, funktionen, nachFunktion, daten, hell, priori
 function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
-    <h1>Vorstand</h1>
+    ${brotkrume([{ text: "Verein", href: `${PFAD}verein/` }, { text: "Vorstand & Kontakt" }])}
+    <h1>Vorstand &amp; Kontakt</h1>
     <p class="seitenkopf__lead">Wer den Verein führt. Der Kontakt läuft über die Vereinsadressen – ohne private Handynummern.</p>
   </div>
 </section>`;
@@ -134,13 +135,18 @@ export function seite(daten) {
 
   const gruppen = GRUPPEN_DEFINITION.map((g) => gruppenAbschnitt({ ...g, nachFunktion, daten, prioritaetsSet }));
 
-  const inhalt = [seitenkopfAbschnitt(), ...gruppen, hinweisAbschnitt()].join("\n");
+  const inhalt = [
+    seitenkopfAbschnitt(),
+    ...gruppen,
+    hinweisAbschnitt(),
+    ruecklinkAbschnitt(`${PFAD}verein/`, "Verein"),
+  ].join("\n");
 
   return {
     url: "/verein/vorstand/",
-    title: "Vorstand",
+    title: "Vorstand & Kontakt",
     description:
-      "Der Vorstand des FFV Sportfreunde 04: Vorsitz, Kasse, Jugendleitung, Kinderschutzbeauftragter, Senioren und Karnevalabteilung – mit Funktion und Vereinsmail.",
+      "Vorstand & Kontakt des FFV Sportfreunde 04: Vorsitz, Kasse, Jugendleitung, Kinderschutzbeauftragter, Senioren und Karnevalabteilung – mit Funktion und Vereinsmail.",
     inhalt,
   };
 }

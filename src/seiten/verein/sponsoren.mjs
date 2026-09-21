@@ -2,6 +2,7 @@
 // App-Projektpartner) aus data/sponsoren.json plus Aufruf "Sponsor werden".
 
 import { bild } from "../../vorlagen/bild.mjs";
+import { brotkrume, ruecklinkAbschnitt } from "../../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/verein/sponsoren/" (Tiefe 2), daher immer
 // "../../" (siehe pfadZurWurzel() in tools/build.mjs).
@@ -35,10 +36,12 @@ function logoEintrag(sponsor, daten) {
     ? `<a href="${escapeHtml(href)}" rel="noopener" target="_blank">${escapeHtml(nameText)}</a>`
     : escapeHtml(nameText);
 
-  // vmapit: zusätzlicher Satz zur appack-Plattform unter dem Namen.
+  // vmapit: zusätzlicher Satz zur appack-Plattform unter dem Namen. W3,
+  // Abschnitt 7: "bisherige Website" irritiert auf der aktuellen Website –
+  // durch "Website" ersetzt.
   const vmapitZusatz =
     sponsor.firma === "vmapit GmbH"
-      ? `<p class="meta">Die Vereins-App und die bisherige Website laufen auf der Plattform appack der vmapit GmbH.</p>`
+      ? `<p class="meta">Die Vereins-App und die Website laufen auf der Plattform appack der vmapit GmbH.</p>`
       : "";
 
   return `<li>
@@ -51,6 +54,7 @@ function logoEintrag(sponsor, daten) {
 function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
+    ${brotkrume([{ text: "Verein", href: `${PFAD}verein/` }, { text: "Sponsoren & Partner" }])}
     <h1>Sponsoren &amp; Partner</h1>
     <p class="seitenkopf__lead">Ohne Unterstützung kein Vereinsleben. Danke an alle, die die Sportfreunde tragen.</p>
   </div>
@@ -73,13 +77,32 @@ function partnerAbschnitt(sponsoren, daten) {
 </section>`;
 }
 
+// W3, Abschnitt 7 (Datenkorrektur data/sponsoren.json): VM Elite ist eine
+// Fußballschule, kein App-Projektpartner – eigene Kategorie/Abschnitt.
+function fussballschuleAbschnitt(sponsoren, daten) {
+  const eintraege = sponsoren
+    .filter((s) => s.kategorie === "Fußballschule")
+    .map((s) => logoEintrag(s, daten))
+    .join("\n    ");
+  if (!eintraege) return "";
+
+  return `<section class="abschnitt--hell abschnitt">
+  <div class="container fluss">
+    <h2>Fußballschule</h2>
+    <ul class="logo-reihe" role="list">
+    ${eintraege}
+    </ul>
+  </div>
+</section>`;
+}
+
 function appProjektpartnerAbschnitt(sponsoren, daten) {
   const eintraege = sponsoren
     .filter((s) => s.kategorie === "App-Projektpartner")
     .map((s) => logoEintrag(s, daten))
     .join("\n    ");
 
-  return `<section class="abschnitt--hell abschnitt">
+  return `<section class="abschnitt">
   <div class="container fluss">
     <h2>App-Projektpartner</h2>
     <ul class="logo-reihe" role="list">
@@ -107,8 +130,10 @@ export function seite(daten) {
   const inhalt = [
     seitenkopfAbschnitt(),
     partnerAbschnitt(sponsoren, daten),
+    fussballschuleAbschnitt(sponsoren, daten),
     appProjektpartnerAbschnitt(sponsoren, daten),
     sponsorWerdenAbschnitt(),
+    ruecklinkAbschnitt(`${PFAD}verein/`, "Verein"),
   ].join("\n");
 
   return {

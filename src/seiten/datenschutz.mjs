@@ -21,7 +21,7 @@ function seitenkopfAbschnitt(datenschutz) {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
     <h1>Datenschutz&shy;erklärung</h1>
-    <p class="seitenkopf__lead">Fassung der Vereins-App vom ${escapeHtml(datenschutz.stand ?? "")}</p>
+    <p class="seitenkopf__lead">Fassung der Vereins-App und Website vom ${escapeHtml(datenschutz.stand ?? "")}</p>
     <div class="hinweis hinweis--offen">
       <p style="margin:0;">${escapeHtml(datenschutz.hinweis ?? "")}</p>
     </div>

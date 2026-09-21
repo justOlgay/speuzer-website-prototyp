@@ -26,6 +26,7 @@
 <main id="inhalt">
 <section class="abschnitt seitenkopf">
   <div class="container">
+    <nav aria-label="Brotkrumen"><ol class="brotkrumen"><li><a href="spielplan.html">Spielplan &amp; Tabellen</a></li><li aria-hidden="true">›</li><li><span aria-current="page">E1-Jugend</span></li></ol></nav>
     <p class="meta">Spielplan · Saison 2026/27</p>
     <h1>Spielplan E1-Jugend</h1>
     <p class="seitenkopf__lead">1. Kreisklasse · EJ Quali Gr. 08 · Qualifikationsrunde, Kreispokal; Hauptrunde ab Oktober</p>
@@ -60,7 +61,15 @@
     <div class="zweispaltig">
       <div class="fluss">
     <h2>Spielplan der Saison</h2>
-    <iframe src="https://justolgay.github.io/speuzer-spielplan/app-e-jugend.html#E1" title="Spielplan E1-Jugend (Generator, DFBnet)" loading="lazy" data-generator-iframe style="width:100%;height:640px;border:0;border-radius:var(--r-lg);display:block;"></iframe>
+    <div data-nur-appack hidden>
+      <div class="fussballde-wrap">
+        <div class="fussballde_widget" data-id="946f72f6-9ef2-4199-8b9d-6051948a2103" data-type="team-matches"></div>
+      </div>
+      <p class="meta fussballde-hinweis">Spiele seitlich wischbar</p>
+      <p class="meta">Live von FUSSBALL.DE (DFBnet): vergangene Spiele mit Ergebnis, kommende Spiele. Tippen öffnet die Spielseite.</p>
+    </div>
+    <div data-nur-prototyp>
+      <iframe src="https://justolgay.github.io/speuzer-spielplan/app-e-jugend.html#E1" title="Spielplan E1-Jugend (Generator, DFBnet)" loading="lazy" data-generator-iframe style="width:100%;height:640px;border:0;border-radius:var(--r-lg);display:block;"></iframe>
     <p class="meta">Die Übersicht öffnet auf E1; die Reiter zeigen die ganze Gruppe (E1, E2, E3). Das nächste Spiel ist hervorgehoben.</p>
     <p class="meta">Quelle: DFBnet, täglich aktualisiert. Tippen auf ein Spiel öffnet FUSSBALL.DE.</p>
     <script>
@@ -76,6 +85,7 @@
       });
     })();
     </script>
+    </div>
   </div>
       <aside class="fluss">
     <div class="karte fluss">
@@ -87,7 +97,10 @@
     <div class="karte fluss">
       <h2 class="karte__titel">Tabelle</h2>
       <div data-nur-appack hidden>
-        <div class="fussballde_widget" data-id="210e4f4f-cd22-4771-ae3b-423b6061afe1" data-type="table"></div>
+        <div class="fussballde-wrap">
+          <div class="fussballde_widget" data-id="210e4f4f-cd22-4771-ae3b-423b6061afe1" data-type="table"></div>
+        </div>
+        <p class="meta fussballde-hinweis">Tabelle seitlich wischbar</p>
       </div>
       <div data-nur-prototyp>
         <p class="meta">Platz 1 von 6 · 9 Punkte</p>
@@ -114,7 +127,7 @@
 </section>
 <section class="abschnitt">
   <div class="container fluss">
-    <p><a href="spielplan.html">← Alle Spielpläne</a></p>
+    <p><a href="spielplan.html">‹ Zurück zu Spielplan & Tabellen</a></p>
   </div>
 </section>
 <script>

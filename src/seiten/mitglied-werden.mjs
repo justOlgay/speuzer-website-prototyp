@@ -58,6 +58,11 @@ function seitenkopfAbschnitt() {
 
 // ---------- Beiträge ----------
 
+// W3, Abschnitt 7 (Prüfer-Befund): unter 480px war die Spalte "jährlich"
+// abgeschnitten ("JÄHR", "1…"). .beitragstabelle (komponenten.css) verkleinert
+// dort Schrift/Innenabstand; die Kopfzeilen zeigen unter 480px die kurze Form
+// ("mtl."/"jährl." statt "monatlich"/"jährlich"), damit der Jahreswert nie
+// abgeschnitten wird.
 function beitragsTabelle(gruppen) {
   const zeilen = (gruppen ?? [])
     .map(
@@ -70,12 +75,12 @@ function beitragsTabelle(gruppen) {
     .join("\n        ");
 
   return `<div class="tabelle-wrap">
-      <table>
+      <table class="beitragstabelle">
         <thead>
           <tr>
             <th>Beitragsgruppe</th>
-            <th class="zahl">monatlich</th>
-            <th class="zahl">jährlich</th>
+            <th class="zahl"><span class="beitragstabelle__lang">monatlich</span><span class="beitragstabelle__kurz">mtl.</span></th>
+            <th class="zahl"><span class="beitragstabelle__lang">jährlich</span><span class="beitragstabelle__kurz">jährl.</span></th>
           </tr>
         </thead>
         <tbody>
@@ -117,7 +122,8 @@ function beitraegeAbschnitt(daten) {
     <h2>Beiträge</h2>
     ${karten}
     ${hinweise}
-    <p class="meta">Kündigung: ${escapeHtml(mitSchlusspunkt(beitraege.kuendigung))} · Doppelmitgliedschaft: ${escapeHtml(mitSchlusspunkt(beitraege.doppelmitgliedschaft))} · Quelle: ${escapeHtml(mitSchlusspunkt(beitraege.quelle))}</p>
+    <p class="meta">Kündigung: ${escapeHtml(mitSchlusspunkt(beitraege.kuendigung))} · Doppelmitgliedschaft: ${escapeHtml(mitSchlusspunkt(beitraege.doppelmitgliedschaft))}</p>
+    <p class="meta">Beiträge laut Beitragsordnung 2026; verbindlich ist der Aufnahmeantrag.</p>
     <p class="knopfzeile">
       ${downloadKnopf(beitragsuebersicht, "Beitragsübersicht (PDF)")}
     </p>
@@ -201,8 +207,9 @@ function unterlagenAbschnitt(daten) {
 
 // W2: löst den früheren Formularentwurf (assets/js/formular.js) ab – der
 // Antrag läuft jetzt über das appack-Formular des Vereins (speichert in ein
-// Worksheet, Bestätigung per E-Mail an die Geschäftsstelle). Öffnet im
-// selben Rahmen (kein target="_blank"), daneben unverändert der bestehende
+// Worksheet, Bestätigung per E-Mail an die Geschäftsstelle). W3, Abschnitt 7:
+// öffnet in einem neuen Fenster (target="_blank" rel="noopener") – das
+// appack-Formular hat keinen Rückweg –, daneben unverändert der bestehende
 // PDF-Knopf für den Aufnahmeantrag.
 const APPACK_FORMULAR_URL = "https://appack.de/rest-api/drender/6a903758337cdc97f94f2655";
 
@@ -215,7 +222,7 @@ function antragOnlineAbschnitt(daten) {
     <div class="karte fluss">
       <p>Der Antrag läuft über das Formular des Vereins: Angaben, Abteilung, Beitragsgruppe, SEPA-Mandat und Unterschrift in einem Schritt. Die Geschäftsstelle bestätigt per E-Mail.</p>
       <p class="knopfzeile">
-        <a class="knopf knopf--gross" href="${escapeHtml(APPACK_FORMULAR_URL)}">Antrag online ausfüllen</a>
+        <a class="knopf knopf--gross" href="${escapeHtml(APPACK_FORMULAR_URL)}" target="_blank" rel="noopener">Antrag online ausfüllen</a>
         ${downloadKnopf(aufnahmeantrag, "Aufnahmeantrag (PDF)")}
       </p>
     </div>

@@ -39,6 +39,36 @@ const LIESMICH_PFAD = path.join(PAKET_DIR, "LIESMICH.md");
 const GH_PAGES_ASSETS = "https://justolgay.github.io/speuzer-website-prototyp/assets/";
 const ZIEL_WORKSPACE_ORDNER = "https://cdn.appack.de/sportfreunde04/workspace/web/";
 
+// W3, Abschnitt 3/7 (Prüfer-Befund, Schwere "blocker"): styleguide.html ist
+// eine interne Seite (Übernahmepaket-Anhang, "Interner Anhang für das
+// Übernahmepaket", Momentaufnahme-Datum, Beispiel-Kontaktdaten) und darf
+// nicht öffentlich im Live-Ordner landen – aus dem Paket ausgeschlossen.
+// docs/ws/ enthält jetzt 38 Workspace-Seiten (37 wie zuvor + neu
+// verein-ueber-uns.html), das Paket entsprechend 37 (38 minus
+// styleguide.html) statt 38.
+const AUSGESCHLOSSENE_DATEIEN = new Set(["styleguide.html"]);
+const ERWARTETE_WS_DATEIEN = 38;
+
+// canonical/og:url: statt der GitHub-Pages-Prototyp-Adresse zeigt das Paket
+// auf die künftige Live-Adresse im appack-Workspace (W3, Abschnitt 7,
+// Prüfer-Befund "alle 37 Seiten – canonical/og:url"). og:image bleibt
+// GitHub Pages (dieses Muster trifft nur auf "/ws/<datei>"-Adressen zu,
+// og:image zeigt auf "/assets/og/…" und bleibt unverändert).
+const CANONICAL_MUSTER = /href="https:\/\/justolgay\.github\.io\/speuzer-website-prototyp\/ws\/([a-z0-9-]+\.html)"/g;
+const OG_URL_MUSTER = /(<meta property="og:url" content=")https:\/\/justolgay\.github\.io\/speuzer-website-prototyp\/ws\/([a-z0-9-]+\.html)(">)/g;
+
+function schreibeCanonicalUndOgUrlUm(html, zaehler) {
+  let ergebnis = html.replace(CANONICAL_MUSTER, (_treffer, datei) => {
+    zaehler.canonical += 1;
+    return `href="${ZIEL_WORKSPACE_ORDNER}${datei}"`;
+  });
+  ergebnis = ergebnis.replace(OG_URL_MUSTER, (_treffer, vor, datei, nach) => {
+    zaehler.ogUrl += 1;
+    return `${vor}${ZIEL_WORKSPACE_ORDNER}${datei}${nach}`;
+  });
+  return ergebnis;
+}
+
 // Attribute, in denen "../assets/…" durch die absolute GitHub-Pages-Adresse
 // ersetzt wird (srcset wird gesondert behandelt, siehe unten). Das Muster
 // verlangt ein Leerzeichen oder "<" direkt vor dem Attributnamen, damit z. B.
@@ -156,6 +186,9 @@ function schreibeSeiteUm(html, dateiname, zaehler) {
     return `${attribut}="${GH_PAGES_ASSETS}${rest}"`;
   });
 
+  // 4) canonical/og:url -> Live-Adresse im appack-Workspace (W3, siehe oben).
+  ergebnis = schreibeCanonicalUndOgUrlUm(ergebnis, zaehler);
+
   return ergebnis;
 }
 
@@ -271,6 +304,33 @@ solange die appack-Vorlagen START/MENU/FOOTER nicht auf diesen Ordner
 umgestellt sind – bis dahin kann er ohne Wirkung auf die Live-Seite gelöscht
 oder neu hochgeladen werden.
 
+## Ausgeschlossen (W3)
+
+\`styleguide.html\` (interne Seite, "Interner Anhang für das
+Übernahmepaket", Momentaufnahme-Datum, Beispiel-Kontaktdaten) ist NICHT im
+Paket – \`docs/ws/styleguide.html\` bleibt nur lokal/auf GitHub Pages
+(Gestaltungssystem), \`tools/appack-paket.mjs\` nimmt sie aus der
+Dateiliste. Die gleichnamige Live-Datei im appack-Workspace (falls aus
+einem früheren Upload noch vorhanden) sollte geleert bzw. gelöscht werden –
+das macht der Verein im CMS.
+
+## Nur vmapit
+
+Diese Befunde betreffen die Hülle (appack-Vorlage "Microwebseite",
+vmapit/appack) selbst, nicht die hier gebauten Workspace-Seiten – sie sind
+hier nur dokumentiert (W3-Spezifikation Abschnitt 5), nicht umgesetzt:
+
+- Startseite der Hülle ohne Inhalt (nur Claim + Fußbereich).
+- Fester Rahmen 92\`vh\` für Inhaltsseiten (\`#showFrame\`), darunter sofort
+  der Hüllen-Fußbereich – kein Rahmen, der die Inhaltshöhe übernimmt.
+- Fußzeile: Impressum/Datenschutz öffnen in einem 40\`vw\`-Rahmen (1440px),
+  anderes Layout als alle Menüseiten.
+- Nicht ladende Stylesheets des appack-Terminmoduls
+  (\`application.appack.de/appointment-module/…/preloading.css\`,
+  \`theme-light.css\`, \`layout.css\`, HTTP 404) – appack melden.
+- Facebook-Link der Fußzeile zeigt auf eine andere Adresse als
+  \`kontakt.html\` (Worksheet-Pflege, macht der Auftraggeber im CMS).
+
 ## Dateien (${dateiliste.length})
 
 ${dateiliste.map((d) => `- ${d}`).join("\n")}
@@ -289,13 +349,15 @@ function main() {
     process.exit(1);
   }
 
-  const htmlDateien = readdirSync(WS_DIR)
+  const alleHtmlDateien = readdirSync(WS_DIR)
     .filter((d) => d.endsWith(".html"))
     .sort();
-  if (htmlDateien.length !== 37) {
-    console.error(`Erwartet 37 Workspace-Seiten in docs/ws/, gefunden ${htmlDateien.length}.`);
+  if (alleHtmlDateien.length !== ERWARTETE_WS_DATEIEN) {
+    console.error(`Erwartet ${ERWARTETE_WS_DATEIEN} Workspace-Seiten in docs/ws/, gefunden ${alleHtmlDateien.length}.`);
     process.exit(1);
   }
+  // styleguide.html bleibt draußen (siehe AUSGESCHLOSSENE_DATEIEN oben).
+  const htmlDateien = alleHtmlDateien.filter((d) => !AUSGESCHLOSSENE_DATEIEN.has(d));
 
   rmSync(PAKET_DIR, { recursive: true, force: true });
   mkdirSync(WEB_DIR, { recursive: true });
@@ -303,7 +365,7 @@ function main() {
   const paketDateien = new Set([...htmlDateien, "site.css"]);
   const zaehler = {
     cssLink: 0, href: 0, src: 0, srcset: 0, content: 0, poster: 0, dataStern: 0, cssUrl: 0,
-    nurAppackHidden: 0, nurPrototyp: 0,
+    nurAppackHidden: 0, nurPrototyp: 0, canonical: 0, ogUrl: 0,
   };
   const manifestEintraege = [];
   let gesamtBytes = 0;
@@ -358,6 +420,9 @@ function main() {
   console.log(`  poster="../assets/…" -> absolute Adresse: ${zaehler.poster}`);
   console.log(`  data-*="../assets/…" -> absolute Adresse: ${zaehler.dataStern}`);
   console.log(`  site.css: url("../fonts/…") -> absolute Adresse: ${zaehler.cssUrl}`);
+  console.log(`  canonical -> ${ZIEL_WORKSPACE_ORDNER}<datei>: ${zaehler.canonical}`);
+  console.log(`  og:url -> ${ZIEL_WORKSPACE_ORDNER}<datei>: ${zaehler.ogUrl}`);
+  console.log(`Ausgeschlossen: ${[...AUSGESCHLOSSENE_DATEIEN].join(", ")} (${AUSGESCHLOSSENE_DATEIEN.size} Datei(en), nicht im Paket)`);
   console.log(`Paket: ${path.relative(ROOT, PAKET_DIR)}/`);
   console.log(`Manifest: ${path.relative(ROOT, MANIFEST_PFAD)}`);
   console.log(`LIESMICH: ${path.relative(ROOT, LIESMICH_PFAD)}`);

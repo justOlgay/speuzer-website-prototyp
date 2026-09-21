@@ -3,7 +3,7 @@
 // Sportplatz Mainzer Landstraße (kein Kartenbild, kein externer Dienst
 // eingebettet).
 
-import { mailLink } from "../vorlagen/hilfen.mjs";
+import { mailLink, brotkrume, ruecklinkAbschnitt } from "../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/kontakt/" (Tiefe 1), daher immer "../"
 // (siehe pfadZurWurzel() in tools/build.mjs).
@@ -35,12 +35,68 @@ function mailKnopf({ adresse, betreff }) {
   return `<a class="knopf knopf--sekundaer" href="${escapeHtml(href)}">E-Mail schreiben</a>`;
 }
 
+// ---------- Öffnungszeiten (W3, aus data/geschaeftsstelle.json,
+// tools/appack-daten.mjs) ----------
+
+const WOCHENTAGE_OEFFNUNG = [
+  { feld: "monday", label: "Montag" },
+  { feld: "tuesday", label: "Dienstag" },
+  { feld: "wednesday", label: "Mittwoch" },
+  { feld: "thursday", label: "Donnerstag" },
+  { feld: "friday", label: "Freitag" },
+  { feld: "saturday", label: "Samstag", hiderFeld: "saturdayhider" },
+  { feld: "sunday", label: "Sonntag", hiderFeld: "sundayhider" },
+];
+
+// Wochentagszeile: "geschlossen" bei leeren Zeiten, sonst "09:30–16:00 Uhr"
+// bzw. mit Mittagspause "08:30–12:30 Uhr, 13:00–16:00 Uhr". Ein Wochentag mit
+// gesetztem *hider-Feld entfällt ganz (Quelle blendet ihn aus).
+function oeffnungszeitenZeilen(oeffnungszeiten) {
+  return WOCHENTAGE_OEFFNUNG.map(({ feld, label, hiderFeld }) => {
+    if (hiderFeld && oeffnungszeiten?.[hiderFeld]) return null;
+    const open = oeffnungszeiten?.[`${feld}open`];
+    const close = oeffnungszeiten?.[`${feld}close`];
+    const midStart = oeffnungszeiten?.[`${feld}midstart`];
+    const midEnd = oeffnungszeiten?.[`${feld}midend`];
+    let zeitText;
+    if (!open || !close) {
+      zeitText = "geschlossen";
+    } else if (midStart && midEnd) {
+      zeitText = `${open}–${midStart} Uhr, ${midEnd}–${close} Uhr`;
+    } else {
+      zeitText = `${open}–${close} Uhr`;
+    }
+    return `<li><span>${escapeHtml(label)}:</span> <span>${escapeHtml(zeitText)}</span></li>`;
+  })
+    .filter(Boolean)
+    .join("\n          ");
+}
+
+// Ist das Worksheet leer (keine Zeile geladen, alle Felder fehlen), zeigt der
+// Kasten stattdessen den Ausweichsatz aus der Spezifikation.
+function oeffnungszeitenHtml(geschaeftsstelle) {
+  const oeffnungszeiten = geschaeftsstelle?.oeffnungszeiten;
+  if (!oeffnungszeiten || Object.keys(oeffnungszeiten).length === 0) {
+    return `<p style="margin:0;">Die Geschäftsstelle ist per E-Mail erreichbar, telefonisch nach Vereinbarung.</p>`;
+  }
+  const zeilen = oeffnungszeitenZeilen(oeffnungszeiten);
+  const textZusatz = oeffnungszeiten.openingtext
+    ? `<p class="meta" style="margin-top:var(--sp-2);">${escapeHtml(oeffnungszeiten.openingtext)}</p>`
+    : "";
+  return `<p style="margin:0 0 var(--sp-2);font-weight:600;">Öffnungszeiten der Geschäftsstelle</p>
+        <ul class="oeffnungszeiten" role="list" style="margin:0;padding:0;list-style:none;">
+          ${zeilen}
+        </ul>
+        ${textZusatz}`;
+}
+
 // ---------- Seitenkopf ----------
 
 function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
-    <h1>Kontakt &amp; Anfahrt</h1>
+    ${brotkrume([{ text: "Verein", href: `${PFAD}verein/` }, { text: "Geschäftsstelle & Anfahrt" }])}
+    <h1>Geschäftsstelle &amp; Anfahrt</h1>
     <p class="seitenkopf__lead">So erreichst du uns – per E-Mail an die passende Vereinsadresse oder telefonisch in der Geschäftsstelle.</p>
   </div>
 </section>`;
@@ -145,6 +201,7 @@ function geschaeftsstelleAbschnitt(daten) {
   const verein = daten.verein ?? {};
   const sportstaette = verein.sportstaette ?? {};
   const post = verein.post ?? {};
+  const geschaeftsstelle = daten.geschaeftsstelle ?? {};
 
   return `<section class="abschnitt--hell abschnitt">
   <div class="container fluss">
@@ -175,8 +232,8 @@ function geschaeftsstelleAbschnitt(daten) {
           </dd>
         </dl>
       </div>
-      <div class="hinweis hinweis--offen">
-        <p style="margin:0;">Öffnungszeiten der Geschäftsstelle: Angabe folgt.</p>
+      <div class="hinweis hinweis--info">
+        ${oeffnungszeitenHtml(geschaeftsstelle)}
       </div>
     </div>
   </div>
@@ -192,7 +249,6 @@ function anfahrtAbschnitt(daten) {
   const verein = daten.verein ?? {};
   const sportstaette = verein.sportstaette ?? {};
   const karten = verein.karten ?? {};
-  const hinweise = verein.hinweise ?? {};
   const rebstockUrl = googleMapsUrl("Am Römerhof 9, 60486 Frankfurt am Main");
 
   return `<section class="abschnitt">
@@ -210,10 +266,9 @@ function anfahrtAbschnitt(daten) {
     <div class="hinweis hinweis--info">
       <h3 style="margin:0 0 var(--sp-2);">Zugang &amp; Parken</h3>
       <p style="margin:0;">${escapeHtml(verein.anfahrt_hinweis ?? "")}</p>
-      <p class="meta" style="margin-top:var(--sp-2);">Quelle: ${escapeHtml(hinweise.parken_quelle ?? "")}</p>
     </div>
-    <div class="hinweis hinweis--offen">
-      <p style="margin:0;">ÖPNV: Haltestelle und Fußweg folgen.</p>
+    <div class="hinweis hinweis--info">
+      <p style="margin:0;">Mit Bus und Bahn: <a href="https://www.rmv.de" target="_blank" rel="noopener">Verbindung in der RMV-Auskunft</a></p>
     </div>
     <p>Die Herren spielen ihre Heimspiele auf der Anlage von SW Griesheim am Rebstock, Am Römerhof 9, 60486 Frankfurt. <a href="${escapeHtml(rebstockUrl)}" rel="noopener" target="_blank">Route</a></p>
   </div>
@@ -226,19 +281,16 @@ export function seite(daten) {
     ansprechpartnerAbschnitt(daten),
     geschaeftsstelleAbschnitt(daten),
     anfahrtAbschnitt(daten),
+    ruecklinkAbschnitt(`${PFAD}verein/`, "Verein"),
   ].join("\n");
 
   return {
     url: "/kontakt/",
-    title: "Kontakt & Anfahrt",
-    // Wörtlicher Plan-Text hat 172 Zeichen (Gate in tools/pruefen.mjs: max.
-    // 170) – kleinstmögliche Korrektur nach dem Muster von P2/P5 (siehe
-    // src/seiten/index.mjs, src/seiten/verein/index.mjs): "Vereinsadressen"
-    // zu "Adressen" gekürzt und abschließenden Punkt entfernt (164 Zeichen),
-    // Wortlaut sonst unverändert. Siehe Abschlussbericht, Abschnitt
-    // „Abweichungen“.
+    // W3, Abschnitt 2: einheitlicher Begriff wie in der App ("Geschäftsstelle
+    // & Anfahrt" statt "Kontakt & Anfahrt").
+    title: "Geschäftsstelle & Anfahrt",
     description:
-      "Kontakt zum FFV Sportfreunde 04: Adressen nach Anliegen, Geschäftsstelle, Sportplatz Mainzer Landstraße 480 in Frankfurt-Gallus mit Anfahrt und Hinweisen zum Parken",
+      "Geschäftsstelle & Anfahrt zum FFV Sportfreunde 04: Adressen nach Anliegen, Öffnungszeiten, Sportplatz Mainzer Landstraße 480 in Frankfurt-Gallus mit Anfahrt und Parken",
     inhalt,
     bodyclass: "kontakt",
   };

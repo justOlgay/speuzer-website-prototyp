@@ -20,22 +20,18 @@ function escapeHtml(text) {
     .replaceAll('"', "&quot;");
 }
 
+// Verein-Icon wie im Klick-Prototyp (src/appkonzept/bildschirme.mjs,
+// ICON.verein): SVG-Raute.
+function liesVereinIcon() {
+  return `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 20 12 12 21 4 12z"/></svg>`;
+}
+
 // Platzhalter für Seiten, die im aktuellen Paket noch nicht existieren –
 // gleiches Muster wie header.mjs/footer.mjs/index.mjs (siehe navigation.mjs).
 function baldSpan(titel, { knopf = false } = {}) {
   const klassen = ["nav__bald", knopf ? "knopf" : null].filter(Boolean).join(" ");
   return `<span class="${klassen}" aria-disabled="true" title="Seite folgt">${escapeHtml(titel)}</span>`;
 }
-
-const TAG_KUERZEL = {
-  Montag: "Mo",
-  Dienstag: "Di",
-  Mittwoch: "Mi",
-  Donnerstag: "Do",
-  Freitag: "Fr",
-  Samstag: "Sa",
-  Sonntag: "So",
-};
 
 // "Jahrgang {jahrgang}" – bei den Herren nur "Senioren" (kein "Jahrgang"-
 // Präfix, kein Jahrgangswert; P3, Korrektur A1 abgeleitet aus kategorie
@@ -45,37 +41,53 @@ function jahrgangPraefix(team) {
   return j === "Senioren" ? j : `Jahrgang ${j}`;
 }
 
-// Kompakte Trainingsliste innerhalb einer Team-Karte: "Di 17:30–19:30" je
-// Einheit, ohne "Uhr"-Zusatz (Platzgrund in der Karte).
-function trainingKompakt(team) {
-  return (team.training ?? [])
-    .map((t) => `<li>${escapeHtml(TAG_KUERZEL[t.tag] ?? t.tag)} ${escapeHtml(t.von)}–${escapeHtml(t.bis)}</li>`)
-    .join("\n      ");
-}
-
+// W3, Abschnitt 7 (verbindliche Entscheidung): Trainingszeiten stehen nur
+// noch in der Tabelle "Trainingszeiten" weiter unten (keine Dopplung mehr) –
+// die Karte zeigt nur noch Jahrgang · Liga/Staffel und den Link.
 function teamKarte(team) {
   return `<a class="karte karte--link" href="${PFAD}mannschaften/${team.slug}/">
       <span class="karte__titel">${escapeHtml(team.name)}</span>
       <span class="karte__meta">${escapeHtml(jahrgangPraefix(team))} · ${escapeHtml(team.staffel ?? "")}</span>
-      <ul class="karte__training" role="list">
-      ${trainingKompakt(team)}
-      </ul>
       <span class="karte__mehr">Zur Mannschaft →</span>
     </a>`;
 }
 
-function gruppenAbschnitt({ titel, satz, slugs, teamNachSlug }) {
+function gruppenAbschnitt({ titel, satz, slugs, teamNachSlug, id }) {
   const karten = slugs
     .map((slug) => teamNachSlug[slug])
     .filter(Boolean)
     .map(teamKarte)
     .join("\n    ");
-  return `<section class="abschnitt">
+  const idAttr = id ? ` id="${escapeHtml(id)}"` : "";
+  return `<section class="abschnitt"${idAttr}>
   <div class="container fluss">
     <h2>${escapeHtml(titel)}</h2>
     <p class="meta">${escapeHtml(satz)}</p>
     <div class="raster raster--3">
     ${karten}
+    </div>
+  </div>
+</section>`;
+}
+
+// ---------- Abteilungen im Kopfbereich (W3, Abschnitt 4) ----------
+// Karneval-Karte rückt in den Kopfbereich, als zweite "Abteilung" neben
+// einem Verweis auf die Fußball-Mannschaften weiter unten auf derselben
+// Seite – kürzerer Weg zu den Schnauzern.
+function abteilungenKopfAbschnitt() {
+  return `<section class="abschnitt">
+  <div class="container fluss">
+    <div class="raster raster--2">
+      <a class="karte karte--link karte--abteilung" href="#mannschaften-liste">
+        ${liesVereinIcon()}
+        <span class="karte__titel">Fußball</span>
+        <span class="karte__meta">Die Mannschaften unten</span>
+      </a>
+      <a class="karte karte--link karte--abteilung" href="${PFAD}verein/karneval/">
+        ${liesVereinIcon()}
+        <span class="karte__titel">Karneval</span>
+        <span class="karte__meta">Die Schnauzer · 5 Gruppen</span>
+      </a>
     </div>
   </div>
 </section>`;
@@ -109,28 +121,6 @@ function zusatzangeboteAbschnitt(daten) {
 </section>`;
 }
 
-// Karneval-Karte wie auf der Startseite (gleicher Text, siehe
-// src/seiten/index.mjs#karnevalAbschnitt). P5: /verein/karneval/ existiert
-// jetzt – echter Link statt baldSpan(). P16, Schritt 0: der Ferienhinweis
-// stand hier zusätzlich zum Trainingszeiten-Abschnitt (Dopplung aus der
-// Sichtprüfung von P15) und ist hier entfallen – er bleibt nur noch im
-// Trainingszeiten-Abschnitt oben.
-function karnevalAbschnitt(daten) {
-  const verein = daten.verein ?? {};
-  return `<section class="abschnitt">
-  <div class="container fluss">
-    <article class="karte fluss">
-      <h2 class="karte__titel">Karnevalabteilung „Die Schnauzer"</h2>
-      <p>Fünf Gruppen von den Little Fruities bis zu den Dreamboys – die zweite Abteilung des Vereins.</p>
-      <p class="knopfzeile">
-        <a class="knopf" href="${PFAD}verein/karneval/">Zur Karnevalabteilung</a>
-        ${mailLink(verein.mails?.karneval ?? "karnevalabteilung@sportfreunde04.de")}
-      </p>
-    </article>
-  </div>
-</section>`;
-}
-
 export function seite(daten) {
   const teamNachSlug = Object.fromEntries((daten.teams ?? []).map((t) => [t.slug, t]));
 
@@ -153,6 +143,8 @@ export function seite(daten) {
       titel: "Senioren",
       satz: "Kreisliga A, Heimspiele auf der Anlage von SW Griesheim am Rebstock.",
       slugs: ["herren"],
+      // W3, Abschnitt 4: Sprungziel der Fußball-Abteilungskarte im Kopfbereich.
+      id: "mannschaften-liste",
     },
     {
       titel: "Jugend",
@@ -166,11 +158,14 @@ export function seite(daten) {
     },
   ].map((g) => gruppenAbschnitt({ ...g, teamNachSlug }));
 
-  // P16, Schritt 0: Reihenfolge korrigiert – Mannschaftsübersicht →
-  // Trainingszeiten → Probetraining → Karneval-Karte → Zusatzangebote
-  // (externe Angebote zuletzt).
+  // W3, Abschnitt 4: die Karneval-Karte ist in den Kopfbereich gewandert
+  // (abteilungenKopfAbschnitt(), direkt unter dem Lead) – die vorherige
+  // Karneval-Karte weiter unten entfällt, kein doppelter Weg zu den
+  // Schnauzern. Reihenfolge sonst wie zuvor: Mannschaftsübersicht →
+  // Trainingszeiten → Probetraining → Zusatzangebote.
   const inhalt = [
     seitenkopf,
+    abteilungenKopfAbschnitt(),
     ...gruppen,
     // P15: Trainingszeiten-Baustein (ursprünglich Startseite) nach der
     // Mannschaftsübersicht eingefügt (siehe src/vorlagen/bausteine.mjs). Der
@@ -181,7 +176,6 @@ export function seite(daten) {
     // denselben Probetraining-Baustein wie auf den anderen Seiten (siehe
     // src/vorlagen/bausteine.mjs).
     probetrainingAbschnitt(PFAD),
-    karnevalAbschnitt(daten),
     zusatzangeboteAbschnitt(daten),
   ].join("\n");
 

@@ -16,6 +16,7 @@
     "pruefen": "node tools/pruefen.mjs",
     "pii": "python3 tools/pii-check.py",
     "daten": "python3 tools/daten.py",
+    "appack-daten": "node tools/appack-daten.mjs",
     "bilder": "python3 tools/bilder.py",
     "serve": "node tools/server.mjs",
     "screenshots": "node tools/screenshots.mjs",

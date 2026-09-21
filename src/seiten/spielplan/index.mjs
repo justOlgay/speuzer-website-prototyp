@@ -25,12 +25,21 @@ function escapeHtml(text) {
 
 // ---------- Seitenkopf ----------
 
+// W3, Abschnitt 3 und 7: kein Datum-"Stand" mehr im Live-Modus (appack) –
+// die feste Datumszeile würde ab dem Folgetag falsch stehen, obwohl die
+// Widgets darunter live sind. Im Prototyp bleibt die Stand-Zeile (Build-Datum
+// als Kontext für die interne Abstimmung, siehe workspace.html-Fußzeile).
 function seitenkopfAbschnitt(daten) {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
     <h1>${escapeHtml("Spielplan & Tabellen")}</h1>
     <p class="seitenkopf__lead">Alle Spiele unserer elf Mannschaften aus dem DFBnet – Liga, Pokal, Freundschaftsspiele und Kinderfestivals. Dazu die aktuellen Tabellen.</p>
-    <p class="meta">Stand ${datumLang(daten.stand)} · Quelle: DFBnet, täglich aktualisiert</p>
+    <div data-nur-appack hidden>
+      <p class="meta">Spiele und Tabellen live aus dem DFBnet (FUSSBALL.DE).</p>
+    </div>
+    <div data-nur-prototyp>
+      <p class="meta">Stand ${datumLang(daten.stand)} · Quelle: DFBnet, täglich aktualisiert</p>
+    </div>
   </div>
 </section>`;
 }
@@ -74,7 +83,10 @@ function naechsteSpieleAbschnitt(daten) {
   <div class="container fluss">
     <h2>Nächste Spiele</h2>
     <div data-nur-appack hidden>
-      <div class="fussballde_widget" data-id="${escapeHtml(vereinSpieleWidgetId)}" data-type="club-matches"></div>
+      <div class="fussballde-wrap fussballde-wrap--hoch">
+        <div class="fussballde_widget" data-id="${escapeHtml(vereinSpieleWidgetId)}" data-type="club-matches"></div>
+      </div>
+      <p class="meta fussballde-hinweis">Spiele seitlich wischbar</p>
     </div>
     <div data-nur-prototyp>
       ${inhalt || `<p class="meta">Keine kommenden Spiele ab dem Build-Datum in data/spiele.json gefunden.</p>`}

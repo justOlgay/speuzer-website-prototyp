@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { bild } from "../../vorlagen/bild.mjs";
-import { mailLink } from "../../vorlagen/hilfen.mjs";
+import { mailLink, brotkrume, ruecklinkAbschnitt } from "../../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/verein/karneval/" (Tiefe 2), daher immer
 // "../../" (siehe pfadZurWurzel() in tools/build.mjs).
@@ -58,20 +58,23 @@ function personKarte(person, daten) {
 function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
+    ${brotkrume([{ text: "Verein", href: `${PFAD}verein/` }, { text: "Karneval" }])}
     <span class="seitenkopf__kicker">Zweite Abteilung des Vereins</span>
-    <h1>Karnevalabteilung „Die Schnauzer“</h1>
+    <h1>Karneval – Die Schnauzer</h1>
     <p class="seitenkopf__lead">Fünf Gruppen, eine Bühne: Die Karnevalabteilung des Frankfurter Fußballvereins Sportfreunde 1904 e.V.</p>
   </div>
 </section>`;
 }
 
-// Je Gruppe: Titel, Leitung (mit Komma verbunden), Übungsstunde – oder ein
-// kleiner .hinweis--offen, wenn die Übungszeit noch nicht feststeht.
+// Je Gruppe: Titel, Leitung (mit Komma verbunden), Übungsstunde – wenn noch
+// nicht gepflegt, bleibt die Zeile weg (W3, Abschnitt 7: keine
+// "Angabe folgt"-Kästen mehr; stattdessen ein Satz unter den Karten, siehe
+// uebungszeitHinweisAbschnitt() unten).
 function gruppenKarte(gruppe) {
   const leitungText = (gruppe.leitung ?? []).join(", ");
   const uebungszeitHtml = gruppe.uebungszeit
     ? `<p class="meta">Übungsstunde: ${escapeHtml(gruppe.uebungszeit)}</p>`
-    : `<div class="hinweis hinweis--offen"><p style="margin:0;">Übungszeit: Angabe folgt.</p></div>`;
+    : "";
 
   return `<div class="karte fluss">
       <span class="karte__titel">${escapeHtml(gruppe.name)}</span>
@@ -87,6 +90,19 @@ function gruppenAbschnitt(karneval) {
     <div class="raster raster--3">
     ${karten}
     </div>
+  </div>
+</section>`;
+}
+
+// W3, Abschnitt 7 (verbindliche Entscheidung): ein ruhiger Satz statt vier
+// "Übungszeit: Angabe folgt."-Kästen, mit dem bestehenden Mail-Knopf.
+function uebungszeitHinweisAbschnitt() {
+  return `<section class="abschnitt">
+  <div class="container fluss">
+    <p class="meta">Übungszeiten der übrigen Gruppen nennt die Abteilung auf Anfrage.</p>
+    <p class="knopfzeile">
+      <a class="knopf knopf--sekundaer" href="mailto:karnevalabteilung@sportfreunde04.de">E-Mail an die Karnevalabteilung</a>
+    </p>
   </div>
 </section>`;
 }
@@ -129,8 +145,10 @@ export function seite(daten) {
   const inhalt = [
     seitenkopfAbschnitt(),
     gruppenAbschnitt(karneval),
+    uebungszeitHinweisAbschnitt(),
     ansprechpartnerAbschnitt(daten),
     hinweisAbschnitt(),
+    ruecklinkAbschnitt(`${PFAD}verein/`, "Verein"),
   ].join("\n");
 
   return {

@@ -138,6 +138,41 @@ export function mailLink(adresse, text) {
   return `<a class="mail" href="mailto:${escapeHtml(adresse ?? "")}">${anzeige}</a>`;
 }
 
+// ---------- Brotkrumen + Rücklink (W3) ----------
+// Gemeinsamer Baustein für alle Unterseiten (Verein-Unterseiten,
+// Mannschafts- und Spielplan-Teamseiten, Tabellen): oben eine verlinkte
+// Brotkrume ("Verein › Vorstand & Kontakt"), unten ein Rücklink
+// ("‹ Zurück zu Verein"). Pfeil-Glyphen einheitlich "‹"/"›", keine Emojis
+// (Prüfer-Befund, W3-Spezifikation Abschnitt 7).
+
+// teile: Array von { text, href? } – href fehlt beim letzten (aktuellen)
+// Eintrag. Wird direkt in den Seitenkopf-Container eingesetzt (vor dem h1).
+// Jeder Eintrag steht in einem eigenen <li> (Tippziel-Ausnahme in
+// tools/pruefen.mjs gilt für Fließtext-Links in p/li – ein reiner
+// Brotkrumen-Link ist kein 44×44px-Tippziel wie ein Knopf).
+export function brotkrume(teile) {
+  const eintraege = teile
+    .map((t, i) => {
+      const istLetztes = i === teile.length - 1;
+      const inhalt =
+        t.href && !istLetztes
+          ? `<a href="${escapeHtml(t.href)}">${escapeHtml(t.text)}</a>`
+          : `<span aria-current="page">${escapeHtml(t.text)}</span>`;
+      return `<li>${inhalt}</li>`;
+    })
+    .join('<li aria-hidden="true">›</li>');
+  return `<nav aria-label="Brotkrumen"><ol class="brotkrumen">${eintraege}</ol></nav>`;
+}
+
+// Rücklink-Abschnitt "‹ Zurück zu …" ans Ende einer Seite.
+export function ruecklinkAbschnitt(href, ziel) {
+  return `<section class="abschnitt">
+  <div class="container fluss">
+    <p><a href="${escapeHtml(href)}">‹ Zurück zu ${escapeHtml(ziel)}</a></p>
+  </div>
+</section>`;
+}
+
 // ---------- Nächste Spiele ----------
 
 // daten.spiele mit datum >= ab (Standard: daten.stand als YYYY-MM-DD), nicht

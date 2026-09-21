@@ -1,7 +1,7 @@
 // Tabellen /tabellen/ (P4) – eine Sprungliste plus je Team mit Tabelle ein
 // Abschnitt mit der aktuellen Tabelle aus data/tabellen.json.
 
-import { datumLang, zeit, fussballdeTeamUrl, FUSSBALLDE_WIDGET_LADER } from "../vorlagen/hilfen.mjs";
+import { datumLang, zeit, fussballdeTeamUrl, FUSSBALLDE_WIDGET_LADER, brotkrume, ruecklinkAbschnitt } from "../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/tabellen/" (Tiefe 1), daher immer "../"
 // (siehe pfadZurWurzel() in tools/build.mjs).
@@ -26,6 +26,7 @@ function seitenkopfAbschnitt(daten) {
   const uhrzeit = String(stand).slice(11, 16);
   return `<section class="abschnitt seitenkopf">
   <div class="container">
+    ${brotkrume([{ text: "Spielplan & Tabellen", href: `${PFAD}spielplan/` }, { text: "Tabellen" }])}
     <h1>Tabellen</h1>
     <p class="seitenkopf__lead">Die aktuellen Tabellen unserer Mannschaften mit Ligabetrieb.</p>
     <div data-nur-appack hidden>
@@ -105,7 +106,10 @@ function teamAbschnitt(team, daten, index) {
     <h2 id="${team.slug}">${escapeHtml(team.name)}</h2>
     <p class="meta">${escapeHtml(eintrag?.staffel ?? team.staffel ?? "")}</p>
     <div data-nur-appack hidden>
-      <div class="fussballde_widget" data-id="${escapeHtml(widgetId)}" data-type="table"></div>
+      <div class="fussballde-wrap">
+        <div class="fussballde_widget" data-id="${escapeHtml(widgetId)}" data-type="table"></div>
+      </div>
+      <p class="meta fussballde-hinweis">Tabelle seitlich wischbar</p>
     </div>
     <div data-nur-prototyp>
       <div class="tabelle-wrap">
@@ -154,6 +158,7 @@ export function seite(daten) {
     sprunglisteAbschnitt(teamsMitTabelle),
     ...teamsMitTabelle.map((team, index) => teamAbschnitt(team, daten, index)),
     kinderfussballHinweisAbschnitt(),
+    ruecklinkAbschnitt(`${PFAD}spielplan/`, "Spielplan & Tabellen"),
     FUSSBALLDE_WIDGET_LADER,
   ].join("\n");
 
