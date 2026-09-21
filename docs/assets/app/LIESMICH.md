@@ -110,3 +110,70 @@ und einen Kontaktbogen nach `tools/cache/app-optik/vorschau/` (gitignored)
 und druckt eine Tippziel-Messtabelle. Die Modul-Kopien enthalten private
 Telefonnummern der Verantwortlichen – bleiben deshalb im ignorierten
 Cache-Ordner und werden nie committet oder zitiert.
+
+## Startseite_v3.tpl (B1)
+
+**`Startseite_v3.tpl`** → wird als **dynamische Seite** im appack-CMS
+angelegt, nicht in den Workspace hochgeladen. Sie ergibt die neue
+Startseite der Vereins-App (Begrüßung, „Heute und demnächst" mit echten
+Kalenderterminen, „Aktuelles" mit echten Meldungen, Hinweis, zwei Knöpfe) –
+ohne Foto, Kacheln oder Sponsorenleiste. Kopf- und Tab-Leiste kommen von
+der App-Hülle; die Vorlage liefert nur den Inhalt.
+
+### Anlegen im CMS
+
+1. appack-CMS → **Seiten** → **„+"** → **dynamische Seite**.
+2. Name: `Startseite_v3.tpl`.
+3. Datenquelle: **„Start"** (dieselbe wie bei der heutigen Startseite).
+4. Quelltext von `assets/app/Startseite_v3.tpl` vollständig einfügen bzw.
+   die Datei hochladen.
+
+### Erst testen, dann umschalten
+
+**Wichtig:** die neue Seite zunächst nur über einen **zusätzlichen
+Menüpunkt/Tab** in der App verlinken, **ohne** die heutige Startseite zu
+ändern. Erst wenn der Test in der echten App (iOS und Android) überzeugt,
+den bisherigen Start-Tab auf `Startseite_v3.tpl` umstellen.
+
+### Rückweg (Rollback)
+
+`Startseite_v2.tpl` bleibt währenddessen unverändert im CMS bestehen –
+im Fehlerfall den Start-Tab einfach wieder auf `Startseite_v2.tpl` zeigen
+lassen. `Startseite_v3.tpl` selbst muss dafür nicht gelöscht werden.
+
+### Lokale Vorschau
+
+```
+npm run tpl-vorschau
+```
+
+Rendert `Startseite_v3.tpl` lokal ohne appack: ersetzt die appack-
+FreeMarker-Konstrukte der Vorlage gegen Mock-Daten aus
+`tools/app-optik/mock-start.json` (angemeldeter Test-Nutzer ohne echten
+Namen, eine Kachel „Mitglied werden") und die drei appack-cdn-Skripte
+(jQuery, `graph-api.js`, `component-news-widget.js`) durch lokale Stubs
+(zwei feste Mock-Termine, zwei feste Mock-Meldungen; `App` bleibt
+undefiniert, wie im Browser-Fallback). Schreibt Screenshots (390×760,
+Viewport + fullPage), einen Kontaktbogen (`vergleich.png`, Vergleich mit
+`docs/app-konzept/start.html`) und eine Tippziel-Messtabelle nach
+`tools/cache/app-optik/tpl-vorschau/` (gitignored, nie committet).
+
+### Offene Punkte (nur in der echten App/CMS prüfbar)
+
+- **Webfonts vom GitHub-Pages-Host** (`justolgay.github.io`) in der
+  nativen WebView: die lokale Vorschau lief offline, Barlow
+  Condensed/Inter luden dort nicht – ob appacks WebView (iOS/Android)
+  die absoluten Adressen zulässt und die Schriften tatsächlich lädt, ist
+  ungeprüft (Fallback-Stack greift andernfalls automatisch).
+- **Verhalten von `nav://…`-Links** außerhalb der App (Browser-Test): im
+  echten appack-Kontext navigiert das die native App; in einem reinen
+  Browser-Tab (z. B. appack-Vorschau im CMS) passiert vermutlich nichts
+  Sichtbares – ungeprüft.
+- **Weitere Felder in `profile_json`** (z. B. Gruppen/Kategorien des
+  Nutzers): laut `API-NOTIZ.md` sind nur `id`, `firstname`, `imageId`
+  belegt; ob zusätzliche Felder (etwa Team-/Gruppenzugehörigkeit)
+  existieren, ist ungeprüft – die Vorlage zeigt deshalb bewusst keine
+  Gruppen-Tags (anders als der Klick-Prototyp `docs/app-konzept/start.html`).
+- Ob `graphApi.calendar.listUpcomingCalendarEvents` bei 0 sichtbaren
+  Kalendern tatsächlich ein leeres Array liefert (und nicht einen Fehler),
+  ist nur am echten Kalendermodul zu prüfen.
