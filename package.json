@@ -21,7 +21,8 @@
     "lighthouse": "node tools/lighthouse.mjs",
     "vorstand-pdf": "node tools/vorstand-pdf/bauen.mjs",
     "app-optik": "node tools/app-optik/vorschau.mjs",
-    "tpl-vorschau": "node tools/app-optik/tpl-vorschau.mjs"
+    "tpl-vorschau": "node tools/app-optik/tpl-vorschau.mjs",
+    "tpl-bauen": "node tools/app-optik/tpl-bauen.mjs"
   },
   "keywords": [],
   "author": "",

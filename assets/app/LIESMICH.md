@@ -195,3 +195,132 @@ Viewport + fullPage), einen Kontaktbogen (`vergleich.png`, Vergleich mit
 - Ob `graphApi.calendar.listUpcomingCalendarEvents` bei 0 sichtbaren
   Kalendern tatsächlich ein leeres Array liefert (und nicht einen Fehler),
   ist nur am echten Kalendermodul zu prüfen.
+
+## Stufe C – Vereinsseiten (C1)
+
+Fünf weitere appack-Vorlagen, im selben System wie `Startseite_v3.tpl`
+(gleicher Kopf, gleiche Tokens/Bausteine): der appack-CMS-Verteiler
+„Verein" sowie die vier Abteilungs-/Kontaktseiten dahinter. Anders als
+`Startseite_v3.tpl` (Datenquelle „Start") laden diese fünf Seiten ihre
+Inhalte **zur Laufzeit selbst** über die Workbook-API – dieselben
+Worksheets, die heute schon die appack-Modulseiten (`Abteilungen.tpl`,
+`Ansprechpartner.tpl`, `Sponsoren.tpl`) anzeigen. Eine Datenquelle, keine
+Doppelpflege.
+
+### Dateien → Module → Rückweg
+
+| Datei | Zweck | Ersetzt im CMS (Modul) | Heutiger Seitenlink | Rückweg |
+|---|---|---|---|---|
+| `Verein_v3.tpl` | Verteiler „Verein" (Tab 4 der neuen App) | `sportfreunde04_TextImage_1783060935192` („Verein") | `Verein.tpl` | Seitenlink zurück auf `Verein.tpl` |
+| `Mannschaften_v3.tpl` | Fußball: alle aktiven Mannschaften | `sportfreunde04_TextImage_1783343147611` („Mannschaften") | Seite „Abteilungen Fußball" (`Abteilungen.tpl`) | Seitenlink zurück auf die bisherige Fußball-Seite |
+| `Karneval_v3.tpl` | Karnevalabteilung mit ihren Gruppen | `sportfreunde04_TextImage_1780401660343` („Sportangebote", wird zu „Karneval") | `Abteilungsliste.tpl` | Seitenlink zurück auf `Abteilungsliste.tpl` |
+| `Vorstand_v3.tpl` | Vorstand & Ansprechpartner | `sportfreunde04_TextImage_1780401660340` („Ansprechpartner") | `Ansprechpartnerliste.tpl` | Seitenlink zurück auf `Ansprechpartnerliste.tpl` |
+| `Sponsoren_v3.tpl` | Sponsoren & Partner | `sportfreunde04_TextImage_1780401660337` („Sponsoren") | `Sponsoren.tpl` | Seitenlink zurück auf `Sponsoren.tpl` |
+
+Jede Vorlage beginnt mit `<h1 class="visually-hidden">` (Seitentitel, die
+Hülle zeigt den Modultitel bereits als Kopfzeile) und sichtbaren
+`<h2 class="abschnittstitel">`-Zwischenüberschriften.
+
+### Datenquellen (Workbook-API, zur Laufzeit)
+
+Abteilungen (Mannschaften, Karneval), wie `Abteilungen.tpl` sie lädt:
+
+| Worksheet | Workbook-ID | Genutzt von |
+|---|---|---|
+| Übersicht | `6a1ec5fcf68a05bf129cdb7a` | Verein_v3 (Zählung), Mannschaften_v3, Karneval_v3 |
+| Trainingszeiten | `6a1ec5fcf68a05bf129cdb7e` | Mannschaften_v3 |
+| Buttons | `6a1ec5fcf68a05bf129cdb82` | Mannschaften_v3, Karneval_v3 |
+| Kategorien | `6a1ec5fcf68a05bf129cdb85` | geladen, nicht für Farben verwendet (Vereinsblau-System) |
+| Einstellungen | `6a1ec5fcf68a05bf129cdb89` | Mannschaften_v3 (`showContent`) |
+
+Ansprechpartner (Vorstand), wie `Ansprechpartner.tpl`:
+
+| Worksheet | Workbook-ID |
+|---|---|
+| Kontakte | `6a1ec5fcf68a05bf129cdb8b` |
+| Kategorien | `6a1ec5fcf68a05bf129cdb90` |
+| Einstellungen | `6a1ec5fcf68a05bf129cdb95` (geladen, aktuell nicht ausgewertet) |
+
+Sponsoren, wie `Sponsoren.tpl`:
+
+| Worksheet | Workbook-ID |
+|---|---|
+| Sponsoren | `6a1ec5fcf68a05bf129cdbac` (Filter `{ sponActive: true }`) |
+| Einstellungen | `6a1ec5fcf68a05bf129cdbb0` (`setGroupByCategory`) |
+
+Alle Felder gelten als optional (können fehlen, `null` oder `""` sein) –
+die Vorlagen blenden fehlende Angaben aus, statt „undefined"/„null"
+anzuzeigen. HTML-Felder (`description`, `sponBeschreibung`, `ansInfo`)
+werden vor dem Einsetzen von `<script>`-Tags befreit; alle anderen Felder
+laufen über `textContent`.
+
+### Anlegen im CMS
+
+1. appack-CMS → **Seiten** → **„+"** → **dynamische Seite**.
+2. Name: z. B. `Verein_v3.tpl` (entsprechend für die anderen vier).
+3. Datenquelle: **nicht nötig** – anders als bei `Startseite_v3.tpl` laden
+   diese fünf Seiten alles selbst per Workbook-API.
+4. Quelltext der jeweiligen Datei aus `assets/app/` vollständig einfügen
+   bzw. die Datei hochladen.
+5. **Erst testen, dann umschalten**: die neue Seite zunächst über einen
+   zusätzlichen Menüpunkt/Tab verlinken, ohne das bestehende Modul zu
+   ändern (siehe Vorgehen bei `Startseite_v3.tpl`). Erst nach bestandenem
+   Test in der echten App (iOS und Android) den jeweiligen Seitenlink in
+   der Modulverwaltung umstellen.
+
+### Umschalten je Modul / Rückweg
+
+Modulverwaltung → jeweiliges Modul (Tabelle oben) → Seitenlink (Stift →
+Dateiauswahl → `<Name>_v3.tpl` → „Datei wählen" → „Speichern"). Rückweg:
+denselben Weg mit dem in der Tabelle genannten bisherigen Dateinamen als
+Seitenlink. Die alten Vorlagen (`Verein.tpl`, `Abteilungen.tpl`,
+`Abteilungsliste.tpl`, `Ansprechpartnerliste.tpl`, `Sponsoren.tpl`) bleiben
+dafür unverändert im CMS bestehen und müssen nicht gelöscht werden.
+
+### Bauweise
+
+Gemeinsame Grundlage `src/app/v3-basis.css` (Schriften, Tokens,
+Grundregeln, gemeinsame Bausteine – wörtlich aus `Startseite_v3.tpl`
+extrahiert) plus je Seite `src/app/<Name>_v3.html` (Body-Markup,
+seitenspezifisches `<style>`, `<script>`). `tools/app-optik/tpl-bauen.mjs`
+(`npm run tpl-bauen`) setzt daraus die fünf `assets/app/<Name>_v3.tpl`
+zusammen (derselbe `<head>` wie `Startseite_v3.tpl`). **`Startseite_v3.tpl`
+bleibt unverändert** und wird von diesem Bauskript nicht angefasst. Die
+gebauten `.tpl`-Dateien werden committet – sie sind das, was ins CMS
+kopiert wird, nicht die `src/app/`-Quellen. `npm run build` kopiert
+`assets/` unverändert nach `docs/assets/`, die fünf `.tpl` kommen dabei
+automatisch mit (wie `Startseite_v3.tpl`).
+
+Lokale Vorschau: `npm run tpl-vorschau` (ohne Argument: alle sechs
+Vorlagen; mit Argument, z. B. `Verein_v3`, nur diese eine) rendert gegen
+Mock-Daten aus `tools/app-optik/mock-start.json` (nur `Startseite_v3.tpl`)
+bzw. `tools/app-optik/mock-worksheets.json` (die fünf C1-Vorlagen,
+Schlüssel = Workbook-ID) und stubbt die appack-cdn-Skripte (jQuery,
+graph-api, News-Widget, **neu:** `appack.workbook-1.4.1.js`). Screenshots
+(390×760 und 320×760, Viewport + fullPage) und ein Kontaktbogen landen in
+`tools/cache/app-optik/tpl-vorschau/` (gitignored, nie committet).
+
+### Offene Punkte (nur in der echten App/CMS prüfbar)
+
+- **`nav://…`-Ziele** (Tabelle „Navigationsziele" in der C1-Spezifikation):
+  außerhalb der App führen sie ins Leere, wie bei `Startseite_v3.tpl` – im
+  echten appack-Kontext ungeprüft.
+- **Bild-URLs aus den Worksheets** (`sliderImage*`, `categoryImage`,
+  `ansImg`, `sponImg`): ob sie ohne Zugriffsschutz/Login von appacks
+  WebView aus erreichbar sind, ist ungeprüft.
+- **`<details>`/`<summary>`** (Beschreibungen, aufklappbar) in älteren
+  WebViews (ältere Android-Systemwebviews): Darstellung/Bedienbarkeit
+  ungeprüft, moderne iOS-/Android-WebViews unterstützen es.
+- **`assets/img/`** (in der C1-Spezifikation als Bildquelle für die Mocks
+  vorgesehen) existiert im Repo nicht – die Mocks in
+  `tools/app-optik/mock-worksheets.json` lassen Bild-Felder deshalb leer
+  (Fallback laut Spezifikation).
+- **Reihenfolge/Priorität bei zwei Telefonnummern** (`firstContactPhone`
+  **und** `firstContactHandy` gleichzeitig gefüllt): die Vorlagen zeigen
+  dafür einen einzigen „Anrufen"-Knopf und bevorzugen die Handynummer –
+  keine Vorgabe dazu in der Spezifikation, am echten Datenbestand zu
+  prüfen.
+- **`sponButton`/`sponButtonLink`** (Sponsoren-Worksheet): werden geladen,
+  aber nicht separat dargestellt (in der C1-Spezifikation nicht als
+  eigene Aktion vorgesehen, anders als `sponLink`/`sponMail`/`sponInst`/
+  `sponFace`).
