@@ -459,8 +459,9 @@ svg { display: block; flex: 0 0 auto; }
       aktionen.appendChild(mailLink);
     }
 
+    // Anrufen nur ohne Mail-Adresse (QA-Befund, C2 Abschnitt 7).
     var telNummer = textFeld(zeile, handyFeld) || textFeld(zeile, phoneFeld);
-    if (telNummer) {
+    if (!mail && telNummer) {
       var telLink = document.createElement("a");
       telLink.className = "icon-knopf";
       telLink.href = telHref(telNummer);

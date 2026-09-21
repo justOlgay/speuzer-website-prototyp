@@ -1,0 +1,134 @@
+<h1 class="visually-hidden">Über uns</h1>
+
+<div class="karte">
+  <p class="ueber-uns-titel">Wer wir sind</p>
+  <p class="ueber-uns-lead">Frankfurter Fußballverein Sportfreunde 1904 e.&nbsp;V. – im Gallus sagt man einfach „die Speuzer“.</p>
+</div>
+
+<h2 class="abschnittstitel">Gründung 1904</h2>
+<div class="karte">
+  <p>Gegründet wurde der Verein am 15. Mai 1904 als Frankfurter FC Britannia. Nach dem Ersten Weltkrieg erhielt er 1919 seinen heutigen Namen. Der sportliche Höhepunkt war die Saison 1955/56 in der 1. Amateurliga Hessen; seit den 1960er Jahren spielen die Sportfreunde in den Klassen des Fußballkreises Frankfurt.</p>
+</div>
+
+<h2 class="abschnittstitel">Die Speuzer heute</h2>
+<div class="karte">
+  <div class="zahlen-raster">
+    <div class="zahl">
+      <span class="zahl__wert">1904</span>
+      <span class="zahl__label">gegründet</span>
+    </div>
+    <div class="zahl">
+      <span class="zahl__wert">__ANZAHL_MANNSCHAFTEN__</span>
+      <span class="zahl__label">Fußballmannschaften</span>
+    </div>
+    <div class="zahl">
+      <span class="zahl__wert">__ANZAHL_KARNEVALGRUPPEN__</span>
+      <span class="zahl__label">Karnevalgruppen</span>
+    </div>
+  </div>
+  <p>Heute stellt der Verein __ANZAHL_MANNSCHAFTEN__ Fußballmannschaften – von der 1. Herrenmannschaft bis zur G-Jugend – und die Karnevalabteilung „Die Schnauzer“ mit __ANZAHL_KARNEVALGRUPPEN__ Gruppen. Trainiert und gespielt wird auf dem eigenen Platz an der Mainzer Landstraße 480; die Herren tragen ihre Heimspiele auf der Anlage am Rebstock aus.</p>
+</div>
+
+<h2 class="abschnittstitel">Unsere Werte</h2>
+<div class="karte">
+  <p class="leitsatz">„Wir wollen nicht nur erfolgreiche Mannschaften entwickeln, sondern erfolgreiche Menschen und einen starken Verein für kommende Generationen.“</p>
+  <p>Unsere Werte sind Gemeinschaft, Respekt, Wertschätzung, Verantwortung, Fairness, Entwicklung und Kinderschutz.</p>
+</div>
+
+<div class="liste">
+  <a class="zeile" href="https://cdn.appack.de/sportfreunde04/pdf/Chronik%20Sportfreunde.pdf" target="_blank" rel="noopener">
+    <span class="zeile__text"><span class="zeile__titel">Chronik (PDF)</span></span>
+    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+  </a>
+  <a class="zeile" href="https://justolgay.github.io/speuzer-website-prototyp/assets/downloads/vereinsphilosophie-und-zukunftskonzept.pdf" target="_blank" rel="noopener">
+    <span class="zeile__text"><span class="zeile__titel">Vereinsphilosophie (PDF)</span></span>
+    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+  </a>
+  <a class="zeile" href="nav://sportfreunde04_Application_1783064196311">
+    <span class="zeile__text"><span class="zeile__titel">Kinder- und Jugendschutz</span></span>
+    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+  </a>
+</div>
+
+<p class="fuss">F.F.V. Sportfreunde 04 · Vereins-App</p>
+
+<style>
+/* Ueber-uns_v3.tpl – seitenspezifisch (C2). Statischer Inhalt (keine
+   Workbook-Aufrufe): Text aus der heutigen Workspace-Seite "Über uns.html"
+   und docs/ws/verein.html, Zahlen __ANZAHL_MANNSCHAFTEN__/
+   __ANZAHL_KARNEVALGRUPPEN__ werden von tools/app-optik/tpl-bauen.mjs zur
+   Bauzeit aus data/verein.json bzw. data/karneval.json eingesetzt (kein
+   appack-FreeMarker-Ausdruck an dieser Stelle, siehe Kopfkommentar von
+   tpl-bauen.mjs). */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.karte + .abschnittstitel,
+.abschnittstitel + .karte { margin-top: 0; }
+
+.ueber-uns-titel {
+  margin: 0 0 var(--sp-2);
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 26px;
+  text-transform: uppercase;
+  color: var(--blau-950);
+}
+
+.ueber-uns-lead {
+  margin: 0;
+  font-size: 15px;
+  color: var(--ink-2);
+}
+
+.karte p { margin: 0 0 var(--sp-2); font-size: 14px; color: var(--ink-2); }
+.karte p:last-child { margin-bottom: 0; }
+
+.leitsatz {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 18px;
+  text-transform: none;
+  color: var(--blau-950);
+  font-style: italic;
+}
+
+.zahlen-raster {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.zahl { min-width: 0; text-align: center; }
+
+.zahl__wert {
+  display: block;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--blau-700);
+}
+
+.zahl__label {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-3);
+  overflow-wrap: break-word;
+}
+</style>
+
+<script>
+// Ueber-uns_v3.tpl lädt keine Worksheets zur Laufzeit (statischer Inhalt,
+// siehe C2-Spezifikation Abschnitt 4) – kein Skript nötig.
+</script>

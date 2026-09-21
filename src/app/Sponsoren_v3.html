@@ -5,7 +5,7 @@
 <div id="sponsoren-bereich"></div>
 
 <div class="liste">
-  <a class="zeile" href="mailto:vorstand@sportfreunde04.de?subject=Sponsoring%20FFV%20Sportfreunde%2004">
+  <a class="zeile" href="mailto:geschaeftsstelle@sportfreunde04.de?subject=Sponsoring%20FFV%20Sportfreunde%2004">
     <span class="zeile__text"><span class="zeile__titel">Selbst Sponsor werden</span></span>
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
   </a>
@@ -133,6 +133,12 @@
   function textFeld(zeile, name) {
     var v = zeile && zeile[name];
     return (v === undefined || v === null) ? "" : String(v);
+  }
+
+  // Platzhalterkarte des Vereins ("Hier könnte Ihre Werbung stehen") nicht
+  // rendern (QA-Befund, C2 Abschnitt 7; Datenpflege-Hinweis in LIESMICH.md).
+  function istPlatzhalter(firma) {
+    return /hier k[öo]nnte/i.test(String(firma || ""));
   }
 
   function sicheresHtml(html) {
@@ -313,7 +319,11 @@
     ladeWorkbook(EINSTELLUNGEN_ID)
   ]).then(function (ergebnisse) {
     var sponsoren = ergebnisse[0]
-      .filter(function (s) { return s.sponActive === true && (textFeld(s, "sponFirma") || textFeld(s, "sponImg")); })
+      .filter(function (s) {
+        return s.sponActive === true
+          && (textFeld(s, "sponFirma") || textFeld(s, "sponImg"))
+          && !istPlatzhalter(textFeld(s, "sponFirma"));
+      })
       .slice()
       .sort(vergleicheSponsoren);
     var einstellungenZeilen = ergebnisse[1];

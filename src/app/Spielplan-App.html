@@ -1,0 +1,312 @@
+<h1 class="visually-hidden">Spielplan &amp; Tabellen</h1>
+
+<div id="team-pillen" class="filterleiste"></div>
+
+<div id="team-inhalt"></div>
+
+<h2 class="abschnittstitel">Kalender abonnieren</h2>
+<div id="kalender-zeile" class="liste"></div>
+
+<p class="fuss">F.F.V. Sportfreunde 04 · Vereins-App</p>
+
+<style>
+/* Spielplan-App.html – statische Workspace-Seite (C2, Abschnitt 2). Wird von
+   tools/app-optik/tpl-bauen.mjs (Ausgabeart "statisch") NICHT mit
+   dem appack-FreeMarker-Titelausdruck versehen (fester <title>), sondern 1:1 nach
+   assets/app/Spielplan-App.html geschrieben und dort unter
+   workspace/Spielplan-App.html ausgeliefert (Domain-Freigabe der
+   FUSSBALL.DE-Widgets gilt nur für cdn.appack.de, siehe LIESMICH.md). */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.filterleiste {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-4);
+}
+
+.filter-knopf {
+  min-height: 44px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.filter-knopf--aktiv {
+  background: var(--blau-700);
+  color: var(--weiss);
+}
+
+.karte + .abschnittstitel { margin-top: var(--sp-6); }
+
+.fussballde_widget {
+  min-height: 240px;
+  background: var(--blau-50);
+  border-radius: var(--r-md);
+}
+
+.tabelle-wrapper {
+  position: relative;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabelle-wrapper::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 24px;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0), var(--surface));
+  pointer-events: none;
+}
+
+.tabelle-wischen-hinweis {
+  display: none;
+  margin: var(--sp-2) 0 0;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+@media (max-width: 639px) {
+  .tabelle-wischen-hinweis { display: block; }
+}
+
+.kinderfestival-iframe {
+  width: 100%;
+  height: 640px;
+  border: 0;
+  border-radius: var(--r-md);
+  display: block;
+}
+</style>
+
+<script>
+(function () {
+  "use strict";
+
+  // Widget-IDs des Vereins (data/widgets.json) – von tpl-bauen.mjs zur
+  // Bauzeit eingesetzt (kein appack-FreeMarker-Ausdruck in dieser statischen Datei).
+  var WIDGETS = __WIDGETS_JSON__;
+
+  var SPEICHER_SCHLUESSEL = "speuzer.spielplan.team";
+  var GENERATOR_BASIS = "https://justolgay.github.io/speuzer-spielplan/";
+  var KALENDER_BASIS = "https://justolgay.github.io/speuzer-spielplan/";
+
+  // Reihenfolge und Beschriftung wie in der C2-Spezifikation (Abschnitt 2).
+  var TEAMS = [
+    { schluessel: "herren", label: "Herren", kalenderDatei: "herren" },
+    { schluessel: "a-jugend", label: "A-Jugend", kalenderDatei: "a" },
+    { schluessel: "d1", label: "D1", kalenderDatei: "d1" },
+    { schluessel: "d2", label: "D2", kalenderDatei: "d2" },
+    { schluessel: "d3", label: "D3", kalenderDatei: "d3" },
+    { schluessel: "e1", label: "E1", kalenderDatei: "e1" },
+    { schluessel: "e2", label: "E2", kalenderDatei: "e2" },
+    { schluessel: "e3", label: "E3", kalenderDatei: "e3" },
+    { schluessel: "f1", label: "F1", kalenderDatei: "f1", generatorGruppe: "f-jugend" },
+    { schluessel: "f2", label: "F2", kalenderDatei: "f2", generatorGruppe: "f-jugend" },
+    { schluessel: "g-jugend", label: "G1", kalenderDatei: "g1", generatorGruppe: "g-jugend" },
+  ];
+
+  function teamZuSchluessel(wert) {
+    var w = String(wert || "").trim().toLowerCase();
+    if (!w) return null;
+    for (var i = 0; i < TEAMS.length; i++) {
+      if (TEAMS[i].schluessel === w || TEAMS[i].label.toLowerCase() === w) return TEAMS[i].schluessel;
+    }
+    return null;
+  }
+
+  function ermittleAusgewaehltesTeam() {
+    var ausHash = teamZuSchluessel(window.location.hash.replace(/^#/, ""));
+    if (ausHash) return ausHash;
+    var gespeichert = null;
+    try {
+      gespeichert = window.localStorage.getItem(SPEICHER_SCHLUESSEL);
+    } catch (e) {
+      gespeichert = null;
+    }
+    var ausSpeicher = teamZuSchluessel(gespeichert);
+    if (ausSpeicher) return ausSpeicher;
+    return "herren";
+  }
+
+  function teamByKey(schluessel) {
+    for (var i = 0; i < TEAMS.length; i++) {
+      if (TEAMS[i].schluessel === schluessel) return TEAMS[i];
+    }
+    return TEAMS[0];
+  }
+
+  // ---------- Widget-/Iframe-Bausteine ----------
+
+  function baueWidget(widgetId, widgetType) {
+    var container = document.createElement("div");
+    container.className = "fussballde_widget";
+    container.setAttribute("data-id", widgetId);
+    container.setAttribute("data-type", widgetType);
+    return container;
+  }
+
+  function baueTabelleKarte(widgetId) {
+    var karte = document.createElement("div");
+    karte.className = "karte";
+    var wrapper = document.createElement("div");
+    wrapper.className = "tabelle-wrapper";
+    wrapper.appendChild(baueWidget(widgetId, "table"));
+    karte.appendChild(wrapper);
+    var hinweis = document.createElement("p");
+    hinweis.className = "tabelle-wischen-hinweis";
+    hinweis.textContent = "Tabelle seitlich wischbar";
+    karte.appendChild(hinweis);
+    return karte;
+  }
+
+  function baueKinderfestivalIframe(team) {
+    var iframe = document.createElement("iframe");
+    iframe.className = "kinderfestival-iframe";
+    iframe.loading = "lazy";
+    iframe.title = "Spielplan " + team.label + " (Kinderfestival)";
+    iframe.src = GENERATOR_BASIS + "app-" + team.generatorGruppe + ".html#" + encodeURIComponent(team.label);
+    window.addEventListener("message", function (event) {
+      if (event.origin !== "https://justolgay.github.io") return;
+      if (event.source !== iframe.contentWindow) return;
+      var h = event.data && event.data.speuzerHeight;
+      if (typeof h !== "number" || h < 200 || h > 20000) return;
+      iframe.style.height = h + "px";
+    });
+    return iframe;
+  }
+
+  function baueHinweisKarte(text) {
+    var karte = document.createElement("div");
+    karte.className = "karte hinweis";
+    var p = document.createElement("p");
+    p.textContent = text;
+    karte.appendChild(p);
+    return karte;
+  }
+
+  function baueAbschnitt(titel, inhaltNode) {
+    var wrapper = document.createDocumentFragment();
+    var h2 = document.createElement("h2");
+    h2.className = "abschnittstitel";
+    h2.textContent = titel;
+    wrapper.appendChild(h2);
+    wrapper.appendChild(inhaltNode);
+    return wrapper;
+  }
+
+  // ---------- Inhalt eines Teams ----------
+
+  function renderTeam(schluessel) {
+    var team = teamByKey(schluessel);
+    var eintrag = WIDGETS[team.schluessel] || {};
+    var inhalt = document.getElementById("team-inhalt");
+    inhalt.innerHTML = "";
+
+    if (eintrag.spiele) {
+      var naechstesKarte = document.createElement("div");
+      naechstesKarte.className = "karte";
+      naechstesKarte.appendChild(baueWidget(eintrag.spiele, "next-match"));
+      inhalt.appendChild(baueAbschnitt("Nächstes Spiel", naechstesKarte));
+
+      var saisonKarte = document.createElement("div");
+      saisonKarte.className = "karte";
+      saisonKarte.appendChild(baueWidget(eintrag.spiele, "team-matches"));
+      inhalt.appendChild(baueAbschnitt("Spielplan der Saison", saisonKarte));
+    } else if (team.generatorGruppe) {
+      var iframeKarte = document.createElement("div");
+      iframeKarte.className = "karte";
+      iframeKarte.appendChild(baueKinderfestivalIframe(team));
+      inhalt.appendChild(baueAbschnitt("Spielplan der Saison", iframeKarte));
+    }
+
+    if (eintrag.tabelle) {
+      inhalt.appendChild(baueAbschnitt("Tabelle", baueTabelleKarte(eintrag.tabelle)));
+    } else if (team.generatorGruppe) {
+      inhalt.appendChild(baueAbschnitt("Tabelle", baueHinweisKarte("Im Kinderfußball gibt es keine Tabellen.")));
+    }
+
+    // Kalender abonnieren
+    var kalenderZeile = document.getElementById("kalender-zeile");
+    kalenderZeile.innerHTML = "";
+    kalenderZeile.appendChild(baueKalenderLink("Spielplan " + team.label + " (ICS)", KALENDER_BASIS + team.kalenderDatei + ".ics"));
+    kalenderZeile.appendChild(baueKalenderLink("Trainingszeiten " + team.label + " (ICS)", KALENDER_BASIS + "training-" + team.kalenderDatei + ".ics"));
+  }
+
+  function baueKalenderLink(text, href) {
+    var link = document.createElement("a");
+    link.className = "zeile";
+    link.href = href;
+    var textSpan = document.createElement("span");
+    textSpan.className = "zeile__text";
+    var titelSpan = document.createElement("span");
+    titelSpan.className = "zeile__titel";
+    titelSpan.textContent = text;
+    textSpan.appendChild(titelSpan);
+    link.appendChild(textSpan);
+    return link;
+  }
+
+  // ---------- Team-Pillen ----------
+
+  function baueTeamPillen(ausgewaehlt) {
+    var pillenZeile = document.getElementById("team-pillen");
+    pillenZeile.innerHTML = "";
+    for (var i = 0; i < TEAMS.length; i++) {
+      var team = TEAMS[i];
+      var knopf = document.createElement("button");
+      knopf.type = "button";
+      knopf.className = "tag filter-knopf" + (team.schluessel === ausgewaehlt ? " filter-knopf--aktiv" : "");
+      knopf.textContent = team.label;
+      knopf.setAttribute("data-team", team.schluessel);
+      knopf.addEventListener("click", function () {
+        var neuesTeam = this.getAttribute("data-team");
+        try {
+          window.localStorage.setItem(SPEICHER_SCHLUESSEL, neuesTeam);
+        } catch (e) {
+          // localStorage kann in privaten Fenstern fehlschlagen – Hash reicht als Zustand.
+        }
+        // widgets.js (FUSSBALL.DE) bietet keine Init-Funktion für neu
+        // eingefügte Container (geprüft im Quelltext) – ein voller Neuladen
+        // mit dem neuen Hash ist die zuverlässige Lösung (Hash hält den
+        // Zustand über den Reload hinweg).
+        window.location.hash = teamByKey(neuesTeam).label;
+        window.location.reload();
+      });
+      pillenZeile.appendChild(knopf);
+    }
+  }
+
+  // ---------- Ablauf ----------
+
+  var ausgewaehlt = ermittleAusgewaehltesTeam();
+  try {
+    window.localStorage.setItem(SPEICHER_SCHLUESSEL, ausgewaehlt);
+  } catch (e) {
+    // ohne localStorage bleibt der Hash die einzige Zustandsquelle
+  }
+  baueTeamPillen(ausgewaehlt);
+  renderTeam(ausgewaehlt);
+
+  // FUSSBALL.DE-Widgets: Skript einmal laden, nachdem die Widget-Container
+  // im DOM stehen (die Bibliothek scannt beim eigenen DOMContentLoaded bzw.
+  // sofort, wenn das Dokument schon geladen ist).
+  var widgetSkript = document.createElement("script");
+  widgetSkript.src = "https://www.fussball.de/widgets.js";
+  document.body.appendChild(widgetSkript);
+})();
+</script>
