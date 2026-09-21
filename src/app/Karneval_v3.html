@@ -53,11 +53,15 @@
   margin-top: var(--sp-5);
 }
 
+/* Fotos und Logos vollstaendig zeigen (kein Beschnitt von Koepfen oder
+   Logos): feste Hoehe, Bild eingepasst, ruhige Flaeche in Vereinsblau-50. */
 .gruppe-karte__bild {
   display: block;
   width: 100%;
-  height: 160px;
-  object-fit: cover;
+  height: 200px;
+  object-fit: contain;
+  object-position: center;
+  background: var(--blau-50);
   border-radius: var(--r-md);
   margin-bottom: var(--sp-3);
 }
