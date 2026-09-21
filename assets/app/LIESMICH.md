@@ -135,11 +135,29 @@ Menüpunkt/Tab** in der App verlinken, **ohne** die heutige Startseite zu
 ändern. Erst wenn der Test in der echten App (iOS und Android) überzeugt,
 den bisherigen Start-Tab auf `Startseite_v3.tpl` umstellen.
 
+### Stand 21.09.2026: umgeschaltet
+
+- `Startseite_v3.tpl` ist im CMS als dynamische Seite angelegt
+  (Id `6ab10e248db70284fa1153c8`, Datenquelle „Start").
+- Test über einen vorübergehenden Menüeintrag (Modul „Interner Bereich",
+  Sichtbarkeit „Nach Rolle: App-Administrator") in der echten Mac-App
+  bestanden; Olgay: „sieht ok aus". Der Testeintrag ist wieder
+  zurückgebaut: Modul „Interner Bereich" zeigt wieder auf
+  `Interner Bereich.tpl`, der Menüeintrag ist über „Aus dem Menü
+  entfernen" (Zeile markieren, Knopf oben rechts) gelöscht.
+- Der Start-Tab (Modul „Start", `sportfreunde04_TextImage_1780401660314`)
+  zeigt seit 21.09.2026 auf `Startseite_v3.tpl`. Die App zeigt die neue
+  Startseite nach einem Neustart.
+- Im CMS eingespielte Nacharbeiten: Details-Knopf als `nav://`-Link
+  (B1e) und `padding-bottom: 96px` gegen die schwebende Tab-Leiste (B1f).
+
 ### Rückweg (Rollback)
 
-`Startseite_v2.tpl` bleibt währenddessen unverändert im CMS bestehen –
-im Fehlerfall den Start-Tab einfach wieder auf `Startseite_v2.tpl` zeigen
-lassen. `Startseite_v3.tpl` selbst muss dafür nicht gelöscht werden.
+`Startseite_v2.tpl` bleibt unverändert im CMS bestehen – im Fehlerfall
+Modulverwaltung → Modul „Start" → Seitenlink (Stift → Dateiauswahl →
+`Startseite_v2.tpl` → „Datei wählen" → „Speichern"). Achtung: das ⓧ neben
+dem Feld leert den Seitenlink, nicht benutzen. `Startseite_v3.tpl` selbst
+muss dafür nicht gelöscht werden.
 
 ### Lokale Vorschau
 
