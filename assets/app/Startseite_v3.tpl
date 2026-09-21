@@ -515,6 +515,7 @@ svg { display: block; flex: 0 0 auto; }
     return wochentag + ", " + datumText + " · " + zeit + " Uhr";
   }
 
+  // Derzeit ungenutzt (siehe Details-Knopf): App.navigate öffnete im Test nichts.
   function oeffneTermin(id) {
     if (window.App) {
       if (App.isNativeAndroid && App.isNativeAndroid()) {
@@ -575,11 +576,14 @@ svg { display: block; flex: 0 0 auto; }
 
     // Zu-/Absage bewusst nicht auf der Startseite (Entscheidung 21.09.2026);
     // "Details" öffnet den Termin im Kalendermodul, dort ist die Rückmeldung.
-    var details = document.createElement("button");
-    details.type = "button";
+    // Test in der echten App (21.09.2026): App.navigate(...) aus einem Skript
+    // öffnete nichts, ein nav://-Link dagegen zuverlässig. Deshalb ein Link
+    // auf das Kalendermodul; der Termin steht dort als nächster Eintrag.
+    var details = document.createElement("a");
     details.className = "knopf knopf--leise";
+    details.href = "nav://" + KALENDER_ID;
+    details.setAttribute("data-termin", termin.id || "");
     details.textContent = "Details";
-    details.addEventListener("click", function () { oeffneTermin(termin.id); });
 
     knoepfe.appendChild(details);
     inhalt.appendChild(knoepfe);
