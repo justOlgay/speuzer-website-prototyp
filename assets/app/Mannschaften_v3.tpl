@@ -401,7 +401,7 @@ svg { display: block; flex: 0 0 auto; }
   <a class="knopf" href="mailto:jugendleitung@sportfreunde04.de?subject=Probetraining%20beim%20FFV%20Sportfreunde%2004&amp;body=Hallo%2C%0A%0Awir%20interessieren%20uns%20f%C3%BCr%20ein%20Probetraining.%0AJahrgang%20des%20Kindes%3A%20%0AVorerfahrung%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe">Probetraining vereinbaren</a>
 </div>
 <a class="zeile" href="nav://sportfreunde04_TextImage_1783345459688">
-  <span class="zeile__text"><span class="zeile__titel">Spielpläne &amp; Tabellen</span></span>
+  <span class="zeile__text"><span class="zeile__titel">Spielplan &amp; Tabellen</span></span>
   <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
 </a>
 

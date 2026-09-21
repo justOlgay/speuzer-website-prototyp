@@ -38,6 +38,8 @@
 
 .filter-knopf {
   min-height: 44px;
+  min-width: 44px;
+  justify-content: center;
   border: none;
   cursor: pointer;
   font-family: inherit;
@@ -62,7 +64,7 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.tabelle-wrapper::after {
+.tabelle-wrapper.ist-wischbar::after {
   content: "";
   position: absolute;
   top: 0;
@@ -80,8 +82,8 @@
   color: var(--ink-3);
 }
 
-@media (max-width: 639px) {
-  .tabelle-wischen-hinweis { display: block; }
+.tabelle-wischen-hinweis.ist-sichtbar {
+  display: block;
 }
 
 .kinderfestival-iframe {
@@ -160,6 +162,16 @@
     return container;
   }
 
+  // Das echte FUSSBALL.DE-Widget setzt ein <iframe width="100%"> ein, das
+  // nie horizontal scrollt – der Wischen-Hinweis und der Schatten sollen
+  // deshalb nur erscheinen, wenn die Tabelle nach dem Widget-Resize
+  // tatsaechlich breiter ist als ihr sichtbarer Bereich (QA-Befund, C2b).
+  function aktualisiereWischHinweis(wrapper, hinweis) {
+    var brauchtWischen = window.innerWidth < 640 && wrapper.scrollWidth > wrapper.clientWidth;
+    wrapper.classList.toggle("ist-wischbar", brauchtWischen);
+    hinweis.classList.toggle("ist-sichtbar", brauchtWischen);
+  }
+
   function baueTabelleKarte(widgetId) {
     var karte = document.createElement("div");
     karte.className = "karte";
@@ -171,6 +183,11 @@
     hinweis.className = "tabelle-wischen-hinweis";
     hinweis.textContent = "Tabelle seitlich wischbar";
     karte.appendChild(hinweis);
+    window.addEventListener("message", function (event) {
+      var typ = event.data && typeof event.data === "object" ? event.data.type : event.data;
+      if (typ !== "fussballde_widget:resize") return;
+      aktualisiereWischHinweis(wrapper, hinweis);
+    });
     return karte;
   }
 

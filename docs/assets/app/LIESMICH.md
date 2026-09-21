@@ -370,3 +370,130 @@ graph-api, News-Widget, **neu:** `appack.workbook-1.4.1.js`). Screenshots
   aber nicht separat dargestellt (in der C1-Spezifikation nicht als
   eigene Aktion vorgesehen, anders als `sponLink`/`sponMail`/`sponInst`/
   `sponFace`).
+
+## Stufe C2 – Spielplan & Tabellen, Geschäftsstelle & Anfahrt, Über uns
+
+Drei weitere Seiten, dieselbe Familie wie Stufe C: zwei dynamische
+`_v3.tpl`-Vorlagen (Workbook-API zur Laufzeit, wie C1) und eine **statische**
+Workspace-Seite. Grund für die Ausnahme: die FUSSBALL.DE-Widgets
+(`fussballde_widget`, `https://www.fussball.de/widgets.js`) sind laut
+Freigabe nur für die Domain **cdn.appack.de** eingerichtet. Eine dynamische
+`.tpl`-Seite liefert appack unter `appack.de/rest-api/drender/…` aus – eine
+andere Domain, auf der die Widgets vermutlich nicht laufen. Die neue Seite
+„Spielplan & Tabellen" ist deshalb `assets/app/Spielplan-App.html`, wird 1:1
+in den appack-Workspace hochgeladen (wie `styles.css`/`app-color.css`, siehe
+oben) und landet dort unter
+`https://cdn.appack.de/sportfreunde04/workspace/Spielplan-App.html`.
+
+### Dateien → Module → Rückweg
+
+| Datei | Zweck | Ersetzt im CMS (Modul) | Heutiger Seitenlink | Rückweg |
+|---|---|---|---|---|
+| `Spielplan-App.html` | Spielplan &amp; Tabellen je Mannschaft, FUSSBALL.DE-Widgets live | „Übersicht aller Spiele" (`sportfreunde04_TextImage_1783345459688`) | `Tabelle-Spielplan-Uebersicht.tpl` (bzw. je nach Verlinkung `Spiele-Alle-Mannschaften.html`/`Spielplan-D-Jugend.html`/`Tabellen-D-Jugend.html`, siehe QA-Befund unten) | Seitenlink zurück auf `Tabelle-Spielplan-Uebersicht.tpl` |
+| `Geschaeftsstelle_v3.tpl` | Öffnungszeiten, Adresse/Anfahrt, Kontakt, Ansprechpartner | `sportfreunde04_TextImage_1780401660324` („Geschäftsstelle & Anfahrt") | `Geschäftsstelle.tpl` | Seitenlink zurück auf `Geschäftsstelle.tpl` |
+| `Ueber-uns_v3.tpl` | Vereinsgeschichte, Zahlen, Werte, Downloads | `sportfreunde04_TextImage_1784295208452` („Über uns") | `Über uns.html` | Seitenlink zurück auf `Über uns.html` |
+
+Wie bei Stufe C1: erst über einen zusätzlichen Menüpunkt/Tab testen, dann
+den jeweiligen Seitenlink in der Modulverwaltung umstellen (siehe „Erst
+testen, dann umschalten" oben). `Spielplan-App.html` zusätzlich in den
+Workspace hochladen (CMS → Workspace-Bereich → Datei hinzufügen/ersetzen),
+**bevor** das Modul umgestellt wird.
+
+### Bauweise
+
+`Geschaeftsstelle_v3.tpl` und `Ueber-uns_v3.tpl` laufen über dieselbe
+`tools/app-optik/tpl-bauen.mjs`-Pipeline wie die fünf C1-Vorlagen
+(`src/app/<Name>.html` → `assets/app/<Name>.tpl`, gleicher Kopf/Tokens/
+Bausteine aus `v3-basis.css`). `Ueber-uns_v3.tpl` lädt zur Laufzeit keine
+Worksheets (statischer Inhalt); die Zahlen „11 Mannschaften"/„5
+Karnevalgruppen" ersetzt `tpl-bauen.mjs` beim Bauen selbst aus
+`data/verein.json` (`anzahl_mannschaften`) und `data/karneval.json`
+(Anzahl `gruppen`) – Platzhalter `__ANZAHL_MANNSCHAFTEN__`/
+`__ANZAHL_KARNEVALGRUPPEN__` in `src/app/Ueber-uns_v3.html`, kein
+appack-FreeMarker-Ausdruck an dieser Stelle.
+
+`Spielplan-App.html` läuft über eine zweite, **statische** Ausgabeart
+desselben Bauskripts (`STATISCHE_SEITEN` in `tpl-bauen.mjs`): kein
+appack-Titelausdruck (fester `<title>Spielplan &amp; Tabellen</title>`),
+dieselbe `v3-basis.css` inline, aber kein appack-Fußskript (jQuery/
+Workbook) – die Seite braucht keines. Die Widget-IDs aus
+`data/widgets.json` (`spiele`, `tabelle`) setzt `tpl-bauen.mjs` beim Bauen
+über den Platzhalter `__WIDGETS_JSON__` in `src/app/Spielplan-App.html`
+ein (`JSON.stringify`, ohne das Dokumentationsfeld `_hinweis`).
+
+### Geschäftsstelle & Anfahrt: Worksheet-Felder
+
+Feldnamen (Wochentage englisch, Kleinschreibung) am heutigen
+`Geschäftsstelle.tpl` verifiziert (`https://appack.de/rest-api/drender/
+6a1ec5fcf68a05bf129cdbb7`, öffentlich abrufbar, Stand 21.09.2026):
+
+| Worksheet | Workbook-ID | Genutzt für |
+|---|---|---|
+| Beschreibung | `6a1ec5fcf68a05bf129cdb97` | Kopfkarte „Geschäftsstelle" (`description`) |
+| Kontakt | `6a1ec5fcf68a05bf129cdb9b` | Adresse, Anfahrt, Kontakt-Icon-Knöpfe |
+| Öffnungszeiten | `6a1ec5fcf68a05bf129cdb9d` | Tabelle Montag–Sonntag (`<tag>open/close/midstart/midend`, `saturdayhider`/`sundayhider`, `openingtext`) |
+| Ansprechpartner | `6a1ec5fcf68a05bf129cdb9f` | Kompakte Kontaktzeilen (`ansName`, `ansATitle`, `ansImg`, `ansMail`, `ansSortNumber`) |
+| Einstellungen | `6a1ec5fcf68a05bf129cdba2` | Abschnitte ein-/ausblenden (`descriptionActive`, `openingActive`, `contactActive`, `ansActive`) |
+
+Die live gepflegten Felder `holidayopen/close/midstart/midend`,
+`holidayhider`, `seasonstart`, `seasonend`, `state`, `closeInactive`
+(Sonderöffnungszeiten/Saison-Override der alten `Geschäftsstelle.tpl`)
+werden von `Geschaeftsstelle_v3.tpl` **nicht** ausgewertet – die
+Spezifikation verlangt nur die Wochentabelle Montag–Sonntag mit
+`hider`/`geschlossen`-Fallback und den `openingtext`-Hinweis. Eine
+saisonale Sonderregelung müsste bei Bedarf nachgezogen werden.
+
+### Spielplan-App.html: Teamwechsel der Widgets
+
+`https://www.fussball.de/widgets.js` (Quelltext geprüft, Stand
+21.09.2026) initialisiert beim eigenen `DOMContentLoaded` einmalig alle
+zu diesem Zeitpunkt im DOM stehenden `.fussballde_widget`-Container und
+bietet **keine** Funktion, neu eingefügte Container nachträglich zu
+initialisieren. Der Teamwechsel (Pille antippen) speichert das gewählte
+Team deshalb in `localStorage` (`speuzer.spielplan.team`) **und** im
+`location.hash` (z. B. `#D3`) und lädt die Seite anschließend per
+`location.reload()` neu – der Hash hält den Zustand über den Reload
+hinweg, `widgets.js` initialisiert beim Neuladen die (neuen) Container
+des gewählten Teams frisch.
+
+### Datenpflege durch den Verein
+
+Befunde aus der Qualitätsprüfung, die reine Worksheet-/Live-Daten
+betreffen (nicht die Vorlagen) – zu klären im appack-CMS des Vereins:
+
+- **Sponsoren-Worksheet**: Eintrag „Fußballschule VM Elite" verlinkt auf
+  `instagram.com/bundeswehrkarriere` (falscher Insta-Handle); zwei
+  Karten (Bundeswehr-, Köhler-Logo) haben kein `sponFirma` (Name fehlt,
+  dadurch Leerflächen in der 2-Spalten-Kachel); „Köhler" fehlt auf der
+  Website ganz (dort heißt der Bundeswehr-Eintrag „Bundeswehr").
+- **Vorstand/Ansprechpartner-Worksheet** (`6a1ec5fcf68a05bf129cdb8b`):
+  Kategorien-Worksheet (`…cdb90`) enthält nur eine belegte Kategorie,
+  dadurch keine Gruppierung nach den vier Website-Gruppen
+  (Geschäftsführender Vorstand, Jugendleitung, Senioren,
+  Karnevalabteilung). Unbesetzter Schriftführer steht als Name „n.B.";
+  Website schreibt „derzeit nicht besetzt". Eine Mailadresse beginnt mit
+  einem Tabulator, eine endet mit einem Leerzeichen (`mailto:`-Link kann
+  in manchen Mail-Clients scheitern).
+- **Mannschaften/Trainingszeiten-Worksheet** (`…cdb7e`): bei nahezu allen
+  Teams keine Trainingszeiten hinterlegt (nur ein Testwert „test" bei
+  E1-Jugend); die echten Zeiten stehen nur im Beschreibungstext. Namen
+  uneinheitlich: „Bambinis" (App) vs. „G-Jugend (Bambinis)" (Website),
+  „Fußballschule- Athletik" (Tippfehler mit Leerzeichen) vs.
+  „Fußballschule-Athletik VM Elite" (Website).
+- **Karneval-Worksheet**: vier der fünf Gruppen ohne Übungszeit (nur
+  Dreamboys gepflegt); Website zeigt dafür „Übungszeit: Angabe folgt."
+  Gruppenbilder von Little Fruities/Flying Fruities zeigen ein Porträt
+  der Trainerin statt der Gruppe; Freaky Fruities zeigt ein Foto mit
+  erkennbaren Kindern (Einwilligungsfrage). Schreibweise
+  „Fridjof-Nansen-Schule" korrekt „Fridtjof-Nansen-Schule".
+- **Sponsoren-Kategorie „Hauptsponsoren"**: enthielt bislang nur die
+  Platzhalterkarte „Hier könnte Ihre Werbung stehen" – `Sponsoren_v3`
+  blendet Karten mit diesem Namen jetzt aus (C2 Abschnitt 7), die
+  Kategorie bleibt aber leer, bis echte Hauptsponsoren gepflegt sind.
+
+Aus dem Prüfbericht ebenfalls gemeldet, aber **nicht Teil des
+C2-Auftrags** (weder Aufgabe 1–5 noch Abschnitt 7 verlangen es) und daher
+hier nur vermerkt statt umgesetzt: eine `Mitglied-werden_v3`-Seite
+(Beitragstabellen/Ablauf/Unterlagen statt des alten appack-Formulars)
+und ein Umbau des Mehr-Menüs (Allgemeine Infos/Medien) – beides
+CMS-Tableiste bzw. neue Seiten außerhalb des zugewiesenen Umfangs.

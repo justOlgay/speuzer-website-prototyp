@@ -359,7 +359,7 @@ svg { display: block; flex: 0 0 auto; }
   </a>
   <a class="zeile" href="nav://sportfreunde04_TextImage_1783345459688">
     <span class="zeile__text">
-      <span class="zeile__titel">Spielpläne &amp; Tabellen</span>
+      <span class="zeile__titel">Spielplan &amp; Tabellen</span>
       <span class="zeile__untertitel">Alle Mannschaften auf einen Blick</span>
     </span>
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
@@ -408,6 +408,14 @@ svg { display: block; flex: 0 0 auto; }
     return String(anzahl) + " " + (anzahl === 1 ? einzahl : mehrzahl);
   }
 
+  // Fußballschulen (externes, kostenpflichtiges Zusatzangebot) tragen im
+  // Worksheet dieselbe Kategorie "fussball", zählen aber nicht als
+  // Mannschaft (QA-Befund, C2 Abschnitt 7).
+  function istFussballschule(team) {
+    var t = String(team || "");
+    return /^fu[ßs]{1,2}ballschule/i.test(t) || /academy/i.test(t) || /athletik/i.test(t);
+  }
+
   ladeWorkbook(UEBERSICHT_ID)
     .then(function (zeilen) {
       var fussball = 0;
@@ -416,8 +424,9 @@ svg { display: block; flex: 0 0 auto; }
         var z = zeilen[i] || {};
         if (z.isActive !== true) continue;
         var kategorie = String(z.category || "").toLowerCase();
-        if (kategorie === "fussball") fussball++;
-        else if (kategorie === "karnevalabteilung") karneval++;
+        if (kategorie === "fussball") {
+          if (!istFussballschule(z.team)) fussball++;
+        } else if (kategorie === "karnevalabteilung") karneval++;
       }
       var fussballEl = document.getElementById("anzahl-fussball");
       if (fussballEl) fussballEl.textContent = zaehlungText(fussball, "Mannschaft", "Mannschaften");

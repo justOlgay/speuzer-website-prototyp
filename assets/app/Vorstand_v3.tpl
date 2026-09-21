@@ -539,8 +539,10 @@ svg { display: block; flex: 0 0 auto; }
     var telNummer = textFeld(person, "ansHandy") || textFeld(person, "ansTel");
     if (!mail && telNummer) aktionen.appendChild(baueAktion(telHref(telNummer), ICON_PHONE, "Anrufen"));
 
+    // WhatsApp nur ohne Mail-Adresse: private Handynummern bleiben sonst
+    // ueber die wa.me-Nummer sichtbar (QA-Befund, C2b).
     var whatsapp = textFeld(person, "ansWhatsApp");
-    if (whatsapp) {
+    if (!mail && whatsapp) {
       var ziffern = whatsapp.replace(/\D/g, "");
       aktionen.appendChild(baueAktion("https://wa.me/" + (ziffern || whatsapp), ICON_CHAT, "WhatsApp", true));
     }

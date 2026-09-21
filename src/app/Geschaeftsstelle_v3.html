@@ -186,7 +186,7 @@
   overflow-wrap: break-word;
 }
 
-.ansprechpartner-zeile .icon-knopf { flex: 0 0 auto; padding-inline: var(--sp-2); }
+.ansprechpartner-zeile .icon-knopf { flex: 0 0 auto; padding-inline: var(--sp-2); min-width: 44px; justify-content: center; }
 .ansprechpartner-zeile .icon-knopf span { display: none; }
 </style>
 
@@ -457,7 +457,7 @@
 
   function zeigeAnsprechpartner(zeilen, einstellungen) {
     if (einstellungen.ansActive !== true) return;
-    var aktive = zeilen.filter(function (p) { return p.ansActive !== false; }).slice().sort(vergleicheAnsprechpartner);
+    var aktive = zeilen.filter(function (p) { return p.ansActive !== false && textFeld(p, "ansName"); }).slice().sort(vergleicheAnsprechpartner);
     if (!aktive.length) return;
     var titel = document.getElementById("ansprechpartner-titel");
     var liste = document.getElementById("ansprechpartner-liste");
@@ -473,7 +473,7 @@
   var fehlerBereich = document.getElementById("fehler-bereich");
 
   Promise.all([
-    ladeWorkbook(EINSTELLUNGEN_ID, 1),
+    ladeWorkbook(EINSTELLUNGEN_ID, 1).catch(function () { return []; }),
     ladeWorkbook(BESCHREIBUNG_ID, 1).catch(function () { return null; }),
     ladeWorkbook(OEFFNUNGSZEITEN_ID, 1).catch(function () { return null; }),
     ladeWorkbook(KONTAKT_ID, 1).catch(function () { return null; }),
