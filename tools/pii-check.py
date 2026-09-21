@@ -31,6 +31,10 @@ WHITELIST_TELEFON = {
     # P8: dieselbe Platzwart-Nummer, wörtlich so in der App-Datenschutzerklärung
     # (data/datenschutz.json) geschrieben – "(0)" nach der Landesvorwahl.
     "+49 (0) 69 732193",
+    # W3: dieselbe Geschäftsstellen-Nummer, so wie sie die appack-Worksheet-API
+    # liefert (data/geschaeftsstelle.json, tools/appack-daten.mjs) – mit
+    # Bindestrich statt Leerzeichen.
+    "069-736868",
 }
 
 MUSTER_TELEFON_1 = re.compile(r"\+49[\d /()\-]{6,}")

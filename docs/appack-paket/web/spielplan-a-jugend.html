@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Spielplan A-Jugend – FFV Sportfreunde 04</title>
 <meta name="description" content="Spielplan der A-Jugend des FFV Sportfreunde 04 in der Saison 2026/27: Gruppenliga · AJGL Frankfurt, alle Termine, Kalender-Abo und Tabelle.">
-<link rel="canonical" href="https://justolgay.github.io/speuzer-website-prototyp/ws/spielplan-a-jugend.html">
+<link rel="canonical" href="https://cdn.appack.de/sportfreunde04/workspace/web/spielplan-a-jugend.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="FFV Sportfreunde 04">
 <meta property="og:title" content="Spielplan A-Jugend – FFV Sportfreunde 04">
 <meta property="og:description" content="Spielplan der A-Jugend des FFV Sportfreunde 04 in der Saison 2026/27: Gruppenliga · AJGL Frankfurt, alle Termine, Kalender-Abo und Tabelle.">
-<meta property="og:url" content="https://justolgay.github.io/speuzer-website-prototyp/ws/spielplan-a-jugend.html">
+<meta property="og:url" content="https://cdn.appack.de/sportfreunde04/workspace/web/spielplan-a-jugend.html">
 <meta property="og:image" content="https://justolgay.github.io/speuzer-website-prototyp/assets/og/standard.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#191793">
@@ -26,6 +26,7 @@
 <main id="inhalt">
 <section class="abschnitt seitenkopf">
   <div class="container">
+    <nav aria-label="Brotkrumen"><ol class="brotkrumen"><li><a href="spielplan.html">Spielplan &amp; Tabellen</a></li><li aria-hidden="true">›</li><li><span aria-current="page">A-Jugend</span></li></ol></nav>
     <p class="meta">Spielplan · Saison 2026/27</p>
     <h1>Spielplan A-Jugend</h1>
     <p class="seitenkopf__lead">Gruppenliga · AJGL Frankfurt · Meisterschaft, Kreispokal</p>
@@ -46,22 +47,14 @@
     <div class="zweispaltig">
       <div class="fluss">
     <h2>Spielplan der Saison</h2>
-    <iframe src="https://justolgay.github.io/speuzer-spielplan/app-a-jugend.html#A-Jugend" title="Spielplan A-Jugend (Generator, DFBnet)" loading="lazy" data-generator-iframe style="width:100%;height:640px;border:0;border-radius:var(--r-lg);display:block;"></iframe>
-    <p class="meta">Das nächste Spiel ist hervorgehoben.</p>
-    <p class="meta">Quelle: DFBnet, täglich aktualisiert. Tippen auf ein Spiel öffnet FUSSBALL.DE.</p>
-    <script>
-    (function () {
-      var iframe = document.querySelector('[data-generator-iframe]');
-      if (!iframe) return;
-      window.addEventListener('message', function (event) {
-        if (event.origin !== 'https://justolgay.github.io') return;
-        if (event.source !== iframe.contentWindow) return;
-        var h = event.data && event.data.speuzerHeight;
-        if (typeof h !== 'number' || h < 200 || h > 20000) return;
-        iframe.style.height = h + 'px';
-      });
-    })();
-    </script>
+    <div data-nur-appack>
+      <div class="fussballde-wrap">
+        <div class="fussballde_widget" data-id="7f1d494c-ad2d-47d0-bb61-f4f0106ac2c4" data-type="team-matches"></div>
+      </div>
+      <p class="meta fussballde-hinweis">Spiele seitlich wischbar</p>
+      <p class="meta">Live von FUSSBALL.DE (DFBnet): vergangene Spiele mit Ergebnis, kommende Spiele. Tippen öffnet die Spielseite.</p>
+    </div>
+    
   </div>
       <aside class="fluss">
     <div class="karte fluss">
@@ -73,7 +66,10 @@
     <div class="karte fluss">
       <h2 class="karte__titel">Tabelle</h2>
       <div data-nur-appack>
-        <div class="fussballde_widget" data-id="19b1dbfb-9aad-44d2-90bb-71b244f8ce70" data-type="table"></div>
+        <div class="fussballde-wrap">
+          <div class="fussballde_widget" data-id="19b1dbfb-9aad-44d2-90bb-71b244f8ce70" data-type="table"></div>
+        </div>
+        <p class="meta fussballde-hinweis">Tabelle seitlich wischbar</p>
       </div>
       
     </div>
@@ -93,7 +89,7 @@
 </section>
 <section class="abschnitt">
   <div class="container fluss">
-    <p><a href="spielplan.html">← Alle Spielpläne</a></p>
+    <p><a href="spielplan.html">‹ Zurück zu Spielplan & Tabellen</a></p>
   </div>
 </section>
 <script>

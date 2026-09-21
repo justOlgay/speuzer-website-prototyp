@@ -2,7 +2,7 @@
 // data/teams.json: Training, nächste Spiele, Ansprechpartner, Heimspiele,
 // Kalender-Abos, Verweis auf weitere Mannschaften derselben Gruppe.
 
-import { mailLink, jahrgangText, naechsteSpiele, spielZeile, trainingsZeilen } from "../../vorlagen/hilfen.mjs";
+import { mailLink, jahrgangText, naechsteSpiele, spielZeile, trainingsZeilen, brotkrume } from "../../vorlagen/hilfen.mjs";
 
 // Diese Seiten liegen immer unter "/mannschaften/<slug>/" (Tiefe 2), daher
 // immer "../../" (siehe pfadZurWurzel() in tools/build.mjs).
@@ -86,6 +86,7 @@ function beschreibung(team) {
 function seitenkopfAbschnitt(team) {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
+    ${brotkrume([{ text: "Mannschaften", href: `${PFAD}mannschaften/` }, { text: team.name }])}
     <p class="meta">Mannschaft · ${escapeHtml(team.gruppe ?? "")}</p>
     <h1>${escapeHtml(team.name)}</h1>
     <p class="seitenkopf__lead">${escapeHtml(jahrgangPraefix(team))} · ${escapeHtml(team.staffel ?? "")}</p>
@@ -123,6 +124,26 @@ function hauptspalte(team, daten) {
     ? `<a class="knopf knopf--sekundaer" href="${PFAD}tabellen/#${team.slug}">Tabelle</a>`
     : `<span class="meta">Im Kinderfußball gibt es keine Tabellen.</span>`;
 
+  // W3, Abschnitt 5/7 (Prüfer-Befund, Schwere "blocker"): die eingebackenen
+  // "Nächste Spiele" veralten ab dem ersten gespielten Termin. Im
+  // appack-Modus (Live-Website) ersetzt das FUSSBALL.DE-Widget "next-match"
+  // des Teams die Liste, wie schon auf spielplan-<team>.html; Teams ohne
+  // Widget (Kinderfußball F1, F2, G-Jugend) behalten die Liste in beiden
+  // Modi. Im Prototyp bleibt für alle Teams die eingefrorene Liste.
+  const spieleWidgetId = daten.widgets?.[team.slug]?.spiele ?? "";
+  const naechsteSpieleAbschnitt = spieleWidgetId
+    ? `<div data-nur-appack hidden>
+      <h2>Nächstes Spiel</h2>
+      <div class="fussballde_widget" data-id="${escapeHtml(spieleWidgetId)}" data-type="next-match"></div>
+      <p class="meta">Live von FUSSBALL.DE (DFBnet). Tippen öffnet die Spielseite.</p>
+    </div>
+    <div data-nur-prototyp>
+      <h2>Nächste Spiele</h2>
+      ${spieleHtml}
+    </div>`
+    : `<h2>Nächste Spiele</h2>
+    ${spieleHtml}`;
+
   return `<div class="fluss">
     <h2>Training</h2>
     ${sonderHinweis}
@@ -132,8 +153,7 @@ function hauptspalte(team, daten) {
     <div class="hinweis hinweis--info">
       <p style="margin:0;">${escapeHtml(verein.hinweise?.ferien ?? "")}</p>
     </div>
-    <h2>Nächste Spiele</h2>
-    ${spieleHtml}
+    ${naechsteSpieleAbschnitt}
     <p class="knopfzeile">
       <a class="knopf" href="${PFAD}spielplan/${team.slug}/">Spielplan ${escapeHtml(team.kurz)}</a>
       ${tabelleTeil}
@@ -219,7 +239,7 @@ function weitereMannschaftenAbschnitt(team, daten) {
   return `<section class="abschnitt">
   <div class="container fluss">
     ${weitereBlock}
-    <p><a href="${PFAD}mannschaften/">← Alle Mannschaften</a></p>
+    <p><a href="${PFAD}mannschaften/">‹ Zurück zu Mannschaften</a></p>
   </div>
 </section>`;
 }

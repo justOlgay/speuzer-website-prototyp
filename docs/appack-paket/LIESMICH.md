@@ -69,6 +69,33 @@ solange die appack-Vorlagen START/MENU/FOOTER nicht auf diesen Ordner
 umgestellt sind – bis dahin kann er ohne Wirkung auf die Live-Seite gelöscht
 oder neu hochgeladen werden.
 
+## Ausgeschlossen (W3)
+
+`styleguide.html` (interne Seite, "Interner Anhang für das
+Übernahmepaket", Momentaufnahme-Datum, Beispiel-Kontaktdaten) ist NICHT im
+Paket – `docs/ws/styleguide.html` bleibt nur lokal/auf GitHub Pages
+(Gestaltungssystem), `tools/appack-paket.mjs` nimmt sie aus der
+Dateiliste. Die gleichnamige Live-Datei im appack-Workspace (falls aus
+einem früheren Upload noch vorhanden) sollte geleert bzw. gelöscht werden –
+das macht der Verein im CMS.
+
+## Nur vmapit
+
+Diese Befunde betreffen die Hülle (appack-Vorlage "Microwebseite",
+vmapit/appack) selbst, nicht die hier gebauten Workspace-Seiten – sie sind
+hier nur dokumentiert (W3-Spezifikation Abschnitt 5), nicht umgesetzt:
+
+- Startseite der Hülle ohne Inhalt (nur Claim + Fußbereich).
+- Fester Rahmen 92`vh` für Inhaltsseiten (`#showFrame`), darunter sofort
+  der Hüllen-Fußbereich – kein Rahmen, der die Inhaltshöhe übernimmt.
+- Fußzeile: Impressum/Datenschutz öffnen in einem 40`vw`-Rahmen (1440px),
+  anderes Layout als alle Menüseiten.
+- Nicht ladende Stylesheets des appack-Terminmoduls
+  (`application.appack.de/appointment-module/…/preloading.css`,
+  `theme-light.css`, `layout.css`, HTTP 404) – appack melden.
+- Facebook-Link der Fußzeile zeigt auf eine andere Adresse als
+  `kontakt.html` (Worksheet-Pflege, macht der Auftraggeber im CMS).
+
 ## Dateien (38)
 
 - web/datenschutz.html
@@ -100,12 +127,12 @@ oder neu hochgeladen werden.
 - web/spielplan-g-jugend.html
 - web/spielplan-herren.html
 - web/spielplan.html
-- web/styleguide.html
 - web/tabellen.html
 - web/verein-downloads.html
 - web/verein-karneval.html
 - web/verein-mach-mit.html
 - web/verein-sponsoren.html
+- web/verein-ueber-uns.html
 - web/verein-vorstand.html
 - web/verein.html
 - web/site.css

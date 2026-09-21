@@ -55,7 +55,7 @@ function angabenAbschnitt(daten) {
       <dd><p style="margin:0;">${mailLink(verein.mail ?? "geschaeftsstelle@sportfreunde04.de")}</p></dd>
 
       <dt>Webseite</dt>
-      <dd>www.sportfreunde04.de<br><span class="meta">derzeit Weiterleitung auf die Vereins-App</span></dd>
+      <dd>www.sportfreunde04.de</dd>
 
       <dt>Vertretungsberechtigter Vorstand</dt>
       <dd>

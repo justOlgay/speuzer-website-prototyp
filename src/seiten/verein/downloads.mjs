@@ -1,6 +1,8 @@
 // Downloads /verein/downloads/ (P5) – Gruppen aus data/downloads.json in
 // fester Reihenfolge (Anmeldung, Verein, Kinder- und Jugendschutz).
 
+import { brotkrume, ruecklinkAbschnitt } from "../../vorlagen/hilfen.mjs";
+
 // Diese Seite liegt immer unter "/verein/downloads/" (Tiefe 2), daher immer
 // "../../" (siehe pfadZurWurzel() in tools/build.mjs).
 const PFAD = "../../";
@@ -16,13 +18,14 @@ function escapeHtml(text) {
 }
 
 // Titel als Link, darunter .meta "PDF · {seiten} Seiten · {kb} KB" (fehlende
-// Werte weggelassen; das Feld "hinweis" wird nie ausgegeben). Interne Ziele
-// (Pfad beginnt mit "/") ohne target/rel; externe (cdn.appack.de) mit
-// target="_blank" rel="noopener" und zusätzlicher .meta-Zeile.
+// Werte weggelassen; das Feld "hinweis" wird nie ausgegeben). W3, Abschnitt
+// 7: alle PDF-Links öffnen in einem neuen Fenster (target="_blank"
+// rel="noopener"), unabhängig davon, ob intern oder auf cdn.appack.de – die
+// bisherige Extra-Zeile "öffnet cdn.appack.de" entfällt (Serverkunde für
+// Besucher, siehe hinweisAbschnitt() unten für den ersetzenden Hinweis).
 function downloadZeile(eintrag) {
   const istIntern = (eintrag.datei ?? "").startsWith("/");
   const href = istIntern ? PFAD + eintrag.datei.replace(/^\//, "") : eintrag.datei;
-  const attrs = istIntern ? "" : ' rel="noopener" target="_blank"';
 
   const teile = ["PDF"];
   // Singular/Plural (P5-Korrektur A2): "1 Seite" statt "1 Seiten".
@@ -30,19 +33,17 @@ function downloadZeile(eintrag) {
   if (eintrag.kb) teile.push(`${eintrag.kb} KB`);
   const metaText = teile.join(" · ");
 
-  const externMeta = istIntern ? "" : `<span class="meta">öffnet cdn.appack.de</span>`;
-
   return `<li class="download">
-      <a href="${escapeHtml(href)}"${attrs}>${escapeHtml(eintrag.titel)}</a>
+      <a href="${escapeHtml(href)}" target="_blank" rel="noopener">${escapeHtml(eintrag.titel)}</a>
       <span class="meta">${escapeHtml(metaText)}</span>
-      ${externMeta}
     </li>`;
 }
 
 function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
-    <h1>Downloads</h1>
+    ${brotkrume([{ text: "Verein", href: `${PFAD}verein/` }, { text: "Downloads & Anträge" }])}
+    <h1>Downloads &amp; Anträge</h1>
     <p class="seitenkopf__lead">Satzung, Beiträge, Anmeldung und Schutzkonzept als PDF.</p>
   </div>
 </section>`;
@@ -68,7 +69,7 @@ function hinweisAbschnitt() {
   return `<section class="abschnitt">
   <div class="container">
     <div class="hinweis hinweis--info">
-      <p style="margin:0;">Die Dokumente liegen auf dem Server der Vereins-App (cdn.appack.de) und öffnen sich als PDF.</p>
+      <p style="margin:0;">Alle Dokumente öffnen sich als PDF in einem neuen Fenster.</p>
     </div>
   </div>
 </section>`;
@@ -81,13 +82,14 @@ export function seite(daten) {
     seitenkopfAbschnitt(),
     ...GRUPPEN_REIHENFOLGE.map((g, i) => gruppenAbschnitt(g, downloads, i)),
     hinweisAbschnitt(),
+    ruecklinkAbschnitt(`${PFAD}verein/`, "Verein"),
   ].join("\n");
 
   return {
     url: "/verein/downloads/",
-    title: "Downloads",
+    title: "Downloads & Anträge",
     description:
-      "Downloads des FFV Sportfreunde 04: Aufnahmeantrag, Beitragsübersicht, Satzung 2025, Präventions- und Schutzkonzept, Vereinsphilosophie und Chronik als PDF.",
+      "Downloads & Anträge des FFV Sportfreunde 04: Aufnahmeantrag, Beitragsübersicht, Satzung 2025, Präventions- und Schutzkonzept, Vereinsphilosophie und Chronik als PDF.",
     inhalt,
   };
 }

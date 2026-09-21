@@ -174,6 +174,44 @@
 }
 
 /* ==========================================================================
+   Brotkrumen (W3) – oben im Seitenkopf jeder Unterseite ("Verein ›
+   Vorstand & Kontakt"), Pfeil-Glyph "›" statt Emoji. Eigene Zeile über dem
+   h1, kein zusätzliches Tippziel-Raster nötig (reiner Fließtext-Link).
+   ========================================================================== */
+
+.brotkrumen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+  margin: 0 0 var(--sp-3);
+  padding: 0;
+  list-style: none;
+}
+
+.brotkrumen li {
+  display: flex;
+  align-items: center;
+}
+
+.brotkrumen a {
+  color: var(--ink-3);
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+}
+
+.brotkrumen a:hover,
+.brotkrumen a:focus-visible {
+  color: var(--blau-700);
+  text-decoration-color: currentColor;
+}
+
+.brotkrumen [aria-current="page"] {
+  color: var(--ink-2);
+}
+
+/* ==========================================================================
    Inhaltsverzeichnis (P9-Korrektur A3) – /datenschutz/: lief vorher über die
    volle Containerbreite, während der Text darunter auf .inhalt (720px)
    eingerückt war (siehe .container.inhalt in datenschutz.mjs). Ohne eigene
@@ -345,6 +383,89 @@
   font-size: var(--fs-sm);
   color: var(--blau-700);
   text-align: right;
+}
+
+/* ==========================================================================
+   Abteilungs-Karte (W3, /verein/) – zwei Karten "Fußball" und "Karneval" im
+   Verein-Verteiler, Icon (Raute, wie src/appkonzept/bildschirme.mjs) + Titel
+   + Untertitel. Nutzt .raster--2 (2 Spalten ab ~640px, siehe dort).
+   ========================================================================== */
+
+.karte--abteilung {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-2);
+}
+
+.karte--abteilung svg {
+  width: 32px;
+  height: 32px;
+  color: var(--blau-700);
+}
+
+.karte--abteilung .karte__titel {
+  margin: 0;
+}
+
+.karte--abteilung .karte__meta {
+  display: block;
+}
+
+/* ==========================================================================
+   Listenzeile (W3, ".zeile") – Baustein für Verteiler-Listen ("Der Verein"
+   auf /verein/): Titel, Untertitel, Pfeil. Gleiche Maße wie im App-Konzept
+   (assets/css/app-konzept.css, gleicher Klassenname) – Tokens hier aus
+   tokens.css statt der App-Konzept-eigenen Werte, ≥56px Zeilenhöhe, das
+   ganze <a> ist das Tippziel (≥44px).
+   ========================================================================== */
+
+.zeile {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 56px;
+  padding-block: var(--sp-2);
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+}
+
+.zeile:last-child {
+  border-bottom: none;
+}
+
+.zeile:hover .zeile__titel {
+  color: var(--blau-700);
+}
+
+.zeile__text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.zeile__titel {
+  display: block;
+  font-weight: 600;
+  overflow-wrap: break-word;
+}
+
+.zeile__untertitel {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+  overflow-wrap: break-word;
+}
+
+.zeile__pfeil {
+  flex: 0 0 auto;
+  color: var(--ink-3);
+}
+
+.zeilen-liste {
+  display: flex;
+  flex-direction: column;
 }
 
 /* ==========================================================================
@@ -834,6 +955,15 @@
 .zweispaltig {
   display: grid;
   gap: var(--sp-7);
+}
+
+/* W3: ohne min-width:0 wachsen Grid-Spalten auf die intrinsische
+   Mindestbreite ihres Inhalts (min-content) – ein FUSSBALL.DE-Widget mit
+   fester Mindestbreite (.fussballde-wrap, siehe dort) hätte sonst die ganze
+   Seite bei 390px horizontal aufgerissen, statt nur innerhalb seines eigenen
+   overflow-x:auto-Wrappers seitlich zu scrollen. */
+.zweispaltig > * {
+  min-width: 0;
 }
 
 @media (min-width: 1024px) {
@@ -1699,5 +1829,71 @@ body.datenschutz h2 {
     flex-direction: row;
     justify-content: center;
     align-items: flex-start;
+  }
+}
+
+/* ==========================================================================
+   FUSSBALL.DE-Widget-Container (W3) – Tabellen- und Spiele-Widgets skalieren
+   nicht selbst (scrolling="no" im Widget-iframe, siehe Prüfer-Befund); ein
+   Wrapper mit overflow-x:auto und Mindestbreite macht sie wenigstens seitlich
+   wischbar, dazu ein Kurzhinweis unter 640px. Für hoch werdende Widgets
+   (club-matches auf /spielplan/) zusätzlich .fussballde-wrap--hoch mit
+   max-height + overflow-y:auto (kein 500px-Leerraum mehr unter dem Inhalt).
+   ========================================================================== */
+
+.fussballde-wrap {
+  overflow-x: auto;
+  min-width: 0;
+}
+
+.fussballde-wrap .fussballde_widget {
+  min-width: 420px;
+}
+
+.fussballde-wrap--hoch {
+  max-height: 720px;
+  overflow-y: auto;
+}
+
+.fussballde-hinweis {
+  display: none;
+  margin: var(--sp-2) 0 0;
+}
+
+@media (max-width: 639.98px) {
+  .fussballde-hinweis {
+    display: block;
+  }
+}
+
+/* ==========================================================================
+   Beitragstabelle unter 480px (W3, /mitglied-werden/) – Kopfzeilen "mtl."/
+   "jährl." statt ausgeschriebener Wörter, kleinere Schrift, damit der
+   Jahreswert nie abgeschnitten wird (Prüfer-Befund: "JÄHR"/"1…").
+   ========================================================================== */
+
+@media (max-width: 479.98px) {
+  .beitragstabelle th,
+  .beitragstabelle td {
+    padding: var(--sp-2);
+    font-size: var(--fs-sm);
+  }
+
+  .beitragstabelle .beitragstabelle__kurz {
+    display: inline;
+  }
+
+  .beitragstabelle .beitragstabelle__lang {
+    display: none;
+  }
+}
+
+.beitragstabelle__kurz {
+  display: none;
+}
+
+@media (min-width: 480px) {
+  .beitragstabelle__lang {
+    display: inline;
   }
 }

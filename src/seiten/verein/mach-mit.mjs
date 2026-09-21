@@ -1,11 +1,19 @@
 // Mach mit /verein/mach-mit/ (P5) – Aufruf zu ehrenamtlichem Engagement,
-// Text von der Live-Seite übernommen (ohne Emojis). Diese Seite verlinkt
-// weder Bilder noch andere interne Seiten, daher kein PFAD-Konstante nötig
-// (siehe pfadZurWurzel() in tools/build.mjs für Seiten, die eine brauchen).
+// Text von der Live-Seite übernommen (ohne Emojis). W3, Abschnitt 7: je
+// Karte ein Satz (statt leerer Platzhalter) und Links zu Mannschaften und
+// Vorstand & Kontakt, dafür jetzt PFAD nötig (siehe pfadZurWurzel() in
+// tools/build.mjs).
+
+import { brotkrume, ruecklinkAbschnitt } from "../../vorlagen/hilfen.mjs";
+
+// Diese Seite liegt immer unter "/verein/mach-mit/" (Tiefe 2), daher immer
+// "../../" (siehe pfadZurWurzel() in tools/build.mjs).
+const PFAD = "../../";
 
 function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
+    ${brotkrume([{ text: "Verein", href: `${PFAD}verein/` }, { text: "Mach mit" }])}
     <h1>Mach mit</h1>
     <p class="seitenkopf__lead">Wir brauchen Dich! Werde Teil unseres Vereins-Teams.</p>
   </div>
@@ -17,20 +25,28 @@ function einleitungAbschnitt() {
   <div class="container fluss">
     <p class="inhalt">Liebe Vereinsmitglieder, Eltern und Freunde des Vereins, ein Verein lebt nicht nur vom Sport auf dem Platz, sondern vor allem von den Menschen dahinter. Damit wir auch in Zukunft unseren Kindern, Jugendlichen und Erwachsenen ein attraktives Vereinsleben bieten können, suchen wir engagierte Unterstützung.</p>
     <div class="raster raster--4">
-      <div class="karte">
+      <div class="karte fluss">
         <span class="karte__titel">Trainer</span>
+        <p>Jugendteams von der G- bis zur A-Jugend; eine Lizenz ist keine Voraussetzung, der Verein unterstützt die Ausbildung.</p>
       </div>
-      <div class="karte">
+      <div class="karte fluss">
         <span class="karte__titel">Betreuer</span>
+        <p>Spieltage begleiten, Eltern koordinieren, Trikots und Getränke im Blick.</p>
       </div>
-      <div class="karte">
+      <div class="karte fluss">
         <span class="karte__titel">Vorstand</span>
+        <p>Mitarbeit in Ausschüssen und Projekten, Wahl in der Mitgliederversammlung.</p>
       </div>
-      <div class="karte">
-        <span class="karte__titel">Ehrenamt mit Herz</span>
+      <div class="karte fluss">
+        <span class="karte__titel">Helfer</span>
+        <p>Arbeitstage, Turniere, Feste – jede Hand zählt.</p>
       </div>
     </div>
     <p class="inhalt">Du musst kein Profi sein. Wichtig sind vor allem Freude am Vereinsleben, Teamgeist und die Bereitschaft, sich einzubringen. Ob regelmäßig oder gelegentlich, jede helfende Hand ist wertvoll und trägt dazu bei, unseren Verein weiterzuentwickeln. Gemeinsam können wir dafür sorgen, dass unser Verein auch in Zukunft ein Ort für Sport, Gemeinschaft und Freundschaft bleibt.</p>
+    <p class="knopfzeile">
+      <a class="knopf knopf--sekundaer" href="${PFAD}mannschaften/">Zu den Mannschaften</a>
+      <a class="knopf knopf--sekundaer" href="${PFAD}verein/vorstand/">Zum Vorstand &amp; Kontakt</a>
+    </p>
   </div>
 </section>`;
 }
@@ -48,7 +64,12 @@ function aufrufAbschnitt() {
 }
 
 export function seite() {
-  const inhalt = [seitenkopfAbschnitt(), einleitungAbschnitt(), aufrufAbschnitt()].join("\n");
+  const inhalt = [
+    seitenkopfAbschnitt(),
+    einleitungAbschnitt(),
+    aufrufAbschnitt(),
+    ruecklinkAbschnitt(`${PFAD}verein/`, "Verein"),
+  ].join("\n");
 
   return {
     url: "/verein/mach-mit/",

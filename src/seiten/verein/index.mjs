@@ -1,11 +1,15 @@
-// Verein-Übersicht /verein/ (P5) – "Wer wir sind": Vereinsgeschichte, Zahlen,
-// Kinderschutz und ein Raster mit Links auf die weiteren Verein-Unterseiten.
+// Verein-Verteiler /verein/ (W3) – "aus einem Guss" mit der App: zwei
+// Abteilungskarten (Fußball, Karneval) und darunter die Liste "Der Verein" in
+// exakt der App-Reihenfolge (Verein_v3, src/app/Verein_v3.html), plus die
+// zwei Website-Zusätze "Mach mit · Ehrenamt" und "Fanshop & Teamshop" am
+// Ende (W3-Spezifikation Abschnitt 1 und 7). Der bisherige Seiteninhalt
+// (Wer wir sind, Zahlen, Kinderschutz) ist vollständig nach
+// /verein/ueber-uns/ umgezogen (src/seiten/verein/ueber-uns.mjs) – hier
+// nichts gelöscht, nur verschoben.
 
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { bild } from "../../vorlagen/bild.mjs";
-import { mailLink } from "../../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/verein/" (Tiefe 1), daher immer "../"
 // (siehe pfadZurWurzel() in tools/build.mjs).
@@ -13,8 +17,10 @@ const PFAD = "../";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 
-function liesWappenBlau() {
-  return readFileSync(path.join(ROOT, "assets", "logo", "wappen-blau.svg"), "utf8");
+function liesVereinIcon() {
+  // Verein-Icon wie im Klick-Prototyp (src/appkonzept/bildschirme.mjs,
+  // ICON.verein): SVG-Raute, viewBox 0 0 24 24, stroke currentColor.
+  return `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 20 12 12 21 4 12z"/></svg>`;
 }
 
 function escapeHtml(text) {
@@ -25,187 +31,90 @@ function escapeHtml(text) {
     .replaceAll('"', "&quot;");
 }
 
-// Platzhalter für Seiten, die im aktuellen Paket noch nicht existieren –
-// gleiches Muster wie header.mjs/footer.mjs (siehe navigation.mjs). Hier als
-// ganze .karte--link, wie im Styleguide-Beispiel (P1/P2) vorgezeichnet.
-function baldKarte(titel, meta) {
-  return `<span class="karte karte--link" aria-disabled="true" title="Seite folgt">
-      <span class="karte__titel">${escapeHtml(titel)}</span>
-      <span class="karte__meta">${escapeHtml(meta)}</span>
-    </span>`;
-}
-
-function linkKarte(titel, meta, ziel) {
-  return `<a class="karte karte--link" href="${ziel}">
-      <span class="karte__titel">${escapeHtml(titel)}</span>
-      <span class="karte__meta">${escapeHtml(meta)}</span>
-    </a>`;
-}
-
-// Personen-Karte (Kinderschutzbeauftragter) – mit Foto oder Wappen-Platzhalter
-// bei --blau-100 (siehe .person__bild--platzhalter in komponenten.css).
-// prioritaet:true fest (P11, Plan-Abschnitt B3: "die Personen-Karte
-// Kinderschutz auf /verein/" – die einzige Personen-Karte dieser Seite).
-function personKarte(person, daten) {
-  const bildHtml = person?.foto
-    ? bild({
-        pfad: PFAD,
-        daten,
-        name: person.foto.quelle,
-        alt: person.name ? `Porträt ${person.name}` : "",
-        sizes: "(min-width: 640px) 260px, 50vw",
-        klasse: "person__bild",
-        prioritaet: true,
-      })
-    : `<span class="person__bild person__bild--platzhalter" aria-hidden="true">${liesWappenBlau()}</span>`;
-  const nameHtml = person?.name ? escapeHtml(person.name) : "derzeit nicht besetzt";
-  const mailHtml = person?.mail ? `<p class="person__mail">${mailLink(person.mail)}</p>` : "";
-
-  return `<div class="person" style="max-width:260px;">
-      ${bildHtml}
-      <p class="person__name">${nameHtml}</p>
-      <p class="person__funktion">${escapeHtml(person?.funktion ?? "")}</p>
-      ${mailHtml}
-    </div>`;
-}
-
-// Download-Eintrag per Titel-Teilstring finden (data/downloads.json).
-function downloadEintrag(daten, titelTeil) {
-  return (daten.downloads ?? []).find((d) => (d.titel ?? "").includes(titelTeil));
-}
-
-// Link auf einen Download-Eintrag: intern (Pfad beginnt mit "/") ohne
-// target/rel, extern (cdn.appack.de) mit rel="noopener" target="_blank".
-function downloadKnopf(eintrag, text) {
-  if (!eintrag) return "";
-  const istIntern = (eintrag.datei ?? "").startsWith("/");
-  const href = istIntern ? PFAD + eintrag.datei.replace(/^\//, "") : eintrag.datei;
-  const attrs = istIntern ? "" : ' rel="noopener" target="_blank"';
-  return `<a class="knopf knopf--sekundaer" href="${escapeHtml(href)}"${attrs}>${escapeHtml(text)}</a>`;
-}
-
 // ---------- Seitenkopf ----------
 
 function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
-    <h1>Wer wir sind</h1>
+    <h1>Verein</h1>
     <p class="seitenkopf__lead">Frankfurter Fußballverein Sportfreunde 1904 e.V. – im Gallus sagt man einfach „die Speuzer“.</p>
   </div>
 </section>`;
 }
 
-// ---------- Geschichte/Werte (drei Absätze) ----------
+// ---------- Abteilungen (zwei Karten, wie im App-Konzept) ----------
 
-function geschichteAbschnitt(daten) {
-  const philosophie = downloadEintrag(daten, "Vereinsphilosophie");
-  const chronik = downloadEintrag(daten, "Chronik");
-
-  return `<section class="abschnitt">
-  <div class="container fluss">
-    <p class="inhalt">Gegründet wurde der Verein am 15. Mai 1904 als Frankfurter FC Britannia. Nach dem Ersten Weltkrieg erhielt er 1919 seinen heutigen Namen. Der sportliche Höhepunkt war die Saison 1955/56 in der 1. Amateurliga Hessen; seit den 1960er Jahren spielen die Sportfreunde in den Klassen des Fußballkreises Frankfurt.</p>
-    <p class="inhalt">Heute stellt der Verein elf Fußballmannschaften – von der 1. Herrenmannschaft bis zur G-Jugend – und die Karnevalabteilung „Die Schnauzer“ mit fünf Gruppen. Trainiert und gespielt wird auf dem eigenen Platz an der Mainzer Landstraße 480; die Herren tragen ihre Heimspiele auf der Anlage am Rebstock aus.</p>
-    <p class="inhalt">Unser Leitsatz aus der Vereinsphilosophie: „Wir wollen nicht nur erfolgreiche Mannschaften entwickeln, sondern erfolgreiche Menschen und einen starken Verein für kommende Generationen.“ Unsere Werte sind Gemeinschaft, Respekt, Wertschätzung, Verantwortung, Fairness, Entwicklung und Kinderschutz.</p>
-    <p class="knopfzeile">
-      ${downloadKnopf(philosophie, "Vereinsphilosophie lesen (PDF, 50 Seiten)")}
-      ${downloadKnopf(chronik, "Chronik (PDF, 27 Seiten)")}
-    </p>
-  </div>
-</section>`;
+function abteilungKarte(titel, untertitel, ziel) {
+  return `<a class="karte karte--link karte--abteilung" href="${ziel}">
+      ${liesVereinIcon()}
+      <span class="karte__titel">${escapeHtml(titel)}</span>
+      <span class="karte__meta">${escapeHtml(untertitel)}</span>
+    </a>`;
 }
 
-// ---------- Zahlen ----------
-
-function zahlenAbschnitt() {
-  const zahlen = [
-    ["1904", "gegründet"],
-    ["11", "Fußballmannschaften"],
-    ["5", "Karnevalgruppen"],
-    ["2", "Abteilungen"],
-  ];
-  const kacheln = zahlen
-    .map(
-      ([wert, label]) => `<div class="zahl">
-        <span class="zahl__wert">${escapeHtml(wert)}</span>
-        <span class="zahl__label">${escapeHtml(label)}</span>
-      </div>`
-    )
-    .join("\n      ");
-
-  return `<section class="abschnitt--blau abschnitt">
-  <div class="container fluss">
-    <h2>Der Verein in Zahlen</h2>
-    <div class="raster raster--4">
-      ${kacheln}
-    </div>
-  </div>
-</section>`;
-}
-
-// ---------- Kinderschutz ----------
-
-function kinderschutzAbschnitt(daten) {
-  const beauftragter = (daten.vorstand ?? []).find((p) => p.funktion === "Kinderschutzbeauftragter");
-  const konzept = downloadEintrag(daten, "Präventions- und Schutzkonzept");
-
-  return `<section class="abschnitt--hell abschnitt">
-  <div class="container fluss">
-    <h2>Kinderschutz</h2>
-    <p class="inhalt">Das Wohl von Kindern und Jugendlichen steht für uns über allem. Unser Präventions- und Schutzkonzept sowie die Vorgaben von HFV und DFB bilden den verbindlichen Rahmen.</p>
-    ${personKarte(beauftragter, daten)}
-    <p class="knopfzeile">
-      ${downloadKnopf(konzept, "Präventions- und Schutzkonzept (PDF)")}
-    </p>
-  </div>
-</section>`;
-}
-
-// ---------- Mehr über den Verein ----------
-
-function mehrAbschnitt() {
+function abteilungenAbschnitt() {
   const karten = [
-    linkKarte("Vorstand", "Wer den Verein führt – mit Funktion und Vereinsmail.", `${PFAD}verein/vorstand/`),
-    linkKarte("Sponsoren & Partner", "Wer uns unterstützt – und wie Sie Sponsor werden.", `${PFAD}verein/sponsoren/`),
-    linkKarte("Mach mit", "Trainer, Betreuer, Vorstand, Ehrenamt – wir suchen Verstärkung.", `${PFAD}verein/mach-mit/`),
-    linkKarte("Karnevalabteilung", "Die Schnauzer: fünf Gruppen, eine Bühne.", `${PFAD}verein/karneval/`),
-    linkKarte("Downloads", "Satzung, Beiträge, Anmeldung, Schutzkonzept.", `${PFAD}verein/downloads/`),
-    // P8: /kontakt/ existiert jetzt – echter Link statt baldKarte().
-    // P15: Meta-Text wörtlich aus der Spezifikation ersetzt.
-    linkKarte("Kontakt & Anfahrt", "Adressen nach Anliegen, Platz, Anfahrt", `${PFAD}kontakt/`),
-    // P15: Shop-Karte ergänzt, damit die Seite Karten zu allen Unterseiten hat.
-    linkKarte("Shop", "Fanshop und Teamshop", `${PFAD}shop/`),
+    abteilungKarte("Fußball", "11 Mannschaften, Herren bis G-Jugend", `${PFAD}mannschaften/`),
+    abteilungKarte("Karneval", "Die Schnauzer · 5 Gruppen", `${PFAD}verein/karneval/`),
   ].join("\n    ");
 
   return `<section class="abschnitt">
   <div class="container fluss">
-    <h2>Mehr über den Verein</h2>
-    <div class="raster raster--3">
+    <h2>Abteilungen</h2>
+    <div class="raster raster--2">
     ${karten}
     </div>
   </div>
 </section>`;
 }
 
-export function seite(daten) {
-  const inhalt = [
-    seitenkopfAbschnitt(),
-    geschichteAbschnitt(daten),
-    zahlenAbschnitt(),
-    kinderschutzAbschnitt(daten),
-    mehrAbschnitt(),
-  ].join("\n");
+// ---------- Der Verein (Listenzeilen, App-Reihenfolge) ----------
+
+function zeile(titel, untertitel, ziel) {
+  return `<a class="zeile" href="${ziel}">
+      <span class="zeile__text">
+        <span class="zeile__titel">${escapeHtml(titel)}</span>
+        <span class="zeile__untertitel">${escapeHtml(untertitel)}</span>
+      </span>
+      <svg class="zeile__pfeil" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+    </a>`;
+}
+
+function derVereinAbschnitt() {
+  // Reihenfolge und Wortlaut exakt wie in der App (Verein_v3,
+  // src/app/Verein_v3.html), siehe W3-Spezifikation Abschnitt 1. Die beiden
+  // Website-Zusätze am Ende (Abschnitt 7, verbindliche Entscheidung) sind in
+  // der App noch nicht vorhanden.
+  const zeilen = [
+    zeile("Vorstand & Kontakt", "Wer den Verein führt, wen du erreichst", `${PFAD}verein/vorstand/`),
+    zeile("Mitglied werden", "Beiträge, Ablauf, Antrag", `${PFAD}mitglied-werden/`),
+    zeile("Sponsoren & Partner", "Wer uns unterstützt", `${PFAD}verein/sponsoren/`),
+    zeile("Downloads & Anträge", "Satzung, Beiträge, Bescheinigungen", `${PFAD}verein/downloads/`),
+    zeile("Spielplan & Tabellen", "Alle Mannschaften auf einen Blick", `${PFAD}spielplan/`),
+    zeile("Über uns", "Seit 1904 im Gallus", `${PFAD}verein/ueber-uns/`),
+    zeile("Geschäftsstelle & Anfahrt", "Öffnungszeiten, Adresse, Zugang", `${PFAD}kontakt/`),
+    zeile("Mach mit · Ehrenamt", "Trainer, Betreuer, Vorstand, Helfer", `${PFAD}verein/mach-mit/`),
+    zeile("Fanshop & Teamshop", "Fanartikel und Teamausstattung", `${PFAD}shop/`),
+  ].join("\n    ");
+
+  return `<section class="abschnitt--hell abschnitt">
+  <div class="container fluss">
+    <h2>Der Verein</h2>
+    <div class="zeilen-liste">
+    ${zeilen}
+    </div>
+  </div>
+</section>`;
+}
+
+export function seite() {
+  const inhalt = [seitenkopfAbschnitt(), abteilungenAbschnitt(), derVereinAbschnitt()].join("\n");
 
   return {
     url: "/verein/",
     title: "Verein",
-    // Wörtlicher Plan-Text hat 184 Zeichen (Gate in tools/pruefen.mjs: max.
-    // 170) – kleinstmögliche Korrektur nach dem Muster von P2 (siehe
-    // src/seiten/index.mjs): "Wer die Sportfreunde 04 sind:" zu
-    // "Sportfreunde 04:" gekürzt und abschließenden Punkt entfernt (170
-    // Zeichen), Wortlaut sonst unverändert. Siehe Abschlussbericht,
-    // Abschnitt „Abweichungen“.
     description:
-      "Sportfreunde 04: seit 1904 im Frankfurter Gallus, elf Fußballmannschaften, Karnevalabteilung Die Schnauzer, Werte und Kinderschutz – mit Vorstand, Sponsoren und Downloads",
+      "Verein-Verteiler des FFV Sportfreunde 04: Fußball, Karneval, Vorstand & Kontakt, Mitglied werden, Sponsoren, Downloads, Spielplan & Tabellen, Über uns, Geschäftsstelle",
     inhalt,
   };
 }

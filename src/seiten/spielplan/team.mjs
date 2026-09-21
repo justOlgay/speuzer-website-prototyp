@@ -8,6 +8,7 @@ import {
   wettbewerbTag,
   naechsteSpiele,
   FUSSBALLDE_WIDGET_LADER,
+  brotkrume,
 } from "../../vorlagen/hilfen.mjs";
 
 // Diese Seiten liegen immer unter "/spielplan/<slug>/" (Tiefe 2), daher immer
@@ -60,6 +61,7 @@ function beschreibung(team) {
 function seitenkopfAbschnitt(team) {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
+    ${brotkrume([{ text: "Spielplan & Tabellen", href: `${PFAD}spielplan/` }, { text: team.name }])}
     <p class="meta">Spielplan · Saison 2026/27</p>
     <h1>Spielplan ${escapeHtml(team.name)}</h1>
     <p class="seitenkopf__lead">${escapeHtml(team.staffel ?? "")} · ${escapeHtml(team.spielbetrieb ?? "")}</p>
@@ -173,13 +175,15 @@ const GRUPPE_JE_TEAM = {
 
 const GENERATOR_BASIS = "https://justolgay.github.io/speuzer-spielplan/";
 
-// W2: "Ganze Saison" ist in BEIDEN Ausgabemodi (Prototyp und appack) ein
-// <iframe> auf die Gruppen-Seite des Spielplan-Generators – keine
-// eingefrorenen Daten mehr, daher kein data-nur-appack/data-nur-prototyp an
-// dieser Stelle. Ohne Team-Vorauswahl im Generator (siehe oben) nennt der
-// Hinweistext die anderen Teams der Gruppe als Geschwister, statt "Tab X
-// wählen" zu schreiben.
-function ganzeSaisonAbschnitt(team, daten) {
+// W3, Abschnitt 3: im appack-Modus (Live-Website) zeigt "Spielplan der
+// Saison" bei Teams mit FUSSBALL.DE-Widget (alle außer F1, F2, G-Jugend –
+// Kinderfußball, dort gibt es kein Widget) das Widget "team-matches"
+// (vergangene Spiele mit Ergebnis, kommende Spiele, live) statt des
+// Generator-iframes; im Prototyp-Modus bleibt für alle Teams der
+// Generator-iframe (Widgets laden auf GitHub Pages nicht). Ohne
+// Team-Vorauswahl im Generator nennt der Hinweistext die anderen Teams der
+// Gruppe als Geschwister, statt "Tab X wählen" zu schreiben.
+function generatorIframe(team, daten) {
   const gruppe = GRUPPE_JE_TEAM[team.slug];
   // Team-Vorauswahl des Generators (seit 21.09.2026): #<Reiter> öffnet den Reiter des Teams.
   const reiter = daten.widgets?.[team.slug]?.reiter ?? "";
@@ -193,9 +197,7 @@ function ganzeSaisonAbschnitt(team, daten) {
         )}). Das nächste Spiel ist hervorgehoben.</p>`
       : `<p class="meta">Das nächste Spiel ist hervorgehoben.</p>`;
 
-  return `<div class="fluss">
-    <h2>Spielplan der Saison</h2>
-    <iframe src="${escapeHtml(generatorUrl)}" title="${escapeHtml(`Spielplan ${team.name} (Generator, DFBnet)`)}" loading="lazy" data-generator-iframe style="width:100%;height:640px;border:0;border-radius:var(--r-lg);display:block;"></iframe>
+  return `<iframe src="${escapeHtml(generatorUrl)}" title="${escapeHtml(`Spielplan ${team.name} (Generator, DFBnet)`)}" loading="lazy" data-generator-iframe style="width:100%;height:640px;border:0;border-radius:var(--r-lg);display:block;"></iframe>
     ${geschwisterHinweis}
     <p class="meta">Quelle: DFBnet, täglich aktualisiert. Tippen auf ein Spiel öffnet FUSSBALL.DE.</p>
     <script>
@@ -210,7 +212,34 @@ function ganzeSaisonAbschnitt(team, daten) {
         iframe.style.height = h + 'px';
       });
     })();
-    </script>
+    </script>`;
+}
+
+function ganzeSaisonAbschnitt(team, daten) {
+  const spieleWidgetId = daten.widgets?.[team.slug]?.spiele ?? "";
+  const iframeHtml = generatorIframe(team, daten);
+
+  if (!spieleWidgetId) {
+    // Kinderfußball (F1, F2, G-Jugend): kein FUSSBALL.DE-Widget, Generator in
+    // beiden Modi.
+    return `<div class="fluss">
+    <h2>Spielplan der Saison</h2>
+    ${iframeHtml}
+  </div>`;
+  }
+
+  return `<div class="fluss">
+    <h2>Spielplan der Saison</h2>
+    <div data-nur-appack hidden>
+      <div class="fussballde-wrap">
+        <div class="fussballde_widget" data-id="${escapeHtml(spieleWidgetId)}" data-type="team-matches"></div>
+      </div>
+      <p class="meta fussballde-hinweis">Spiele seitlich wischbar</p>
+      <p class="meta">Live von FUSSBALL.DE (DFBnet): vergangene Spiele mit Ergebnis, kommende Spiele. Tippen öffnet die Spielseite.</p>
+    </div>
+    <div data-nur-prototyp>
+      ${iframeHtml}
+    </div>
   </div>`;
 }
 
@@ -234,11 +263,23 @@ function seitenspalte(team, daten) {
   const tabelleEintrag = daten.tabellen?.teams?.[team.slug];
   const eigene = tabelleEintrag?.zeilen?.find((z) => z.eigene);
   const tabelleWidgetId = daten.widgets?.[team.slug]?.tabelle ?? "";
+  // W3, Abschnitt 7 (verbindliche Entscheidung): bei F1/F2/G-Jugend ersetzt
+  // die Karte "Kinderfestivals" die bisherige "Tabelle"-Karte
+  // ("Im Kinderfußball gibt es keine Tabellen.") – Spielform je Team, keine
+  // Tabellen, keine Ergebnisse, Spaß und Ballkontakte zählen.
+  const KINDERFESTIVAL_SPIELFORM = {
+    f1: "4 gegen 4 plus Torwart",
+    f2: "4 gegen 4",
+    "g-jugend": "3 gegen 3",
+  };
   const tabelleKarte = team.tabelle
     ? `<div class="karte fluss">
       <h2 class="karte__titel">Tabelle</h2>
       <div data-nur-appack hidden>
-        <div class="fussballde_widget" data-id="${escapeHtml(tabelleWidgetId)}" data-type="table"></div>
+        <div class="fussballde-wrap">
+          <div class="fussballde_widget" data-id="${escapeHtml(tabelleWidgetId)}" data-type="table"></div>
+        </div>
+        <p class="meta fussballde-hinweis">Tabelle seitlich wischbar</p>
       </div>
       <div data-nur-prototyp>
         ${eigene ? `<p class="meta">Platz ${eigene.platz} von ${tabelleEintrag.zeilen.length} · ${eigene.punkte} Punkte</p>` : ""}
@@ -249,8 +290,9 @@ function seitenspalte(team, daten) {
       </div>
     </div>`
     : `<div class="karte fluss">
-      <h2 class="karte__titel">Tabelle</h2>
-      <p class="meta">Im Kinderfußball gibt es keine Tabellen.</p>
+      <h2 class="karte__titel">Kinderfestivals</h2>
+      <p>${escapeHtml(KINDERFESTIVAL_SPIELFORM[team.slug] ?? "")} – Kinderfestivals statt Ligabetrieb.</p>
+      <p class="meta">Keine Tabellen, keine Ergebnisse: Spaß und Ballkontakte zählen.</p>
     </div>`;
 
   const mannschaftKarte = `<div class="karte fluss">
@@ -275,7 +317,7 @@ function seitenspalte(team, daten) {
 function zurueckAbschnitt() {
   return `<section class="abschnitt">
   <div class="container fluss">
-    <p><a href="${PFAD}spielplan/">← Alle Spielpläne</a></p>
+    <p><a href="${PFAD}spielplan/">‹ Zurück zu Spielplan & Tabellen</a></p>
   </div>
 </section>`;
 }
