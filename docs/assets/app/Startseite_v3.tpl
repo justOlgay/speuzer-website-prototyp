@@ -105,7 +105,8 @@ svg { display: block; flex: 0 0 auto; }
 
 .inhalt {
   padding: var(--sp-4);
-  padding-bottom: 24px;
+  /* Die schwebende Tab-Leiste der App liegt über dem Seitenende (gemessen 21.09.2026) */
+  padding-bottom: 96px;
 }
 
 /* === 4. Bausteine aus assets/css/app-konzept.css === */
