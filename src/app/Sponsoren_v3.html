@@ -195,6 +195,24 @@
     return link;
   }
 
+  // Bild-URLs aus den Worksheets: nur absolute http(s)-Adressen verwenden
+  // (im Feld stehen gelegentlich Ids oder Reste), und ein Bild, das nicht
+  // laedt, wieder aus der Karte nehmen statt eine leere Flaeche zu lassen.
+  function bildUrlGueltig(url) {
+    return /^https?:\/\//i.test(url || "");
+  }
+  function bildMitRueckbau(url, klasse, alt) {
+    var bild = document.createElement("img");
+    bild.className = klasse;
+    bild.src = url;
+    bild.alt = alt || "";
+    bild.loading = "lazy";
+    bild.addEventListener("error", function () {
+      if (bild.parentNode) bild.parentNode.removeChild(bild);
+    });
+    return bild;
+  }
+
   function sammleZiele(sponsor) {
     var ziele = [];
     var website = mitSchema(textFeld(sponsor, "sponLink"));
@@ -228,11 +246,11 @@
     var logoUrl = textFeld(sponsor, "sponImg");
     var logoBox = document.createElement("div");
     logoBox.className = "sponsor-karte__logo";
-    if (logoUrl) {
-      var img = document.createElement("img");
-      img.src = logoUrl;
-      img.alt = textFeld(sponsor, "sponFirma");
-      img.loading = "lazy";
+    if (bildUrlGueltig(logoUrl)) {
+      var img = bildMitRueckbau(logoUrl, "", textFeld(sponsor, "sponFirma"));
+      img.addEventListener("error", function () {
+        if (logoBox.parentNode) logoBox.parentNode.removeChild(logoBox);
+      });
       logoBox.appendChild(img);
       karte.appendChild(logoBox);
     }
