@@ -33,6 +33,34 @@ bleibt und CORS `*` setzt (wie heute schon bei den App-Vorlagen, siehe
 Prototyp unter einer anderen Adresse veröffentlicht, muss das Paket neu
 gebaut werden.
 
+## Zwei Ausgabemodi (W2)
+
+Die Seitenvorlagen (`src/seiten/spielplan/index.mjs`, `src/seiten/spielplan/
+team.mjs`, `src/seiten/tabellen.mjs`) markieren Inhalt, der nur in einem der
+beiden Ausgabemodi erscheinen soll – die beiden genauen Attributnamen dafür
+stehen in `tools/appack-paket.mjs` (Abschnitt "Zwei Ausgabemodi") und werden
+hier bewusst nicht wörtlich wiederholt, damit sie nach dem Umschreiben nicht
+fälschlich als stehengebliebene Markierung erscheinen:
+
+- Live-Markierung – nur für die Live-Website. Dieses Skript macht den Inhalt
+  sichtbar (entfernt ein Sichtbarkeits-Attribut).
+- Prototyp-Markierung – nur für den GitHub-Pages-Prototyp (eingefrorene Daten
+  mit Stand-Angabe). Dieses Skript entfernt den ganzen Block.
+
+Damit enthält `web/` ausschließlich Live-Inhalt: FUSSBALL.DE-Widgets für die
+Vereinsspiele (`spielplan.html`, Typ `club-matches`) und die Tabellen
+(`spielplan-<team>.html`, `tabellen.html`, je Typ `table`, IDs aus
+`data/widgets.json`) sowie `<iframe>`-Einbettungen der Gruppen-Seiten des
+Spielplan-Generators (`https://justolgay.github.io/speuzer-spielplan/
+app-<gruppe>.html`, `<gruppe>` ∈ herren, a-jugend, d-jugend, e-jugend,
+f-jugend, g-jugend) auf jeder `spielplan-<team>.html`. Das FUSSBALL.DE-Skript
+`widgets.js` wird clientseitig nur nachgeladen, wenn ein sichtbares
+Tabellen-Widget im Dokument steht (siehe `FUSSBALLDE_WIDGET_LADER` in
+`src/vorlagen/hilfen.mjs`). Die FUSSBALL.DE-Widgets sind bei FUSSBALL.DE nur
+für die Domain `cdn.appack.de` freigegeben – lokal oder auf GitHub Pages
+zeigen sie eine Fehlermeldung von FUSSBALL.DE, das ist kein Seitenfehler
+(siehe `tools/appack-paket-pruefen.mjs`).
+
 ## Rückweg
 
 Der Ordner `web` im appack-Workspace ist von der Live-Website unabhängig,

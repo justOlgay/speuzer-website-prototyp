@@ -34,7 +34,11 @@
 <section class="abschnitt">
   <div class="container fluss">
     <h2>Nächste Spiele</h2>
-    <h3>Samstag, 26. September 2026</h3>
+    <div data-nur-appack hidden>
+      <div class="fussballde_widget" data-id="49e9745b-dc1c-4ae2-9292-b06c0f7a6c6e" data-type="club-matches"></div>
+    </div>
+    <div data-nur-prototyp>
+      <h3>Samstag, 26. September 2026</h3>
     <ul class="spiele" role="list">
       <li class="spiel spiel--naechstes">
       <span class="spiel__datum">09:00 Uhr</span>
@@ -163,6 +167,8 @@
       <span class="spiel__ergebnis"></span>
     </li>
     </ul>
+      <p class="meta">Auf der Vereinswebsite kommen die Spiele live aus dem DFBnet.</p>
+    </div>
   </div>
 </section>
 <section class="abschnitt--hell abschnitt">
@@ -288,6 +294,16 @@
     <p class="meta" style="color:var(--blau-100);">Der Kalender wird jede Nacht aus dem DFBnet neu erzeugt. Kurzfristige Absagen kommen weiterhin vom Trainerteam.</p>
   </div>
 </section>
+<script>
+(function () {
+  if (document.querySelector('[data-nur-appack]:not([hidden]) .fussballde_widget')) {
+    var s = document.createElement('script');
+    s.src = 'https://www.fussball.de/widgets.js';
+    s.defer = true;
+    document.head.appendChild(s);
+  }
+})();
+</script>
 </main>
 <footer class="ws-fuss">
   <p>Prototyp · Testumgebung, keine Live-Seite · Inhalte Stand Montag, 21. September 2026</p>

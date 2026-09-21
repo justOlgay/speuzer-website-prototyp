@@ -52,10 +52,74 @@ function sha256(inhalt) {
   return createHash("sha256").update(inhalt).digest("hex");
 }
 
+// ---------- Zwei Ausgabemodi: Prototyp (GitHub Pages) und appack (Live), W2 ----------
+// Die Seitenvorlagen markieren Inhalt, der nur in einem der beiden Modi
+// erscheinen soll:
+//   <div data-nur-appack hidden>…</div>   – nur Live-Website (Widgets, Generator)
+//   <div data-nur-prototyp>…</div>        – nur Prototyp (eingefrorene Daten)
+// Für das appack-Paket (dieses Skript) gilt: "hidden" bei data-nur-appack
+// verschwindet (Inhalt wird sichtbar), data-nur-prototyp-Blöcke verschwinden
+// vollständig (inklusive verschachtelter <div>, siehe tiefenbewusstes
+// Entfernen unten). docs/ws/*.html selbst (der Prototyp) bleibt unangetastet
+// – dort bleibt "hidden" stehen und der data-nur-prototyp-Block bleibt drin.
+
+const NUR_APPACK_HIDDEN_MUSTER = /<div data-nur-appack hidden>/g;
+
+// Entfernt jeden "<div data-nur-prototyp>…</div>"-Block vollständig,
+// einschließlich beliebig tief verschachtelter <div>-Elemente darin (reines
+// String-Matching mit Tiefenzähler statt eines HTML-Parsers, da die Vorlagen
+// ausschließlich wohlgeformte <div>-Öffnungs-/Schluss-Tags enthalten).
+function entferneNurPrototypBloecke(html) {
+  const OEFFNER = "<div data-nur-prototyp>";
+  const DIV_TAG_MUSTER = /<div\b[^>]*>|<\/div>/g;
+  let ergebnis = "";
+  let rest = html;
+  let anzahl = 0;
+  let start;
+
+  while ((start = rest.indexOf(OEFFNER)) !== -1) {
+    ergebnis += rest.slice(0, start);
+    DIV_TAG_MUSTER.lastIndex = start + OEFFNER.length;
+    let tiefe = 1;
+    let treffer;
+    let ende = -1;
+    while ((treffer = DIV_TAG_MUSTER.exec(rest))) {
+      tiefe += treffer[0].startsWith("</div") ? -1 : 1;
+      if (tiefe === 0) {
+        ende = treffer.index + treffer[0].length;
+        break;
+      }
+    }
+    if (ende === -1) {
+      throw new Error(`data-nur-prototyp: kein passendes schließendes </div> gefunden (ab Position ${start})`);
+    }
+    anzahl += 1;
+    rest = rest.slice(ende);
+  }
+  ergebnis += rest;
+  return { html: ergebnis, anzahl };
+}
+
+// Schaltet eine Seite von "Prototyp" auf "appack" (Live) um: hidden weg bei
+// data-nur-appack, data-nur-prototyp-Blöcke ganz weg. Zählt beide Typen in
+// zaehler.nurAppackHidden / zaehler.nurPrototyp.
+function wandleAusgabemodusUm(html, zaehler) {
+  const nurAppackTreffer = html.match(NUR_APPACK_HIDDEN_MUSTER) ?? [];
+  const ergebnisAppack = html.replace(NUR_APPACK_HIDDEN_MUSTER, "<div data-nur-appack>");
+  const { html: ergebnis, anzahl: nurPrototypAnzahl } = entferneNurPrototypBloecke(ergebnisAppack);
+
+  zaehler.nurAppackHidden += nurAppackTreffer.length;
+  zaehler.nurPrototyp += nurPrototypAnzahl;
+
+  return ergebnis;
+}
+
 // ---------- HTML-Seiten umschreiben ----------
 
 function schreibeSeiteUm(html, dateiname, zaehler) {
-  let ergebnis = html;
+  // 0) Ausgabemodus umschalten: data-nur-appack sichtbar machen,
+  // data-nur-prototyp-Blöcke entfernen (W2, siehe oben).
+  let ergebnis = wandleAusgabemodusUm(html, zaehler);
 
   // 1) site.css: gleicher Ordner wie die Seite selbst, kein "../assets/" mehr.
   const cssTreffer = ergebnis.match(SITE_CSS_LINK_MUSTER) ?? [];
@@ -100,6 +164,14 @@ function schreibeSeiteUm(html, dateiname, zaehler) {
 function pruefeAusgabe(dateiname, html, paketDateien) {
   if (html.includes("../assets/") || html.includes("../fonts/")) {
     throw new Error(`${dateiname}: enthält noch '../assets/' oder '../fonts/' nach dem Umschreiben`);
+  }
+  // W2: Selbstprüfung des Ausgabemodus – im Paket darf kein Marker des
+  // Prototyp-Modus mehr vorkommen.
+  if (html.includes("data-nur-prototyp")) {
+    throw new Error(`${dateiname}: enthält noch 'data-nur-prototyp' nach dem Umschreiben`);
+  }
+  if (html.includes("data-nur-appack hidden")) {
+    throw new Error(`${dateiname}: enthält noch 'data-nur-appack hidden' nach dem Umschreiben`);
   }
   const stylesheetTreffer = [...html.matchAll(/<link\s+rel="stylesheet"\s+href="site\.css">/g)];
   if (stylesheetTreffer.length !== 1) {
@@ -163,6 +235,34 @@ bleibt und CORS \`*\` setzt (wie heute schon bei den App-Vorlagen, siehe
 Prototyp unter einer anderen Adresse veröffentlicht, muss das Paket neu
 gebaut werden.
 
+## Zwei Ausgabemodi (W2)
+
+Die Seitenvorlagen (\`src/seiten/spielplan/index.mjs\`, \`src/seiten/spielplan/
+team.mjs\`, \`src/seiten/tabellen.mjs\`) markieren Inhalt, der nur in einem der
+beiden Ausgabemodi erscheinen soll – die beiden genauen Attributnamen dafür
+stehen in \`tools/appack-paket.mjs\` (Abschnitt "Zwei Ausgabemodi") und werden
+hier bewusst nicht wörtlich wiederholt, damit sie nach dem Umschreiben nicht
+fälschlich als stehengebliebene Markierung erscheinen:
+
+- Live-Markierung – nur für die Live-Website. Dieses Skript macht den Inhalt
+  sichtbar (entfernt ein Sichtbarkeits-Attribut).
+- Prototyp-Markierung – nur für den GitHub-Pages-Prototyp (eingefrorene Daten
+  mit Stand-Angabe). Dieses Skript entfernt den ganzen Block.
+
+Damit enthält \`web/\` ausschließlich Live-Inhalt: FUSSBALL.DE-Widgets für die
+Vereinsspiele (\`spielplan.html\`, Typ \`club-matches\`) und die Tabellen
+(\`spielplan-<team>.html\`, \`tabellen.html\`, je Typ \`table\`, IDs aus
+\`data/widgets.json\`) sowie \`<iframe>\`-Einbettungen der Gruppen-Seiten des
+Spielplan-Generators (\`https://justolgay.github.io/speuzer-spielplan/
+app-<gruppe>.html\`, \`<gruppe>\` ∈ herren, a-jugend, d-jugend, e-jugend,
+f-jugend, g-jugend) auf jeder \`spielplan-<team>.html\`. Das FUSSBALL.DE-Skript
+\`widgets.js\` wird clientseitig nur nachgeladen, wenn ein sichtbares
+Tabellen-Widget im Dokument steht (siehe \`FUSSBALLDE_WIDGET_LADER\` in
+\`src/vorlagen/hilfen.mjs\`). Die FUSSBALL.DE-Widgets sind bei FUSSBALL.DE nur
+für die Domain \`cdn.appack.de\` freigegeben – lokal oder auf GitHub Pages
+zeigen sie eine Fehlermeldung von FUSSBALL.DE, das ist kein Seitenfehler
+(siehe \`tools/appack-paket-pruefen.mjs\`).
+
 ## Rückweg
 
 Der Ordner \`web\` im appack-Workspace ist von der Live-Website unabhängig,
@@ -200,7 +300,10 @@ function main() {
   mkdirSync(WEB_DIR, { recursive: true });
 
   const paketDateien = new Set([...htmlDateien, "site.css"]);
-  const zaehler = { cssLink: 0, href: 0, src: 0, srcset: 0, content: 0, poster: 0, dataStern: 0, cssUrl: 0 };
+  const zaehler = {
+    cssLink: 0, href: 0, src: 0, srcset: 0, content: 0, poster: 0, dataStern: 0, cssUrl: 0,
+    nurAppackHidden: 0, nurPrototyp: 0,
+  };
   const manifestEintraege = [];
   let gesamtBytes = 0;
 
@@ -242,6 +345,9 @@ function main() {
   console.log("=== appack-paket.mjs: Zusammenfassung ===");
   console.log(`Dateien: ${manifestEintraege.length} (${htmlDateien.length} HTML + 1 site.css)`);
   console.log(`Bytes gesamt: ${gesamtBytes}`);
+  console.log("Ausgabemodus (W2):");
+  console.log(`  data-nur-appack: "hidden" entfernt (jetzt sichtbar): ${zaehler.nurAppackHidden}×`);
+  console.log(`  data-nur-prototyp: Blöcke vollständig entfernt: ${zaehler.nurPrototyp}×`);
   console.log("Ersetzte Verweise je Typ:");
   console.log(`  site.css-Verweis (href) auf "site.css" umgeschrieben: ${zaehler.cssLink}`);
   console.log(`  href="../assets/…" -> absolute Adresse: ${zaehler.href}`);

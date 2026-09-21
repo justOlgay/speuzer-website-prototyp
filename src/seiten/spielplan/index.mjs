@@ -2,7 +2,14 @@
 // gruppiert nach Tag, Spielpläne je Mannschaft, Tabellen-Kurzübersicht,
 // Kalender-Abo.
 
-import { datumLang, datumKurz, zeit, naechsteSpiele, spielZeile } from "../../vorlagen/hilfen.mjs";
+import {
+  datumLang,
+  datumKurz,
+  zeit,
+  naechsteSpiele,
+  spielZeile,
+  FUSSBALLDE_WIDGET_LADER,
+} from "../../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/spielplan/" (Tiefe 1), daher immer "../"
 // (siehe pfadZurWurzel() in tools/build.mjs).
@@ -30,6 +37,12 @@ function seitenkopfAbschnitt(daten) {
 
 // ---------- Nächste Spiele, gruppiert nach Tag ----------
 
+// W2: appack-Modus (Live-Website) zeigt das FUSSBALL.DE-Widget
+// "club-matches" (alle Spiele des Vereins, live aus dem DFBnet, siehe
+// data/widgets.json "verein.spiele"); der Prototyp zeigt weiterhin die
+// eingefrorene, nach Tag gruppierte Liste mit Stand-Hinweis. Beide Blöcke
+// stehen nebeneinander im HTML, tools/appack-paket.mjs schaltet zwischen
+// ihnen um (siehe dort).
 function naechsteSpieleAbschnitt(daten) {
   const spiele = naechsteSpiele(daten, { anzahl: 12 });
 
@@ -55,10 +68,18 @@ function naechsteSpieleAbschnitt(daten) {
     })
     .join("\n    ");
 
+  const vereinSpieleWidgetId = daten.widgets?.verein?.spiele ?? "";
+
   return `<section class="abschnitt">
   <div class="container fluss">
     <h2>Nächste Spiele</h2>
-    ${inhalt || `<p class="meta">Keine kommenden Spiele ab dem Build-Datum in data/spiele.json gefunden.</p>`}
+    <div data-nur-appack hidden>
+      <div class="fussballde_widget" data-id="${escapeHtml(vereinSpieleWidgetId)}" data-type="club-matches"></div>
+    </div>
+    <div data-nur-prototyp>
+      ${inhalt || `<p class="meta">Keine kommenden Spiele ab dem Build-Datum in data/spiele.json gefunden.</p>`}
+      <p class="meta">Auf der Vereinswebsite kommen die Spiele live aus dem DFBnet.</p>
+    </div>
   </div>
 </section>`;
 }
@@ -155,6 +176,7 @@ export function seite(daten) {
     spielplaeneAbschnitt(daten),
     tabellenAbschnitt(daten),
     kalenderAboAbschnitt(daten),
+    FUSSBALLDE_WIDGET_LADER,
   ].join("\n");
 
   return {

@@ -53,77 +53,23 @@
   <div class="container">
     <div class="zweispaltig">
       <div class="fluss">
-    <h2>Alle Spiele</h2>
-    <p class="meta">6 Spiele · Stand Montag, 21. September 2026</p>
-    <div class="hinweis hinweis--info">
-      <p style="margin:0;">Ergebnisse stehen im Prototyp noch nicht in der Datenquelle. In der App und auf FUSSBALL.DE sind sie aktuell.</p>
-    </div>
-    <h3>September 2026</h3>
-    <ul class="spiele" role="list">
-      <li class="spiel spiel--vergangen">
-      <span class="spiel__datum">Sa 05.09. · 10:30 Uhr</span>
-      <span class="tag tag--auswaerts">Auswärts</span>
-      <span class="spiel__gegner-block">
-        <span class="spiel__gegner">FC Kalbach I / 1 2</span>
-        <span class="spiel__ort meta">Am Hopfenbrunnen 51, 60437 Frankfurt am Main</span>
-        <span class="meta spiel__wettbewerb">Kinderfestival</span>
-      </span>
-      <span class="spiel__ergebnis"></span>
-    </li>
-      <li class="spiel spiel--vergangen">
-      <span class="spiel__datum">Sa 12.09. · 09:00 Uhr</span>
-      <span class="tag tag--auswaerts">Auswärts</span>
-      <span class="spiel__gegner-block">
-        <span class="spiel__gegner">FFC Olympia 07 IV</span>
-        <span class="spiel__ort meta">Ostparkstr. 16, 60385 Frankfurt am Main</span>
-        <span class="meta spiel__wettbewerb">Kinderfestival</span>
-      </span>
-      <span class="spiel__ergebnis"></span>
-    </li>
-      <li class="spiel spiel--vergangen">
-      <span class="spiel__datum">Sa 19.09. · 09:00 Uhr</span>
-      <span class="tag tag--auswaerts">Auswärts</span>
-      <span class="spiel__gegner-block">
-        <span class="spiel__gegner">SV Bonames</span>
-        <span class="spiel__ort meta">Harheimer Weg 44, 60437 Frankfurt am Main</span>
-        <span class="meta spiel__wettbewerb">Kinderfestival</span>
-      </span>
-      <span class="spiel__ergebnis"></span>
-    </li>
-      <li class="spiel">
-      <span class="spiel__datum">Sa 26.09. · 09:00 Uhr</span>
-      <span class="tag tag--auswaerts">Auswärts</span>
-      <span class="spiel__gegner-block">
-        <span class="spiel__gegner">BSC SW 1919 Ffm. 2</span>
-        <span class="spiel__ort meta">Eschersheimer Landstr. 328, 60320 Frankfurt am Main</span>
-        <span class="meta spiel__wettbewerb">Kinderfestival</span>
-      </span>
-      <span class="spiel__ergebnis"></span>
-    </li>
-    </ul>
-    <h3>Oktober 2026</h3>
-    <ul class="spiele" role="list">
-      <li class="spiel">
-      <span class="spiel__datum">Sa 24.10. · 09:00 Uhr</span>
-      <span class="tag tag--auswaerts">Auswärts</span>
-      <span class="spiel__gegner-block">
-        <span class="spiel__gegner">FC Kalbach I / 1 2</span>
-        <span class="spiel__ort meta">Am Hopfenbrunnen 51, 60437 Frankfurt am Main</span>
-        <span class="meta spiel__wettbewerb">Kinderfestival</span>
-      </span>
-      <span class="spiel__ergebnis"></span>
-    </li>
-      <li class="spiel">
-      <span class="spiel__datum">Sa 31.10. · 11:00 Uhr</span>
-      <span class="tag tag--auswaerts">Auswärts</span>
-      <span class="spiel__gegner-block">
-        <span class="spiel__gegner">SG Harheim 2 / 2</span>
-        <span class="spiel__ort meta">Riedhalsstr., 60437 Frankfurt am Main</span>
-        <span class="meta spiel__wettbewerb">Kinderfestival</span>
-      </span>
-      <span class="spiel__ergebnis"></span>
-    </li>
-    </ul>
+    <h2>Ganze Saison</h2>
+    <iframe src="https://justolgay.github.io/speuzer-spielplan/app-g-jugend.html" title="Spielplan G-Jugend (Bambinis) (Generator, DFBnet)" loading="lazy" data-generator-iframe style="width:100%;height:640px;border:0;border-radius:var(--r-lg);display:block;"></iframe>
+    
+    <p class="meta">Quelle: DFBnet, täglich aktualisiert. Tippen auf ein Spiel öffnet FUSSBALL.DE.</p>
+    <script>
+    (function () {
+      var iframe = document.querySelector('[data-generator-iframe]');
+      if (!iframe) return;
+      window.addEventListener('message', function (event) {
+        if (event.origin !== 'https://justolgay.github.io') return;
+        if (event.source !== iframe.contentWindow) return;
+        var h = event.data && event.data.speuzerHeight;
+        if (typeof h !== 'number' || h < 200 || h > 20000) return;
+        iframe.style.height = h + 'px';
+      });
+    })();
+    </script>
   </div>
       <aside class="fluss">
     <div class="karte fluss">
@@ -154,6 +100,7 @@
     <p><a href="spielplan.html">← Alle Spielpläne</a></p>
   </div>
 </section>
+
 </main>
 <footer class="ws-fuss">
   <p>Prototyp · Testumgebung, keine Live-Seite · Inhalte Stand Montag, 21. September 2026</p>
