@@ -469,6 +469,14 @@ svg { display: block; flex: 0 0 auto; }
 
   // ---------- Begrüßung ----------
 
+  // Ob ein Gast (ohne profileJSON.id) unterwegs ist: einmal zentral
+  // bestimmen, damit Termine/Aktuelles denselben Gast-Fall behandeln
+  // (QA-Befund, C2 Abschnitt 7 – keine graphql-Aufrufe/401 für Gäste).
+  function istAngemeldet() {
+    var profil = window.profileJSON || {};
+    return !!profil.id;
+  }
+
   function begruessung() {
     var el = document.getElementById("gruss");
     if (!el) return;
@@ -482,8 +490,7 @@ svg { display: block; flex: 0 0 auto; }
   // ---------- Profil / Registrieren ----------
 
   function profilKnopfUmschalten() {
-    var profil = window.profileJSON || {};
-    var angemeldet = !!profil.id;
+    var angemeldet = istAngemeldet();
     var profilKnopf = document.getElementById("profil-knopf");
     var registrieren = document.getElementById("registrieren-pille");
     if (!angemeldet) {
@@ -594,6 +601,27 @@ svg { display: block; flex: 0 0 auto; }
     return karte;
   }
 
+  // Gast (nicht angemeldet): keine Kalender vorhanden, also kein
+  // graphApi-Aufruf (der ohne Anmeldung mit HTTP 401 scheitert) – stattdessen
+  // ein Hinweis mit Anmelden-Knopf (QA-Befund, C2 Abschnitt 7).
+  function zeigeTermineHinweisGast() {
+    var container = document.getElementById("termine");
+    if (!container) return;
+    container.innerHTML = "";
+    var karte = document.createElement("div");
+    karte.className = "hinweis";
+    var p = document.createElement("p");
+    p.textContent = "Nach der Anmeldung siehst du hier deine Termine.";
+    karte.appendChild(p);
+    var anmelden = document.createElement("a");
+    anmelden.className = "knopf";
+    anmelden.style.marginTop = "var(--sp-3)";
+    anmelden.href = "nav://sportfreunde04_Profile_1783059427823";
+    anmelden.textContent = "Anmelden";
+    karte.appendChild(anmelden);
+    container.appendChild(karte);
+  }
+
   function zeigeTermine(termine) {
     var container = document.getElementById("termine");
     if (!container) return;
@@ -614,6 +642,12 @@ svg { display: block; flex: 0 0 auto; }
   }
 
   function ladeTermine() {
+    if (!istAngemeldet()) {
+      // Gast ohne eigene Kalender: kein graphApi-Aufruf (401), stattdessen
+      // Hinweis + Anmelden-Knopf.
+      zeigeTermineHinweisGast();
+      return;
+    }
     if (!window.graphApi) {
       zeigeTermine([]);
       return;
@@ -628,9 +662,23 @@ svg { display: block; flex: 0 0 auto; }
       .catch(function () { zeigeTermine([]); });
   }
 
+  // ---------- Aktuelles (News-Widget) ----------
+
+  // Gast ohne Anmeldung: das News-Widget-Skript ruft beim Start selbst eine
+  // graphql-API auf, die ohne Anmeldung 401 liefert (leere Karte,
+  // Skript-Fehler). Den Widget-Container deshalb vor dem
+  // DOMContentLoaded-Lauf von component-news-widget.js entfernen; die Zeile
+  // "Alle Meldungen" bleibt stehen (QA-Befund, C2 Abschnitt 7).
+  function entferneNewsWidgetFuerGast() {
+    if (istAngemeldet()) return;
+    var widget = document.querySelector(".news.aktuelles[news-widget]");
+    if (widget && widget.parentNode) widget.parentNode.removeChild(widget);
+  }
+
   begruessung();
   profilKnopfUmschalten();
   ladeTermine();
+  entferneNewsWidgetFuerGast();
 })();
 </script>
 </body>

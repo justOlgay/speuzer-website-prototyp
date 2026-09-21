@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="format-detection" content="telephone=no">
+<meta name="format-detection" content="address=no">
+<meta name="format-detection" content="email=no">
+<meta name="format-detection" content="date=no">
+<title>${userTitle}</title>
+<style>
+
+/* Speuzer Blau-Weiß – Geschaeftsstelle_v3.tpl (C1)
+   appack-Vorlage für die Seite "Geschäftsstelle & Anfahrt". Kopf- und Tab-Leiste
+   kommen von der App-Huelle und sind NICHT Teil dieser Vorlage (kein eigener
+   Kopf, kein eigener Fuss). Erzeugt aus src/app/v3-basis.css + src/app/Geschaeftsstelle_v3.html
+   durch tools/app-optik/tpl-bauen.mjs (npm run tpl-bauen) – NICHT von Hand
+   bearbeiten, sondern die Quelldateien unter src/app/ ändern und neu bauen.
+   Details/Datenquellen: siehe assets/app/LIESMICH.md, Abschnitt "Stufe C". */
+
+/* Speuzer Blau-Weiß – v3-basis.css (C1)
+   Gemeinsame Grundlage der appack-Vorlagen-Familie "_v3" (Startseite_v3.tpl
+   [B1] und die fünf Vereinsseiten [C1]). Schriften, Tokens, Grundregeln und
+   die gemeinsamen Bausteine (Karte, Zeile, Abschnittstitel, Knopf, Knopf
+   leise, Tag, Hinweis, Aktionen, Fuß) sind wörtlich aus
+   assets/app/Startseite_v3.tpl (Abschnitte 1–4 und 8) übernommen –
+   inhaltlich identisch, nur hierher ausgelagert, damit tools/app-optik/
+   tpl-bauen.mjs sie den fünf neuen Vorlagen voranstellen kann.
+   Startseite_v3.tpl selbst bleibt unverändert (produktiv, siehe C1-Spezifikation)
+   und wird NICHT auf dieses Bauskript umgestellt – dieser Block hier ist eine
+   bewusste Kopie, keine gemeinsame Quelle mit Startseite_v3.tpl.
+   Kopf- und Tab-Leiste kommen von der App-Hülle und sind NICHT Teil dieser
+   Vorlagen (kein eigener Kopf, kein eigener Fuß). Farben/Schrift/Abstände
+   ausschließlich aus assets/css/tokens.css. Kein Foto, keine Kacheln, keine
+   Sponsorenleiste, kein Eintracht-Design. */
+
+/* === 1. Schriften (absolute GitHub-Pages-Adressen, siehe assets/app/styles.css) === */
+
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/barlow-condensed-600.woff2") format('woff2');
+}
+
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/barlow-condensed-700.woff2") format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/inter.woff2") format('woff2');
+}
+
+/* === 2. Tokens (Teilmenge aus assets/css/tokens.css) === */
+
+:root {
+  --blau-950: #0B0E4A;
+  --blau-900: #151A7A;
+  --blau-800: #191793;
+  --blau-700: #1F2DBE;
+  --blau-500: #3D4FEA;
+  --blau-100: #E4E7FA;
+  --blau-50: #F3F5FC;
+  --ink: #12142B;
+  --ink-2: #3F4360;
+  --ink-3: #5B6079;
+  --line: #D8DBEA;
+  --bg: #F5F6FB;
+  --surface: #FFFFFF;
+  --weiss: #FFFFFF;
+
+  --font-head: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-text: "Inter", system-ui, sans-serif;
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-lg: 20px;
+  --r-pill: 999px;
+
+  --sh-1: 0 1px 2px rgba(11, 14, 74, .06), 0 1px 1px rgba(11, 14, 74, .04);
+  --sh-2: 0 8px 24px rgba(11, 14, 74, .10);
+}
+
+/* === 3. Grundregeln === */
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: 14px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; }
+svg { display: block; flex: 0 0 auto; }
+
+/* [hidden] muss auch gegen eigene display:flex/inline-flex-Regeln gewinnen –
+   ohne diese Regel gewinnt die spezifischere Klassenregel gegen das
+   UA-Stylesheet (siehe Startseite_v3.tpl, Schritt 1.1). */
+[hidden] { display: none !important; }
+
+.inhalt {
+  padding: var(--sp-4);
+  /* Die schwebende Tab-Leiste der App liegt über dem Seitenende (gemessen 21.09.2026) */
+  padding-bottom: 96px;
+}
+
+/* === 4. Bausteine === */
+
+.karte {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-1);
+  padding: var(--sp-4);
+}
+
+.zeile {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 56px;
+  padding-block: var(--sp-2);
+  text-decoration: none;
+  color: inherit;
+  border-bottom: 1px solid var(--line);
+}
+
+.zeile:last-child { border-bottom: none; }
+
+.zeile__text { flex: 1 1 auto; min-width: 0; }
+
+.zeile__titel {
+  margin: 0;
+  font-weight: 600;
+  font-size: 15px;
+  overflow-wrap: break-word;
+}
+
+.zeile__pfeil {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  color: var(--ink-3);
+}
+
+.abschnittstitel {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 20px;
+  text-transform: uppercase;
+  color: var(--blau-950);
+  margin: var(--sp-6) 0 var(--sp-3);
+}
+
+.inhalt > .abschnittstitel:first-child { margin-top: 0; }
+
+.knopf {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding-inline: var(--sp-4);
+  border-radius: var(--r-md);
+  background: var(--blau-700);
+  color: var(--weiss);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+.knopf--leise {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--blau-800);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  background: var(--blau-100);
+  color: var(--blau-800);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+}
+
+.hinweis {
+  display: block;
+  border-left: 3px solid var(--blau-700);
+  background: var(--blau-50);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  font-size: 14px;
+  color: var(--ink-2);
+  margin-top: var(--sp-5);
+}
+
+.hinweis p { margin: 0; }
+
+/* === 8. Aktionen und Fuß === */
+
+.aktionen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-top: var(--sp-5);
+}
+
+.fuss {
+  margin: var(--sp-6) 0 0;
+  font-size: 12px;
+  color: var(--ink-3);
+  text-align: center;
+}
+
+/* Geschaeftsstelle_v3.tpl – seitenspezifisch (C2). */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.karte + .karte,
+.abschnittstitel + .karte { margin-top: 0; }
+
+.beschreibung-titel {
+  margin: 0 0 var(--sp-2);
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 22px;
+  text-transform: uppercase;
+  color: var(--blau-950);
+}
+
+.beschreibung-text { font-size: 14px; color: var(--ink-2); }
+.beschreibung-text p { margin: 0 0 var(--sp-2); }
+.beschreibung-text p:last-child { margin-bottom: 0; }
+
+.oeffnungszeiten-tabelle {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.oeffnungszeiten-tabelle td {
+  padding: var(--sp-2) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.oeffnungszeiten-tabelle tr:last-child td { border-bottom: none; }
+
+.oeffnungszeiten-tabelle td:first-child { color: var(--ink-2); }
+.oeffnungszeiten-tabelle td:last-child { text-align: right; font-weight: 600; }
+
+.oeffnungszeiten-heute td {
+  color: var(--blau-800);
+  font-weight: 700;
+}
+
+.oeffnungszeiten-hinweistext {
+  margin: var(--sp-3) 0 0;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.adresse-text {
+  margin: 0 0 var(--sp-3);
+  font-size: 15px;
+  font-weight: 600;
+  overflow-wrap: break-word;
+}
+
+.aktionen--inline {
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 0;
+  margin-bottom: var(--sp-4);
+}
+
+.hinweis--parkplatz { margin-top: var(--sp-4); }
+
+.kontakt-aktionen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.icon-knopf {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding-inline: var(--sp-3);
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--blau-800);
+  font-weight: 600;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.icon-knopf svg { width: 18px; height: 18px; }
+
+.ansprechpartner-liste {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.ansprechpartner-zeile {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.ansprechpartner-zeile__bild {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-pill);
+  object-fit: cover;
+}
+
+.ansprechpartner-zeile__initialen {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-pill);
+  background: var(--blau-100);
+  color: var(--blau-800);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.ansprechpartner-zeile__text { flex: 1 1 auto; min-width: 0; }
+
+.ansprechpartner-zeile__name {
+  margin: 0;
+  font-weight: 600;
+  font-size: 14px;
+  overflow-wrap: break-word;
+}
+
+.ansprechpartner-zeile__funktion {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--ink-3);
+  overflow-wrap: break-word;
+}
+
+.ansprechpartner-zeile .icon-knopf { flex: 0 0 auto; padding-inline: var(--sp-2); }
+.ansprechpartner-zeile .icon-knopf span { display: none; }
+</style>
+</head>
+<body>
+<main class="inhalt">
+
+<h1 class="visually-hidden">Geschäftsstelle &amp; Anfahrt</h1>
+
+<div id="beschreibung-karte" class="karte" hidden>
+  <p class="beschreibung-titel">Geschäftsstelle</p>
+  <div id="beschreibung-text" class="beschreibung-text"></div>
+</div>
+
+<h2 id="oeffnungszeiten-titel" class="abschnittstitel" hidden>Öffnungszeiten</h2>
+<div id="oeffnungszeiten-karte" class="karte" hidden>
+  <table class="oeffnungszeiten-tabelle">
+    <tbody id="oeffnungszeiten-tabelle-body"></tbody>
+  </table>
+  <p id="openingtext-hinweis" class="oeffnungszeiten-hinweistext" hidden></p>
+</div>
+
+<h2 class="abschnittstitel">Adresse &amp; Anfahrt</h2>
+<div class="karte">
+  <p id="adresse-text" class="adresse-text"></p>
+  <div class="aktionen aktionen--inline">
+    <a id="route-knopf" class="knopf" href="#" target="_blank" rel="noopener" hidden>Route</a>
+  </div>
+  <a class="zeile" href="nav://sportfreunde04_Map_1783059375623">
+    <span class="zeile__text"><span class="zeile__titel">Karte in der App</span></span>
+    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+  </a>
+  <!-- HINWEIS Parkplatz: statisch im Quelltext gepflegt, wie auf Startseite_v3.tpl
+       (dieselbe Formulierung); im CMS-Quelltext pflegen oder leeren. -->
+  <div class="hinweis hinweis--parkplatz"><p>Der Parkplatz am Vereinsgelände ist wegen des Neubaus des Funktionsgebäudes voraussichtlich bis Ende Januar 2027 gesperrt. Der Zugang zum Gelände ist über den Hintereingang am „Haus der Jugend“ (Pavillon) möglich.</p></div>
+</div>
+
+<h2 id="kontakt-titel" class="abschnittstitel" hidden>Kontakt</h2>
+<div id="kontakt-aktionen" class="kontakt-aktionen" hidden></div>
+
+<h2 id="ansprechpartner-titel" class="abschnittstitel" hidden>Ansprechpartner</h2>
+<div id="ansprechpartner-liste" class="ansprechpartner-liste"></div>
+
+<div id="fehler-bereich"></div>
+
+<p class="fuss">F.F.V. Sportfreunde 04 · Vereins-App</p>
+
+</main>
+
+<script src="https://cdn.appack.de/modules/common/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.appack.de/modules/appack.workbook-1.4.1.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var BESCHREIBUNG_ID = "6a1ec5fcf68a05bf129cdb97";
+  var KONTAKT_ID = "6a1ec5fcf68a05bf129cdb9b";
+  var OEFFNUNGSZEITEN_ID = "6a1ec5fcf68a05bf129cdb9d";
+  var ANSPRECHPARTNER_ID = "6a1ec5fcf68a05bf129cdb9f";
+  var EINSTELLUNGEN_ID = "6a1ec5fcf68a05bf129cdba2";
+
+  var ICON_MAIL = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M4 6.5l8 6 8-6"/></svg>';
+  var ICON_PHONE = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.5 3.5h3.2c.5 0 .9.3 1 .8l.9 3a1.1 1.1 0 0 1-.3 1.1L7.8 9.9a13 13 0 0 0 6.3 6.3l1.5-1.5c.3-.3.7-.4 1.1-.3l3 .9c.5.1.8.5.8 1v3.2c0 .8-.7 1.4-1.5 1.3-8-1-14.4-7.4-15.4-15.4-.1-.8.5-1.5 1.3-1.5z"/></svg>';
+  var ICON_GLOBUS = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.5 3.8 5.5 3.8 8.5s-1.3 6-3.8 8.5c-2.5-2.5-3.8-5.5-3.8-8.5s1.3-6 3.8-8.5z"/></svg>';
+  var ICON_KAMERA = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 8h3l2-2h6l2 2h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+  var ICON_FACEBOOK = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 21v-7h2.5l.5-3H14V9.2c0-.9.3-1.5 1.6-1.5H17V5.2C16.6 5.1 15.7 5 14.7 5 12.5 5 11 6.3 11 8.8V11H8.5v3H11v7z"/></svg>';
+
+  // ---------- Hilfsfunktionen (defensiv: Felder können fehlen/null/leer sein) ----------
+
+  function textFeld(zeile, name) {
+    var v = zeile && zeile[name];
+    return (v === undefined || v === null) ? "" : String(v);
+  }
+
+  function sicheresHtml(html) {
+    var div = document.createElement("div");
+    div.innerHTML = String(html || "");
+    var scripts = div.querySelectorAll("script");
+    for (var i = 0; i < scripts.length; i++) scripts[i].remove();
+    return div.innerHTML;
+  }
+
+  function telHref(nummer) {
+    var extrahiert = String(nummer || "").replace(/[^\d+]/g, "");
+    return "tel:" + (extrahiert || nummer);
+  }
+
+  function mitSchema(url) {
+    var u = String(url || "").trim();
+    if (!u) return "";
+    return /^(https?:|mailto:|tel:)/i.test(u) ? u : "https://" + u;
+  }
+
+  function instaOderFaceUrl(wert, domain) {
+    var w = String(wert || "").trim();
+    if (!w) return "";
+    if (/^https?:/i.test(w)) return w;
+    return "https://" + domain + "/" + w.replace(/^@/, "");
+  }
+
+  function initialen(name) {
+    var teile = String(name || "").trim().split(/\s+/).filter(Boolean);
+    if (!teile.length) return "";
+    var erste = teile[0].charAt(0);
+    var letzte = teile.length > 1 ? teile[teile.length - 1].charAt(0) : "";
+    return (erste + letzte).toUpperCase();
+  }
+
+  function bildUrlGueltig(url) {
+    return /^https?:\/\//i.test(url || "");
+  }
+  function bildMitRueckbau(url, klasse, alt) {
+    var bild = document.createElement("img");
+    bild.className = klasse;
+    bild.src = url;
+    bild.alt = alt || "";
+    bild.loading = "lazy";
+    bild.addEventListener("error", function () {
+      if (bild.parentNode) bild.parentNode.removeChild(bild);
+    });
+    return bild;
+  }
+
+  function ladeWorkbook(id, limit) {
+    if (!window.Workbook || typeof Workbook.load !== "function") {
+      return Promise.reject(new Error("Workbook-API fehlt"));
+    }
+    return Workbook.load({ workbook: id, filter: {}, offset: 0, limit: limit || 5, sort: "_id", direction: "asc" })
+      .then(function (rows) { return Array.isArray(rows) ? rows : []; });
+  }
+
+  function baueAktion(href, innerHtml, beschriftung, extern) {
+    var link = document.createElement("a");
+    link.className = "icon-knopf";
+    link.href = href;
+    link.setAttribute("aria-label", beschriftung);
+    link.innerHTML = innerHtml + "<span>" + beschriftung + "</span>";
+    if (extern) {
+      link.target = "_blank";
+      link.rel = "noopener";
+    }
+    return link;
+  }
+
+  function fehlerKarte(text) {
+    var hinweis = document.createElement("div");
+    hinweis.className = "hinweis";
+    var p = document.createElement("p");
+    p.textContent = text;
+    hinweis.appendChild(p);
+    return hinweis;
+  }
+
+  // ---------- Beschreibung ----------
+
+  function zeigeBeschreibung(zeilen, einstellungen) {
+    if (einstellungen.descriptionActive !== true) return;
+    var zeile = zeilen[0] || {};
+    var text = textFeld(zeile, "description");
+    if (!text) return;
+    var karte = document.getElementById("beschreibung-karte");
+    var textEl = document.getElementById("beschreibung-text");
+    textEl.innerHTML = sicheresHtml(text);
+    karte.hidden = false;
+  }
+
+  // ---------- Öffnungszeiten ----------
+
+  var WOCHENTAGE = [
+    { feld: "monday", label: "Montag" },
+    { feld: "tuesday", label: "Dienstag" },
+    { feld: "wednesday", label: "Mittwoch" },
+    { feld: "thursday", label: "Donnerstag" },
+    { feld: "friday", label: "Freitag" },
+    { feld: "saturday", label: "Samstag", hiderFeld: "saturdayhider" },
+    { feld: "sunday", label: "Sonntag", hiderFeld: "sundayhider" },
+  ];
+
+  function zeitTextFuerTag(zeile, feld) {
+    var open = textFeld(zeile, feld + "open");
+    var close = textFeld(zeile, feld + "close");
+    var midStart = textFeld(zeile, feld + "midstart");
+    var midEnd = textFeld(zeile, feld + "midend");
+    if (!open) return "geschlossen";
+    if (close && midStart && midEnd) return open + "–" + midStart + " und " + midEnd + "–" + close;
+    if (close) return open + "–" + close;
+    return "ab " + open;
+  }
+
+  function zeigeOeffnungszeiten(zeilen, einstellungen) {
+    if (einstellungen.openingActive !== true) return;
+    var zeile = zeilen[0];
+    if (!zeile) return;
+    var titel = document.getElementById("oeffnungszeiten-titel");
+    var karte = document.getElementById("oeffnungszeiten-karte");
+    var tbody = document.getElementById("oeffnungszeiten-tabelle-body");
+    // Montag = 0 … Sonntag = 6 (JS: Sonntag = 0)
+    var heuteIndex = (new Date().getDay() + 6) % 7;
+    for (var i = 0; i < WOCHENTAGE.length; i++) {
+      var tag = WOCHENTAGE[i];
+      if (tag.hiderFeld && zeile[tag.hiderFeld] === true) continue;
+      var tr = document.createElement("tr");
+      if (i === heuteIndex) tr.className = "oeffnungszeiten-heute";
+      var tdTag = document.createElement("td");
+      tdTag.textContent = tag.label;
+      var tdZeit = document.createElement("td");
+      tdZeit.textContent = zeitTextFuerTag(zeile, tag.feld);
+      tr.appendChild(tdTag);
+      tr.appendChild(tdZeit);
+      tbody.appendChild(tr);
+    }
+    var hinweisText = textFeld(zeile, "openingtext");
+    if (hinweisText) {
+      var hinweisEl = document.getElementById("openingtext-hinweis");
+      hinweisEl.textContent = hinweisText;
+      hinweisEl.hidden = false;
+    }
+    titel.hidden = false;
+    karte.hidden = false;
+  }
+
+  // ---------- Adresse & Anfahrt ----------
+
+  function zeigeAdresse(zeilen) {
+    var kontakt = zeilen[0] || {};
+    var strasse = textFeld(kontakt, "address");
+    var ort = [textFeld(kontakt, "postalCode"), textFeld(kontakt, "city")].filter(Boolean).join(" ");
+    var teile = [strasse, ort].filter(Boolean);
+    var adresseText = document.getElementById("adresse-text");
+    adresseText.textContent = teile.join(", ");
+    var routeKnopf = document.getElementById("route-knopf");
+    if (teile.length) {
+      routeKnopf.href = "https://maps.apple.com/?q=" + encodeURIComponent(teile.join(", "));
+      routeKnopf.hidden = false;
+    }
+  }
+
+  // ---------- Kontakt ----------
+
+  function zeigeKontakt(zeilen, einstellungen) {
+    if (einstellungen.contactActive !== true) return;
+    var kontakt = zeilen[0] || {};
+    if (kontakt.contactActive === false) return;
+    var bereich = document.getElementById("kontakt-aktionen");
+    var titel = document.getElementById("kontakt-titel");
+
+    var email = textFeld(kontakt, "email");
+    if (email) bereich.appendChild(baueAktion("mailto:" + email, ICON_MAIL, "E-Mail", false));
+
+    var telNummer = textFeld(kontakt, "mobileNumber") || textFeld(kontakt, "phoneNumber");
+    if (telNummer) bereich.appendChild(baueAktion(telHref(telNummer), ICON_PHONE, "Anrufen", false));
+
+    var website = textFeld(kontakt, "website");
+    if (website) bereich.appendChild(baueAktion(mitSchema(website), ICON_GLOBUS, "Website", true));
+
+    var insta = instaOderFaceUrl(textFeld(kontakt, "insta"), "instagram.com");
+    if (insta) bereich.appendChild(baueAktion(insta, ICON_KAMERA, "Instagram", true));
+
+    var face = instaOderFaceUrl(textFeld(kontakt, "face"), "facebook.com");
+    if (face) bereich.appendChild(baueAktion(face, ICON_FACEBOOK, "Facebook", true));
+
+    if (bereich.children.length) {
+      titel.hidden = false;
+      bereich.hidden = false;
+    }
+  }
+
+  // ---------- Ansprechpartner ----------
+
+  function vergleicheAnsprechpartner(a, b) {
+    var an = typeof a.ansSortNumber === "number" ? a.ansSortNumber : Infinity;
+    var bn = typeof b.ansSortNumber === "number" ? b.ansSortNumber : Infinity;
+    if (an !== bn) return an - bn;
+    return textFeld(a, "ansName").localeCompare(textFeld(b, "ansName"), "de");
+  }
+
+  function baueAnsprechpartnerZeile(person) {
+    var zeile = document.createElement("div");
+    zeile.className = "ansprechpartner-zeile";
+
+    var bildUrl = textFeld(person, "ansImg");
+    var kreis = document.createElement("div");
+    kreis.className = "ansprechpartner-zeile__initialen";
+    kreis.setAttribute("aria-hidden", "true");
+    kreis.textContent = initialen(textFeld(person, "ansName"));
+    if (bildUrlGueltig(bildUrl)) {
+      var bild = bildMitRueckbau(bildUrl, "ansprechpartner-zeile__bild", "");
+      bild.addEventListener("error", function () {
+        if (!kreis.parentNode) zeile.insertBefore(kreis, zeile.firstChild);
+      });
+      zeile.appendChild(bild);
+    } else {
+      zeile.appendChild(kreis);
+    }
+
+    var text = document.createElement("div");
+    text.className = "ansprechpartner-zeile__text";
+    var name = document.createElement("p");
+    name.className = "ansprechpartner-zeile__name";
+    name.textContent = textFeld(person, "ansName");
+    text.appendChild(name);
+    var funktion = textFeld(person, "ansATitle");
+    if (funktion) {
+      var funktionEl = document.createElement("p");
+      funktionEl.className = "ansprechpartner-zeile__funktion";
+      funktionEl.textContent = funktion;
+      text.appendChild(funktionEl);
+    }
+    zeile.appendChild(text);
+
+    var mail = textFeld(person, "ansMail");
+    if (mail) zeile.appendChild(baueAktion("mailto:" + mail, ICON_MAIL, "E-Mail", false));
+
+    return zeile;
+  }
+
+  function zeigeAnsprechpartner(zeilen, einstellungen) {
+    if (einstellungen.ansActive !== true) return;
+    var aktive = zeilen.filter(function (p) { return p.ansActive !== false; }).slice().sort(vergleicheAnsprechpartner);
+    if (!aktive.length) return;
+    var titel = document.getElementById("ansprechpartner-titel");
+    var liste = document.getElementById("ansprechpartner-liste");
+    for (var i = 0; i < aktive.length; i++) liste.appendChild(baueAnsprechpartnerZeile(aktive[i]));
+    titel.hidden = false;
+  }
+
+  // ---------- Hauptablauf ----------
+  // Jeder Datenblock wird einzeln geladen; scheitert einer, bleibt sein
+  // Abschnitt einfach leer/verborgen statt die ganze Seite zu blockieren
+  // ("Fehler -> .hinweis" gilt nur, wenn ALLE Blöcke scheitern).
+
+  var fehlerBereich = document.getElementById("fehler-bereich");
+
+  Promise.all([
+    ladeWorkbook(EINSTELLUNGEN_ID, 1),
+    ladeWorkbook(BESCHREIBUNG_ID, 1).catch(function () { return null; }),
+    ladeWorkbook(OEFFNUNGSZEITEN_ID, 1).catch(function () { return null; }),
+    ladeWorkbook(KONTAKT_ID, 1).catch(function () { return null; }),
+    ladeWorkbook(ANSPRECHPARTNER_ID, 200).catch(function () { return null; }),
+  ]).then(function (ergebnisse) {
+    var einstellungen = (ergebnisse[0] && ergebnisse[0][0]) || {};
+    var beschreibung = ergebnisse[1];
+    var oeffnungszeiten = ergebnisse[2];
+    var kontakt = ergebnisse[3];
+    var ansprechpartner = ergebnisse[4];
+
+    if (beschreibung) zeigeBeschreibung(beschreibung, einstellungen);
+    if (oeffnungszeiten) zeigeOeffnungszeiten(oeffnungszeiten, einstellungen);
+    if (kontakt) zeigeAdresse(kontakt);
+    if (kontakt) zeigeKontakt(kontakt, einstellungen);
+    if (ansprechpartner) zeigeAnsprechpartner(ansprechpartner, einstellungen);
+
+    if (!beschreibung && !oeffnungszeiten && !kontakt && !ansprechpartner) {
+      fehlerBereich.appendChild(fehlerKarte("Die Geschäftsstelle-Angaben konnten gerade nicht geladen werden."));
+    }
+  }).catch(function () {
+    fehlerBereich.appendChild(fehlerKarte("Die Geschäftsstelle-Angaben konnten gerade nicht geladen werden."));
+  });
+})();
+</script>
+</body>
+</html>

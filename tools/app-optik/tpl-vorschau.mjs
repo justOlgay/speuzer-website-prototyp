@@ -55,6 +55,8 @@ const SEITEN_TITEL = {
   "Karneval_v3.tpl": "Karneval",
   "Vorstand_v3.tpl": "Vorstand & Kontakt",
   "Sponsoren_v3.tpl": "Sponsoren & Partner",
+  "Geschaeftsstelle_v3.tpl": "Geschäftsstelle & Anfahrt",
+  "Ueber-uns_v3.tpl": "Über uns",
 };
 
 // ---------- Mini-FreeMarker-Teilmenge ----------
@@ -300,6 +302,30 @@ function workbookStub(mockWorksheets) {
   };`;
 }
 
+// C2: Stub für https://www.fussball.de/widgets.js (Spielplan-App.html, aber
+// auch harmlos für alle anderen Vorlagen, falls sie je ein Widget hätten).
+// Zeichnet in jeden ".fussballde_widget"-Container eine graue Fläche mit
+// Beschriftung des Widget-Typs (data-type) statt das echte iframe zu laden.
+function fussballWidgetsStub() {
+  return `(function () {
+    var els = document.getElementsByClassName("fussballde_widget");
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      var typ = el.getAttribute("data-type") || "?";
+      el.style.minHeight = "240px";
+      el.style.display = "flex";
+      el.style.alignItems = "center";
+      el.style.justifyContent = "center";
+      el.style.background = "#E4E7FA";
+      el.style.color = "#191793";
+      el.style.fontFamily = "sans-serif";
+      el.style.fontSize = "13px";
+      el.style.borderRadius = "12px";
+      el.textContent = "FUSSBALL.DE-Widget: " + typ;
+    }
+  })();`;
+}
+
 // ---------- Rendern + Screenshot ----------
 
 function warte(ms) {
@@ -368,6 +394,10 @@ async function screenshotTpl(browser, htmlPfad, namePräfix, mockWorksheets) {
     }
     if (url.includes("cdn.appack.de/modules/appack.workbook-1.4.1.js")) {
       req.respond({ status: 200, contentType: "application/javascript; charset=utf-8", body: workbookStub(mockWorksheets) });
+      return;
+    }
+    if (url.includes("www.fussball.de/widgets.js")) {
+      req.respond({ status: 200, contentType: "application/javascript; charset=utf-8", body: fussballWidgetsStub() });
       return;
     }
     // Webfonts (GitHub Pages) dürfen laden oder offline fehlschlagen – Fallback-Stack greift.
@@ -546,6 +576,26 @@ async function renderVereinsseite(browser, dateiname, mockWorksheets, ergebnisse
   bilderFuerKontaktbogen.push({ beschriftung: dateiname, pfad: ergebnis.zielViewport });
 }
 
+// ---------- C2: Spielplan-App.html (statisch, kein FreeMarker) ----------
+
+async function renderSpielplanApp(browser, ergebnisse, bilderFuerKontaktbogen) {
+  const quellPfad = path.join(APP_DIR, "Spielplan-App.html");
+  if (!existsSync(quellPfad)) {
+    console.warn("  Spielplan-App.html fehlt, übersprungen.");
+    return;
+  }
+  mkdirSync(ZIEL, { recursive: true });
+  // Kein FreeMarker in dieser Datei (statische Seite) – 1:1 kopieren.
+  const inhalt = readFileSync(quellPfad, "utf8");
+  const htmlPfad = path.join(ZIEL, "_spielplan-app.html");
+  writeFileSync(htmlPfad, inhalt, "utf8");
+
+  console.log("Rendere Spielplan-App.html …");
+  const ergebnis = await screenshotTpl(browser, htmlPfad, "spielplan-app", {});
+  ergebnisse.push(ergebnis);
+  bilderFuerKontaktbogen.push({ beschriftung: "Spielplan-App.html (Herren)", pfad: ergebnis.zielViewport });
+}
+
 // ---------- Hauptablauf ----------
 
 async function main() {
@@ -556,7 +606,8 @@ async function main() {
   const arg = process.argv[2];
   const alleTplDateien = readdirSync(APP_DIR).filter((d) => d.endsWith("_v3.tpl")).sort();
   const tplDateien = arg ? alleTplDateien.filter((d) => d === `${arg}.tpl`) : alleTplDateien;
-  if (!tplDateien.length) {
+  const spielplanAppMitrendern = !arg || arg === "Spielplan-App";
+  if (!tplDateien.length && !spielplanAppMitrendern) {
     throw new Error(`Keine Vorlage gefunden für Argument "${arg}" (erwartet z. B. "Verein_v3")`);
   }
 
@@ -571,6 +622,9 @@ async function main() {
       } else {
         await renderVereinsseite(browser, dateiname, mockWorksheets, ergebnisse, bilderFuerKontaktbogen);
       }
+    }
+    if (spielplanAppMitrendern) {
+      await renderSpielplanApp(browser, ergebnisse, bilderFuerKontaktbogen);
     }
     await baueKontaktbogen(browser, bilderFuerKontaktbogen);
   } finally {

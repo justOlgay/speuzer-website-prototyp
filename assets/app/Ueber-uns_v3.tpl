@@ -10,10 +10,10 @@
 <title>${userTitle}</title>
 <style>
 
-/* Speuzer Blau-Weiß – Verein_v3.tpl (C1)
-   appack-Vorlage für die Seite "Verteiler "Verein" (Tab 4 der neuen App)". Kopf- und Tab-Leiste
+/* Speuzer Blau-Weiß – Ueber-uns_v3.tpl (C1)
+   appack-Vorlage für die Seite "Über uns". Kopf- und Tab-Leiste
    kommen von der App-Huelle und sind NICHT Teil dieser Vorlage (kein eigener
-   Kopf, kein eigener Fuss). Erzeugt aus src/app/v3-basis.css + src/app/Verein_v3.html
+   Kopf, kein eigener Fuss). Erzeugt aus src/app/v3-basis.css + src/app/Ueber-uns_v3.html
    durch tools/app-optik/tpl-bauen.mjs (npm run tpl-bauen) – NICHT von Hand
    bearbeiten, sondern die Quelldateien unter src/app/ ändern und neu bauen.
    Details/Datenquellen: siehe assets/app/LIESMICH.md, Abschnitt "Stufe C". */
@@ -238,10 +238,13 @@ svg { display: block; flex: 0 0 auto; }
   text-align: center;
 }
 
-/* Verein_v3.tpl – seitenspezifisch (C1). .visually-hidden und
-   .zeile__untertitel sind hier definiert und nicht in v3-basis.css, weil
-   Startseite_v3.tpl (B1) beide Klassen nicht verwendet (Regel: die Basis
-   ist wörtlich aus Startseite_v3.tpl extrahiert, keine neuen Klassen). */
+/* Ueber-uns_v3.tpl – seitenspezifisch (C2). Statischer Inhalt (keine
+   Workbook-Aufrufe): Text aus der heutigen Workspace-Seite "Über uns.html"
+   und docs/ws/verein.html, Zahlen 11/
+   5 werden von tools/app-optik/tpl-bauen.mjs zur
+   Bauzeit aus data/verein.json bzw. data/karneval.json eingesetzt (kein
+   appack-FreeMarker-Ausdruck an dieser Stelle, siehe Kopfkommentar von
+   tpl-bauen.mjs). */
 
 .visually-hidden {
   position: absolute;
@@ -255,54 +258,56 @@ svg { display: block; flex: 0 0 auto; }
   border: 0;
 }
 
-.zeile__titel,
-.zeile__untertitel {
-  display: block;
+.karte + .abschnittstitel,
+.abschnittstitel + .karte { margin-top: 0; }
+
+.ueber-uns-titel {
+  margin: 0 0 var(--sp-2);
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 26px;
+  text-transform: uppercase;
+  color: var(--blau-950);
 }
 
-.zeile__untertitel {
-  margin: 2px 0 0;
-  font-size: 13px;
-  color: var(--ink-3);
-  overflow-wrap: break-word;
+.ueber-uns-lead {
+  margin: 0;
+  font-size: 15px;
+  color: var(--ink-2);
 }
 
-.abteilungen-raster {
+.karte p { margin: 0 0 var(--sp-2); font-size: 14px; color: var(--ink-2); }
+.karte p:last-child { margin-bottom: 0; }
+
+.leitsatz {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 18px;
+  text-transform: none;
+  color: var(--blau-950);
+  font-style: italic;
+}
+
+.zahlen-raster {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--sp-4);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
 }
 
-@media (min-width: 360px) {
-  .abteilungen-raster { grid-template-columns: 1fr 1fr; }
-}
+.zahl { min-width: 0; text-align: center; }
 
-.abteilung-karte {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--sp-2);
-  min-width: 0;
-  text-decoration: none;
-  color: inherit;
-}
-
-.abteilung-karte svg {
-  width: 32px;
-  height: 32px;
+.zahl__wert {
+  display: block;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 28px;
   color: var(--blau-700);
 }
 
-.abteilung-karte__titel {
-  margin: 0;
-  font-weight: 700;
-  font-size: 16px;
-  overflow-wrap: break-word;
-}
-
-.abteilung-karte__untertitel {
-  margin: 0;
-  font-size: 13px;
+.zahl__label {
+  display: block;
+  font-size: 12px;
   color: var(--ink-3);
   overflow-wrap: break-word;
 }
@@ -311,77 +316,56 @@ svg { display: block; flex: 0 0 auto; }
 <body>
 <main class="inhalt">
 
-<h1 class="visually-hidden">Verein</h1>
+<h1 class="visually-hidden">Über uns</h1>
 
-<h2 class="abschnittstitel">Abteilungen</h2>
-<div class="abteilungen-raster">
-  <a class="karte abteilung-karte" href="nav://sportfreunde04_TextImage_1783343147611">
-    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 20 12 12 21 4 12z"/></svg>
-    <p class="abteilung-karte__titel">Fußball</p>
-    <p class="abteilung-karte__untertitel"><span id="anzahl-fussball">Mannschaften</span></p>
-  </a>
-  <a class="karte abteilung-karte" href="nav://sportfreunde04_TextImage_1780401660343">
-    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 20 12 12 21 4 12z"/></svg>
-    <p class="abteilung-karte__titel">Karneval</p>
-    <p class="abteilung-karte__untertitel">Die Schnauzer · <span id="anzahl-karneval">Gruppen</span></p>
-  </a>
+<div class="karte">
+  <p class="ueber-uns-titel">Wer wir sind</p>
+  <p class="ueber-uns-lead">Frankfurter Fußballverein Sportfreunde 1904 e.&nbsp;V. – im Gallus sagt man einfach „die Speuzer“.</p>
 </div>
 
-<h2 class="abschnittstitel">Der Verein</h2>
+<h2 class="abschnittstitel">Gründung 1904</h2>
+<div class="karte">
+  <p>Gegründet wurde der Verein am 15. Mai 1904 als Frankfurter FC Britannia. Nach dem Ersten Weltkrieg erhielt er 1919 seinen heutigen Namen. Der sportliche Höhepunkt war die Saison 1955/56 in der 1. Amateurliga Hessen; seit den 1960er Jahren spielen die Sportfreunde in den Klassen des Fußballkreises Frankfurt.</p>
+</div>
+
+<h2 class="abschnittstitel">Die Speuzer heute</h2>
+<div class="karte">
+  <div class="zahlen-raster">
+    <div class="zahl">
+      <span class="zahl__wert">1904</span>
+      <span class="zahl__label">gegründet</span>
+    </div>
+    <div class="zahl">
+      <span class="zahl__wert">11</span>
+      <span class="zahl__label">Fußballmannschaften</span>
+    </div>
+    <div class="zahl">
+      <span class="zahl__wert">5</span>
+      <span class="zahl__label">Karnevalgruppen</span>
+    </div>
+  </div>
+  <p>Heute stellt der Verein 11 Fußballmannschaften – von der 1. Herrenmannschaft bis zur G-Jugend – und die Karnevalabteilung „Die Schnauzer“ mit 5 Gruppen. Trainiert und gespielt wird auf dem eigenen Platz an der Mainzer Landstraße 480; die Herren tragen ihre Heimspiele auf der Anlage am Rebstock aus.</p>
+</div>
+
+<h2 class="abschnittstitel">Unsere Werte</h2>
+<div class="karte">
+  <p class="leitsatz">„Wir wollen nicht nur erfolgreiche Mannschaften entwickeln, sondern erfolgreiche Menschen und einen starken Verein für kommende Generationen.“</p>
+  <p>Unsere Werte sind Gemeinschaft, Respekt, Wertschätzung, Verantwortung, Fairness, Entwicklung und Kinderschutz.</p>
+</div>
+
 <div class="liste">
-  <a class="zeile" href="nav://sportfreunde04_TextImage_1780401660340">
-    <span class="zeile__text">
-      <span class="zeile__titel">Vorstand &amp; Kontakt</span>
-      <span class="zeile__untertitel">Wer den Verein führt, wen du erreichst</span>
-    </span>
+  <a class="zeile" href="https://cdn.appack.de/sportfreunde04/pdf/Chronik%20Sportfreunde.pdf" target="_blank" rel="noopener">
+    <span class="zeile__text"><span class="zeile__titel">Chronik (PDF)</span></span>
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
   </a>
-  <a class="zeile" href="nav://sportfreunde04_TextImage_1780401660329">
-    <span class="zeile__text">
-      <span class="zeile__titel">Mitglied werden</span>
-      <span class="zeile__untertitel">Beiträge, Ablauf, Antrag</span>
-    </span>
-    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
-  </a>
-  <a class="zeile" href="nav://sportfreunde04_TextImage_1780401660337">
-    <span class="zeile__text">
-      <span class="zeile__titel">Sponsoren &amp; Partner</span>
-      <span class="zeile__untertitel">Wer uns unterstützt</span>
-    </span>
+  <a class="zeile" href="https://justolgay.github.io/speuzer-website-prototyp/assets/downloads/vereinsphilosophie-und-zukunftskonzept.pdf" target="_blank" rel="noopener">
+    <span class="zeile__text"><span class="zeile__titel">Vereinsphilosophie (PDF)</span></span>
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
   </a>
   <a class="zeile" href="nav://sportfreunde04_Application_1783064196311">
-    <span class="zeile__text">
-      <span class="zeile__titel">Downloads &amp; Anträge</span>
-      <span class="zeile__untertitel">Satzung, Beiträge, Bescheinigungen</span>
-    </span>
+    <span class="zeile__text"><span class="zeile__titel">Kinder- und Jugendschutz</span></span>
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
   </a>
-  <a class="zeile" href="nav://sportfreunde04_TextImage_1783345459688">
-    <span class="zeile__text">
-      <span class="zeile__titel">Spielplan &amp; Tabellen</span>
-      <span class="zeile__untertitel">Alle Mannschaften auf einen Blick</span>
-    </span>
-    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
-  </a>
-  <a class="zeile" href="nav://sportfreunde04_TextImage_1784295208452">
-    <span class="zeile__text">
-      <span class="zeile__titel">Über uns</span>
-      <span class="zeile__untertitel">Seit 1904 im Gallus</span>
-    </span>
-    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
-  </a>
-  <a class="zeile" href="nav://sportfreunde04_TextImage_1780401660324">
-    <span class="zeile__text">
-      <span class="zeile__titel">Geschäftsstelle &amp; Anfahrt</span>
-      <span class="zeile__untertitel">Öffnungszeiten, Adresse, Zugang</span>
-    </span>
-    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
-  </a>
-</div>
-
-<div class="aktionen">
-  <a class="knopf" href="mailto:jugendleitung@sportfreunde04.de?subject=Probetraining%20beim%20FFV%20Sportfreunde%2004&amp;body=Hallo%2C%0A%0Awir%20interessieren%20uns%20f%C3%BCr%20ein%20Probetraining.%0AJahrgang%20des%20Kindes%3A%20%0AVorerfahrung%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe">Probetraining vereinbaren</a>
 </div>
 
 <p class="fuss">F.F.V. Sportfreunde 04 · Vereins-App</p>
@@ -391,53 +375,8 @@ svg { display: block; flex: 0 0 auto; }
 <script src="https://cdn.appack.de/modules/common/jquery-3.4.1.min.js"></script>
 <script src="https://cdn.appack.de/modules/appack.workbook-1.4.1.js"></script>
 <script>
-(function () {
-  "use strict";
-
-  var UEBERSICHT_ID = "6a1ec5fcf68a05bf129cdb7a";
-
-  function ladeWorkbook(id) {
-    if (!window.Workbook || typeof Workbook.load !== "function") {
-      return Promise.reject(new Error("Workbook-API fehlt"));
-    }
-    return Workbook.load({ workbook: id, filter: {}, offset: 0, limit: 5000, sort: "_id", direction: "asc" })
-      .then(function (rows) { return Array.isArray(rows) ? rows : []; });
-  }
-
-  function zaehlungText(anzahl, einzahl, mehrzahl) {
-    return String(anzahl) + " " + (anzahl === 1 ? einzahl : mehrzahl);
-  }
-
-  // Fußballschulen (externes, kostenpflichtiges Zusatzangebot) tragen im
-  // Worksheet dieselbe Kategorie "fussball", zählen aber nicht als
-  // Mannschaft (QA-Befund, C2 Abschnitt 7).
-  function istFussballschule(team) {
-    var t = String(team || "");
-    return /^fu[ßs]{1,2}ballschule/i.test(t) || /academy/i.test(t) || /athletik/i.test(t);
-  }
-
-  ladeWorkbook(UEBERSICHT_ID)
-    .then(function (zeilen) {
-      var fussball = 0;
-      var karneval = 0;
-      for (var i = 0; i < zeilen.length; i++) {
-        var z = zeilen[i] || {};
-        if (z.isActive !== true) continue;
-        var kategorie = String(z.category || "").toLowerCase();
-        if (kategorie === "fussball") {
-          if (!istFussballschule(z.team)) fussball++;
-        } else if (kategorie === "karnevalabteilung") karneval++;
-      }
-      var fussballEl = document.getElementById("anzahl-fussball");
-      if (fussballEl) fussballEl.textContent = zaehlungText(fussball, "Mannschaft", "Mannschaften");
-      var karnevalEl = document.getElementById("anzahl-karneval");
-      if (karnevalEl) karnevalEl.textContent = zaehlungText(karneval, "Gruppe", "Gruppen");
-    })
-    .catch(function () {
-      // Kein Treffer/Fehler: die statischen Texte aus dem Markup
-      // ("Mannschaften" / "Gruppen") bleiben stehen.
-    });
-})();
+// Ueber-uns_v3.tpl lädt keine Worksheets zur Laufzeit (statischer Inhalt,
+// siehe C2-Spezifikation Abschnitt 4) – kein Skript nötig.
 </script>
 </body>
 </html>

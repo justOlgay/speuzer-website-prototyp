@@ -21,16 +21,27 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const SRC_APP = path.join(ROOT, "src", "app");
 const ZIEL_APP = path.join(ROOT, "assets", "app");
+const DATA_DIR = path.join(ROOT, "data");
 
 const BASIS_CSS = readFileSync(path.join(SRC_APP, "v3-basis.css"), "utf8").trim();
 
-// Reihenfolge wie in der C1-Spezifikation (Tabelle "Ziel").
+// Reihenfolge wie in der C1-Spezifikation (Tabelle "Ziel"), C2 hängt die
+// beiden neuen dynamischen Seiten (Geschäftsstelle & Anfahrt, Über uns) an.
 const SEITEN = [
   { name: "Verein_v3", beschreibung: "Verteiler \"Verein\" (Tab 4 der neuen App)" },
   { name: "Mannschaften_v3", beschreibung: "Fußball: alle aktiven Mannschaften" },
   { name: "Karneval_v3", beschreibung: "Karnevalabteilung mit ihren Gruppen" },
   { name: "Vorstand_v3", beschreibung: "Vorstand & Ansprechpartner" },
   { name: "Sponsoren_v3", beschreibung: "Sponsoren & Partner" },
+  { name: "Geschaeftsstelle_v3", beschreibung: "Geschäftsstelle & Anfahrt" },
+  { name: "Ueber-uns_v3", beschreibung: "Über uns" },
+];
+
+// C2, Abschnitt 5: statische Workspace-Seite (kein ${userTitle}, kein
+// appack-Kopf) – aktuell nur Spielplan-App.html (FUSSBALL.DE-Widgets sind
+// nur für cdn.appack.de freigegeben, siehe LIESMICH.md).
+const STATISCHE_SEITEN = [
+  { name: "Spielplan-App", titel: "Spielplan & Tabellen" },
 ];
 
 // Kopf der Vorlage als Zeilen-Array statt Template-Literal: "${userTitle}"
@@ -109,16 +120,111 @@ function baueVorlage(name, beschreibung, teile) {
   return teileHtml.join("\n");
 }
 
+// ---------- Bauzeit-Werte (C2): Zahlen für Ueber-uns_v3 aus data/*.json ----------
+// Kein appack-"${" – eigene Platzhalter (__NAME__), hier per String.replace
+// ersetzt, bevor die Vorlage zusammengesetzt wird.
+
+function bauzeitWerte() {
+  const verein = JSON.parse(readFileSync(path.join(DATA_DIR, "verein.json"), "utf8"));
+  const karneval = JSON.parse(readFileSync(path.join(DATA_DIR, "karneval.json"), "utf8"));
+  return {
+    __ANZAHL_MANNSCHAFTEN__: String(verein.anzahl_mannschaften ?? ""),
+    __ANZAHL_KARNEVALGRUPPEN__: String((karneval.gruppen ?? []).length),
+  };
+}
+
+function ersetzeBauzeitWerte(html, werte) {
+  let ergebnis = html;
+  for (const [platzhalter, wert] of Object.entries(werte)) {
+    ergebnis = ergebnis.split(platzhalter).join(wert);
+  }
+  return ergebnis;
+}
+
+// ---------- Statische Seite (C2, Abschnitt 5) ----------
+
+const KOPF_STATISCH_ZEILEN = (titel) => [
+  "<!DOCTYPE html>",
+  '<html lang="de">',
+  "<head>",
+  '<meta charset="utf-8">',
+  '<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">',
+  '<meta name="format-detection" content="telephone=no">',
+  '<meta name="format-detection" content="address=no">',
+  '<meta name="format-detection" content="email=no">',
+  '<meta name="format-detection" content="date=no">',
+  `<title>${titel}</title>`,
+  "<style>",
+];
+
+function kopfKommentarStatisch(name) {
+  return [
+    "<!-- Speuzer Blau-Weiß – " + name + ".html (C2)",
+    "     Statische Workspace-Seite (kein appack-Modul, kein FreeMarker-Titelausdruck): FUSSBALL.DE-",
+    "     Widgets sind nur für die Domain cdn.appack.de freigegeben, eine dynamische",
+    "     .tpl-Seite (appack.de/rest-api/drender/...) könnte sie nicht zeigen. Wird 1:1 in",
+    "     den appack-Workspace hochgeladen und unter",
+    "     https://cdn.appack.de/sportfreunde04/workspace/" + name + ".html ausgeliefert.",
+    "     Erzeugt aus src/app/" + name + ".html durch tools/app-optik/tpl-bauen.mjs",
+    "     (npm run tpl-bauen) – NICHT von Hand bearbeiten. Details: assets/app/LIESMICH.md,",
+    "     Abschnitt \"Stufe C2\". -->",
+    "",
+  ].join("\n");
+}
+
+function baueStatischeVorlage(name, titel, teile) {
+  const teileHtml = [
+    KOPF_STATISCH_ZEILEN(titel).join("\n"),
+    "",
+    kopfKommentarStatisch(name),
+    BASIS_CSS,
+    "",
+    teile.style,
+    "</style>",
+    "</head>",
+    "<body>",
+    '<main class="inhalt">',
+    "",
+    teile.body,
+    "",
+    "</main>",
+    "",
+    "<script>",
+    teile.script,
+    "</script>",
+    "</body>",
+    "</html>",
+    "",
+  ];
+  return teileHtml.join("\n");
+}
+
 function main() {
+  const werte = bauzeitWerte();
   for (const { name, beschreibung } of SEITEN) {
     const quellDatei = path.join(SRC_APP, `${name}.html`);
-    const html = readFileSync(quellDatei, "utf8");
+    let html = readFileSync(quellDatei, "utf8");
+    if (name === "Ueber-uns_v3") html = ersetzeBauzeitWerte(html, werte);
     const teile = teileQuelle(html, `${name}.html`);
     const vorlage = baueVorlage(name, beschreibung, teile);
     const zielDatei = path.join(ZIEL_APP, `${name}.tpl`);
     writeFileSync(zielDatei, vorlage, "utf8");
     console.log(`  assets/app/${name}.tpl geschrieben (${vorlage.length} Zeichen)`);
   }
+
+  const widgets = JSON.parse(readFileSync(path.join(DATA_DIR, "widgets.json"), "utf8"));
+  delete widgets._hinweis;
+  for (const { name, titel } of STATISCHE_SEITEN) {
+    const quellDatei = path.join(SRC_APP, `${name}.html`);
+    let html = readFileSync(quellDatei, "utf8");
+    html = html.split("__WIDGETS_JSON__").join(JSON.stringify(widgets));
+    const teile = teileQuelle(html, `${name}.html`);
+    const vorlage = baueStatischeVorlage(name, titel, teile);
+    const zielDatei = path.join(ZIEL_APP, `${name}.html`);
+    writeFileSync(zielDatei, vorlage, "utf8");
+    console.log(`  assets/app/${name}.html geschrieben (${vorlage.length} Zeichen)`);
+  }
+
   console.log("Fertig.");
 }
 
