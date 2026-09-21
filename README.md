@@ -73,7 +73,15 @@ werden nach `docs/vorher-nachher/`, `docs/app/` sowie `docs/404.html` gebaut.
 ## Befehle
 
 ```
-npm run build     Baut die Seiten nach docs/ (Workspace-Seiten und die Hülle)
+npm run build     Baut die Seiten nach docs/ (Workspace-Seiten und die Hülle), danach
+                  automatisch npm run appack-paket
+npm run appack-paket
+                  Baut aus docs/ws/*.html und docs/assets/css/site.css das
+                  appack-Upload-Paket nach dist/appack-paket/web/ (Teil von npm run
+                  build, siehe tools/appack-paket.mjs)
+npm run appack-paket-pruefen
+                  Prüft dist/appack-paket/web/ über einen lokalen Static-Server bei
+                  390/1440px (siehe tools/appack-paket-pruefen.mjs)
 npm run huelle-bilder
                   Erzeugt assets/huelle/startbild.jpg und assets/huelle/wappen-512.png
                   aus den SVG-Wappen (assets/logo/) per headless Chrome (puppeteer-core).

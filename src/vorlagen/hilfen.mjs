@@ -98,6 +98,27 @@ export function fussballdeTeamUrl(team) {
   return `https://www.fussball.de/mannschaft/x/-/saison/2627/team-id/${team.fussballde_id}`;
 }
 
+// ---------- FUSSBALL.DE-Widgets (W2) ----------
+
+// widgets.js von FUSSBALL.DE genau einmal je Seite laden – aber nur, wenn ein
+// ".fussballde_widget" sichtbar ist (also im appack-Modus, siehe
+// tools/appack-paket.mjs: dort verliert "[data-nur-appack]" sein
+// "hidden"-Attribut; im Prototyp bleibt es und ":not([hidden])" schlägt
+// fehl). "hidden" allein hindert ein <script> nicht am Laden, deshalb kein
+// <script src="…widgets.js"> im data-nur-appack-Block, sondern dieser
+// bedingte Nachlader (einmal pro Seite einbinden, siehe index.mjs/team.mjs/
+// tabellen.mjs).
+export const FUSSBALLDE_WIDGET_LADER = `<script>
+(function () {
+  if (document.querySelector('[data-nur-appack]:not([hidden]) .fussballde_widget')) {
+    var s = document.createElement('script');
+    s.src = 'https://www.fussball.de/widgets.js';
+    s.defer = true;
+    document.head.appendChild(s);
+  }
+})();
+</script>`;
+
 // ---------- Mail-Link mit <wbr> vor "@" und vor jedem "." danach ----------
 
 // P7-Korrektur A3: <wbr> nur noch direkt vor dem "@", nicht mehr vor jedem

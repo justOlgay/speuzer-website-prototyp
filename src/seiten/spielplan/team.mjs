@@ -5,11 +5,9 @@
 import {
   datumLang,
   zeit,
-  monatName,
-  istVergangen,
   wettbewerbTag,
   naechsteSpiele,
-  spielZeile,
+  FUSSBALLDE_WIDGET_LADER,
 } from "../../vorlagen/hilfen.mjs";
 
 // Diese Seiten liegen immer unter "/spielplan/<slug>/" (Tiefe 2), daher immer
@@ -128,53 +126,65 @@ function naechstesSpielAbschnitt(team, daten) {
 </section>`;
 }
 
-// ---------- Hauptspalte: Alle Spiele ----------
+// ---------- Hauptspalte: Ganze Saison (W2: Generator-iframe, beide Modi) ----------
 
-function hauptspalte(team, daten) {
-  const stand = daten.stand;
-  const alle = (daten.spiele ?? [])
-    .filter((s) => s.team === team.slug)
-    .slice()
-    .sort((a, b) => (a.datum + a.zeit).localeCompare(b.datum + b.zeit));
+// Team -> Gruppe des Spielplan-Generators (https://justolgay.github.io/
+// speuzer-spielplan/app-<gruppe>.html). Der Generator bietet keine
+// Team-Vorauswahl per URL (kein #<Team>/?team=<Team> im Quelltext, "aktiv"
+// ist dort fest auf den ersten Tab der Gruppe gesetzt) – deshalb wird immer
+// die ganze Gruppen-Seite eingebettet, siehe ganzeSaisonAbschnitt() unten.
+const GRUPPE_JE_TEAM = {
+  herren: "herren",
+  "a-jugend": "a-jugend",
+  d1: "d-jugend",
+  d2: "d-jugend",
+  d3: "d-jugend",
+  e1: "e-jugend",
+  e2: "e-jugend",
+  e3: "e-jugend",
+  f1: "f-jugend",
+  f2: "f-jugend",
+  "g-jugend": "g-jugend",
+};
 
-  const hatOffeneVergangene = alle.some(
-    (s) => !s.entfaellt && !s.ergebnis && istVergangen(s, stand)
-  );
+const GENERATOR_BASIS = "https://justolgay.github.io/speuzer-spielplan/";
 
-  const gruppen = [];
-  for (const s of alle) {
-    const monat = monatName(s.datum);
-    let gruppe = gruppen.find((g) => g.monat === monat);
-    if (!gruppe) {
-      gruppe = { monat, spiele: [] };
-      gruppen.push(gruppe);
-    }
-    gruppe.spiele.push(s);
-  }
+// W2: "Ganze Saison" ist in BEIDEN Ausgabemodi (Prototyp und appack) ein
+// <iframe> auf die Gruppen-Seite des Spielplan-Generators – keine
+// eingefrorenen Daten mehr, daher kein data-nur-appack/data-nur-prototyp an
+// dieser Stelle. Ohne Team-Vorauswahl im Generator (siehe oben) nennt der
+// Hinweistext die anderen Teams der Gruppe als Geschwister, statt "Tab X
+// wählen" zu schreiben.
+function ganzeSaisonAbschnitt(team, daten) {
+  const gruppe = GRUPPE_JE_TEAM[team.slug];
+  const generatorUrl = `${GENERATOR_BASIS}app-${gruppe}.html`;
 
-  const gruppenHtml = gruppen
-    .map((gruppe) => {
-      const zeilen = gruppe.spiele
-        .map((s) => spielZeile(s, { pfad: PFAD, mitTeam: false, vergangen: istVergangen(s, stand) }))
-        .join("\n      ");
-      return `<h3>${escapeHtml(gruppe.monat)}</h3>
-    <ul class="spiele" role="list">
-      ${zeilen}
-    </ul>`;
-    })
-    .join("\n    ");
-
-  const hinweisHtml = hatOffeneVergangene
-    ? `<div class="hinweis hinweis--info">
-      <p style="margin:0;">Ergebnisse stehen im Prototyp noch nicht in der Datenquelle. In der App und auf FUSSBALL.DE sind sie aktuell.</p>
-    </div>`
-    : "";
+  const gruppenTeams = (daten.teams ?? []).filter((t) => GRUPPE_JE_TEAM[t.slug] === gruppe);
+  const geschwisterHinweis =
+    gruppenTeams.length > 1
+      ? `<p class="meta">Diese Übersicht zeigt die ganze Gruppe: ${escapeHtml(
+          gruppenTeams.map((t) => t.kurz).join(", ")
+        )}.</p>`
+      : "";
 
   return `<div class="fluss">
-    <h2>Alle Spiele</h2>
-    <p class="meta">${alle.length} Spiele · Stand ${datumLang(stand)}</p>
-    ${hinweisHtml}
-    ${gruppenHtml || `<p class="meta">Keine Spiele in data/spiele.json gefunden.</p>`}
+    <h2>Ganze Saison</h2>
+    <iframe src="${escapeHtml(generatorUrl)}" title="${escapeHtml(`Spielplan ${team.name} (Generator, DFBnet)`)}" loading="lazy" data-generator-iframe style="width:100%;height:640px;border:0;border-radius:var(--r-lg);display:block;"></iframe>
+    ${geschwisterHinweis}
+    <p class="meta">Quelle: DFBnet, täglich aktualisiert. Tippen auf ein Spiel öffnet FUSSBALL.DE.</p>
+    <script>
+    (function () {
+      var iframe = document.querySelector('[data-generator-iframe]');
+      if (!iframe) return;
+      window.addEventListener('message', function (event) {
+        if (event.origin !== 'https://justolgay.github.io') return;
+        if (event.source !== iframe.contentWindow) return;
+        var h = event.data && event.data.speuzerHeight;
+        if (typeof h !== 'number' || h < 200 || h > 20000) return;
+        iframe.style.height = h + 'px';
+      });
+    })();
+    </script>
   </div>`;
 }
 
@@ -191,15 +201,25 @@ function seitenspalte(team, daten) {
       <p class="meta">Einmal abonnieren – Verlegungen kommen automatisch an.</p>
     </div>`;
 
+  // W2: appack-Modus zeigt das FUSSBALL.DE-Tabellen-Widget des Teams (aus
+  // data/widgets.json), der Prototyp weiterhin die eingefrorene Platzangabe
+  // wie bisher. Teams ohne Tabelle (Kinderfußball F/G) behalten ihren
+  // Hinweistext unverändert in beiden Modi.
   const tabelleEintrag = daten.tabellen?.teams?.[team.slug];
   const eigene = tabelleEintrag?.zeilen?.find((z) => z.eigene);
+  const tabelleWidgetId = daten.widgets?.[team.slug]?.tabelle ?? "";
   const tabelleKarte = team.tabelle
     ? `<div class="karte fluss">
       <h2 class="karte__titel">Tabelle</h2>
-      ${eigene ? `<p class="meta">Platz ${eigene.platz} von ${tabelleEintrag.zeilen.length} · ${eigene.punkte} Punkte</p>` : ""}
-      <p class="knopfzeile">
-        <a class="knopf knopf--sekundaer" href="${PFAD}tabellen/#${team.slug}">Zur Tabelle</a>
-      </p>
+      <div data-nur-appack hidden>
+        <div class="fussballde_widget" data-id="${escapeHtml(tabelleWidgetId)}" data-type="table"></div>
+      </div>
+      <div data-nur-prototyp>
+        ${eigene ? `<p class="meta">Platz ${eigene.platz} von ${tabelleEintrag.zeilen.length} · ${eigene.punkte} Punkte</p>` : ""}
+        <p class="knopfzeile">
+          <a class="knopf knopf--sekundaer" href="${PFAD}tabellen/#${team.slug}">Zur Tabelle</a>
+        </p>
+      </div>
     </div>`
     : `<div class="karte fluss">
       <h2 class="karte__titel">Tabelle</h2>
@@ -240,12 +260,13 @@ function seiteFuerTeam(team, daten) {
     `<section class="abschnitt">
   <div class="container">
     <div class="zweispaltig">
-      ${hauptspalte(team, daten)}
+      ${ganzeSaisonAbschnitt(team, daten)}
       ${seitenspalte(team, daten)}
     </div>
   </div>
 </section>`,
     zurueckAbschnitt(),
+    team.tabelle ? FUSSBALLDE_WIDGET_LADER : "",
   ].join("\n");
 
   return {

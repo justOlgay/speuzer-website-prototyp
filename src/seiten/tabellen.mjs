@@ -1,7 +1,7 @@
 // Tabellen /tabellen/ (P4) – eine Sprungliste plus je Team mit Tabelle ein
 // Abschnitt mit der aktuellen Tabelle aus data/tabellen.json.
 
-import { datumLang, zeit, fussballdeTeamUrl } from "../vorlagen/hilfen.mjs";
+import { datumLang, zeit, fussballdeTeamUrl, FUSSBALLDE_WIDGET_LADER } from "../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/tabellen/" (Tiefe 1), daher immer "../"
 // (siehe pfadZurWurzel() in tools/build.mjs).
@@ -64,6 +64,11 @@ function tabelleZeile(zeile) {
       </tr>`;
 }
 
+// W2: appack-Modus zeigt das FUSSBALL.DE-Tabellen-Widget des Teams (aus
+// data/widgets.json, in derselben Reihenfolge wie bisher: Herren, A, D1, D2,
+// D3, E1, E2, E3), der Prototyp weiterhin die eingefrorene Tabelle wie
+// heute. Überschrift, Staffel-Angabe und der Link zum Spielplan bleiben in
+// beiden Modi sichtbar.
 function teamAbschnitt(team, daten, index) {
   const eintrag = daten.tabellen?.teams?.[team.slug];
   const zeilen = eintrag?.zeilen ?? [];
@@ -81,32 +86,39 @@ function teamAbschnitt(team, daten, index) {
     ? `<p class="meta">zg. = zurückgezogen, Ergebnisse werden eingerechnet</p>`
     : "";
 
+  const widgetId = daten.widgets?.[team.slug]?.tabelle ?? "";
+
   return `<section class="abschnitt${hellKlasse}">
   <div class="container fluss">
     <h2 id="${team.slug}">${escapeHtml(team.name)}</h2>
     <p class="meta">${escapeHtml(eintrag?.staffel ?? team.staffel ?? "")}</p>
-    <div class="tabelle-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th class="zahl">Platz</th>
-            <th class="tabelle__mannschaft">Mannschaft</th>
-            <th class="zahl">Sp</th>
-            <th class="zahl tabelle__optional">G</th>
-            <th class="zahl tabelle__optional">U</th>
-            <th class="zahl tabelle__optional">V</th>
-            <th class="zahl tabelle__optional">Tore</th>
-            <th class="zahl tabelle__optional-2">Diff</th>
-            <th class="zahl">Pkt</th>
-          </tr>
-        </thead>
-        <tbody>
-      ${zeilenHtml}
-        </tbody>
-      </table>
+    <div data-nur-appack hidden>
+      <div class="fussballde_widget" data-id="${escapeHtml(widgetId)}" data-type="table"></div>
     </div>
-    ${fussnote}
-    ${fussballdeLink}
+    <div data-nur-prototyp>
+      <div class="tabelle-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="zahl">Platz</th>
+              <th class="tabelle__mannschaft">Mannschaft</th>
+              <th class="zahl">Sp</th>
+              <th class="zahl tabelle__optional">G</th>
+              <th class="zahl tabelle__optional">U</th>
+              <th class="zahl tabelle__optional">V</th>
+              <th class="zahl tabelle__optional">Tore</th>
+              <th class="zahl tabelle__optional-2">Diff</th>
+              <th class="zahl">Pkt</th>
+            </tr>
+          </thead>
+          <tbody>
+        ${zeilenHtml}
+          </tbody>
+        </table>
+      </div>
+      ${fussnote}
+      ${fussballdeLink}
+    </div>
     <p><a href="${PFAD}spielplan/${team.slug}/">Spielplan ${escapeHtml(team.kurz)}</a></p>
   </div>
 </section>`;
@@ -130,6 +142,7 @@ export function seite(daten) {
     sprunglisteAbschnitt(teamsMitTabelle),
     ...teamsMitTabelle.map((team, index) => teamAbschnitt(team, daten, index)),
     kinderfussballHinweisAbschnitt(),
+    FUSSBALLDE_WIDGET_LADER,
   ].join("\n");
 
   return {

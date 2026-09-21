@@ -1,7 +1,8 @@
 // Mitglied werden /mitglied-werden/ (P7) – Beiträge, Ablauf, Unterlagen und
-// ein Formularentwurf für den Aufnahmeantrag. Das Formular ist ein reiner
-// Entwurf: es sendet nichts, speichert nichts, setzt keine Cookies (siehe
-// assets/js/formular.js).
+// der Aufnahmeantrag. W2: der frühere Formularentwurf (assets/js/formular.js)
+// ist ersetzt durch einen Knopf auf das appack-Formular des Vereins
+// (speichert in ein Worksheet, Bestätigung per E-Mail an die
+// Geschäftsstelle), siehe antragOnlineAbschnitt() unten.
 
 import { PROBETRAINING_MAILTO } from "../vorlagen/hilfen.mjs";
 
@@ -135,7 +136,7 @@ function ablaufAbschnitt(daten) {
     <h2>So wird man Mitglied</h2>
     <ol class="schritte">
       <li><p>Probetraining: ${escapeHtml(unterlagen.probetraining ?? "")} <a href="${escapeHtml(PROBETRAINING_MAILTO)}">Probetraining vereinbaren</a></p></li>
-      <li><p>Aufnahmeantrag ausfüllen – als PDF ausdrucken oder unten den Online-Entwurf nutzen.</p></li>
+      <li><p>Aufnahmeantrag ausfüllen – online oder als PDF.</p></li>
       <li><p>Unterlagen abgeben: im Vereinsheim oder beim Trainerteam. Was dazugehört, steht unten.</p></li>
       <li><p>Spielerpass: Der Verein beantragt die Spielerlaubnis beim HFV. ${escapeHtml(beitraege.eintritt ?? "")}</p></li>
     </ol>
@@ -196,179 +197,28 @@ function unterlagenAbschnitt(daten) {
 </section>`;
 }
 
-// ---------- Aufnahmeantrag online – Entwurf ----------
+// ---------- Aufnahmeantrag online stellen ----------
 
-// Text-/Zahlenfeld mit Label, optionalem Pflicht-Stern und einer (per
-// assets/js/formular.js befüllten) Fehlerzeile darunter.
-function textFeld({ id, label, type = "text", required = false, pattern, inputmode, maxlength, autocomplete, hinweis }) {
-  const attrTeile = [
-    `type="${type}"`,
-    `id="${id}"`,
-    `name="${id}"`,
-    required ? "required" : null,
-    pattern ? `pattern="${pattern}"` : null,
-    inputmode ? `inputmode="${inputmode}"` : null,
-    maxlength ? `maxlength="${maxlength}"` : null,
-    autocomplete !== undefined ? `autocomplete="${autocomplete}"` : null,
-    `aria-describedby="${id}-fehler"`,
-  ]
-    .filter(Boolean)
-    .join(" ");
+// W2: löst den früheren Formularentwurf (assets/js/formular.js) ab – der
+// Antrag läuft jetzt über das appack-Formular des Vereins (speichert in ein
+// Worksheet, Bestätigung per E-Mail an die Geschäftsstelle). Öffnet im
+// selben Rahmen (kein target="_blank"), daneben unverändert der bestehende
+// PDF-Knopf für den Aufnahmeantrag.
+const APPACK_FORMULAR_URL = "https://appack.de/rest-api/drender/6a903758337cdc97f94f2655";
 
-  const pflichtHtml = required ? ` <span class="formular__pflicht">*</span>` : "";
-  const hinweisHtml = hinweis ? `<p class="meta">${escapeHtml(hinweis)}</p>` : "";
-
-  return `<div class="formular__feld">
-        <label for="${id}">${escapeHtml(label)}${pflichtHtml}</label>
-        <input ${attrTeile}>
-        ${hinweisHtml}
-        <p class="formular__fehler" id="${id}-fehler" hidden></p>
-      </div>`;
-}
-
-// Einzelne Pflicht-/Freiwilligkeits-Checkbox mit eigener Fehlerzeile.
-// labelHtml wird nicht escaped (kann z. B. das Sternchen-Span enthalten).
-// P8-Korrektur A2: .formular__checkzeile ist jetzt selbst das <label> (statt
-// eines <div> mit separatem <label for>) – Eingabe und Text liegen darin,
-// das <label> ist damit die ganze, mindestens 44px hohe Zeile und zugleich
-// das Tippziel, obwohl der sichtbare Kasten selbst nur noch 24×24px groß ist
-// (siehe komponenten.css).
-function checkboxFeld({ id, labelHtml, required = false, meta }) {
-  const pflichtHtml = required ? ` <span class="formular__pflicht">*</span>` : "";
-  const metaHtml = meta ? `<p class="meta">${escapeHtml(meta)}</p>` : "";
-
-  return `<div class="formular__checkzeile-block">
-      <label class="formular__checkzeile">
-        <input type="checkbox" id="${id}" name="${id}"${required ? " required" : ""} aria-describedby="${id}-fehler">
-        <span>${labelHtml}${pflichtHtml}</span>
-      </label>
-      ${metaHtml}
-      <p class="formular__fehler" id="${id}-fehler" hidden></p>
-    </div>`;
-}
-
-// Wie checkboxFeld(), aber die Beschriftung steht in einem <p> mit
-// aria-labelledby statt in <label for>: Sie enthält einen Link (auf die
-// Satzung), und ein Link innerhalb eines <label> wäre vom Tippziel-Gate in
-// tools/pruefen.mjs nicht ausgenommen (das gilt nur für Links in <p>/<li>) –
-// als Fließtext-Link in einem <p> dagegen schon.
-function checkboxFeldMitLink({ id, textHtml, required = false }) {
-  const pflichtHtml = required ? ` <span class="formular__pflicht">*</span>` : "";
-  return `<div class="formular__checkzeile-block">
-      <div class="formular__checkzeile">
-        <input type="checkbox" id="${id}" name="${id}"${required ? " required" : ""} aria-describedby="${id}-fehler" aria-labelledby="${id}-text">
-        <p id="${id}-text">${textHtml}${pflichtHtml}</p>
-      </div>
-      <p class="formular__fehler" id="${id}-fehler" hidden></p>
-    </div>`;
-}
-
-function formularAbschnitt(daten) {
-  const beitraege = daten.beitraege ?? {};
-  const satzung = downloadEintrag(daten, "Satzung");
-  const satzungHref = satzung ? escapeHtml(satzung.datei) : "#";
-
-  const beitragsgruppenOptionen = (beitraege.fussball ?? [])
-    .map(
-      (g) =>
-        `<option value="${escapeHtml(g.gruppe)}">${escapeHtml(g.gruppe)} – ${escapeHtml(String(g.monat))} € monatlich</option>`
-    )
-    .join("\n          ");
-
-  const mandatstext = `Ich ermächtige den Frankfurter Fußballverein Sportfreunde 1904 e.V. (Gläubiger-ID ${escapeHtml(beitraege.glaeubiger_id ?? "")}, Mandatsreferenz „${escapeHtml(beitraege.mandatsreferenz ?? "")}“), Zahlungen von meinem Konto mittels Lastschrift einzuziehen. Zugleich weise ich mein Kreditinstitut an, die vom Verein auf mein Konto gezogenen Lastschriften einzulösen. Ich kann innerhalb von acht Wochen, beginnend mit dem Belastungsdatum, die Erstattung des belasteten Betrages verlangen. Es gelten dabei die mit meinem Kreditinstitut vereinbarten Bedingungen.`;
+function antragOnlineAbschnitt(daten) {
+  const aufnahmeantrag = downloadEintrag(daten, "Aufnahmeantrag");
 
   return `<section class="abschnitt--hell abschnitt">
   <div class="container fluss">
-    <h2>Aufnahmeantrag online – Entwurf</h2>
-    <div class="hinweis hinweis--info">
-      <p style="margin:0;">Dieses Formular ist ein Entwurf für den neuen Webauftritt. Im Prototyp wird nichts gesendet und nichts gespeichert. Der gültige Weg ist der Aufnahmeantrag als PDF.</p>
+    <h2>Aufnahmeantrag online stellen</h2>
+    <div class="karte fluss">
+      <p>Der Antrag läuft über das Formular des Vereins: Angaben, Abteilung, Beitragsgruppe, SEPA-Mandat und Unterschrift in einem Schritt. Die Geschäftsstelle bestätigt per E-Mail.</p>
+      <p class="knopfzeile">
+        <a class="knopf knopf--gross" href="${escapeHtml(APPACK_FORMULAR_URL)}">Antrag online ausfüllen</a>
+        ${downloadKnopf(aufnahmeantrag, "Aufnahmeantrag (PDF)")}
+      </p>
     </div>
-
-    <form class="formular inhalt" novalidate>
-      <p class="meta">* Pflichtfeld</p>
-
-      <fieldset>
-        <legend>Mitgliedschaft</legend>
-        <div class="formular__checkgruppe">
-          <label class="formular__checkzeile">
-            <input type="checkbox" id="mw-abt-fussball" name="abteilung-fussball" aria-describedby="mw-abteilung-fehler">
-            <span>Fußballabteilung</span>
-          </label>
-          <label class="formular__checkzeile">
-            <input type="checkbox" id="mw-abt-karneval" name="abteilung-karneval" aria-describedby="mw-abteilung-fehler">
-            <span>Karnevalabteilung</span>
-          </label>
-          <p class="formular__fehler" id="mw-abteilung-fehler" hidden>Bitte mindestens eine Abteilung wählen.</p>
-        </div>
-        <div class="formular__feld">
-          <label for="mw-beitragsgruppe">Beitragsgruppe</label>
-          <select id="mw-beitragsgruppe" name="beitragsgruppe">
-            ${beitragsgruppenOptionen}
-          </select>
-        </div>
-      </fieldset>
-
-      <fieldset>
-        <legend>Persönliche Angaben</legend>
-        ${textFeld({ id: "mw-vorname", label: "Vorname", required: true, autocomplete: "given-name" })}
-        ${textFeld({ id: "mw-nachname", label: "Nachname", required: true, autocomplete: "family-name" })}
-        ${textFeld({ id: "mw-geburtsdatum", label: "Geburtsdatum", type: "date", required: true, autocomplete: "bday" })}
-        ${textFeld({ id: "mw-strasse", label: "Straße und Hausnummer", required: true, autocomplete: "street-address" })}
-        ${textFeld({ id: "mw-plz", label: "PLZ", required: true, inputmode: "numeric", pattern: "\\d{5}", maxlength: 5, autocomplete: "postal-code" })}
-        ${textFeld({ id: "mw-ort", label: "Ort", required: true, autocomplete: "address-level2" })}
-        ${textFeld({ id: "mw-email", label: "E-Mail", type: "email", required: true, autocomplete: "email" })}
-        ${textFeld({ id: "mw-telefon", label: "Telefon", type: "tel", autocomplete: "tel", hinweis: "für Rückfragen, freiwillig" })}
-      </fieldset>
-
-      <fieldset>
-        <legend>Gesetzliche Vertretung (bei Minderjährigen)</legend>
-        <p>Bei Kindern und Jugendlichen unter 18 Jahren stellen die Erziehungsberechtigten den Antrag.</p>
-        ${textFeld({ id: "mw-vertreter-name", label: "Name der/des Erziehungsberechtigten" })}
-        ${textFeld({ id: "mw-vertreter-email", label: "E-Mail", type: "email" })}
-        ${checkboxFeld({ id: "mw-volljaehrig", labelHtml: "Ich bin volljährig und zur Anmeldung berechtigt.", required: true })}
-      </fieldset>
-
-      <fieldset>
-        <legend>Familienbeitrag (optional)</legend>
-        <p class="meta">Bei Familienbeitrag bitte die weiteren Familienmitglieder mit Name und Geburtsdatum im PDF-Antrag angeben.</p>
-      </fieldset>
-
-      <fieldset>
-        <legend>SEPA-Lastschriftmandat</legend>
-        ${textFeld({ id: "mw-kontoinhaber", label: "Kontoinhaber/in", required: true, autocomplete: "cc-name" })}
-        ${textFeld({ id: "mw-iban", label: "IBAN", required: true, inputmode: "text", pattern: "DE\\d{2}\\s?(\\d{4}\\s?){4}\\d{2}", autocomplete: "off" })}
-        ${textFeld({ id: "mw-kreditinstitut", label: "Kreditinstitut", required: true })}
-        <p class="meta">${mandatstext}</p>
-        ${checkboxFeld({ id: "mw-sepa-mandat", labelHtml: "Ich erteile das SEPA-Lastschriftmandat.", required: true })}
-      </fieldset>
-
-      <fieldset>
-        <legend>Einwilligungen</legend>
-        ${checkboxFeldMitLink({
-          id: "mw-einwilligung-satzung",
-          // P8, Abschnitt F: "Datenschutzerklärung" ist jetzt ein echter Link
-          // auf /datenschutz/ statt reinem Text.
-          textHtml: `Ich habe die <a href="${satzungHref}" rel="noopener" target="_blank">Satzung (PDF)</a> und die <a href="${PFAD}datenschutz/">Datenschutzerklärung</a> gelesen und erkenne die Satzung, Ordnungen und Beiträge an.`,
-          required: true,
-        })}
-        ${checkboxFeld({
-          id: "mw-einwilligung-fotos",
-          labelHtml: "Ich bin damit einverstanden, dass Fotos vom Vereinsleben, auf denen ich bzw. mein Kind zu sehen ist, in Vereinsmedien veröffentlicht werden. Diese Einwilligung ist freiwillig und jederzeit widerrufbar.",
-          meta: "Die Foto-Einwilligung steht auch im Aufnahmeantrag (Seite 2).",
-        })}
-      </fieldset>
-
-      <fieldset>
-        <legend>Absenden</legend>
-        <p class="knopfzeile">
-          <button type="submit" class="knopf knopf--gross">Antrag prüfen</button>
-        </p>
-        <p class="meta">Der Antrag wird im Prototyp nicht gesendet.</p>
-        <div class="hinweis hinweis--info formular__erfolg" role="status" hidden>
-          <p style="margin:0;">Danke – im echten Auftritt geht der Antrag jetzt an die Geschäftsstelle. Im Prototyp wurde nichts gesendet.</p>
-        </div>
-      </fieldset>
-    </form>
   </div>
 </section>`;
 }
@@ -388,17 +238,13 @@ function abschlussAbschnitt() {
 }
 
 export function seite(daten) {
-  // formular.js gehört nur zu dieser Seite (Validierungsanzeige des
-  // Formularentwurfs) – daher hier als Teil von "inhalt" eingebunden statt
-  // sitesweit über basis.html/nav.js, das jede Seite lädt.
   const inhalt = [
     seitenkopfAbschnitt(),
     beitraegeAbschnitt(daten),
     ablaufAbschnitt(daten),
     unterlagenAbschnitt(daten),
-    formularAbschnitt(daten),
+    antragOnlineAbschnitt(daten),
     abschlussAbschnitt(),
-    `<script src="${PFAD}assets/js/formular.js" defer></script>`,
   ].join("\n");
 
   return {

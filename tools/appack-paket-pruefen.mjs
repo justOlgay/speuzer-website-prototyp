@@ -11,6 +11,10 @@
 // Hinweis: cdn.appack.de ist im lokalen Test nicht im Spiel (das Paket wird
 // nicht hochgeladen) – site.css kommt aus dem Paketordner selbst, exakt wie
 // die Seiten es nach dem Umschreiben (href="site.css") erwarten.
+// W2: fehlgeschlagene Requests und HTTP-Fehler (>= 400) von fussball.de-
+// Adressen (die FUSSBALL.DE-Widgets sind dort nur für cdn.appack.de
+// freigegeben, siehe LIESMICH) sind erwartet und zählen nicht als Fehler –
+// siehe istFussballdeAdresse() unten. Alles andere bleibt ein echter Fehler.
 
 import puppeteer from "puppeteer-core";
 import { readFileSync, readdirSync, existsSync } from "node:fs";
@@ -81,17 +85,44 @@ function starteMiniServer() {
 
 // ---------- Prüfung je Seite und Breite ----------
 
+// W2: die FUSSBALL.DE-Widgets sind bei FUSSBALL.DE nur für die Domain
+// cdn.appack.de freigegeben (siehe LIESMICH). Lokal (dieser Mini-Server) und
+// auf GitHub Pages liefert fussball.de deshalb eine Fehlermeldung bzw.
+// HTTP-Fehler für seine Adressen (www.fussball.de/widgets.js,
+// next.fussball.de/widget/…) – das ist erwartet (Domain-Freigabe) und kein
+// Seitenfehler. Alle anderen Fehler (auch von justolgay.github.io, dem
+// Spielplan-Generator) bleiben echte Fehler.
+function istFussballdeAdresse(url) {
+  try {
+    const host = new URL(url).hostname;
+    return host === "fussball.de" || host.endsWith(".fussball.de");
+  } catch {
+    return false;
+  }
+}
+
 async function pruefeSeiteBeiBreite(browser, dateiname, breite) {
   const page = await browser.newPage();
   const fehler = [];
+  const erwartet = [];
 
   page.on("pageerror", (err) => fehler.push(`pageerror: ${err.message}`));
   page.on("requestfailed", (req) => {
-    fehler.push(`requestfailed: ${req.url()} (${req.failure()?.errorText ?? "unbekannt"})`);
+    const eintrag = `requestfailed: ${req.url()} (${req.failure()?.errorText ?? "unbekannt"})`;
+    if (istFussballdeAdresse(req.url())) {
+      erwartet.push(`erwartet (Domain-Freigabe): ${eintrag}`);
+    } else {
+      fehler.push(eintrag);
+    }
   });
   page.on("response", (resp) => {
     if (resp.status() >= 400) {
-      fehler.push(`HTTP ${resp.status()}: ${resp.url()}`);
+      const eintrag = `HTTP ${resp.status()}: ${resp.url()}`;
+      if (istFussballdeAdresse(resp.url())) {
+        erwartet.push(`erwartet (Domain-Freigabe): ${eintrag}`);
+      } else {
+        fehler.push(eintrag);
+      }
     }
   });
 
@@ -138,7 +169,7 @@ async function pruefeSeiteBeiBreite(browser, dateiname, breite) {
   }
 
   await page.close();
-  return fehler;
+  return { fehler, erwartet };
 }
 
 // ---------- Hauptablauf ----------
@@ -165,15 +196,18 @@ async function main() {
     try {
       for (const dateiname of seiten) {
         const fehlerJeSeite = [];
+        const erwartetJeSeite = [];
         for (const breite of BREITEN) {
-          const fehler = await pruefeSeiteBeiBreite(browser, dateiname, breite);
+          const { fehler, erwartet } = await pruefeSeiteBeiBreite(browser, dateiname, breite);
           for (const f of fehler) fehlerJeSeite.push(`${breite}px: ${f}`);
+          for (const e of erwartet) erwartetJeSeite.push(`${breite}px: ${e}`);
         }
         const bestanden = fehlerJeSeite.length === 0;
         if (!bestanden) allesOk = false;
-        bericht.push({ seite: dateiname, bestanden, fehler: fehlerJeSeite });
-        console.log(`${bestanden ? "OK  " : "FEHLER"} ${dateiname} (${fehlerJeSeite.length} Fehler)`);
+        bericht.push({ seite: dateiname, bestanden, fehler: fehlerJeSeite, erwartet: erwartetJeSeite });
+        console.log(`${bestanden ? "OK  " : "FEHLER"} ${dateiname} (${fehlerJeSeite.length} Fehler, ${erwartetJeSeite.length} erwartet/Domain-Freigabe)`);
         for (const f of fehlerJeSeite) console.log(`  - ${f}`);
+        for (const e of erwartetJeSeite) console.log(`  · ${e}`);
       }
     } finally {
       await browser.close();
