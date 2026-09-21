@@ -573,19 +573,6 @@ svg { display: block; flex: 0 0 auto; }
     var knoepfe = document.createElement("div");
     knoepfe.className = "termin-karte__knoepfe";
 
-    var zusagen = document.createElement("button");
-    zusagen.type = "button";
-    zusagen.className = "knopf";
-    zusagen.textContent = "Zu- oder absagen";
-    zusagen.addEventListener("click", function () { oeffneTermin(termin.id); });
-
-    var details = document.createElement("button");
-    details.type = "button";
-    details.className = "knopf knopf--leise";
-    details.textContent = "Details";
-    details.addEventListener("click", function () { oeffneTermin(termin.id); });
-
-    knoepfe.appendChild(zusagen);
     knoepfe.appendChild(details);
     inhalt.appendChild(knoepfe);
 
