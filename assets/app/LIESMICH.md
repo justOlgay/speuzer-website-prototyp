@@ -459,9 +459,7 @@ des gewählten Teams frisch.
 ### Datenpflege durch den Verein
 
 Befunde aus der Qualitätsprüfung, die reine Worksheet-/Live-Daten
-betreffen (nicht die Vorlagen) – zu klären über
-`brand.eintracht.de`-Weg ist hier nicht einschlägig, sondern das
-appack-CMS des Vereins:
+betreffen (nicht die Vorlagen) – zu klären im appack-CMS des Vereins:
 
 - **Sponsoren-Worksheet**: Eintrag „Fußballschule VM Elite" verlinkt auf
   `instagram.com/bundeswehrkarriere` (falscher Insta-Handle); zwei

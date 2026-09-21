@@ -394,11 +394,14 @@ svg { display: block; flex: 0 0 auto; }
 
 <div id="mannschaften-liste" class="mannschaften-liste"></div>
 
+<h2 id="fussballschulen-titel" class="abschnittstitel" hidden>Fußballschulen (Zusatzangebot)</h2>
+<div id="fussballschulen-liste" class="mannschaften-liste"></div>
+
 <div class="aktionen">
   <a class="knopf" href="mailto:jugendleitung@sportfreunde04.de?subject=Probetraining%20beim%20FFV%20Sportfreunde%2004&amp;body=Hallo%2C%0A%0Awir%20interessieren%20uns%20f%C3%BCr%20ein%20Probetraining.%0AJahrgang%20des%20Kindes%3A%20%0AVorerfahrung%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe">Probetraining vereinbaren</a>
 </div>
 <a class="zeile" href="nav://sportfreunde04_TextImage_1783345459688">
-  <span class="zeile__text"><span class="zeile__titel">Spielpläne &amp; Tabellen</span></span>
+  <span class="zeile__text"><span class="zeile__titel">Spielplan &amp; Tabellen</span></span>
   <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
 </a>
 
@@ -455,10 +458,19 @@ svg { display: block; flex: 0 0 auto; }
 
   // ---------- Gruppierung für die Filterpillen ----------
 
+  // Fußballschulen (externes, kostenpflichtiges Zusatzangebot) tragen im
+  // Worksheet dieselbe Kategorie "fussball", zählen aber nicht als
+  // Mannschaft und erscheinen als eigener Abschnitt (QA-Befund, C2
+  // Abschnitt 7).
+  function istFussballschule(team) {
+    var t = String(team || "");
+    return /^fu[ßs]{1,2}ballschule/i.test(t) || /academy/i.test(t) || /athletik/i.test(t);
+  }
+
   function gruppeVonTeam(team) {
     var t = String(team || "");
+    if (istFussballschule(t)) return "schule";
     if (/herren/i.test(t) || /soma/i.test(t)) return "herren";
-    if (/^f[uü]ßballschule/i.test(t) || /academy/i.test(t)) return "schule";
     return "jugend";
   }
 
@@ -520,9 +532,11 @@ svg { display: block; flex: 0 0 auto; }
       aktionen.appendChild(mailLink);
     }
 
-    // Handy vor Festnetz, falls beides gefüllt ist (kein zweiter Anrufen-Knopf).
+    // Anrufen nur ohne Mail-Adresse: Trainer-Kontakte laufen über die
+    // Vereinsmail, private Handynummern bleiben sonst unsichtbar
+    // (QA-Befund, C2 Abschnitt 7). Handy vor Festnetz, falls beides gefüllt ist.
     var telNummer = textFeld(zeile, handyFeld) || textFeld(zeile, phoneFeld);
-    if (telNummer) {
+    if (!mail && telNummer) {
       var telLink = document.createElement("a");
       telLink.className = "icon-knopf";
       telLink.href = telHref(telNummer);
@@ -583,13 +597,20 @@ svg { display: block; flex: 0 0 auto; }
     return bild;
   }
 
-  function baueTeamKarte(team, trainingszeiten, buttons, beschreibungOffen) {
+  function baueTeamKarte(team, trainingszeiten, buttons, beschreibungOffen, istZusatzangebot) {
     var karte = document.createElement("div");
     karte.className = "karte team-karte";
 
     var bildUrl = [textFeld(team, "sliderImage1"), textFeld(team, "categoryImage")].filter(bildUrlGueltig)[0];
     if (bildUrl) {
       karte.appendChild(bildMitRueckbau(bildUrl, "team-karte__bild", ""));
+    }
+
+    if (istZusatzangebot) {
+      var zusatzTag = document.createElement("span");
+      zusatzTag.className = "tag";
+      zusatzTag.textContent = "Zusatzangebot, kostenpflichtig";
+      karte.appendChild(zusatzTag);
     }
 
     var titel = document.createElement("p");
@@ -657,6 +678,8 @@ svg { display: block; flex: 0 0 auto; }
   // ---------- Hauptablauf ----------
 
   var listeContainer = document.getElementById("mannschaften-liste");
+  var fussballschulenTitel = document.getElementById("fussballschulen-titel");
+  var fussballschulenContainer = document.getElementById("fussballschulen-liste");
   var filterleiste = document.getElementById("filterleiste");
 
   Promise.all([
@@ -680,6 +703,8 @@ svg { display: block; flex: 0 0 auto; }
 
     if (!teams.length) {
       listeContainer.innerHTML = "";
+      fussballschulenTitel.hidden = true;
+      fussballschulenContainer.innerHTML = "";
       var hinweis = document.createElement("div");
       hinweis.className = "hinweis";
       var p = document.createElement("p");
@@ -688,6 +713,12 @@ svg { display: block; flex: 0 0 auto; }
       listeContainer.appendChild(hinweis);
       return;
     }
+
+    // Mannschaften und Fußballschulen (externes, kostenpflichtiges
+    // Zusatzangebot, tragen dieselbe Worksheet-Kategorie "fussball")
+    // getrennt halten (QA-Befund, C2 Abschnitt 7).
+    var mannschaften = teams.filter(function (t) { return !istFussballschule(textFeld(t, "team")); });
+    var fussballschulen = teams.filter(function (t) { return istFussballschule(textFeld(t, "team")); });
 
     // Belegung der drei Filtergruppen für die "≥ 2 Gruppen belegt"-Regel.
     var zaehler = { herren: 0, jugend: 0, schule: 0 };
@@ -698,11 +729,18 @@ svg { display: block; flex: 0 0 auto; }
 
     function rendern() {
       listeContainer.innerHTML = "";
-      var sichtbar = aktuellerFilter
-        ? teams.filter(function (t) { return gruppeVonTeam(textFeld(t, "team")) === aktuellerFilter; })
-        : teams;
-      for (var i = 0; i < sichtbar.length; i++) {
-        listeContainer.appendChild(baueTeamKarte(sichtbar[i], trainingszeiten, buttons, beschreibungOffen));
+      fussballschulenContainer.innerHTML = "";
+
+      var mannschaftenSichtbar = aktuellerFilter === "schule" ? [] :
+        (aktuellerFilter ? mannschaften.filter(function (t) { return gruppeVonTeam(textFeld(t, "team")) === aktuellerFilter; }) : mannschaften);
+      for (var i = 0; i < mannschaftenSichtbar.length; i++) {
+        listeContainer.appendChild(baueTeamKarte(mannschaftenSichtbar[i], trainingszeiten, buttons, beschreibungOffen, false));
+      }
+
+      var schuleSichtbar = (aktuellerFilter === "" || aktuellerFilter === "schule") ? fussballschulen : [];
+      fussballschulenTitel.hidden = schuleSichtbar.length === 0;
+      for (var j = 0; j < schuleSichtbar.length; j++) {
+        fussballschulenContainer.appendChild(baueTeamKarte(schuleSichtbar[j], trainingszeiten, buttons, beschreibungOffen, true));
       }
     }
 
@@ -725,6 +763,8 @@ svg { display: block; flex: 0 0 auto; }
 
     rendern();
   }).catch(function () {
+    fussballschulenTitel.hidden = true;
+    fussballschulenContainer.innerHTML = "";
     zeigeFehler(listeContainer);
   });
 })();

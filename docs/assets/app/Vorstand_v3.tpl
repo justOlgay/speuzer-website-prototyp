@@ -533,11 +533,16 @@ svg { display: block; flex: 0 0 auto; }
     var mail = textFeld(person, "ansMail");
     if (mail) aktionen.appendChild(baueAktion("mailto:" + mail, ICON_MAIL, "E-Mail"));
 
+    // Anrufen nur ohne Mail-Adresse: Vorstandsämter laufen über
+    // Vereinsadressen, private Handynummern bleiben sonst unsichtbar
+    // (QA-Befund, C2 Abschnitt 7).
     var telNummer = textFeld(person, "ansHandy") || textFeld(person, "ansTel");
-    if (telNummer) aktionen.appendChild(baueAktion(telHref(telNummer), ICON_PHONE, "Anrufen"));
+    if (!mail && telNummer) aktionen.appendChild(baueAktion(telHref(telNummer), ICON_PHONE, "Anrufen"));
 
+    // WhatsApp nur ohne Mail-Adresse: private Handynummern bleiben sonst
+    // ueber die wa.me-Nummer sichtbar (QA-Befund, C2b).
     var whatsapp = textFeld(person, "ansWhatsApp");
-    if (whatsapp) {
+    if (!mail && whatsapp) {
       var ziffern = whatsapp.replace(/\D/g, "");
       aktionen.appendChild(baueAktion("https://wa.me/" + (ziffern || whatsapp), ICON_CHAT, "WhatsApp", true));
     }

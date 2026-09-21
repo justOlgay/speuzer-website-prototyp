@@ -28,13 +28,13 @@ const BASIS_CSS = readFileSync(path.join(SRC_APP, "v3-basis.css"), "utf8").trim(
 // Reihenfolge wie in der C1-Spezifikation (Tabelle "Ziel"), C2 hängt die
 // beiden neuen dynamischen Seiten (Geschäftsstelle & Anfahrt, Über uns) an.
 const SEITEN = [
-  { name: "Verein_v3", beschreibung: "Verteiler \"Verein\" (Tab 4 der neuen App)" },
-  { name: "Mannschaften_v3", beschreibung: "Fußball: alle aktiven Mannschaften" },
-  { name: "Karneval_v3", beschreibung: "Karnevalabteilung mit ihren Gruppen" },
-  { name: "Vorstand_v3", beschreibung: "Vorstand & Ansprechpartner" },
-  { name: "Sponsoren_v3", beschreibung: "Sponsoren & Partner" },
-  { name: "Geschaeftsstelle_v3", beschreibung: "Geschäftsstelle & Anfahrt" },
-  { name: "Ueber-uns_v3", beschreibung: "Über uns" },
+  { name: "Verein_v3", beschreibung: "Verteiler \"Verein\" (Tab 4 der neuen App)", stufe: "C1" },
+  { name: "Mannschaften_v3", beschreibung: "Fußball: alle aktiven Mannschaften", stufe: "C1" },
+  { name: "Karneval_v3", beschreibung: "Karnevalabteilung mit ihren Gruppen", stufe: "C1" },
+  { name: "Vorstand_v3", beschreibung: "Vorstand & Ansprechpartner", stufe: "C1" },
+  { name: "Sponsoren_v3", beschreibung: "Sponsoren & Partner", stufe: "C1" },
+  { name: "Geschaeftsstelle_v3", beschreibung: "Geschäftsstelle & Anfahrt", stufe: "C2" },
+  { name: "Ueber-uns_v3", beschreibung: "Über uns", stufe: "C2" },
 ];
 
 // C2, Abschnitt 5: statische Workspace-Seite (kein ${userTitle}, kein
@@ -62,15 +62,16 @@ const KOPF_ZEILEN = [
 ];
 const KOPF = KOPF_ZEILEN.join("\n");
 
-function kopfKommentar(name, beschreibung) {
+function kopfKommentar(name, beschreibung, stufe) {
+  const abschnitt = stufe === "C2" ? "Stufe C2" : "Stufe C";
   return [
-    "/* Speuzer Blau-Weiß – " + name + ".tpl (C1)",
+    "/* Speuzer Blau-Weiß – " + name + ".tpl (" + stufe + ")",
     "   appack-Vorlage für die Seite \"" + beschreibung + "\". Kopf- und Tab-Leiste",
     "   kommen von der App-Huelle und sind NICHT Teil dieser Vorlage (kein eigener",
     "   Kopf, kein eigener Fuss). Erzeugt aus src/app/v3-basis.css + src/app/" + name + ".html",
     "   durch tools/app-optik/tpl-bauen.mjs (npm run tpl-bauen) – NICHT von Hand",
     "   bearbeiten, sondern die Quelldateien unter src/app/ ändern und neu bauen.",
-    "   Details/Datenquellen: siehe assets/app/LIESMICH.md, Abschnitt \"Stufe C\". */",
+    "   Details/Datenquellen: siehe assets/app/LIESMICH.md, Abschnitt \"" + abschnitt + "\". */",
     "",
   ].join("\n");
 }
@@ -91,11 +92,11 @@ function teileQuelle(html, dateiname) {
 
 // ---------- Vorlage zusammensetzen ----------
 
-function baueVorlage(name, beschreibung, teile) {
+function baueVorlage(name, beschreibung, stufe, teile) {
   const teileHtml = [
     KOPF,
     "",
-    kopfKommentar(name, beschreibung),
+    kopfKommentar(name, beschreibung, stufe),
     BASIS_CSS,
     "",
     teile.style,
@@ -143,6 +144,13 @@ function ersetzeBauzeitWerte(html, werte) {
 
 // ---------- Statische Seite (C2, Abschnitt 5) ----------
 
+function htmlEscapen(text) {
+  return text
+    .split("&").join("&amp;")
+    .split("<").join("&lt;")
+    .split(">").join("&gt;");
+}
+
 const KOPF_STATISCH_ZEILEN = (titel) => [
   "<!DOCTYPE html>",
   '<html lang="de">',
@@ -153,7 +161,7 @@ const KOPF_STATISCH_ZEILEN = (titel) => [
   '<meta name="format-detection" content="address=no">',
   '<meta name="format-detection" content="email=no">',
   '<meta name="format-detection" content="date=no">',
-  `<title>${titel}</title>`,
+  `<title>${htmlEscapen(titel)}</title>`,
   "<style>",
 ];
 
@@ -201,12 +209,12 @@ function baueStatischeVorlage(name, titel, teile) {
 
 function main() {
   const werte = bauzeitWerte();
-  for (const { name, beschreibung } of SEITEN) {
+  for (const { name, beschreibung, stufe } of SEITEN) {
     const quellDatei = path.join(SRC_APP, `${name}.html`);
     let html = readFileSync(quellDatei, "utf8");
     if (name === "Ueber-uns_v3") html = ersetzeBauzeitWerte(html, werte);
     const teile = teileQuelle(html, `${name}.html`);
-    const vorlage = baueVorlage(name, beschreibung, teile);
+    const vorlage = baueVorlage(name, beschreibung, stufe, teile);
     const zielDatei = path.join(ZIEL_APP, `${name}.tpl`);
     writeFileSync(zielDatei, vorlage, "utf8");
     console.log(`  assets/app/${name}.tpl geschrieben (${vorlage.length} Zeichen)`);
