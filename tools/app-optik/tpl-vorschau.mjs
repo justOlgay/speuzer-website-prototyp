@@ -1,42 +1,69 @@
 #!/usr/bin/env node
-// Speuzer Website Prototyp – B1 App-Startseite: lokale Vorschau von
-// assets/app/Startseite_v3.tpl ohne appack.
+// Speuzer Website Prototyp – B1/C1: lokale Vorschau der appack-Vorlagen unter
+// assets/app/*_v3.tpl ohne appack.
 //
-// (a) Rendert die appack-FreeMarker-Teilmenge, die diese eine Vorlage
-//     tatsächlich benutzt ([#if x?has_content]…[#else]…[/#if], ${…},
-//     [#list … as entry]…[/#list], [#assign …]) gegen Mock-Daten aus
-//     mock-start.json. Kein allgemeiner FreeMarker-Interpreter – nur die
-//     Konstrukte, die in Startseite_v3.tpl vorkommen.
-// (b) Ersetzt die drei appack-cdn-Skripte (jquery, graph-api.js,
-//     component-news-widget.js) per Puppeteer-Request-Interception durch
-//     lokale Stubs: der Kalender liefert zwei feste Mock-Termine, das
-//     News-Widget füllt die Karten-Vorlage im Dokument mit zwei festen
-//     Mock-Meldungen. `App` bleibt bewusst undefiniert (Browser-Fallback,
-//     siehe Vorlage).
+// (a) Rendert die appack-FreeMarker-Teilmenge, die diese Vorlagen tatsächlich
+//     benutzen ([#if x?has_content]…[#else]…[/#if], ${…}, [#list … as
+//     entry]…[/#list], [#assign …]) gegen Mock-Daten. Startseite_v3.tpl
+//     (B1) braucht dafür mock-start.json (Profil, Kachel-Liste); die fünf
+//     Vereinsseiten (C1) nutzen ausschließlich ${userTitle} (kein sonstiges
+//     FreeMarker, siehe C1-Spezifikation) – derselbe Mini-Renderer wertet
+//     das ohne Änderung aus.
+// (b) Ersetzt die appack-cdn-Skripte per Puppeteer-Request-Interception durch
+//     lokale Stubs: jQuery (leer), graph-api.js (zwei feste Mock-Termine,
+//     nur von Startseite_v3.tpl genutzt), component-news-widget.js (zwei
+//     feste Mock-Meldungen, dito) und – neu in C1 – appack.workbook-1.4.1.js:
+//     Workbook.load(options) beantwortet als Promise mit den Zeilen aus
+//     tools/app-optik/mock-worksheets.json (Schlüssel = Workbook-ID),
+//     unbekannte ID -> [], `filter` wird per striktem Gleichheitsvergleich
+//     aller angegebenen Felder angewendet (deckt insbesondere
+//     `{ sponActive: true }` ab, wie es Sponsoren_v3.tpl sendet). `App`
+//     bleibt bewusst undefiniert (Browser-Fallback, siehe Vorlagen).
 //
-// Screenshots (390×760, Viewport + fullPage) und ein Kontaktbogen landen
-// in tools/cache/app-optik/tpl-vorschau/ (gitignored, siehe .gitignore
-// "tools/cache/") – nichts davon wird committet.
+// Aufruf ohne Argument: alle assets/app/*_v3.tpl. Mit Argument (z. B.
+// "Verein_v3"): nur diese eine Vorlage.
+//
+// Screenshots (390×760, Viewport + fullPage, zusätzlich 320×760 für die
+// Sichtprüfung "kein horizontales Scrollen") und ein Kontaktbogen landen in
+// tools/cache/app-optik/tpl-vorschau/ (gitignored, siehe .gitignore
+// "tools/cache/") – nichts davon wird committet. pageerror-Ereignisse
+// (unbehandelte JS-Fehler in der Seite) werden gezählt und ausgegeben.
 
 import puppeteer from "puppeteer-core";
-import { readFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { readFileSync, existsSync, mkdirSync, writeFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-const TPL_PFAD = path.join(ROOT, "assets", "app", "Startseite_v3.tpl");
-const MOCK_PFAD = path.join(ROOT, "tools", "app-optik", "mock-start.json");
+const APP_DIR = path.join(ROOT, "assets", "app");
+const MOCK_START_PFAD = path.join(ROOT, "tools", "app-optik", "mock-start.json");
+const MOCK_WORKSHEETS_PFAD = path.join(ROOT, "tools", "app-optik", "mock-worksheets.json");
 const VERGLEICH_PFAD = path.join(ROOT, "docs", "app-konzept", "start.html");
 const ZIEL = path.join(ROOT, "tools", "cache", "app-optik", "tpl-vorschau");
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 
 const BREITE = 390;
 const HOEHE = 760;
+const SCHMAL_BREITE = 320; // Sichtprüfung C1-Gate 5: kein horizontales Scrollen
+
+// userTitle-Werte der fünf C1-Vorlagen (appack setzt das serverseitig aus dem
+// Modultitel; für die Vorschau ist der jeweilige sichtbare Seitentitel (h1)
+// eine plausible Annahme).
+const SEITEN_TITEL = {
+  "Verein_v3.tpl": "Verein",
+  "Mannschaften_v3.tpl": "Mannschaften",
+  "Karneval_v3.tpl": "Karneval",
+  "Vorstand_v3.tpl": "Vorstand & Kontakt",
+  "Sponsoren_v3.tpl": "Sponsoren & Partner",
+};
 
 // ---------- Mini-FreeMarker-Teilmenge ----------
-// Unterstützt genau das, was Startseite_v3.tpl verwendet: ${…}-Ausgabe,
+// Unterstützt genau das, was die Vorlagen verwenden: ${…}-Ausgabe,
 // [#if]/[#elseif]/[#else]/[/#if], [#list … as x]…[/#list],
-// [#assign n = "…"] und die Block-Form [#assign n]…[/#assign].
+// [#assign n = "…"] und die Block-Form [#assign n]…[/#assign]. Die fünf
+// C1-Vorlagen nutzen ausschließlich ${userTitle}, also nur den einfachsten
+// Zweig (ein einzelnes "output"-Token) – derselbe Renderer wie für
+// Startseite_v3.tpl, unverändert.
 
 function tokenisieren(tpl) {
   const tokens = [];
@@ -251,6 +278,28 @@ function newsWidgetStub(mockNews) {
   });`;
 }
 
+// C1: Workbook.load(options) -> Promise<rows>. mockWorksheets: { [workbookId]: Zeile[] }.
+// Unbekannte Workbook-ID -> []. filter: strikter Gleichheitsvergleich je
+// angegebenem Feld (deckt { sponActive: true } ab).
+function workbookStub(mockWorksheets) {
+  return `window.Workbook = {
+    load: function (options) {
+      var alle = (${JSON.stringify(mockWorksheets)})[(options && options.workbook) || ""] || [];
+      var filter = (options && options.filter) || {};
+      var schluessel = Object.keys(filter);
+      var gefiltert = schluessel.length
+        ? alle.filter(function (zeile) {
+            for (var i = 0; i < schluessel.length; i++) {
+              if (zeile[schluessel[i]] !== filter[schluessel[i]]) return false;
+            }
+            return true;
+          })
+        : alle;
+      return Promise.resolve(gefiltert);
+    }
+  };`;
+}
+
 // ---------- Rendern + Screenshot ----------
 
 function warte(ms) {
@@ -283,8 +332,8 @@ const MOCK_NEWS = [
   { title: "Auswärtssieg der 1. Mannschaft", datum: "13.09.26, 20:00", body: "Die Herren gewinnen ihr Auswärtsspiel und stehen weiter ungeschlagen an der Tabellenspitze.", quelle: "App-News" },
 ];
 
-async function rendereUndSpeichere(scope, dateiname) {
-  const tplText = readFileSync(TPL_PFAD, "utf8");
+async function rendereUndSpeichere(tplPfad, scope, dateiname) {
+  const tplText = readFileSync(tplPfad, "utf8");
   const html = rendereVorlage(tplText, scope);
   mkdirSync(ZIEL, { recursive: true });
   const pfad = path.join(ZIEL, dateiname);
@@ -292,10 +341,16 @@ async function rendereUndSpeichere(scope, dateiname) {
   return pfad;
 }
 
-async function screenshotTpl(browser, htmlPfad, namePräfix) {
+async function screenshotTpl(browser, htmlPfad, namePräfix, mockWorksheets) {
   const page = await browser.newPage();
   await page.setViewport({ width: BREITE, height: HOEHE });
   await page.setRequestInterception(true);
+
+  const pageErrors = [];
+  page.on("pageerror", (err) => pageErrors.push(String(err && err.message ? err.message : err)));
+  page.on("console", (msg) => {
+    if (msg.type() === "error") pageErrors.push(`console.error: ${msg.text()}`);
+  });
 
   page.on("request", (req) => {
     const url = req.url();
@@ -311,6 +366,10 @@ async function screenshotTpl(browser, htmlPfad, namePräfix) {
       req.respond({ status: 200, contentType: "application/javascript; charset=utf-8", body: newsWidgetStub(MOCK_NEWS) });
       return;
     }
+    if (url.includes("cdn.appack.de/modules/appack.workbook-1.4.1.js")) {
+      req.respond({ status: 200, contentType: "application/javascript; charset=utf-8", body: workbookStub(mockWorksheets) });
+      return;
+    }
     // Webfonts (GitHub Pages) dürfen laden oder offline fehlschlagen – Fallback-Stack greift.
     req.continue();
   });
@@ -320,14 +379,18 @@ async function screenshotTpl(browser, htmlPfad, namePräfix) {
   } catch (err) {
     console.warn(`  (Ladefehler ${namePräfix}: ${err.message})`);
   }
-  await warte(800);
+  // Workbook.load() läuft asynchron (Promise) – etwas länger warten als bei
+  // der reinen graph-api/news-widget-Vorschau, damit die DOM-Bausteine der
+  // C1-Vorlagen (Karten, Filterpillen) vor dem Screenshot stehen.
+  await warte(1200);
 
   const zielViewport = path.join(ZIEL, `${namePräfix}.png`);
   const zielFull = path.join(ZIEL, `${namePräfix}-full.png`);
   await page.screenshot({ path: zielViewport });
   await page.screenshot({ path: zielFull, fullPage: true });
 
-  // Schritt 3: Tippziele messen.
+  // Tippziele messen (generische Auswahl, deckt Bausteine aus v3-basis.css
+  // und den seitenspezifischen Stilen ab).
   const selektoren = [
     "#profil-knopf",
     "#registrieren-pille",
@@ -336,6 +399,9 @@ async function screenshotTpl(browser, htmlPfad, namePräfix) {
     ".aktionen .knopf",
     ".aktionen .knopf--leise",
     ".news-karte",
+    ".icon-knopf",
+    ".filter-knopf",
+    ".abteilung-karte",
   ];
   const messung = await page.evaluate((sels) => {
     const ergebnis = [];
@@ -354,18 +420,22 @@ async function screenshotTpl(browser, htmlPfad, namePräfix) {
     return ergebnis;
   }, selektoren);
 
-  // Kein horizontales Scrollen bei 360/390 prüfen (Schritt 3).
+  // Kein horizontales Scrollen bei 320/360/390 prüfen; bei 320 zusätzlich
+  // einen Screenshot speichern (C1-Gate 5).
   const breitenErgebnis = [];
-  for (const breite of [360, 390]) {
+  for (const breite of [SCHMAL_BREITE, 360, 390]) {
     await page.setViewport({ width: breite, height: HOEHE });
     await warte(150);
     const scrollBreite = await page.evaluate(() => document.documentElement.scrollWidth);
     breitenErgebnis.push({ breite, scrollBreite, scrolltHorizontal: scrollBreite > breite });
+    if (breite === SCHMAL_BREITE) {
+      await page.screenshot({ path: path.join(ZIEL, `${namePräfix}-320.png`) });
+    }
   }
   await page.setViewport({ width: BREITE, height: HOEHE });
 
   await page.close();
-  return { namePräfix, messung, breitenErgebnis, zielViewport, zielFull };
+  return { namePräfix, messung, breitenErgebnis, pageErrors, zielViewport, zielFull };
 }
 
 async function screenshotVergleich(browser) {
@@ -386,7 +456,7 @@ async function baueKontaktbogen(browser, bilder) {
     .join("\n");
   const html = `<!doctype html><html lang="de"><head><meta charset="utf-8"><style>
     * { box-sizing: border-box; }
-    body { margin: 0; background: #eee; font-family: sans-serif; display: flex; gap: 16px; padding: 16px; }
+    body { margin: 0; background: #eee; font-family: sans-serif; display: flex; flex-wrap: wrap; gap: 16px; padding: 16px; }
     figure { margin: 0; }
     figure img { display: block; width: ${BREITE}px; height: ${HOEHE}px; object-fit: cover; border: 1px solid #999; }
     figcaption { text-align: center; font-size: 12px; padding-top: 4px; }
@@ -394,7 +464,9 @@ async function baueKontaktbogen(browser, bilder) {
   const htmlPfad = path.join(ZIEL, "_vergleich.html");
   writeFileSync(htmlPfad, html, "utf8");
   const page = await browser.newPage();
-  await page.setViewport({ width: BREITE * bilder.length + 80, height: HOEHE + 60 });
+  const spaltenBreite = BREITE + 24;
+  const reihen = Math.ceil(bilder.length / 3);
+  await page.setViewport({ width: Math.min(bilder.length, 3) * spaltenBreite + 40, height: reihen * (HOEHE + 60) + 40 });
   await page.goto(pathToFileURL(htmlPfad).href, { waitUntil: "load" });
   await warte(300);
   const ziel = path.join(ZIEL, "vergleich.png");
@@ -409,18 +481,25 @@ function druckeMesstabelle(ergebnisse) {
   console.log("Variante | Selektor | Anzahl | min. Breite | min. Höhe | zu klein");
   for (const e of ergebnisse) {
     for (const m of e.messung) {
+      if (m.anzahl === 0) continue;
       console.log(`${e.namePräfix} | ${m.selektor} | ${m.anzahl} | ${m.minBreite ?? "-"} | ${m.minHoehe ?? "-"} | ${m.zuKlein}`);
     }
     for (const b of e.breitenErgebnis) {
       console.log(`${e.namePräfix} | (Breite ${b.breite}px) scrollWidth=${b.scrollBreite} horizontal=${b.scrolltHorizontal ? "JA" : "nein"}`);
     }
+    console.log(`${e.namePräfix} | pageerror=${e.pageErrors.length}${e.pageErrors.length ? " -> " + e.pageErrors.join(" | ") : ""}`);
   }
 }
 
-async function main() {
-  if (!existsSync(TPL_PFAD)) throw new Error(`Vorlage fehlt: ${TPL_PFAD}`);
-  const mock = JSON.parse(readFileSync(MOCK_PFAD, "utf8"));
-  mkdirSync(ZIEL, { recursive: true });
+// ---------- Startseite_v3.tpl (B1) – bestehendes Verhalten, unverändert ----------
+
+async function renderStartseite(browser, ergebnisse, bilderFuerKontaktbogen) {
+  const tplPfad = path.join(APP_DIR, "Startseite_v3.tpl");
+  if (!existsSync(tplPfad)) {
+    console.warn("  Startseite_v3.tpl fehlt, übersprungen.");
+    return;
+  }
+  const mock = JSON.parse(readFileSync(MOCK_START_PFAD, "utf8"));
 
   const scopeAngemeldet = {
     userTitle: mock.userTitle,
@@ -433,23 +512,67 @@ async function main() {
     liste: mock.liste,
   };
 
-  const htmlAngemeldet = await rendereUndSpeichere(scopeAngemeldet, "_start-v3-angemeldet.html");
-  const htmlGast = await rendereUndSpeichere(scopeGast, "_start-v3-gast.html");
+  const htmlAngemeldet = await rendereUndSpeichere(tplPfad, scopeAngemeldet, "_start-v3-angemeldet.html");
+  const htmlGast = await rendereUndSpeichere(tplPfad, scopeGast, "_start-v3-gast.html");
 
-  const browser = await puppeteer.launch({ executablePath: CHROME, headless: true });
-  const ergebnisse = [];
-  try {
-    console.log("Rendere Startseite_v3.tpl (angemeldet) …");
-    ergebnisse.push(await screenshotTpl(browser, htmlAngemeldet, "start-v3"));
-    console.log("Rendere Startseite_v3.tpl (Gast) …");
-    ergebnisse.push(await screenshotTpl(browser, htmlGast, "start-v3-gast"));
+  console.log("Rendere Startseite_v3.tpl (angemeldet) …");
+  const eAngemeldet = await screenshotTpl(browser, htmlAngemeldet, "start-v3", {});
+  ergebnisse.push(eAngemeldet);
+  bilderFuerKontaktbogen.push({ beschriftung: "Startseite_v3.tpl (angemeldet)", pfad: eAngemeldet.zielViewport });
+
+  console.log("Rendere Startseite_v3.tpl (Gast) …");
+  const eGast = await screenshotTpl(browser, htmlGast, "start-v3-gast", {});
+  ergebnisse.push(eGast);
+  bilderFuerKontaktbogen.push({ beschriftung: "Startseite_v3.tpl (Gast)", pfad: eGast.zielViewport });
+
+  if (existsSync(VERGLEICH_PFAD)) {
     console.log("Screenshot Klick-Prototyp (docs/app-konzept/start.html) …");
     const vergleichBild = await screenshotVergleich(browser);
-    await baueKontaktbogen(browser, [
-      { beschriftung: "Startseite_v3.tpl (angemeldet)", pfad: ergebnisse[0].zielViewport },
-      { beschriftung: "Startseite_v3.tpl (Gast)", pfad: ergebnisse[1].zielViewport },
-      { beschriftung: "Klick-Prototyp start.html", pfad: vergleichBild },
-    ]);
+    bilderFuerKontaktbogen.push({ beschriftung: "Klick-Prototyp start.html", pfad: vergleichBild });
+  }
+}
+
+// ---------- C1: die fünf Vereinsseiten ----------
+
+async function renderVereinsseite(browser, dateiname, mockWorksheets, ergebnisse, bilderFuerKontaktbogen) {
+  const tplPfad = path.join(APP_DIR, dateiname);
+  const namePräfix = dateiname.replace(/\.tpl$/, "").toLowerCase();
+  const scope = { userTitle: SEITEN_TITEL[dateiname] || dateiname };
+
+  const htmlPfad = await rendereUndSpeichere(tplPfad, scope, `_${namePräfix}.html`);
+  console.log(`Rendere ${dateiname} …`);
+  const ergebnis = await screenshotTpl(browser, htmlPfad, namePräfix, mockWorksheets);
+  ergebnisse.push(ergebnis);
+  bilderFuerKontaktbogen.push({ beschriftung: dateiname, pfad: ergebnis.zielViewport });
+}
+
+// ---------- Hauptablauf ----------
+
+async function main() {
+  if (!existsSync(APP_DIR)) throw new Error(`Ordner fehlt: ${APP_DIR}`);
+  const mockWorksheets = existsSync(MOCK_WORKSHEETS_PFAD) ? JSON.parse(readFileSync(MOCK_WORKSHEETS_PFAD, "utf8")) : {};
+  mkdirSync(ZIEL, { recursive: true });
+
+  const arg = process.argv[2];
+  const alleTplDateien = readdirSync(APP_DIR).filter((d) => d.endsWith("_v3.tpl")).sort();
+  const tplDateien = arg ? alleTplDateien.filter((d) => d === `${arg}.tpl`) : alleTplDateien;
+  if (!tplDateien.length) {
+    throw new Error(`Keine Vorlage gefunden für Argument "${arg}" (erwartet z. B. "Verein_v3")`);
+  }
+
+  const ergebnisse = [];
+  const bilderFuerKontaktbogen = [];
+
+  const browser = await puppeteer.launch({ executablePath: CHROME, headless: true });
+  try {
+    for (const dateiname of tplDateien) {
+      if (dateiname === "Startseite_v3.tpl") {
+        await renderStartseite(browser, ergebnisse, bilderFuerKontaktbogen);
+      } else {
+        await renderVereinsseite(browser, dateiname, mockWorksheets, ergebnisse, bilderFuerKontaktbogen);
+      }
+    }
+    await baueKontaktbogen(browser, bilderFuerKontaktbogen);
   } finally {
     await browser.close();
   }
@@ -457,11 +580,14 @@ async function main() {
   druckeMesstabelle(ergebnisse);
 
   const tabellenText = ergebnisse
-    .flatMap((e) => e.messung.map((m) => `${e.namePräfix}\t${m.selektor}\t${m.anzahl}\t${m.minBreite ?? "-"}\t${m.minHoehe ?? "-"}\t${m.zuKlein}`))
+    .flatMap((e) => e.messung.filter((m) => m.anzahl > 0).map((m) => `${e.namePräfix}\t${m.selektor}\t${m.anzahl}\t${m.minBreite ?? "-"}\t${m.minHoehe ?? "-"}\t${m.zuKlein}`))
     .join("\n");
   writeFileSync(path.join(ZIEL, "tippziele.tsv"), `variante\tselektor\tanzahl\tminBreite\tminHoehe\tzuKlein\n${tabellenText}\n`, "utf8");
 
-  console.log(`\nFertig. Screenshots + Kontaktbogen liegen in ${path.relative(ROOT, ZIEL)}/`);
+  const gesamtFehler = ergebnisse.reduce((summe, e) => summe + e.pageErrors.length, 0);
+  console.log(`\nFertig. ${ergebnisse.length} Vorlage(n) gerendert, pageerror gesamt: ${gesamtFehler}.`);
+  console.log(`Screenshots + Kontaktbogen liegen in ${path.relative(ROOT, ZIEL)}/`);
+  if (gesamtFehler > 0) process.exitCode = 1;
 }
 
 main().catch((err) => {

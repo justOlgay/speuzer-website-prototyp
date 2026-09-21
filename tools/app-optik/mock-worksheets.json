@@ -1,0 +1,53 @@
+{
+  "6a1ec5fcf68a05bf129cdb7a": [
+    { "category": "Fussball", "team": "1. Herrenmannschaft", "trainingTitle": "Kreisliga A", "description": "<p>Die erste Herrenmannschaft spielt in der Kreisliga A.</p>", "isActive": true, "sortNumber": 1, "id": "101", "categoryImage": "", "sliderImage1": "" },
+    { "category": "Fussball", "team": "Alte Herren", "trainingTitle": "", "description": "", "isActive": true, "sortNumber": 2, "id": "102", "categoryImage": "", "sliderImage1": "" },
+    { "category": "Fussball", "team": "D2-Jugend", "trainingTitle": "", "description": "<p>Jahrgang 2015/2016.</p>", "isActive": true, "sortNumber": 3, "id": "103", "categoryImage": "", "sliderImage1": "" },
+    { "category": "Fussball", "team": "D3-Jugend", "trainingTitle": "", "description": "", "isActive": true, "sortNumber": 4, "id": "104", "categoryImage": "", "sliderImage1": "" },
+    { "category": "Fussball", "team": "G-Jugend", "trainingTitle": "", "description": "", "isActive": true, "sortNumber": 5, "id": "105", "categoryImage": "", "sliderImage1": "" },
+    { "category": "Fussball", "team": "Fußballschule Regista Academy", "trainingTitle": "", "description": "<p>Für Kinder von 4 bis 6 Jahren.</p>", "isActive": true, "sortNumber": 6, "id": "106", "categoryImage": "", "sliderImage1": "" },
+    { "category": "Karnevalabteilung", "team": "Dreamboys", "trainingTitle": "Donnerstag, 19:30–21:00 Uhr", "description": "<p>Tanzgarde der Herren.</p>", "isActive": true, "sortNumber": 1, "id": "201", "categoryImage": "", "sliderImage1": "" },
+    { "category": "Karnevalabteilung", "team": "Little Fruities", "trainingTitle": "Freitag, 17:00–18:00 Uhr", "description": "", "isActive": true, "sortNumber": 2, "id": "202", "categoryImage": "", "sliderImage1": "" },
+    { "category": "Karnevalabteilung", "team": "Freaky Fruities", "trainingTitle": "Freitag, 18:00–19:00 Uhr", "description": "", "isActive": true, "sortNumber": 3, "id": "203", "categoryImage": "", "sliderImage1": "" },
+    { "category": "Karnevalabteilung", "team": "Flying Fruities", "trainingTitle": "", "description": "", "isActive": true, "sortNumber": 4, "id": "204", "categoryImage": "", "sliderImage1": "" },
+    { "category": "Karnevalabteilung", "team": "Pfläumchen", "trainingTitle": "Mittwoch, 16:30–17:15 Uhr", "description": "<p>Die jüngste Gruppe der Schnauzer.</p>", "isActive": true, "sortNumber": 5, "id": "205", "categoryImage": "", "sliderImage1": "" }
+  ],
+  "6a1ec5fcf68a05bf129cdb7e": [
+    { "trainingID": 101, "day": "Mittwoch", "time": "17:30–19:00", "location": "Vereinsplatz", "locationDescription": "Große Sporthalle", "street": "", "plz": "", "city": "", "noticeTitle": "", "notice": "", "sortNumber": 1 },
+    { "trainingID": 999, "day": "", "time": "", "location": "", "locationDescription": "", "street": "", "plz": "", "city": "", "noticeTitle": "", "notice": "", "sortNumber": 2 }
+  ],
+  "6a1ec5fcf68a05bf129cdb82": [
+    { "buttonID": "101", "buttonText": "Kader ansehen", "buttonLink": "https://www.fussball.de/", "externalLink": true },
+    { "buttonID": "102", "buttonText": "x", "buttonLink": "x", "externalLink": false }
+  ],
+  "6a1ec5fcf68a05bf129cdb85": [
+    { "name": "Fussball", "backgroundColor": "#191793", "textColor": "#FFFFFF" },
+    { "name": "Karnevalabteilung", "backgroundColor": "#191793", "textColor": "#FFFFFF" }
+  ],
+  "6a1ec5fcf68a05bf129cdb89": [
+    { "showContent": true, "descriptionCanBeToggled": true }
+  ],
+  "6a1ec5fcf68a05bf129cdb8b": [
+    { "ansName": "Vorname Nachname", "ansFunc": "1. Vorsitzende", "ansKat": "Vorstand", "ansImg": "", "ansInfo": "<p>Erreichbar für allgemeine Vereinsfragen.</p><script>window.pwned = true;</script>", "ansMail": "vorsitz@sportfreunde04.de", "ansHandy": "tel-platzhalter", "ansTel": "", "ansWhatsApp": "tel-platzhalter", "ansInsta": "sportfreunde04", "ansLink": "", "ansSortNumber": 1 },
+    { "ansName": "Vorname Nachname", "ansFunc": "2. Vorsitzender", "ansKat": "Vorstand", "ansImg": "", "ansInfo": "", "ansMail": "vorsitz@sportfreunde04.de", "ansHandy": "", "ansTel": "", "ansWhatsApp": "", "ansInsta": "", "ansLink": "", "ansSortNumber": 2 },
+    { "ansName": "Vorname Nachname", "ansFunc": "1. Kassierer", "ansKat": "Vorstand", "ansImg": "", "ansInfo": "", "ansMail": "kassierer@sportfreunde04.de", "ansHandy": "", "ansTel": "", "ansWhatsApp": "", "ansInsta": "", "ansLink": "sportfreunde04.de", "ansSortNumber": 3 },
+    { "ansName": "Vorname Nachname", "ansFunc": "Team Jugendleitung", "ansKat": "Fußballabteilung", "ansImg": "", "ansInfo": "", "ansMail": "jugendleitung@sportfreunde04.de", "ansHandy": "", "ansTel": "", "ansWhatsApp": "", "ansInsta": "", "ansLink": "", "ansSortNumber": 4 }
+  ],
+  "6a1ec5fcf68a05bf129cdb90": [
+    { "katName": "Karnevalabteilung" },
+    { "katName": "Fußballabteilung" },
+    { "katName": "Vorstand" }
+  ],
+  "6a1ec5fcf68a05bf129cdb95": [
+    { "showSearch": true, "showKat": true, "showDesc": true }
+  ],
+  "6a1ec5fcf68a05bf129cdbac": [
+    { "sponActive": true, "sponSort": 1, "sponKategorie": "App-Projektpartner", "sponFirma": "vmapit GmbH", "sponImg": "", "sponBeschreibung": "<p>Technischer Partner für App und Website.</p><script>window.pwned = true;</script>", "sponBranche": "IT-Dienstleistung", "sponOrt": "Mannheim", "sponPLZ": "68159", "sponStrasse": "", "sponLink": "vmapit.de", "sponButton": "", "sponButtonLink": "", "sponMail": "info@vmapit.de", "sponTel": "", "sponInst": "", "sponFace": "", "showSlider": false },
+    { "sponActive": true, "sponSort": 2, "sponKategorie": "Hauptsponsoren", "sponFirma": "Hier könnte Ihre Werbung stehen", "sponImg": "", "sponBeschreibung": "", "sponBranche": "", "sponOrt": "", "sponPLZ": "", "sponStrasse": "", "sponLink": "", "sponButton": "", "sponButtonLink": "", "sponMail": "", "sponTel": "", "sponInst": "", "sponFace": "", "showSlider": false },
+    { "sponActive": false, "sponSort": 3, "sponKategorie": "Partner", "sponFirma": "Testfirma Inaktiv", "sponImg": "", "sponBeschreibung": "", "sponBranche": "", "sponOrt": "", "sponPLZ": "", "sponStrasse": "", "sponLink": "", "sponButton": "", "sponButtonLink": "", "sponMail": "", "sponTel": "", "sponInst": "", "sponFace": "", "showSlider": false },
+    { "sponActive": true, "sponSort": 4, "sponKategorie": "Sonstiges", "sponFirma": "", "sponImg": "", "sponBeschreibung": "", "sponBranche": "", "sponOrt": "", "sponPLZ": "", "sponStrasse": "", "sponLink": "", "sponButton": "", "sponButtonLink": "", "sponMail": "", "sponTel": "", "sponInst": "", "sponFace": "", "showSlider": false }
+  ],
+  "6a1ec5fcf68a05bf129cdbb0": [
+    { "setGroupByCategory": true }
+  ]
+}

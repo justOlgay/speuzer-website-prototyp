@@ -1,0 +1,340 @@
+<h1 class="visually-hidden">Karneval</h1>
+
+<div class="karte">
+  <span class="tag">Abteilung</span>
+  <p class="karneval-titel">Die Schnauzer</p>
+  <p class="karneval-text">Die Karnevalabteilung der Sportfreunde 04 – Gruppen von den Little Fruities bis zu den Dreamboys.</p>
+</div>
+
+<div id="gruppen-liste" class="gruppen-liste"></div>
+
+<div class="aktionen">
+  <a class="knopf" href="mailto:karnevalabteilung@sportfreunde04.de">Kontakt Karnevalabteilung</a>
+</div>
+<a class="zeile" href="nav://sportfreunde04_Application_1780401660369">
+  <span class="zeile__text"><span class="zeile__titel">Termine</span></span>
+  <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+</a>
+
+<style>
+/* Karneval_v3.tpl – seitenspezifisch (C1). */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.karneval-titel {
+  margin: var(--sp-2) 0 0;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 26px;
+  text-transform: uppercase;
+  color: var(--blau-950);
+}
+
+.karneval-text {
+  margin: var(--sp-2) 0 0;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.gruppen-liste {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  margin-top: var(--sp-5);
+}
+
+.gruppe-karte__bild {
+  display: block;
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: var(--r-md);
+  margin-bottom: var(--sp-3);
+}
+
+.gruppe-karte__titel {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 22px;
+  margin: 0 0 4px;
+  color: var(--blau-950);
+}
+
+.gruppe-karte__untertitel {
+  margin: 0 0 var(--sp-2);
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.gruppe-karte__details {
+  margin-top: var(--sp-2);
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.gruppe-karte__details summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--blau-700);
+}
+
+.gruppe-karte__details > div {
+  margin-top: var(--sp-2);
+}
+
+.gruppe-karte__kontakt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--line);
+}
+
+.gruppe-karte__kontakt-text {
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: break-word;
+}
+
+.gruppe-karte__kontakt-aktionen {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.icon-knopf {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding-inline: var(--sp-3);
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--blau-800);
+  font-weight: 600;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.icon-knopf svg { width: 18px; height: 18px; }
+
+.gruppe-karte__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+}
+</style>
+
+<script>
+(function () {
+  "use strict";
+
+  var UEBERSICHT_ID = "6a1ec5fcf68a05bf129cdb7a";
+  var BUTTONS_ID = "6a1ec5fcf68a05bf129cdb82";
+
+  var ICON_MAIL = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M4 6.5l8 6 8-6"/></svg>';
+  var ICON_PHONE = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.5 3.5h3.2c.5 0 .9.3 1 .8l.9 3a1.1 1.1 0 0 1-.3 1.1L7.8 9.9a13 13 0 0 0 6.3 6.3l1.5-1.5c.3-.3.7-.4 1.1-.3l3 .9c.5.1.8.5.8 1v3.2c0 .8-.7 1.4-1.5 1.3-8-1-14.4-7.4-15.4-15.4-.1-.8.5-1.5 1.3-1.5z"/></svg>';
+
+  function textFeld(zeile, name) {
+    var v = zeile && zeile[name];
+    return (v === undefined || v === null) ? "" : String(v);
+  }
+
+  function sicheresHtml(html) {
+    var div = document.createElement("div");
+    div.innerHTML = String(html || "");
+    var scripts = div.querySelectorAll("script");
+    for (var i = 0; i < scripts.length; i++) scripts[i].remove();
+    return div.innerHTML;
+  }
+
+  function telHref(nummer) {
+    var extrahiert = String(nummer || "").replace(/[^\d+]/g, "");
+    return "tel:" + (extrahiert || nummer);
+  }
+
+  function ladeWorkbook(id) {
+    if (!window.Workbook || typeof Workbook.load !== "function") {
+      return Promise.reject(new Error("Workbook-API fehlt"));
+    }
+    return Workbook.load({ workbook: id, filter: {}, offset: 0, limit: 5000, sort: "_id", direction: "asc" })
+      .then(function (rows) { return Array.isArray(rows) ? rows : []; });
+  }
+
+  function vergleicheGruppen(a, b) {
+    var an = typeof a.sortNumber === "number" ? a.sortNumber : Infinity;
+    var bn = typeof b.sortNumber === "number" ? b.sortNumber : Infinity;
+    if (an !== bn) return an - bn;
+    return textFeld(a, "team").localeCompare(textFeld(b, "team"), "de");
+  }
+
+  function baueKontaktZeile(zeile, titelFeld, nameFeld, mailFeld, phoneFeld, handyFeld) {
+    var titel = textFeld(zeile, titelFeld);
+    var name = textFeld(zeile, nameFeld);
+    if (!titel && !name) return null;
+
+    var kontakt = document.createElement("div");
+    kontakt.className = "gruppe-karte__kontakt";
+
+    var text = document.createElement("span");
+    text.className = "gruppe-karte__kontakt-text";
+    text.textContent = [titel, name].filter(Boolean).join(" ");
+    kontakt.appendChild(text);
+
+    var aktionen = document.createElement("span");
+    aktionen.className = "gruppe-karte__kontakt-aktionen";
+
+    var mail = textFeld(zeile, mailFeld);
+    if (mail) {
+      var mailLink = document.createElement("a");
+      mailLink.className = "icon-knopf";
+      mailLink.href = "mailto:" + mail;
+      mailLink.innerHTML = ICON_MAIL + "<span>E-Mail</span>";
+      aktionen.appendChild(mailLink);
+    }
+
+    var telNummer = textFeld(zeile, handyFeld) || textFeld(zeile, phoneFeld);
+    if (telNummer) {
+      var telLink = document.createElement("a");
+      telLink.className = "icon-knopf";
+      telLink.href = telHref(telNummer);
+      telLink.innerHTML = ICON_PHONE + "<span>Anrufen</span>";
+      aktionen.appendChild(telLink);
+    }
+
+    if (!mail && !telNummer) return null;
+    kontakt.appendChild(aktionen);
+    return kontakt;
+  }
+
+  function baueButtons(gruppe, buttons) {
+    var id = textFeld(gruppe, "id");
+    var passende = buttons.filter(function (b) {
+      if (textFeld(b, "buttonID") !== id) return false;
+      var link = textFeld(b, "buttonLink");
+      return /^(https?:|nav:\/\/|mailto:|tel:)/i.test(link);
+    });
+    if (!passende.length) return null;
+
+    var wrapper = document.createElement("div");
+    wrapper.className = "gruppe-karte__buttons";
+    for (var i = 0; i < passende.length; i++) {
+      var b = passende[i];
+      var link = document.createElement("a");
+      link.className = "knopf knopf--leise";
+      link.href = textFeld(b, "buttonLink");
+      link.textContent = textFeld(b, "buttonText") || "Mehr";
+      if (b.externalLink === true) {
+        link.target = "_blank";
+        link.rel = "noopener";
+      }
+      wrapper.appendChild(link);
+    }
+    return wrapper;
+  }
+
+  function baueGruppenKarte(gruppe, buttons) {
+    var karte = document.createElement("div");
+    karte.className = "karte gruppe-karte";
+
+    var bildUrl = textFeld(gruppe, "sliderImage1") || textFeld(gruppe, "categoryImage");
+    if (bildUrl) {
+      var bild = document.createElement("img");
+      bild.className = "gruppe-karte__bild";
+      bild.src = bildUrl;
+      bild.alt = "";
+      bild.loading = "lazy";
+      karte.appendChild(bild);
+    }
+
+    var titel = document.createElement("p");
+    titel.className = "gruppe-karte__titel";
+    titel.textContent = textFeld(gruppe, "team");
+    karte.appendChild(titel);
+
+    var uebungszeit = textFeld(gruppe, "trainingTitle");
+    if (uebungszeit) {
+      var untertitel = document.createElement("p");
+      untertitel.className = "gruppe-karte__untertitel";
+      untertitel.textContent = uebungszeit;
+      karte.appendChild(untertitel);
+    }
+
+    var beschreibung = textFeld(gruppe, "description");
+    if (beschreibung) {
+      var details = document.createElement("details");
+      details.className = "gruppe-karte__details";
+      var summary = document.createElement("summary");
+      summary.textContent = "Mehr zur Gruppe";
+      details.appendChild(summary);
+      var inhalt = document.createElement("div");
+      inhalt.innerHTML = sicheresHtml(beschreibung);
+      details.appendChild(inhalt);
+      karte.appendChild(details);
+    }
+
+    var kontakt1 = baueKontaktZeile(gruppe, "firstContactTitle", "firstContactName", "firstContactMail", "firstContactPhone", "firstContactHandy");
+    if (kontakt1) karte.appendChild(kontakt1);
+    var kontakt2 = baueKontaktZeile(gruppe, "secondContactTitle", "secondContactName", "secondContactMail", "secondContactPhone", "secondContactHandy");
+    if (kontakt2) karte.appendChild(kontakt2);
+
+    var buttonsBlock = baueButtons(gruppe, buttons);
+    if (buttonsBlock) karte.appendChild(buttonsBlock);
+
+    return karte;
+  }
+
+  var listeContainer = document.getElementById("gruppen-liste");
+
+  Promise.all([
+    ladeWorkbook(UEBERSICHT_ID),
+    ladeWorkbook(BUTTONS_ID)
+  ]).then(function (ergebnisse) {
+    var uebersicht = ergebnisse[0];
+    var buttons = ergebnisse[1];
+
+    var gruppen = uebersicht
+      .filter(function (z) { return z.isActive === true && String(z.category || "").toLowerCase() === "karnevalabteilung"; })
+      .slice()
+      .sort(vergleicheGruppen);
+
+    listeContainer.innerHTML = "";
+    if (!gruppen.length) {
+      var hinweis = document.createElement("div");
+      hinweis.className = "hinweis";
+      var p = document.createElement("p");
+      p.textContent = "Aktuell sind keine Gruppen hinterlegt.";
+      hinweis.appendChild(p);
+      listeContainer.appendChild(hinweis);
+      return;
+    }
+    for (var i = 0; i < gruppen.length; i++) {
+      listeContainer.appendChild(baueGruppenKarte(gruppen[i], buttons));
+    }
+  }).catch(function () {
+    listeContainer.innerHTML = "";
+    var hinweis = document.createElement("div");
+    hinweis.className = "hinweis";
+    var p = document.createElement("p");
+    p.textContent = "Die Gruppen konnten gerade nicht geladen werden.";
+    hinweis.appendChild(p);
+    listeContainer.appendChild(hinweis);
+  });
+})();
+</script>
