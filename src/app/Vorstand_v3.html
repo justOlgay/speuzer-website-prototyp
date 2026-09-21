@@ -219,23 +219,41 @@
     return link;
   }
 
+  // Bild-URLs aus den Worksheets: nur absolute http(s)-Adressen verwenden
+  // (im Feld stehen gelegentlich Ids oder Reste), und ein Bild, das nicht
+  // laedt, wieder aus der Karte nehmen statt eine leere Flaeche zu lassen.
+  function bildUrlGueltig(url) {
+    return /^https?:\/\//i.test(url || "");
+  }
+  function bildMitRueckbau(url, klasse, alt) {
+    var bild = document.createElement("img");
+    bild.className = klasse;
+    bild.src = url;
+    bild.alt = alt || "";
+    bild.loading = "lazy";
+    bild.addEventListener("error", function () {
+      if (bild.parentNode) bild.parentNode.removeChild(bild);
+    });
+    return bild;
+  }
+
   function bauePersonKarte(person) {
     var karte = document.createElement("div");
     karte.className = "karte person-karte";
 
     var bildUrl = textFeld(person, "ansImg");
-    if (bildUrl) {
-      var bild = document.createElement("img");
-      bild.className = "person-karte__bild";
-      bild.src = bildUrl;
-      bild.alt = "";
-      bild.loading = "lazy";
+    var kreis = document.createElement("div");
+    kreis.className = "person-karte__initialen";
+    kreis.setAttribute("aria-hidden", "true");
+    kreis.textContent = initialen(textFeld(person, "ansName"));
+    if (bildUrlGueltig(bildUrl)) {
+      var bild = bildMitRueckbau(bildUrl, "person-karte__bild", "");
+      // Laedt das Foto nicht, treten die Initialen an seine Stelle.
+      bild.addEventListener("error", function () {
+        if (!kreis.parentNode) karte.insertBefore(kreis, karte.firstChild);
+      });
       karte.appendChild(bild);
     } else {
-      var kreis = document.createElement("div");
-      kreis.className = "person-karte__initialen";
-      kreis.setAttribute("aria-hidden", "true");
-      kreis.textContent = initialen(textFeld(person, "ansName"));
       karte.appendChild(kreis);
     }
 

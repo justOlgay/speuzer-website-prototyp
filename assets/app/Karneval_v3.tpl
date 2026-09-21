@@ -495,18 +495,31 @@ svg { display: block; flex: 0 0 auto; }
     return wrapper;
   }
 
+  // Bild-URLs aus den Worksheets: nur absolute http(s)-Adressen verwenden
+  // (im Feld stehen gelegentlich Ids oder Reste), und ein Bild, das nicht
+  // laedt, wieder aus der Karte nehmen statt eine leere Flaeche zu lassen.
+  function bildUrlGueltig(url) {
+    return /^https?:\/\//i.test(url || "");
+  }
+  function bildMitRueckbau(url, klasse, alt) {
+    var bild = document.createElement("img");
+    bild.className = klasse;
+    bild.src = url;
+    bild.alt = alt || "";
+    bild.loading = "lazy";
+    bild.addEventListener("error", function () {
+      if (bild.parentNode) bild.parentNode.removeChild(bild);
+    });
+    return bild;
+  }
+
   function baueGruppenKarte(gruppe, buttons) {
     var karte = document.createElement("div");
     karte.className = "karte gruppe-karte";
 
-    var bildUrl = textFeld(gruppe, "sliderImage1") || textFeld(gruppe, "categoryImage");
+    var bildUrl = [textFeld(gruppe, "sliderImage1"), textFeld(gruppe, "categoryImage")].filter(bildUrlGueltig)[0];
     if (bildUrl) {
-      var bild = document.createElement("img");
-      bild.className = "gruppe-karte__bild";
-      bild.src = bildUrl;
-      bild.alt = "";
-      bild.loading = "lazy";
-      karte.appendChild(bild);
+      karte.appendChild(bildMitRueckbau(bildUrl, "gruppe-karte__bild", ""));
     }
 
     var titel = document.createElement("p");
