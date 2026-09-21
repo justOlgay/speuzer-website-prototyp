@@ -1,5 +1,5 @@
 {
-  "erzeugt": "2026-09-21T19:40:11.001Z",
+  "erzeugt": "2026-09-21T19:50:21.657Z",
   "zielOrdner": "web",
   "quelle": {
     "build": "npm run build",
@@ -78,8 +78,8 @@
     },
     {
       "datei": "web/mannschaften.html",
-      "bytes": 15339,
-      "sha256": "83593ebca1a9c939ec49b326c576a33dcd687e83359ff5ca6b87656051d5074e"
+      "bytes": 16270,
+      "sha256": "f47a8f1c0604fc4c1ef87692b5f2a39f6c3a2cc9d75efe77f2b92fa26981dfdf"
     },
     {
       "datei": "web/mitglied-werden.html",
