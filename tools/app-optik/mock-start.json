@@ -1,0 +1,13 @@
+{
+  "userTitle": "Start",
+  "profile": {
+    "id": "demo-user-1",
+    "firstname": "Testnutzer"
+  },
+  "liste": [
+    {
+      "title": "Mitglied werden",
+      "componentLink": "sportfreunde04_Demo"
+    }
+  ]
+}
