@@ -22,7 +22,7 @@
 
 import {
   readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, rmSync, existsSync,
-} from "node:fs";
+, cpSync} from "node:fs";
 import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -254,6 +254,13 @@ function main() {
   console.log(`Paket: ${path.relative(ROOT, PAKET_DIR)}/`);
   console.log(`Manifest: ${path.relative(ROOT, MANIFEST_PFAD)}`);
   console.log(`LIESMICH: ${path.relative(ROOT, LIESMICH_PFAD)}`);
+  // Öffentliche Kopie unter docs/appack-paket/ (GitHub Pages): von dort holt
+  // sich der CMS-Import (fetch aus dem eingebauten Browser, CORS *) die Dateien.
+  // Inhalt = docs/ws/ mit umgeschriebenen Adressen, also nichts Neues öffentlich.
+  const DOCS_KOPIE = path.join(ROOT, "docs", "appack-paket");
+  rmSync(DOCS_KOPIE, { recursive: true, force: true });
+  cpSync(PAKET_DIR, DOCS_KOPIE, { recursive: true });
+  console.log(`Öffentliche Kopie: ${path.relative(ROOT, DOCS_KOPIE)}/`);
 }
 
 main();

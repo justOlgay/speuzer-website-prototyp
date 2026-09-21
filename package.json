@@ -9,7 +9,7 @@
     "doc": "docs"
   },
   "scripts": {
-    "build": "node tools/build.mjs",
+    "build": "node tools/build.mjs && node tools/appack-paket.mjs",
     "appack-paket": "node tools/appack-paket.mjs",
     "appack-paket-pruefen": "node tools/appack-paket-pruefen.mjs",
     "huelle-bilder": "node tools/huelle-bilder.mjs",
