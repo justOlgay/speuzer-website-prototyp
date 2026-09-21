@@ -162,7 +162,7 @@ export function seite(daten) {
     url: "/datenschutz/",
     title: "Datenschutz",
     description:
-      "Datenschutzerklärung des FFV Sportfreunde 04 – Fassung der Vereins-App vom 17. Juli 2026, im Prototyp unverändert übernommen und zur juristischen Prüfung vorgemerkt.",
+      "Datenschutzerklärung des FFV Sportfreunde 04 für Website und Vereins-App, Fassung vom 17. Juli 2026.",
     inhalt,
     bodyclass: "datenschutz",
   };
