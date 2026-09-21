@@ -352,6 +352,8 @@ svg { display: block; flex: 0 0 auto; }
 </style>
 </head>
 <body>
+<main class="inhalt">
+
 <h1 class="visually-hidden">Vorstand &amp; Kontakt</h1>
 
 <div id="filterleiste" class="filterleiste" hidden></div>
@@ -368,6 +370,8 @@ svg { display: block; flex: 0 0 auto; }
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
   </a>
 </div>
+
+</main>
 
 <script src="https://cdn.appack.de/modules/common/jquery-3.4.1.min.js"></script>
 <script src="https://cdn.appack.de/modules/appack.workbook-1.4.1.js"></script>
@@ -413,7 +417,7 @@ svg { display: block; flex: 0 0 auto; }
   function mitSchema(url) {
     var u = String(url || "").trim();
     if (!u) return "";
-    return /^[a-z][a-z0-9+.-]*:/i.test(u) ? u : "https://" + u;
+    return /^(https?:|mailto:|tel:)/i.test(u) ? u : "https://" + u;
   }
 
   function ladeWorkbook(id) {
@@ -449,11 +453,15 @@ svg { display: block; flex: 0 0 auto; }
     return geordnet;
   }
 
-  function baueAktion(href, innerHtml, beschriftung) {
+  function baueAktion(href, innerHtml, beschriftung, extern) {
     var link = document.createElement("a");
     link.className = "icon-knopf";
     link.href = href;
     link.innerHTML = innerHtml + "<span>" + beschriftung + "</span>";
+    if (extern) {
+      link.target = "_blank";
+      link.rel = "noopener";
+    }
     return link;
   }
 
@@ -513,17 +521,17 @@ svg { display: block; flex: 0 0 auto; }
     var whatsapp = textFeld(person, "ansWhatsApp");
     if (whatsapp) {
       var ziffern = whatsapp.replace(/\D/g, "");
-      aktionen.appendChild(baueAktion("https://wa.me/" + (ziffern || whatsapp), ICON_CHAT, "WhatsApp"));
+      aktionen.appendChild(baueAktion("https://wa.me/" + (ziffern || whatsapp), ICON_CHAT, "WhatsApp", true));
     }
 
     var insta = textFeld(person, "ansInsta");
     if (insta) {
       var instaUrl = /^https?:/i.test(insta) ? insta : "https://instagram.com/" + insta.replace(/^@/, "");
-      aktionen.appendChild(baueAktion(instaUrl, ICON_KAMERA, "Instagram"));
+      aktionen.appendChild(baueAktion(instaUrl, ICON_KAMERA, "Instagram", true));
     }
 
     var link = textFeld(person, "ansLink");
-    if (link) aktionen.appendChild(baueAktion(mitSchema(link), ICON_GLOBUS, "Website"));
+    if (link) aktionen.appendChild(baueAktion(mitSchema(link), ICON_GLOBUS, "Website", true));
 
     if (aktionen.children.length) inhalt.appendChild(aktionen);
     karte.appendChild(inhalt);

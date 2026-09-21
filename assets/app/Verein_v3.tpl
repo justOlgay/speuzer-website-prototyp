@@ -255,6 +255,11 @@ svg { display: block; flex: 0 0 auto; }
   border: 0;
 }
 
+.zeile__titel,
+.zeile__untertitel {
+  display: block;
+}
+
 .zeile__untertitel {
   margin: 2px 0 0;
   font-size: 13px;
@@ -304,6 +309,8 @@ svg { display: block; flex: 0 0 auto; }
 </style>
 </head>
 <body>
+<main class="inhalt">
+
 <h1 class="visually-hidden">Verein</h1>
 
 <h2 class="abschnittstitel">Abteilungen</h2>
@@ -378,6 +385,8 @@ svg { display: block; flex: 0 0 auto; }
 </div>
 
 <p class="fuss">F.F.V. Sportfreunde 04 · Vereins-App</p>
+
+</main>
 
 <script src="https://cdn.appack.de/modules/common/jquery-3.4.1.min.js"></script>
 <script src="https://cdn.appack.de/modules/appack.workbook-1.4.1.js"></script>
