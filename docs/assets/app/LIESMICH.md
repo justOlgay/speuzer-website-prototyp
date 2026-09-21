@@ -239,7 +239,7 @@ Ansprechpartner (Vorstand), wie `Ansprechpartner.tpl`:
 |---|---|
 | Kontakte | `6a1ec5fcf68a05bf129cdb8b` |
 | Kategorien | `6a1ec5fcf68a05bf129cdb90` |
-| Einstellungen | `6a1ec5fcf68a05bf129cdb95` (geladen, aktuell nicht ausgewertet) |
+| Einstellungen | `6a1ec5fcf68a05bf129cdb95` (nicht geladen, optional laut Spezifikation) |
 
 Sponsoren, wie `Sponsoren.tpl`:
 

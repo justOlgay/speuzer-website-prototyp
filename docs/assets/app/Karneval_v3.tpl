@@ -363,6 +363,8 @@ svg { display: block; flex: 0 0 auto; }
 </style>
 </head>
 <body>
+<main class="inhalt">
+
 <h1 class="visually-hidden">Karneval</h1>
 
 <div class="karte">
@@ -380,6 +382,8 @@ svg { display: block; flex: 0 0 auto; }
   <span class="zeile__text"><span class="zeile__titel">Termine</span></span>
   <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
 </a>
+
+</main>
 
 <script src="https://cdn.appack.de/modules/common/jquery-3.4.1.min.js"></script>
 <script src="https://cdn.appack.de/modules/appack.workbook-1.4.1.js"></script>
@@ -460,8 +464,7 @@ svg { display: block; flex: 0 0 auto; }
       aktionen.appendChild(telLink);
     }
 
-    if (!mail && !telNummer) return null;
-    kontakt.appendChild(aktionen);
+    if (mail || telNummer) kontakt.appendChild(aktionen);
     return kontakt;
   }
 
@@ -478,11 +481,12 @@ svg { display: block; flex: 0 0 auto; }
     wrapper.className = "gruppe-karte__buttons";
     for (var i = 0; i < passende.length; i++) {
       var b = passende[i];
+      var buttonLink = textFeld(b, "buttonLink");
       var link = document.createElement("a");
       link.className = "knopf knopf--leise";
-      link.href = textFeld(b, "buttonLink");
+      link.href = buttonLink;
       link.textContent = textFeld(b, "buttonText") || "Mehr";
-      if (b.externalLink === true) {
+      if (b.externalLink === true || /^https?:/i.test(buttonLink)) {
         link.target = "_blank";
         link.rel = "noopener";
       }

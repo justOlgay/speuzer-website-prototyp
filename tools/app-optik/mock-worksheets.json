@@ -25,7 +25,7 @@
     { "name": "Karnevalabteilung", "backgroundColor": "#191793", "textColor": "#FFFFFF" }
   ],
   "6a1ec5fcf68a05bf129cdb89": [
-    { "showContent": true, "descriptionCanBeToggled": true }
+    { "showContent": false, "descriptionCanBeToggled": true }
   ],
   "6a1ec5fcf68a05bf129cdb8b": [
     { "ansName": "Vorname Nachname", "ansFunc": "1. Vorsitzende", "ansKat": "Vorstand", "ansImg": "", "ansInfo": "<p>Erreichbar für allgemeine Vereinsfragen.</p><script>window.pwned = true;</script>", "ansMail": "vorsitz@sportfreunde04.de", "ansHandy": "tel-platzhalter", "ansTel": "", "ansWhatsApp": "tel-platzhalter", "ansInsta": "sportfreunde04", "ansLink": "", "ansSortNumber": 1 },
@@ -45,7 +45,8 @@
     { "sponActive": true, "sponSort": 1, "sponKategorie": "App-Projektpartner", "sponFirma": "vmapit GmbH", "sponImg": "", "sponBeschreibung": "<p>Technischer Partner für App und Website.</p><script>window.pwned = true;</script>", "sponBranche": "IT-Dienstleistung", "sponOrt": "Mannheim", "sponPLZ": "68159", "sponStrasse": "", "sponLink": "vmapit.de", "sponButton": "", "sponButtonLink": "", "sponMail": "info@vmapit.de", "sponTel": "", "sponInst": "", "sponFace": "", "showSlider": false },
     { "sponActive": true, "sponSort": 2, "sponKategorie": "Hauptsponsoren", "sponFirma": "Hier könnte Ihre Werbung stehen", "sponImg": "", "sponBeschreibung": "", "sponBranche": "", "sponOrt": "", "sponPLZ": "", "sponStrasse": "", "sponLink": "", "sponButton": "", "sponButtonLink": "", "sponMail": "", "sponTel": "", "sponInst": "", "sponFace": "", "showSlider": false },
     { "sponActive": false, "sponSort": 3, "sponKategorie": "Partner", "sponFirma": "Testfirma Inaktiv", "sponImg": "", "sponBeschreibung": "", "sponBranche": "", "sponOrt": "", "sponPLZ": "", "sponStrasse": "", "sponLink": "", "sponButton": "", "sponButtonLink": "", "sponMail": "", "sponTel": "", "sponInst": "", "sponFace": "", "showSlider": false },
-    { "sponActive": true, "sponSort": 4, "sponKategorie": "Sonstiges", "sponFirma": "", "sponImg": "", "sponBeschreibung": "", "sponBranche": "", "sponOrt": "", "sponPLZ": "", "sponStrasse": "", "sponLink": "", "sponButton": "", "sponButtonLink": "", "sponMail": "", "sponTel": "", "sponInst": "", "sponFace": "", "showSlider": false }
+    { "sponActive": true, "sponSort": 4, "sponKategorie": "Sonstiges", "sponFirma": "", "sponImg": "", "sponBeschreibung": "", "sponBranche": "", "sponOrt": "", "sponPLZ": "", "sponStrasse": "", "sponLink": "", "sponButton": "", "sponButtonLink": "", "sponMail": "", "sponTel": "", "sponInst": "", "sponFace": "", "showSlider": false },
+    { "sponActive": true, "sponSort": 5, "sponKategorie": "Sonstiges", "sponFirma": "Einzelziel Sponsoring UG", "sponImg": "", "sponBeschreibung": "<p>Testeintrag mit genau einem Ziel und Beschreibung (Karte darf kein Link sein, siehe C1b).</p>", "sponBranche": "", "sponOrt": "Frankfurt am Main", "sponPLZ": "", "sponStrasse": "", "sponLink": "", "sponButton": "", "sponButtonLink": "", "sponMail": "kontakt@einzelziel-test.de", "sponTel": "", "sponInst": "", "sponFace": "", "showSlider": false }
   ],
   "6a1ec5fcf68a05bf129cdbb0": [
     { "setGroupByCategory": true }

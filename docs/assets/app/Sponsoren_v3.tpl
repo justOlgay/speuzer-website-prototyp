@@ -345,6 +345,8 @@ svg { display: block; flex: 0 0 auto; }
 </style>
 </head>
 <body>
+<main class="inhalt">
+
 <h1 class="visually-hidden">Sponsoren &amp; Partner</h1>
 
 <div class="hinweis hinweis--einleitung"><p>Diese Unternehmen und Partner unterstützen den Verein. Danke!</p></div>
@@ -357,6 +359,8 @@ svg { display: block; flex: 0 0 auto; }
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
   </a>
 </div>
+
+</main>
 
 <script src="https://cdn.appack.de/modules/common/jquery-3.4.1.min.js"></script>
 <script src="https://cdn.appack.de/modules/appack.workbook-1.4.1.js"></script>
@@ -388,7 +392,7 @@ svg { display: block; flex: 0 0 auto; }
   function mitSchema(url) {
     var u = String(url || "").trim();
     if (!u) return "";
-    return /^[a-z][a-z0-9+.-]*:/i.test(u) ? u : "https://" + u;
+    return /^(https?:|mailto:|tel:)/i.test(u) ? u : "https://" + u;
   }
 
   function instaOderFaceUrl(wert, domain) {
@@ -452,7 +456,11 @@ svg { display: block; flex: 0 0 auto; }
 
   function baueSponsorKarte(sponsor) {
     var ziele = sammleZiele(sponsor);
-    var karteTag = ziele.length === 1 ? "a" : "div";
+    var beschreibung = textFeld(sponsor, "sponBeschreibung");
+    // Interaktiver Inhalt (<details>) ist in einem <a> ungueltiges HTML,
+    // darum die Karte nur ohne Beschreibung als Link bauen; mit
+    // Beschreibung bleibt das eine Ziel ein Icon-Knopf in den Aktionen.
+    var karteTag = ziele.length === 1 && !beschreibung ? "a" : "div";
     var karte = document.createElement(karteTag);
     karte.className = "karte sponsor-karte";
     if (karteTag === "a") {
@@ -491,7 +499,6 @@ svg { display: block; flex: 0 0 auto; }
       karte.appendChild(ortEl);
     }
 
-    var beschreibung = textFeld(sponsor, "sponBeschreibung");
     if (beschreibung) {
       var details = document.createElement("details");
       details.className = "sponsor-karte__details";
@@ -504,7 +511,7 @@ svg { display: block; flex: 0 0 auto; }
       karte.appendChild(details);
     }
 
-    if (ziele.length > 1) {
+    if (karteTag !== "a" && ziele.length > 0) {
       var aktionen = document.createElement("div");
       aktionen.className = "sponsor-karte__aktionen";
       for (var i = 0; i < ziele.length; i++) {
@@ -534,7 +541,7 @@ svg { display: block; flex: 0 0 auto; }
     ladeWorkbook(EINSTELLUNGEN_ID)
   ]).then(function (ergebnisse) {
     var sponsoren = ergebnisse[0]
-      .filter(function (s) { return textFeld(s, "sponFirma") || textFeld(s, "sponImg"); })
+      .filter(function (s) { return s.sponActive === true && (textFeld(s, "sponFirma") || textFeld(s, "sponImg")); })
       .slice()
       .sort(vergleicheSponsoren);
     var einstellungenZeilen = ergebnisse[1];

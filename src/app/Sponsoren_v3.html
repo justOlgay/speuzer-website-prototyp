@@ -146,7 +146,7 @@
   function mitSchema(url) {
     var u = String(url || "").trim();
     if (!u) return "";
-    return /^[a-z][a-z0-9+.-]*:/i.test(u) ? u : "https://" + u;
+    return /^(https?:|mailto:|tel:)/i.test(u) ? u : "https://" + u;
   }
 
   function instaOderFaceUrl(wert, domain) {
@@ -210,7 +210,11 @@
 
   function baueSponsorKarte(sponsor) {
     var ziele = sammleZiele(sponsor);
-    var karteTag = ziele.length === 1 ? "a" : "div";
+    var beschreibung = textFeld(sponsor, "sponBeschreibung");
+    // Interaktiver Inhalt (<details>) ist in einem <a> ungueltiges HTML,
+    // darum die Karte nur ohne Beschreibung als Link bauen; mit
+    // Beschreibung bleibt das eine Ziel ein Icon-Knopf in den Aktionen.
+    var karteTag = ziele.length === 1 && !beschreibung ? "a" : "div";
     var karte = document.createElement(karteTag);
     karte.className = "karte sponsor-karte";
     if (karteTag === "a") {
@@ -249,7 +253,6 @@
       karte.appendChild(ortEl);
     }
 
-    var beschreibung = textFeld(sponsor, "sponBeschreibung");
     if (beschreibung) {
       var details = document.createElement("details");
       details.className = "sponsor-karte__details";
@@ -262,7 +265,7 @@
       karte.appendChild(details);
     }
 
-    if (ziele.length > 1) {
+    if (karteTag !== "a" && ziele.length > 0) {
       var aktionen = document.createElement("div");
       aktionen.className = "sponsor-karte__aktionen";
       for (var i = 0; i < ziele.length; i++) {
@@ -292,7 +295,7 @@
     ladeWorkbook(EINSTELLUNGEN_ID)
   ]).then(function (ergebnisse) {
     var sponsoren = ergebnisse[0]
-      .filter(function (s) { return textFeld(s, "sponFirma") || textFeld(s, "sponImg"); })
+      .filter(function (s) { return s.sponActive === true && (textFeld(s, "sponFirma") || textFeld(s, "sponImg")); })
       .slice()
       .sort(vergleicheSponsoren);
     var einstellungenZeilen = ergebnisse[1];

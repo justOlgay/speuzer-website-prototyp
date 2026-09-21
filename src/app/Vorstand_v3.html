@@ -171,7 +171,7 @@
   function mitSchema(url) {
     var u = String(url || "").trim();
     if (!u) return "";
-    return /^[a-z][a-z0-9+.-]*:/i.test(u) ? u : "https://" + u;
+    return /^(https?:|mailto:|tel:)/i.test(u) ? u : "https://" + u;
   }
 
   function ladeWorkbook(id) {
@@ -207,11 +207,15 @@
     return geordnet;
   }
 
-  function baueAktion(href, innerHtml, beschriftung) {
+  function baueAktion(href, innerHtml, beschriftung, extern) {
     var link = document.createElement("a");
     link.className = "icon-knopf";
     link.href = href;
     link.innerHTML = innerHtml + "<span>" + beschriftung + "</span>";
+    if (extern) {
+      link.target = "_blank";
+      link.rel = "noopener";
+    }
     return link;
   }
 
@@ -271,17 +275,17 @@
     var whatsapp = textFeld(person, "ansWhatsApp");
     if (whatsapp) {
       var ziffern = whatsapp.replace(/\D/g, "");
-      aktionen.appendChild(baueAktion("https://wa.me/" + (ziffern || whatsapp), ICON_CHAT, "WhatsApp"));
+      aktionen.appendChild(baueAktion("https://wa.me/" + (ziffern || whatsapp), ICON_CHAT, "WhatsApp", true));
     }
 
     var insta = textFeld(person, "ansInsta");
     if (insta) {
       var instaUrl = /^https?:/i.test(insta) ? insta : "https://instagram.com/" + insta.replace(/^@/, "");
-      aktionen.appendChild(baueAktion(instaUrl, ICON_KAMERA, "Instagram"));
+      aktionen.appendChild(baueAktion(instaUrl, ICON_KAMERA, "Instagram", true));
     }
 
     var link = textFeld(person, "ansLink");
-    if (link) aktionen.appendChild(baueAktion(mitSchema(link), ICON_GLOBUS, "Website"));
+    if (link) aktionen.appendChild(baueAktion(mitSchema(link), ICON_GLOBUS, "Website", true));
 
     if (aktionen.children.length) inhalt.appendChild(aktionen);
     karte.appendChild(inhalt);

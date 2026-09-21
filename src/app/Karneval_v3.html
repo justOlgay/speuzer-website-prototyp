@@ -218,8 +218,7 @@
       aktionen.appendChild(telLink);
     }
 
-    if (!mail && !telNummer) return null;
-    kontakt.appendChild(aktionen);
+    if (mail || telNummer) kontakt.appendChild(aktionen);
     return kontakt;
   }
 
@@ -236,11 +235,12 @@
     wrapper.className = "gruppe-karte__buttons";
     for (var i = 0; i < passende.length; i++) {
       var b = passende[i];
+      var buttonLink = textFeld(b, "buttonLink");
       var link = document.createElement("a");
       link.className = "knopf knopf--leise";
-      link.href = textFeld(b, "buttonLink");
+      link.href = buttonLink;
       link.textContent = textFeld(b, "buttonText") || "Mehr";
-      if (b.externalLink === true) {
+      if (b.externalLink === true || /^https?:/i.test(buttonLink)) {
         link.target = "_blank";
         link.rel = "noopener";
       }
