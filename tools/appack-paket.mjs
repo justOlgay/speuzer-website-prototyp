@@ -21,8 +21,8 @@
 // "#…", externe Links) bleibt unangetastet.
 
 import {
-  readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, rmSync, existsSync,
-, cpSync} from "node:fs";
+  readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, rmSync, existsSync, cpSync,
+} from "node:fs";
 import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
