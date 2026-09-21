@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verein – App-Konzept · FFV Sportfreunde 04</title>
+<meta name="description" content="Bildschirm Verein im App-Konzept: Abteilungen Fußball und Karneval sowie Vorstand, Mitgliedschaft, Sponsoren, Downloads, Über uns und Anfahrt.">
+<link rel="stylesheet" href="../assets/css/tokens.css">
+<link rel="stylesheet" href="../assets/css/fonts.css">
+<link rel="stylesheet" href="../assets/css/app-konzept.css">
+</head>
+<body>
+<!-- Kopfleiste: appack-Hülle, nur Farbe steuerbar -->
+  <header class="app-kopf">
+    <div class="app-kopf__status"></div>
+    <div class="app-kopf__titel-zeile">
+      
+      <h1 class="app-kopf__titel">Verein</h1>
+    </div>
+  </header>
+<main class="app-inhalt">
+<h2 class="abschnittstitel">Abteilungen</h2>
+<div class="app-abteilungen">
+  <a class="karte app-abteilung-karte" href="verein-mannschaften.html">
+    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 20 12 12 21 4 12z"/></svg>
+    <p class="app-abteilung-karte__titel">Fußball</p>
+    <p class="app-abteilung-karte__untertitel">11 Mannschaften, Herren bis G-Jugend</p>
+  </a>
+  <a class="karte app-abteilung-karte" href="karneval.html">
+    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 20 12 12 21 4 12z"/></svg>
+    <p class="app-abteilung-karte__titel">Karneval</p>
+    <p class="app-abteilung-karte__untertitel">Die Schnauzer, fünf Gruppen</p>
+  </a>
+</div>
+
+<h2 class="abschnittstitel">Der Verein</h2>
+<div class="app-liste">
+  <a class="zeile" href="verein-vorstand.html">
+    <span class="zeile__text">
+      <span class="zeile__titel">Vorstand &amp; Kontakt</span>
+      <span class="zeile__untertitel">Wer den Verein führt, wen du erreichst</span>
+    </span>
+    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+  </a>
+  <a class="zeile" href="../ws/mitglied-werden.html">
+    <span class="zeile__text">
+      <span class="zeile__titel">Mitglied werden</span>
+      <span class="zeile__untertitel">Beiträge, Ablauf, Antrag</span>
+    </span>
+    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+  </a>
+  <a class="zeile" href="../ws/verein-sponsoren.html">
+    <span class="zeile__text">
+      <span class="zeile__titel">Sponsoren &amp; Partner</span>
+      <span class="zeile__untertitel">Wer uns unterstützt</span>
+    </span>
+    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+  </a>
+  <a class="zeile" href="../ws/verein-downloads.html">
+    <span class="zeile__text">
+      <span class="zeile__titel">Downloads &amp; Anträge</span>
+      <span class="zeile__untertitel">Satzung, Beiträge, Bescheinigungen</span>
+    </span>
+    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+  </a>
+  <a class="zeile" href="../ws/verein.html">
+    <span class="zeile__text">
+      <span class="zeile__titel">Über uns</span>
+      <span class="zeile__untertitel">Seit 1904 im Gallus</span>
+    </span>
+    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+  </a>
+  <a class="zeile" href="verein-kontakt.html">
+    <span class="zeile__text">
+      <span class="zeile__titel">Anfahrt</span>
+      <span class="zeile__untertitel">Mainzer Landstraße 480, Zugang und Parken</span>
+    </span>
+    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+  </a>
+</div>
+<!-- Alle Ziele sind dieselben Seiten wie im Website-Menü (eine Quelle). -->
+</main>
+<!-- Tab-Leiste: Einträge im CMS konfigurierbar, Gestaltung appack -->
+  <nav class="app-tabs" aria-label="Tab-Leiste">
+    <a class="app-tabs__eintrag" href="start.html"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/></svg><span>Start</span></a>
+    <a class="app-tabs__eintrag" href="termine.html"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>Termine</span></a>
+    <a class="app-tabs__eintrag" href="news.html"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M8 9h8M8 12.5h8M8 16h5"/></svg><span>News</span></a>
+    <a class="app-tabs__eintrag app-tabs__eintrag--aktiv" href="verein.html" aria-current="page"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 20 12 12 21 4 12z"/></svg><span>Verein</span></a>
+    <a class="app-tabs__eintrag" href="mehr.html"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="6" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18" cy="12" r="1.6"/></svg><span>Mehr</span></a>
+  </nav>
+</body>
+</html>

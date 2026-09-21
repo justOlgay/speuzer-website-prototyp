@@ -587,6 +587,90 @@ async function pruefeHuelle(browser) {
   return { fehler, bestanden: fehler.length === 0 };
 }
 
+// ---------- K1: App-Konzept-Bildschirme (docs/app-konzept/) ----------
+// Eigene, schlankere Prüfschleife statt pruefeSeite(): die Bildschirme sind
+// KEINE Workspace-/Begleitseiten (eigenes Stylesheet app-konzept.css statt
+// site.css, kein og:*/canonical-Block, siehe src/appkonzept/bildschirme.mjs)
+// und laufen daher nicht über die Sitemap – außer index.html, das als
+// einziger Sitemap-Eintrag (siehe tools/build.mjs) bereits die volle
+// pruefeSeite()-Prüfung (inkl. og:*, axe-core, interne Links) durchläuft.
+// Hier nur, was der K1-Auftrag für "alle Bildschirme" verlangt: lang, genau
+// eine h1 (= Titel in der Kopfleiste), eine Meta-Beschreibung, kein
+// horizontales Scrollen bei 320–1920 sowie Tippziele ≥ 44 px.
+function leseAppKonzeptDateien() {
+  const dir = path.join(DOCS, "app-konzept");
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    // index.html ist der einzige Sitemap-Eintrag (siehe tools/build.mjs) und
+    // läuft deshalb schon durch die volle pruefeSeite()-Schleife oben (inkl.
+    // der dortigen Fließtext-Link-Ausnahme für Tippziele in <li>/<p>, die die
+    // schlankere Prüfung hier nicht nachbildet) – hier nicht doppelt prüfen.
+    .filter((d) => d.endsWith(".html") && d !== "index.html")
+    .sort()
+    .map((d) => `/app-konzept/${d}`);
+}
+
+async function pruefeAppKonzeptSeite(browser, seitenPfad, bericht) {
+  const page = await browser.newPage();
+  const url = BASIS + seitenPfad;
+  const ergebnisSeite = { seite: seitenPfad, fehler: [] };
+
+  await page.goto(url, { waitUntil: "networkidle0", timeout: 30000 });
+
+  const meta = await page.evaluate(() => {
+    const h1e = document.querySelectorAll("h1");
+    const beschreibung = document.querySelector('meta[name="description"]');
+    return {
+      lang: document.documentElement.getAttribute("lang"),
+      anzahlH1: h1e.length,
+      beschreibung: beschreibung ? beschreibung.getAttribute("content") : null,
+    };
+  });
+
+  if (meta.lang !== "de") ergebnisSeite.fehler.push(`lang ist '${meta.lang}', erwartet 'de'`);
+  if (meta.anzahlH1 !== 1) ergebnisSeite.fehler.push(`h1-Anzahl ist ${meta.anzahlH1}, erwartet 1`);
+  if (!meta.beschreibung || meta.beschreibung.trim() === "") {
+    ergebnisSeite.fehler.push("meta description fehlt oder ist leer");
+  }
+
+  for (const breite of BREITEN) {
+    await page.setViewport({ width: breite, height: 900 });
+    const scroll = await page.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      innerWidth: window.innerWidth,
+    }));
+    if (scroll.scrollWidth > scroll.innerWidth + 1) {
+      ergebnisSeite.fehler.push(
+        `horizontales Scrollen bei ${breite}px (scrollWidth ${scroll.scrollWidth} > innerWidth ${scroll.innerWidth})`
+      );
+    }
+  }
+
+  await page.setViewport({ width: 390, height: 844 });
+  await warte(200);
+
+  const tippzieleFehler = await page.evaluate(() => {
+    const fehler = [];
+    const elemente = document.querySelectorAll("a, button, input, select");
+    for (const el of elemente) {
+      const rect = el.getBoundingClientRect();
+      if (rect.width === 0 && rect.height === 0) continue; // unsichtbar/nicht gerendert
+      if (rect.height < 44 || rect.width < 44) {
+        fehler.push(
+          `${el.tagName.toLowerCase()} "${(el.textContent || el.getAttribute("aria-label") || "").trim().slice(0, 40)}" ist ${Math.round(rect.width)}×${Math.round(rect.height)}px`
+        );
+      }
+    }
+    return fehler;
+  });
+  for (const f of tippzieleFehler) ergebnisSeite.fehler.push(`Tippziel zu klein: ${f}`);
+
+  await page.close();
+  ergebnisSeite.bestanden = ergebnisSeite.fehler.length === 0;
+  bericht.appKonzept.push(ergebnisSeite);
+  return ergebnisSeite.bestanden;
+}
+
 async function main() {
   mkdirSync(CACHE, { recursive: true });
 
@@ -597,7 +681,7 @@ async function main() {
   const axeSkript = readFileSync(AXE_PFAD, "utf8");
 
   const serverProc = await starteServer();
-  const bericht = { erstellt: new Date().toISOString(), seiten: [], bilder: { verstoesse: [] } };
+  const bericht = { erstellt: new Date().toISOString(), seiten: [], appKonzept: [], bilder: { verstoesse: [] } };
   let allesOk = true;
 
   try {
@@ -616,6 +700,14 @@ async function main() {
       const huelleErgebnis = await pruefeHuelle(browser);
       bericht.huelle = huelleErgebnis;
       if (!huelleErgebnis.bestanden) allesOk = false;
+
+      // K1: docs/app-konzept/*.html (siehe pruefeAppKonzeptSeite() oben).
+      const appKonzeptPfade = leseAppKonzeptDateien();
+      for (const seitenPfad of appKonzeptPfade) {
+        console.log(`Prüfe ${seitenPfad} …`);
+        const ok = await pruefeAppKonzeptSeite(browser, seitenPfad, bericht);
+        if (!ok) allesOk = false;
+      }
     } finally {
       await browser.close();
     }
@@ -650,6 +742,10 @@ async function main() {
   }
   console.log(`${bericht.huelle.bestanden ? "OK  " : "FEHLER"} / (Hülle) (${bericht.huelle.fehler.length} Fehler)`);
   for (const f of bericht.huelle.fehler) console.log(`  - ${f}`);
+  for (const s of bericht.appKonzept) {
+    console.log(`${s.bestanden ? "OK  " : "FEHLER"} ${s.seite} (${s.fehler.length} Fehler)`);
+    for (const f of s.fehler) console.log(`  - ${f}`);
+  }
   if (bericht.bilder.verstoesse.length) {
     console.log("Bildgrößen-Verstöße:");
     for (const v of bericht.bilder.verstoesse) console.log(`  - ${v}`);

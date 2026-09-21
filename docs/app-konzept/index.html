@@ -1,0 +1,104 @@
+<!doctype html>
+<!--
+  Speuzer Website Prototyp – Vorlage für Begleitseiten (P17)
+  Wie src/vorlagen/workspace.html (lang="de", Meta, OG, site.css), aber mit
+  einer eigenen schmalen Kopfleiste vor <main> und Pfaden über ../ statt
+  fest "../" – Begleitseiten liegen zwar wie Workspace-Seiten in Tiefe 1
+  (/vorher-nachher/, /app/), 404.html aber in Tiefe 0 (docs/404.html), siehe
+  tools/build.mjs. Begleitseiten sind NICHT Teil der nachgebildeten
+  appack-Website (docs/index.html): eigene Kopfleiste statt Hülle, eigene
+  Fußzeile (ws-fuss, wie Workspace-Seiten) mit dem Hinweis, dass es sich um
+  Begleitmaterial für den Vorstand handelt.
+-->
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>App-Konzept – FFV Sportfreunde 04</title>
+<meta name="description" content="Klick-Prototyp der neu strukturierten Speuzer-App: fünf Tabs, personalisierter Start und Vereinsbereich, appack-Hülle als Attrappe.">
+<link rel="canonical" href="https://justolgay.github.io/speuzer-website-prototyp/app-konzept/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FFV Sportfreunde 04">
+<meta property="og:title" content="App-Konzept – FFV Sportfreunde 04">
+<meta property="og:description" content="Klick-Prototyp der neu strukturierten Speuzer-App: fünf Tabs, personalisierter Start und Vereinsbereich, appack-Hülle als Attrappe.">
+<meta property="og:url" content="https://justolgay.github.io/speuzer-website-prototyp/app-konzept/">
+<meta property="og:image" content="https://justolgay.github.io/speuzer-website-prototyp/assets/og/standard.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#191793">
+<link rel="icon" href="../assets/logo/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/logo/apple-touch-icon.png">
+<link rel="preload" href="../assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body class="ws">
+<header class="begleit-kopf">
+  <div class="container begleit-kopf__zeile">
+    <p class="begleit-kopf__marke">Begleitseite zum Prototyp · FFV Sportfreunde 04</p>
+    <nav aria-label="Begleitseiten"><ul>
+      <li><a href="../">appack-Fassung</a></li>
+      <li><a href="../vorher-nachher/">Vorher / Nachher</a></li>
+      <li><a href="../app/">In der App</a></li>
+      <li><a href="../app-konzept/">App-Konzept</a></li>
+    </ul></nav>
+  </div>
+</header>
+<main id="inhalt">
+<section class="abschnitt seitenkopf">
+  <div class="container">
+    <h1>App-Konzept</h1>
+    <p class="seitenkopf__lead">Klick-Prototyp der neu strukturierten Vereins-App: fünf Tabs, ein Startbildschirm, der arbeitet, und Vereinsseiten, die App und Website gemeinsam nutzen. Kopf- und Tab-Leiste sind Attrappen der appack-Hülle; Termine, News und Mehr bleiben appack-Bildschirme.</p>
+  </div>
+</section>
+<section class="abschnitt">
+  <div class="container">
+    <div class="telefone-paar">
+      <div class="telefon-eintrag">
+        <div class="telefon">
+          <iframe id="appkonzept-rahmen" src="start.html" title="Vorschau der Bildschirm-Attrappe" loading="lazy"></iframe>
+        </div>
+      </div>
+      <div class="fluss">
+        <h2>Bildschirme</h2>
+        <ul>
+        <li><a href="start.html" data-appkonzept-ziel="start.html">Start</a></li>
+        <li><a href="termine.html" data-appkonzept-ziel="termine.html">Termine</a></li>
+        <li><a href="news.html" data-appkonzept-ziel="news.html">News</a></li>
+        <li><a href="verein.html" data-appkonzept-ziel="verein.html">Verein</a></li>
+        <li><a href="karneval.html" data-appkonzept-ziel="karneval.html">Karneval</a></li>
+        <li><a href="verein-mannschaften.html" data-appkonzept-ziel="verein-mannschaften.html">Verein · Mannschaften</a></li>
+        <li><a href="verein-vorstand.html" data-appkonzept-ziel="verein-vorstand.html">Verein · Vorstand &amp; Kontakt</a></li>
+        <li><a href="verein-kontakt.html" data-appkonzept-ziel="verein-kontakt.html">Verein · Anfahrt</a></li>
+        <li><a href="mehr.html" data-appkonzept-ziel="mehr.html">Mehr</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="abschnitt">
+  <div class="container fluss">
+    <h2>Was hier Attrappe ist</h2>
+    <p>Kopfleiste: appack liefert Höhe, Aufbau und Schrift der Kopfleiste vor; der Verein steuert nur ihre Farbe.</p>
+    <p>Tab-Leiste: Anzahl, Reihenfolge, Ziele und Beschriftung der fünf Einträge legt der Verein im CMS fest, Icon-Stil, Höhe und Schrift der Leiste bleiben appack.</p>
+    <p>Native Module: Termine, Mehr und die einzelnen App-Bildschirme darin (Kalender, News, Chat, Galerie, Schwarzes Brett, Profil) bleiben appack-Bildschirme; der Verein liefert nur Inhalte, Reihenfolge und Farben.</p>
+  </div>
+</section>
+<script>
+(function () {
+  var rahmen = document.getElementById("appkonzept-rahmen");
+  if (!rahmen) return;
+  var links = document.querySelectorAll("[data-appkonzept-ziel]");
+  for (var i = 0; i < links.length; i++) {
+    links[i].addEventListener("click", function (ereignis) {
+      ereignis.preventDefault();
+      rahmen.src = this.getAttribute("data-appkonzept-ziel");
+    });
+  }
+})();
+</script>
+</main>
+<footer class="ws-fuss"><p>Begleitmaterial für den Vorstand, nicht Teil der Website · Stand Montag, 21. September 2026</p></footer>
+</body>
+</html>

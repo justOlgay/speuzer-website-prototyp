@@ -1,0 +1,536 @@
+/*
+  Speuzer App-Konzept – Klick-Prototyp der App (K1)
+  Eigenständiges Stylesheet für die Bildschirm-Attrappen unter
+  docs/app-konzept/*.html (Ausnahme: index.html, das site.css nutzt, siehe
+  src/appkonzept/bildschirme.mjs). Setzt tokens.css und fonts.css voraus
+  (beide separat per <link> eingebunden) – keine eigenen Farb-, Schrift- oder
+  Abstandswerte außerhalb dieser Tokens, mit Ausnahme der im K1-Auftrag fest
+  vorgegebenen Pixelmaße (Kopfleiste, Tab-Leiste, Schriftgrößen der
+  Bildschirm-Attrappe), die bewusst nicht auf die Website-Skala (--fs-*)
+  abgebildet sind, weil appack diese Maße eigenständig vorgibt.
+*/
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: 14px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
+
+svg {
+  display: block;
+  flex: 0 0 auto;
+}
+
+/* ==========================================================================
+   Kopfleiste – appack-Hülle, nur Farbe steuerbar
+   ========================================================================== */
+
+.app-kopf {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: 88px;
+  background: var(--blau-800);
+  color: var(--weiss);
+}
+
+.app-kopf__status {
+  height: 44px;
+}
+
+.app-kopf__titel-zeile {
+  position: relative;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 56px;
+}
+
+.app-kopf__titel {
+  margin: 0;
+  font-family: var(--font-text);
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--weiss);
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Sichtbarer Knopf 36 px (K1-Vorgabe), Tippziel 44 px (Bausteine-Regel "Alle
+   Tippziele ≥ 44 px"): der Link selbst spannt die vollen 44×44 px auf, der
+   36-px-Kreis ist ein zentriertes inneres Element (.app-kopf__zurueck-kreis) –
+   damit bleibt die vorgegebene Knopfgröße optisch unverändert. */
+.app-kopf__zurueck {
+  position: absolute;
+  left: var(--sp-2);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.app-kopf__zurueck-kreis {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-pill);
+  background: var(--blau-700);
+  color: var(--weiss);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-kopf__zurueck-kreis svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ==========================================================================
+   Inhalt
+   ========================================================================== */
+
+.app-inhalt {
+  padding: var(--sp-4);
+  padding-bottom: 96px;
+  min-height: calc(100vh - 88px);
+}
+
+.app-inhalt--voll {
+  padding: 0;
+}
+
+/* ==========================================================================
+   Tab-Leiste – Einträge im CMS konfigurierbar, Gestaltung appack
+   ========================================================================== */
+
+.app-tabs {
+  position: fixed;
+  left: var(--sp-3);
+  right: var(--sp-3);
+  bottom: var(--sp-3);
+  z-index: 30;
+  height: 64px;
+  display: flex;
+  background: rgba(255, 255, 255, .92);
+  border-radius: var(--r-pill);
+  box-shadow: var(--sh-2);
+}
+
+.app-tabs__eintrag {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 44px;
+  color: var(--ink-3);
+  text-decoration: none;
+}
+
+.app-tabs__eintrag svg {
+  width: 24px;
+  height: 24px;
+  margin-inline: auto;
+}
+
+.app-tabs__eintrag span {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.app-tabs__eintrag--aktiv {
+  color: var(--blau-800);
+}
+
+/* ==========================================================================
+   Gemeinsame Bausteine
+   ========================================================================== */
+
+.karte {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-1);
+  padding: var(--sp-4);
+}
+
+.zeile {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 56px;
+  padding-block: var(--sp-2);
+  text-decoration: none;
+  color: inherit;
+  border-bottom: 1px solid var(--line);
+}
+
+.zeile:last-child {
+  border-bottom: none;
+}
+
+.zeile__text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.zeile__titel {
+  margin: 0;
+  font-weight: 600;
+  font-size: 15px;
+  overflow-wrap: break-word;
+}
+
+.zeile__untertitel {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--ink-3);
+  overflow-wrap: break-word;
+}
+
+.zeile__pfeil {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  color: var(--ink-3);
+}
+
+/* Karneval-Gruppenliste (ohne Link, siehe karneval.html): dieselbe Optik wie
+   .zeile, aber kein Tippziel/keine Pfeil-Spalte, weil keine Zielseite
+   existiert. */
+.zeile--ohne-link {
+  cursor: default;
+}
+
+/* Termine-Attrappe: halbtransparent, kein Tippziel (siehe termine.html). */
+.zeile--attrappe {
+  opacity: .7;
+  cursor: default;
+}
+
+.abschnittstitel {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 20px;
+  text-transform: uppercase;
+  color: var(--blau-950);
+  margin: var(--sp-6) 0 var(--sp-3);
+}
+
+.app-inhalt > .abschnittstitel:first-child {
+  margin-top: 0;
+}
+
+.knopf {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding-inline: var(--sp-4);
+  border-radius: var(--r-md);
+  background: var(--blau-700);
+  color: var(--weiss);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+.knopf--leise {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--blau-800);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  background: var(--blau-100);
+  color: var(--blau-800);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+}
+
+.hinweis {
+  display: block;
+  border-left: 3px solid var(--blau-700);
+  background: var(--blau-50);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  font-size: 14px;
+  color: var(--ink-2);
+  margin-top: var(--sp-5);
+}
+
+.hinweis p {
+  margin: 0;
+}
+
+/* ==========================================================================
+   Start
+   ========================================================================== */
+
+.app-gruss {
+  margin: 0;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 26px;
+  color: var(--blau-950);
+}
+
+.app-gruppen {
+  margin: var(--sp-1) 0 0;
+  font-size: 14px;
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.app-termine {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.app-termin-karte {
+  display: flex;
+  gap: var(--sp-4);
+}
+
+.app-termin-karte__datum {
+  flex: 0 0 auto;
+  width: 52px;
+  text-align: center;
+}
+
+.app-termin-karte__tag {
+  display: block;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--blau-950);
+}
+
+.app-termin-karte__monat {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.app-termin-karte__inhalt {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.app-termin-karte__titel {
+  margin: 4px 0 0;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.app-termin-karte__zeile {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.app-termin-karte__knoepfe {
+  display: flex;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  margin-top: var(--sp-2);
+}
+
+.app-termin-karte__knoepfe .knopf {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-inline: var(--sp-3);
+}
+
+.app-weiter-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  min-height: 44px;
+  margin-top: var(--sp-1);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--blau-700);
+  text-decoration: none;
+}
+
+.app-weiter-link svg {
+  width: 18px;
+  height: 18px;
+  color: var(--blau-700);
+}
+
+.app-aktuelles {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-aktionen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-top: var(--sp-5);
+}
+
+.app-fuss {
+  margin: var(--sp-6) 0 0;
+  font-size: 12px;
+  color: var(--ink-3);
+  text-align: center;
+}
+
+/* ==========================================================================
+   Termine / News – appack-Modul-Hinweis
+   ========================================================================== */
+
+.app-modul-karte p {
+  margin: var(--sp-2) 0 0;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.app-liste {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--sp-5);
+}
+
+.app-liste-kommentar {
+  margin: var(--sp-2) 0 0;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+/* ==========================================================================
+   Verein
+   ========================================================================== */
+
+.app-abteilungen {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-4);
+}
+
+.app-abteilung-karte {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.app-abteilung-karte svg {
+  width: 32px;
+  height: 32px;
+  color: var(--blau-700);
+}
+
+.app-abteilung-karte__titel {
+  margin: 0;
+  font-weight: 700;
+  font-size: 16px;
+  overflow-wrap: break-word;
+}
+
+.app-abteilung-karte__untertitel {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-3);
+  overflow-wrap: break-word;
+}
+
+/* ==========================================================================
+   Karneval
+   ========================================================================== */
+
+.app-karneval-titel {
+  margin: var(--sp-2) 0 0;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 24px;
+  text-transform: uppercase;
+  color: var(--blau-950);
+}
+
+.app-karneval-text {
+  margin: var(--sp-2) 0 0;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.app-karneval-gruppen {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--sp-5);
+}
+
+/* ==========================================================================
+   Iframe-Bildschirme (Mannschaften, Vorstand & Kontakt, Anfahrt)
+   ========================================================================== */
+
+.app-iframe {
+  display: block;
+  width: 100%;
+  height: calc(100vh - 88px);
+  border: 0;
+}
+
+/* ==========================================================================
+   Mehr
+   ========================================================================== */
+
+.app-fussnote {
+  margin: var(--sp-4) 0 0;
+  font-size: 12px;
+  color: var(--ink-3);
+}

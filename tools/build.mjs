@@ -7,6 +7,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
 import { datumLang } from "../src/vorlagen/hilfen.mjs";
+import { bildschirme } from "../src/appkonzept/bildschirme.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = path.join(ROOT, "src");
@@ -419,6 +420,19 @@ async function main() {
     begleitGeschrieben.push({ url, title: seite.title });
   }
 
+  // K1: Klick-Prototyp der App (docs/app-konzept/) – neun eigenständige
+  // Bildschirm-Attrappen (eigenes Stylesheet app-konzept.css, kein site.css)
+  // plus die Rahmenseite index.html (nutzt wie die Begleitseiten oben die
+  // Begleit-Vorlage, siehe src/appkonzept/bildschirme.mjs). Nur index.html
+  // bekommt einen Sitemap-Eintrag (unten) – die neun Bildschirme sind kein
+  // eigenständiges Prüfziel der allgemeinen Begleitseiten-Prüfung, siehe
+  // tools/pruefen.mjs (eigene, schlankere Prüfschleife für docs/app-konzept/).
+  const appKonzeptDateien = bildschirme(daten);
+  mkdirSync(path.join(DOCS, "app-konzept"), { recursive: true });
+  for (const { datei, html } of appKonzeptDateien) {
+    writeFileSync(path.join(DOCS, "app-konzept", datei), html, "utf8");
+  }
+
   // docs/index.html – die Hülle (P16): Nachbildung der appack-Vorlage
   // "Microwebseite", siehe baueHuelle() oben. Erster Eintrag der Sitemap
   // (unten).
@@ -513,6 +527,9 @@ async function main() {
   const sitemapEintraege = [
     `  <url><loc>${BASIS_URL}</loc></url>`,
     ...begleitGeschrieben.map((s) => `  <url><loc>${BASIS_URL.replace(/\/$/, "")}${s.url}</loc></url>`),
+    // K1: Sitemap-Eintrag nur für die Rahmenseite (docs/app-konzept/index.html),
+    // nicht für die neun Bildschirm-Attrappen (siehe oben).
+    `  <url><loc>${BASIS_URL}app-konzept/</loc></url>`,
     ...geschrieben.map((s) => `  <url><loc>${BASIS_URL.replace(/\/$/, "")}/ws/${s.name}.html</loc></url>`),
   ].join("\n");
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEintraege}\n</urlset>\n`;
@@ -523,6 +540,8 @@ async function main() {
   for (const s of begleitGeschrieben) console.log(`  ${s.url}  (${s.title})`);
   console.log(`Gebaute Workspace-Seiten (${geschrieben.length}):`);
   for (const s of geschrieben) console.log(`  ws/${s.name}.html  (${s.url})`);
+  console.log(`Gebaute App-Konzept-Bildschirme (${appKonzeptDateien.length}):`);
+  for (const s of appKonzeptDateien) console.log(`  app-konzept/${s.datei}`);
   console.log(`docs/index.html, 404.html, robots.txt, sitemap.xml, .nojekyll geschrieben.`);
   console.log(`Fertig in ${dauer}s.`);
 }
