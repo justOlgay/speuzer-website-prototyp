@@ -374,7 +374,7 @@ svg { display: block; flex: 0 0 auto; }
   <a class="zeile" href="nav://sportfreunde04_TextImage_1780401660324">
     <span class="zeile__text">
       <span class="zeile__titel">Geschäftsstelle &amp; Anfahrt</span>
-      <span class="zeile__untertitel">Öffnungszeiten, Adresse, Zugang</span>
+      <span class="zeile__untertitel">Adresse, Zugang, Kontakt</span>
     </span>
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
   </a>

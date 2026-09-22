@@ -17,8 +17,8 @@
     },
     {
       "datei": "web/kontakt.html",
-      "bytes": 9092,
-      "sha256": "e7df852d8c6177a9a377f43ba050b63ee8b307ee7f7a4df8e5cbc5e79daf3f49"
+      "bytes": 9146,
+      "sha256": "e6845be9de9d2dea1b0e2e120b086159190e3fffacd98556b2246d85eb0ceb78"
     },
     {
       "datei": "web/mannschaften-a-jugend.html",
@@ -187,8 +187,8 @@
     },
     {
       "datei": "web/verein.html",
-      "bytes": 7973,
-      "sha256": "4177145cf3974339690cfc27af02a5fdccfd700a28a32e96b762685373639aeb"
+      "bytes": 7965,
+      "sha256": "0e360f1328883760213ef57a28b788a414feb84472ffadf3fc1b7ef30eefbdd5"
     },
     {
       "datei": "web/site.css",

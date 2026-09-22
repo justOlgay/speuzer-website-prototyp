@@ -1,6 +1,6 @@
 # appack-Upload-Paket – Ordner "web" (W1)
 
-Stand: 2026-09-21. Erzeugt von `tools/appack-paket.mjs` (`npm run appack-paket`)
+Stand: 2026-09-22. Erzeugt von `tools/appack-paket.mjs` (`npm run appack-paket`)
 aus `docs/ws/*.html` und `docs/assets/css/site.css` (Ergebnis von
 `npm run build`). Dieses Paket liegt unter `dist/appack-paket/` und wird
 nicht committet.
