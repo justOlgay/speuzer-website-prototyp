@@ -58,11 +58,11 @@
     "hinweis": "von Olgay am 11.09.2026 nachgeliefert (Autorin Melanie Seipp); seit 22.09.2026 in der appack-Mediathek (cdn.appack.de), nicht mehr im Repo; Live-Link defekt (AccessDenied) – Datei ins Repo übernommen"
   },
   {
-    "titel": "Chronik des Vereins",
-    "datei": "https://cdn.appack.de/sportfreunde04/pdf/Chronik%20Sportfreunde.pdf",
-    "seiten": 27,
-    "kb": null,
+    "titel": "Vereinschronik 1904 bis 2026",
+    "datei": "https://cdn.appack.de/sportfreunde04/pdf/Chronik-FFV-Sportfreunde-04-2026.pdf",
+    "seiten": 53,
+    "kb": 1606,
     "gruppe": "Verein",
-    "hinweis": "Link prüfen (Dateiname mit Leerzeichen)"
+    "hinweis": "Ausgabe September 2026 (Redaktionsschluss 18.09.2026); loest die 27-seitige Fassung bis 2013/14 ab. Quelle ist die Word-Datei des Vereins, aus ihr entstehen auch die Chronik-Seiten (tools/chronik-bauen.mjs)."
   }
 ]
