@@ -341,6 +341,46 @@ Stufe-C-Seiten (`Startseite_v3` … `Sponsoren_v3`) wurden am selben Abend
 mit dem C2-Stand neu eingespielt (u. a. Fußballschulen als eigener
 Abschnitt, Verein-Verteiler mit „Spielplan & Tabellen", Gast-Fix Startseite).
 
+## Vereinschronik (Stand 22.09.2026)
+
+Die Chronik wird vom Verein **in Word gepflegt**
+(`Chronik_FFV_Sportfreunde_04_2026.docx` im Vereinsordner, nicht im Repo).
+Daraus erzeugt `node tools/chronik-bauen.mjs --quelle <datei.docx> --ziel <verzeichnis>`
+alle Seiten: eine Quelle, keine Doppelpflege. Nach jeder Änderung in Word das
+Werkzeug erneut laufen lassen und die geänderten Seiten einspielen.
+
+Das Werkzeug liest die Formatvorlagen der Word-Datei und übersetzt sie in die
+Bausteine des Gestaltungssystems:
+
+| Word-Formatvorlage | Website | App |
+|---|---|---|
+| `Heading1` | neue Kapitelseite, `h1` | Kapitel in der Kapitelwahl, `.abschnittstitel` |
+| `Eyebrow` | Kicker über dem Kapitel | entfällt (Titel reicht) |
+| `Lead` | `.seitenkopf__lead` bzw. Zitat | `.kapitel-lead` bzw. `.chronik-zitat` |
+| `Heading2` | `h2` | `h2.abschnittstitel`, beginnt eine neue `.karte` |
+| Standard | `p.inhalt` | `p` in der `.karte` |
+| `Caption` | `figcaption` der Abbildung | dito |
+| `Source` | `p.chronik-quelle` mit Sprungmarke `#quelle-<n>` | `p.chronik-quelle` |
+| Tabelle | `table.chronik-tabelle` | dito in `.tabelle-wrapper` |
+| Bild | JPEG in der Mediathek, `figure.chronik-bild` | dito |
+
+Quellenverweise im Fließtext (`[13]`) werden auf der Website automatisch auf
+das Kapitel „Quellen und Anmerkungen" verlinkt.
+
+**Ausgabe liegt bewusst nicht im Repo.** Die Chronik nennt Namen aus
+Mannschaftsfotos, auch von damals Jugendlichen. Sie wird über appack
+veröffentlicht; im Repo steht nur das Werkzeug. Deshalb verlinken
+`verein.html` und `verein-ueber-uns.html` die Chronik über die absolute
+Adresse `cdn.appack.de/sportfreunde04/workspace/web/chronik.html` – eine
+relative Verknüpfung würde der Verweis-Gate des Builds zu Recht bemängeln,
+weil die Seite im Repo nicht existiert.
+
+**Ergebnis:** 15 Seiten für die Website (Übersicht mit Vorwort und Zeitleiste,
+12 Zeitabschnitte, Mannschaften und Ehrenamt, Quellen und Anmerkungen),
+`Chronik-App.html` für die App (eine Seite, Kapitelwahl über `.filterleiste`
+wie die Teamwahl auf `Spielplan-App.html`, Verlauf über `#<slug>`) und neun
+Bilder für die Mediathek.
+
 ### Bauweise
 
 Gemeinsame Grundlage `src/app/v3-basis.css` (Schriften, Tokens,

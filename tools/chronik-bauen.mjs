@@ -253,7 +253,13 @@ function bilderAufbereiten(temp, zielBilder, genutzte) {
     if (!existsSync(quelle)) continue;
     const name = "chronik-" + path.basename(datei, path.extname(datei)) + ".jpg";
     const ziel = path.join(zielBilder, name);
-    execFileSync("sips", ["-s", "format", "jpeg", "-s", "formatOptions", "68", "-Z", "1100", quelle, "--out", ziel], { stdio: "ignore" });
+    // Nur verkleinern, nie hochrechnen: die Bilder sind Scans aus der alten
+    // Chronik (400 bis 690 px breit). Hochskalieren bläht die Datei auf, ohne
+    // ein Detail mehr zu zeigen.
+    const masse = execFileSync("sips", ["-g", "pixelWidth", quelle], { encoding: "utf8" });
+    const breite = Number(masse.match(/pixelWidth:\s*(\d+)/)?.[1] ?? 1100);
+    const zielBreite = Math.min(1100, breite);
+    execFileSync("sips", ["-s", "format", "jpeg", "-s", "formatOptions", "72", "-Z", String(zielBreite), quelle, "--out", ziel], { stdio: "ignore" });
     karte.set(datei, name);
   }
   return karte;
