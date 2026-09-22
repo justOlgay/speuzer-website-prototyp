@@ -90,7 +90,7 @@ function derVereinAbschnitt() {
     zeile("Downloads & Anträge", "Satzung, Beiträge, Bescheinigungen", `${PFAD}verein/downloads/`),
     zeile("Spielplan & Tabellen", "Alle Mannschaften auf einen Blick", `${PFAD}spielplan/`),
     zeile("Über uns", "Seit 1904 im Gallus", `${PFAD}verein/ueber-uns/`),
-    zeile("Geschäftsstelle & Anfahrt", "Öffnungszeiten, Adresse, Zugang", `${PFAD}kontakt/`),
+    zeile("Geschäftsstelle & Anfahrt", "Adresse, Zugang, Kontakt", `${PFAD}kontakt/`),
     zeile("Mach mit · Ehrenamt", "Trainer, Betreuer, Vorstand, Helfer", `${PFAD}verein/mach-mit/`),
     zeile("Fanshop & Teamshop", "Fanartikel und Teamausstattung", `${PFAD}shop/`),
   ].join("\n    ");

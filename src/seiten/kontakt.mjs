@@ -35,67 +35,13 @@ function mailKnopf({ adresse, betreff }) {
   return `<a class="knopf knopf--sekundaer" href="${escapeHtml(href)}">E-Mail schreiben</a>`;
 }
 
-// ---------- Öffnungszeiten (W3, aus data/geschaeftsstelle.json,
-// tools/appack-daten.mjs) ----------
-
-const WOCHENTAGE_OEFFNUNG = [
-  { feld: "monday", label: "Montag" },
-  { feld: "tuesday", label: "Dienstag" },
-  { feld: "wednesday", label: "Mittwoch" },
-  { feld: "thursday", label: "Donnerstag" },
-  { feld: "friday", label: "Freitag" },
-  { feld: "saturday", label: "Samstag", hiderFeld: "saturdayhider" },
-  { feld: "sunday", label: "Sonntag", hiderFeld: "sundayhider" },
-];
-
-// Wochentagszeile: "geschlossen" bei leeren Zeiten, sonst "09:30–16:00 Uhr"
-// bzw. mit Mittagspause "08:30–12:30 Uhr, 13:00–16:00 Uhr". Ein Wochentag mit
-// gesetztem *hider-Feld entfällt ganz (Quelle blendet ihn aus).
-function oeffnungszeitenZeilen(oeffnungszeiten) {
-  return WOCHENTAGE_OEFFNUNG.map(({ feld, label, hiderFeld }) => {
-    if (hiderFeld && oeffnungszeiten?.[hiderFeld]) return null;
-    const open = oeffnungszeiten?.[`${feld}open`];
-    const close = oeffnungszeiten?.[`${feld}close`];
-    const midStart = oeffnungszeiten?.[`${feld}midstart`];
-    const midEnd = oeffnungszeiten?.[`${feld}midend`];
-    let zeitText;
-    if (!open || !close) {
-      zeitText = "geschlossen";
-    } else if (midStart && midEnd) {
-      zeitText = `${open}–${midStart} Uhr, ${midEnd}–${close} Uhr`;
-    } else {
-      zeitText = `${open}–${close} Uhr`;
-    }
-    return `<li><span>${escapeHtml(label)}:</span> <span>${escapeHtml(zeitText)}</span></li>`;
-  })
-    .filter(Boolean)
-    .join("\n          ");
-}
-
-// Ist das Worksheet leer (keine Zeile geladen, alle Felder fehlen) ODER hat
-// die Geschäftsstelle die Anzeige im Einstellungen-Worksheet deaktiviert
-// (oeffnungszeitenAktiv === false – dasselbe Feld "openingActive", mit dem
-// auch die App die Öffnungszeiten ausblendet, src/app/Geschaeftsstelle_v3.html;
-// W3b, Prüfer-Befund "wichtig"), zeigt der Kasten stattdessen den
-// Ausweichsatz aus der Spezifikation.
-function oeffnungszeitenHtml(geschaeftsstelle) {
-  const oeffnungszeiten = geschaeftsstelle?.oeffnungszeiten;
-  if (
-    geschaeftsstelle?.oeffnungszeitenAktiv === false ||
-    !oeffnungszeiten ||
-    Object.keys(oeffnungszeiten).length === 0
-  ) {
-    return `<p style="margin:0;">Die Geschäftsstelle ist per E-Mail erreichbar, telefonisch nach Vereinbarung.</p>`;
-  }
-  const zeilen = oeffnungszeitenZeilen(oeffnungszeiten);
-  const textZusatz = oeffnungszeiten.openingtext
-    ? `<p class="meta" style="margin-top:var(--sp-2);">${escapeHtml(oeffnungszeiten.openingtext)}</p>`
-    : "";
-  return `<p style="margin:0 0 var(--sp-2);font-weight:600;">Öffnungszeiten der Geschäftsstelle</p>
-        <ul class="oeffnungszeiten" role="list" style="margin:0;padding:0;list-style:none;">
-          ${zeilen}
-        </ul>
-        ${textZusatz}`;
+// ---------- Erreichbarkeit ----------
+// Entscheidung Olgay 22.09.2026: Die Geschäftsstelle hat keine festen
+// Öffnungszeiten. Website und App zeigen deshalb denselben festen Satz; das
+// appack-Worksheet "Öffnungszeiten" (Beispieldaten der Vorlage, in der App
+// per openingActive=false ausgeblendet) wird nicht mehr ausgewertet.
+function erreichbarkeitHtml() {
+  return `<p style="margin:0;"><strong>Keine festen Öffnungszeiten.</strong> Die Geschäftsstelle ist per E-Mail erreichbar, telefonisch nach Vereinbarung.</p>`;
 }
 
 // ---------- Seitenkopf ----------
@@ -210,10 +156,9 @@ function ansprechpartnerAbschnitt(daten) {
 // "die Öffnungszeiten … und die Kontaktzeile" rendert (W3b, Prüfer-Befund
 // "wichtig" – bislang kamen diese vier Felder nur aus data/verein.json).
 // data/verein.json bleibt Fallback, falls das appack-Worksheet ein Feld
-// nicht liefert. Facebook bleibt bewusst aus data/verein.json (der Befund
-// nennt nur Telefon/E-Mail/Website/Instagram als Kontaktzeile; der
-// abweichende Facebook-Wert im Worksheet – eine Gruppe statt der
-// Vereinsseite – ist ungeklärt, siehe Abschlussbericht).
+// nicht liefert. Facebook: Der Verein hat keine Facebook-Seite, nur die
+// Gruppe (Entscheidung Olgay 22.09.2026); data/verein.json und das
+// Worksheet nennen dieselbe Gruppen-Adresse.
 function ausWorksheetOderVerein(wert, fallback) {
   const text = String(wert ?? "").trim();
   return text || fallback;
@@ -268,7 +213,7 @@ function geschaeftsstelleAbschnitt(daten) {
         </dl>
       </div>
       <div class="hinweis hinweis--info">
-        ${oeffnungszeitenHtml(geschaeftsstelle)}
+        ${erreichbarkeitHtml()}
       </div>
     </div>
   </div>
