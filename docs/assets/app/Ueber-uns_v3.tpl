@@ -357,7 +357,7 @@ svg { display: block; flex: 0 0 auto; }
     <span class="zeile__text"><span class="zeile__titel">Chronik (PDF)</span></span>
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
   </a>
-  <a class="zeile" href="https://justolgay.github.io/speuzer-website-prototyp/assets/downloads/vereinsphilosophie-und-zukunftskonzept.pdf" target="_blank" rel="noopener">
+  <a class="zeile" href="https://cdn.appack.de/sportfreunde04/pdf/vereinsphilosophie-und-zukunftskonzept.pdf" target="_blank" rel="noopener">
     <span class="zeile__text"><span class="zeile__titel">Vereinsphilosophie (PDF)</span></span>
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
   </a>
