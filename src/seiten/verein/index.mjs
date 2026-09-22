@@ -90,6 +90,9 @@ function derVereinAbschnitt() {
     zeile("Downloads & Anträge", "Satzung, Beiträge, Bescheinigungen", `${PFAD}verein/downloads/`),
     zeile("Spielplan & Tabellen", "Alle Mannschaften auf einen Blick", `${PFAD}spielplan/`),
     zeile("Über uns", "Seit 1904 im Gallus", `${PFAD}verein/ueber-uns/`),
+    // Die Chronik entsteht aus der Word-Datei des Vereins (tools/chronik-bauen.mjs)
+    // und liegt nur im appack-Workspace, nicht im Repo – daher die absolute Adresse.
+    zeile("Vereinschronik", "1904 bis 2026, Kapitel für Kapitel", "https://cdn.appack.de/sportfreunde04/workspace/web/chronik.html"),
     zeile("Geschäftsstelle & Anfahrt", "Adresse, Zugang, Kontakt", `${PFAD}kontakt/`),
     zeile("Mach mit · Ehrenamt", "Trainer, Betreuer, Vorstand, Helfer", `${PFAD}verein/mach-mit/`),
     zeile("Fanshop & Teamshop", "Fanartikel und Teamausstattung", `${PFAD}shop/`),

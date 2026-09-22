@@ -157,8 +157,8 @@
     },
     {
       "datei": "web/verein-downloads.html",
-      "bytes": 5953,
-      "sha256": "b9245bf74147387b3479294502ac17b98deec2b3017799bbdf3dc880d7494665"
+      "bytes": 5983,
+      "sha256": "47d192d59a58e97648ab7d511c0884e8b9c37639639df9a873054407e920d210"
     },
     {
       "datei": "web/verein-karneval.html",
@@ -177,8 +177,8 @@
     },
     {
       "datei": "web/verein-ueber-uns.html",
-      "bytes": 7071,
-      "sha256": "02e2ee7a9a37d65e2a7cfede9f251ceada61e489d38d2c09847fe96d3f10be1e"
+      "bytes": 7022,
+      "sha256": "48aaf388a73acdd2651bb920ebd6986776cc32c771d390ab4f20c6c913bea0e3"
     },
     {
       "datei": "web/verein-vorstand.html",
@@ -187,8 +187,8 @@
     },
     {
       "datei": "web/verein.html",
-      "bytes": 7965,
-      "sha256": "0e360f1328883760213ef57a28b788a414feb84472ffadf3fc1b7ef30eefbdd5"
+      "bytes": 8497,
+      "sha256": "5c7e93cd85320b15233ce58dbb7c72179d538a76b4d50b066415a654b022ea16"
     },
     {
       "datei": "web/site.css",
