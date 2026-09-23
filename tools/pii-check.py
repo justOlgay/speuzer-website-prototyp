@@ -46,6 +46,9 @@ WHITELIST_TELEFON = {
     # "069-736868") statt aus data/verein.json rendert – telHref() entfernt
     # dafür alle Nicht-Ziffern.
     "069736868",
+    # W9: Platzwart-Nummer in derselben kompakten tel:-Schreibweise, seit
+    # data/verein.json die Nummern einheitlich als "069 …" führt.
+    "069732193",
 }
 
 MUSTER_TELEFON_1 = re.compile(r"\+49[\d /()\-]{6,}")

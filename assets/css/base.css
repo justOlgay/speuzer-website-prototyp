@@ -58,11 +58,14 @@ h1, h2, h3, h4 {
      /datenschutz/) dürfen bei 320/360px nicht zu horizontalem Scrollen
      führen – Wortlaut bleibt unverändert, nur die Umbruch-Erlaubnis ist neu. */
   overflow-wrap: anywhere;
-  /* W8-Korrektur: Überschriften sollen bei Bedarf sauber trennen können
-     (Seiten sind lang="de", siehe src/vorlagen/workspace.html/begleit.html) –
-     .seitenkopf h1 überschreibt dies gezielt auf "manual" für den
-     &shy;-Trick auf /datenschutz/ (komponenten.css), das bleibt unberührt. */
-  hyphens: auto;
+  /* W9-Korrektur (Entscheidung 13, QA3 390-7/quer-7): Überschriften nie mehr
+     automatisch trennen ("GESCHÄFTSFÜH-/RENDER VORSTAND" wirkte falsch) –
+     vorher "auto" mit der Absicht, bei Bedarf sauber zu trennen; das ergab
+     aber mitten im Wort getrennte Überschriften. &shy; bleibt als
+     Handschalter möglich (siehe /datenschutz/, komponenten.css), overflow-
+     wrap:anywhere bleibt als Sicherheitsnetz gegen horizontales Scrollen bei
+     sehr langen Einzelwörtern bestehen. */
+  hyphens: manual;
 }
 
 h1 { font-size: var(--fs-3xl); }
@@ -70,11 +73,35 @@ h2 { font-size: var(--fs-2xl); }
 h3 { font-size: var(--fs-xl); }
 h4 { font-size: var(--fs-lg); }
 
+/* W9-B-Nachprüfung (Entscheidung 13, "H1 auf dem Handy deutlich größer als
+   H2"): Die H1-Verkleinerung auf dem Handy (.seitenkopf h1, komponenten.css,
+   clamp(1,8rem, 9.5vw, var(--fs-3xl)) – ergibt bei 390px ca. 37px) reicht
+   allein nicht: var(--fs-3xl) ist zugleich die Desktop-H1-Größe, ein
+   größerer vw-Faktor würde die mobile H1 über die Desktop-Größe hinaus
+   wachsen lassen. Stattdessen H2 auf dem Handy verkleinert (26px statt
+   31px) – Faktor H1/H2 dann ≥ 1,33 (37 / 26 ≈ 1,42) statt vorher nur 1,17.
+   Wirkt zugleich den überlangen Versal-H2-Blöcken im Datenschutz entgegen
+   (Abschnitt 10, elf Zeilen Versal). */
+@media (max-width: 479.98px) {
+  h2 {
+    font-size: 1.625rem;
+  }
+}
+
 /* Ausgewogenerer Zeilenumbruch (P2-K/K1); .hero h1 bricht damit z. B. bei
    1440px sauber „FUSSBALL IM GALLUS – / SEIT 1904.“ statt zufällig. W8-
    Korrektur: auch h4 (z. B. Karten-Überschriften), nicht nur h1–h3. */
 h1, h2, h3, h4 {
   text-wrap: balance;
+}
+
+/* W9-Korrektur (Entscheidung 13): Fließtext ohne einsame letzte Wörter/Zeilen
+   ("Handynummern." allein in Zeile 2 u. ä.) – text-wrap:pretty optimiert nur
+   die letzte Zeile eines Absatzes, ohne wie balance den ganzen Textfluss
+   umzuverteilen. Browser ohne Unterstützung ignorieren die Deklaration
+   folgenlos (progressive enhancement). */
+p {
+  text-wrap: pretty;
 }
 
 .hero h1 {

@@ -16,10 +16,15 @@ function escapeHtml(text) {
     .replaceAll('"', "&quot;");
 }
 
-// Logo (bild(), contain, max-height 72px und weiße Kachel bereits über
-// .logo-reihe__kachel in komponenten.css), darunter Firma, ggf. Ort als
-// .meta; Link nur wenn vorhanden (extern, rel="noopener", http:// ergänzt,
-// wenn das Feld ohne Schema geliefert wurde).
+// Logo (bild(), contain, weiße Kachel über .logo-reihe__kachel in
+// komponenten.css), daneben/darunter Firma, ggf. Ort als .meta; Link nur
+// wenn vorhanden (extern, rel="noopener", http:// ergänzt, wenn das Feld
+// ohne Schema geliefert wurde). W9-Korrektur (Entscheidung "Sponsoren"-
+// Raster, w9-b.md): Instagram-Symbol, wenn sponsor.instagram gesetzt ist
+// (vorher gar nicht gerendert, obwohl data/sponsoren.json das Feld führt).
+const ICON_INSTAGRAM =
+  '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>';
+
 function logoEintrag(sponsor, daten) {
   const logoHtml = bild({
     pfad: PFAD,
@@ -44,10 +49,17 @@ function logoEintrag(sponsor, daten) {
       ? `<p class="meta">Die Vereins-App und die Website laufen auf der Plattform appack der vmapit GmbH.</p>`
       : "";
 
+  const instagramHtml = sponsor.instagram
+    ? `<p class="meta"><a href="${escapeHtml(`https://instagram.com/${String(sponsor.instagram).replace(/^@/, "")}`)}" rel="noopener" target="_blank" aria-label="Instagram">${ICON_INSTAGRAM} Instagram</a></p>`
+    : "";
+
   return `<li>
       <span class="logo-reihe__kachel">${logoHtml}</span>
-      <p class="meta" style="margin-top:var(--sp-2);text-align:center;">${nameHtml}</p>
-      ${vmapitZusatz}
+      <div class="logo-reihe__info">
+        <p class="meta">${nameHtml}</p>
+        ${vmapitZusatz}
+        ${instagramHtml}
+      </div>
     </li>`;
 }
 
@@ -112,11 +124,14 @@ function appProjektpartnerAbschnitt(sponsoren, daten) {
 </section>`;
 }
 
+// W9-Korrektur (QA3 1440-3/390-1/quer-1, Entscheidung w9-gemeinsam.md): Der
+// Verein siezt Firmen genau in diesem Abschnitt (sonst duzt die Website) –
+// wörtlicher Wortlaut wie in der App (src/app/Sponsoren_v3.html).
 function sponsorWerdenAbschnitt() {
   return `<section class="abschnitt--blau abschnitt abschnitt--eng">
   <div class="container fluss">
     <h2>Sponsor werden</h2>
-    <p>Möchtest du die Sportfreunde 04 unterstützen – als Trikotsponsor, mit einer Bandenwerbung oder als Partner der Jugendabteilung? Schreib uns, wir melden uns zeitnah.</p>
+    <p class="inhalt">Sie möchten die Sportfreunde 04 unterstützen&nbsp;– als Trikotsponsor, mit einer Bandenwerbung oder als Partner der Jugendabteilung? Schreiben Sie uns, wir melden uns zeitnah.</p>
     <p class="knopfzeile">
       <a class="knopf knopf--weiss" href="mailto:geschaeftsstelle@sportfreunde04.de?subject=Sponsoring%20FFV%20Sportfreunde%2004">E-Mail an die Geschäftsstelle</a>
     </p>

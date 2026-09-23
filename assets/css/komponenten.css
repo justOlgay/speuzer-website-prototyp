@@ -182,10 +182,15 @@
 
 /* P9-Korrektur A3 (/datenschutz/): unter 480px ist var(--fs-3xl) bei langen
    Überschriften wie "Datenschutzerklärung" zu groß – clamp() verkleinert nur
-   dort, ab 480px bleibt --fs-3xl unverändert. */
+   dort, ab 480px bleibt --fs-3xl unverändert. W9-Korrektur (Entscheidung 13,
+   QA3-Maßstab "H1 auf dem Handy deutlich größer als H2"): der bisherige
+   8vw-Faktor traf bei 390px fast genau die feste H2-Größe (--fs-2xl,
+   1,953rem) – beide Überschriften wirkten gleich groß. 9.5vw hält bei 390px
+   deutlich Abstand zu H2 (≈2,3rem) und bleibt bei sehr schmalen Screens
+   (< 480px) weiter durch die Klammer begrenzt. */
 @media (max-width: 479.98px) {
   .seitenkopf h1 {
-    font-size: clamp(1.8rem, 8vw, var(--fs-3xl));
+    font-size: clamp(1.8rem, 9.5vw, var(--fs-3xl));
   }
 }
 
@@ -196,19 +201,24 @@
   margin-top: var(--sp-3);
 }
 
-/* Kicker im (hellen) Seitenkopf (P5, /verein/karneval/) – wie .hero__kicker,
-   aber in --ink-3 statt --blau-100 (das wäre auf hellem Grund unlesbar).
-   W8-Korrektur: dieselbe Klasse jetzt auch als kleine Zwischenüberschrift
-   innerhalb einer .zeilen-liste (Verein-Verteiler, /verein/) – "Eyebrow/
-   Kicker überall im selben Stil" statt einer zweiten, abweichenden Variante. */
-.seitenkopf__kicker,
-.zeilen-liste__kicker {
+/* Kicker im (hellen) Seitenkopf – wie .hero__kicker, aber in --ink-3 statt
+   --blau-100 (das wäre auf hellem Grund unlesbar). */
+.seitenkopf__kicker {
   display: block;
   font-size: var(--fs-xs);
   text-transform: uppercase;
   letter-spacing: .08em;
   color: var(--ink-3);
   margin: 0 0 var(--sp-2);
+}
+
+/* W9-Korrektur (QA3 quer-33/390-30): Gruppenüberschriften in der
+   .zeilen-liste (Verein-Verteiler, /verein/) sind jetzt ein echtes <h2> statt
+   des früheren kleinen grauen Kickers – "aus einem Guss" mit der App, die an
+   derselben Stelle fette Überschriften zeigt. Die H2-Typografie kommt aus
+   base.css, hier nur noch der Gruppenabstand. */
+.zeilen-liste__kicker {
+  margin: 0 0 var(--sp-3);
 }
 
 /* Mehrere Gruppen in einer .zeilen-liste (W8, /verein/): Abstand vor jeder
@@ -262,13 +272,24 @@
   gap: var(--sp-2);
 }
 
+/* W9-Korrektur (Entscheidung: Links in Inhaltsverzeichnissen in Vereinsblau,
+   QA3 1440-19): vorher grau wie der übrige Fließtext – dadurch sahen die
+   Sprungmarken nicht wie Links aus, während sonst auf der Website (Impressum,
+   Kontakt, Downloads) Links blau sind. */
 .inhaltsverzeichnis a {
   font-size: var(--fs-sm);
-  color: var(--ink-3);
+  color: var(--blau-700);
 }
 
 .inhaltsverzeichnis a:hover {
-  color: var(--blau-700);
+  color: var(--blau-600);
+}
+
+/* W9-Korrektur (QA3 1440-6/390-15): Die Punkte 1–11 sind Unterpunkte von
+   "Unsere Datenschutzerklärung" – vorher stand alles gleichrangig
+   untereinander. */
+.inhaltsverzeichnis__unterpunkt {
+  margin-left: var(--sp-5);
 }
 
 /* ==========================================================================
@@ -292,26 +313,62 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
 }
 
-/* Personen-Raster (P5-Korrektur A1) – ersetzt raster--3/raster--4 überall dort,
-   wo Personen-Karten liegen (Vorstand, Karnevalabteilung): mit wenigen
-   Einträgen (Senioren: 2, Karneval-Ansprechpartner: 3) wurden die Karten sonst
-   auf halbe Containerbreite gestreckt und der 3:4-Platzhalter über 700px hoch.
-   Ab 640px feste Kartenbreite (auto-fill statt auto-fit, dadurch kein Strecken
-   auf leere Spalten), darunter zwei bzw. eine Spalte. */
+/* Personen-Raster (P5-Korrektur A1, W9-Korrektur QA3 1440-11/390-5/390-6/
+   quer-6) – für alle Personen-Karten (Vorstand, Karnevalabteilung, Über uns/
+   Kinderschutz): auf dem Handy (< 640px) eine einspaltige Liste kompakter
+   Zeilen (Foto/Initialen 72px links, Text rechts – wie die App und die
+   Trainerteam-Zeilen), keine seitenbreiten Hochformatfotos mehr. Ab 640px ein
+   FESTES 4-Spalten-Raster mit gleicher Kartenbreite, unabhängig von der
+   Personenzahl je Gruppe (vorher auto-fit/auto-fill: 4 Spalten bei 4
+   Personen, aber 2 bzw. 3 breite Spalten bei weniger Personen) – eine nicht
+   volle letzte Zeile lässt einfach leere Spalten, ohne die Karten zu
+   strecken. Das Umschalten der Kartenform selbst (Zeile ↔ Bildkarte)
+   übernimmt .person/.person__bild unten. */
 .raster--personen {
-  grid-template-columns: 1fr;
-}
-
-@media (min-width: 360px) {
-  .raster--personen {
-    grid-template-columns: repeat(2, minmax(150px, 1fr));
-  }
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
 }
 
 @media (min-width: 640px) {
   .raster--personen {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 260px));
-    justify-content: start;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--sp-5);
+  }
+}
+
+/* Gruppenkarten der Karnevalabteilung (W9-Korrektur QA3 1440-25, W9-B-
+   Nachprüfung): höchstens drei Karten je Zeile, ohne einsame/breitere Karte.
+   Das frühere flex-wrap-Raster (flex:1 1 240px; max-width:320px) machte die
+   Karten je nach Zeilenfüllung unterschiedlich breit (bei 1440px die fünfte
+   Karte 320px statt 274px wie die vier oberen) und zog sie auf dem Handy
+   durch justify-content:center auf 320px zusammen, eingerückt statt bündig
+   mit dem übrigen Inhalt. Jetzt ein Grid: auf dem Handy eine volle Spalte
+   (Kartenbreite 100%, wie der restliche Inhalt), ab 640px sechs
+   gleich breite Teilspalten – die ersten drei Karten spannen je zwei
+   Teilspalten (= drei gleich breite Karten je Zeile), Karte 4 und 5 spannen
+   ab Teilspalte 2 bzw. 4 (mittig, gleiche Breite wie die anderen). */
+.raster--karneval-gruppen {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .raster--karneval-gruppen {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .raster--karneval-gruppen > * {
+    grid-column: span 2;
+  }
+
+  .raster--karneval-gruppen > *:nth-child(4) {
+    grid-column: 2 / span 2;
+  }
+
+  .raster--karneval-gruppen > *:nth-child(5) {
+    grid-column: 4 / span 2;
   }
 }
 
@@ -330,10 +387,14 @@
   transition: box-shadow var(--t-kurz), transform var(--t-kurz);
 }
 
-/* Ansprechpartner-Karten (P9-Korrektur A1, /kontakt/): Flex-Spalte, damit die
-   Knopfzeile per margin-top:auto unten sitzt – im Raster gleich hohe Karten
-   trotz unterschiedlich langer Sätze, statt vorher ungleicher Kartenhöhen mit
-   leeren Flächen bei Karten ohne Satz. */
+/* Karten mit Knopf am Kartenfuß (P9-Korrektur A1, /kontakt/): Flex-Spalte,
+   damit die Knopfzeile per margin-top:auto unten sitzt – im Raster gleich
+   hohe Karten trotz unterschiedlich langer Sätze, statt vorher ungleicher
+   Kartenhöhen mit leeren Flächen bei Karten ohne Satz. W9-B-Nachprüfung
+   (kontakt 1440, Anfahrt): jetzt auch auf den beiden Anfahrt-Karten
+   (Vereinsplatz/Rebstock) verwendet – vorher standen die Knöpfe direkt unter
+   dem Text, dadurch auf unterschiedlicher Höhe, weil nur die
+   Rebstock-Karte den Zusatzsatz "Hier spielen die Herren …" hat. */
 .karte--anliegen {
   display: flex;
   flex-direction: column;
@@ -447,7 +508,23 @@
 @media (min-width: 640px) {
   .raster--mannschaften {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    /* W9-A, w9-a.md: auto-fill statt auto-fit – mit auto-fit kollabieren
+       leere Spalten in dünner besetzten Gruppen (Senioren: 1 Team,
+       Kinderfußball: 3 Teams) und die 1fr-Restbreite geht an die
+       verbleibenden Karten, dadurch fluchteten diese nicht mit der 7 Teams
+       starken Jugend-Gruppe (jede Gruppe ein eigenes Grid, siehe
+       gruppenAbschnitt() in index.mjs). auto-fill lässt leere Spalten stehen
+       (0 Elemente, aber ihre Spurbreite bleibt erhalten) – dieselbe Lehre
+       wie bei .raster--personen oben. Prüfbefund web-1440-mannschaften
+       Nr. 12.
+       W9-A-Nachprüfung (neu_kaputt, mannschaften-1024-*.png): die 220px-
+       Mindestspurbreite ließ die Herren-Karte zwischen etwa 740–1180px auf
+       229–262px schrumpfen – dort brach der Titel "1. HERRENMANNSCHAFT"
+       nach "1." um. 260px ist breit genug für die längsten Kartentitel
+       (siehe auch die geschützte Leerstelle nach "1." in teamKarte()/
+       index.mjs), auto-fill bildet damit einfach eine Spalte weniger statt
+       schmalere Spalten. */
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
     gap: var(--sp-5);
   }
 
@@ -582,6 +659,18 @@
   font-size: var(--fs-sm);
   color: var(--ink-3);
   overflow-wrap: break-word;
+}
+
+/* W9-Korrektur (Entscheidung 4, QA3 quer-28/390-2) – E-Mail-Adressen in der
+   Ansprechpartner-Liste (/kontakt/): überall sonst darf .zeile__untertitel
+   mitten im Wort brechen (break-word), das riss E-Mail-Adressen mitten in
+   der Domain auseinander ("…sportfreunde0"/"4.de"). Hier nur der manuelle
+   <wbr> vor dem "@" (siehe kontakt.mjs) erlaubt einen Umbruch, dazu etwas
+   kleinere Schrift für sehr lange Adressen (Entscheidung 4: "bei sehr langen
+   Adressen kleinere Schrift statt Umbruch"). */
+.zeile__adresse {
+  overflow-wrap: normal;
+  font-size: var(--fs-xs);
 }
 
 .zeile__pfeil {
@@ -735,7 +824,12 @@
   align-items: baseline;
   column-gap: var(--sp-4);
   row-gap: var(--sp-1);
-  padding: var(--sp-2) var(--sp-4);
+  /* W9-A-Nachprüfung (web-390 Nr. 29): kein eigener horizontaler Innenabstand
+     mehr – der Container bringt schon var(--sp-4) mit, die frühere
+     zusätzliche Zeilen-Polsterung ergab zusammen 32px und damit eine dritte,
+     eigene linke Kante gegenüber "Trainingsort" und der Überschrift (beide
+     ohne eigenen Innenabstand, bündig auf der Inhaltskante). */
+  padding-block: var(--sp-2);
   border-bottom: 1px solid var(--line);
 }
 
@@ -752,32 +846,87 @@
   color: var(--ink-3);
 }
 
+/* W9-A, Entscheidung 9 (w9-gemeinsam.md): Platzteil auf dem Handy immer in
+   einer eigenen zweiten Zeile – bisher blieb kurzer Text (z. B. "Rebstock",
+   "Court") dank flex-wrap in derselben Zeile wie Tag/Uhrzeit, während er bei
+   längerem Text umbrach; dadurch wirkte der Baustein uneinheitlich
+   (Prüfbefund web-390-mannschaften Nr. 28). */
+@media (max-width: 639.98px) {
+  .training__platz {
+    flex-basis: 100%;
+  }
+}
+
 /* ==========================================================================
    Personen-Karte
    ========================================================================== */
 
+/* W9-Korrektur (Entscheidung 5, QA3 1440-10/1440-11/390-4/390-5/390-6/
+   quer-6/quer-8): einheitlicher Personenbaustein auf Website und App. Handy
+   (< 640px): kompakte Zeile – Bild/Initialen 72px links (grid-column 1, über
+   alle Textzeilen gespannt), Name/Funktion/Mail rechts (grid-column 2,
+   gestapelt) – kein seitenbreites Hochformatfoto mehr. Ab 640px zurück zur
+   vertikalen Bildkarte (Bild oben, Text darunter, linksbündig). */
 .person {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  column-gap: var(--sp-3);
+  row-gap: 2px;
+  align-items: start;
+  align-content: center;
+}
+
+/* W9-B-Nachprüfung: ohne explizite grid-template-rows endet die "explizite"
+   Rasterzeile bei Zeile 1 – "grid-row: 1 / -1" spannte das Bild dadurch nur
+   über die erste (Name-)Zeile, Funktion und Mail landeten rund 74px tiefer,
+   unter statt neben dem Bild (Loch dazwischen). "span 3" spannt stattdessen
+   ausdrücklich über alle drei Textzeilen (Name/Funktion/Mail); align-content
+   oben zentriert das Bild vertikal in dieser Höhe, wie in der App. */
+.person > :first-child {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+}
+
+.person__name { grid-column: 2; grid-row: 1; }
+.person__funktion { grid-column: 2; grid-row: 2; }
+.person__mail { grid-column: 2; grid-row: 3; }
+
+@media (min-width: 640px) {
+  .person {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
 }
 
 /* W8-Korrektur: eine einzelne Personen-Karte außerhalb eines Mehrspalten-
    Rasters (z. B. Kinderschutzbeauftragter auf /verein/ueber-uns/) – ohne
    Begrenzung nimmt sie in einem Grid mit nur einem Kind die volle
    Containerbreite ein (auto-fit/1fr strecken das einzige Element), das
-   Porträt wirkte dadurch riesig statt wie eine kompakte Karte. */
-.person--einzeln {
-  max-width: 260px;
+   Porträt wirkte dadurch riesig statt wie eine kompakte Karte. W9-Korrektur:
+   die Begrenzung gilt jetzt nur noch ab 640px – auf dem Handy soll dieselbe
+   Karte die volle Breite der kompakten Zeile nutzen wie alle anderen. */
+@media (min-width: 640px) {
+  .person--einzeln {
+    max-width: 260px;
+  }
 }
 
 .person__bild {
   display: block;
-  width: 100%;
-  aspect-ratio: 3 / 4;
-  border-radius: var(--r-md);
+  width: 72px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
   background: var(--blau-100);
   overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .person__bild {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    border-radius: var(--r-md);
+  }
 }
 
 /* bild() setzt die Klasse auf das äußere <picture> – object-fit/-position
@@ -792,13 +941,14 @@
 /* W8-Korrektur: Platzhalter ohne Foto (Vorstand/Karneval/Kinderschutz) war
    die volle 3:4-Fläche mit dem Wappen bei 36% Breite – Prüfer-Befund "kein
    großes Wappen", "kompakte Karte mit Initialen-Kreis (gleicher Stil wie
-   Trainer, aber passend zur Kartengröße)". Ersetzt die volle Bildfläche
-   durch einen zentrierten Kreis in Kartenbreite (kein festes 48px wie bei
-   .person-mini__bild--platzhalter – die Personen-Karte ist deutlich größer). */
+   Trainer, aber passend zur Kartengröße)". W9-Korrektur (Entscheidung 5):
+   auf dem Handy derselbe 72px-Kreis wie das Foto (.person__bild), ab 640px
+   dasselbe Bildformat wie die Fotos (3:4-Fläche statt kleinem Kreis) – "kein
+   Wechsel zwischen großen Hochformatfotos und kleinen Kreisen auf derselben
+   Seite". */
 .person__bild--initialen {
-  width: 96px;
-  height: 96px;
-  align-self: center;
+  width: 72px;
+  height: 72px;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   display: flex;
@@ -807,9 +957,18 @@
   background: var(--blau-100);
   color: var(--blau-700);
   font-family: var(--font-head);
-  font-size: var(--fs-2xl);
+  font-size: var(--fs-lg);
   font-weight: 700;
-  margin-block: var(--sp-3);
+}
+
+@media (min-width: 640px) {
+  .person__bild--initialen {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 4;
+    border-radius: var(--r-md);
+    font-size: var(--fs-2xl);
+  }
 }
 
 .person__name {
@@ -830,12 +989,13 @@
 }
 
 /* .mail (siehe "Knöpfe, Meta, Hilfsklassen" weiter unten) verhindert mit
-   gleicher Klassen-Spezifität sonst das Umbrechen – im schmalen
-   .raster--personen (P6-Korrektur A1, zwei Spalten ab 360px) reicht die
-   Spaltenbreite für lange lokale Teile wie "kinderschutzbeauftragter" nicht
-   aus (horizontales Scrollen). Hier mit höherer Spezifität erzwungen, nur
-   innerhalb der Personen-Karte – das allgemeine .mail-Verhalten (z. B.
-   Fußbereich, Vorstands-Hinweiszeile) bleibt unverändert. */
+   gleicher Klassen-Spezifität sonst das Umbrechen – in der schmalen
+   Text-Spalte der kompakten Zeile (Handy) bzw. im festen Personen-Raster
+   (ab 640px) reicht die Breite für lange lokale Teile wie
+   "kinderschutzbeauftragter" nicht immer aus (horizontales Scrollen). Hier
+   mit höherer Spezifität erzwungen, nur innerhalb der Personen-Karte – das
+   allgemeine .mail-Verhalten (z. B. Fußbereich, Vorstands-Hinweiszeile)
+   bleibt unverändert. */
 .person__mail .mail {
   overflow-wrap: anywhere;
   word-break: normal;
@@ -910,33 +1070,126 @@
   margin: 0;
 }
 
+/* W9-A, Entscheidung 10 (w9-gemeinsam.md): die Trainerteam-Mailadresse
+   ("Die Nachricht geht an:" + Adresse in eigener Zeile) bricht nicht mehr
+   mitten vor dem "@" um, und der Abstand zur Unterstreichung ist größer, gut
+   erkennbar (Prüfbefunde web-1440-mannschaften Nr. 11, web-390-mannschaften
+   Nr. 16). */
+.trainerteam-adresse {
+  display: inline-block;
+  white-space: nowrap;
+}
+.trainerteam-adresse .mail {
+  text-underline-offset: 3px;
+}
+
+/* W9-A, Entscheidung 4 (w9-gemeinsam.md): Adresse dreizeilig (Platzname /
+   Straße Nr. / PLZ Ort) statt eines einzelnen, umbrechenden Fließtexts
+   (Prüfbefunde web-390-mannschaften Nr. 17, quervergleich Nr. 28), siehe
+   adresseDreizeiligHtml() in team.mjs. */
+.adresse-dreizeilig {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+}
+
 /* ==========================================================================
    Logo-Reihe (Sponsoren)
    ========================================================================== */
 
+/* W9-Korrektur (Entscheidung: "Sponsoren"-Raster, QA3 1440-12/390-28,
+   w9-b.md): einheitliches Logo-Raster wie die App – Handy (< 640px)
+   kompakte Zeilen (Logo 64 px links, Name/Ort/Links rechts), ab 640px ein
+   FESTES 3-Spalten-Raster (vorher auto-fit: eine Gruppe mit nur einem
+   Sponsor bekam eine auf fast 1200 px gestreckte, leer wirkende Kachel). */
 .logo-reihe {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
+/* W9-B-Nachprüfung (390): Wortmarken (SK SportConnects, 11TeamSports) waren
+   im quadratischen 64px-Feld nur ca. 46×10px groß und unlesbar – ein
+   breiteres Logofeld (96×64, wie im Vorschlag) gibt breiten Wortmarken mehr
+   Platz, ohne die Zeile höher zu machen. */
+.logo-reihe li {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  column-gap: var(--sp-3);
+  align-items: center;
+}
+
 .logo-reihe__kachel {
-  background: var(--surface);
+  width: 96px;
+  height: 64px;
+  background: var(--weiss);
   border: 1px solid var(--line);
   border-radius: var(--r-md);
-  padding: var(--sp-4);
+  padding: 8px;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .logo-reihe__kachel img {
-  max-height: 72px;
+  max-width: 100%;
+  max-height: 100%;
   width: auto;
   object-fit: contain;
+}
+
+.logo-reihe__info { min-width: 0; }
+.logo-reihe__info .meta { text-align: left; margin: 0; }
+.logo-reihe__info .meta + .meta { margin-top: 2px; }
+
+.logo-reihe__info .meta a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+@media (min-width: 640px) {
+  .logo-reihe {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--sp-4);
+  }
+
+  .logo-reihe li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-2);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: var(--sp-4);
+  }
+
+  /* W9-B-Nachprüfung (1440-12): Die Kachel erbte bisher weiterhin
+     "padding: 8px" aus der mobilen Grundregel – bei breiten Wortmarken
+     (11TeamSports 327px in einer 345px-Kachel) blieb dadurch nur rund 9px
+     Rand statt der geforderten mindestens 24px. Kein eigener Rahmen mehr auf
+     der Kachel (nur noch auf der Karte ".logo-reihe li" oben) – sonst ein
+     doppelter Rahmen (Karte + Kachel). */
+  .logo-reihe__kachel {
+    width: 100%;
+    height: 120px;
+    padding: var(--sp-5);
+    border: none;
+    background: transparent;
+  }
+
+  .logo-reihe__kachel img {
+    max-height: 72px;
+  }
+
+  .logo-reihe__info .meta { text-align: center; }
 }
 
 /* Zusatzangebote (Mannschaften): Logo klein neben Badge und Name */
@@ -952,6 +1205,12 @@
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-md);
+  /* W9-A, Entscheidung 17 (w9-gemeinsam.md): 6px Innenabstand, damit beide
+     Logos (Regista, VM Elite) im gleichen Rahmen mit gleichem Abstand zum
+     Rand sitzen (Prüfbefund web-1440-mannschaften Nr. 20). box-sizing sorgt
+     dafür, dass der Innenabstand nicht zur festen 72px-Größe hinzukommt. */
+  padding: 6px;
+  box-sizing: border-box;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -959,10 +1218,35 @@
 }
 .angebot__logo picture { display: contents; }
 .angebot__logo img { width: 100%; height: 100%; object-fit: contain; }
-.angebot__titel { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-2); min-width: 0; }
-.angebot__titel .karte__titel { margin: 0; }
+.angebot__kopf .karte__titel { margin: 0; min-width: 0; }
+.angebot > .tag { justify-self: start; align-self: flex-start; }
+/* W9-A, Entscheidung 17: Karten gleich hoch (die Grid-Zelle streckt sie
+   ohnehin, siehe .raster--2), der "E-Mail schreiben ›"-Link sitzt dank
+   Flex-Spalte + margin-top:auto bei beiden Karten auf gleicher Höhe am
+   Kartenfuß, unabhängig davon, ob die optionale Leitungszeile vorkommt
+   (Prüfbefund web-1440-mannschaften Nr. 20, web-390-mannschaften Nr. 22). */
+.angebot {
+  display: flex;
+  flex-direction: column;
+}
+.angebot > p:last-child {
+  margin-top: auto;
+}
 /* Teambeschreibung im Seitenkopf (aus dem Abteilungen-Worksheet) */
 .seitenkopf .teamtext { max-width: 62ch; margin-top: var(--sp-3); }
+.seitenkopf .teamtext + .meta { margin-top: var(--sp-3); }
+
+/* W9-A-Nachprüfung (tools/pruefen.mjs, 320px, mannschaften-f1): die
+   Staffel-Segmente sind jetzt (web-390 Nr. 14) vollständig umbruchfrei
+   ("4 gegen 4 plus Torwart, Gruppe 2" als ein Stück, siehe staffelLesbar()
+   in hilfen.mjs) – bei F1 passt das nicht mehr in die 320px-Mindestbreite
+   der Unterzeile im Seitenkopf. Sicherheitsnetz nach demselben Prinzip wie
+   .mail (overflow-wrap: anywhere) oben: bricht nur, wenn die Zeile bei sehr
+   schmalen Breiten sonst seitlich überliefe, bei allen anderen Breiten
+   bleibt das Segment eine Zeile. */
+.team-unterzeile-staffel {
+  overflow-wrap: anywhere;
+}
 
 /* ==========================================================================
    Hinweiskasten
@@ -1100,6 +1384,17 @@
   flex-wrap: wrap;
 }
 
+/* W9-A-Nachprüfung (Entscheidung 15/quervergleich Nr. 14): Knöpfe innerhalb
+   von Karten volle Breite – bisher war z. B. der Routen-Knopf in der Karte
+   "Heimspiele"/"Unser Platz" nur 97 von 310px breit. Bewusst als eigene
+   Klasse (nicht ".karte .knopfzeile" global), damit nur die Karten, die sie
+   explizit anfordern (Trainerteam, Heimspiele/Unser Platz auf den
+   Mannschaftsseiten), betroffen sind. */
+.knopfzeile--voll .knopf {
+  width: 100%;
+  text-align: center;
+}
+
 .meta {
   font-size: var(--fs-sm);
   color: var(--ink-3);
@@ -1150,7 +1445,11 @@
   content: counter(schritt);
   flex: none;
   width: 40px;
-  text-align: center;
+  /* W9-A, w9-a.md: linksbündig statt zentriert – bei text-align:center stand
+     die Ziffer sichtbar eingerückt gegenüber der Inhaltskante von
+     Überschrift/Knopf darüber/darunter (Prüfbefund web-390-mannschaften
+     Nr. 36, web-1440-mannschaften Nr. 25). */
+  text-align: left;
   font-family: var(--font-head);
   font-size: var(--fs-2xl);
   line-height: 1;
@@ -1159,6 +1458,23 @@
 
 .schritte p {
   margin: 0;
+}
+
+/* W9-Korrektur (/mitglied-werden/, w9-b.md): einzelne Schritte brauchen mehr
+   als einen Absatz (z. B. Schritt 1 "Probetraining" mit eigener
+   Karneval-Zeile, Schritt 2 "Antrag" mit Knopfzeile) – ".schritte li" ist
+   selbst eine Flex-Zeile mit align-items:center für die Zifferspalte, ein
+   einzelnes ".schritt__inhalt" bündelt den restlichen Inhalt als Spalte
+   darunter, ohne ".schritte li"/".schritte p" für die einfachen
+   Einzeiler-Schritte (Probetraining auf /mannschaften/ u. a.) zu ändern. */
+.schritte li:has(.schritt__inhalt) {
+  align-items: flex-start;
+}
+
+.schritt__inhalt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
 }
 
 /* ==========================================================================
@@ -1222,22 +1538,34 @@
 .trainingsraster__zeile {
   display: grid;
   grid-template-columns: 1fr auto;
-  grid-template-areas:
-    "name einheiten"
-    "jahrgang einheiten";
+  grid-template-areas: "team einheiten";
   column-gap: var(--sp-4);
-  align-items: center;
+  /* W9-A-Nachprüfung (mannschaften-390-03.png, web-390 Nr. 24): die linke
+     Zelle (Name + Jahrgang) ist jetzt EIN Grid-Item ".trainingsraster__team"
+     statt zweier über zwei Zeilen verteilter Items – vorher spannte
+     "einheiten" (bei drei Trainingszeiten höher als die linke Spalte) über
+     beide Zeilen, wodurch die Grid-Zeilenverteilung den Jahrgang je nach
+     Zeilenanzahl rechts unterschiedlich tief zog (Jahrgang schwebte bei drei
+     Zeiten auf Höhe der mittleren Zeile statt direkt unter dem Namen). Mit
+     nur einer Grid-Zeile bleibt ".trainingsraster__team" unabhängig von der
+     Höhe der rechten Spalte oben ausgerichtet (align-items:start), siehe
+     .trainingsraster__team unten für die Block-Anordnung selbst. */
+  align-items: start;
   padding-block: var(--sp-3);
   border-bottom: 1px solid var(--line);
 }
 
-.trainingsraster__name {
-  grid-area: name;
-  font-weight: 600;
+.trainingsraster__team {
+  grid-area: team;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: var(--sp-1);
+  min-width: 0;
 }
 
-.trainingsraster__jahrgang {
-  grid-area: jahrgang;
+.trainingsraster__name {
+  font-weight: 600;
 }
 
 .trainingsraster__einheiten {
@@ -1271,10 +1599,32 @@
     grid-template-areas: "name jahrgang einheiten";
   }
 
+  /* Ab 768px sind Name und Jahrgang wieder zwei eigene Spalten (nicht mehr
+     Block untereinander) – ".trainingsraster__team" reicht seine Kinder per
+     display:contents direkt an das Zeilen-Grid weiter, die dann wie zuvor
+     über "name"/"jahrgang" platziert werden. */
+  .trainingsraster__team {
+    display: contents;
+  }
+
+  .trainingsraster__name {
+    grid-area: name;
+  }
+
+  .trainingsraster__jahrgang {
+    grid-area: jahrgang;
+  }
+
   .trainingsraster__einheiten {
     align-items: flex-start;
     text-align: left;
   }
+}
+
+/* QA3 web-390 Nr. 20: Auf dem Handy steht der Jahrgang schon in der
+   Teamliste direkt darüber – in den Trainingszeiten nur Name und Zeiten. */
+@media (max-width: 767px) {
+  .trainingsraster__jahrgang { display: none; }
 }
 
 /* ==========================================================================
@@ -1423,11 +1773,15 @@ body.datenschutz h2 {
   flex-direction: column;
 }
 
+/* W9-Korrektur (QA3 1440-13/1440-32/quer-35): Der seitliche Innenabstand
+   (--sp-4, ca. 16 px) rückte die Einträge gegenüber Überschriften und
+   Trennlinien ein – jetzt an der Inhaltskante wie alle anderen Listen
+   (.zeile, .trainingsraster__zeile). */
 .download {
   display: flex;
   flex-direction: column;
   gap: var(--sp-1);
-  padding: var(--sp-3) var(--sp-4);
+  padding-block: var(--sp-3);
   border-bottom: 1px solid var(--line);
 }
 
@@ -1622,6 +1976,24 @@ body.datenschutz h2 {
   display: flex;
   flex-direction: column;
   margin: 0;
+}
+
+/* W9-B-Nachprüfung (Datenschutz "Verantwortliche Stelle", Kontakt
+   "Erreichbarkeit"): ".angaben" setzt oben "margin:0", um den
+   UA-Standardabstand von <dl> zu entfernen – das hat zufällig dieselbe
+   Spezifität wie ".fluss > * + *" (komponenten.css, "Abschnitte und
+   Fließtext-Rhythmus"); weil ".angaben" in der Datei später steht, gewinnt
+   es den Spezifitäts-Gleichstand und unterdrückt den Gruppenabstand, wenn
+   ein dl.angaben direkt einem Absatz als .fluss-Geschwister folgt (statt
+   z. B. direkt einem h2, wo ".fluss > h2 + *" mit höherer Spezifität
+   ohnehin gewinnt) – der Abstand kollabierte dadurch auf wenige Pixel
+   (Zeilenhöhe) statt der üblichen 24px. Diese Regel (zwei Klassen, höhere
+   Spezifität als beide) stellt ihn für genau diesen Fall wieder her, ohne
+   ".angaben" in Kontexten außerhalb von ".fluss" (z. B. in einer eigenen
+   ".karte" ohne "fluss"-Klasse, siehe Kontakt-Schlussblock/"Gut zu
+   wissen") zu verändern. */
+.fluss > * + .angaben {
+  margin-top: var(--fluss, var(--sp-4));
 }
 
 .angaben dt {
@@ -2194,6 +2566,20 @@ body.datenschutz h2 {
 }
 
 .spiele-kasten.ist-offen::after {
+  display: none;
+}
+
+/* W9-A, Entscheidung 11 (w9-gemeinsam.md): Verlauf und Knopf nur zeigen,
+   wenn der Inhalt die Höchsthöhe tatsächlich überschreitet – die Klasse
+   ".spiele-kasten-block--kurz" setzt SPIELE_KASTEN_SKRIPT (hilfen.mjs) per
+   Höhenmessung (scrollHeight vs. clientHeight), sobald das FUSSBALL.DE-
+   Widget seine Höhe gemeldet hat. Ohne Überlauf wirkten Verlauf und Knopf
+   sonst wie abgeschnittener Inhalt, den es gar nicht gibt (Prüfbefund
+   web-1440-mannschaften Nr. 13). */
+.spiele-kasten-block--kurz .spiele-kasten::after {
+  display: none;
+}
+.spiele-kasten-block--kurz > .knopfzeile {
   display: none;
 }
 

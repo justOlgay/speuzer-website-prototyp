@@ -15,24 +15,48 @@ function escapeHtml(text) {
     .replaceAll('"', "&quot;");
 }
 
+// W9-Korrektur (QA3 1440-25): Dachzeile "Zweite Abteilung des Vereins"
+// entfernt – gibt es auf keiner anderen geprüften Seite, klang wie eine
+// Rangfolge und ist für den Seiteninhalt nicht nötig.
 function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
-    <span class="seitenkopf__kicker">Zweite Abteilung des Vereins</span>
     <h1>Karneval – Die Schnauzer</h1>
-    <p class="seitenkopf__lead">Fünf Gruppen, eine Bühne: Die Karnevalabteilung des Frankfurter Fußballvereins Sportfreunde 1904&nbsp;e.&nbsp;V.</p>
+    <p class="seitenkopf__lead">Fünf Gruppen, eine Bühne: Die Karnevalabteilung des Frankfurter Fußballvereins Sportfreunde&nbsp;1904&nbsp;e.&nbsp;V.</p>
   </div>
 </section>`;
 }
 
-// Je Gruppe: Titel, Leitung (mit Komma verbunden), Übungsstunde – wenn noch
+// W9-Korrektur (QA3 1440-25): "Co-Trainerin" bricht sonst am Bindestrich um
+// (data/karneval.json ist tabu, siehe W9-Auftrag – die Korrektur passiert
+// deshalb hier an der Anzeige, nicht am Rohtext) – geschützter Bindestrich
+// (U+2011) statt des normalen Bindestrichs.
+function mitGeschuetztemBindestrich(text) {
+  return String(text ?? "").replaceAll("Co-Trainerin", "Co‑Trainerin");
+}
+
+// W9-B-Nachprüfung (Karneval 1440, Dreamboys-Karte): "Mittwoch 19:00–21:00
+// Uhr, Turnhalle Fridtjof-Nansen-Schule" (data/karneval.json, tabu) bricht
+// sonst mitten in der Zeitspanne ("19:00–"/"21:00 Uhr") und mitten im
+// Schulnamen ("Fridtjof-"/"Nansen-Schule") um – Korrektur nur an der Anzeige,
+// wie bei mitGeschuetztemBindestrich() oben. Muss NACH escapeHtml() laufen
+// (fügt ein <span> ein, das nicht mit-escaped werden darf).
+function mitGeschuetzterUebungszeit(text) {
+  return escapeHtml(text)
+    .replace(/(\d{1,2}:\d{2}–\d{1,2}:\d{2}\s*Uhr)/, '<span style="white-space:nowrap;">$1</span>')
+    .replaceAll("Fridtjof-Nansen-Schule", "Fridtjof‑Nansen‑Schule");
+}
+
+// Je Gruppe: Titel, Leitung (mit Komma verbunden), Übungszeit – wenn noch
 // nicht gepflegt, bleibt die Zeile weg (W3, Abschnitt 7: keine
 // "Angabe folgt"-Kästen mehr; stattdessen ein Satz unter den Karten, siehe
-// uebungszeitHinweisAbschnitt() unten).
+// uebungszeitHinweisAbschnitt() unten). W9-Korrektur (Entscheidung 14):
+// Beschriftung einheitlich "Übungszeit" (vorher "Übungsstunde", während der
+// Satz unter den Karten schon "Übungszeiten" sagte).
 function gruppenKarte(gruppe) {
-  const leitungText = (gruppe.leitung ?? []).join(", ");
+  const leitungText = mitGeschuetztemBindestrich((gruppe.leitung ?? []).join(", "));
   const uebungszeitHtml = gruppe.uebungszeit
-    ? `<p class="meta">Übungsstunde: ${escapeHtml(gruppe.uebungszeit)}</p>`
+    ? `<p class="meta">Übungszeit: ${mitGeschuetzterUebungszeit(gruppe.uebungszeit)}</p>`
     : "";
 
   return `<div class="karte fluss">
@@ -45,17 +69,22 @@ function gruppenKarte(gruppe) {
 // W8-Korrektur: Der Satz "Übungszeiten der übrigen Gruppen nennt die
 // Abteilung auf Anfrage." (unter dem Ansprechpartner-Abschnitt) stand nicht
 // bei der Gruppenliste, auf die er sich bezieht – jetzt direkt darunter, mit
-// dem vorgegebenen Wortlaut und dem Mail-Knopf.
+// dem vorgegebenen Wortlaut und dem Mail-Knopf. W9-Korrektur (QA3 1440-25):
+// eigenes Raster ".raster--karneval-gruppen" statt ".raster--3" – bei fünf
+// Karten stand die fünfte sonst allein in einer zweiten Reihe mit drei
+// leeren Plätzen; das neue Raster zeigt höchstens drei Karten je Zeile, die
+// Restkarten zentriert (siehe komponenten.css). Knopf jetzt Primäraktion
+// (gefüllt, Entscheidung 15 – gleich wie in der App).
 function gruppenAbschnitt(karneval) {
   const karten = (karneval.gruppen ?? []).map(gruppenKarte).join("\n    ");
   return `<section class="abschnitt">
   <div class="container fluss">
-    <div class="raster raster--3">
+    <div class="raster raster--karneval-gruppen">
     ${karten}
     </div>
     <p class="meta">Übungszeiten und Ort erfährst du bei der Karnevalabteilung.</p>
     <p class="knopfzeile">
-      <a class="knopf knopf--sekundaer" href="${escapeHtml(`mailto:${karneval.mail ?? "karnevalabteilung@sportfreunde04.de"}`)}">E-Mail an die Karnevalabteilung</a>
+      <a class="knopf" href="${escapeHtml(`mailto:${karneval.mail ?? "karnevalabteilung@sportfreunde04.de"}`)}">E-Mail an die Karnevalabteilung</a>
     </p>
   </div>
 </section>`;
@@ -73,14 +102,17 @@ function gruppenAbschnitt(karneval) {
 // diesem Abschnitt mit fest kodierter Mailadresse – entfällt jetzt (siehe
 // gruppenAbschnitt() oben). W8-Korrektur: der graue Schlussabschnitt mit dem
 // Mitglied-werden-Verweis (vorher ein eigener Abschnitt ganz unten) ist jetzt
-// hier mit eingezogen.
+// hier mit eingezogen. W9-Korrektur (QA3 1440-10/390-4/quer-8): "E-Mail
+// schreiben ›" fehlte bisher (mail wurde bewusst auf null gesetzt) – jetzt
+// wie auf der Vorstandsseite bei allen dreien vorhanden, gleicher
+// Personenbaustein (personKarte()), gleiche Bildgröße/-format (komponenten.css).
 function ansprechpartnerAbschnitt(daten) {
-  const funktionen = ["Abteilungsleiter Karneval", "Kassiererin Abteilung Karneval", "Schriftführerin Abteilung Karneval"];
+  const funktionen = ["Abteilungsleiter Karneval", "Kassiererin Karneval", "Schriftführerin Karneval"];
   const personen = funktionen
     .map((f) => (daten.vorstand ?? []).find((p) => p.funktion === f))
     .filter(Boolean);
   const karten = personen
-    .map((p) => personKarte({ ...p, mail: null }, daten, { pfad: PFAD }))
+    .map((p) => personKarte(p, daten, { pfad: PFAD }))
     .join("\n      ");
 
   return `<section class="abschnitt--hell abschnitt">

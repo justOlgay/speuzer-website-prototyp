@@ -1,27 +1,31 @@
 <h1 class="visually-hidden">Mannschaften</h1>
 
 <div id="listenansicht">
-  <p class="seitenkopf-lead">Elf Fußballmannschaften von den Herren bis zur G-Jugend. Für jedes Team findest du hier Jahrgang, Trainingszeiten, Ansprechpartner und den Weg zum Spielplan.</p>
+  <p class="seitenkopf-lead">Elf Fußballmannschaften von den Herren bis zur G&#8209;Jugend. Für jedes Team findest du hier Jahrgang, Trainingszeiten und den Weg zum Spielplan.</p>
 
   <div id="filterleiste" class="filterleiste" hidden>
     <button type="button" class="tag filter-knopf filter-knopf--aktiv" data-gruppe="">Alle</button>
     <button type="button" class="tag filter-knopf" data-gruppe="Senioren" hidden>Senioren</button>
     <button type="button" class="tag filter-knopf" data-gruppe="Jugend" hidden>Jugend</button>
     <button type="button" class="tag filter-knopf" data-gruppe="Kinderfußball" hidden>Kinderfußball</button>
-    <button type="button" class="tag filter-knopf" data-gruppe="schule" hidden>Fußballschulen</button>
+    <button type="button" class="tag filter-knopf" data-gruppe="schule" hidden>Zusatzangebote</button>
   </div>
 
   <div id="mannschaften-liste" class="mannschaften-liste"></div>
+
+  <!-- W9, Auftrag D (Entscheidung 9/quervergleich Nr. 9, 22): Reihenfolge
+       Teams › Probetraining › Zusatzangebote › Nächste Spiele des Vereins
+       (ganz unten) – der Knopf stand vorher direkt unter der letzten
+       Fußballschulen-Karte und wirkte wie ein Probetraining bei ihr. -->
+  <div id="probetraining-aktionen" class="aktionen">
+    <a class="knopf" href="mailto:jugendleitung@sportfreunde04.de?subject=Probetraining%20beim%20FFV%20Sportfreunde%2004&amp;body=Hallo%2C%0A%0Awir%20interessieren%20uns%20f%C3%BCr%20ein%20Probetraining.%0AJahrgang%20des%20Kindes%3A%20%0AVorerfahrung%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe">Probetraining vereinbaren</a>
+  </div>
 
   <div id="fussballschulen-titel" hidden>
     <h2 class="abschnittstitel">Zusatzangebote</h2>
     <p class="team-karte__untertitel">Zwei Fußballschulen nutzen unseren Platz. Sie sind kostenpflichtige Angebote externer Anbieter und stehen auch Spielerinnen und Spielern anderer Vereine offen.</p>
   </div>
   <div id="fussballschulen-liste" class="mannschaften-liste"></div>
-
-  <div class="aktionen">
-    <a class="knopf" href="mailto:jugendleitung@sportfreunde04.de?subject=Probetraining%20beim%20FFV%20Sportfreunde%2004&amp;body=Hallo%2C%0A%0Awir%20interessieren%20uns%20f%C3%BCr%20ein%20Probetraining.%0AJahrgang%20des%20Kindes%3A%20%0AVorerfahrung%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe">Probetraining vereinbaren</a>
-  </div>
 
   <h2 class="abschnittstitel">Nächste Spiele des Vereins</h2>
   <p class="team-karte__untertitel">Alle Spiele unserer Mannschaften der nächsten Tage. Spielplan und Tabelle je Team findest du auf der jeweiligen Mannschaftsseite.</p>
@@ -41,7 +45,10 @@
   <p id="detail-spielbetrieb" class="team-karte__untertitel"></p>
 
   <h2 class="abschnittstitel">Training</h2>
-  <div id="detail-sonderhinweis"></div>
+  <!-- W9, Auftrag D (Entscheidung 9): eine graue Zeile "Trainingsort: …"
+       statt der früheren blauen Hinweiskästen bei Herren/A-Jugend – der
+       Heimspielort steht nur noch in der Karte "Heimspiele"/"Unser Platz". -->
+  <p id="detail-trainingsort" class="team-karte__untertitel"></p>
   <div class="karte">
     <ul id="detail-training-liste" class="team-karte__zeiten"></ul>
   </div>
@@ -55,20 +62,20 @@
     <div class="aktionen">
       <a id="trainerteam-mail-knopf" class="knopf" href="#">E-Mail an das Trainerteam</a>
     </div>
-    <p id="trainerteam-hinweis" class="team-karte__untertitel" style="margin-top:var(--sp-2);"></p>
+    <p id="trainerteam-hinweis" class="team-karte__untertitel" style="margin-top:var(--sp-2);">Die Nachricht geht an:<br><span id="trainerteam-adresse" class="trainerteam-adresse"></span></p>
   </div>
 
-  <h2 class="abschnittstitel">Heimspiele</h2>
+  <h2 id="detail-heimspiele-titel" class="abschnittstitel">Heimspiele</h2>
   <div class="karte">
-    <p id="detail-heimspiele" class="team-karte__untertitel" style="margin:0 0 var(--sp-3);"></p>
+    <p id="detail-heimspiele" class="adresse-block"></p>
     <div class="aktionen">
-      <a id="detail-route-knopf" class="knopf knopf--leise" href="#" target="_blank" rel="noopener">Route</a>
+      <a id="detail-route-knopf" class="knopf knopf--leise" href="#" target="_blank" rel="noopener">Route planen</a>
     </div>
   </div>
 
   <h2 class="abschnittstitel">Kalender abonnieren</h2>
   <div id="kalender-zeile" class="liste"></div>
-  <p class="team-karte__untertitel" style="margin-top:var(--sp-2);">Einmal abonnieren – Verlegungen kommen automatisch an.</p>
+  <p class="team-karte__untertitel" style="margin-top:var(--sp-2);">Einmal abonnieren – Verlegungen kommen automatisch&nbsp;an.</p>
 
   <h2 id="weitere-mannschaften-titel" class="abschnittstitel" hidden>Weitere Mannschaften</h2>
   <div id="weitere-mannschaften-liste" class="mannschaften-liste mannschaften-liste--kompakt"></div>
@@ -153,6 +160,29 @@
 
 .team-karte--kompakt { padding: var(--sp-3) var(--sp-4); }
 
+/* W9, Auftrag D (quervergleich Nr. 22): sichtbarer Pfeil wie bei den
+   übrigen tippbaren Listenzeilen der App – die Teamkarten hatten bisher
+   keinen Hinweis, dass die ganze Fläche tippbar ist. Element-Selektor
+   ("a.team-karte--link") ist spezifischer als ".karte"/".team-karte--
+   kompakt" oben, damit padding-right sicher gewinnt statt vom
+   Deklarationsort abzuhängen. */
+a.team-karte--link {
+  position: relative;
+  padding-right: 40px;
+}
+
+/* W9-Nachprüfung D-app Nr. 11: dasselbe dünne SVG-Chevron (.zeile__pfeil aus
+   v3-basis.css) wie bei den Kalender-Zeilen/dem Verein-Tab, statt des
+   vorherigen fetten Textzeichens "›" per ::after – gleiche Größe/Farbe (von
+   .zeile__pfeil geerbt), hier nur die Position auf der Karte, vertikal
+   mittig zur Karte. Element wird von baueChevronSvg() angehängt. */
+.team-karte__pfeil {
+  position: absolute;
+  top: 50%;
+  right: var(--sp-4);
+  transform: translateY(-50%);
+}
+
 /* Fotos und Logos vollstaendig zeigen (kein Beschnitt von Koepfen oder
    Logos): feste Hoehe, Bild eingepasst, ruhige Flaeche in Vereinsblau-50 –
    als eigene Box IMMER vorhanden (W8, Befund 1: "Logos einheitlich, gleich
@@ -175,29 +205,72 @@
   object-position: center;
 }
 
+/* W9-Nachprüfung D-app Nr. 18: Kartentitel kleiner als die
+   Abschnittsüberschrift (.abschnittstitel, 20px) statt größer (vorher
+   22px), und engerer Zeilenabstand für die Display-Schrift, damit ein
+   zweizeiliger Titel (z. B. "Fußballschule Regista Academy") nicht mit dem
+   Fließtext-Zeilenabstand (1,4) auseinanderklafft. */
 .team-karte__titel {
   font-family: var(--font-head);
   font-weight: 700;
-  font-size: 22px;
+  font-size: 19px;
+  line-height: 1.15;
   margin: 0 0 4px;
   color: var(--blau-950);
 }
 
-/* Teamtitel der Detailansicht: eine Stufe größer als .abschnittstitel
-   (W8, Befund 1), direkt unter dem Zurück-Link. */
+/* Teamtitel der Detailansicht: DEUTLICH größer als .abschnittstitel (20px)
+   statt nur eine Stufe (W9, Auftrag D, Befund "app" Nr. 16 – vorher 24px,
+   kaum vom Zwischenüberschriften-Stil zu unterscheiden), direkt unter dem
+   Zurück-Link. */
 .team-titel {
   font-family: var(--font-head);
   font-weight: 700;
-  font-size: 24px;
+  font-size: 32px;
   text-transform: uppercase;
   color: var(--blau-950);
   margin: var(--sp-4) 0 var(--sp-1);
+  hyphens: manual;
+  text-wrap: balance;
 }
 
 .team-karte__untertitel {
   margin: 0 0 var(--sp-2);
   font-size: 13px;
   color: var(--ink-3);
+}
+
+/* W9-Nachprüfung D-app Nr. 2: dreizeiliger Adressblock (Platzname / Straße
+   Nr. / PLZ Ort) für "Heimspiele"/"Unser Platz" – wortgleiche Regeln wie
+   .adresse-block auf "Kontakt & Anfahrt" (Geschaeftsstelle_v3.html), damit
+   Schrift und Farbe innerhalb der App gleich sind. */
+.adresse-block {
+  margin: 0 0 var(--sp-3);
+  font-size: 15px;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+}
+
+.adresse-block strong {
+  display: block;
+  font-weight: 700;
+}
+
+/* W9-Nachprüfung D-app Nr. 3: Trainerteam-Hinweis wie auf der Website
+   (unterhalb des Trainerteam.mjs, "Die Nachricht geht an:" + Adresse in
+   eigener Zeile, .trainerteam-adresse in komponenten.css) – nowrap und
+   größerer text-underline-offset, damit die Adresse nicht mitten vor dem
+   "@" umbricht und der Unterstrich gut erkennbar ist. */
+.trainerteam-adresse {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.trainerteam-adresse a {
+  color: var(--blau-800);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .team-karte__details {
@@ -231,6 +304,12 @@
 
 .team-karte__zeiten li:first-child { margin-top: 0; }
 
+/* W9, Auftrag D (Befund "app" Nr. 16): in der Detailansicht ist die Liste
+   allein in ihrer Karte (kein Titel/Text davor, der den oberen
+   Listenabstand bräuchte) – ohne diesen Reset addierte sich der
+   Listenabstand zum Karten-Innenabstand (oben ~37 statt unten ~20 px). */
+#detail-training-liste { margin-top: 0; }
+
 .zeitspanne { white-space: nowrap; }
 
 .person-mini-liste {
@@ -246,12 +325,12 @@
   gap: var(--sp-3);
 }
 
-.teamtext { margin: var(--sp-2) 0 var(--sp-2); font-size: 15px; line-height: 1.5; color: var(--ink-2); }
+.teamtext { margin: var(--sp-2) 0 var(--sp-3); font-size: 15px; line-height: 1.5; color: var(--ink-2); }
 .angebot-karte { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
 .angebot-karte__kopf { display: flex; align-items: center; gap: 12px; }
 .angebot-karte__logo { flex: 0 0 64px; width: 64px; height: 64px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--surface); object-fit: contain; }
-.angebot-karte__titel { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 0; }
-.angebot-karte__titel .team-karte__titel { margin: 0; }
+.angebot-karte__kopf .team-karte__titel { margin: 0; min-width: 0; }
+.angebot-karte > .tag { align-self: flex-start; }
 .angebot-karte__text { margin: 0; font-size: 14px; color: var(--ink-2); }
 .angebot-karte__mail { font-size: 14px; font-weight: 600; color: var(--blau-800); text-decoration: none; overflow-wrap: anywhere; }
 
@@ -400,7 +479,11 @@
   max-height: none;
 }
 
-.spiele-kasten::after {
+/* W9, Auftrag D (Entscheidung 11): Ausblendung nur, wenn der Inhalt die
+   Höchsthöhe wirklich überschreitet (Klasse "hat-mehr-inhalt" setzt
+   pruefeSpieleHoehe() nach der Höhenmeldung des Widgets) – sonst zeigte
+   die Ausblend-Fläche auch über einem bereits vollständigen Inhalt. */
+.spiele-kasten.hat-mehr-inhalt::after {
   content: "";
   position: absolute;
   left: 0;
@@ -415,13 +498,30 @@
   display: none;
 }
 
+/* W9-Nachprüfung D-app Nr. 5 (Entscheidung 15): innerhalb einer Karte volle
+   Breite, wie "Route planen". */
 .spiele-kasten-knopf {
   margin-top: var(--sp-3);
+  width: 100%;
 }
 
+/* W9-Nachprüfung D-app Nr. 10: 640px war für die einzelnen Kinderfestival-
+   Vorschauen (?einzeln#<Team>) zu hoch – Ursache ist ein Rückkopplungs-Effekt
+   von document.documentElement.scrollHeight: solange der eigene Inhalt
+   kürzer ist als die vom iframe vorgegebene Höhe, meldet der Generator per
+   postMessage (speuzerHeight) genau diese Höhe zurück (scrollHeight ist nie
+   kleiner als die eigene Fensterhöhe), die App übernimmt sie unverändert –
+   jeder Startwert ≥ Inhaltshöhe bestätigt sich so selbst, unabhängig vom
+   gewählten Wert (mit 580px genau geprüft: Meldung kam als "580" zurück,
+   obwohl der reale Inhalt bei direkter Messung nur 502px braucht). Ein
+   Startwert klar UNTER jeder realen Inhaltshöhe (F1 502px, F2 559px, G
+   445px, live gemessen) durchbricht die Schleife: die erste Meldung trägt
+   dann die echte, kleinere Inhaltshöhe, und baueKinderfestivalIframe()
+   vergrößert das iframe danach korrekt (der Listener lehnt Werte < 200px
+   ohnehin ab, siehe dort). */
 .kinderfestival-iframe {
   width: 100%;
-  height: 640px;
+  height: 200px;
   border: 0;
   border-radius: var(--r-md);
   display: block;
@@ -579,10 +679,24 @@
     if (liga === "Kinderfußball") {
       var plus = rest.match(/(\d+)\+1/);
       var vs = rest.match(/(\d+)\s*vs\s*(\d+)/i);
-      var form = plus ? plus[1] + " gegen " + plus[1] + " plus Torwart" : (vs ? vs[1] + " gegen " + vs[2] : "");
-      return form ? liga + " · " + form + gruppe : liga + gruppe;
+      // W9, Auftrag D (Entscheidung 2/quervergleich Nr. 30): Spielform mit
+      // geschützten Leerzeichen zusammenhalten ("4 gegen 4 plus Torwart"
+      // brach sonst mitten in der Angabe um). W9-Nachprüfung D-app Nr. 1:
+      // das Wort "Kinderfußball" steht wie bei staffelLesbar() in
+      // hilfen.mjs nicht mehr in der Unterzeile (es steht schon in der
+      // Dachzeile/Gruppenüberschrift) – nur noch Spielform + Gruppe.
+      var form = plus ? plus[1] + " gegen " + plus[1] + " plus Torwart" : (vs ? vs[1] + " gegen " + vs[2] : "");
+      return form ? form + gruppe : liga + gruppe;
     }
     return liga + gruppe;
+  }
+
+  // W9-Nachprüfung D-app Nr. 1: Unterzeile Teamseite/Teamkarte wie
+  // unterzeileTeam() in src/seiten/mannschaften/team.mjs – Herren nur die
+  // Staffel (kein "Senioren" davor), alle anderen Jahrgang · Staffel.
+  function unterzeileTeam(team) {
+    var staffel = staffelLesbar(team.staffel);
+    return team.kategorie === "Senioren" ? staffel : jahrgangPraefix(team) + " · " + staffel;
   }
 
   // ---------- Initialen (wie initialen() in src/vorlagen/hilfen.mjs) ----------
@@ -657,7 +771,7 @@
     var untertitel = document.createElement("p");
     untertitel.className = "team-karte__untertitel";
     untertitel.style.margin = "0";
-    untertitel.textContent = jahrgangPraefix(team) + " · " + staffelLesbar(team.staffel);
+    untertitel.textContent = unterzeileTeam(team);
     karte.appendChild(untertitel);
 
     if (team.training && team.training.length) {
@@ -668,6 +782,8 @@
       }
       karte.appendChild(liste);
     }
+
+    karte.appendChild(baueChevronSvg("zeile__pfeil team-karte__pfeil"));
 
     return karte;
   }
@@ -696,23 +812,22 @@
       logo.addEventListener("error", function () { logo.remove(); });
       kopf.appendChild(logo);
     }
-    var titelBox = document.createElement("div");
-    titelBox.className = "angebot-karte__titel";
+    var titel = document.createElement("p");
+    titel.className = "team-karte__titel";
+    // W9, Auftrag D (app Nr. 21/quervergleich Nr. 26): "VM Elite" nicht
+    // zwischen "VM" und "Elite" umbrechen.
+    titel.textContent = String(angebot.name || "").replace("VM Elite", "VM Elite");
+    kopf.appendChild(titel);
+    karte.appendChild(kopf);
     var tag = document.createElement("span");
     tag.className = "tag";
     tag.textContent = "Externes Angebot · kostenpflichtig";
-    titelBox.appendChild(tag);
-    var titel = document.createElement("p");
-    titel.className = "team-karte__titel";
-    titel.textContent = angebot.name;
-    titelBox.appendChild(titel);
-    kopf.appendChild(titelBox);
-    karte.appendChild(kopf);
+    karte.appendChild(tag);
 
     if (angebot.text) {
       var text = document.createElement("p");
       text.className = "angebot-karte__text";
-      text.textContent = deutscheAnfuehrungszeichen(ersteZweiSaetze(angebot.text));
+      text.textContent = deutscheAnfuehrungszeichen(ersteZweiSaetze(angebot.text)).replace(/\b([A-Z])-Lizenz/g, "$1\u2011Lizenz");
       karte.appendChild(text);
     }
 
@@ -736,7 +851,7 @@
 
   // ---------- Widget-/Iframe-Bausteine (Abschnitt B1.3, 1:1 aus
   // Spielplan-App.html – baueWidget()/aktualisiereWischHinweis()/
-  // baueKinderfestivalIframe()/baueHinweisKarte()/baueAbschnitt()/
+  // baueKinderfestivalIframe()/baueAbschnitt()/
   // baueKalenderLink() unverändert; baueTabelleKarte() dort heißt hier
   // baueWidgetKarte() und nimmt zusätzlich Widget-Typ und Wisch-Hinweistext
   // entgegen, damit dieselbe Wrapper-Logik auch für das Vereins-Widget
@@ -756,7 +871,11 @@
     hinweis.classList.toggle("ist-sichtbar", brauchtWischen);
   }
 
-  function baueWidgetKarte(widgetId, widgetType, hinweisText) {
+  // W9-Nachprüfung D-app Nr. 4 (Entscheidung 12): der Satz zur Tabelle steht
+  // fest und wird immer angezeigt (wörtlich wie team.mjs), nicht mehr nur,
+  // wenn scrollWidth > clientWidth ist – das trifft beim iframe nie zu, der
+  // Hinweis blieb dadurch unsichtbar (hinweisText-Parameter entfällt).
+  function baueWidgetKarte(widgetId, widgetType) {
     var karte = document.createElement("div");
     karte.className = "karte";
     var wrapper = document.createElement("div");
@@ -764,14 +883,9 @@
     wrapper.appendChild(baueWidget(widgetId, widgetType));
     karte.appendChild(wrapper);
     var hinweis = document.createElement("p");
-    hinweis.className = "tabelle-wischen-hinweis";
-    hinweis.textContent = hinweisText;
+    hinweis.className = "tabelle-wischen-hinweis ist-sichtbar";
+    hinweis.textContent = "Die Tabelle lässt sich seitlich wischen. Live von FUSSBALL.DE.";
     karte.appendChild(hinweis);
-    window.addEventListener("message", function (event) {
-      var typ = event.data && typeof event.data === "object" ? event.data.type : event.data;
-      if (typ !== "fussballde_widget:resize") return;
-      aktualisiereWischHinweis(wrapper, hinweis);
-    });
     return karte;
   }
 
@@ -783,7 +897,9 @@
       var lead = document.createElement("p");
       lead.className = "team-karte__untertitel";
       lead.style.margin = "0 0 8px";
-      lead.textContent = "Nächste Spiele zuerst, frühere Ergebnisse über die Pfeile im Kasten.";
+      // W9-Nachprüfung D-app Nr. 4 (Entscheidung 12): Satz wörtlich wie
+      // team.mjs, inklusive "Live von FUSSBALL.DE.".
+      lead.textContent = "Nächste Spiele zuerst – frühere Ergebnisse über die Pfeile im Kasten. Live von FUSSBALL.DE.";
       karte.appendChild(lead);
     }
 
@@ -799,10 +915,14 @@
     hinweis.className = "tabelle-wischen-hinweis";
     hinweis.textContent = "";
 
+    // W9, Auftrag D (Entscheidung 11): Knopf erst sichtbar, wenn der Inhalt
+    // die Höchsthöhe wirklich überschreitet (siehe pruefeSpieleHoehe()
+    // unten) – sonst Kasten auf Inhaltshöhe, ohne Knopf.
     var knopf = document.createElement("button");
     knopf.type = "button";
     knopf.className = "knopf knopf--leise spiele-kasten-knopf";
     knopf.textContent = "Alle Spiele anzeigen";
+    knopf.hidden = true;
     knopf.setAttribute("aria-expanded", "false");
     knopf.addEventListener("click", function () {
       var offen = kasten.classList.toggle("ist-offen");
@@ -812,11 +932,21 @@
     });
     karte.appendChild(knopf);
 
+    function pruefeSpieleHoehe() {
+      var brauchtBegrenzung = kasten.scrollHeight > kasten.clientHeight + 1;
+      kasten.classList.toggle("hat-mehr-inhalt", brauchtBegrenzung);
+      knopf.hidden = !brauchtBegrenzung;
+    }
+
     window.addEventListener("message", function (event) {
       var typ = event.data && typeof event.data === "object" ? event.data.type : event.data;
       if (typ !== "fussballde_widget:resize") return;
       aktualisiereWischHinweis(wrapper, hinweis);
+      pruefeSpieleHoehe();
     });
+    // Auch ohne weitere Resize-Nachricht einmal prüfen (z. B. Inhalt bleibt
+    // von Anfang an unter der Höchsthöhe).
+    pruefeSpieleHoehe();
 
     return karte;
   }
@@ -826,7 +956,10 @@
     iframe.className = "kinderfestival-iframe";
     iframe.loading = "lazy";
     iframe.title = "Spielplan " + team.kurz + " (Kinderfestival)";
-    iframe.src = GENERATOR_BASIS + "app-" + gruppe + ".html#" + encodeURIComponent(team.kurz);
+    // W9, Auftrag D (Entscheidung 8): "?einzeln" zeigt nur dieses Team, ohne
+    // Umschalter, ohne Kopfzeile und ohne eigenen Kinderfestival-Hinweis
+    // (bereits umgesetzt und live auf dem Generator).
+    iframe.src = GENERATOR_BASIS + "app-" + gruppe + ".html?einzeln#" + encodeURIComponent(team.kurz);
     window.addEventListener("message", function (event) {
       if (event.origin !== "https://justolgay.github.io") return;
       if (event.source !== iframe.contentWindow) return;
@@ -835,15 +968,6 @@
       iframe.style.height = h + "px";
     });
     return iframe;
-  }
-
-  function baueHinweisKarte(text) {
-    var karte = document.createElement("div");
-    karte.className = "karte hinweis";
-    var p = document.createElement("p");
-    p.textContent = text;
-    karte.appendChild(p);
-    return karte;
   }
 
   function baueReiter(reiter) {
@@ -896,6 +1020,31 @@
     return wrapper;
   }
 
+  // W9-Nachprüfung D-app Nr. 11: EIN Chevron-Symbol für alle tippbaren
+  // Karten/Zeilen der Seite (gleiche Größe, Farbe, vertikale Mitte) – bisher
+  // hatten Kalender-Zeilen dieses dünne SVG-Chevron, Teamkarten dagegen ein
+  // fettes Textzeichen "›" per ::after (ausgebaut, siehe .team-karte__pfeil
+  // unten). baueChevronSvg() bündelt das SVG, das vorher nur in
+  // baueKalenderLink() gebaut wurde.
+  function baueChevronSvg(klasse) {
+    var pfeil = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    pfeil.setAttribute("class", klasse);
+    pfeil.setAttribute("viewBox", "0 0 24 24");
+    pfeil.setAttribute("stroke", "currentColor");
+    pfeil.setAttribute("stroke-width", "1.8");
+    pfeil.setAttribute("fill", "none");
+    pfeil.setAttribute("stroke-linecap", "round");
+    pfeil.setAttribute("stroke-linejoin", "round");
+    pfeil.setAttribute("aria-hidden", "true");
+    pfeil.setAttribute("focusable", "false");
+    var pfad = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    pfad.setAttribute("d", "M9 5l7 7-7 7");
+    pfeil.appendChild(pfad);
+    return pfeil;
+  }
+
+  // W9, Auftrag D (quervergleich Nr. 22): mit Pfeil "›" wie die übrigen
+  // tippbaren Listenzeilen der App.
   function baueKalenderLink(text, href) {
     var link = document.createElement("a");
     link.className = "zeile";
@@ -907,7 +1056,35 @@
     titelSpan.textContent = text;
     textSpan.appendChild(titelSpan);
     link.appendChild(textSpan);
+    link.appendChild(baueChevronSvg("zeile__pfeil"));
     return link;
+  }
+
+  // ---------- Adresse dreizeilig (W9-Nachprüfung D-app Nr. 2: wie
+  // adresseDreizeiligHtml() in src/seiten/mannschaften/team.mjs) ----------
+  // data/teams.json hat "heimspiele" seit der Datenaktualisierung einheitlich
+  // als "Platzname, Straße Nr., PLZ Ort" (Entscheidung 3) – genau drei durch
+  // ", " getrennte Teile. Über DOM-Methoden statt innerHTML gebaut (kein
+  // escapeHtml() in dieser Datei nötig), "SW Griesheim"/"PLZ Ort" mit
+  // geschütztem Leerzeichen, damit nichts an ungünstiger Stelle umbricht.
+  function fuelleAdresseDreizeilig(el, adresse) {
+    el.innerHTML = "";
+    var teile = String(adresse || "").split(", ").map(function (t) { return t.trim(); });
+    if (teile.length !== 3) {
+      el.textContent = adresse || "";
+      return;
+    }
+    var platz = teile[0].replace(/SW Griesheim/, "SW Griesheim");
+    var strasse = teile[1];
+    var plzOrt = teile[2]
+      .replace(/^(\d{5}) /, "$1 ")
+      .replace(/ am (Main)\b/, " am $1");
+    var stark = document.createElement("strong");
+    stark.textContent = platz;
+    el.appendChild(stark);
+    el.appendChild(document.createTextNode(strasse));
+    el.appendChild(document.createElement("br"));
+    el.appendChild(document.createTextNode(plzOrt));
   }
 
   // ---------- Route (wie routeUrl() in mannschaften/<team>.mjs) ----------
@@ -924,9 +1101,14 @@
     return googleMapsUrl(((s.strasse || "") + ", " + (s.plz || "") + " " + (s.ort || "")).trim());
   }
 
-  // ---------- Weitere Mannschaften (wie weitereMannschaftenAbschnitt() in
-  // mannschaften/<team>.mjs: feste Altersreihenfolge aus data/teams.json,
-  // gleiche Gruppe, Nachbarn zuerst, 4 Stück) ----------
+  // ---------- Weitere Mannschaften (W9, Auftrag D, Entscheidung 6 – Logik
+  // 1:1 aus weitereMannschaftenAbschnitt() in mannschaften/<team>.mjs
+  // übernommen: Auswahl über den Index-Abstand in data/teams.json, OHNE
+  // Beschränkung auf dieselbe Gruppe [die frühere Gruppe-Bedingung ließ
+  // diesen Abschnitt auf der Herrenseite leer, siehe quervergleich Nr. 11],
+  // vier Nachbarn nach Alter. Angezeigt aber in der Reihenfolge der
+  // Übersicht [Entscheidung 6], deshalb der zweite Sortierschritt nach dem
+  // ursprünglichen Index – die Auswahl selbst bleibt dieselbe. ----------
 
   function weitereMannschaften(team) {
     var aktuellerIndex = -1;
@@ -936,11 +1118,13 @@
     var kandidaten = [];
     for (var j = 0; j < TEAMS.length; j++) {
       var t = TEAMS[j];
-      if (t.gruppe !== team.gruppe || t.slug === team.slug) continue;
-      kandidaten.push({ t: t, abstand: Math.abs(j - aktuellerIndex) });
+      if (t.slug === team.slug) continue;
+      kandidaten.push({ t: t, index: j, abstand: Math.abs(j - aktuellerIndex) });
     }
     kandidaten.sort(function (a, b) { return a.abstand - b.abstand; });
-    return kandidaten.slice(0, 4).map(function (k) { return k.t; });
+    var ausgewaehlt = kandidaten.slice(0, 4);
+    ausgewaehlt.sort(function (a, b) { return a.index - b.index; });
+    return ausgewaehlt.map(function (k) { return k.t; });
   }
 
   function baueWeitereMannschaftKarte(t) {
@@ -962,6 +1146,7 @@
     untertitel.style.margin = "0";
     untertitel.textContent = jahrgangPraefix(t);
     a.appendChild(untertitel);
+    a.appendChild(baueChevronSvg("zeile__pfeil team-karte__pfeil"));
     return a;
   }
 
@@ -1011,7 +1196,11 @@
       return;
     }
     titel.hidden = false;
-    titel.textContent = namen.length === 1 ? "Trainer" : "Trainerteam";
+    // W9, Auftrag D (Entscheidung 10): Überschrift immer "Trainerteam",
+    // auch bei nur einer Person – vorher stand hier bei einem Trainer
+    // "Trainer", während der Knopf darunter weiter "E-Mail an das
+    // Trainerteam" hieß (app Nr. 19, quervergleich Nr. 13).
+    titel.textContent = "Trainerteam";
 
     var zeile = findeUebersichtZeileFuerTeam(uebersicht, team.slug);
     var uebersichtBilder = zeile ? bilderFuerUebersichtZeile(zeile) : [];
@@ -1035,29 +1224,45 @@
 
     var mailKnopf = document.getElementById("trainerteam-mail-knopf");
     mailKnopf.href = "mailto:" + team.mail + "?subject=" + encodeURIComponent(team.kurz + ": Anfrage über die App");
-    var hinweis = document.getElementById("trainerteam-hinweis");
-    hinweis.innerHTML = "Die Nachricht geht an <strong>" + team.mail + "</strong> – keine privaten Handynummern.";
+    var adresseSpan = document.getElementById("trainerteam-adresse");
+    adresseSpan.innerHTML = "";
+    var adresseLink = document.createElement("a");
+    adresseLink.href = "mailto:" + team.mail;
+    adresseLink.textContent = team.mail;
+    adresseSpan.appendChild(adresseLink);
   }
 
-  // ---------- Training (W8 Befund 1: je Tag mit Ort/Platzteil,
-  // Ferienhinweis, Sonderhinweis Herren/A-Jugend wie auf der Website) ----------
+  // ---------- Training (W9, Auftrag D, Entscheidung 9: eine graue Zeile
+  // "Trainingsort: …" für alle Teams gleich, darunter die Tabelle mit dem
+  // Platzteil je Zeile, keine zusätzlichen blauen Ortskästen mehr für
+  // Herren/A-Jugend – der Heimspielort steht nur noch in "Heimspiele"/
+  // "Unser Platz") ----------
 
-  var SONDERHINWEIS = {
-    herren: "Die Herren trainieren und spielen extern auf der Bezirkssportanlage am Rebstock (Anlage von SW Griesheim), Am Römerhof 9, 60486 Frankfurt.",
-    "a-jugend": "Training auf dem Vereinsplatz, Heimspiele auf der Anlage von SW Griesheim am Rebstock (Am Römerhof 9)."
-  };
+  // Herren: eigene, externe Anlage (kein Komma-getrennter Platzteil in
+  // team.platz) – Trainingsort wie im Hinweiskasten, Zeilen nur "Rebstock"
+  // (w9-d, Abschnitt "Mannschaften-App"). Alle anderen Teams: team.platz
+  // ist "Ort, Platzteil" (wie platzAufgeteilt() in src/vorlagen/hilfen.mjs).
+  function trainingsortUndTeil(team) {
+    if (team.slug === "herren") {
+      return { ort: "Bezirkssportanlage am Rebstock (SW Griesheim)", teil: "Rebstock" };
+    }
+    var roh = String(team.platz || "");
+    var komma = roh.indexOf(",");
+    if (komma === -1) return { ort: roh.trim(), teil: "" };
+    return { ort: roh.slice(0, komma).trim(), teil: roh.slice(komma + 1).trim() };
+  }
 
   function renderTraining(team) {
+    var stelle = trainingsortUndTeil(team);
+
+    var trainingsort = document.getElementById("detail-trainingsort");
+    trainingsort.textContent = stelle.ort ? "Trainingsort: " + stelle.ort + "." : "";
+
     var liste = document.getElementById("detail-training-liste");
     liste.innerHTML = "";
     (team.training || []).forEach(function (t) {
-      liste.appendChild(baueTrainingszeile(t, team.platz || ""));
+      liste.appendChild(baueTrainingszeile(t, stelle.teil));
     });
-
-    var sonderContainer = document.getElementById("detail-sonderhinweis");
-    sonderContainer.innerHTML = "";
-    var sonderText = SONDERHINWEIS[team.slug];
-    if (sonderText) sonderContainer.appendChild(baueHinweisKarte(sonderText));
 
     document.getElementById("detail-ferienhinweis").textContent = (VEREIN && VEREIN.hinweise && VEREIN.hinweise.ferien) || "";
   }
@@ -1068,16 +1273,28 @@
     var eintrag = WIDGETS[team.slug] || {};
 
     document.getElementById("detail-titel").textContent = team.name;
-    document.getElementById("detail-jahrgang").textContent = jahrgangPraefix(team) + " · " + staffelLesbar(team.staffel);
-    // Teambeschreibung wie auf der Website (data/teams.json, Quelle
-    // Abteilungen-Worksheet); ist der Text im Worksheet inzwischen geändert,
-    // gilt der aktuelle Worksheet-Text.
-    var zeile = findeUebersichtZeileFuerTeam(uebersicht, team.slug);
-    var beschreibung = (zeile && textFeld(zeile, "description").trim()) || team.beschreibung || "";
+    document.getElementById("detail-jahrgang").textContent = unterzeileTeam(team);
+    // W9, Auftrag D (gemeinsame Entscheidung 1): Teambeschreibung nur noch
+    // aus data/teams.json (der erste Satz aus dem CMS) – keine Live-
+    // Beschreibung aus dem Worksheet mehr (die war oft länger und
+    // wiederholte, was unten in Training/Trainerteam ohnehin steht, app
+    // Nr. 7).
+    var beschreibung = team.beschreibung || "";
     var beschreibungEl = document.getElementById("detail-beschreibung");
     beschreibungEl.textContent = beschreibung;
     beschreibungEl.hidden = !beschreibung;
-    document.getElementById("detail-spielbetrieb").textContent = "Spielbetrieb: " + (team.spielbetrieb || "") + ".";
+
+    var istKinderfussball = GRUPPE_JE_TEAM[team.slug] !== undefined;
+    var spielbetriebEl = document.getElementById("detail-spielbetrieb");
+    // W9, Auftrag D (Entscheidung 8): Zeile "Spielbetrieb: …" entfällt bei
+    // Kinderfußball (F1, F2, G-Jugend) – der Abschnitt "Kinderfestivals"
+    // erklärt den Spielbetrieb dort bereits.
+    if (istKinderfussball) {
+      spielbetriebEl.hidden = true;
+    } else {
+      spielbetriebEl.hidden = false;
+      spielbetriebEl.textContent = "Spielbetrieb: " + (team.spielbetrieb || "") + ".";
+    }
 
     renderTraining(team);
 
@@ -1089,31 +1306,51 @@
       // groß und zu präsent“ – ein Abschnitt mit Umschalter wie auf der Website.
       inhalt.appendChild(baueAbschnitt("Spiele & Tabelle", baueReiter([
         { titel: "Spiele", node: baueSpieleKarte(eintrag.spiele, "team-matches", true) },
-        { titel: "Tabelle", node: baueWidgetKarte(eintrag.tabelle, "table", "Tabelle seitlich wischbar") }
+        { titel: "Tabelle", node: baueWidgetKarte(eintrag.tabelle, "table") }
       ])));
     } else if (eintrag.spiele) {
       inhalt.appendChild(baueAbschnitt("Spiele", baueSpieleKarte(eintrag.spiele, "team-matches", true)));
-      if (eintrag.tabelle) inhalt.appendChild(baueAbschnitt("Tabelle", baueWidgetKarte(eintrag.tabelle, "table", "Tabelle seitlich wischbar")));
-    } else if (GRUPPE_JE_TEAM[team.slug]) {
-      // W8, Befund 1: bei Kinderfußball steht der Kinderfestival-Satz VOR
-      // dem Generator-Spielplan (vorher umgekehrt).
+      if (eintrag.tabelle) inhalt.appendChild(baueAbschnitt("Tabelle", baueWidgetKarte(eintrag.tabelle, "table")));
+    } else if (istKinderfussball) {
+      // W9, Auftrag D (Entscheidung 8): die Kinderfestival-Erklärung steht
+      // nur noch EINMAL (Spielform je Team eingesetzt), danach der
+      // eingebettete Spielplan mit "?einzeln" (ohne Umschalter/Kopfzeile/
+      // eigenen Hinweis) und darunter die Legende – vorher stand dieselbe
+      // Erklärung zusätzlich in der Unterzeile und noch einmal knapper im
+      // Hinweiskasten, dazu eine eigene, doppelte Überschrift "Spielplan der
+      // Saison" (app Nr. 19).
       var spielform = KINDERFESTIVAL_SPIELFORM[team.slug] || "";
-      inhalt.appendChild(baueAbschnitt("Kinderfestivals", baueHinweisKarte((spielform ? spielform + " – " : "") + "Kinderfestivals statt Ligabetrieb. Keine Tabellen, keine Ergebnisse: Spaß und Ballkontakte zählen.")));
-      var iframeKarte = document.createElement("div");
-      iframeKarte.className = "karte";
-      iframeKarte.appendChild(baueKinderfestivalIframe(team, GRUPPE_JE_TEAM[team.slug]));
-      inhalt.appendChild(baueAbschnitt("Spielplan der Saison", iframeKarte));
+      var kinderfestivalKarte = document.createElement("div");
+      kinderfestivalKarte.className = "karte";
+      var erklaerung = document.createElement("p");
+      erklaerung.className = "teamtext";
+      erklaerung.style.marginTop = "0";
+      erklaerung.innerHTML = "Im Kinderfußball gibt es keine Ligaspiele und keine Tabellen, sondern Kinderfestivals – bei uns oder bei einem anderen Verein. Gespielt wird " + spielform.replace(/ /g, " ") + ". Der Kreis setzt die Termine in Blöcken an, deshalb reicht der Plan nur wenige Wochen voraus.";
+      kinderfestivalKarte.appendChild(erklaerung);
+      kinderfestivalKarte.appendChild(baueKinderfestivalIframe(team, GRUPPE_JE_TEAM[team.slug]));
+      var legende = document.createElement("p");
+      legende.className = "team-karte__untertitel";
+      legende.style.margin = "var(--sp-2) 0 0";
+      legende.textContent = "Der nächste Termin ist hervorgehoben. Kurzfristige Absagen kommen vom Trainerteam.";
+      kinderfestivalKarte.appendChild(legende);
+      inhalt.appendChild(baueAbschnitt("Kinderfestivals", kinderfestivalKarte));
     }
 
     renderTrainerteam(team, uebersicht, ansprechpartner);
 
-    document.getElementById("detail-heimspiele").textContent = team.heimspiele || "";
+    // W9, Auftrag D (Entscheidung 8): Karte "Heimspiele" heißt bei
+    // Kinderfußball "Unser Platz" (dort finden keine Heimspiele, sondern
+    // Kinderfestivals statt).
+    document.getElementById("detail-heimspiele-titel").textContent = istKinderfussball ? "Unser Platz" : "Heimspiele";
+    fuelleAdresseDreizeilig(document.getElementById("detail-heimspiele"), team.heimspiele);
     document.getElementById("detail-route-knopf").href = routeUrlFuerTeam(team);
 
+    // W9, Auftrag D (Entscheidung 7): Linktexte ohne Teamnamen – die Seite
+    // nennt das Team schon (Titel/Unterzeile).
     var kalenderZeile = document.getElementById("kalender-zeile");
     kalenderZeile.innerHTML = "";
-    kalenderZeile.appendChild(baueKalenderLink("Spielplan " + team.kurz + " abonnieren", KALENDER_BASIS + team.kalender));
-    kalenderZeile.appendChild(baueKalenderLink("Trainingszeiten " + team.kurz + " abonnieren", KALENDER_BASIS + team.trainingsKalender));
+    kalenderZeile.appendChild(baueKalenderLink("Spielplan abonnieren", KALENDER_BASIS + team.kalender));
+    kalenderZeile.appendChild(baueKalenderLink("Trainingszeiten abonnieren", KALENDER_BASIS + team.trainingsKalender));
 
     var weitere = weitereMannschaften(team);
     var weitereTitel = document.getElementById("weitere-mannschaften-titel");
@@ -1163,6 +1400,7 @@
     var fussballschulenTitel = document.getElementById("fussballschulen-titel");
     var fussballschulenContainer = document.getElementById("fussballschulen-liste");
     var filterleiste = document.getElementById("filterleiste");
+    var probetrainingAktionen = document.getElementById("probetraining-aktionen");
 
     // Belegung der vier Filtergruppen für die "≥ 2 Gruppen belegt"-Regel
     // (W8 Befund 1: Filtergruppen wie die Abschnitte der Website).
@@ -1181,6 +1419,10 @@
       for (var i = 0; i < mannschaftenSichtbar.length; i++) {
         listeContainer.appendChild(baueTeamKarte(mannschaftenSichtbar[i]));
       }
+      // W9-Nachprüfung D-app Nr. 9: der Knopf "Probetraining vereinbaren"
+      // gehört zu den Mannschaften, nicht zu den (kostenpflichtigen)
+      // Zusatzangeboten – mit aktivem Filter "Zusatzangebote" nur Teams.
+      if (probetrainingAktionen) probetrainingAktionen.hidden = mannschaftenSichtbar.length === 0;
 
       var schuleSichtbar = (aktuellerFilter === "" || aktuellerFilter === "schule") ? ZUSATZANGEBOTE : [];
       fussballschulenTitel.hidden = schuleSichtbar.length === 0;

@@ -15,6 +15,19 @@ function telHref(nummer) {
   return "tel:" + String(nummer ?? "").replace(/[^\d+]/g, "");
 }
 
+// W9-Korrektur (Entscheidung 13/390-17, w9-b.md): "Sportfreunde 1904 e. V."
+// bricht sonst vor der Jahreszahl um ("Frankfurter Fußballverein
+// Sportfreunde" / "1904 e. V."), auf schmalen Screens (verein-karneval-01)
+// sogar "1904 e. V." allein in der letzten Zeile. data/verein.json koppelt
+// "1904"/"e."/"V." bereits mit geschützten Leerzeichen, nur die Lücke
+// zwischen "Sportfreunde" und "1904" ist noch ein normales Leerzeichen –
+// data/verein.json ist tabu (nur Titel/Metadaten von downloads/unterlagen/
+// datenschutz dürfen geändert werden), daher hier nur diese eine Lücke an
+// der Anzeige nachgezogen.
+function mitGeschuetztemVereinsnamen(text) {
+  return String(text ?? "").replace("Sportfreunde 1904", "Sportfreunde 1904");
+}
+
 function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
@@ -37,7 +50,7 @@ function angabenAbschnitt(daten) {
     <div class="inhalt">
     <dl class="angaben">
       <dt>Anbieter</dt>
-      <dd>${escapeHtml(verein.name_register ?? "")}</dd>
+      <dd>${escapeHtml(mitGeschuetztemVereinsnamen(verein.name_register ?? ""))}</dd>
 
       <dt>Sportstätte</dt>
       <dd>${escapeHtml(sportstaette.strasse ?? "")}<br>${escapeHtml(sportstaette.plz ?? "")} ${escapeHtml(sportstaette.ort ?? "")}</dd>

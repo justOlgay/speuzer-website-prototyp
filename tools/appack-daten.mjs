@@ -45,6 +45,11 @@ function nurFelder(zeile, felder) {
       ergebnis[f] = zeile[f];
     }
   }
+  // W9: Telefonnummern überall in derselben Schreibweise ("069 736868"),
+  // das Worksheet liefert "069-736868".
+  if (typeof ergebnis.phoneNumber === "string") {
+    ergebnis.phoneNumber = ergebnis.phoneNumber.replace(/^(0\d{2,4})[-\/ ]+/, "$1 ");
+  }
   return ergebnis;
 }
 

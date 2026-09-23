@@ -170,7 +170,15 @@ svg { display: block; flex: 0 0 auto; }
   text-transform: uppercase;
   color: var(--blau-950);
   margin: var(--sp-6) 0 var(--sp-3);
+  /* W9, Auftrag D (Entscheidung 13, App-weit): Überschriften nie
+     automatisch trennen. */
+  hyphens: manual;
+  text-wrap: balance;
 }
+
+/* W9, Auftrag D (Entscheidung 13, App-weit): Fließtext mit ausgewogenerem
+   Umbruch (unterstützende Browser; ohne Unterstützung normaler Umbruch). */
+p { text-wrap: pretty; }
 
 .inhalt > .abschnittstitel:first-child { margin-top: 0; }
 
@@ -204,6 +212,17 @@ summary::marker { content: ""; }
   text-decoration: none;
   border: none;
   cursor: pointer;
+}
+
+/* W9-Nachprüfung D-app Nr. 5: ein <button class="knopf"> erbt ohne
+   font-family: inherit nicht die App-Schrift (User-Agent-Standard, z. B.
+   Arial), anders als ein <a class="knopf"> – "font: inherit" setzt Familie/
+   Größe/Gewicht zurück, deshalb Gewicht/Größe direkt danach wie .knopf
+   erneut gesetzt. */
+button.knopf {
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .knopf--leise {
@@ -255,7 +274,7 @@ summary::marker { content: ""; }
 }
 
 /* Sponsoren_v3.tpl – seitenspezifisch (C1). W8, Grundsatz Daten: Namen,
-   Kategorie, Ort, Link, Instagram aus [{"firma":"SK SportConnects GbR","kategorie":"Partner","ort":"Hösbach","link":"www.sk-sportconnects.de","instagram":"sksportconnects","beschreibung":null,"logo":{"quelle":"sponsor-sk-sportconnects-gbr","bytes":34968},"hinweis":null},{"firma":"vmapit GmbH","kategorie":"App-Projektpartner","ort":"Mannheim","link":"https://www.appack.app/","instagram":null,"beschreibung":"Wir entwickeln Apps für die unterschiedlichsten Anwendungsbereiche z.B. Bürger-Apps, Schul-Apps, Kindergarten- u. Kita-Apps, Kirchengemeinde-Apps, Mitarbeiter-Apps, speziell für Ihr Business oder Event, um Menschen zu erreichen und die Chancen der Digitalisierung zu nutzen.  \nFür Sportvereine, Bürgervereine, Non-Profits und gemeinnützige Organisationen sogar gefördert, gemeinsam mit dem DOSB, Stifter Helfen und vmapit.  \nOder haben Sie eine eigene, individuelle App Idee? \nSprechen Sie uns an!","logo":{"quelle":"sponsor-vmapit-gmbh","bytes":20913},"hinweis":null},{"firma":"Bundeswehr","kategorie":"Partner","ort":null,"link":null,"instagram":null,"beschreibung":null,"logo":{"quelle":"sponsor-bundeswehr","bytes":71831},"hinweis":null},{"firma":"Fußballschule VM Elite","kategorie":"Fußballschule","ort":null,"link":null,"instagram":null,"beschreibung":null,"logo":{"quelle":"sponsor-fuballschule-vm-elite","bytes":152104},"hinweis":"W3, Abschnitt 7 (Datenkorrektur): kategorie von 'App-Projektpartner' auf 'Fußballschule' geändert – VM Elite ist kein App-Projektpartner. Live-Link zeigt auf instagram.com/bundeswehrkarriere – falsch; ohne Link übernehmen"},{"firma":"11TeamSports","kategorie":"Partner","ort":null,"link":null,"instagram":null,"beschreibung":null,"logo":{"quelle":"sponsor-11teamsports","bytes":24700},"hinweis":null}] (data/sponsoren.json)
+   Kategorie, Ort, Link, Instagram aus [{"firma":"SK SportConnects GbR","kategorie":"Partner","ort":"Hösbach","link":"www.sk-sportconnects.de","instagram":"sksportconnects","beschreibung":null,"logo":{"quelle":"sponsor-sk-sportconnects-gbr","bytes":34968},"hinweis":null},{"firma":"vmapit GmbH","kategorie":"App-Projektpartner","ort":"Mannheim","link":"https://www.appack.app/","instagram":null,"beschreibung":"Wir entwickeln Apps für die unterschiedlichsten Anwendungsbereiche z.B. Bürger-Apps, Schul-Apps, Kindergarten- u. Kita-Apps, Kirchengemeinde-Apps, Mitarbeiter-Apps, speziell für Ihr Business oder Event, um Menschen zu erreichen und die Chancen der Digitalisierung zu nutzen.  \nFür Sportvereine, Bürgervereine, Non-Profits und gemeinnützige Organisationen sogar gefördert, gemeinsam mit dem DOSB, Stifter Helfen und vmapit.  \nOder haben Sie eine eigene, individuelle App Idee? \nSprechen Sie uns an!","logo":{"quelle":"sponsor-vmapit-gmbh","bytes":20913},"hinweis":null},{"firma":"Bundeswehr","kategorie":"Partner","ort":null,"link":null,"instagram":null,"beschreibung":null,"logo":{"quelle":"sponsor-bundeswehr","bytes":71831},"hinweis":null},{"firma":"Fußballschule-Athletik VM Elite","kategorie":"Fußballschule","ort":null,"link":null,"instagram":null,"beschreibung":null,"logo":{"quelle":"sponsor-fuballschule-vm-elite","bytes":152104},"hinweis":"W3, Abschnitt 7 (Datenkorrektur): kategorie von 'App-Projektpartner' auf 'Fußballschule' geändert – VM Elite ist kein App-Projektpartner. Live-Link zeigt auf instagram.com/bundeswehrkarriere – falsch; ohne Link übernehmen"},{"firma":"11TeamSports","kategorie":"Partner","ort":null,"link":null,"instagram":null,"beschreibung":null,"logo":{"quelle":"sponsor-11teamsports","bytes":24700},"hinweis":null}] (data/sponsoren.json)
    – dieselbe Quelle wie verein/sponsoren.mjs, feste Reihenfolge Partner ›
    Fußballschule › App-Projektpartner statt der bisherigen dynamischen
    CMS-Gruppierung. Logos bleiben zur Laufzeit aus dem Sponsoren-Worksheet
@@ -276,27 +295,33 @@ summary::marker { content: ""; }
 .sponsoren-gruppe { margin-top: var(--sp-6); }
 .sponsoren-gruppe:first-child { margin-top: 0; }
 
-.sponsoren-raster {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+/* W9, Auftrag D (Befund "app" Nr. 12): kompakte Zeilen statt des
+   2-Spalten-Rasters, das bei einer ungeraden Anzahl Karten bzw. Logos ohne
+   Ort/Link halbleer blieb und Karten unterschiedlich hoch streckte – Logo
+   64 px links, Name/Ort und Links rechts, wie eine Karte je Sponsor. */
+.sponsoren-liste {
+  display: flex;
+  flex-direction: column;
   gap: var(--sp-3);
 }
 
 .sponsor-karte {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
 }
 
 .sponsor-karte__logo {
-  height: 96px;
+  flex: 0 0 64px;
+  width: 64px;
+  height: 64px;
   background: var(--weiss);
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
-  padding: 12px;
+  padding: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: var(--sp-2);
 }
 
 .sponsor-karte__logo img {
@@ -305,6 +330,11 @@ summary::marker { content: ""; }
   object-fit: contain;
 }
 
+.sponsor-karte__inhalt { flex: 1 1 auto; min-width: 0; }
+
+/* W9-Nachprüfung D-app Nr. 15: kein <a> mehr in .sponsor-karte__name (Namen
+   immer in derselben Farbe, unabhängig von sponsor.link) – der Link liegt
+   allein auf den Symbolknöpfen (.sponsor-karte__aktionen). */
 .sponsor-karte__name {
   margin: 0;
   font-family: var(--font-text);
@@ -312,8 +342,6 @@ summary::marker { content: ""; }
   font-size: 14px;
   overflow-wrap: break-word;
 }
-
-.sponsor-karte__name a { color: var(--blau-800); text-decoration: none; }
 
 .sponsor-karte__aktionen {
   display: flex;
@@ -368,7 +396,7 @@ summary::marker { content: ""; }
 (function () {
   "use strict";
 
-  var SPONSOREN = [{"firma":"SK SportConnects GbR","kategorie":"Partner","ort":"Hösbach","link":"www.sk-sportconnects.de","instagram":"sksportconnects","beschreibung":null,"logo":{"quelle":"sponsor-sk-sportconnects-gbr","bytes":34968},"hinweis":null},{"firma":"vmapit GmbH","kategorie":"App-Projektpartner","ort":"Mannheim","link":"https://www.appack.app/","instagram":null,"beschreibung":"Wir entwickeln Apps für die unterschiedlichsten Anwendungsbereiche z.B. Bürger-Apps, Schul-Apps, Kindergarten- u. Kita-Apps, Kirchengemeinde-Apps, Mitarbeiter-Apps, speziell für Ihr Business oder Event, um Menschen zu erreichen und die Chancen der Digitalisierung zu nutzen.  \nFür Sportvereine, Bürgervereine, Non-Profits und gemeinnützige Organisationen sogar gefördert, gemeinsam mit dem DOSB, Stifter Helfen und vmapit.  \nOder haben Sie eine eigene, individuelle App Idee? \nSprechen Sie uns an!","logo":{"quelle":"sponsor-vmapit-gmbh","bytes":20913},"hinweis":null},{"firma":"Bundeswehr","kategorie":"Partner","ort":null,"link":null,"instagram":null,"beschreibung":null,"logo":{"quelle":"sponsor-bundeswehr","bytes":71831},"hinweis":null},{"firma":"Fußballschule VM Elite","kategorie":"Fußballschule","ort":null,"link":null,"instagram":null,"beschreibung":null,"logo":{"quelle":"sponsor-fuballschule-vm-elite","bytes":152104},"hinweis":"W3, Abschnitt 7 (Datenkorrektur): kategorie von 'App-Projektpartner' auf 'Fußballschule' geändert – VM Elite ist kein App-Projektpartner. Live-Link zeigt auf instagram.com/bundeswehrkarriere – falsch; ohne Link übernehmen"},{"firma":"11TeamSports","kategorie":"Partner","ort":null,"link":null,"instagram":null,"beschreibung":null,"logo":{"quelle":"sponsor-11teamsports","bytes":24700},"hinweis":null}];
+  var SPONSOREN = [{"firma":"SK SportConnects GbR","kategorie":"Partner","ort":"Hösbach","link":"www.sk-sportconnects.de","instagram":"sksportconnects","beschreibung":null,"logo":{"quelle":"sponsor-sk-sportconnects-gbr","bytes":34968},"hinweis":null},{"firma":"vmapit GmbH","kategorie":"App-Projektpartner","ort":"Mannheim","link":"https://www.appack.app/","instagram":null,"beschreibung":"Wir entwickeln Apps für die unterschiedlichsten Anwendungsbereiche z.B. Bürger-Apps, Schul-Apps, Kindergarten- u. Kita-Apps, Kirchengemeinde-Apps, Mitarbeiter-Apps, speziell für Ihr Business oder Event, um Menschen zu erreichen und die Chancen der Digitalisierung zu nutzen.  \nFür Sportvereine, Bürgervereine, Non-Profits und gemeinnützige Organisationen sogar gefördert, gemeinsam mit dem DOSB, Stifter Helfen und vmapit.  \nOder haben Sie eine eigene, individuelle App Idee? \nSprechen Sie uns an!","logo":{"quelle":"sponsor-vmapit-gmbh","bytes":20913},"hinweis":null},{"firma":"Bundeswehr","kategorie":"Partner","ort":null,"link":null,"instagram":null,"beschreibung":null,"logo":{"quelle":"sponsor-bundeswehr","bytes":71831},"hinweis":null},{"firma":"Fußballschule-Athletik VM Elite","kategorie":"Fußballschule","ort":null,"link":null,"instagram":null,"beschreibung":null,"logo":{"quelle":"sponsor-fuballschule-vm-elite","bytes":152104},"hinweis":"W3, Abschnitt 7 (Datenkorrektur): kategorie von 'App-Projektpartner' auf 'Fußballschule' geändert – VM Elite ist kein App-Projektpartner. Live-Link zeigt auf instagram.com/bundeswehrkarriere – falsch; ohne Link übernehmen"},{"firma":"11TeamSports","kategorie":"Partner","ort":null,"link":null,"instagram":null,"beschreibung":null,"logo":{"quelle":"sponsor-11teamsports","bytes":24700},"hinweis":null}];
   var SPONSOREN_ID = "6a1ec5fcf68a05bf129cdbac";
 
   var ICON_GLOBUS = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.5 3.8 5.5 3.8 8.5s-1.3 6-3.8 8.5c-2.5-2.5-3.8-5.5-3.8-8.5s1.3-6 3.8-8.5z"/></svg>';
@@ -403,6 +431,12 @@ summary::marker { content: ""; }
     return null;
   }
 
+  // W9, Auftrag D (Abschnitt "Sponsoren & Partner"): "Fußballschule VM
+  // Elite" nie zwischen "VM" und "Elite" umbrechen.
+  function nameMitSchutz(text) {
+    return String(text || "").replace("VM Elite", "VM Elite");
+  }
+
   function baueSponsorKarte(sponsor, sponsorenZeilen) {
     var karte = document.createElement("div");
     karte.className = "karte sponsor-karte";
@@ -410,7 +444,11 @@ summary::marker { content: ""; }
     var logoBox = document.createElement("div");
     logoBox.className = "sponsor-karte__logo";
     karte.appendChild(logoBox);
-    var logoUrl = logoUrlFuerFirma(sponsorenZeilen, sponsor.firma);
+    // Logos wie auf der Website (data/sponsoren.json logo.quelle, Varianten
+    // auf GitHub Pages); das Worksheet-Bild nur als Rückfall.
+    var logoUrl = (sponsor.logo && sponsor.logo.quelle)
+      ? "https://justolgay.github.io/speuzer-website-prototyp/assets/bilder/erzeugt/" + sponsor.logo.quelle + "-480.jpg"
+      : logoUrlFuerFirma(sponsorenZeilen, sponsor.firma);
     if (bildUrlGueltig(logoUrl)) {
       var testbild = new Image();
       testbild.onload = function () {
@@ -423,21 +461,22 @@ summary::marker { content: ""; }
       testbild.src = logoUrl;
     }
 
-    var nameText = [sponsor.firma, sponsor.ort].filter(Boolean).join(", ");
+    var inhalt = document.createElement("div");
+    inhalt.className = "sponsor-karte__inhalt";
+    karte.appendChild(inhalt);
+
+    // W9-Nachprüfung D-app Nr. 15: Name einheitlich als Marke ohne Ort, immer
+    // in derselben Farbe (kein Link mehr auf dem Namen selbst) – der Link
+    // führt stattdessen ausschließlich über die Symbolknöpfe (aktionen
+    // unten), sonst wirkten Namen mit/ohne sponsor.link unterschiedlich
+    // eingefärbt (blau verlinkt vs. schwarz).
+    var nameText = nameMitSchutz(sponsor.firma);
     var nameEl = document.createElement("p");
     nameEl.className = "sponsor-karte__name";
+    nameEl.textContent = nameText;
+    inhalt.appendChild(nameEl);
+
     var href = sponsor.link ? mitSchema(sponsor.link) : "";
-    if (href) {
-      var a = document.createElement("a");
-      a.href = href;
-      a.target = "_blank";
-      a.rel = "noopener";
-      a.textContent = nameText;
-      nameEl.appendChild(a);
-    } else {
-      nameEl.textContent = nameText;
-    }
-    karte.appendChild(nameEl);
 
     var aktionen = document.createElement("div");
     aktionen.className = "sponsor-karte__aktionen";
@@ -461,7 +500,7 @@ summary::marker { content: ""; }
       insta.innerHTML = ICON_KAMERA + "<span>Instagram</span>";
       aktionen.appendChild(insta);
     }
-    if (aktionen.children.length) karte.appendChild(aktionen);
+    if (aktionen.children.length) inhalt.appendChild(aktionen);
 
     return karte;
   }
@@ -480,7 +519,7 @@ summary::marker { content: ""; }
       titel.textContent = kategorie;
       abschnitt.appendChild(titel);
       var raster = document.createElement("div");
-      raster.className = "sponsoren-raster";
+      raster.className = "sponsoren-liste";
       sponsoren.forEach(function (s) { raster.appendChild(baueSponsorKarte(s, sponsorenZeilen)); });
       abschnitt.appendChild(raster);
       bereich.appendChild(abschnitt);
@@ -496,7 +535,7 @@ summary::marker { content: ""; }
       titel.textContent = kategorie;
       abschnitt.appendChild(titel);
       var raster = document.createElement("div");
-      raster.className = "sponsoren-raster";
+      raster.className = "sponsoren-liste";
       sponsoren.forEach(function (s) { raster.appendChild(baueSponsorKarte(s, [])); });
       abschnitt.appendChild(raster);
       bereich.appendChild(abschnitt);

@@ -1,6 +1,6 @@
 <h1 class="visually-hidden">Karneval</h1>
 
-<p class="seitenkopf-lead">Fünf Gruppen, eine Bühne: Die Karnevalabteilung des Frankfurter Fußballvereins Sportfreunde 1904 e.&nbsp;V.</p>
+<p class="seitenkopf-lead">Fünf Gruppen, eine Bühne: Die Karnevalabteilung „Die Schnauzer“ des Frankfurter Fußballvereins Sportfreunde 1904&nbsp;e.&nbsp;V.</p>
 
 <div id="gruppen-liste" class="gruppen-liste"></div>
 
@@ -11,6 +11,7 @@
 
 <h2 class="abschnittstitel">Ansprechpartner</h2>
 <div id="ansprechpartner-liste" class="ansprechpartner-liste"></div>
+<p class="karneval-hinweistext">Beiträge der Karnevalabteilung stehen unter „<a href="nav://sportfreunde04_TextImage_1780401660329">Mitglied werden</a>“.</p>
 
 <p class="fuss">F.F.V. Sportfreunde 04 · Vereins-App</p>
 
@@ -46,6 +47,7 @@
   font-family: var(--font-head);
   font-weight: 700;
   font-size: 20px;
+  text-transform: uppercase;
   margin: 0 0 4px;
   color: var(--blau-950);
 }
@@ -180,6 +182,20 @@
   // ---------- Gruppen (wie gruppenKarte() in verein/karneval.mjs: Name,
   // Leitung mit Komma verbunden, Übungsstunde nur wenn gepflegt) ----------
 
+  // W9, Auftrag D (Entscheidung 13): Personennamen in der Leitungsliste
+  // nicht mitten im Namen trennen ("Melanie / Seipp"), "Co-Trainerin" nicht
+  // am Bindestrich trennen.
+  function leitungTextMitSchutz(liste) {
+    return (liste || []).map(function (eintrag) {
+      var klammer = eintrag.indexOf(" (");
+      var name = klammer === -1 ? eintrag : eintrag.slice(0, klammer);
+      var rest = klammer === -1 ? "" : eintrag.slice(klammer);
+      name = name.replace(/ /g, " ");
+      rest = rest.replace(/Co-Trainerin/g, "Co‑Trainerin");
+      return name + rest;
+    }).join(", ");
+  }
+
   var gruppenListe = document.getElementById("gruppen-liste");
   (KARNEVAL.gruppen || []).forEach(function (g) {
     var karte = document.createElement("div");
@@ -190,12 +206,12 @@
     karte.appendChild(titel);
     var leitung = document.createElement("p");
     leitung.className = "gruppe-karte__untertitel";
-    leitung.textContent = "Leitung: " + (g.leitung || []).join(", ");
+    leitung.textContent = "Leitung: " + leitungTextMitSchutz(g.leitung);
     karte.appendChild(leitung);
     if (g.uebungszeit) {
       var zeit = document.createElement("p");
       zeit.className = "gruppe-karte__untertitel";
-      zeit.textContent = "Übungsstunde: " + g.uebungszeit;
+      zeit.textContent = "Übungszeit: " + g.uebungszeit;
       karte.appendChild(zeit);
     }
     gruppenListe.appendChild(karte);
@@ -207,7 +223,7 @@
   // verein/karneval.mjs: Abteilungsleiter/Kassiererin/Schriftführerin aus
   // data/vorstand.json, Foto zur Laufzeit per Namensgleichheit) ----------
 
-  var FUNKTIONEN = ["Abteilungsleiter Karneval", "Kassiererin Abteilung Karneval", "Schriftführerin Abteilung Karneval"];
+  var FUNKTIONEN = ["Abteilungsleiter Karneval", "Kassiererin Karneval", "Schriftführerin Karneval"];
   var personen = FUNKTIONEN
     .map(function (f) { return (VORSTAND || []).find(function (p) { return p.funktion === f; }); })
     .filter(Boolean);

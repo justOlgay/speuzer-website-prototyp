@@ -172,7 +172,15 @@ svg { display: block; flex: 0 0 auto; }
   text-transform: uppercase;
   color: var(--blau-950);
   margin: var(--sp-6) 0 var(--sp-3);
+  /* W9, Auftrag D (Entscheidung 13, App-weit): Überschriften nie
+     automatisch trennen. */
+  hyphens: manual;
+  text-wrap: balance;
 }
+
+/* W9, Auftrag D (Entscheidung 13, App-weit): Fließtext mit ausgewogenerem
+   Umbruch (unterstützende Browser; ohne Unterstützung normaler Umbruch). */
+p { text-wrap: pretty; }
 
 .inhalt > .abschnittstitel:first-child { margin-top: 0; }
 
@@ -206,6 +214,17 @@ summary::marker { content: ""; }
   text-decoration: none;
   border: none;
   cursor: pointer;
+}
+
+/* W9-Nachprüfung D-app Nr. 5: ein <button class="knopf"> erbt ohne
+   font-family: inherit nicht die App-Schrift (User-Agent-Standard, z. B.
+   Arial), anders als ein <a class="knopf"> – "font: inherit" setzt Familie/
+   Größe/Gewicht zurück, deshalb Gewicht/Größe direkt danach wie .knopf
+   erneut gesetzt. */
+button.knopf {
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .knopf--leise {

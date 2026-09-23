@@ -170,7 +170,15 @@ svg { display: block; flex: 0 0 auto; }
   text-transform: uppercase;
   color: var(--blau-950);
   margin: var(--sp-6) 0 var(--sp-3);
+  /* W9, Auftrag D (Entscheidung 13, App-weit): Überschriften nie
+     automatisch trennen. */
+  hyphens: manual;
+  text-wrap: balance;
 }
+
+/* W9, Auftrag D (Entscheidung 13, App-weit): Fließtext mit ausgewogenerem
+   Umbruch (unterstützende Browser; ohne Unterstützung normaler Umbruch). */
+p { text-wrap: pretty; }
 
 .inhalt > .abschnittstitel:first-child { margin-top: 0; }
 
@@ -204,6 +212,17 @@ summary::marker { content: ""; }
   text-decoration: none;
   border: none;
   cursor: pointer;
+}
+
+/* W9-Nachprüfung D-app Nr. 5: ein <button class="knopf"> erbt ohne
+   font-family: inherit nicht die App-Schrift (User-Agent-Standard, z. B.
+   Arial), anders als ein <a class="knopf"> – "font: inherit" setzt Familie/
+   Größe/Gewicht zurück, deshalb Gewicht/Größe direkt danach wie .knopf
+   erneut gesetzt. */
+button.knopf {
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .knopf--leise {
@@ -257,7 +276,7 @@ summary::marker { content: ""; }
 /* Karneval_v3.tpl – seitenspezifisch (C1). W8, Grundsatz Daten: Gruppen
    (Name/Leitung/Übungszeit) aus {"name":"Karnevalabteilung „Die Schnauzer“","mail":"karnevalabteilung@sportfreunde04.de","leitung":"Patrick Krösche (Abteilungsleiter)","gruppen":[{"name":"Dreamboys","leitung":["Alexandra Schrödl (Trainerin)","Melanie Seipp (Co-Trainerin)"],"uebungszeit":"Mittwoch 19:00–21:00 Uhr, Turnhalle Fridtjof-Nansen-Schule","offen":null},{"name":"Little Fruities","leitung":["Stephanie Künstler (Trainerin)","Melanie Seipp (Co-Trainerin)"],"uebungszeit":null,"offen":"Übungszeit nicht belegt"},{"name":"Freaky Fruities","leitung":["Stephanie Künstler (Trainerin)","Melanie Seipp (Co-Trainerin)"],"uebungszeit":null,"offen":"Übungszeit nicht belegt"},{"name":"Flying Fruities","leitung":["Simone Bechstein (Trainerin)"],"uebungszeit":null,"offen":"Übungszeit nicht belegt"},{"name":"Pfläumchen","leitung":["Simone Bechstein (Trainerin)","Stephanie Künstler (Co-Trainerin)"],"uebungszeit":null,"offen":"Übungszeit nicht belegt"}],"hinweis":"Live-Seite nennt 'Fridjof-Nansen-Schule' (Schreibweise der Schule: Fridtjof-Nansen-Schule)"} (data/karneval.json),
    Ansprechpartner (Abteilungsleiter/Kassiererin/Schriftführerin) aus
-   [{"name":"Melanie Seipp","funktion":"1. Vorsitzende","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-melanie-seipp","bytes":525138}},{"name":"Uwe Korndörfer","funktion":"2. Vorsitzender","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-uwe-korndorfer","bytes":517113}},{"name":"Wolfgang Schirmer","funktion":"1. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-wolfgang-schirmer","bytes":495840}},{"name":"Bernhard Henrich","funktion":"2. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-bernhard-henrich","bytes":135549}},{"name":"Ralf Schwager","funktion":"1. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-ralf-schwager","bytes":112402}},{"name":"Olgay Özkan","funktion":"2. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-olgay-ozkan","bytes":60038}},{"name":"Marcel Hogg","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-marcel-hogg","bytes":125052}},{"name":"Vassilios Miamis","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-vassilios-miamis","bytes":215395}},{"name":"Florian Müller","funktion":"Kinderschutzbeauftragter","mail":"kinderschutzbeauftragter@sportfreunde04.de","foto":{"quelle":"vorstand-florian-muller","bytes":69465}},{"name":null,"funktion":"Schriftführer","mail":null,"foto":null,"hinweis":"nicht besetzt"},{"name":"Wolfgang Krönung","funktion":"Sportliche Leitung Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Christine Rothe","funktion":"Spielausschuss Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Patrick Krösche","funktion":"Abteilungsleiter Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":{"quelle":"vorstand-patrick-krosche","bytes":221052}},{"name":"Sigrid Weber","funktion":"Kassiererin Abteilung Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null},{"name":"Bettina Leven-Grieb","funktion":"Schriftführerin Abteilung Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null}] (data/vorstand.json) – dieselben Daten wie
+   [{"name":"Melanie Seipp","funktion":"1. Vorsitzende","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-melanie-seipp","bytes":525138}},{"name":"Uwe Korndörfer","funktion":"2. Vorsitzender","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-uwe-korndorfer","bytes":517113}},{"name":"Wolfgang Schirmer","funktion":"1. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-wolfgang-schirmer","bytes":495840}},{"name":"Bernhard Henrich","funktion":"2. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-bernhard-henrich","bytes":135549}},{"name":"Ralf Schwager","funktion":"1. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-ralf-schwager","bytes":112402}},{"name":"Olgay Özkan","funktion":"2. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-olgay-ozkan","bytes":60038}},{"name":"Marcel Hogg","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-marcel-hogg","bytes":125052}},{"name":"Vassilios Miamis","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-vassilios-miamis","bytes":215395}},{"name":"Florian Müller","funktion":"Kinderschutzbeauftragter","mail":"kinderschutzbeauftragter@sportfreunde04.de","foto":{"quelle":"vorstand-florian-muller","bytes":69465}},{"name":null,"funktion":"Schriftführer","mail":null,"foto":null,"hinweis":"nicht besetzt"},{"name":"Wolfgang Krönung","funktion":"Sportliche Leitung Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Christine Rothe","funktion":"Spielausschuss Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Patrick Krösche","funktion":"Abteilungsleiter Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":{"quelle":"vorstand-patrick-krosche","bytes":221052}},{"name":"Sigrid Weber","funktion":"Kassiererin Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null},{"name":"Bettina Leven-Grieb","funktion":"Schriftführerin Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null}] (data/vorstand.json) – dieselben Daten wie
    verein/karneval.mjs. Keine Gruppenbilder mehr (uneinheitlich, teils
    private Porträts, siehe W8-Spezifikation Abschnitt 3) – nur noch das
    Ansprechpartner-Foto wird zur Laufzeit aus dem Ansprechpartner-Worksheet
@@ -285,6 +304,7 @@ summary::marker { content: ""; }
   font-family: var(--font-head);
   font-weight: 700;
   font-size: 20px;
+  text-transform: uppercase;
   margin: 0 0 4px;
   color: var(--blau-950);
 }
@@ -368,7 +388,7 @@ summary::marker { content: ""; }
 
 <h1 class="visually-hidden">Karneval</h1>
 
-<p class="seitenkopf-lead">Fünf Gruppen, eine Bühne: Die Karnevalabteilung des Frankfurter Fußballvereins Sportfreunde 1904 e.&nbsp;V.</p>
+<p class="seitenkopf-lead">Fünf Gruppen, eine Bühne: Die Karnevalabteilung „Die Schnauzer“ des Frankfurter Fußballvereins Sportfreunde 1904&nbsp;e.&nbsp;V.</p>
 
 <div id="gruppen-liste" class="gruppen-liste"></div>
 
@@ -379,6 +399,7 @@ summary::marker { content: ""; }
 
 <h2 class="abschnittstitel">Ansprechpartner</h2>
 <div id="ansprechpartner-liste" class="ansprechpartner-liste"></div>
+<p class="karneval-hinweistext">Beiträge der Karnevalabteilung stehen unter „<a href="nav://sportfreunde04_TextImage_1780401660329">Mitglied werden</a>“.</p>
 
 <p class="fuss">F.F.V. Sportfreunde 04 · Vereins-App</p>
 
@@ -391,7 +412,7 @@ summary::marker { content: ""; }
   "use strict";
 
   var KARNEVAL = {"name":"Karnevalabteilung „Die Schnauzer“","mail":"karnevalabteilung@sportfreunde04.de","leitung":"Patrick Krösche (Abteilungsleiter)","gruppen":[{"name":"Dreamboys","leitung":["Alexandra Schrödl (Trainerin)","Melanie Seipp (Co-Trainerin)"],"uebungszeit":"Mittwoch 19:00–21:00 Uhr, Turnhalle Fridtjof-Nansen-Schule","offen":null},{"name":"Little Fruities","leitung":["Stephanie Künstler (Trainerin)","Melanie Seipp (Co-Trainerin)"],"uebungszeit":null,"offen":"Übungszeit nicht belegt"},{"name":"Freaky Fruities","leitung":["Stephanie Künstler (Trainerin)","Melanie Seipp (Co-Trainerin)"],"uebungszeit":null,"offen":"Übungszeit nicht belegt"},{"name":"Flying Fruities","leitung":["Simone Bechstein (Trainerin)"],"uebungszeit":null,"offen":"Übungszeit nicht belegt"},{"name":"Pfläumchen","leitung":["Simone Bechstein (Trainerin)","Stephanie Künstler (Co-Trainerin)"],"uebungszeit":null,"offen":"Übungszeit nicht belegt"}],"hinweis":"Live-Seite nennt 'Fridjof-Nansen-Schule' (Schreibweise der Schule: Fridtjof-Nansen-Schule)"};
-  var VORSTAND = [{"name":"Melanie Seipp","funktion":"1. Vorsitzende","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-melanie-seipp","bytes":525138}},{"name":"Uwe Korndörfer","funktion":"2. Vorsitzender","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-uwe-korndorfer","bytes":517113}},{"name":"Wolfgang Schirmer","funktion":"1. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-wolfgang-schirmer","bytes":495840}},{"name":"Bernhard Henrich","funktion":"2. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-bernhard-henrich","bytes":135549}},{"name":"Ralf Schwager","funktion":"1. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-ralf-schwager","bytes":112402}},{"name":"Olgay Özkan","funktion":"2. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-olgay-ozkan","bytes":60038}},{"name":"Marcel Hogg","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-marcel-hogg","bytes":125052}},{"name":"Vassilios Miamis","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-vassilios-miamis","bytes":215395}},{"name":"Florian Müller","funktion":"Kinderschutzbeauftragter","mail":"kinderschutzbeauftragter@sportfreunde04.de","foto":{"quelle":"vorstand-florian-muller","bytes":69465}},{"name":null,"funktion":"Schriftführer","mail":null,"foto":null,"hinweis":"nicht besetzt"},{"name":"Wolfgang Krönung","funktion":"Sportliche Leitung Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Christine Rothe","funktion":"Spielausschuss Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Patrick Krösche","funktion":"Abteilungsleiter Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":{"quelle":"vorstand-patrick-krosche","bytes":221052}},{"name":"Sigrid Weber","funktion":"Kassiererin Abteilung Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null},{"name":"Bettina Leven-Grieb","funktion":"Schriftführerin Abteilung Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null}];
+  var VORSTAND = [{"name":"Melanie Seipp","funktion":"1. Vorsitzende","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-melanie-seipp","bytes":525138}},{"name":"Uwe Korndörfer","funktion":"2. Vorsitzender","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-uwe-korndorfer","bytes":517113}},{"name":"Wolfgang Schirmer","funktion":"1. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-wolfgang-schirmer","bytes":495840}},{"name":"Bernhard Henrich","funktion":"2. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-bernhard-henrich","bytes":135549}},{"name":"Ralf Schwager","funktion":"1. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-ralf-schwager","bytes":112402}},{"name":"Olgay Özkan","funktion":"2. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-olgay-ozkan","bytes":60038}},{"name":"Marcel Hogg","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-marcel-hogg","bytes":125052}},{"name":"Vassilios Miamis","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-vassilios-miamis","bytes":215395}},{"name":"Florian Müller","funktion":"Kinderschutzbeauftragter","mail":"kinderschutzbeauftragter@sportfreunde04.de","foto":{"quelle":"vorstand-florian-muller","bytes":69465}},{"name":null,"funktion":"Schriftführer","mail":null,"foto":null,"hinweis":"nicht besetzt"},{"name":"Wolfgang Krönung","funktion":"Sportliche Leitung Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Christine Rothe","funktion":"Spielausschuss Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Patrick Krösche","funktion":"Abteilungsleiter Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":{"quelle":"vorstand-patrick-krosche","bytes":221052}},{"name":"Sigrid Weber","funktion":"Kassiererin Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null},{"name":"Bettina Leven-Grieb","funktion":"Schriftführerin Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null}];
   var ANSPRECHPARTNER_ID = "6a1ec5fcf68a05bf129cdb8b";
 
   // Porträts wie auf der Website: dieselben, einheitlich zugeschnittenen
@@ -442,6 +463,20 @@ summary::marker { content: ""; }
   // ---------- Gruppen (wie gruppenKarte() in verein/karneval.mjs: Name,
   // Leitung mit Komma verbunden, Übungsstunde nur wenn gepflegt) ----------
 
+  // W9, Auftrag D (Entscheidung 13): Personennamen in der Leitungsliste
+  // nicht mitten im Namen trennen ("Melanie / Seipp"), "Co-Trainerin" nicht
+  // am Bindestrich trennen.
+  function leitungTextMitSchutz(liste) {
+    return (liste || []).map(function (eintrag) {
+      var klammer = eintrag.indexOf(" (");
+      var name = klammer === -1 ? eintrag : eintrag.slice(0, klammer);
+      var rest = klammer === -1 ? "" : eintrag.slice(klammer);
+      name = name.replace(/ /g, " ");
+      rest = rest.replace(/Co-Trainerin/g, "Co‑Trainerin");
+      return name + rest;
+    }).join(", ");
+  }
+
   var gruppenListe = document.getElementById("gruppen-liste");
   (KARNEVAL.gruppen || []).forEach(function (g) {
     var karte = document.createElement("div");
@@ -452,12 +487,12 @@ summary::marker { content: ""; }
     karte.appendChild(titel);
     var leitung = document.createElement("p");
     leitung.className = "gruppe-karte__untertitel";
-    leitung.textContent = "Leitung: " + (g.leitung || []).join(", ");
+    leitung.textContent = "Leitung: " + leitungTextMitSchutz(g.leitung);
     karte.appendChild(leitung);
     if (g.uebungszeit) {
       var zeit = document.createElement("p");
       zeit.className = "gruppe-karte__untertitel";
-      zeit.textContent = "Übungsstunde: " + g.uebungszeit;
+      zeit.textContent = "Übungszeit: " + g.uebungszeit;
       karte.appendChild(zeit);
     }
     gruppenListe.appendChild(karte);
@@ -469,7 +504,7 @@ summary::marker { content: ""; }
   // verein/karneval.mjs: Abteilungsleiter/Kassiererin/Schriftführerin aus
   // data/vorstand.json, Foto zur Laufzeit per Namensgleichheit) ----------
 
-  var FUNKTIONEN = ["Abteilungsleiter Karneval", "Kassiererin Abteilung Karneval", "Schriftführerin Abteilung Karneval"];
+  var FUNKTIONEN = ["Abteilungsleiter Karneval", "Kassiererin Karneval", "Schriftführerin Karneval"];
   var personen = FUNKTIONEN
     .map(function (f) { return (VORSTAND || []).find(function (p) { return p.funktion === f; }); })
     .filter(Boolean);

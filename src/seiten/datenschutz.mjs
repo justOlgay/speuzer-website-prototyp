@@ -3,6 +3,8 @@
 // übernommen (siehe dort: Stand, Quelle und Hinweis auf die noch fehlende
 // juristische Prüfung).
 
+import { mailLink, telefonAnzeige } from "../vorlagen/hilfen.mjs";
+
 function escapeHtml(text) {
   return String(text ?? "")
     .replaceAll("&", "&amp;")
@@ -17,11 +19,15 @@ function escapeHtml(text) {
 // .seitenkopf h1 (komponenten.css) bricht der Browser dort statt beliebig
 // mitten im Wort (das bisherige overflow-wrap:anywhere aus base.css bleibt
 // als Sicherheitsnetz bestehen).
+// W9-Korrektur (QA3 1440-7): Die Unterzeile "Fassung der Vereins-App und
+// Website vom …" war schief formuliert ("Fassung … vom" – eine Fassung ist
+// nicht "vom" einem Datum) – jetzt "Stand: … – gilt für Vereins-App und
+// Website" (genauer Wortlaut aus w9-b.md).
 function seitenkopfAbschnitt(datenschutz) {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
     <h1>Datenschutz&shy;erklärung</h1>
-    <p class="seitenkopf__lead">Fassung der Vereins-App und Website vom ${escapeHtml(datenschutz.stand ?? "")}</p>
+    <p class="seitenkopf__lead">Stand: ${escapeHtml(datenschutz.stand ?? "")} – gilt für Vereins‑App und Website</p>
     <div class="hinweis hinweis--info">
       <p style="margin:0;">${escapeHtml(datenschutz.hinweis ?? "")}</p>
     </div>
@@ -36,12 +42,20 @@ function seitenkopfAbschnitt(datenschutz) {
 // (list-style:none), weil die Titel bereits "1. …" tragen; die zwei Einträge
 // ohne eigene Nummer ("Datenschutzhinweise", "Unsere Datenschutzerklärung")
 // bleiben unverändert ohne Nummer – hier wird nichts nachnummeriert.
+// W9-Korrektur (QA3 1440-6/390-15): Die Punkte 1–11 sind inhaltlich
+// Unterpunkte von "Unsere Datenschutzerklärung", standen im Verzeichnis aber
+// gleichrangig – jetzt mit ".inhaltsverzeichnis__unterpunkt" eingerückt
+// (rein optisch, gleiche flache <ol>, kein verschachteltes Markup nötig).
 function inhaltsverzeichnisAbschnitt(abschnitte) {
   const eintraege = abschnitte
-    .map((a, i) => `<li><a href="#abschnitt-${i + 1}">${escapeHtml(a.titel)}</a></li>`)
+    .map((a, i) => {
+      const istUnterpunkt = i >= 2;
+      const klasse = istUnterpunkt ? ' class="inhaltsverzeichnis__unterpunkt"' : "";
+      return `<li${klasse}><a href="#abschnitt-${i + 1}">${escapeHtml(a.titel)}</a></li>`;
+    })
     .join("\n      ");
 
-  return `<nav aria-label="Abschnitte">
+  return `<nav id="inhaltsverzeichnis" aria-label="Abschnitte">
   <div class="container">
     <div class="inhalt">
     <ol class="inhaltsverzeichnis">
@@ -50,6 +64,13 @@ function inhaltsverzeichnisAbschnitt(abschnitte) {
     </div>
   </div>
 </nav>`;
+}
+
+// W9-Korrektur (QA3 1440-19/390-15): Auf der sehr langen Seite gab es keinen
+// Weg zurück zum Inhaltsverzeichnis – ein Link "Nach oben ›" am Ende jedes
+// Abschnitts (zum <nav id="inhaltsverzeichnis"> oben, siehe seite()).
+function nachObenLink() {
+  return `<p class="meta"><a href="#inhaltsverzeichnis">Nach oben ›</a></p>`;
 }
 
 // P9-Korrektur A3: Im Abschnitt "Datenschutzhinweise" standen mehrere
@@ -74,6 +95,68 @@ const UEBERSCHRIFT_PRAEFIX = "§H§ ";
 
 function alsUeberschrift(text) {
   return text.startsWith(UEBERSCHRIFT_PRAEFIX) ? text.slice(UEBERSCHRIFT_PRAEFIX.length) : null;
+}
+
+// W9-B-Nachprüfung (1440-18, zweiter Teil): "Ihre Rechte als betroffene
+// Person" (Abschnitt "6. Routinemäßige Löschung …") ist eine Gruppen-
+// überschrift für die folgenden Zwischentitel "Recht auf Bestätigung",
+// "Recht auf Auskunft" usw. – stand bisher als gleich große "§H§"-Überschrift
+// direkt über der ersten von ihnen, ohne eigenen Text und ohne optische
+// Abstufung, wirkte dadurch wie ein weiterer gleichrangiger Zwischentitel
+// statt wie deren gemeinsame Klammer. "§H2§ " markiert diese eine Zeile jetzt
+// separat – bleibt aus Gründen der Dokument-Gliederung ein <h3> (kein
+// zusätzliches <h2> mitten im Abschnitt), aber optisch eine Stufe größer,
+// mit mehr Abstand nach oben.
+const GRUPPENUEBERSCHRIFT_PRAEFIX = "§H2§ ";
+
+function alsGruppenUeberschrift(text) {
+  return text.startsWith(GRUPPENUEBERSCHRIFT_PRAEFIX) ? text.slice(GRUPPENUEBERSCHRIFT_PRAEFIX.length) : null;
+}
+
+// W9-Korrektur (QA3 1440-18/390-… "Aufzählungen als Listen", w9-b.md): die
+// echten Aufzählungen unter "Recht auf Auskunft", "Recht auf Löschung" und
+// "Recht auf Einschränkung der Verarbeitung" (Abschnitt "6. Routinemäßige
+// Löschung …") standen als lose Absätze ohne Aufzählungszeichen – anders als
+// bei "Datenschutzhinweise" reicht hier die Längen-Heuristik nicht (die
+// DSGVO-Listenpunkte sind oft lang und enden mit einem Punkt). Die 18
+// betroffenen Einträge sind in data/datenschutz.json deshalb von Hand mit
+// dem Präfix "§L§ " markiert (gleiches Prinzip wie "§H§ " für Überschriften)
+// – reine Formatierung, der Wortlaut ist unverändert.
+const LISTENPUNKT_PRAEFIX = "§L§ ";
+
+function alsListenpunkt(text) {
+  return text.startsWith(LISTENPUNKT_PRAEFIX) ? text.slice(LISTENPUNKT_PRAEFIX.length) : null;
+}
+
+// W9-Korrektur (QA3 1440-4/390-13, w9-b.md "Anschrift der verantwortlichen
+// Stelle als Adressblock wie im Impressum"): Der Absatz mit Name, Anschrift,
+// E-Mail, Telefon und Website der verantwortlichen Stelle (Abschnitt "1.
+// Begrifflichkeiten") stand bisher als ein einziger Fließtext-Satz und brach
+// mitten in der Adresse/Telefonnummer um, mit von Impressum/Kontakt
+// abweichenden Schreibweisen ("Email:", "Webseite:", "+49 (0) 69 736868",
+// "e.V."). In data/datenschutz.json markiert "§ADR§" diese Stelle jetzt nur
+// noch (der Rohtext stand dort doppelt zu data/verein.json und war schon
+// veraltet) – der Adressblock wird stattdessen aus derselben Quelle wie das
+// Impressum gebaut, damit beide nie auseinanderlaufen können.
+const ADRESSE_MARKER = "§ADR§";
+
+function verantwortlicheStelleHtml(daten) {
+  const verein = daten.verein ?? {};
+  const sportstaette = verein.sportstaette ?? {};
+  const name = String(verein.name_register ?? "").replace("Sportfreunde 1904", "Sportfreunde 1904");
+  return `<dl class="angaben">
+      <dt>Verantwortliche Stelle</dt>
+      <dd>${escapeHtml(name)}<br>${escapeHtml(sportstaette.strasse ?? "")}<br>${escapeHtml(sportstaette.plz ?? "")} ${escapeHtml(sportstaette.ort ?? "")}</dd>
+
+      <dt>E-Mail</dt>
+      <dd><p style="margin:0;">${mailLink(verein.mail ?? "geschaeftsstelle@sportfreunde04.de")}</p></dd>
+
+      <dt>Telefon</dt>
+      <dd><p style="margin:0;"><a href="tel:${escapeHtml(String(verein.tel_geschaeftsstelle ?? "").replace(/[^\d+]/g, ""))}">${escapeHtml(telefonAnzeige(verein.tel_geschaeftsstelle))}</a></p></dd>
+
+      <dt>Website</dt>
+      <dd>www.sportfreunde04.de</dd>
+    </dl>`;
 }
 
 function qualifiziertFuerListe(text) {
@@ -102,9 +185,20 @@ function gruppiereAbsaetze(absaetze) {
 
   for (const p of absaetze) {
     const ueberschrift = alsUeberschrift(p);
+    // W9-B-Nachprüfung (Datenschutzhinweise): "Push-Token je Betriebssystem,
+    // APNs Token (iOS) bzw. FCM Token (Android)" ist inhaltlich derselbe
+    // Aufzählungspunkt wie "Name des Smartphones" usw. davor, überschreitet
+    // aber mit 73 Zeichen die 60-Zeichen-Schwelle von qualifiziertFuerListe()
+    // – stand deshalb als loser Absatz nach der Liste, obwohl derselbe Punkt
+    // in Abschnitt 2 (data/datenschutz.json, §L§-Mechanik) in der Liste
+    // steht. "§L§ " erzwingt hier denselben Listenplatz, unabhängig von der
+    // Länge – gleiches Prinzip wie "§H§ " für Überschriften.
+    const listenpunkt = alsListenpunkt(p);
     if (ueberschrift !== null) {
       laufSchliessen();
       bloecke.push({ typ: "ueberschrift", text: ueberschrift });
+    } else if (listenpunkt !== null) {
+      lauf.push(listenpunkt);
     } else if (qualifiziertFuerListe(p)) {
       lauf.push(p);
     } else {
@@ -116,15 +210,50 @@ function gruppiereAbsaetze(absaetze) {
   return bloecke;
 }
 
-function absaetzeHtml(abschnitt) {
+// Für alle Abschnitte außer "Datenschutzhinweise" (siehe unten): §H§-
+// Überschriften, §L§-Listenpunkte (zu einer <ul> zusammengefasst) und der
+// §ADR§-Adressblock werden erkannt, alles andere bleibt ein normaler <p>.
+function allgemeineBloeckeHtml(absaetze, daten) {
+  const teile = [];
+  let listenLauf = [];
+
+  function listeSchliessen() {
+    if (listenLauf.length) {
+      teile.push(`<ul>
+        ${listenLauf.map((li) => `<li>${escapeHtml(li)}</li>`).join("\n        ")}
+      </ul>`);
+      listenLauf = [];
+    }
+  }
+
+  for (const p of absaetze) {
+    const listenpunkt = alsListenpunkt(p);
+    if (listenpunkt !== null) {
+      listenLauf.push(listenpunkt);
+      continue;
+    }
+    listeSchliessen();
+
+    if (p === ADRESSE_MARKER) {
+      teile.push(verantwortlicheStelleHtml(daten));
+      continue;
+    }
+    const gruppenUeberschrift = alsGruppenUeberschrift(p);
+    if (gruppenUeberschrift !== null) {
+      teile.push(`<h3 style="font-size:var(--fs-2xl); margin-top:var(--sp-8);">${escapeHtml(gruppenUeberschrift)}</h3>`);
+      continue;
+    }
+    const ueberschrift = alsUeberschrift(p);
+    teile.push(ueberschrift !== null ? `<h3>${escapeHtml(ueberschrift)}</h3>` : `<p>${escapeHtml(p)}</p>`);
+  }
+  listeSchliessen();
+  return teile.join("\n      ");
+}
+
+function absaetzeHtml(abschnitt, daten) {
   const absaetze = abschnitt.absaetze ?? [];
   if (abschnitt.titel !== ABSAETZE_GRUPPIEREN_TITEL) {
-    return absaetze
-      .map((p) => {
-        const ueberschrift = alsUeberschrift(p);
-        return ueberschrift !== null ? `<h3>${escapeHtml(ueberschrift)}</h3>` : `<p>${escapeHtml(p)}</p>`;
-      })
-      .join("\n      ");
+    return allgemeineBloeckeHtml(absaetze, daten);
   }
   return gruppiereAbsaetze(absaetze)
     .map((block) => {
@@ -141,8 +270,8 @@ function absaetzeHtml(abschnitt) {
     .join("\n      ");
 }
 
-function abschnittSection(abschnitt, index) {
-  const absaetze = absaetzeHtml(abschnitt);
+function abschnittSection(abschnitt, index, daten) {
+  const absaetze = absaetzeHtml(abschnitt, daten);
   const listeHtml = abschnitt.liste
     ? `<ul>
         ${abschnitt.liste.map((li) => `<li>${escapeHtml(li)}</li>`).join("\n        ")}
@@ -163,6 +292,7 @@ function abschnittSection(abschnitt, index) {
     ${absaetze}
     ${listeHtml}
     ${absaetzeNachListeHtml}
+    ${nachObenLink()}
     </div>
   </div>
 </section>`;
@@ -186,7 +316,7 @@ export function seite(daten) {
   const inhalt = [
     seitenkopfAbschnitt(datenschutz),
     inhaltsverzeichnisAbschnitt(abschnitte),
-    ...abschnitte.map(abschnittSection),
+    ...abschnitte.map((abschnitt, index) => abschnittSection(abschnitt, index, daten)),
     quelleAbschnitt(datenschutz),
   ].join("\n");
 

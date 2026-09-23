@@ -170,7 +170,15 @@ svg { display: block; flex: 0 0 auto; }
   text-transform: uppercase;
   color: var(--blau-950);
   margin: var(--sp-6) 0 var(--sp-3);
+  /* W9, Auftrag D (Entscheidung 13, App-weit): Überschriften nie
+     automatisch trennen. */
+  hyphens: manual;
+  text-wrap: balance;
 }
+
+/* W9, Auftrag D (Entscheidung 13, App-weit): Fließtext mit ausgewogenerem
+   Umbruch (unterstützende Browser; ohne Unterstützung normaler Umbruch). */
+p { text-wrap: pretty; }
 
 .inhalt > .abschnittstitel:first-child { margin-top: 0; }
 
@@ -204,6 +212,17 @@ summary::marker { content: ""; }
   text-decoration: none;
   border: none;
   cursor: pointer;
+}
+
+/* W9-Nachprüfung D-app Nr. 5: ein <button class="knopf"> erbt ohne
+   font-family: inherit nicht die App-Schrift (User-Agent-Standard, z. B.
+   Arial), anders als ein <a class="knopf"> – "font: inherit" setzt Familie/
+   Größe/Gewicht zurück, deshalb Gewicht/Größe direkt danach wie .knopf
+   erneut gesetzt. */
+button.knopf {
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .knopf--leise {
@@ -254,16 +273,20 @@ summary::marker { content: ""; }
   text-align: center;
 }
 
-/* Geschaeftsstelle_v3.tpl – seitenspezifisch (C2). W8, Grundsatz Daten:
-   Bausteine/Reihenfolge wie kontakt.html der Website, Inhalte aus
-   {"name_register":"Frankfurter Fußballverein Sportfreunde 1904 e. V.","name_kurz":"FFV Sportfreunde 04","spitzname":"Speuzer","gegruendet":"15. Mai 1904","gruendungsname":"Frankfurter FC Britannia","umbenannt":"1919","stadtteil":"Gallus","sportstaette":{"strasse":"Mainzer Landstraße 480","plz":"60326","ort":"Frankfurt am Main"},"post":{"postfach":"Postfach 190442","plz":"60091","ort":"Frankfurt am Main"},"mail":"geschaeftsstelle@sportfreunde04.de","tel_geschaeftsstelle":"+49 69 736868","tel_platzwart":"+49 69 732193","register":"Amtsgericht Frankfurt am Main, VR 4727","vorsitz":["Melanie Seipp (1. Vorsitzende)","Uwe Korndörfer (2. Vorsitzender)"],"vertretung":["Melanie Seipp (1. Vorsitzende)","Uwe Korndörfer (2. Vorsitzender)"],"instagram":"https://www.instagram.com/speuzer_ffm/","facebook":"https://www.facebook.com/groups/223133414377924/","fanshop":"https://sportfreunde04.fan12.de/","teamshop":"https://www.11teamsports.com/de-de/clubshop/frankfurter-fussballvereine-sportfreunde-04/","mails":{"jugendleitung":"jugendleitung@sportfreunde04.de","kassierer":"kassierer@sportfreunde04.de","kinderschutz":"kinderschutzbeauftragter@sportfreunde04.de","karneval":"karnevalabteilung@sportfreunde04.de","senioren":"spielausschuss_senioren@sportfreunde04.de","vorstand":"vorstand@sportfreunde04.de"},"hinweise":{"parken":"Der Parkplatz am Vereinsgelände ist wegen des Neubaus des Funktionsgebäudes voraussichtlich bis Ende Januar 2027 gesperrt. Der Zugang zum Gelände ist über den Hintereingang am „Haus der Jugend“ (Pavillon) möglich.","parken_quelle":"App-News vom 21.07.2026","ferien":"In den hessischen Schulferien und an Feiertagen findet in der Regel kein Training statt. Ausnahmen sagt das Trainerteam an."},"oepnv":null,"anfahrt_hinweis":"Zugang zum Vereinsgelände derzeit über den Hintereingang am „Haus der Jugend“ (Pavillon); der Parkplatz ist wegen des Neubaus bis voraussichtlich Ende Januar 2027 gesperrt.","gruendung_jahr":1904,"anzahl_mannschaften":11,"karten":{"apple":"https://maps.apple.com/?q=Mainzer+Landstra%C3%9Fe+480,+60326+Frankfurt+am+Main","google":"https://www.google.com/maps/search/?api=1&query=Mainzer+Landstra%C3%9Fe+480%2C+60326+Frankfurt+am+Main"},"kalender_basis":"https://justolgay.github.io/speuzer-spielplan/"} (data/verein.json) und {"_quelle":"appack public workbook API, Worksheet 6a1ec5fcf68a05bf129cdb9b (Kontakt der Geschäftsstelle), geholt am 2026-09-22 mit tools/appack-daten.mjs. Nur Adresse/Telefon/E-Mail/Website/Social; keine Personendaten, \"mobileNumber\" bewusst nicht übernommen. Öffnungszeiten werden seit 22.09.2026 nicht mehr übernommen (Entscheidung Olgay: es gibt keine festen Öffnungszeiten).","kontakt":{"address":" Postfach 190442 (postalisch)","postalCode":"60091","city":"Frankfurt","phoneNumber":"069-736868","email":"geschaeftsstelle@sportfreunde04.de","website":"https://www.sportfreunde04.de","insta":"https://www.instagram.com/speuzer_ffm/","face":"https://www.facebook.com/groups/223133414377924/"}}
-   (data/geschaeftsstelle.json) – dieselbe Quelle wie die Website, von
-   tools/app-optik/tpl-bauen.mjs zur Bauzeit eingesetzt. Kein Workbook-Aufruf
-   mehr auf dieser Seite (die frühere rohe "Hinweis:"-Karte aus dem
-   Beschreibung-Worksheet, die dynamische Öffnungszeiten-Tabelle, die
-   generischen Kontakt-Icons und die generische Ansprechpartner-Liste
-   entfallen – ersetzt durch Erreichbarkeit/Anliegen/Anfahrt wie auf der
-   Website, siehe W8-Spezifikation Abschnitt 2). */
+/* Geschaeftsstelle_v3.tpl – seitenspezifisch (C2). Seite heißt künftig
+   "Kontakt & Anfahrt" (W9, Auftrag D, Abschnitt "Geschäftsstelle & Anfahrt";
+   der appack-Modultitel wird vom Hauptagenten im CMS geändert). W8/W9,
+   Grundsatz Daten: Bausteine/Reihenfolge wie kontakt.html der Website,
+   Inhalte aus {"name_register":"Frankfurter Fußballverein Sportfreunde 1904 e. V.","name_kurz":"FFV Sportfreunde 04","spitzname":"Speuzer","gegruendet":"15. Mai 1904","gruendungsname":"Frankfurter FC Britannia","umbenannt":"1919","stadtteil":"Gallus","sportstaette":{"strasse":"Mainzer Landstraße 480","plz":"60326","ort":"Frankfurt am Main"},"post":{"postfach":"Postfach 190442","plz":"60091","ort":"Frankfurt am Main"},"mail":"geschaeftsstelle@sportfreunde04.de","tel_geschaeftsstelle":"069 736868","tel_platzwart":"069 732193","register":"Amtsgericht Frankfurt am Main, VR 4727","vorsitz":["Melanie Seipp (1. Vorsitzende)","Uwe Korndörfer (2. Vorsitzender)"],"vertretung":["Melanie Seipp (1. Vorsitzende)","Uwe Korndörfer (2. Vorsitzender)"],"instagram":"https://www.instagram.com/speuzer_ffm/","facebook":"https://www.facebook.com/groups/223133414377924/","fanshop":"https://sportfreunde04.fan12.de/","teamshop":"https://www.11teamsports.com/de-de/clubshop/frankfurter-fussballvereine-sportfreunde-04/","mails":{"jugendleitung":"jugendleitung@sportfreunde04.de","kassierer":"kassierer@sportfreunde04.de","kinderschutz":"kinderschutzbeauftragter@sportfreunde04.de","karneval":"karnevalabteilung@sportfreunde04.de","senioren":"spielausschuss_senioren@sportfreunde04.de","vorstand":"vorstand@sportfreunde04.de"},"hinweise":{"parken":"Der Parkplatz am Vereinsgelände ist wegen des Neubaus des Funktionsgebäudes voraussichtlich bis Ende Januar 2027 gesperrt. Der Zugang zum Gelände ist über den Hintereingang am „Haus der Jugend“ (Pavillon) möglich.","parken_quelle":"App-News vom 21.07.2026","ferien":"In den hessischen Schulferien und an Feiertagen findet in der Regel kein Training statt. Ausnahmen sagt das Trainerteam an."},"oepnv":null,"anfahrt_hinweis":"Zugang zum Vereinsgelände derzeit über den Hintereingang am „Haus der Jugend“ (Pavillon); der Parkplatz ist wegen des Neubaus bis voraussichtlich Ende Januar 2027 gesperrt.","gruendung_jahr":1904,"anzahl_mannschaften":11,"karten":{"apple":"https://maps.apple.com/?q=Mainzer+Landstra%C3%9Fe+480,+60326+Frankfurt+am+Main","google":"https://www.google.com/maps/search/?api=1&query=Mainzer+Landstra%C3%9Fe+480%2C+60326+Frankfurt+am+Main"},"kalender_basis":"https://justolgay.github.io/speuzer-spielplan/"} (data/verein.json) und
+   {"_quelle":"appack public workbook API, Worksheet 6a1ec5fcf68a05bf129cdb9b (Kontakt der Geschäftsstelle), geholt am 2026-09-22 mit tools/appack-daten.mjs. Nur Adresse/Telefon/E-Mail/Website/Social; keine Personendaten, \"mobileNumber\" bewusst nicht übernommen. Öffnungszeiten werden seit 22.09.2026 nicht mehr übernommen (Entscheidung Olgay: es gibt keine festen Öffnungszeiten).","kontakt":{"address":" Postfach 190442 (postalisch)","postalCode":"60091","city":"Frankfurt","phoneNumber":"069 736868","email":"geschaeftsstelle@sportfreunde04.de","website":"https://www.sportfreunde04.de","insta":"https://www.instagram.com/speuzer_ffm/","face":"https://www.facebook.com/groups/223133414377924/"}} (data/geschaeftsstelle.json) – dieselbe Quelle
+   wie die Website, von tools/app-optik/tpl-bauen.mjs zur Bauzeit eingesetzt.
+   W9, Auftrag D: Gliederung wie die Website – Einleitung › Erreichbarkeit
+   (fester Satz, E-Mail, Telefon Geschäftsstelle, Telefon Platzwart) ›
+   Ansprechpartner nach Anliegen (Adresse in Zeile 2 statt Beschreibungstext)
+   › Anfahrt mit zwei gleich aufgebauten, dreizeiligen Adressblöcken
+   (Vereinsplatz / Bezirkssportanlage am Rebstock) mit je einem Knopf "Route
+   planen" › ein gemeinsamer Kasten "Zugang & Parken" + "Bus & Bahn" ›
+   Postanschrift und Social im selben Label-Stil wie "Erreichbarkeit". */
 
 .visually-hidden {
   position: absolute;
@@ -302,18 +325,18 @@ summary::marker { content: ""; }
 
 .mail-link { display: inline-block; max-width: 100%; overflow-wrap: break-word; color: var(--blau-800); text-decoration: none; }
 
-.adresse-text {
+/* W9, Auftrag D: dreizeiliger Adressblock (Platzname / Straße Nr. / PLZ
+   Ort) für die beiden gleich aufgebauten Anfahrt-Karten. */
+.adresse-block {
   margin: 0 0 var(--sp-3);
   font-size: 15px;
-  font-weight: 600;
+  line-height: 1.5;
   overflow-wrap: break-word;
 }
 
-.aktionen--inline {
-  flex-direction: row;
-  flex-wrap: wrap;
-  margin-top: 0;
-  margin-bottom: var(--sp-4);
+.adresse-block strong {
+  display: block;
+  font-weight: 700;
 }
 
 .zeile__untertitel {
@@ -323,14 +346,39 @@ summary::marker { content: ""; }
   color: var(--ink-3);
   overflow-wrap: break-word;
 }
+
+/* W9-Nachprüfung D-app Nr. 6: gleicher Kartenabstand zwischen den beiden
+   Anfahrt-Karten wie bei anderen Kartengruppen der App (z. B.
+   .gruppen-liste auf Karneval_v3). */
+.anfahrt-liste {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+/* W9-Nachprüfung D-app Nr. 7: "Zugang & Parken"/"Bus & Bahn" als kleine
+   Zwischenüberschriften statt fetter Satzanfänge, wie die h3 im gleichen
+   Kasten auf der Website (kontakt.mjs). */
+.hinweis-untertitel {
+  margin: 0 0 var(--sp-2);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* W9-Nachprüfung D-app "neu_kaputt": der Hinweiskasten und die Karte
+   Postanschrift/Social klebten ohne Abstand aneinander. */
+.hinweis + .karte {
+  margin-top: var(--sp-4);
+}
 </style>
 </head>
 <body>
 <main class="inhalt">
 
-<h1 class="visually-hidden">Geschäftsstelle &amp; Anfahrt</h1>
+<h1 class="visually-hidden">Kontakt &amp; Anfahrt</h1>
 
-<p class="seitenkopf-lead">So erreichst du uns – per E-Mail an die passende Vereinsadresse oder telefonisch in der Geschäftsstelle.</p>
+<p class="seitenkopf-lead">So erreichst du uns.</p>
 
 <h2 class="abschnittstitel">Erreichbarkeit</h2>
 <div class="karte">
@@ -340,41 +388,51 @@ summary::marker { content: ""; }
     <dd><a class="mail-link" id="gs-mail-link" href="#"></a></dd>
     <dt>Telefon Geschäftsstelle</dt>
     <dd><a class="mail-link" id="gs-tel-link" href="#"></a></dd>
+    <dt>Telefon Platzwart</dt>
+    <dd><a class="mail-link" id="gs-tel-platzwart-link" href="#"></a></dd>
   </dl>
 </div>
 
-<h2 class="abschnittstitel">Anliegen</h2>
+<h2 class="abschnittstitel">Ansprechpartner nach Anliegen</h2>
 <div id="anliegen-liste" class="liste"></div>
 
 <h2 class="abschnittstitel">Anfahrt</h2>
-<div class="karte">
-  <p id="anfahrt-adresse" class="adresse-text"></p>
-  <div class="aktionen aktionen--inline">
-    <a id="route-apple-knopf" class="knopf knopf--leise" href="#" target="_blank" rel="noopener">Route in Apple Karten</a>
-    <a id="route-google-knopf" class="knopf knopf--leise" href="#" target="_blank" rel="noopener">Route in Google Maps</a>
+<div class="anfahrt-liste">
+  <div class="karte">
+    <p class="adresse-block"><strong>Vereinsplatz</strong><span id="anfahrt-vereinsplatz-strasse"></span><br><span id="anfahrt-vereinsplatz-ort"></span></p>
+    <div class="aktionen">
+      <a id="route-vereinsplatz-knopf" class="knopf knopf--leise" href="#" target="_blank" rel="noopener">Route planen</a>
+    </div>
   </div>
-  <a class="zeile" href="nav://sportfreunde04_Map_1783059375623">
-    <span class="zeile__text"><span class="zeile__titel">Karte anzeigen</span></span>
-    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
-  </a>
+
+  <div class="karte">
+    <p class="adresse-block"><strong>Bezirkssportanlage am Rebstock (SW&nbsp;Griesheim)</strong>Am Römerhof 9<br>60486&nbsp;Frankfurt am&nbsp;Main</p>
+    <p style="margin:0 0 var(--sp-3);">Hier spielen die Herren (und die A&#8209;Jugend) ihre Heimspiele.</p>
+    <div class="aktionen">
+      <a id="route-rebstock-knopf" class="knopf knopf--leise" href="#" target="_blank" rel="noopener">Route planen</a>
+    </div>
+  </div>
+</div>
+
+<div class="hinweis">
+  <p class="hinweis-untertitel">Zugang &amp; Parken</p>
+  <p id="anfahrt-zugang-text" style="margin:0;"></p>
+  <p class="hinweis-untertitel" style="margin-top:var(--sp-3);">Bus &amp; Bahn</p>
+  <p style="margin:0;">Verbindung in der <a class="mail-link" href="https://www.rmv.de" target="_blank" rel="noopener">RMV&#8209;Auskunft</a>.</p>
 </div>
 
 <div class="karte">
-  <p class="beschreibung-titel" style="font-size:16px;margin:0 0 var(--sp-2);">Postanschrift</p>
-  <p id="anfahrt-postanschrift" class="adresse-text" style="margin-bottom:0;"></p>
-</div>
-
-<div class="hinweis">
-  <p><strong>Zugang &amp; Parken.</strong> <span id="anfahrt-zugang-text"></span></p>
-</div>
-<div class="hinweis">
-  <p>Mit Bus und Bahn: <a href="https://www.rmv.de" target="_blank" rel="noopener">Verbindung in der RMV-Auskunft</a></p>
-</div>
-<div class="hinweis">
-  <p id="anfahrt-rebstock-text"></p>
-  <div class="aktionen" style="margin-top:var(--sp-3);">
-    <a id="route-rebstock-knopf" class="knopf knopf--leise" href="#" target="_blank" rel="noopener">Route</a>
-  </div>
+  <dl class="angaben">
+    <dt>Verein</dt>
+    <dd id="anfahrt-verein"></dd>
+    <dt>Postanschrift</dt>
+    <dd id="anfahrt-postanschrift"></dd>
+    <dt>Social</dt>
+    <dd>
+      <p style="margin:0;"><a class="mail-link" id="anfahrt-instagram-link" href="#" rel="noopener" target="_blank">Instagram @speuzer_ffm</a></p>
+      <p style="margin:4px 0 0;"><a class="mail-link" id="anfahrt-facebook-link" href="#" rel="noopener" target="_blank">Facebook-Gruppe</a></p>
+    </dd>
+  </dl>
 </div>
 
 <p class="fuss">F.F.V. Sportfreunde 04 · Vereins-App</p>
@@ -387,9 +445,17 @@ summary::marker { content: ""; }
 (function () {
   "use strict";
 
-  var VEREIN = {"name_register":"Frankfurter Fußballverein Sportfreunde 1904 e. V.","name_kurz":"FFV Sportfreunde 04","spitzname":"Speuzer","gegruendet":"15. Mai 1904","gruendungsname":"Frankfurter FC Britannia","umbenannt":"1919","stadtteil":"Gallus","sportstaette":{"strasse":"Mainzer Landstraße 480","plz":"60326","ort":"Frankfurt am Main"},"post":{"postfach":"Postfach 190442","plz":"60091","ort":"Frankfurt am Main"},"mail":"geschaeftsstelle@sportfreunde04.de","tel_geschaeftsstelle":"+49 69 736868","tel_platzwart":"+49 69 732193","register":"Amtsgericht Frankfurt am Main, VR 4727","vorsitz":["Melanie Seipp (1. Vorsitzende)","Uwe Korndörfer (2. Vorsitzender)"],"vertretung":["Melanie Seipp (1. Vorsitzende)","Uwe Korndörfer (2. Vorsitzender)"],"instagram":"https://www.instagram.com/speuzer_ffm/","facebook":"https://www.facebook.com/groups/223133414377924/","fanshop":"https://sportfreunde04.fan12.de/","teamshop":"https://www.11teamsports.com/de-de/clubshop/frankfurter-fussballvereine-sportfreunde-04/","mails":{"jugendleitung":"jugendleitung@sportfreunde04.de","kassierer":"kassierer@sportfreunde04.de","kinderschutz":"kinderschutzbeauftragter@sportfreunde04.de","karneval":"karnevalabteilung@sportfreunde04.de","senioren":"spielausschuss_senioren@sportfreunde04.de","vorstand":"vorstand@sportfreunde04.de"},"hinweise":{"parken":"Der Parkplatz am Vereinsgelände ist wegen des Neubaus des Funktionsgebäudes voraussichtlich bis Ende Januar 2027 gesperrt. Der Zugang zum Gelände ist über den Hintereingang am „Haus der Jugend“ (Pavillon) möglich.","parken_quelle":"App-News vom 21.07.2026","ferien":"In den hessischen Schulferien und an Feiertagen findet in der Regel kein Training statt. Ausnahmen sagt das Trainerteam an."},"oepnv":null,"anfahrt_hinweis":"Zugang zum Vereinsgelände derzeit über den Hintereingang am „Haus der Jugend“ (Pavillon); der Parkplatz ist wegen des Neubaus bis voraussichtlich Ende Januar 2027 gesperrt.","gruendung_jahr":1904,"anzahl_mannschaften":11,"karten":{"apple":"https://maps.apple.com/?q=Mainzer+Landstra%C3%9Fe+480,+60326+Frankfurt+am+Main","google":"https://www.google.com/maps/search/?api=1&query=Mainzer+Landstra%C3%9Fe+480%2C+60326+Frankfurt+am+Main"},"kalender_basis":"https://justolgay.github.io/speuzer-spielplan/"};
-  var GESCHAEFTSSTELLE = {"_quelle":"appack public workbook API, Worksheet 6a1ec5fcf68a05bf129cdb9b (Kontakt der Geschäftsstelle), geholt am 2026-09-22 mit tools/appack-daten.mjs. Nur Adresse/Telefon/E-Mail/Website/Social; keine Personendaten, \"mobileNumber\" bewusst nicht übernommen. Öffnungszeiten werden seit 22.09.2026 nicht mehr übernommen (Entscheidung Olgay: es gibt keine festen Öffnungszeiten).","kontakt":{"address":" Postfach 190442 (postalisch)","postalCode":"60091","city":"Frankfurt","phoneNumber":"069-736868","email":"geschaeftsstelle@sportfreunde04.de","website":"https://www.sportfreunde04.de","insta":"https://www.instagram.com/speuzer_ffm/","face":"https://www.facebook.com/groups/223133414377924/"}};
+  var VEREIN = {"name_register":"Frankfurter Fußballverein Sportfreunde 1904 e. V.","name_kurz":"FFV Sportfreunde 04","spitzname":"Speuzer","gegruendet":"15. Mai 1904","gruendungsname":"Frankfurter FC Britannia","umbenannt":"1919","stadtteil":"Gallus","sportstaette":{"strasse":"Mainzer Landstraße 480","plz":"60326","ort":"Frankfurt am Main"},"post":{"postfach":"Postfach 190442","plz":"60091","ort":"Frankfurt am Main"},"mail":"geschaeftsstelle@sportfreunde04.de","tel_geschaeftsstelle":"069 736868","tel_platzwart":"069 732193","register":"Amtsgericht Frankfurt am Main, VR 4727","vorsitz":["Melanie Seipp (1. Vorsitzende)","Uwe Korndörfer (2. Vorsitzender)"],"vertretung":["Melanie Seipp (1. Vorsitzende)","Uwe Korndörfer (2. Vorsitzender)"],"instagram":"https://www.instagram.com/speuzer_ffm/","facebook":"https://www.facebook.com/groups/223133414377924/","fanshop":"https://sportfreunde04.fan12.de/","teamshop":"https://www.11teamsports.com/de-de/clubshop/frankfurter-fussballvereine-sportfreunde-04/","mails":{"jugendleitung":"jugendleitung@sportfreunde04.de","kassierer":"kassierer@sportfreunde04.de","kinderschutz":"kinderschutzbeauftragter@sportfreunde04.de","karneval":"karnevalabteilung@sportfreunde04.de","senioren":"spielausschuss_senioren@sportfreunde04.de","vorstand":"vorstand@sportfreunde04.de"},"hinweise":{"parken":"Der Parkplatz am Vereinsgelände ist wegen des Neubaus des Funktionsgebäudes voraussichtlich bis Ende Januar 2027 gesperrt. Der Zugang zum Gelände ist über den Hintereingang am „Haus der Jugend“ (Pavillon) möglich.","parken_quelle":"App-News vom 21.07.2026","ferien":"In den hessischen Schulferien und an Feiertagen findet in der Regel kein Training statt. Ausnahmen sagt das Trainerteam an."},"oepnv":null,"anfahrt_hinweis":"Zugang zum Vereinsgelände derzeit über den Hintereingang am „Haus der Jugend“ (Pavillon); der Parkplatz ist wegen des Neubaus bis voraussichtlich Ende Januar 2027 gesperrt.","gruendung_jahr":1904,"anzahl_mannschaften":11,"karten":{"apple":"https://maps.apple.com/?q=Mainzer+Landstra%C3%9Fe+480,+60326+Frankfurt+am+Main","google":"https://www.google.com/maps/search/?api=1&query=Mainzer+Landstra%C3%9Fe+480%2C+60326+Frankfurt+am+Main"},"kalender_basis":"https://justolgay.github.io/speuzer-spielplan/"};
+  var GESCHAEFTSSTELLE = {"_quelle":"appack public workbook API, Worksheet 6a1ec5fcf68a05bf129cdb9b (Kontakt der Geschäftsstelle), geholt am 2026-09-22 mit tools/appack-daten.mjs. Nur Adresse/Telefon/E-Mail/Website/Social; keine Personendaten, \"mobileNumber\" bewusst nicht übernommen. Öffnungszeiten werden seit 22.09.2026 nicht mehr übernommen (Entscheidung Olgay: es gibt keine festen Öffnungszeiten).","kontakt":{"address":" Postfach 190442 (postalisch)","postalCode":"60091","city":"Frankfurt","phoneNumber":"069 736868","email":"geschaeftsstelle@sportfreunde04.de","website":"https://www.sportfreunde04.de","insta":"https://www.instagram.com/speuzer_ffm/","face":"https://www.facebook.com/groups/223133414377924/"}};
   var kontakt = (GESCHAEFTSSTELLE && GESCHAEFTSSTELLE.kontakt) || {};
+
+  // W9, Auftrag D (Abschnitt 4): "Frankfurt am Main" bzw. "PLZ Ort" nie
+  // trennen – alle Leerzeichen der Orts-/Straßenangabe durch geschützte
+  // Leerzeichen ersetzen (wie staffelLesbar()/jahrgangPraefix() an anderer
+  // Stelle in der App).
+  function nieTrennen(text) {
+    return String(text || "").replace(/ /g, " ");
+  }
 
   // ---------- Erreichbarkeit ----------
 
@@ -403,19 +469,29 @@ summary::marker { content: ""; }
   gsTelLink.href = "tel:" + telefon.replace(/[^\d+]/g, "");
   gsTelLink.textContent = telefon;
 
-  // ---------- Anliegen (wie ansprechpartnerAbschnitt() in kontakt.mjs,
-  // als kompakte Liste statt Karten mit eigenem Knopf – W8, Befund 2) ----------
+  var telefonPlatzwart = VEREIN.tel_platzwart || "";
+  var gsTelPlatzwartLink = document.getElementById("gs-tel-platzwart-link");
+  gsTelPlatzwartLink.href = "tel:" + telefonPlatzwart.replace(/[^\d+]/g, "");
+  gsTelPlatzwartLink.textContent = telefonPlatzwart;
+
+  // ---------- Ansprechpartner nach Anliegen (wie ansprechpartnerAbschnitt()
+  // in kontakt.mjs, als kompakte Liste statt Karten mit eigenem Knopf – W8,
+  // Befund 2). W9, Auftrag D: Zeile 2 zeigt jetzt die Adresse selbst statt
+  // eines Beschreibungstexts (wie auf der Website), Begriffe nach
+  // Entscheidung 14 ("Kinder- und Jugendschutz", "Sponsoren & Partner"),
+  // dazu ein neuer Eintrag "Vorstand". ----------
 
   var mails = VEREIN.mails || {};
   var ANLIEGEN = [
-    { titel: "Allgemeine Fragen", text: "Alles, was sonst nirgends passt – die Geschäftsstelle leitet weiter.", mail: VEREIN.mail, betreff: "Anfrage über die Website" },
-    { titel: "Probetraining & Jugend", text: "Für Kinder und Jugendliche von der A- bis zur G-Jugend.", mail: mails.jugendleitung, betreff: "Probetraining" },
-    { titel: "Herren & Senioren", text: "Fragen zur 1. Herrenmannschaft, Spielausschuss und Seniorenfußball.", mail: mails.senioren, betreff: "Herren" },
-    { titel: "Karnevalabteilung", text: "Die Schnauzer: Gruppen, Übungsstunden, Auftritte.", mail: mails.karneval, betreff: "Karnevalabteilung" },
-    { titel: "Beiträge & Rechnungen", text: "Beiträge, Lastschrift, Bescheinigungen für Bildung und Teilhabe.", mail: mails.kassierer, betreff: "Beiträge" },
-    { titel: "Kinderschutz", text: "Vertraulicher Kontakt zum Kinderschutzbeauftragten.", mail: mails.kinderschutz, betreff: "" },
-    { titel: "Sponsoring & Partner", text: "Trikot- und Bandenwerbung, Partnerschaften mit der Jugendabteilung.", mail: VEREIN.mail, betreff: "Sponsoring" },
-    { titel: "Trainer- und Ehrenamt", text: "Mitmachen als Trainer, Betreuer oder im Vorstand.", mail: VEREIN.mail, betreff: "Ich helfe gern" }
+    { titel: "Allgemeine Fragen", mail: VEREIN.mail, betreff: "Anfrage über die Website" },
+    { titel: "Vorstand", mail: mails.vorstand, betreff: "Vorstand" },
+    { titel: "Probetraining & Jugend", mail: mails.jugendleitung, betreff: "Probetraining" },
+    { titel: "Herren & Senioren", mail: mails.senioren, betreff: "Herren" },
+    { titel: "Karnevalabteilung", mail: mails.karneval, betreff: "Karnevalabteilung" },
+    { titel: "Beiträge & Rechnungen", mail: mails.kassierer, betreff: "Beiträge" },
+    { titel: "Kinder- und Jugendschutz", mail: mails.kinderschutz, betreff: "" },
+    { titel: "Sponsoren & Partner", mail: VEREIN.mail, betreff: "Sponsoring" },
+    { titel: "Trainer- und Ehrenamt", mail: VEREIN.mail, betreff: "Ich helfe gern" }
   ];
 
   var anliegenListe = document.getElementById("anliegen-liste");
@@ -433,7 +509,7 @@ summary::marker { content: ""; }
     textSpan.appendChild(titelSpan);
     var untertitelSpan = document.createElement("span");
     untertitelSpan.className = "zeile__untertitel";
-    untertitelSpan.textContent = a.text;
+    untertitelSpan.textContent = a.mail;
     textSpan.appendChild(untertitelSpan);
     zeile.appendChild(textSpan);
     var pfeil = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -453,25 +529,36 @@ summary::marker { content: ""; }
     anliegenListe.appendChild(zeile);
   });
 
-  // ---------- Anfahrt ----------
+  // ---------- Anfahrt (W9, Auftrag D: zwei gleich aufgebaute, dreizeilige
+  // Adressblöcke mit je einem Knopf "Route planen" statt Apple/Google
+  // nebeneinander bzw. der Rebstock-Adresse als bloßer Hinweistext) ----------
 
   function googleMapsUrl(adresse) {
     return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(adresse);
   }
 
   var s = VEREIN.sportstaette || {};
-  var sportstaetteAdresse = (s.strasse || "") + ", " + (s.plz || "") + " " + (s.ort || "");
-  document.getElementById("anfahrt-adresse").textContent = sportstaetteAdresse;
-  document.getElementById("route-apple-knopf").href = VEREIN.karten && VEREIN.karten.apple ? VEREIN.karten.apple : "https://maps.apple.com/?q=" + encodeURIComponent(sportstaetteAdresse);
-  document.getElementById("route-google-knopf").href = VEREIN.karten && VEREIN.karten.google ? VEREIN.karten.google : googleMapsUrl(sportstaetteAdresse);
+  document.getElementById("anfahrt-vereinsplatz-strasse").textContent = s.strasse || "";
+  document.getElementById("anfahrt-vereinsplatz-ort").textContent = nieTrennen((s.plz || "") + " " + (s.ort || ""));
+  var vereinsplatzAdresse = (s.strasse || "") + ", " + (s.plz || "") + " " + (s.ort || "");
+  document.getElementById("route-vereinsplatz-knopf").href = VEREIN.karten && VEREIN.karten.google ? VEREIN.karten.google : googleMapsUrl(vereinsplatzAdresse);
+
+  document.getElementById("route-rebstock-knopf").href = googleMapsUrl("Am Römerhof 9, 60486 Frankfurt am Main");
+
+  // W9-Nachprüfung D-app Nr. 7: eigene "Verein"-Zeile wie postAbschnitt() in
+  // kontakt.mjs (mitGeschuetztemVereinsnamen) – data/verein.json koppelt
+  // "1904 e. V." schon mit geschützten Leerzeichen, nur die Lücke zwischen
+  // "Sportfreunde" und "1904" ist noch ein normales Leerzeichen.
+  document.getElementById("anfahrt-verein").textContent =
+    (VEREIN.name_register || "").replace("Sportfreunde 1904", "Sportfreunde 1904");
 
   var post = VEREIN.post || {};
-  document.getElementById("anfahrt-postanschrift").textContent = (post.postfach || "") + ", " + (post.plz || "") + " " + (post.ort || "");
+  document.getElementById("anfahrt-postanschrift").innerHTML = (post.postfach || "") + "<br>" + nieTrennen((post.plz || "") + " " + (post.ort || ""));
 
   document.getElementById("anfahrt-zugang-text").textContent = VEREIN.anfahrt_hinweis || "";
 
-  document.getElementById("anfahrt-rebstock-text").textContent = "Die Herren und die A-Jugend spielen ihre Heimspiele auf der Anlage von SW Griesheim am Rebstock, Am Römerhof 9, 60486 Frankfurt am Main.";
-  document.getElementById("route-rebstock-knopf").href = googleMapsUrl("Am Römerhof 9, 60486 Frankfurt am Main");
+  document.getElementById("anfahrt-instagram-link").href = VEREIN.instagram || "";
+  document.getElementById("anfahrt-facebook-link").href = VEREIN.facebook || "";
 })();
 </script>
 </body>

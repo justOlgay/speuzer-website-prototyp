@@ -170,7 +170,15 @@ svg { display: block; flex: 0 0 auto; }
   text-transform: uppercase;
   color: var(--blau-950);
   margin: var(--sp-6) 0 var(--sp-3);
+  /* W9, Auftrag D (Entscheidung 13, App-weit): Überschriften nie
+     automatisch trennen. */
+  hyphens: manual;
+  text-wrap: balance;
 }
+
+/* W9, Auftrag D (Entscheidung 13, App-weit): Fließtext mit ausgewogenerem
+   Umbruch (unterstützende Browser; ohne Unterstützung normaler Umbruch). */
+p { text-wrap: pretty; }
 
 .inhalt > .abschnittstitel:first-child { margin-top: 0; }
 
@@ -204,6 +212,17 @@ summary::marker { content: ""; }
   text-decoration: none;
   border: none;
   cursor: pointer;
+}
+
+/* W9-Nachprüfung D-app Nr. 5: ein <button class="knopf"> erbt ohne
+   font-family: inherit nicht die App-Schrift (User-Agent-Standard, z. B.
+   Arial), anders als ein <a class="knopf"> – "font: inherit" setzt Familie/
+   Größe/Gewicht zurück, deshalb Gewicht/Größe direkt danach wie .knopf
+   erneut gesetzt. */
+button.knopf {
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .knopf--leise {
@@ -254,13 +273,19 @@ summary::marker { content: ""; }
   text-align: center;
 }
 
-/* Ueber-uns_v3.tpl – seitenspezifisch (C2). Statischer Inhalt (keine
-   Workbook-Aufrufe): Text aus der heutigen Workspace-Seite "Über uns.html"
-   und docs/ws/verein.html, Zahlen 11/
-   5 werden von tools/app-optik/tpl-bauen.mjs zur
-   Bauzeit aus data/verein.json bzw. data/karneval.json eingesetzt (kein
-   appack-FreeMarker-Ausdruck an dieser Stelle, siehe Kopfkommentar von
-   tpl-bauen.mjs). */
+/* Ueber-uns_v3.tpl – seitenspezifisch (C2). W9, Auftrag D: Einleitung und
+   Gliederung wie die Website-Seite "Über uns"
+   (src/seiten/verein/ueber-uns.mjs) – eigene Einleitung statt der Verein-Tab-
+   Einleitung, ein Fließtext-Block (Geschichte, Zahlen-Absatz, Leitsatz,
+   Downloads) ohne die frühere Doppel-Kennzahl "Gründung 1904"/"1904
+   gegründet", "Der Verein in Zahlen" jetzt mit denselben vier Werten wie die
+   Website, "Kinder- und Jugendschutz" als eigener Abschnitt mit Personenkarte
+   (wie Vorstand/Karneval) statt einer bloßen Verweiszeile. Zahlen
+   11/5 werden von
+   tools/app-optik/tpl-bauen.mjs zur Bauzeit aus data/verein.json bzw.
+   data/karneval.json eingesetzt, [{"name":"Melanie Seipp","funktion":"1. Vorsitzende","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-melanie-seipp","bytes":525138}},{"name":"Uwe Korndörfer","funktion":"2. Vorsitzender","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-uwe-korndorfer","bytes":517113}},{"name":"Wolfgang Schirmer","funktion":"1. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-wolfgang-schirmer","bytes":495840}},{"name":"Bernhard Henrich","funktion":"2. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-bernhard-henrich","bytes":135549}},{"name":"Ralf Schwager","funktion":"1. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-ralf-schwager","bytes":112402}},{"name":"Olgay Özkan","funktion":"2. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-olgay-ozkan","bytes":60038}},{"name":"Marcel Hogg","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-marcel-hogg","bytes":125052}},{"name":"Vassilios Miamis","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-vassilios-miamis","bytes":215395}},{"name":"Florian Müller","funktion":"Kinderschutzbeauftragter","mail":"kinderschutzbeauftragter@sportfreunde04.de","foto":{"quelle":"vorstand-florian-muller","bytes":69465}},{"name":null,"funktion":"Schriftführer","mail":null,"foto":null,"hinweis":"nicht besetzt"},{"name":"Wolfgang Krönung","funktion":"Sportliche Leitung Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Christine Rothe","funktion":"Spielausschuss Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Patrick Krösche","funktion":"Abteilungsleiter Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":{"quelle":"vorstand-patrick-krosche","bytes":221052}},{"name":"Sigrid Weber","funktion":"Kassiererin Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null},{"name":"Bettina Leven-Grieb","funktion":"Schriftführerin Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null}] (Kinderschutzbeauftragter)
+   wie auf den anderen Vereinsseiten (kein appack-FreeMarker-Ausdruck an
+   dieser Stelle, siehe Kopfkommentar von tpl-bauen.mjs). */
 
 .visually-hidden {
   position: absolute;
@@ -274,35 +299,21 @@ summary::marker { content: ""; }
   border: 0;
 }
 
-.abschnittstitel + .karte { margin-top: 0; }
-
-.ueber-uns-titel {
-  margin: 0 0 var(--sp-2);
-  font-family: var(--font-head);
-  font-weight: 700;
-  font-size: 26px;
-  text-transform: uppercase;
-  color: var(--blau-950);
-}
-
-.ueber-uns-lead {
-  margin: 0;
-  font-size: 15px;
-  color: var(--ink-2);
-}
-
 .karte p { margin: 0 0 var(--sp-2); font-size: 14px; color: var(--ink-2); }
-.karte p:last-child { margin-bottom: 0; }
+.karte p:last-of-type { margin-bottom: 0; }
 
-.leitsatz-quelle {
-  margin: 0 0 4px;
+.karte p.leitsatz-quelle {
+  margin: var(--sp-3) 0 4px;
   font-size: 12px;
   color: var(--ink-3);
 }
 
 /* W8, Befund 7: Zitat gut lesbar (normale Fließschrift, nicht schmal
-   kursiv) statt der kondensierten, kursiven Kopfschrift. */
-.leitsatz {
+   kursiv) statt der kondensierten, kursiven Kopfschrift. Selektor ".karte
+   p.leitsatz" (statt nur ".leitsatz"), damit die Regel ".karte p" (Farbe/
+   Schriftgröße) sie nicht überstimmt (beide gleich spezifisch wäre sonst
+   die spätere Regel unwirksam). */
+.karte p.leitsatz {
   font-family: var(--font-text);
   font-weight: 600;
   font-size: 16px;
@@ -310,11 +321,13 @@ summary::marker { content: ""; }
   color: var(--blau-950);
 }
 
+.liste--eingebettet { margin-top: var(--sp-3); }
+.liste--eingebettet .zeile:last-child { border-bottom: none; }
+
 .zahlen-raster {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--sp-3);
-  margin-bottom: var(--sp-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-4) var(--sp-3);
 }
 
 .zahl { min-width: 0; text-align: center; }
@@ -333,6 +346,39 @@ summary::marker { content: ""; }
   color: var(--ink-3);
   overflow-wrap: break-word;
 }
+
+.person-mini {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin: var(--sp-4) 0;
+}
+
+.person-mini__bild {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r-pill);
+  object-fit: cover;
+  object-position: 50% 0%;
+  background: var(--blau-50);
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+.person-mini__bild--platzhalter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--blau-800);
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.person-mini__text { display: flex; flex-direction: column; min-width: 0; }
+.person-mini__name { font-weight: 600; font-size: 15px; overflow-wrap: break-word; }
+.person-mini__funktion { margin: 2px 0 var(--sp-1); font-size: 13px; color: var(--ink-3); overflow-wrap: break-word; }
+.person-mini__link { color: var(--blau-700); font-weight: 600; font-size: 13px; text-decoration: none; }
 </style>
 </head>
 <body>
@@ -340,14 +386,35 @@ summary::marker { content: ""; }
 
 <h1 class="visually-hidden">Über uns</h1>
 
-<p class="seitenkopf-lead">Frankfurter Fußballverein Sportfreunde 1904&nbsp;e.&nbsp;V. – im Gallus sagt man einfach „die Speuzer“.</p>
+<p class="seitenkopf-lead">Seit 1904 im Frankfurter Gallus zu Hause: unsere Geschichte, unsere Werte und der Verein in Zahlen.</p>
 
-<h2 class="abschnittstitel">Gründung 1904</h2>
 <div class="karte">
-  <p>Gegründet wurde der Verein am 15. Mai 1904 als Frankfurter FC Britannia. Nach dem Ersten Weltkrieg erhielt er 1919 seinen heutigen Namen. Der sportliche Höhepunkt war die Saison 1955/56 in der 1. Amateurliga Hessen; seit den 1960er Jahren spielen die Sportfreunde in den Klassen des Fußballkreises Frankfurt.</p>
+  <p>Gegründet wurde der Verein am 15.&nbsp;Mai 1904 als Frankfurter FC Britannia. Nach dem Ersten Weltkrieg erhielt er 1919 seinen heutigen Namen. Der sportliche Höhepunkt war die Saison 1955/56 in der 1.&nbsp;Amateurliga Hessen; seit den 1960er Jahren spielen die Sportfreunde in den Klassen des Fußballkreises Frankfurt.</p>
+  <!-- W9-Nachprüfung D-app Nr. 17: "elf"/"fünf" wörtlich wie
+       src/seiten/verein/ueber-uns.mjs (nicht die __ANZAHL_…__-Platzhalter
+       weiter unten in "Der Verein in Zahlen" – dort bleiben Ziffern, wie auf
+       der Website). Heutiger Datenstand (data/verein.json/karneval.json):
+       11 Mannschaften, 5 Karnevalgruppen. -->
+  <p>Heute stellt der Verein elf Fußballmannschaften – von der 1.&nbsp;Herrenmannschaft bis zur G&#8209;Jugend – und die Karnevalabteilung „Die Schnauzer“ mit fünf Gruppen. Trainiert und gespielt wird auf dem eigenen Platz an der Mainzer Landstraße 480. Die Herren und die A&#8209;Jugend tragen ihre Heimspiele auf der Bezirkssportanlage am Rebstock (SW&nbsp;Griesheim), Am Römerhof 9, 60486&nbsp;Frankfurt am&nbsp;Main aus.</p>
+  <p class="leitsatz-quelle">Unser Leitsatz aus der Vereinsphilosophie:</p>
+  <p class="leitsatz">„Wir wollen nicht nur erfolgreiche Mannschaften entwickeln, sondern erfolgreiche Menschen und einen starken Verein für kommende Generationen.“</p>
+  <p>Unsere Werte sind Gemeinschaft, Respekt, Wertschätzung, Verantwortung, Fairness, Entwicklung und Kinderschutz.</p>
+  <div class="aktionen">
+    <a class="knopf" href="nav://sportfreunde04_TextImage_1789020275334">Vereinschronik lesen</a>
+  </div>
+  <div class="liste liste--eingebettet">
+    <a class="zeile" href="https://cdn.appack.de/sportfreunde04/pdf/Chronik-FFV-Sportfreunde-04-2026.pdf" target="_blank" rel="noopener">
+      <span class="zeile__text"><span class="zeile__titel">Chronik (PDF, 53 Seiten)</span></span>
+      <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+    </a>
+    <a class="zeile" href="https://cdn.appack.de/sportfreunde04/pdf/vereinsphilosophie-und-zukunftskonzept.pdf" target="_blank" rel="noopener">
+      <span class="zeile__text"><span class="zeile__titel">Vereinsphilosophie (PDF, 50 Seiten)</span></span>
+      <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+    </a>
+  </div>
 </div>
 
-<h2 class="abschnittstitel">Die Speuzer heute</h2>
+<h2 class="abschnittstitel">Der Verein in Zahlen</h2>
 <div class="karte">
   <div class="zahlen-raster">
     <div class="zahl">
@@ -356,40 +423,34 @@ summary::marker { content: ""; }
     </div>
     <div class="zahl">
       <span class="zahl__wert">11</span>
-      <span class="zahl__label">Mannschaften</span>
+      <span class="zahl__label">Fußballmannschaften</span>
     </div>
     <div class="zahl">
       <span class="zahl__wert">5</span>
       <span class="zahl__label">Karnevalgruppen</span>
     </div>
+    <div class="zahl">
+      <span class="zahl__wert">2</span>
+      <span class="zahl__label">Abteilungen</span>
+    </div>
   </div>
-  <p>Heute stellt der Verein 11 Fußballmannschaften – von der 1. Herrenmannschaft bis zur G-Jugend – und die Karnevalabteilung „Die Schnauzer“ mit 5 Gruppen. Trainiert und gespielt wird auf dem eigenen Platz an der Mainzer Landstraße 480; die Herren tragen ihre Heimspiele auf der Anlage am Rebstock aus.</p>
 </div>
 
-<h2 class="abschnittstitel">Unsere Werte</h2>
-<div class="karte">
-  <p class="leitsatz-quelle">Unser Leitsatz aus der Vereinsphilosophie:</p>
-  <p class="leitsatz">„Wir wollen nicht nur erfolgreiche Mannschaften entwickeln, sondern erfolgreiche Menschen und einen starken Verein für kommende Generationen.“</p>
-  <p>Unsere Werte sind Gemeinschaft, Respekt, Wertschätzung, Verantwortung, Fairness, Entwicklung und Kinderschutz.</p>
-</div>
-
-<div class="liste">
-  <a class="zeile" href="nav://sportfreunde04_TextImage_1789020275334">
-    <span class="zeile__text"><span class="zeile__titel">Vereinschronik lesen</span></span>
-    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
-  </a>
-  <a class="zeile" href="https://cdn.appack.de/sportfreunde04/pdf/Chronik-FFV-Sportfreunde-04-2026.pdf" target="_blank" rel="noopener">
-    <span class="zeile__text"><span class="zeile__titel">Chronik als PDF (53 Seiten)</span></span>
-    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
-  </a>
-  <a class="zeile" href="https://cdn.appack.de/sportfreunde04/pdf/vereinsphilosophie-und-zukunftskonzept.pdf" target="_blank" rel="noopener">
-    <span class="zeile__text"><span class="zeile__titel">Vereinsphilosophie lesen (PDF, 50 Seiten)</span></span>
-    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
-  </a>
-  <a class="zeile" href="nav://sportfreunde04_Application_1783064196311">
-    <span class="zeile__text"><span class="zeile__titel">Kinder- und Jugendschutz</span></span>
-    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
-  </a>
+<h2 class="abschnittstitel">Kinder- und Jugendschutz</h2>
+<div class="karte fluss">
+  <p style="margin:0;">Das Wohl von Kindern und Jugendlichen steht für uns über allem. Unser Präventions- und Schutzkonzept sowie die Vorgaben von HFV und DFB bilden den verbindlichen Rahmen.</p>
+  <div id="kinderschutz-person"></div>
+  <!-- W9-Nachprüfung D-app Nr. 17: Download-Zeile im selben Stil wie
+       "Chronik (PDF, 53 Seiten)" oben (kinderschutzAbschnitt() in
+       ueber-uns.mjs stellte aus demselben Grund von einem Umrandungsknopf
+       auf denselben Download-Baustein um wie Chronik/Vereinsphilosophie –
+       sonst zwei Formen für dieselbe Aufgabe auf einer Seite). -->
+  <div class="liste liste--eingebettet">
+    <a class="zeile" href="https://cdn.appack.de/sportfreunde04/pdf/Pr%C3%A4ventions-%20und%20Schutzkonzept%20FFV%20Sportfreunde%2004%20Stand%20Mai%202025%20(1).pdf" target="_blank" rel="noopener">
+      <span class="zeile__text"><span class="zeile__titel">Präventions- und Schutzkonzept (PDF)</span></span>
+      <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+    </a>
+  </div>
 </div>
 
 <p class="fuss">F.F.V. Sportfreunde 04 · Vereins-App</p>
@@ -399,8 +460,112 @@ summary::marker { content: ""; }
 <script src="https://cdn.appack.de/modules/common/jquery-3.4.1.min.js"></script>
 <script src="https://cdn.appack.de/modules/appack.workbook-1.4.1.js"></script>
 <script>
-// Ueber-uns_v3.tpl lädt keine Worksheets zur Laufzeit (statischer Inhalt,
-// siehe C2-Spezifikation Abschnitt 4) – kein Skript nötig.
+(function () {
+  "use strict";
+
+  var VORSTAND = [{"name":"Melanie Seipp","funktion":"1. Vorsitzende","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-melanie-seipp","bytes":525138}},{"name":"Uwe Korndörfer","funktion":"2. Vorsitzender","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-uwe-korndorfer","bytes":517113}},{"name":"Wolfgang Schirmer","funktion":"1. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-wolfgang-schirmer","bytes":495840}},{"name":"Bernhard Henrich","funktion":"2. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-bernhard-henrich","bytes":135549}},{"name":"Ralf Schwager","funktion":"1. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-ralf-schwager","bytes":112402}},{"name":"Olgay Özkan","funktion":"2. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-olgay-ozkan","bytes":60038}},{"name":"Marcel Hogg","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-marcel-hogg","bytes":125052}},{"name":"Vassilios Miamis","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-vassilios-miamis","bytes":215395}},{"name":"Florian Müller","funktion":"Kinderschutzbeauftragter","mail":"kinderschutzbeauftragter@sportfreunde04.de","foto":{"quelle":"vorstand-florian-muller","bytes":69465}},{"name":null,"funktion":"Schriftführer","mail":null,"foto":null,"hinweis":"nicht besetzt"},{"name":"Wolfgang Krönung","funktion":"Sportliche Leitung Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Christine Rothe","funktion":"Spielausschuss Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Patrick Krösche","funktion":"Abteilungsleiter Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":{"quelle":"vorstand-patrick-krosche","bytes":221052}},{"name":"Sigrid Weber","funktion":"Kassiererin Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null},{"name":"Bettina Leven-Grieb","funktion":"Schriftführerin Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null}];
+  var ANSPRECHPARTNER_ID = "6a1ec5fcf68a05bf129cdb8b";
+
+  // Vorstandsporträts wie auf den übrigen Vereinsseiten (Vorstand_v3,
+  // Karneval_v3): dieselben, einheitlich zugeschnittenen Fotos, Rückfall auf
+  // das Ansprechpartner-Worksheet, sonst Initialen.
+  var FOTO_BASIS = "https://justolgay.github.io/speuzer-website-prototyp/assets/bilder/erzeugt/";
+  function vereinsFotoUrl(name) {
+    var p = (VORSTAND || []).find(function (x) { return x.name === name; });
+    return p && p.foto && p.foto.quelle ? FOTO_BASIS + p.foto.quelle + "-480.jpg" : null;
+  }
+
+  function textFeld(zeile, name) {
+    var v = zeile && zeile[name];
+    return (v === undefined || v === null) ? "" : String(v);
+  }
+
+  function bildUrlGueltig(url) {
+    return /^https?:\/\//i.test(url || "");
+  }
+
+  function initialenAus(name) {
+    var teile = String(name || "").trim().split(/\s+/).filter(Boolean);
+    if (!teile.length) return "";
+    if (teile.length === 1) return teile[0].slice(0, 1).toUpperCase();
+    return (teile[0].slice(0, 1) + teile[teile.length - 1].slice(0, 1)).toUpperCase();
+  }
+
+  function ladeWorkbook(id) {
+    if (!window.Workbook || typeof Workbook.load !== "function") {
+      return Promise.reject(new Error("Workbook-API fehlt"));
+    }
+    return Workbook.load({ workbook: id, filter: {}, offset: 0, limit: 5000, sort: "_id", direction: "asc" })
+      .then(function (rows) { return Array.isArray(rows) ? rows : []; });
+  }
+
+  function findeBildFuerName(ansprechpartner, name) {
+    for (var i = 0; i < ansprechpartner.length; i++) {
+      if (textFeld(ansprechpartner[i], "ansName") === name) {
+        var url = textFeld(ansprechpartner[i], "ansImg");
+        if (bildUrlGueltig(url)) return url;
+      }
+    }
+    return null;
+  }
+
+  var beauftragter = (VORSTAND || []).find(function (p) { return p.funktion === "Kinderschutzbeauftragter"; });
+  if (beauftragter) {
+    var karte = document.createElement("div");
+    karte.className = "person-mini";
+
+    var kreis = document.createElement("span");
+    kreis.className = "person-mini__bild person-mini__bild--platzhalter";
+    kreis.setAttribute("aria-hidden", "true");
+    kreis.textContent = initialenAus(beauftragter.name);
+    karte.appendChild(kreis);
+
+    var inhalt = document.createElement("span");
+    inhalt.className = "person-mini__text";
+    var name = document.createElement("span");
+    name.className = "person-mini__name";
+    name.textContent = beauftragter.name;
+    inhalt.appendChild(name);
+    var funktion = document.createElement("span");
+    funktion.className = "person-mini__funktion";
+    funktion.textContent = beauftragter.funktion;
+    inhalt.appendChild(funktion);
+    if (beauftragter.mail) {
+      var mail = document.createElement("a");
+      mail.className = "person-mini__link";
+      mail.href = "mailto:" + beauftragter.mail;
+      mail.textContent = "E-Mail schreiben ›";
+      inhalt.appendChild(mail);
+    }
+    karte.appendChild(inhalt);
+
+    document.getElementById("kinderschutz-person").appendChild(karte);
+
+    function zeigeBild(bildUrl) {
+      if (!bildUrl) return;
+      var bild = document.createElement("img");
+      bild.className = "person-mini__bild";
+      bild.src = bildUrl;
+      bild.alt = "";
+      bild.loading = "lazy";
+      bild.addEventListener("error", function () {
+        if (bild.parentNode) bild.replaceWith(kreis);
+      });
+      kreis.replaceWith(bild);
+    }
+
+    var fotoUrl = vereinsFotoUrl(beauftragter.name);
+    if (fotoUrl) {
+      zeigeBild(fotoUrl);
+    } else {
+      ladeWorkbook(ANSPRECHPARTNER_ID).then(function (ansprechpartner) {
+        zeigeBild(findeBildFuerName(ansprechpartner, beauftragter.name));
+      }).catch(function () {
+        // Kein Netz/CORS: Initialen bleiben stehen.
+      });
+    }
+  }
+})();
 </script>
 </body>
 </html>

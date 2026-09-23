@@ -1,16 +1,16 @@
-<h1 class="visually-hidden">Vorstand &amp; Kontakt</h1>
+<h1 class="visually-hidden">Vorstand</h1>
 
-<p class="seitenkopf-lead">Wer den Verein führt. Der Kontakt läuft über die Vereinsadressen – ohne private Handynummern.</p>
+<p class="seitenkopf-lead">Wer den Verein führt – erreichbar über die Vereinsadressen.</p>
+
+<div class="hinweis">
+  <dl id="vorstand-hinweis" class="angaben"></dl>
+</div>
 
 <div id="gruppen-bereich"></div>
 
-<div class="hinweis">
-  <p id="vorstand-hinweis"></p>
-</div>
-
 <div class="liste">
   <a class="zeile" href="nav://sportfreunde04_TextImage_1780401660324">
-    <span class="zeile__text"><span class="zeile__titel">Geschäftsstelle &amp; Anfahrt</span></span>
+    <span class="zeile__text"><span class="zeile__titel">Kontakt &amp; Anfahrt</span></span>
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
   </a>
   <a class="zeile" href="nav://sportfreunde04_TextImage_1780401660329">
@@ -41,13 +41,49 @@
   border: 0;
 }
 
+/* W9, Auftrag D (Befund "app" Nr. 26): der Hinweiskasten steht jetzt VOR
+   der Gruppenliste (gleicher Abstand wie zwischen den Gruppen selbst), die
+   frühere Ausnahme "erste Gruppe ohne Abstand" entfällt deshalb – sonst
+   klebte die erste Überschrift am Kasten. */
 .gruppe-abschnitt { margin-top: var(--sp-6); }
-.gruppe-abschnitt:first-child { margin-top: 0; }
 
 .kontakte-liste {
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
+}
+
+/* W9-Nachprüfung D-app Nr. 13: gleicher Label-Stil wie .angaben auf
+   "Kontakt & Anfahrt" (Geschaeftsstelle_v3.html) – wortgleiche Regeln. */
+.angaben {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px 0;
+}
+.angaben dd + dt { margin-top: var(--sp-3); }
+
+.angaben dt {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.angaben dd {
+  margin: 0;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: break-word;
+}
+
+.mail-link { display: inline-block; max-width: 100%; overflow-wrap: break-word; color: var(--blau-800); text-decoration: none; }
+
+/* W9-Nachprüfung D-app "neu_kaputt": seit der Hinweiskasten vor die
+   Gruppenliste gewandert ist (Befund "app" Nr. 26), klebte die Linkliste am
+   Seitenende ohne Abstand an der letzten Personenkarte – jetzt derselbe
+   Abstand wie zwischen zwei Gruppen (.gruppe-abschnitt). */
+#gruppen-bereich + .liste {
+  margin-top: var(--sp-6);
 }
 
 .person-karte {
@@ -110,6 +146,10 @@
 /* W8, Befund 4: unbesetztes Amt ohne Initialen-Avatar – reine Textzeile mit
    Verweis auf "Mach mit". */
 .person-zeile-unbesetzt {
+  /* W9, Auftrag D (Befund "app" Nr. 26): ohne margin:0 addierte sich der
+     UA-Absatzabstand des <p> zum Gruppenabstand darunter (rund 64 statt
+     40 px). */
+  margin: 0;
   padding: var(--sp-2) 0;
   font-size: 14px;
   color: var(--ink-2);
@@ -152,7 +192,7 @@
     { titel: "Geschäftsführender Vorstand", funktionen: ["1. Vorsitzende", "2. Vorsitzender", "1. Kassierer", "2. Kassierer", "Schriftführer"] },
     { titel: "Jugendleitung", funktionen: ["1. Jugendleiter", "2. Jugendleiter", "Team Jugendleitung", "Kinderschutzbeauftragter"] },
     { titel: "Senioren", funktionen: ["Sportliche Leitung Senioren", "Spielausschuss Senioren"] },
-    { titel: "Karnevalabteilung", funktionen: ["Abteilungsleiter Karneval", "Kassiererin Abteilung Karneval", "Schriftführerin Abteilung Karneval"] }
+    { titel: "Karnevalabteilung", funktionen: ["Abteilungsleiter Karneval", "Kassiererin Karneval", "Schriftführerin Karneval"] }
   ];
 
   function textFeld(zeile, name) {
@@ -262,8 +302,26 @@
 
   var vorstandMail = (VEREIN.mails && VEREIN.mails.vorstand) || "vorstand@sportfreunde04.de";
   var gsMail = VEREIN.mail || "geschaeftsstelle@sportfreunde04.de";
-  document.getElementById("vorstand-hinweis").innerHTML =
-    "Anfragen an den Vorstand: <a href=\"mailto:" + vorstandMail + "\">" + vorstandMail + "</a> · Geschäftsstelle: <a href=\"mailto:" + gsMail + "\">" + gsMail + "</a>";
+  // W9-Nachprüfung D-app Nr. 13: Label über der Adresse (wie .angaben auf
+  // "Kontakt & Anfahrt"), statt "Vorstand: <Adresse>" in einer Zeile und
+  // "Geschäftsstelle:" mit der (längeren) Adresse in der nächsten – beide
+  // Zeilen jetzt gleich aufgebaut, unabhängig von der Textlänge.
+  var vorstandHinweis = document.getElementById("vorstand-hinweis");
+  [
+    { label: "Vorstand", mail: vorstandMail },
+    { label: "Geschäftsstelle", mail: gsMail }
+  ].forEach(function (eintrag) {
+    var dt = document.createElement("dt");
+    dt.textContent = eintrag.label;
+    var dd = document.createElement("dd");
+    var link = document.createElement("a");
+    link.className = "mail-link";
+    link.href = "mailto:" + eintrag.mail;
+    link.textContent = eintrag.mail;
+    dd.appendChild(link);
+    vorstandHinweis.appendChild(dt);
+    vorstandHinweis.appendChild(dd);
+  });
 
   function zeigeBild(eintrag, bildUrl) {
     var kreis = eintrag.karteEl.querySelector(".person-karte__initialen");

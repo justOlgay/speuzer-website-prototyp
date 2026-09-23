@@ -24,18 +24,6 @@ function downloadEintrag(daten, titelTeil) {
   return (daten.downloads ?? []).find((d) => (d.titel ?? "").includes(titelTeil));
 }
 
-// Download-Knopf: alle PDF-Links öffnen in einem neuen Fenster
-// (target="_blank" rel="noopener"), unabhängig davon, ob die Datei intern
-// oder auf cdn.appack.de liegt (W3-Spezifikation Abschnitt 7, Befund
-// verein-downloads.html: "auch Vereinsphilosophie/Chronik auf
-// verein-ueber-uns.html").
-function downloadKnopf(eintrag, text) {
-  if (!eintrag) return "";
-  const istIntern = (eintrag.datei ?? "").startsWith("/");
-  const href = istIntern ? PFAD + eintrag.datei.replace(/^\//, "") : eintrag.datei;
-  return `<a class="knopf knopf--sekundaer" href="${escapeHtml(href)}" target="_blank" rel="noopener">${escapeHtml(text)}</a>`;
-}
-
 // ---------- Seitenkopf ----------
 
 function seitenkopfAbschnitt() {
@@ -57,14 +45,14 @@ function geschichteAbschnitt(daten) {
   return `<section class="abschnitt">
   <div class="container fluss">
     <p class="inhalt">Gegründet wurde der Verein am 15.&nbsp;Mai 1904 als Frankfurter FC Britannia. Nach dem Ersten Weltkrieg erhielt er 1919 seinen heutigen Namen. Der sportliche Höhepunkt war die Saison 1955/56 in der 1.&nbsp;Amateurliga Hessen; seit den 1960er Jahren spielen die Sportfreunde in den Klassen des Fußballkreises Frankfurt.</p>
-    <p class="inhalt">Heute stellt der Verein elf Fußballmannschaften – von der 1.&nbsp;Herrenmannschaft bis zur G-Jugend – und die Karnevalabteilung „Die Schnauzer“ mit fünf Gruppen. Trainiert und gespielt wird auf dem eigenen Platz an der Mainzer Landstraße 480. Die Herren und die A-Jugend tragen ihre Heimspiele auf der Bezirkssportanlage am Rebstock aus (Anlage von SW Griesheim, Am Römerhof 9, 60486 Frankfurt).</p>
+    <p class="inhalt">Heute stellt der Verein elf Fußballmannschaften – von der 1.&nbsp;Herrenmannschaft bis zur G‑Jugend – und die Karnevalabteilung „Die Schnauzer“ mit fünf Gruppen. Trainiert und gespielt wird auf dem eigenen Platz an der Mainzer Landstraße 480. Die Herren und die A‑Jugend tragen ihre Heimspiele auf der Bezirkssportanlage am Rebstock (SW Griesheim), Am Römerhof 9, 60486&nbsp;Frankfurt am&nbsp;Main aus.</p>
     <p class="inhalt">Unser Leitsatz aus der Vereinsphilosophie: „Wir wollen nicht nur erfolgreiche Mannschaften entwickeln, sondern erfolgreiche Menschen und einen starken Verein für kommende Generationen.“ Unsere Werte sind Gemeinschaft, Respekt, Wertschätzung, Verantwortung, Fairness, Entwicklung und Kinderschutz.</p>
     <p class="knopfzeile">
       <a class="knopf" href="https://cdn.appack.de/sportfreunde04/workspace/web/chronik.html">Vereinschronik lesen</a>
     </p>
     <ul class="downloads" role="list">
-      ${downloadZeile(chronik, PFAD, "Chronik (PDF)")}
-      ${downloadZeile(philosophie, PFAD, "Vereinsphilosophie (PDF)")}
+      ${downloadZeile(chronik, PFAD)}
+      ${downloadZeile(philosophie, PFAD)}
     </ul>
   </div>
 </section>`;
@@ -102,7 +90,12 @@ function zahlenAbschnitt() {
 
 // W8-Korrektur: dieselbe Personen-Karte wie Vorstand/Karneval
 // (personKarte() aus bausteine.mjs) statt eines einzelnen großen Porträts
-// mit viel Leerraum daneben.
+// mit viel Leerraum daneben. W9-Korrektur (QA3 1440-14, w9-b.md): Download
+// jetzt als derselbe Download-Baustein (downloadZeile()) wie die übrigen
+// PDFs auf dieser Seite und auf "Downloads & Anträge" – vorher ein
+// Umrandungsknopf mit "(PDF)" im Text, während die Chronik/Vereinsphilosophie
+// direkt darüber schon als Linkliste standen (zwei verschiedene Formen für
+// dieselbe Aufgabe auf einer Seite).
 function kinderschutzAbschnitt(daten) {
   const beauftragter = (daten.vorstand ?? []).find((p) => p.funktion === "Kinderschutzbeauftragter");
   const konzept = downloadEintrag(daten, "Präventions- und Schutzkonzept");
@@ -112,9 +105,9 @@ function kinderschutzAbschnitt(daten) {
     <h2>Kinder- und Jugendschutz</h2>
     <p class="inhalt">Das Wohl von Kindern und Jugendlichen steht für uns über allem. Unser Präventions- und Schutzkonzept sowie die Vorgaben von HFV und DFB bilden den verbindlichen Rahmen.</p>
     ${personKarte(beauftragter, daten, { pfad: PFAD, prioritaet: true, einzeln: true })}
-    <p class="knopfzeile">
-      ${downloadKnopf(konzept, "Präventions- und Schutzkonzept (PDF)")}
-    </p>
+    <ul class="downloads" role="list">
+      ${downloadZeile(konzept, PFAD)}
+    </ul>
   </div>
 </section>`;
 }

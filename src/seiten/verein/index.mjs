@@ -31,7 +31,7 @@ function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
     <h1>Verein</h1>
-    <p class="seitenkopf__lead">Frankfurter Fußballverein Sportfreunde 1904&nbsp;e.&nbsp;V. – im Gallus sagt man einfach „die Speuzer“.</p>
+    <p class="seitenkopf__lead">Frankfurter Fußballverein Sportfreunde&nbsp;1904&nbsp;e.&nbsp;V. – im Gallus sagt man einfach „die&nbsp;Speuzer“.</p>
   </div>
 </section>`;
 }
@@ -48,18 +48,22 @@ function zeile(titel, untertitel, ziel) {
     </a>`;
 }
 
-// W8-Korrektur: Einträge in vier Gruppen mit kleinen Zwischenüberschriften
-// (".zeilen-liste__kicker", gleicher Stil wie der Kicker auf
-// /verein/karneval/) statt einer einzigen langen Liste. Titel = Seitentitel
-// der Zielseite (siehe dort jeweils title/h1); Downloads-Untertitel an den
-// Inhalt angepasst ("Anträge" statt "Bescheinigungen" – die Seite listet
-// keine Bescheinigungen). Die App bekommt dieselbe Gliederung durch den
-// parallel arbeitenden Agenten (nicht Teil dieser Datei).
+// W9-Korrektur (QA3 quer-33/390-30): Gruppenüberschriften jetzt im normalen
+// H2-Stil der Website (vorher kleine graue Kicker-Oberzeile, die in der App
+// als fette Überschrift erscheint – "aus einem Guss" verlangt denselben
+// Überschriftenstil). ".zeilen-liste__kicker" bleibt als Klasse für den
+// Gruppenabstand bestehen, ist aber jetzt ein echtes <h2> statt <span> und
+// erbt damit die globale h2-Typografie aus base.css.
 function gruppe(titel, zeilen) {
-  return `<span class="zeilen-liste__kicker">${escapeHtml(titel)}</span>
+  return `<h2 class="zeilen-liste__kicker">${escapeHtml(titel)}</h2>
     ${zeilen.join("\n    ")}`;
 }
 
+// W9-Korrektur (QA3 1440-9/390-30, Entscheidung 14): Einträge auf die
+// festgelegten Begriffe umbenannt – "Vorstand" (statt "Vorstand & Kontakt")
+// und "Kontakt & Anfahrt" (statt "Geschäftsstelle & Anfahrt"); Dateiname/URL
+// (verein/vorstand/, kontakt/) bleiben unverändert. "Mach mit & Ehrenamt"
+// statt "Mach mit · Ehrenamt" (390-30: Trenner überall "&", nicht "·").
 function derVereinAbschnitt() {
   const inhalt = [
     gruppe("Über den Verein", [
@@ -70,8 +74,8 @@ function derVereinAbschnitt() {
       zeile("Vereinschronik", "1904 bis 2026, Kapitel für Kapitel", "https://cdn.appack.de/sportfreunde04/workspace/web/chronik.html"),
     ]),
     gruppe("Kontakt", [
-      zeile("Vorstand & Kontakt", "Wer den Verein führt, wen du erreichst", `${PFAD}verein/vorstand/`),
-      zeile("Geschäftsstelle & Anfahrt", "Adresse, Zugang, Kontakt", `${PFAD}kontakt/`),
+      zeile("Vorstand", "Wer den Verein führt", `${PFAD}verein/vorstand/`),
+      zeile("Kontakt & Anfahrt", "Adresse, E-Mail, Anfahrt", `${PFAD}kontakt/`),
     ]),
     gruppe("Mitmachen", [
       zeile("Mitglied werden", "Beiträge, Ablauf, Antrag", `${PFAD}mitglied-werden/`),
@@ -80,7 +84,7 @@ function derVereinAbschnitt() {
       // die Zeile "Spielplan & Tabellen" entfällt hier (führte auf
       // /spielplan/, jetzt eine Weiterleitung, siehe
       // src/seiten/spielplan/index.mjs).
-      zeile("Mach mit · Ehrenamt", "Trainer, Betreuer, Vorstand, Helfer", `${PFAD}verein/mach-mit/`),
+      zeile("Mach mit & Ehrenamt", "Trainer, Betreuer, Vorstand, Helfer", `${PFAD}verein/mach-mit/`),
     ]),
     gruppe("Service", [
       zeile("Downloads & Anträge", "Satzung, Beiträge, Anträge", `${PFAD}verein/downloads/`),
