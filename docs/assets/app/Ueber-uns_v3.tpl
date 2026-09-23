@@ -198,12 +198,21 @@ summary { list-style: none; cursor: pointer; }
 summary::-webkit-details-marker { display: none; }
 summary::marker { content: ""; }
 
+/* W10, Auftrag D (Entscheidung G): Innenabstand oben/unten gilt auch, wenn
+   eine lange Beschriftung umbricht (vorher nur min-height + flex-center –
+   ein zweizeiliger Knopf hatte dadurch keinerlei Abstand zur Kante),
+   text-align:center zusätzlich zu justify-content, weil das bei mehrzeiligem
+   Text pro Zeile zählt (justify-content zentriert nur den Textblock als
+   Ganzes). Wörtlich wie Startseite_v3.tpl (siehe Kopfkommentar dieser
+   Datei). */
 .knopf {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 44px;
-  padding-inline: var(--sp-4);
+  padding: 12px 20px;
+  line-height: 1.3;
+  text-align: center;
   border-radius: var(--r-md);
   background: var(--blau-700);
   color: var(--weiss);
@@ -225,9 +234,13 @@ button.knopf {
   font-size: 14px;
 }
 
+/* W10-Nachprüfung (offen 10, Entscheidung 15): 2px Rand in Vereinsblau wie
+   .knopf--sekundaer in base.css (Website) – der bisherige 1px hellgraue Rand
+   war als Knopfkante kaum zu erkennen ("Nebenaktionen umrandet – auf
+   Website und App gleich"). */
 .knopf--leise {
   background: var(--surface);
-  border: 1px solid var(--line);
+  border: 2px solid var(--blau-700);
   color: var(--blau-800);
 }
 
@@ -324,6 +337,30 @@ button.knopf {
 .liste--eingebettet { margin-top: var(--sp-3); }
 .liste--eingebettet .zeile:last-child { border-bottom: none; }
 
+/* W10-Nachprüfung (offen 9): kleine Zwischenüberschrift über der PDF-Liste,
+   wie h3.inhalt in ueber-uns.mjs – gleiches Muster wie .hinweis-untertitel
+   in Geschaeftsstelle_v3.html (kleine fette Zwischenüberschrift im Kasten). */
+.download-titel {
+  margin: var(--sp-3) 0 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* W10, Auftrag D (quervergleich Nr. 11): Meta-Zeile "PDF · Seiten · Größe"
+   unter dem Titel, wie im Verein-Verteiler (.zeile__titel ist in
+   v3-basis.css "inline", hier lokal auf "block" gestellt, damit die
+   Meta-Zeile darunter umbricht statt danebenzustehen). */
+.zeile__titel,
+.zeile__untertitel { display: block; }
+
+.zeile__untertitel {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--ink-3);
+  overflow-wrap: break-word;
+}
+
 .zahlen-raster {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -395,20 +432,30 @@ button.knopf {
        weiter unten in "Der Verein in Zahlen" – dort bleiben Ziffern, wie auf
        der Website). Heutiger Datenstand (data/verein.json/karneval.json):
        11 Mannschaften, 5 Karnevalgruppen. -->
-  <p>Heute stellt der Verein elf Fußballmannschaften – von der 1.&nbsp;Herrenmannschaft bis zur G&#8209;Jugend – und die Karnevalabteilung „Die Schnauzer“ mit fünf Gruppen. Trainiert und gespielt wird auf dem eigenen Platz an der Mainzer Landstraße 480. Die Herren und die A&#8209;Jugend tragen ihre Heimspiele auf der Bezirkssportanlage am Rebstock (SW&nbsp;Griesheim), Am Römerhof 9, 60486&nbsp;Frankfurt am&nbsp;Main aus.</p>
-  <p class="leitsatz-quelle">Unser Leitsatz aus der Vereinsphilosophie:</p>
+  <!-- W10, Auftrag D (app Nr. 7): "Mainzer Landstraße 480" mit geschütztem
+       Leerzeichen zusammengehalten, wie auf Kontakt & Anfahrt – die
+       Hausnummer stand sonst allein am Zeilenanfang. -->
+  <p>Heute stellt der Verein elf Fußballmannschaften – von der 1.&nbsp;Herrenmannschaft bis zur G&#8209;Jugend – und die Karnevalabteilung „Die Schnauzer“ mit fünf Gruppen. Trainiert und gespielt wird auf dem eigenen Platz an der Mainzer&nbsp;Landstraße&nbsp;480. Die Herren und die A&#8209;Jugend tragen ihre Heimspiele auf der Bezirkssportanlage am Rebstock (SW&nbsp;Griesheim), Am Römerhof 9, 60486&nbsp;Frankfurt am&nbsp;Main aus.</p>
+  <p class="leitsatz-quelle">Unser Leitsatz aus der Vereinsphilosophie</p>
   <p class="leitsatz">„Wir wollen nicht nur erfolgreiche Mannschaften entwickeln, sondern erfolgreiche Menschen und einen starken Verein für kommende Generationen.“</p>
   <p>Unsere Werte sind Gemeinschaft, Respekt, Wertschätzung, Verantwortung, Fairness, Entwicklung und Kinderschutz.</p>
   <div class="aktionen">
-    <a class="knopf" href="nav://sportfreunde04_TextImage_1789020275334">Vereinschronik lesen</a>
+    <a class="knopf" href="nav://sportfreunde04_TextImage_1789020275334">Vereinschronik online lesen</a>
   </div>
+  <!-- W10, Auftrag D (quervergleich Nr. 11, Entscheidung H): Titel und
+       Meta-Zeile wortgleich mit "Downloads & Anträge" (dieselbe Quelle
+       data/downloads.json) – vorher eigene, kürzere Titel ohne Größenangabe. -->
+  <!-- W10-Nachprüfung (offen 9): eigene Überschrift "Zum Herunterladen"
+       über der PDF-Liste, wie h3 in ueber-uns.mjs – vorher hing die Liste
+       ohne Abgrenzung direkt unter dem Knopf. -->
+  <p class="download-titel">Zum Herunterladen</p>
   <div class="liste liste--eingebettet">
     <a class="zeile" href="https://cdn.appack.de/sportfreunde04/pdf/Chronik-FFV-Sportfreunde-04-2026.pdf" target="_blank" rel="noopener">
-      <span class="zeile__text"><span class="zeile__titel">Chronik (PDF, 53 Seiten)</span></span>
+      <span class="zeile__text"><span class="zeile__titel">Vereinschronik 1904 bis 2026</span><span class="zeile__untertitel">PDF · 53 Seiten · 1,6 MB</span></span>
       <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
     </a>
     <a class="zeile" href="https://cdn.appack.de/sportfreunde04/pdf/vereinsphilosophie-und-zukunftskonzept.pdf" target="_blank" rel="noopener">
-      <span class="zeile__text"><span class="zeile__titel">Vereinsphilosophie (PDF, 50 Seiten)</span></span>
+      <span class="zeile__text"><span class="zeile__titel">Vereinsphilosophie und Zukunftskonzept</span><span class="zeile__untertitel">PDF · 50 Seiten · 295 KB</span></span>
       <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
     </a>
   </div>
@@ -447,7 +494,7 @@ button.knopf {
        sonst zwei Formen für dieselbe Aufgabe auf einer Seite). -->
   <div class="liste liste--eingebettet">
     <a class="zeile" href="https://cdn.appack.de/sportfreunde04/pdf/Pr%C3%A4ventions-%20und%20Schutzkonzept%20FFV%20Sportfreunde%2004%20Stand%20Mai%202025%20(1).pdf" target="_blank" rel="noopener">
-      <span class="zeile__text"><span class="zeile__titel">Präventions- und Schutzkonzept (PDF)</span></span>
+      <span class="zeile__text"><span class="zeile__titel">Präventions- und Schutzkonzept (Stand:&nbsp;Mai&nbsp;2025)</span><span class="zeile__untertitel">PDF · 18 Seiten · 489 KB</span></span>
       <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
     </a>
   </div>

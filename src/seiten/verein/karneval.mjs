@@ -18,11 +18,19 @@ function escapeHtml(text) {
 // W9-Korrektur (QA3 1440-25): Dachzeile "Zweite Abteilung des Vereins"
 // entfernt – gibt es auf keiner anderen geprüften Seite, klang wie eine
 // Rangfolge und ist für den Seiteninhalt nicht nötig.
+// W10-Korrektur (QA4 web-390-verein-und-rest Nr. 13): die Umbruchsperre
+// "Sportfreunde&nbsp;1904&nbsp;e.&nbsp;V." hielt auch "Sportfreunde" an
+// "1904" fest – auf dem Handy passte "Fußballvereins Sportfreunde 1904 e.
+// V." dann nirgends mehr in eine Zeile, "Fußballvereins" stand allein in
+// einer eigenen, kurzen Zeile. Die Sperre jetzt nur noch auf "1904 e. V."
+// beschränkt (wie überall sonst, siehe mitGeschuetztemVereinsnamen() in
+// kontakt.mjs/impressum.mjs) – "Fußballvereins Sportfreunde" darf wieder
+// gemeinsam in eine Zeile.
 function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
     <h1>Karneval – Die Schnauzer</h1>
-    <p class="seitenkopf__lead">Fünf Gruppen, eine Bühne: Die Karnevalabteilung des Frankfurter Fußballvereins Sportfreunde&nbsp;1904&nbsp;e.&nbsp;V.</p>
+    <p class="seitenkopf__lead">Fünf Gruppen, eine Bühne: Die Karnevalabteilung des Frankfurter Fußballvereins Sportfreunde 1904&nbsp;e.&nbsp;V.</p>
   </div>
 </section>`;
 }

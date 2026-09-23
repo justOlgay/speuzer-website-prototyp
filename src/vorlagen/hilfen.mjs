@@ -54,12 +54,17 @@ export function staffelLesbar(staffel) {
 
   const gruppeMatch = rest.match(/Gr\.\s*0*(\d+)\s*$/);
   const gruppe = gruppeMatch ? gruppeMatch[1] : null;
-  // W9-A-Nachprüfung (web-390 Nr. 14): geschütztes Leerzeichen auch NACH dem
-  // Komma, nicht nur innerhalb von "Gruppe N" – sonst bricht die Zeile genau
-  // an der Komma-Leerstelle, "Gruppe 4"/"Gruppe 22" landeten dadurch allein
-  // in Zeile 2 (Entscheidung 2 verlangt Umbruch nur an " · ", nicht an jedem
-  // Komma innerhalb eines Segments).
-  const gruppeHtml = gruppe ? `,&nbsp;Gruppe&nbsp;${escapeHtml(gruppe)}` : "";
+  // W9-A-Nachprüfung (web-390 Nr. 14): "Gruppe N" bleibt intern umbruchfrei
+  // (geschütztes Leerzeichen), das Komma davor bekommt aber seit W10 wieder
+  // ein normales, brechbares Leerzeichen. Grund: Jahrgang und Staffel stehen
+  // seit Entscheidung A (w10-gemeinsam.md) auf zwei eigenen Blockzeilen, die
+  // Staffel konkurriert also nicht mehr mit "Jahrgang …" um denselben
+  // Platz. Ohne Umbruchpunkt am Komma war die ganze Staffel bei langen
+  // Kombinationen wie F1 ("4 gegen 4 plus Torwart, Gruppe 2") EIN
+  // unbrechbares Stück, das in schmalen Teamkarten mitten im Wort
+  // "Gruppe" umbrach (overflow-wrap: anywhere, Prüfbefund
+  // web-1440-mannschaften Nr. 10).
+  const gruppeHtml = gruppe ? `, Gruppe&nbsp;${escapeHtml(gruppe)}` : "";
 
   if (ligaTeil === "Kinderfußball") {
     const plusEins = rest.match(/(\d+)\+1/);
@@ -212,12 +217,20 @@ export const FUSSBALLDE_WIDGET_LADER = `<script>
 // selbst behält seine volle Höhe unverändert), mit weichem Verlauf unten und
 // einem Knopf "Alle Spiele anzeigen"/"Weniger anzeigen" (W7-Spezifikation
 // Abschnitt 4). widgetHtml ist der fertige .fussballde-wrap-Block.
-export function spieleKastenHtml(widgetHtml) {
+// W10, quervergleich Nr. 17 (bestätigt): Anordnung wie in der App – der
+// erklärende Hinweissatz (`hinweisHtml`, optional) steht jetzt ÜBER dem
+// Kasten statt als eigener Absatz danach, der Knopf "Alle Spiele anzeigen"
+// ist jetzt gleich breit wie der Kasten (knopfzeile--voll) statt schmal und
+// linksbündig. Alle Aufrufstellen (team.mjs, index.mjs) übergeben ihren
+// bisherigen Hinweistext jetzt hier statt ihn selbst als <p class="meta">
+// danach anzuhängen.
+export function spieleKastenHtml(widgetHtml, hinweisHtml) {
   return `<div class="spiele-kasten-block">
+      ${hinweisHtml ? `<p class="meta">${hinweisHtml}</p>` : ""}
       <div class="spiele-kasten" data-spiele-kasten>
         ${widgetHtml}
       </div>
-      <p class="knopfzeile">
+      <p class="knopfzeile knopfzeile--voll">
         <button type="button" class="knopf knopf--sekundaer" data-spiele-knopf aria-expanded="false">Alle Spiele anzeigen</button>
       </p>
     </div>`;

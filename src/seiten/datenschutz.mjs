@@ -23,11 +23,31 @@ function escapeHtml(text) {
 // Website vom …" war schief formuliert ("Fassung … vom" – eine Fassung ist
 // nicht "vom" einem Datum) – jetzt "Stand: … – gilt für Vereins-App und
 // Website" (genauer Wortlaut aus w9-b.md).
+// W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 5/web-390-verein-und-rest
+// Nr. 5): der Hinweiskasten stand nur ~6–8px unter der Unterzeile (auf
+// anderen Seiten mit Hinweiskasten, z. B. verein-vorstand-01, sind es rund
+// 70px) und wiederholte fast wörtlich, wofür die Erklärung gilt ("gilt für
+// die Vereins-App und die Website …" gegen "gilt für Vereins‑App und
+// Website" in der Unterzeile direkt darüber). Der Kasten (data/datenschutz.
+// json, Feld "hinweis" – Seitengestaltung, kein Rechtstext) sagt jetzt nur
+// noch, wer Fragen beantwortet.
+// W10-Nachprüfung (offen 8): "margin-top:var(--sp-5)" (24px) reichte nicht
+// – auf Vorstand (die genannte Vorlage) steht der Kasten nicht im Seitenkopf,
+// sondern als eigener erster Inhaltsabschnitt danach (siehe hinweisAbschnitt()
+// in vorstand.mjs), das ergibt den größeren Abstand zwischen zwei
+// .abschnitt-Sektionen. Jetzt genauso: Kasten aus dem Seitenkopf gelöst.
 function seitenkopfAbschnitt(datenschutz) {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
     <h1>Datenschutz&shy;erklärung</h1>
     <p class="seitenkopf__lead">Stand: ${escapeHtml(datenschutz.stand ?? "")} – gilt für Vereins‑App und Website</p>
+  </div>
+</section>`;
+}
+
+function hinweisAbschnitt(datenschutz) {
+  return `<section class="abschnitt">
+  <div class="container">
     <div class="hinweis hinweis--info">
       <p style="margin:0;">${escapeHtml(datenschutz.hinweis ?? "")}</p>
     </div>
@@ -46,12 +66,24 @@ function seitenkopfAbschnitt(datenschutz) {
 // Unterpunkte von "Unsere Datenschutzerklärung", standen im Verzeichnis aber
 // gleichrangig – jetzt mit ".inhaltsverzeichnis__unterpunkt" eingerückt
 // (rein optisch, gleiche flache <ol>, kein verschachteltes Markup nötig).
+// W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 4): "Ihre Rechte als
+// betroffene Person" (Zwischenüberschrift in Kapitel 6, siehe
+// GRUPPENUEBERSCHRIFT_PRAEFIX/IHRE_RECHTE_ANKER unten) fehlte bisher im
+// Verzeichnis – der lange Abschnitt ließ sich nicht direkt anspringen. Jetzt
+// als eigener, noch tiefer eingerückter Eintrag unter Kapitel 6.
+// W10-Nachprüfung (offen 6, web-1440-verein-und-rest Nr. 4, zweiter Teil):
+// das Verzeichnis rückte 1–11 unter "Unsere Datenschutzerklärung" ein – im
+// Text sind "Datenschutzhinweise", "Unsere Datenschutzerklärung" und
+// "1. …"–"11. …" aber gleich große H2 (keine echte Hierarchie). Verzeichnis
+// jetzt flach, wie der Text; nur die echte Unterebene ("Ihre Rechte als
+// betroffene Person" unter "6. …", ein h3 im Text) bleibt eingerückt.
 function inhaltsverzeichnisAbschnitt(abschnitte) {
   const eintraege = abschnitte
     .map((a, i) => {
-      const istUnterpunkt = i >= 2;
-      const klasse = istUnterpunkt ? ' class="inhaltsverzeichnis__unterpunkt"' : "";
-      return `<li${klasse}><a href="#abschnitt-${i + 1}">${escapeHtml(a.titel)}</a></li>`;
+      const ihreRechteZusatz = a.titel.startsWith("6. Routinemäßige Löschung")
+        ? `\n      <li class="inhaltsverzeichnis__unterpunkt inhaltsverzeichnis__unterpunkt--tief"><a href="#${IHRE_RECHTE_ANKER}">Ihre Rechte als betroffene Person</a></li>`
+        : "";
+      return `<li><a href="#abschnitt-${i + 1}">${escapeHtml(a.titel)}</a></li>${ihreRechteZusatz}`;
     })
     .join("\n      ");
 
@@ -69,8 +101,12 @@ function inhaltsverzeichnisAbschnitt(abschnitte) {
 // W9-Korrektur (QA3 1440-19/390-15): Auf der sehr langen Seite gab es keinen
 // Weg zurück zum Inhaltsverzeichnis – ein Link "Nach oben ›" am Ende jedes
 // Abschnitts (zum <nav id="inhaltsverzeichnis"> oben, siehe seite()).
+// W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 8/web-390-verein-und-rest
+// Nr. 9): "›" bedeutet auf der Website sonst "weiter/hin zu" (z. B. "E-Mail
+// schreiben ›"), für einen Sprung NACH OBEN zeigt der Pfeil damit in die
+// falsche Richtung. "↑" statt dessen.
 function nachObenLink() {
-  return `<p class="meta"><a href="#inhaltsverzeichnis">Nach oben ›</a></p>`;
+  return `<p class="meta"><a href="#inhaltsverzeichnis">↑ Nach oben</a></p>`;
 }
 
 // P9-Korrektur A3: Im Abschnitt "Datenschutzhinweise" standen mehrere
@@ -113,6 +149,12 @@ function alsGruppenUeberschrift(text) {
   return text.startsWith(GRUPPENUEBERSCHRIFT_PRAEFIX) ? text.slice(GRUPPENUEBERSCHRIFT_PRAEFIX.length) : null;
 }
 
+// W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 4): Sprungziel für den
+// neuen Inhaltsverzeichnis-Eintrag (siehe inhaltsverzeichnisAbschnitt()
+// oben) – es gibt in data/datenschutz.json nur eine "§H2§"-Zeile, ein
+// einzelner fester Anker genügt.
+const IHRE_RECHTE_ANKER = "ihre-rechte-als-betroffene-person";
+
 // W9-Korrektur (QA3 1440-18/390-… "Aufzählungen als Listen", w9-b.md): die
 // echten Aufzählungen unter "Recht auf Auskunft", "Recht auf Löschung" und
 // "Recht auf Einschränkung der Verarbeitung" (Abschnitt "6. Routinemäßige
@@ -126,6 +168,20 @@ const LISTENPUNKT_PRAEFIX = "§L§ ";
 
 function alsListenpunkt(text) {
   return text.startsWith(LISTENPUNKT_PRAEFIX) ? text.slice(LISTENPUNKT_PRAEFIX.length) : null;
+}
+
+// W10-Korrektur (QA4 web-390-verein-und-rest Nr. 6): die "§H§"-Zwischentitel
+// ("Recht auf Bestätigung", "Auf welche Weise erheben wir Ihre Daten?" u. a.)
+// waren als einfaches <h3> praktisch gleich groß wie die nummerierten
+// Kapitelüberschriften (<h2>, beide in derselben versalen Display-Schrift) –
+// auf der sehr langen Rechtsseite ließ sich die Gliederung kaum noch
+// erkennen. Jetzt als dritte Ebene deutlich kleiner, in der Fließtextschrift,
+// halbfett, nicht versal (Vorschlag aus dem Befund). Gemeinsamer Baustein für
+// beide Rendering-Pfade (allgemeineBloeckeHtml() unten und der
+// "Datenschutzhinweise"-Zweig in absaetzeHtml()), damit beide gleich
+// aussehen.
+function unterUeberschriftHtml(text) {
+  return `<h3 style="font-family:var(--font-text); text-transform:none; letter-spacing:normal; font-size:1.0625rem; font-weight:700;">${escapeHtml(text)}</h3>`;
 }
 
 // W9-Korrektur (QA3 1440-4/390-13, w9-b.md "Anschrift der verantwortlichen
@@ -240,11 +296,16 @@ function allgemeineBloeckeHtml(absaetze, daten) {
     }
     const gruppenUeberschrift = alsGruppenUeberschrift(p);
     if (gruppenUeberschrift !== null) {
-      teile.push(`<h3 style="font-size:var(--fs-2xl); margin-top:var(--sp-8);">${escapeHtml(gruppenUeberschrift)}</h3>`);
+      // W10-Nachprüfung (offen 5, NEU): "1.7rem" fest war auf dem Handy
+      // (390px) mit 27,5px größer als die Kapitel-H2 (26,3px, siehe
+      // "@media (max-width:479.98px) h2" in base.css) – die Hierarchie kehrte
+      // sich um. Jetzt eine eigene, auf beiden Breiten kleinere Klasse
+      // (body.datenschutz h3.gruppenueberschrift, komponenten.css).
+      teile.push(`<h3 id="${IHRE_RECHTE_ANKER}" class="gruppenueberschrift">${escapeHtml(gruppenUeberschrift)}</h3>`);
       continue;
     }
     const ueberschrift = alsUeberschrift(p);
-    teile.push(ueberschrift !== null ? `<h3>${escapeHtml(ueberschrift)}</h3>` : `<p>${escapeHtml(p)}</p>`);
+    teile.push(ueberschrift !== null ? unterUeberschriftHtml(ueberschrift) : `<p>${escapeHtml(p)}</p>`);
   }
   listeSchliessen();
   return teile.join("\n      ");
@@ -263,7 +324,7 @@ function absaetzeHtml(abschnitt, daten) {
       </ul>`;
       }
       if (block.typ === "ueberschrift") {
-        return `<h3>${escapeHtml(block.text)}</h3>`;
+        return unterUeberschriftHtml(block.text);
       }
       return `<p>${escapeHtml(block.text)}</p>`;
     })
@@ -315,6 +376,7 @@ export function seite(daten) {
 
   const inhalt = [
     seitenkopfAbschnitt(datenschutz),
+    hinweisAbschnitt(datenschutz),
     inhaltsverzeichnisAbschnitt(abschnitte),
     ...abschnitte.map((abschnitt, index) => abschnittSection(abschnitt, index, daten)),
     quelleAbschnitt(datenschutz),

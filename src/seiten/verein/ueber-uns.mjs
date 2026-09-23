@@ -38,6 +38,17 @@ function seitenkopfAbschnitt() {
 
 // ---------- Geschichte/Werte (drei Absätze) ----------
 
+// W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 13/web-390-verein-und-rest
+// Nr. 14): Knopf ("Vereinschronik lesen") und PDF-Link ("Vereinschronik 1904
+// bis 2026") standen nur ~15–17px auseinander, ohne erkennbaren Unterschied,
+// warum es beide gibt – wirkte wie eine Doppelung. Der Knopftext sagt jetzt,
+// was er öffnet ("online lesen"), die PDF-Liste bekommt eine eigene kleine
+// Überschrift "Zum Herunterladen" (dadurch auch mehr Abstand, siehe ".fluss
+// > * + h3" in komponenten.css) und ist auf die Textbreite begrenzt (vorher
+// bis 1304px, während der Fließtext bei ~840px endet).
+// W10-Korrektur (quervergleich Nr. 12): der Leitsatz stand unauffällig mitten
+// im dritten Absatz, in der App als eigener, hervorgehobener Zitat-Block mit
+// Beschriftung – jetzt derselbe Baustein auf der Website.
 function geschichteAbschnitt(daten) {
   const philosophie = downloadEintrag(daten, "Vereinsphilosophie");
   const chronik = downloadEintrag(daten, "Vereinschronik");
@@ -46,11 +57,16 @@ function geschichteAbschnitt(daten) {
   <div class="container fluss">
     <p class="inhalt">Gegründet wurde der Verein am 15.&nbsp;Mai 1904 als Frankfurter FC Britannia. Nach dem Ersten Weltkrieg erhielt er 1919 seinen heutigen Namen. Der sportliche Höhepunkt war die Saison 1955/56 in der 1.&nbsp;Amateurliga Hessen; seit den 1960er Jahren spielen die Sportfreunde in den Klassen des Fußballkreises Frankfurt.</p>
     <p class="inhalt">Heute stellt der Verein elf Fußballmannschaften – von der 1.&nbsp;Herrenmannschaft bis zur G‑Jugend – und die Karnevalabteilung „Die Schnauzer“ mit fünf Gruppen. Trainiert und gespielt wird auf dem eigenen Platz an der Mainzer Landstraße 480. Die Herren und die A‑Jugend tragen ihre Heimspiele auf der Bezirkssportanlage am Rebstock (SW Griesheim), Am Römerhof 9, 60486&nbsp;Frankfurt am&nbsp;Main aus.</p>
-    <p class="inhalt">Unser Leitsatz aus der Vereinsphilosophie: „Wir wollen nicht nur erfolgreiche Mannschaften entwickeln, sondern erfolgreiche Menschen und einen starken Verein für kommende Generationen.“ Unsere Werte sind Gemeinschaft, Respekt, Wertschätzung, Verantwortung, Fairness, Entwicklung und Kinderschutz.</p>
+    <blockquote class="zitat inhalt">
+      <p class="zitat__label meta">Unser Leitsatz aus der Vereinsphilosophie</p>
+      <p class="zitat__text">„Wir wollen nicht nur erfolgreiche Mannschaften entwickeln, sondern erfolgreiche Menschen und einen starken Verein für kommende Generationen.“</p>
+    </blockquote>
+    <p class="inhalt">Unsere Werte sind Gemeinschaft, Respekt, Wertschätzung, Verantwortung, Fairness, Entwicklung und Kinderschutz.</p>
     <p class="knopfzeile">
-      <a class="knopf" href="https://cdn.appack.de/sportfreunde04/workspace/web/chronik.html">Vereinschronik lesen</a>
+      <a class="knopf" href="https://cdn.appack.de/sportfreunde04/workspace/web/chronik.html">Vereinschronik online lesen</a>
     </p>
-    <ul class="downloads" role="list">
+    <h3 class="inhalt">Zum Herunterladen</h3>
+    <ul class="downloads inhalt" role="list">
       ${downloadZeile(chronik, PFAD)}
       ${downloadZeile(philosophie, PFAD)}
     </ul>
@@ -105,7 +121,8 @@ function kinderschutzAbschnitt(daten) {
     <h2>Kinder- und Jugendschutz</h2>
     <p class="inhalt">Das Wohl von Kindern und Jugendlichen steht für uns über allem. Unser Präventions- und Schutzkonzept sowie die Vorgaben von HFV und DFB bilden den verbindlichen Rahmen.</p>
     ${personKarte(beauftragter, daten, { pfad: PFAD, prioritaet: true, einzeln: true })}
-    <ul class="downloads" role="list">
+    <h3 class="inhalt">Zum Herunterladen</h3>
+    <ul class="downloads inhalt" role="list">
       ${downloadZeile(konzept, PFAD)}
     </ul>
   </div>

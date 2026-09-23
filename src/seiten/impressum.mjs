@@ -37,6 +37,10 @@ function seitenkopfAbschnitt() {
 </section>`;
 }
 
+// W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 30/web-390-verein-und-rest
+// Nr. 15): dieselbe Adresse (Mainzer Landstraße 480) hieß hier "Sportstätte",
+// auf /kontakt/ (Anfahrt-Karte) "Vereinsplatz" – jetzt einheitlich
+// "Vereinsplatz" auf beiden Seiten.
 function angabenAbschnitt(daten) {
   const verein = daten.verein ?? {};
   const sportstaette = verein.sportstaette ?? {};
@@ -52,7 +56,7 @@ function angabenAbschnitt(daten) {
       <dt>Anbieter</dt>
       <dd>${escapeHtml(mitGeschuetztemVereinsnamen(verein.name_register ?? ""))}</dd>
 
-      <dt>Sportstätte</dt>
+      <dt>Vereinsplatz</dt>
       <dd>${escapeHtml(sportstaette.strasse ?? "")}<br>${escapeHtml(sportstaette.plz ?? "")} ${escapeHtml(sportstaette.ort ?? "")}</dd>
 
       <dt>Postanschrift</dt>
