@@ -154,6 +154,28 @@ function ersetzeBauzeitWerte(html, werte) {
   return ergebnis;
 }
 
+// ---------- W8: dieselben Daten wie die Website (Grundsatz Daten) ----------
+// Wo die Website ihre Inhalte aus data/*.json bezieht (Mannschaften,
+// Zusatzangebote/Fußballschulen, Verein-/Geschäftsstellen-Angaben, Karneval,
+// Vorstand, Sponsoren), sollen die App-Vorlagen dieselben Daten verwenden –
+// wie __WIDGETS_JSON__ per String.replace() zur Bauzeit eingesetzt, bevor
+// die Vorlage zusammengesetzt wird. Nur öffentlich unbedenkliche Felder
+// (keine privaten Telefonnummern) – die Quell-JSONs enthalten ohnehin keine.
+// Ein Platzhalter, der in einer Datei nicht vorkommt, bleibt folgenlos
+// (String.split().join() auf einen nicht vorhandenen Text ändert nichts).
+function datenPlatzhalter() {
+  const laden = (datei) => JSON.parse(readFileSync(path.join(DATA_DIR, datei), "utf8"));
+  return {
+    __TEAMS_JSON__: JSON.stringify(laden("teams.json")),
+    __ZUSATZANGEBOTE_JSON__: JSON.stringify(laden("zusatzangebote.json")),
+    __VEREIN_JSON__: JSON.stringify(laden("verein.json")),
+    __GESCHAEFTSSTELLE_JSON__: JSON.stringify(laden("geschaeftsstelle.json")),
+    __KARNEVAL_JSON__: JSON.stringify(laden("karneval.json")),
+    __VORSTAND_JSON__: JSON.stringify(laden("vorstand.json")),
+    __SPONSOREN_JSON__: JSON.stringify(laden("sponsoren.json")),
+  };
+}
+
 // ---------- Statische Seite (C2, Abschnitt 5) ----------
 
 function htmlEscapen(text) {
@@ -234,10 +256,12 @@ function baueStatischeVorlage(name, titel, teile, braucheWorkbook) {
 
 function main() {
   const werte = bauzeitWerte();
+  const datenWerte = datenPlatzhalter();
   for (const { name, beschreibung, stufe } of SEITEN) {
     const quellDatei = path.join(SRC_APP, `${name}.html`);
     let html = readFileSync(quellDatei, "utf8");
     if (name === "Ueber-uns_v3") html = ersetzeBauzeitWerte(html, werte);
+    html = ersetzeBauzeitWerte(html, datenWerte);
     const teile = teileQuelle(html, `${name}.html`);
     const vorlage = baueVorlage(name, beschreibung, stufe, teile);
     const zielDatei = path.join(ZIEL_APP, `${name}.tpl`);
@@ -251,6 +275,7 @@ function main() {
     const quellDatei = path.join(SRC_APP, `${name}.html`);
     let html = readFileSync(quellDatei, "utf8");
     html = html.split("__WIDGETS_JSON__").join(JSON.stringify(widgets));
+    html = ersetzeBauzeitWerte(html, datenWerte);
     const teile = teileQuelle(html, `${name}.html`);
     const vorlage = baueStatischeVorlage(name, titel, teile, workbook === true);
     const zielDatei = path.join(ZIEL_APP, `${name}.html`);

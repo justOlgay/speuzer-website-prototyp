@@ -128,15 +128,29 @@ function absatzHtml(absatz, rels, quellenZiel) {
     if (teil.startsWith("<w:hyperlink")) {
       const id = teil.match(/r:id="(rId\d+)"/)?.[1];
       const ziel = id ? rels.get(id) : null;
-      const text = [...teil.matchAll(/<w:r\b[\s\S]*?<\/w:r>/g)].map((m) => laufHtml(m[0])).join("");
+      const roh = [...teil.matchAll(/<w:r\b[\s\S]*?<\/w:r>/g)].map((m) => laufHtml(m[0])).join("");
+      // Ein führendes/folgendes Leerzeichen im Hyperlink-Feld (z. B. Word-
+      // Text " Nachweis") gehört nicht mit unter die Unterstreichung des
+      // Links – sonst reicht die Unterstreichung optisch bis vor das Wort.
+      const text = roh.trim();
+      const vor = roh.slice(0, roh.indexOf(text));
+      const nach = text ? roh.slice(roh.indexOf(text) + text.length) : roh;
       inhalt += ziel
-        ? `<a href="${escapeHtml(ziel)}" target="_blank" rel="noopener">${text}</a>`
-        : text;
+        ? `${vor}<a href="${escapeHtml(ziel)}" target="_blank" rel="noopener">${text}</a>${nach}`
+        : roh;
     } else {
-      inhalt += [...teil.matchAll(/<w:r\b[\s\S]*?<\/w:r>/g)].map((m) => laufHtml(m[0])).join("");
+      const stueck = [...teil.matchAll(/<w:r\b[\s\S]*?<\/w:r>/g)].map((m) => laufHtml(m[0])).join("");
+      inhalt += urlAlsLink(stueck);
     }
   }
   return verweiseVerlinken(inhalt, quellenZiel);
+}
+
+// Roh im Fließtext getippte Adressen (kein Word-Hyperlinkfeld, sondern eine
+// nur eingetippte URL) nicht als lange Rohadresse zeigen, sondern als Link
+// mit dem Text "Quelle".
+function urlAlsLink(html) {
+  return html.replace(/https?:\/\/[^\s<]+/g, (url) => `<a href="${url}" target="_blank" rel="noopener">Quelle</a>`);
 }
 
 function stilVon(absatz) {
@@ -288,11 +302,14 @@ function kapitelHtml(kapitel, optionen) {
     if (block.art === "bild") {
       const name = bildKarte.get(block.datei);
       if (!name) continue;
-      schliesse();
-      teile.push(`<figure class="chronik-bild">
-  <img src="${bildBasis}${name}" alt="Historische Aufnahme aus der Vereinschronik" loading="lazy" decoding="async">
-  <figcaption class="chronik-bild__text" data-leer="ja"></figcaption>
-</figure>`);
+      // Bild bleibt im Satzspiegel: nicht aus dem offenen .container.fluss
+      // herauslösen (das erzeugte randlose Vollbreite-Bilder außerhalb jedes
+      // Containers), sondern wie Absätze/Tabellen im Container öffnen.
+      oeffne();
+      teile.push(`    <figure class="chronik-bild">
+      <img src="${bildBasis}${name}" alt="Historische Aufnahme aus der Vereinschronik" loading="lazy" decoding="async">
+      <figcaption class="chronik-bild__text" data-leer="ja"></figcaption>
+    </figure>`);
       continue;
     }
     const html = absatzHtml(block.xml, rels, quellenZiel);
@@ -324,11 +341,19 @@ function kapitelHtml(kapitel, optionen) {
 // ---------- Website ----------
 
 const CHRONIK_CSS = `<style>
-.chronik-bild { margin: 0 0 var(--sp-4); }
-.chronik-bild img { width: 100%; height: auto; border-radius: var(--radius, 12px); background: var(--blau-50, #eef0fb); display: block; }
+/* Bild bleibt im Satzspiegel: höchstens so breit wie der Fließtext
+   (--inhalt, sonst 720px) und nie breiter als seine eigene, native Breite
+   (die Scans sind 400 bis 690px breit) – deshalb width:auto statt
+   width:100%, das schmale Bilder sonst hochskaliert hätte. */
+.chronik-bild { margin: 0 0 var(--sp-4); max-width: var(--inhalt, 720px); }
+.chronik-bild img { width: auto; max-width: 100%; height: auto; border-radius: var(--radius, 12px); background: var(--blau-50, #eef0fb); display: block; }
 .chronik-bild__text { font-size: 0.86rem; line-height: 1.5; color: var(--ink-2, #55607a); margin-top: var(--sp-2); }
-.chronik-zitat { margin: 0 0 var(--sp-3); padding-left: var(--sp-3); border-left: 3px solid var(--blau, #191793); font-style: italic; color: var(--ink-2, #55607a); }
-.chronik-quelle { font-size: 0.86rem; line-height: 1.55; color: var(--ink-2, #55607a); margin: 0 0 var(--sp-2); }
+.chronik-zitat { margin: 0 0 var(--sp-3); padding-left: var(--sp-3); border-left: 3px solid var(--blau, #191793); font-style: italic; color: var(--ink-2, #55607a); max-width: var(--inhalt, 720px); }
+/* Kleindruck (Vorwort-Anmerkung, Quellenangaben): eigener, sichtbarer
+   Abstand zum vorigen Absatz – kein margin-top:0 setzen, sonst überschreibt
+   das den Fluss-Rhythmus (.fluss > * + *) der Seite und der Absatz klebt am
+   vorigen Text. */
+.chronik-quelle { font-size: 0.86rem; line-height: 1.55; color: var(--ink-2, #55607a); margin-bottom: var(--sp-2); max-width: var(--inhalt, 720px); }
 .quellenverweis { text-decoration: none; font-variant-numeric: tabular-nums; }
 .tabelle-wrap { overflow-x: auto; margin: 0 0 var(--sp-4); }
 .chronik-tabelle { width: 100%; border-collapse: collapse; font-size: 0.94rem; min-width: 420px; }
@@ -688,22 +713,39 @@ function main() {
   const bildBasisWeb = `${CDN}/images/`;
 
   // Kapitelseiten
+  // Blätter-Leiste: Epochenkapitel (Jahresspannen) bekommen wie überall in
+  // Knöpfen/Navigationselementen die kurze Gedankenstrich-Form (z. B.
+  // "1919–1933"); die beiden Nicht-Epochenkapitel "Mannschaften und
+  // Ehrenamt" sowie "Quellen und Anmerkungen" dürfen dort nicht gekürzt
+  // werden (k.kurz entfernt bei denen den Titelzusatz) und erscheinen mit
+  // vollem Titel.
+  const navTitel = (k) => (k.epoche ? k.kurz : k.titel);
   const dateien = [];
   kapitel.forEach((k, i) => {
     const vorher = kapitel[i - 1];
     const nachher = kapitel[i + 1];
-    const nav = `<section class="abschnitt">
+    // Letztes Kapitel (kein "nachher"): nicht mit einem Link auf die
+    // fremde Seite "Über uns" enden, sondern zurück zur Kapitelübersicht.
+    const nav = nachher
+      ? `<section class="abschnitt">
   <div class="container">
     <p class="kapitelnav">
-      ${vorher ? `<a href="chronik-${vorher.slug}.html">‹ ${escapeHtml(vorher.kurz)}</a>` : `<a href="chronik.html">‹ Übersicht</a>`}
+      ${vorher ? `<a href="chronik-${vorher.slug}.html">‹ ${escapeHtml(navTitel(vorher))}</a>` : `<a href="chronik.html">‹ Übersicht</a>`}
       <a href="chronik.html">Alle Kapitel</a>
-      ${nachher ? `<a href="chronik-${nachher.slug}.html">${escapeHtml(nachher.kurz)} ›</a>` : `<a href="verein-ueber-uns.html">Über uns ›</a>`}
+      <a href="chronik-${nachher.slug}.html">${escapeHtml(navTitel(nachher))} ›</a>
+    </p>
+  </div>
+</section>`
+      : `<section class="abschnitt">
+  <div class="container">
+    <p class="kapitelnav">
+      <span>${vorher ? `<a href="chronik-${vorher.slug}.html">‹ ${escapeHtml(navTitel(vorher))}</a> · ` : ""}<a href="chronik.html">Alle Kapitel</a></span>
     </p>
   </div>
 </section>`;
     const inhalt = [
       seitenkopf(
-        `<a class="ruecklink" href="chronik.html">‹ Chronik</a>`,
+        `<a class="ruecklink" href="chronik.html">‹ Vereinschronik</a>`,
         k.titel,
         k.lead
       ),
@@ -725,10 +767,12 @@ function main() {
   });
 
   // Übersichtsseite mit Vorwort und Zeitleiste
+  // "›" macht jeden Eintrag als Link erkennbar (CD-Glyphe statt "→", siehe
+  // auch die Blätter-Leiste), statt sich allein auf :hover zu verlassen.
   const zeitleiste = kapitel
     .map(
       (k) => `      <li class="zeitleiste__punkt">
-        <a class="zeitleiste__jahre" href="chronik-${k.slug}.html">${escapeHtml(k.titel)}</a>
+        <a class="zeitleiste__jahre" href="chronik-${k.slug}.html">${escapeHtml(k.titel)} ›</a>
         <span class="zeitleiste__text">${escapeHtml(k.lead ?? "")}</span>
       </li>`
     )
@@ -743,7 +787,11 @@ function main() {
       "1904 bis 2026 – die Geschichte der Speuzer, Kapitel für Kapitel."
     ),
     vorwortHtml,
-    `<section class="abschnitt abschnitt--blau">
+    // abschnitt--kompakt (halber Abschnittsrand, sonst für lange Listen
+    // gedacht, siehe komponenten.css): die Zeitleiste ist selbst schon eine
+    // lange Liste, der volle --sektion-Rand oben/unten erzeugte unnötigen
+    // Leerraum im blauen Band.
+    `<section class="abschnitt abschnitt--blau abschnitt--kompakt">
   <div class="container">
     <h2>Die Kapitel</h2>
     <ul class="zeitleiste">

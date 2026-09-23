@@ -31,6 +31,59 @@ export function jahrgangText(team) {
   return team?.jahrgang ?? "–";
 }
 
+// ---------- Staffel lesbar (W9, Abschnitt 1) ----------
+// Rohwerte in data/teams.json wie "Kreisliga A · KLA Frankfurt Gr. 1" oder
+// "Kinderfußball · F-Junioren 4+1 Gr. 2" enthalten ein DFBnet-internes Kürzel
+// (z. B. "KLA Frankfurt", "DJ KK F"), das für Besucher:innen nicht lesbar ist.
+// staffelLesbar() baut daraus die lesbare Form: Liga-/Spielform-Name (Teil vor
+// "·") + ", Gruppe N" (führende Nullen weg), DFBnet-Kürzel entfällt. Bei
+// Kinderfußball bleibt "Kinderfußball · …" erhalten, aber das DFBnet-Kürzel
+// ("F-Junioren"/"G-Junioren") wird durch die ausgeschriebene Spielform ersetzt
+// ("4+1" -> "4 gegen 4 plus Torwart", "4vs4"/"3vs3" -> "N gegen M") – nie
+// "4+1"/"4vs4" im sichtbaren Text (Prüf-Spezifikation Abschnitt 3.1). Bei
+// Staffeln ohne "Gr. N" (z. B. A-Jugend "Gruppenliga · AJGL Frankfurt") bleibt
+// nur der Liga-Name übrig. Geschütztes Leerzeichen vor der Gruppennummer,
+// damit "Gruppe 4" nicht am Zeilenende auseinanderbricht.
+export function staffelLesbar(staffel) {
+  const roh = String(staffel ?? "").trim();
+  if (!roh) return "";
+
+  const teile = roh.split(" · ");
+  const ligaTeil = (teile[0] ?? "").trim();
+  const rest = (teile[1] ?? "").trim();
+
+  const gruppeMatch = rest.match(/Gr\.\s*0*(\d+)\s*$/);
+  const gruppe = gruppeMatch ? gruppeMatch[1] : null;
+  const gruppeHtml = gruppe ? `, Gruppe&nbsp;${escapeHtml(gruppe)}` : "";
+
+  if (ligaTeil === "Kinderfußball") {
+    const plusEins = rest.match(/(\d+)\+1/);
+    const vsMatch = rest.match(/(\d+)\s*vs\s*(\d+)/i);
+    let spielform = "";
+    if (plusEins) spielform = `${plusEins[1]} gegen ${plusEins[1]} plus Torwart`;
+    else if (vsMatch) spielform = `${vsMatch[1]} gegen ${vsMatch[2]}`;
+    return spielform
+      ? `${escapeHtml(ligaTeil)} · ${escapeHtml(spielform)}${gruppeHtml}`
+      : `${escapeHtml(ligaTeil)}${gruppeHtml}`;
+  }
+
+  return `${escapeHtml(ligaTeil)}${gruppeHtml}`;
+}
+
+// ---------- Trainingsplatz aufgeteilt (W9, Abschnitt 4) ----------
+// team.platz ist ein einzelner String wie "Vereinsplatz Mainzer Landstraße
+// 480, linke Hälfte Tor 1" – für die Trainingszeilen wird nur noch der Teil
+// nach dem ersten Komma je Zeile gezeigt (der gemeinsame Ort steht einmal
+// darüber). Bei den Herren enthält team.platz keinen solchen Platzteil
+// (eigene, externe Anlage) – dort wird ort/teil in team.mjs nicht über diese
+// Funktion, sondern über einen festen Kurznamen ("Rebstock") gebildet.
+export function platzAufgeteilt(team) {
+  const roh = String(team?.platz ?? "");
+  const komma = roh.indexOf(",");
+  if (komma === -1) return { ort: roh.trim(), teil: "" };
+  return { ort: roh.slice(0, komma).trim(), teil: roh.slice(komma + 1).trim() };
+}
+
 // ---------- Datum und Zeit ----------
 
 const WOCHENTAGE_KURZ = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"]; // Index = Date#getDay()
@@ -202,6 +255,34 @@ export const SPIELE_KASTEN_SKRIPT = `<script>
 })();
 </script>`;
 
+// ---------- Telefon-Anzeige (W8, einheitliches Format "069 736868") -------
+
+// Die Rohwerte kommen aus unterschiedlichen Quellen (data/verein.json:
+// "+49 69 736868"; appack-Worksheet in data/geschaeftsstelle.json:
+// "069-736868") – für die Anzeige immer auf die lokale Schreibweise mit
+// Leerzeichen normiert ("069 736868"/"069 732193"), unabhängig vom
+// Ausgangsformat. Der href (telHref in impressum.mjs/kontakt.mjs) bleibt
+// von dieser Funktion unberührt.
+export function telefonAnzeige(nummer) {
+  const ziffern = String(nummer ?? "").replace(/\D/g, "");
+  if (!ziffern) return "";
+  let lokal = ziffern;
+  if (lokal.startsWith("49") && !lokal.startsWith("0")) lokal = `0${lokal.slice(2)}`;
+  else if (!lokal.startsWith("0")) lokal = `0${lokal}`;
+  if (lokal.startsWith("069")) return `069 ${lokal.slice(3)}`;
+  return lokal;
+}
+
+// ---------- Deutsche Anführungszeichen (W9, Abschnitt 3) ----------
+// Ersetzt gerade Anführungszeichen ("Text") aus Rohtexten (z. B.
+// data/zusatzangebote.json) durch deutsche Anführungszeichen („Text") – nur
+// eine Typografie-Korrektur der Glyphen, kein Eingriff in den Inhalt. Muss
+// auf dem UNescapten Rohtext laufen, bevor escapeHtml() das gerade
+// Anführungszeichen sonst zu "&quot;" verwandelt.
+export function deutscheAnfuehrungszeichen(text) {
+  return String(text ?? "").replace(/"([^"]*)"/g, "„$1“");
+}
+
 // ---------- Mail-Link mit <wbr> vor "@" und vor jedem "." danach ----------
 
 // P7-Korrektur A3: <wbr> nur noch direkt vor dem "@", nicht mehr vor jedem
@@ -219,6 +300,18 @@ export function mailLink(adresse, text) {
     anzeige = `${vorAt}<wbr>@${nachAt}`;
   }
   return `<a class="mail" href="mailto:${escapeHtml(adresse ?? "")}">${anzeige}</a>`;
+}
+
+// ---------- E-Mail-Textlink "E-Mail schreiben ›" (W8) ----------
+// In schmalen Personenkarten (Vorstand, Karneval, Kinderschutz) reichte die
+// nackte Adresse (mailLink()) für die Spaltenbreite oft nicht, siehe
+// .person__mail .mail (overflow-wrap:anywhere) als Sicherheitsnetz – jetzt
+// stattdessen ein kurzer Textlink, Adresse in href und title. Pfeil-Glyph
+// einheitlich "›" (wie ruecklink() mit "‹"), kein Emoji.
+export function eMailSchreibenLink(adresse) {
+  if (!adresse) return "";
+  const escaped = escapeHtml(adresse);
+  return `<a class="mail" href="mailto:${escaped}" title="${escaped}">E-Mail schreiben ›</a>`;
 }
 
 // ---------- Rücklink (W3, umgebaut in W7) ----------
@@ -329,15 +422,20 @@ export function spielZeile(spiel, { pfad, mitTeam, naechstes, ohneDatum, vergang
 
 // ---------- Trainings-Zeilen ----------
 
-// Liste von <li class="training"> aus team.training + team.platz, zum
-// Einsetzen in ein umschließendes <ul class="trainings" role="list">.
-export function trainingsZeilen(team) {
+// Liste von <li class="training"> aus team.training + Platzteil (W9,
+// Abschnitt 4): der gemeinsame Ort steht einmal oberhalb der Liste (siehe
+// hauptspalte() in team.mjs), jede Zeile zeigt nur noch "Tag · Uhrzeit ·
+// Platzteil". `teilOverride` erlaubt einen festen Kurznamen statt des
+// automatisch aus team.platz abgeleiteten Platzteils (Herren: "Rebstock",
+// eigene externe Anlage ohne Platzteil-Komma in team.platz).
+export function trainingsZeilen(team, teilOverride) {
+  const teil = teilOverride ?? platzAufgeteilt(team).teil;
   return (team?.training ?? [])
     .map(
       (t) => `<li class="training">
       <span class="training__tag">${escapeHtml(t.tag)}</span>
       <span class="training__zeit">${escapeHtml(t.von)}–${escapeHtml(t.bis)} Uhr</span>
-      <span class="training__platz">${escapeHtml(team.platz ?? "")}</span>
+      <span class="training__platz">${escapeHtml(teil)}</span>
     </li>`
     )
     .join("\n    ");
@@ -500,21 +598,30 @@ export function initialen(name) {
 
 // Statischer (build-seitiger) Rollentext je Trainer-Zeile: data/teams.json
 // kennt nur Namen, kein Geschlecht/keine Rolle je Person (anders als das
-// Worksheet mit firstContactTitle/secondContactTitle, z. B. "Trainerin"). Um
-// nie eine falsche Anrede zu raten, bleibt es bei der neutralen, bereits
-// vorher verwendeten Bezeichnung "Trainerteam" – nur bei genau einer Person
-// eindeutig "Trainer" (W7-Spezifikation Abschnitt 3: "'Trainer' … sonst
-// 'Trainerteam'"; die zusätzlichen Varianten "Trainerin"/"Co-Trainer" sind
-// eine offene Frage, siehe Abschlussbericht).
+// Worksheet mit firstContactTitle/secondContactTitle, z. B. "Trainerin"). W9,
+// Abschnitt 7 (Korrektur der W7-Vorgabe): immer neutral "Trainerteam", auch
+// bei genau einer Person – "Trainer" wäre bei einer Trainerin falsch, und
+// es gibt keine verlässliche Möglichkeit, das Geschlecht zu erkennen. Der
+// Parameter bleibt bestehen, falls er anderswo noch gebraucht wird.
 export function trainerRolleText(anzahl) {
-  return anzahl === 1 ? "Trainer" : "Trainerteam";
+  return "Trainerteam";
 }
 
 // Ein <span> je Trainer:in mit Initialen-Platzhalter (data-trainer-foto ist
 // der Index für trainerFotosSkript() unten), Name (fett) und Rolle (klein).
-export function trainerZeileHtml(name, index, rolleText) {
+// `bildHtml` (W9, Abschnitt 7): fertiges HTML für einen Rückfall-Platzhalter
+// (Vorstandsfoto über bild(), von team.mjs übergeben, da hilfen.mjs bewusst
+// keine Abhängigkeit zu bild.mjs hat) – muss selbst schon
+// data-trainer-foto="${index}" tragen, damit trainerFotosSkript() ein
+// echtes Worksheet-Foto weiterhin bevorzugt einsetzen kann (Reihenfolge:
+// Worksheet-Bild → Vorstandsfoto → Initialen). Ohne bildHtml bleibt der
+// bisherige Initialen-Platzhalter.
+export function trainerZeileHtml(name, index, rolleText, bildHtml) {
+  const bild =
+    bildHtml ??
+    `<span class="person-mini__bild person-mini__bild--platzhalter" data-trainer-foto="${index}" aria-hidden="true">${escapeHtml(initialen(name))}</span>`;
   return `<div class="person-mini">
-      <span class="person-mini__bild person-mini__bild--platzhalter" data-trainer-foto="${index}" aria-hidden="true">${escapeHtml(initialen(name))}</span>
+      ${bild}
       <span class="person-mini__text">
         <span class="person-mini__name">${escapeHtml(name)}</span>
         ${rolleText ? `<span class="person-mini__rolle meta">${escapeHtml(rolleText)}</span>` : ""}

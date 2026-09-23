@@ -2,6 +2,7 @@
 // fester Reihenfolge (Anmeldung, Verein, Kinder- und Jugendschutz).
 
 import { ruecklink } from "../../vorlagen/hilfen.mjs";
+import { downloadZeile } from "../../vorlagen/bausteine.mjs";
 
 // Diese Seite liegt immer unter "/verein/downloads/" (Tiefe 2), daher immer
 // "../../" (siehe pfadZurWurzel() in tools/build.mjs).
@@ -17,28 +18,6 @@ function escapeHtml(text) {
     .replaceAll('"', "&quot;");
 }
 
-// Titel als Link, darunter .meta "PDF · {seiten} Seiten · {kb} KB" (fehlende
-// Werte weggelassen; das Feld "hinweis" wird nie ausgegeben). W3, Abschnitt
-// 7: alle PDF-Links öffnen in einem neuen Fenster (target="_blank"
-// rel="noopener"), unabhängig davon, ob intern oder auf cdn.appack.de – die
-// bisherige Extra-Zeile "öffnet cdn.appack.de" entfällt (Serverkunde für
-// Besucher, siehe hinweisAbschnitt() unten für den ersetzenden Hinweis).
-function downloadZeile(eintrag) {
-  const istIntern = (eintrag.datei ?? "").startsWith("/");
-  const href = istIntern ? PFAD + eintrag.datei.replace(/^\//, "") : eintrag.datei;
-
-  const teile = ["PDF"];
-  // Singular/Plural (P5-Korrektur A2): "1 Seite" statt "1 Seiten".
-  if (eintrag.seiten) teile.push(`${eintrag.seiten} ${eintrag.seiten === 1 ? "Seite" : "Seiten"}`);
-  if (eintrag.kb) teile.push(`${eintrag.kb} KB`);
-  const metaText = teile.join(" · ");
-
-  return `<li class="download">
-      <a href="${escapeHtml(href)}" target="_blank" rel="noopener">${escapeHtml(eintrag.titel)}</a>
-      <span class="meta">${escapeHtml(metaText)}</span>
-    </li>`;
-}
-
 function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
@@ -52,7 +31,7 @@ function seitenkopfAbschnitt() {
 function gruppenAbschnitt(gruppe, downloads, index) {
   const eintraege = downloads.filter((d) => d.gruppe === gruppe);
   if (!eintraege.length) return "";
-  const zeilen = eintraege.map(downloadZeile).join("\n      ");
+  const zeilen = eintraege.map((d) => downloadZeile(d, PFAD)).join("\n      ");
   const hellKlasse = index % 2 === 1 ? " abschnitt--hell" : "";
 
   return `<section class="abschnitt${hellKlasse}">
@@ -65,23 +44,16 @@ function gruppenAbschnitt(gruppe, downloads, index) {
 </section>`;
 }
 
-function hinweisAbschnitt() {
-  return `<section class="abschnitt">
-  <div class="container">
-    <div class="hinweis hinweis--info">
-      <p style="margin:0;">Alle Dokumente öffnen sich als PDF in einem neuen Fenster.</p>
-    </div>
-  </div>
-</section>`;
-}
-
 export function seite(daten) {
   const downloads = daten.downloads ?? [];
 
+  // W8-Korrektur: Hinweis "Alle Dokumente öffnen sich als PDF in einem neuen
+  // Fenster." entfernt (Prüfer-Befund) – die Links selbst öffnen weiterhin in
+  // einem neuen Fenster (target="_blank", siehe downloadZeile() in
+  // bausteine.mjs), nur der erklärende Satz dazu entfällt.
   const inhalt = [
     seitenkopfAbschnitt(),
     ...GRUPPEN_REIHENFOLGE.map((g, i) => gruppenAbschnitt(g, downloads, i)),
-    hinweisAbschnitt(),
   ].join("\n");
 
   return {

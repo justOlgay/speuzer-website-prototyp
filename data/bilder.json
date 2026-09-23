@@ -1,4 +1,25 @@
 {
+  "angebot-regista-academy": {
+    "breite": 1000,
+    "hoehe": 1000,
+    "varianten": {
+      "480": {
+        "avif": "angebot-regista-academy-480.avif",
+        "webp": "angebot-regista-academy-480.webp",
+        "jpg": "angebot-regista-academy-480.jpg"
+      },
+      "960": {
+        "avif": "angebot-regista-academy-960.avif",
+        "webp": "angebot-regista-academy-960.webp",
+        "jpg": "angebot-regista-academy-960.jpg"
+      },
+      "1000": {
+        "avif": "angebot-regista-academy-1000.avif",
+        "webp": "angebot-regista-academy-1000.webp",
+        "jpg": "angebot-regista-academy-1000.jpg"
+      }
+    }
+  },
   "nachher-downloads-handy": {
     "breite": 780,
     "hoehe": 1688,

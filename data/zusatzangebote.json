@@ -2,10 +2,14 @@
   {
     "name": "Fußballschule Regista Academy",
     "art": "kostenpflichtiges Zusatzangebot, auch für Externe",
-    "leitung": "Raphaele Lorenzo Gomoll",
+    "leitung": null,
     "text": "Das ist die Regista Academy, ein kostenpflichtiges Zusatzangebot für Spieler – nicht nur aus unserem Verein. Geleitet wird sie von einem erfahrenen Trainer mit Erfahrung als Scout und Jugendtrainer (u. a. bei Eintracht Frankfurt und TuS Makkabi Frankfurt) sowie einem Bachelor in International Sports Management. Das Angebot umfasst individuelles Fördertraining zur gezielten technischen, taktischen und persönlichen Weiterentwicklung sowie ergänzende Formate wie Feriencamps und Talentetage. Die Trainingszeiten finden mehrfach wöchentlich statt und werden individuell nach Absprache vereinbart.",
     "mail": null,
-    "quelle": "Beschreibung aus dem Worksheet Abteilungen_db der Vereins-App (Stand 21.09.2026), eine Quelle für App und Website"
+    "quelle": "Beschreibung aus dem Worksheet Abteilungen_db der Vereins-App (Stand 21.09.2026), eine Quelle für App und Website",
+    "logo": {
+      "quelle": "angebot-regista-academy"
+    },
+    "hinweis_leitung": "Leitung bewusst ohne Namen (Olgay, 23.09.2026, bis auf Widerruf); Kontakt über die Geschäftsstelle."
   },
   {
     "name": "Fußballschule-Athletik VM Elite",
@@ -13,6 +17,9 @@
     "leitung": "Vassilios Miamis",
     "text": "Das ist die Fußballschule-Athletik \"VM ELITE\", unser Zusatzangebot für individuelles Athletik- und Performancetraining. Geleitet wird sie von Vassilios Miamis, C-Lizenz-Trainer, Cheftrainer unserer D1-Jugend und Fitnessstudio-Trainer sowie Athletik-Coach. Das Training richtet sich an Kinder, Jugendliche und Erwachsene aller Leistungsstufen – vom Anfänger bis zum Fortgeschrittenen – und steht auch Teilnehmern von außerhalb unseres Vereins offen. Die Trainingszeiten werden individuell nach Absprache vereinbart.",
     "mail": "geschaeftsstelle@sportfreunde04.de",
-    "quelle": "Beschreibung aus dem Worksheet Abteilungen_db der Vereins-App (Stand 21.09.2026), eine Quelle für App und Website"
+    "quelle": "Beschreibung aus dem Worksheet Abteilungen_db der Vereins-App (Stand 21.09.2026), eine Quelle für App und Website",
+    "logo": {
+      "quelle": "sponsor-fuballschule-vm-elite"
+    }
   }
 ]

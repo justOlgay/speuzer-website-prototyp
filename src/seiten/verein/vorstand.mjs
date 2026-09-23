@@ -2,21 +2,12 @@
 // Vorstand, Jugendleitung, Senioren, Karnevalabteilung) mit Personen-Karten
 // aus data/vorstand.json, zugeordnet über das Feld "funktion".
 
-import { readFileSync } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { bild } from "../../vorlagen/bild.mjs";
 import { mailLink, ruecklink } from "../../vorlagen/hilfen.mjs";
+import { personKarte, unbesetztZeile } from "../../vorlagen/bausteine.mjs";
 
 // Diese Seite liegt immer unter "/verein/vorstand/" (Tiefe 2), daher immer
 // "../../" (siehe pfadZurWurzel() in tools/build.mjs).
 const PFAD = "../../";
-
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
-
-function liesWappenBlau() {
-  return readFileSync(path.join(ROOT, "assets", "logo", "wappen-blau.svg"), "utf8");
-}
 
 function escapeHtml(text) {
   return String(text ?? "")
@@ -24,34 +15,6 @@ function escapeHtml(text) {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
-}
-
-// Personen-Karte – mit Foto oder Wappen-Platzhalter bei --blau-100 (siehe
-// .person__bild--platzhalter in komponenten.css). Der Eintrag "Schriftführer"
-// hat name: null – dann steht "derzeit nicht besetzt" statt des Namens.
-// prioritaet (P11, Plan-Abschnitt B3): für die ersten vier Personen-Karten
-// dieser Seite gesetzt (siehe seite() unten, prioritaetsSet).
-function personKarte(person, daten, { prioritaet = false } = {}) {
-  const bildHtml = person?.foto
-    ? bild({
-        pfad: PFAD,
-        daten,
-        name: person.foto.quelle,
-        alt: person.name ? `Porträt ${person.name}` : "",
-        sizes: "(min-width: 640px) 260px, 50vw",
-        klasse: "person__bild",
-        prioritaet,
-      })
-    : `<span class="person__bild person__bild--platzhalter" aria-hidden="true">${liesWappenBlau()}</span>`;
-  const nameHtml = person?.name ? escapeHtml(person.name) : "derzeit nicht besetzt";
-  const mailHtml = person?.mail ? `<p class="person__mail">${mailLink(person.mail)}</p>` : "";
-
-  return `<div class="person">
-      ${bildHtml}
-      <p class="person__name">${nameHtml}</p>
-      <p class="person__funktion">${escapeHtml(person?.funktion ?? "")}</p>
-      ${mailHtml}
-    </div>`;
 }
 
 // Personen nach "funktion" gruppieren (Team Jugendleitung kommt zweimal vor).
@@ -63,19 +26,29 @@ function gruppierenNachFunktion(vorstand) {
   return map;
 }
 
+// W8-Korrektur: 4er-Raster auf volle Containerbreite (.raster--4 statt des
+// engeren .raster--personen, das Karten auf max. 260px begrenzt und linksbündig
+// stehen lässt). Der Eintrag "Schriftführer" hat name:null (unbesetzt) – der
+// bekommt keine Karte mehr, sondern eine eigene Textzeile (unbesetztZeile()).
 function gruppenAbschnitt({ titel, funktionen, nachFunktion, daten, hell, prioritaetsSet }) {
   const personen = funktionen.flatMap((f) => nachFunktion[f] ?? []);
-  const karten = personen
-    .map((p) => personKarte(p, daten, { prioritaet: prioritaetsSet.has(p) }))
+  const besetzt = personen.filter((p) => p.name);
+  const unbesetzt = personen.filter((p) => !p.name);
+  const karten = besetzt
+    .map((p) => personKarte(p, daten, { pfad: PFAD, prioritaet: prioritaetsSet.has(p) }))
     .join("\n      ");
   const hellKlasse = hell ? " abschnitt--hell" : "";
+  const unbesetztHtml = unbesetzt
+    .map((p) => unbesetztZeile(p.funktion === "Schriftführer" ? "Schriftführung" : p.funktion, PFAD))
+    .join("\n    ");
 
   return `<section class="abschnitt${hellKlasse}">
   <div class="container fluss">
     <h2>${escapeHtml(titel)}</h2>
-    <div class="raster raster--personen">
+    <div class="raster raster--4">
       ${karten}
     </div>
+    ${unbesetztHtml}
   </div>
 </section>`;
 }

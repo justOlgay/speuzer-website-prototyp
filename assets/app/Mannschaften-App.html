@@ -176,6 +176,22 @@ svg { display: block; flex: 0 0 auto; }
 
 .inhalt > .abschnittstitel:first-child { margin-top: 0; }
 
+/* Seitenkopf-Baustein (W8, App-weit): einheitlicher, kartenloser
+   Einleitungssatz direkt unter dem (unsichtbaren) h1 jeder Seite – die
+   App-Kopfleiste zeigt den Seitentitel bereits, ein eigener Kartentitel
+   wäre doppelt. Gleicher Abstand nach unten wie ein Abschnittstitel. */
+.seitenkopf-lead {
+  margin: 0 0 var(--sp-5);
+  font-size: 15px;
+  color: var(--ink-2);
+}
+
+/* Aufklapper (W8, App-weit): kein natives Dreieck "▶" vor <summary> – der
+   Chevron/"›" steht stattdessen im Text der jeweiligen Beschriftung. */
+summary { list-style: none; cursor: pointer; }
+summary::-webkit-details-marker { display: none; }
+summary::marker { content: ""; }
+
 .knopf {
   display: inline-flex;
   align-items: center;
@@ -240,20 +256,29 @@ svg { display: block; flex: 0 0 auto; }
   text-align: center;
 }
 
-/* Mannschaften-App.html – statische Workspace-Seite (W6, Abschnitt B1).
+/* Mannschaften-App.html – statische Workspace-Seite (W6, Abschnitt B1;
+   Bausteine/Reihenfolge seit W8 an mannschaften/index.mjs und
+   mannschaften/<team>.mjs angeglichen, siehe W8-Spezifikation Abschnitt 1).
    Ersetzt in der App den bisherigen Weg über das Modul "Mannschaften"
    (Mannschaften_v3.tpl) + das separate Modul "Spielplan & Tabellen"
-   (Spielplan-App.html): eine Seite mit Listenansicht (Teamkarten aus dem
-   Abteilungen-Worksheet) und Detailansicht je Team (Spiele, Tabelle bzw.
-   Kinderfestival – "Nächstes Spiel" als eigener Abschnitt ist seit W7
-   entfallen, siehe baueSpieleKarte()), Wechsel über location.hash +
-   location.reload() (die
-   FUSSBALL.DE-Widgets initialisieren nur beim Laden, siehe Kommentar unten).
-   Wird von tools/app-optik/tpl-bauen.mjs (Ausgabeart "statisch") NICHT mit
-   dem appack-FreeMarker-Titelausdruck versehen (fester <title>), sondern 1:1
-   nach assets/app/Mannschaften-App.html geschrieben und dort unter
-   workspace/Mannschaften-App.html ausgeliefert (Domain-Freigabe der
-   FUSSBALL.DE-Widgets gilt nur für cdn.appack.de, siehe LIESMICH.md). */
+   (Spielplan-App.html): eine Seite mit Listenansicht (Teamkarten) und
+   Detailansicht je Team (Training, Spiele/Tabelle bzw. Kinderfestival,
+   Trainerteam, Heimspiele, Kalender, Weitere Mannschaften), Wechsel über
+   location.hash + location.reload() (die FUSSBALL.DE-Widgets initialisieren
+   nur beim Laden, siehe Kommentar unten).
+   W8, Grundsatz Daten: Name/Jahrgang/Staffel/Training/Trainer-Namen/
+   Heimspiele/Kalenderdateien/Gruppe kommen jetzt aus [{"slug":"herren","name":"1. Herrenmannschaft","kurz":"Herren","kategorie":"Senioren","gruppe":"Senioren","jahrgang":null,"staffel":"Kreisliga A · KLA Frankfurt Gr. 1","spielbetrieb":"Meisterschaft, Kreispokal","training":[{"tag":"Mittwoch","von":"19:30","bis":"21:00"},{"tag":"Freitag","von":"19:30","bis":"21:00"}],"platz":"Bezirkssportanlage am Rebstock (Anlage SW Griesheim), Am Römerhof 9, 60486 Frankfurt","heimspiele":"Am Römerhof 9, 60486 Frankfurt (Anlage SW Griesheim)","trainer":["Martin Reyschmidt","Nick Janovsky"],"mail":"senioren_mannschaft@sportfreunde04.de","fussballde_id":"011MICFB14000000VTVG0001VTR8C1K7","csv":"HERREN","tabelle":true,"kalender":"herren.ics","trainingsKalender":"training-herren.ics","beschreibung":"Das ist unsere 1. Herrenmannschaft, die in der Kreisliga A spielt. Trainer sind Martin Reyschmidt und Nick Janovsky. Trainiert wird extern auf der Anlage von SW Griesheim, mittwochs und freitags, je 19:30–21:00 Uhr; auch die Heimspiele finden dort statt."},{"slug":"a-jugend","name":"A-Jugend","kurz":"A-Jugend","kategorie":"Jugend","gruppe":"Jugend","jahrgang":"2008/2009","staffel":"Gruppenliga · AJGL Frankfurt","spielbetrieb":"Meisterschaft, Kreispokal","training":[{"tag":"Montag","von":"19:00","bis":"21:00"},{"tag":"Mittwoch","von":"19:00","bis":"20:30"}],"platz":"Vereinsplatz Mainzer Landstraße 480, linke Hälfte Tor 1","heimspiele":"Am Römerhof 9, 60486 Frankfurt (Anlage SW Griesheim)","trainer":["Ahmed Douzi","Hüseyin Ulutürk"],"mail":"trainer_a_jugend@sportfreunde04.de","fussballde_id":"019ORCB50G000000VV0AG80NVUQ1MD7G","csv":"A","tabelle":true,"kalender":"a.ics","trainingsKalender":"training-a.ics","beschreibung":"Das ist unsere A-Jugend, Jahrgang 2008/2009, die in der Gruppenliga spielt. Trainer sind Ahmed Douzi und Hüseyin Ulutürk. Trainingszeiten: montags und mittwochs, je 19:00–20:30 Uhr. Trainiert wird auf unserem eigenen Platz, die Heimspiele finden jedoch auf dem Platz von SW Griesheim statt."},{"slug":"d1","name":"D1-Jugend","kurz":"D1","kategorie":"Jugend","gruppe":"Jugend","jahrgang":"2014","staffel":"Kreisliga A · DJKL F Gr. 1","spielbetrieb":"Meisterschaft, Kreispokal","training":[{"tag":"Dienstag","von":"17:30","bis":"19:30"},{"tag":"Mittwoch","von":"17:30","bis":"19:00"},{"tag":"Freitag","von":"17:30","bis":"19:30"}],"platz":"Vereinsplatz Mainzer Landstraße 480, linke Hälfte Tor 1","heimspiele":"Mainzer Landstraße 480, 60326 Frankfurt am Main","trainer":["Vassilios Miamis","Daniel Heyer"],"mail":"trainer_d_jugend@sportfreunde04.de","fussballde_id":"011MIE88PK000000VTVG0001VTR8C1K7","csv":"D1","tabelle":true,"kalender":"d1.ics","trainingsKalender":"training-d1.ics","beschreibung":"Das ist unsere D1-Jugend, unsere Leistungsmannschaft im Jahrgang 2014, die in der Kreisklasse spielt. Trainer sind Vassilios Miamis und Daniel Heyer. Trainingszeiten: dienstags 17:30–19:30 Uhr, mittwochs 17:30–19:00 Uhr und freitags 17:30–19:30 Uhr."},{"slug":"d2","name":"D2-Jugend","kurz":"D2","kategorie":"Jugend","gruppe":"Jugend","jahrgang":"2015","staffel":"1. Kreisklasse · DJ KK F Gr. 05","spielbetrieb":"Meisterschaft","training":[{"tag":"Dienstag","von":"17:30","bis":"19:30"},{"tag":"Mittwoch","von":"17:30","bis":"19:00"},{"tag":"Freitag","von":"17:30","bis":"19:30"}],"platz":"Vereinsplatz Mainzer Landstraße 480, linke Hälfte Tor 2","heimspiele":"Mainzer Landstraße 480, 60326 Frankfurt am Main","trainer":["Beyhun Gelberi","Damian Porombka-Kepa"],"mail":"trainer_d_jugend@sportfreunde04.de","fussballde_id":"011MIF9LDC000000VTVG0001VTR8C1K7","csv":"D2","tabelle":true,"kalender":"d2.ics","trainingsKalender":"training-d2.ics","beschreibung":"Das ist unsere D2-Jugend, unsere Leistungsmannschaft im Jahrgang 2015. Trainer sind Beyhun Gelberi und Damin Porombka-Kepa. Trainingszeiten: dienstags 17:30–19:30 Uhr, mittwochs 17:30–19:00 Uhr und freitags 17:30–19:30 Uhr."},{"slug":"d3","name":"D3-Jugend","kurz":"D3","kategorie":"Jugend","gruppe":"Jugend","jahrgang":"2014/2015","staffel":"1. Kreisklasse · DJ KK F Gr. 04","spielbetrieb":"Meisterschaft","training":[{"tag":"Dienstag","von":"17:30","bis":"19:30"},{"tag":"Freitag","von":"17:30","bis":"19:30"}],"platz":"Vereinsplatz Mainzer Landstraße 480, rechte Hälfte Tor 1","heimspiele":"Mainzer Landstraße 480, 60326 Frankfurt am Main","trainer":["Olgay Özkan","Marcel Hogg","Flo Lehr"],"mail":"trainer_d_jugend@sportfreunde04.de","fussballde_id":"02USD4SHUG000000VS5489BRVS0D3BPJ","csv":"D3","tabelle":true,"kalender":"d3.ics","trainingsKalender":"training-d3.ics","beschreibung":"Das ist unsere D3-Jugend, unsere Perspektivmannschaft im Jahrgang 2014/2015. Trainer sind Olgay Özkan, Marcel Hogg und Flo Lehr. Trainingszeiten: dienstags & freitags, je 17:30–19:30 Uhr."},{"slug":"e1","name":"E1-Jugend","kurz":"E1","kategorie":"Jugend","gruppe":"Jugend","jahrgang":"2016","staffel":"1. Kreisklasse · EJ Quali Gr. 08","spielbetrieb":"Qualifikationsrunde, Kreispokal; Hauptrunde ab Oktober","training":[{"tag":"Montag","von":"17:30","bis":"19:00"},{"tag":"Mittwoch","von":"17:30","bis":"19:00"},{"tag":"Donnerstag","von":"17:30","bis":"19:00"}],"platz":"Vereinsplatz Mainzer Landstraße 480, rechte Hälfte","heimspiele":"Mainzer Landstraße 480, 60326 Frankfurt am Main","trainer":["Mohamed Bardouch","Mario Orsolic","Bernhard Henrich"],"mail":"trainer_e_jugend@sportfreunde04.de","fussballde_id":"011MIDBD8C000000VTVG0001VTR8C1K7","csv":"E1","tabelle":true,"kalender":"e1.ics","trainingsKalender":"training-e1.ics","beschreibung":"Das ist unsere E1-Jugend, unsere Leistungsmannschaft im Jahrgang 2016. Trainer sind Mohamed Bardouch, Mario Orsolic und Bernhard Henrich. Trainingszeiten: montags, mittwochs & donnerstags, je 17:30–19:00 Uhr."},{"slug":"e2","name":"E2-Jugend","kurz":"E2","kategorie":"Jugend","gruppe":"Jugend","jahrgang":"2017","staffel":"1. Kreisklasse · EJ Quali Gr. 18","spielbetrieb":"Qualifikationsrunde; Hauptrunde ab Oktober","training":[{"tag":"Montag","von":"17:30","bis":"19:00"},{"tag":"Dienstag","von":"16:30","bis":"18:00"},{"tag":"Donnerstag","von":"17:30","bis":"19:00"}],"platz":"Vereinsplatz Mainzer Landstraße 480, linke bzw. rechte Hälfte","heimspiele":"Mainzer Landstraße 480, 60326 Frankfurt am Main","trainer":["Markus Rees","Samson Tesfay"],"mail":"trainer_e_jugend@sportfreunde04.de","fussballde_id":"011MIE1KH4000000VTVG0001VTR8C1K7","csv":"E2","tabelle":true,"kalender":"e2.ics","trainingsKalender":"training-e2.ics","beschreibung":"Das ist unsere E2-Jugend, unsere Leistungsmannschaft im Jahrgang 2017. Trainer sind Markus Rees und Samson Tesfay. Trainingszeiten: montags 17:30–19:00 Uhr und dienstags 16:30–18:00 Uhr."},{"slug":"e3","name":"E3-Jugend","kurz":"E3","kategorie":"Jugend","gruppe":"Jugend","jahrgang":"2016/2017","staffel":"1. Kreisklasse · EJ Quali Gr. 22","spielbetrieb":"Qualifikationsrunde; Hauptrunde ab Oktober","training":[{"tag":"Montag","von":"16:00","bis":"17:30"},{"tag":"Mittwoch","von":"16:00","bis":"17:30"}],"platz":"Vereinsplatz Mainzer Landstraße 480, rechte Hälfte","heimspiele":"Mainzer Landstraße 480, 60326 Frankfurt am Main","trainer":["Ümit Maras"],"mail":"trainer_e_jugend@sportfreunde04.de","fussballde_id":"02PS0CFJCO000000VS5489B1VVQNIHJA","csv":"E3","tabelle":true,"kalender":"e3.ics","trainingsKalender":"training-e3.ics","beschreibung":"Das ist unsere E3-Jugend, unsere Perspektivmannschaft im Jahrgang 2016/2017. Trainer ist Ümit Maras. Trainingszeiten: montags & mittwochs, je 16:00–17:30 Uhr."},{"slug":"f1","name":"F1-Jugend","kurz":"F1","kategorie":"Jugend","gruppe":"Kinderfußball","jahrgang":"2018","staffel":"Kinderfußball · F-Junioren 4+1 Gr. 2","spielbetrieb":"Kinderfestivals (keine Tabelle)","training":[{"tag":"Montag","von":"17:30","bis":"19:00"},{"tag":"Mittwoch","von":"17:30","bis":"19:00"}],"platz":"Vereinsplatz Mainzer Landstraße 480, linke Hälfte Tor 1 bzw. rechte Hälfte","heimspiele":"Mainzer Landstraße 480, 60326 Frankfurt am Main","trainer":["Ralf Schwager"],"mail":"trainer_f_jugend@sportfreunde04.de","fussballde_id":null,"csv":"F1","tabelle":false,"kalender":"f1.ics","trainingsKalender":"training-f1.ics","beschreibung":"Das ist unsere F1-Jugend, Jahrgang 2018. Trainer ist Ralf Schwager. Trainingszeiten: montags & mittwochs, je 17:30–19:00 Uhr."},{"slug":"f2","name":"F2-Jugend","kurz":"F2","kategorie":"Jugend","gruppe":"Kinderfußball","jahrgang":"2019/2020","staffel":"Kinderfußball · F-Junioren 4vs4 Gr. 4","spielbetrieb":"Kinderfestivals (keine Tabelle)","training":[{"tag":"Dienstag","von":"17:30","bis":"19:00"},{"tag":"Donnerstag","von":"17:30","bis":"19:00"}],"platz":"Vereinsplatz Mainzer Landstraße 480, Käfig bzw. rechte Hälfte","heimspiele":"Mainzer Landstraße 480, 60326 Frankfurt am Main","trainer":["Martin Gehn","Ercan Mutlu"],"mail":"trainer_f_jugend@sportfreunde04.de","fussballde_id":null,"csv":"F2","tabelle":false,"kalender":"f2.ics","trainingsKalender":"training-f2.ics","beschreibung":"Das ist unsere F2-Jugend, Jahrgang 2019/2020. Trainer sind Martin Gehn und Ercan Mutlu. Trainingszeiten: dienstags & donnerstags, je 17:30–19:00 Uhr."},{"slug":"g-jugend","name":"G-Jugend (Bambinis)","kurz":"G-Jugend","kategorie":"Jugend","gruppe":"Kinderfußball","jahrgang":"2021 und jünger","staffel":"Kinderfußball · G-Junioren 3vs3 Gr. 4","spielbetrieb":"Kinderfestivals (keine Tabelle)","training":[{"tag":"Montag","von":"17:30","bis":"19:00"}],"platz":"Vereinsplatz Mainzer Landstraße 480, Court","heimspiele":"Mainzer Landstraße 480, 60326 Frankfurt am Main","trainer":["Biljana Trninic"],"mail":"trainer_g_jugend@sportfreunde04.de","fussballde_id":null,"csv":"G1","tabelle":false,"kalender":"g1.ics","trainingsKalender":"training-g1.ics","beschreibung":"Das ist unsere Bambini-Mannschaft, der Einstieg in den Vereinsfußball für unsere Jüngsten. Trainiert werden hier die Jahrgänge 2021 und jünger, Trainerin ist Biljana Trninic. Trainingszeit: montags 17:30–19:00 Uhr."}]
+   (data/teams.json, dieselbe Quelle wie mannschaften/index.mjs und
+   mannschaften/<team>.mjs), Fußballschulen aus [{"name":"Fußballschule Regista Academy","art":"kostenpflichtiges Zusatzangebot, auch für Externe","leitung":null,"text":"Das ist die Regista Academy, ein kostenpflichtiges Zusatzangebot für Spieler – nicht nur aus unserem Verein. Geleitet wird sie von einem erfahrenen Trainer mit Erfahrung als Scout und Jugendtrainer (u. a. bei Eintracht Frankfurt und TuS Makkabi Frankfurt) sowie einem Bachelor in International Sports Management. Das Angebot umfasst individuelles Fördertraining zur gezielten technischen, taktischen und persönlichen Weiterentwicklung sowie ergänzende Formate wie Feriencamps und Talentetage. Die Trainingszeiten finden mehrfach wöchentlich statt und werden individuell nach Absprache vereinbart.","mail":null,"quelle":"Beschreibung aus dem Worksheet Abteilungen_db der Vereins-App (Stand 21.09.2026), eine Quelle für App und Website","logo":{"quelle":"angebot-regista-academy"},"hinweis_leitung":"Leitung bewusst ohne Namen (Olgay, 23.09.2026, bis auf Widerruf); Kontakt über die Geschäftsstelle."},{"name":"Fußballschule-Athletik VM Elite","art":"kostenpflichtiges Zusatzangebot, auch für Externe","leitung":"Vassilios Miamis","text":"Das ist die Fußballschule-Athletik \"VM ELITE\", unser Zusatzangebot für individuelles Athletik- und Performancetraining. Geleitet wird sie von Vassilios Miamis, C-Lizenz-Trainer, Cheftrainer unserer D1-Jugend und Fitnessstudio-Trainer sowie Athletik-Coach. Das Training richtet sich an Kinder, Jugendliche und Erwachsene aller Leistungsstufen – vom Anfänger bis zum Fortgeschrittenen – und steht auch Teilnehmern von außerhalb unseres Vereins offen. Die Trainingszeiten werden individuell nach Absprache vereinbart.","mail":"geschaeftsstelle@sportfreunde04.de","quelle":"Beschreibung aus dem Worksheet Abteilungen_db der Vereins-App (Stand 21.09.2026), eine Quelle für App und Website","logo":{"quelle":"sponsor-fuballschule-vm-elite"}}]
+   (data/zusatzangebote.json), Ferienhinweis/Sportstätte/Kalenderbasis aus
+   {"name_register":"Frankfurter Fußballverein Sportfreunde 1904 e. V.","name_kurz":"FFV Sportfreunde 04","spitzname":"Speuzer","gegruendet":"15. Mai 1904","gruendungsname":"Frankfurter FC Britannia","umbenannt":"1919","stadtteil":"Gallus","sportstaette":{"strasse":"Mainzer Landstraße 480","plz":"60326","ort":"Frankfurt am Main"},"post":{"postfach":"Postfach 190442","plz":"60091","ort":"Frankfurt am Main"},"mail":"geschaeftsstelle@sportfreunde04.de","tel_geschaeftsstelle":"+49 69 736868","tel_platzwart":"+49 69 732193","register":"Amtsgericht Frankfurt am Main, VR 4727","vorsitz":["Melanie Seipp (1. Vorsitzende)","Uwe Korndörfer (2. Vorsitzender)"],"vertretung":["Melanie Seipp (1. Vorsitzende)","Uwe Korndörfer (2. Vorsitzender)"],"instagram":"https://www.instagram.com/speuzer_ffm/","facebook":"https://www.facebook.com/groups/223133414377924/","fanshop":"https://sportfreunde04.fan12.de/","teamshop":"https://www.11teamsports.com/de-de/clubshop/frankfurter-fussballvereine-sportfreunde-04/","mails":{"jugendleitung":"jugendleitung@sportfreunde04.de","kassierer":"kassierer@sportfreunde04.de","kinderschutz":"kinderschutzbeauftragter@sportfreunde04.de","karneval":"karnevalabteilung@sportfreunde04.de","senioren":"spielausschuss_senioren@sportfreunde04.de","vorstand":"vorstand@sportfreunde04.de"},"hinweise":{"parken":"Der Parkplatz am Vereinsgelände ist wegen des Neubaus des Funktionsgebäudes voraussichtlich bis Ende Januar 2027 gesperrt. Der Zugang zum Gelände ist über den Hintereingang am „Haus der Jugend“ (Pavillon) möglich.","parken_quelle":"App-News vom 21.07.2026","ferien":"In den hessischen Schulferien und an Feiertagen findet in der Regel kein Training statt. Ausnahmen sagt das Trainerteam an."},"oepnv":null,"anfahrt_hinweis":"Zugang zum Vereinsgelände derzeit über den Hintereingang am „Haus der Jugend“ (Pavillon); der Parkplatz ist wegen des Neubaus bis voraussichtlich Ende Januar 2027 gesperrt.","gruendung_jahr":1904,"anzahl_mannschaften":11,"karten":{"apple":"https://maps.apple.com/?q=Mainzer+Landstra%C3%9Fe+480,+60326+Frankfurt+am+Main","google":"https://www.google.com/maps/search/?api=1&query=Mainzer+Landstra%C3%9Fe+480%2C+60326+Frankfurt+am+Main"},"kalender_basis":"https://justolgay.github.io/speuzer-spielplan/"} (data/verein.json) – von tools/app-optik/tpl-bauen.mjs
+   zur Bauzeit eingesetzt (kein appack-FreeMarker-Ausdruck in dieser
+   statischen Datei). Live aus dem Workbook kommen nur noch: Trainerporträts
+   (Übersicht-Worksheet, sliderImage1…5, sowie als Ausweich das
+   Ansprechpartner-Worksheet, Feld ansImg, per Namensgleichheit) und die
+   Logos der Fußballschulen (Übersicht-Worksheet, sliderImage1/
+   categoryImage, per Namensgleichheit) – Personenfotos/Logos bleiben damit
+   ausschließlich zur Laufzeit geladen, nie im Repo. */
 
 .visually-hidden {
   position: absolute;
@@ -294,17 +319,39 @@ svg { display: block; flex: 0 0 auto; }
   gap: var(--sp-4);
 }
 
-/* Fotos und Logos vollstaendig zeigen (kein Beschnitt von Koepfen oder
-   Logos): feste Hoehe, Bild eingepasst, ruhige Flaeche in Vereinsblau-50. */
-.team-karte__bild {
+.mannschaften-liste--kompakt { gap: var(--sp-3); }
+
+/* Die ganze Teamkarte ist ein Link ins Team (W8, Befund 1: kein zweiter
+   Knopf, keine E-Mail-Knöpfe, kein Aufklapper in der Liste). */
+.team-karte--link {
   display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.team-karte--kompakt { padding: var(--sp-3) var(--sp-4); }
+
+/* Fotos und Logos vollstaendig zeigen (kein Beschnitt von Koepfen oder
+   Logos): feste Hoehe, Bild eingepasst, ruhige Flaeche in Vereinsblau-50 –
+   als eigene Box IMMER vorhanden (W8, Befund 1: "Logos einheitlich, gleich
+   große helle Box"), auch bevor/ohne ein zur Laufzeit geladenes Bild. */
+.team-karte__bild {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 200px;
-  object-fit: contain;
-  object-position: center;
   background: var(--blau-50);
   border-radius: var(--r-md);
   margin-bottom: var(--sp-3);
+}
+
+.team-karte__bild img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
 }
 
 .team-karte__titel {
@@ -313,6 +360,17 @@ svg { display: block; flex: 0 0 auto; }
   font-size: 22px;
   margin: 0 0 4px;
   color: var(--blau-950);
+}
+
+/* Teamtitel der Detailansicht: eine Stufe größer als .abschnittstitel
+   (W8, Befund 1), direkt unter dem Zurück-Link. */
+.team-titel {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 24px;
+  text-transform: uppercase;
+  color: var(--blau-950);
+  margin: var(--sp-4) 0 var(--sp-1);
 }
 
 .team-karte__untertitel {
@@ -328,7 +386,6 @@ svg { display: block; flex: 0 0 auto; }
 }
 
 .team-karte__details summary {
-  cursor: pointer;
   font-weight: 600;
   font-size: 14px;
   color: var(--blau-700);
@@ -338,39 +395,44 @@ svg { display: block; flex: 0 0 auto; }
   margin-top: var(--sp-2);
 }
 
+/* Trainingszeiten (Liste in der Teamkarte UND in der Detailansicht):
+   geschützt vor Umbruch mitten in der Zeitspanne (W8, App-weit). */
 .team-karte__zeiten {
   list-style: none;
   padding: 0;
   margin: var(--sp-3) 0 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--sp-2);
   font-size: 13px;
   color: var(--ink-2);
 }
 
-.team-karte__kontakt {
+.team-karte__zeiten li:first-child { margin-top: 0; }
+
+.zeitspanne { white-space: nowrap; }
+
+.person-mini-liste {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   gap: var(--sp-3);
-  flex-wrap: nowrap; /* W7b: Knopf bleibt rechts neben dem Namen */
-  margin-top: var(--sp-3);
-  padding-top: var(--sp-3);
-  border-top: 1px solid var(--line);
+  margin-bottom: var(--sp-3);
 }
 
-/* W7, Abschnitt 3: Trainerporträt (40px, kleiner als die 48px auf der
-   Website) + Name/Titel nebeneinander, als gemeinsamer erster Flex-Kind von
-   .team-karte__kontakt (zweites Kind bleibt .team-karte__kontakt-aktionen,
-   space-between wie bisher). */
-.team-karte__kontakt-person {
+.person-mini {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
-  min-width: 0;
-  flex: 1 1 auto;
 }
+
+.teamtext { margin: var(--sp-2) 0 var(--sp-2); font-size: 15px; line-height: 1.5; color: var(--ink-2); }
+.angebot-karte { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+.angebot-karte__kopf { display: flex; align-items: center; gap: 12px; }
+.angebot-karte__logo { flex: 0 0 64px; width: 64px; height: 64px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--surface); object-fit: contain; }
+.angebot-karte__titel { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 0; }
+.angebot-karte__titel .team-karte__titel { margin: 0; }
+.angebot-karte__text { margin: 0; font-size: 14px; color: var(--ink-2); }
+.angebot-karte__mail { font-size: 14px; font-weight: 600; color: var(--blau-800); text-decoration: none; overflow-wrap: anywhere; }
 
 .person-mini__bild {
   flex: 0 0 auto;
@@ -392,26 +454,16 @@ svg { display: block; flex: 0 0 auto; }
   font-size: 13px;
 }
 
-.team-karte__kontakt-text {
+.person-mini__text {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.3;
-  overflow-wrap: break-word;
 }
-.team-karte__kontakt-rolle {
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--ink-2);
-}
-.team-karte__kontakt-aktionen { flex: 0 0 auto; }
 
-.team-karte__kontakt-aktionen {
-  display: flex;
-  gap: var(--sp-2);
-  flex-wrap: wrap;
+.person-mini__name {
+  font-weight: 600;
+  font-size: 14px;
+  overflow-wrap: break-word;
 }
 
 .icon-knopf {
@@ -431,24 +483,9 @@ svg { display: block; flex: 0 0 auto; }
 
 .icon-knopf svg { width: 18px; height: 18px; }
 
-.team-karte__buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-2);
-  margin-top: var(--sp-3);
-}
-
-/* Detailansicht: Zurück-Link, kompakte Trainings-/Kontaktzeile über den
-   Widget-Karten (wie in der Teamkarte der Listenansicht). */
+/* Detailansicht: Zurück-Link */
 #zurueck-link {
-  margin-bottom: var(--sp-4);
-}
-
-#detail-kontakt .team-karte__kontakt {
-  border-top: none;
-  padding-top: 0;
-  margin-top: 0;
-  margin-bottom: var(--sp-3);
+  margin-bottom: var(--sp-2);
 }
 
 .karte + .abschnittstitel { margin-top: var(--sp-6); }
@@ -576,16 +613,22 @@ svg { display: block; flex: 0 0 auto; }
 <h1 class="visually-hidden">Mannschaften</h1>
 
 <div id="listenansicht">
+  <p class="seitenkopf-lead">Elf Fußballmannschaften von den Herren bis zur G-Jugend. Für jedes Team findest du hier Jahrgang, Trainingszeiten, Ansprechpartner und den Weg zum Spielplan.</p>
+
   <div id="filterleiste" class="filterleiste" hidden>
     <button type="button" class="tag filter-knopf filter-knopf--aktiv" data-gruppe="">Alle</button>
-    <button type="button" class="tag filter-knopf" data-gruppe="herren" hidden>Herren</button>
-    <button type="button" class="tag filter-knopf" data-gruppe="jugend" hidden>Jugend</button>
-    <button type="button" class="tag filter-knopf" data-gruppe="schule" hidden>Fußballschule</button>
+    <button type="button" class="tag filter-knopf" data-gruppe="Senioren" hidden>Senioren</button>
+    <button type="button" class="tag filter-knopf" data-gruppe="Jugend" hidden>Jugend</button>
+    <button type="button" class="tag filter-knopf" data-gruppe="Kinderfußball" hidden>Kinderfußball</button>
+    <button type="button" class="tag filter-knopf" data-gruppe="schule" hidden>Fußballschulen</button>
   </div>
 
   <div id="mannschaften-liste" class="mannschaften-liste"></div>
 
-  <h2 id="fussballschulen-titel" class="abschnittstitel" hidden>Fußballschulen (Zusatzangebot)</h2>
+  <div id="fussballschulen-titel" hidden>
+    <h2 class="abschnittstitel">Zusatzangebote</h2>
+    <p class="team-karte__untertitel">Zwei Fußballschulen nutzen unseren Platz. Sie sind kostenpflichtige Angebote externer Anbieter und stehen auch Spielerinnen und Spielern anderer Vereine offen.</p>
+  </div>
   <div id="fussballschulen-liste" class="mannschaften-liste"></div>
 
   <div class="aktionen">
@@ -593,23 +636,54 @@ svg { display: block; flex: 0 0 auto; }
   </div>
 
   <h2 class="abschnittstitel">Nächste Spiele des Vereins</h2>
-  <p class="meta">Alle Spiele unserer Mannschaften der nächsten Tage. Spielplan und Tabelle je Team findest du auf der jeweiligen Mannschaftsseite.</p>
-  <div id="verein-spiele-inhalt"></div>
+  <p class="team-karte__untertitel">Alle Spiele unserer Mannschaften der nächsten Tage. Spielplan und Tabelle je Team findest du auf der jeweiligen Mannschaftsseite.</p>
+  <div id="verein-spiele-inhalt">
+    <p class="team-karte__untertitel">Spiele werden von FUSSBALL.DE geladen …</p>
+  </div>
 </div>
 
 <div id="detailansicht" hidden>
   <a id="zurueck-link" class="zeile" href="#">
-    <span class="zeile__text"><span class="zeile__titel">‹ Alle Mannschaften</span></span>
+    <span class="zeile__text"><span class="zeile__titel">‹ Mannschaften</span></span>
   </a>
 
-  <h2 id="detail-titel" class="abschnittstitel"></h2>
-  <p id="detail-training" class="team-karte__untertitel" hidden></p>
-  <div id="detail-kontakt"></div>
+  <p id="detail-titel" class="team-titel"></p>
+  <p id="detail-jahrgang" class="team-karte__untertitel"></p>
+  <p id="detail-beschreibung" class="teamtext" hidden></p>
+  <p id="detail-spielbetrieb" class="team-karte__untertitel"></p>
+
+  <h2 class="abschnittstitel">Training</h2>
+  <div id="detail-sonderhinweis"></div>
+  <div class="karte">
+    <ul id="detail-training-liste" class="team-karte__zeiten"></ul>
+  </div>
+  <div class="hinweis"><p id="detail-ferienhinweis"></p></div>
 
   <div id="team-inhalt"></div>
 
+  <h2 id="trainerteam-titel" class="abschnittstitel">Trainerteam</h2>
+  <div class="karte">
+    <div id="trainerteam-liste" class="person-mini-liste"></div>
+    <div class="aktionen">
+      <a id="trainerteam-mail-knopf" class="knopf" href="#">E-Mail an das Trainerteam</a>
+    </div>
+    <p id="trainerteam-hinweis" class="team-karte__untertitel" style="margin-top:var(--sp-2);"></p>
+  </div>
+
+  <h2 class="abschnittstitel">Heimspiele</h2>
+  <div class="karte">
+    <p id="detail-heimspiele" class="team-karte__untertitel" style="margin:0 0 var(--sp-3);"></p>
+    <div class="aktionen">
+      <a id="detail-route-knopf" class="knopf knopf--leise" href="#" target="_blank" rel="noopener">Route</a>
+    </div>
+  </div>
+
   <h2 class="abschnittstitel">Kalender abonnieren</h2>
   <div id="kalender-zeile" class="liste"></div>
+  <p class="team-karte__untertitel" style="margin-top:var(--sp-2);">Einmal abonnieren – Verlegungen kommen automatisch an.</p>
+
+  <h2 id="weitere-mannschaften-titel" class="abschnittstitel" hidden>Weitere Mannschaften</h2>
+  <div id="weitere-mannschaften-liste" class="mannschaften-liste mannschaften-liste--kompakt"></div>
 </div>
 
 <p class="fuss">F.F.V. Sportfreunde 04 · Vereins-App</p>
@@ -623,58 +697,63 @@ svg { display: block; flex: 0 0 auto; }
 (function () {
   "use strict";
 
-  // Widget-IDs des Vereins (data/widgets.json) – von tpl-bauen.mjs zur
-  // Bauzeit eingesetzt (kein appack-FreeMarker-Ausdruck in dieser statischen Datei).
+  // W8, Grundsatz Daten: dieselben Daten wie die Website (data/teams.json,
+  // data/zusatzangebote.json, data/verein.json) – von tpl-bauen.mjs zur
+  // Bauzeit eingesetzt (kein appack-FreeMarker-Ausdruck in dieser
+  // statischen Datei).
+  var TEAMS = [{"slug":"herren","name":"1. Herrenmannschaft","kurz":"Herren","kategorie":"Senioren","gruppe":"Senioren","jahrgang":null,"staffel":"Kreisliga A · KLA Frankfurt Gr. 1","spielbetrieb":"Meisterschaft, Kreispokal","training":[{"tag":"Mittwoch","von":"19:30","bis":"21:00"},{"tag":"Freitag","von":"19:30","bis":"21:00"}],"platz":"Bezirkssportanlage am Rebstock (Anlage SW Griesheim), Am Römerhof 9, 60486 Frankfurt","heimspiele":"Am Römerhof 9, 60486 Frankfurt (Anlage SW Griesheim)","trainer":["Martin Reyschmidt","Nick Janovsky"],"mail":"senioren_mannschaft@sportfreunde04.de","fussballde_id":"011MICFB14000000VTVG0001VTR8C1K7","csv":"HERREN","tabelle":true,"kalender":"herren.ics","trainingsKalender":"training-herren.ics","beschreibung":"Das ist unsere 1. Herrenmannschaft, die in der Kreisliga A spielt. Trainer sind Martin Reyschmidt und Nick Janovsky. Trainiert wird extern auf der Anlage von SW Griesheim, mittwochs und freitags, je 19:30–21:00 Uhr; auch die Heimspiele finden dort statt."},{"slug":"a-jugend","name":"A-Jugend","kurz":"A-Jugend","kategorie":"Jugend","gruppe":"Jugend","jahrgang":"2008/2009","staffel":"Gruppenliga · AJGL Frankfurt","spielbetrieb":"Meisterschaft, Kreispokal","training":[{"tag":"Montag","von":"19:00","bis":"21:00"},{"tag":"Mittwoch","von":"19:00","bis":"20:30"}],"platz":"Vereinsplatz Mainzer Landstraße 480, linke Hälfte Tor 1","heimspiele":"Am Römerhof 9, 60486 Frankfurt (Anlage SW Griesheim)","trainer":["Ahmed Douzi","Hüseyin Ulutürk"],"mail":"trainer_a_jugend@sportfreunde04.de","fussballde_id":"019ORCB50G000000VV0AG80NVUQ1MD7G","csv":"A","tabelle":true,"kalender":"a.ics","trainingsKalender":"training-a.ics","beschreibung":"Das ist unsere A-Jugend, Jahrgang 2008/2009, die in der Gruppenliga spielt. Trainer sind Ahmed Douzi und Hüseyin Ulutürk. Trainingszeiten: montags und mittwochs, je 19:00–20:30 Uhr. Trainiert wird auf unserem eigenen Platz, die Heimspiele finden jedoch auf dem Platz von SW Griesheim statt."},{"slug":"d1","name":"D1-Jugend","kurz":"D1","kategorie":"Jugend","gruppe":"Jugend","jahrgang":"2014","staffel":"Kreisliga A · DJKL F Gr. 1","spielbetrieb":"Meisterschaft, Kreispokal","training":[{"tag":"Dienstag","von":"17:30","bis":"19:30"},{"tag":"Mittwoch","von":"17:30","bis":"19:00"},{"tag":"Freitag","von":"17:30","bis":"19:30"}],"platz":"Vereinsplatz Mainzer Landstraße 480, linke Hälfte Tor 1","heimspiele":"Mainzer Landstraße 480, 60326 Frankfurt am Main","trainer":["Vassilios Miamis","Daniel Heyer"],"mail":"trainer_d_jugend@sportfreunde04.de","fussballde_id":"011MIE88PK000000VTVG0001VTR8C1K7","csv":"D1","tabelle":true,"kalender":"d1.ics","trainingsKalender":"training-d1.ics","beschreibung":"Das ist unsere D1-Jugend, unsere Leistungsmannschaft im Jahrgang 2014, die in der Kreisklasse spielt. Trainer sind Vassilios Miamis und Daniel Heyer. Trainingszeiten: dienstags 17:30–19:30 Uhr, mittwochs 17:30–19:00 Uhr und freitags 17:30–19:30 Uhr."},{"slug":"d2","name":"D2-Jugend","kurz":"D2","kategorie":"Jugend","gruppe":"Jugend","jahrgang":"2015","staffel":"1. Kreisklasse · DJ KK F Gr. 05","spielbetrieb":"Meisterschaft","training":[{"tag":"Dienstag","von":"17:30","bis":"19:30"},{"tag":"Mittwoch","von":"17:30","bis":"19:00"},{"tag":"Freitag","von":"17:30","bis":"19:30"}],"platz":"Vereinsplatz Mainzer Landstraße 480, linke Hälfte Tor 2","heimspiele":"Mainzer Landstraße 480, 60326 Frankfurt am Main","trainer":["Beyhun Gelberi","Damian Porombka-Kepa"],"mail":"trainer_d_jugend@sportfreunde04.de","fussballde_id":"011MIF9LDC000000VTVG0001VTR8C1K7","csv":"D2","tabelle":true,"kalender":"d2.ics","trainingsKalender":"training-d2.ics","beschreibung":"Das ist unsere D2-Jugend, unsere Leistungsmannschaft im Jahrgang 2015. Trainer sind Beyhun Gelberi und Damin Porombka-Kepa. Trainingszeiten: dienstags 17:30–19:30 Uhr, mittwochs 17:30–19:00 Uhr und freitags 17:30–19:30 Uhr."},{"slug":"d3","name":"D3-Jugend","kurz":"D3","kategorie":"Jugend","gruppe":"Jugend","jahrgang":"2014/2015","staffel":"1. Kreisklasse · DJ KK F Gr. 04","spielbetrieb":"Meisterschaft","training":[{"tag":"Dienstag","von":"17:30","bis":"19:30"},{"tag":"Freitag","von":"17:30","bis":"19:30"}],"platz":"Vereinsplatz Mainzer Landstraße 480, rechte Hälfte Tor 1","heimspiele":"Mainzer Landstraße 480, 60326 Frankfurt am Main","trainer":["Olgay Özkan","Marcel Hogg","Flo Lehr"],"mail":"trainer_d_jugend@sportfreunde04.de","fussballde_id":"02USD4SHUG000000VS5489BRVS0D3BPJ","csv":"D3","tabelle":true,"kalender":"d3.ics","trainingsKalender":"training-d3.ics","beschreibung":"Das ist unsere D3-Jugend, unsere Perspektivmannschaft im Jahrgang 2014/2015. Trainer sind Olgay Özkan, Marcel Hogg und Flo Lehr. Trainingszeiten: dienstags & freitags, je 17:30–19:30 Uhr."},{"slug":"e1","name":"E1-Jugend","kurz":"E1","kategorie":"Jugend","gruppe":"Jugend","jahrgang":"2016","staffel":"1. Kreisklasse · EJ Quali Gr. 08","spielbetrieb":"Qualifikationsrunde, Kreispokal; Hauptrunde ab Oktober","training":[{"tag":"Montag","von":"17:30","bis":"19:00"},{"tag":"Mittwoch","von":"17:30","bis":"19:00"},{"tag":"Donnerstag","von":"17:30","bis":"19:00"}],"platz":"Vereinsplatz Mainzer Landstraße 480, rechte Hälfte","heimspiele":"Mainzer Landstraße 480, 60326 Frankfurt am Main","trainer":["Mohamed Bardouch","Mario Orsolic","Bernhard Henrich"],"mail":"trainer_e_jugend@sportfreunde04.de","fussballde_id":"011MIDBD8C000000VTVG0001VTR8C1K7","csv":"E1","tabelle":true,"kalender":"e1.ics","trainingsKalender":"training-e1.ics","beschreibung":"Das ist unsere E1-Jugend, unsere Leistungsmannschaft im Jahrgang 2016. Trainer sind Mohamed Bardouch, Mario Orsolic und Bernhard Henrich. Trainingszeiten: montags, mittwochs & donnerstags, je 17:30–19:00 Uhr."},{"slug":"e2","name":"E2-Jugend","kurz":"E2","kategorie":"Jugend","gruppe":"Jugend","jahrgang":"2017","staffel":"1. Kreisklasse · EJ Quali Gr. 18","spielbetrieb":"Qualifikationsrunde; Hauptrunde ab Oktober","training":[{"tag":"Montag","von":"17:30","bis":"19:00"},{"tag":"Dienstag","von":"16:30","bis":"18:00"},{"tag":"Donnerstag","von":"17:30","bis":"19:00"}],"platz":"Vereinsplatz Mainzer Landstraße 480, linke bzw. rechte Hälfte","heimspiele":"Mainzer Landstraße 480, 60326 Frankfurt am Main","trainer":["Markus Rees","Samson Tesfay"],"mail":"trainer_e_jugend@sportfreunde04.de","fussballde_id":"011MIE1KH4000000VTVG0001VTR8C1K7","csv":"E2","tabelle":true,"kalender":"e2.ics","trainingsKalender":"training-e2.ics","beschreibung":"Das ist unsere E2-Jugend, unsere Leistungsmannschaft im Jahrgang 2017. Trainer sind Markus Rees und Samson Tesfay. Trainingszeiten: montags 17:30–19:00 Uhr und dienstags 16:30–18:00 Uhr."},{"slug":"e3","name":"E3-Jugend","kurz":"E3","kategorie":"Jugend","gruppe":"Jugend","jahrgang":"2016/2017","staffel":"1. Kreisklasse · EJ Quali Gr. 22","spielbetrieb":"Qualifikationsrunde; Hauptrunde ab Oktober","training":[{"tag":"Montag","von":"16:00","bis":"17:30"},{"tag":"Mittwoch","von":"16:00","bis":"17:30"}],"platz":"Vereinsplatz Mainzer Landstraße 480, rechte Hälfte","heimspiele":"Mainzer Landstraße 480, 60326 Frankfurt am Main","trainer":["Ümit Maras"],"mail":"trainer_e_jugend@sportfreunde04.de","fussballde_id":"02PS0CFJCO000000VS5489B1VVQNIHJA","csv":"E3","tabelle":true,"kalender":"e3.ics","trainingsKalender":"training-e3.ics","beschreibung":"Das ist unsere E3-Jugend, unsere Perspektivmannschaft im Jahrgang 2016/2017. Trainer ist Ümit Maras. Trainingszeiten: montags & mittwochs, je 16:00–17:30 Uhr."},{"slug":"f1","name":"F1-Jugend","kurz":"F1","kategorie":"Jugend","gruppe":"Kinderfußball","jahrgang":"2018","staffel":"Kinderfußball · F-Junioren 4+1 Gr. 2","spielbetrieb":"Kinderfestivals (keine Tabelle)","training":[{"tag":"Montag","von":"17:30","bis":"19:00"},{"tag":"Mittwoch","von":"17:30","bis":"19:00"}],"platz":"Vereinsplatz Mainzer Landstraße 480, linke Hälfte Tor 1 bzw. rechte Hälfte","heimspiele":"Mainzer Landstraße 480, 60326 Frankfurt am Main","trainer":["Ralf Schwager"],"mail":"trainer_f_jugend@sportfreunde04.de","fussballde_id":null,"csv":"F1","tabelle":false,"kalender":"f1.ics","trainingsKalender":"training-f1.ics","beschreibung":"Das ist unsere F1-Jugend, Jahrgang 2018. Trainer ist Ralf Schwager. Trainingszeiten: montags & mittwochs, je 17:30–19:00 Uhr."},{"slug":"f2","name":"F2-Jugend","kurz":"F2","kategorie":"Jugend","gruppe":"Kinderfußball","jahrgang":"2019/2020","staffel":"Kinderfußball · F-Junioren 4vs4 Gr. 4","spielbetrieb":"Kinderfestivals (keine Tabelle)","training":[{"tag":"Dienstag","von":"17:30","bis":"19:00"},{"tag":"Donnerstag","von":"17:30","bis":"19:00"}],"platz":"Vereinsplatz Mainzer Landstraße 480, Käfig bzw. rechte Hälfte","heimspiele":"Mainzer Landstraße 480, 60326 Frankfurt am Main","trainer":["Martin Gehn","Ercan Mutlu"],"mail":"trainer_f_jugend@sportfreunde04.de","fussballde_id":null,"csv":"F2","tabelle":false,"kalender":"f2.ics","trainingsKalender":"training-f2.ics","beschreibung":"Das ist unsere F2-Jugend, Jahrgang 2019/2020. Trainer sind Martin Gehn und Ercan Mutlu. Trainingszeiten: dienstags & donnerstags, je 17:30–19:00 Uhr."},{"slug":"g-jugend","name":"G-Jugend (Bambinis)","kurz":"G-Jugend","kategorie":"Jugend","gruppe":"Kinderfußball","jahrgang":"2021 und jünger","staffel":"Kinderfußball · G-Junioren 3vs3 Gr. 4","spielbetrieb":"Kinderfestivals (keine Tabelle)","training":[{"tag":"Montag","von":"17:30","bis":"19:00"}],"platz":"Vereinsplatz Mainzer Landstraße 480, Court","heimspiele":"Mainzer Landstraße 480, 60326 Frankfurt am Main","trainer":["Biljana Trninic"],"mail":"trainer_g_jugend@sportfreunde04.de","fussballde_id":null,"csv":"G1","tabelle":false,"kalender":"g1.ics","trainingsKalender":"training-g1.ics","beschreibung":"Das ist unsere Bambini-Mannschaft, der Einstieg in den Vereinsfußball für unsere Jüngsten. Trainiert werden hier die Jahrgänge 2021 und jünger, Trainerin ist Biljana Trninic. Trainingszeit: montags 17:30–19:00 Uhr."}];
+  var ZUSATZANGEBOTE = [{"name":"Fußballschule Regista Academy","art":"kostenpflichtiges Zusatzangebot, auch für Externe","leitung":null,"text":"Das ist die Regista Academy, ein kostenpflichtiges Zusatzangebot für Spieler – nicht nur aus unserem Verein. Geleitet wird sie von einem erfahrenen Trainer mit Erfahrung als Scout und Jugendtrainer (u. a. bei Eintracht Frankfurt und TuS Makkabi Frankfurt) sowie einem Bachelor in International Sports Management. Das Angebot umfasst individuelles Fördertraining zur gezielten technischen, taktischen und persönlichen Weiterentwicklung sowie ergänzende Formate wie Feriencamps und Talentetage. Die Trainingszeiten finden mehrfach wöchentlich statt und werden individuell nach Absprache vereinbart.","mail":null,"quelle":"Beschreibung aus dem Worksheet Abteilungen_db der Vereins-App (Stand 21.09.2026), eine Quelle für App und Website","logo":{"quelle":"angebot-regista-academy"},"hinweis_leitung":"Leitung bewusst ohne Namen (Olgay, 23.09.2026, bis auf Widerruf); Kontakt über die Geschäftsstelle."},{"name":"Fußballschule-Athletik VM Elite","art":"kostenpflichtiges Zusatzangebot, auch für Externe","leitung":"Vassilios Miamis","text":"Das ist die Fußballschule-Athletik \"VM ELITE\", unser Zusatzangebot für individuelles Athletik- und Performancetraining. Geleitet wird sie von Vassilios Miamis, C-Lizenz-Trainer, Cheftrainer unserer D1-Jugend und Fitnessstudio-Trainer sowie Athletik-Coach. Das Training richtet sich an Kinder, Jugendliche und Erwachsene aller Leistungsstufen – vom Anfänger bis zum Fortgeschrittenen – und steht auch Teilnehmern von außerhalb unseres Vereins offen. Die Trainingszeiten werden individuell nach Absprache vereinbart.","mail":"geschaeftsstelle@sportfreunde04.de","quelle":"Beschreibung aus dem Worksheet Abteilungen_db der Vereins-App (Stand 21.09.2026), eine Quelle für App und Website","logo":{"quelle":"sponsor-fuballschule-vm-elite"}}];
+  var VEREIN = {"name_register":"Frankfurter Fußballverein Sportfreunde 1904 e. V.","name_kurz":"FFV Sportfreunde 04","spitzname":"Speuzer","gegruendet":"15. Mai 1904","gruendungsname":"Frankfurter FC Britannia","umbenannt":"1919","stadtteil":"Gallus","sportstaette":{"strasse":"Mainzer Landstraße 480","plz":"60326","ort":"Frankfurt am Main"},"post":{"postfach":"Postfach 190442","plz":"60091","ort":"Frankfurt am Main"},"mail":"geschaeftsstelle@sportfreunde04.de","tel_geschaeftsstelle":"+49 69 736868","tel_platzwart":"+49 69 732193","register":"Amtsgericht Frankfurt am Main, VR 4727","vorsitz":["Melanie Seipp (1. Vorsitzende)","Uwe Korndörfer (2. Vorsitzender)"],"vertretung":["Melanie Seipp (1. Vorsitzende)","Uwe Korndörfer (2. Vorsitzender)"],"instagram":"https://www.instagram.com/speuzer_ffm/","facebook":"https://www.facebook.com/groups/223133414377924/","fanshop":"https://sportfreunde04.fan12.de/","teamshop":"https://www.11teamsports.com/de-de/clubshop/frankfurter-fussballvereine-sportfreunde-04/","mails":{"jugendleitung":"jugendleitung@sportfreunde04.de","kassierer":"kassierer@sportfreunde04.de","kinderschutz":"kinderschutzbeauftragter@sportfreunde04.de","karneval":"karnevalabteilung@sportfreunde04.de","senioren":"spielausschuss_senioren@sportfreunde04.de","vorstand":"vorstand@sportfreunde04.de"},"hinweise":{"parken":"Der Parkplatz am Vereinsgelände ist wegen des Neubaus des Funktionsgebäudes voraussichtlich bis Ende Januar 2027 gesperrt. Der Zugang zum Gelände ist über den Hintereingang am „Haus der Jugend“ (Pavillon) möglich.","parken_quelle":"App-News vom 21.07.2026","ferien":"In den hessischen Schulferien und an Feiertagen findet in der Regel kein Training statt. Ausnahmen sagt das Trainerteam an."},"oepnv":null,"anfahrt_hinweis":"Zugang zum Vereinsgelände derzeit über den Hintereingang am „Haus der Jugend“ (Pavillon); der Parkplatz ist wegen des Neubaus bis voraussichtlich Ende Januar 2027 gesperrt.","gruendung_jahr":1904,"anzahl_mannschaften":11,"karten":{"apple":"https://maps.apple.com/?q=Mainzer+Landstra%C3%9Fe+480,+60326+Frankfurt+am+Main","google":"https://www.google.com/maps/search/?api=1&query=Mainzer+Landstra%C3%9Fe+480%2C+60326+Frankfurt+am+Main"},"kalender_basis":"https://justolgay.github.io/speuzer-spielplan/"};
   var WIDGETS = {"herren":{"tabelle":"3cd98588-f2bd-4716-a6f8-c663afcd9a52","reiter":"Herren","spiele":"0bc2cd05-999e-4098-8f5a-01faac49eb40"},"a-jugend":{"tabelle":"19b1dbfb-9aad-44d2-90bb-71b244f8ce70","reiter":"A-Jugend","spiele":"7f1d494c-ad2d-47d0-bb61-f4f0106ac2c4"},"d1":{"tabelle":"1e9caaff-1559-444a-ad35-bb60f75e5dca","reiter":"D1","spiele":"97c0160c-4b7a-40e1-ac86-3c8a4b3c6f76"},"d2":{"tabelle":"a0e8a901-ccc9-4810-9fe4-c16f8dc6ca86","reiter":"D2","spiele":"1e1dcbe7-34a6-4727-9744-68096138a415"},"d3":{"tabelle":"f861a1b4-7b87-4b44-ae96-b217b8ba1758","reiter":"D3","spiele":"81d9f5d7-9465-4aa5-ba6e-9830577ec0e6"},"e1":{"tabelle":"210e4f4f-cd22-4771-ae3b-423b6061afe1","reiter":"E1","spiele":"946f72f6-9ef2-4199-8b9d-6051948a2103"},"e2":{"tabelle":"47a2d17f-97d4-45ab-87cd-cb6faf6e0d93","reiter":"E2","spiele":"52cf66bf-3feb-436d-80fa-831c186dbb64"},"e3":{"tabelle":"8a18ef30-e4ac-4936-8049-18dfd14d08f4","reiter":"E3","spiele":"15839ff7-ac56-422d-9853-b240229822ec"},"verein":{"spiele":"49e9745b-dc1c-4ae2-9292-b06c0f7a6c6e"},"f1":{"reiter":"F1"},"f2":{"reiter":"F2"},"g-jugend":{"reiter":"G1"}};
+  var VORSTAND = [{"name":"Melanie Seipp","funktion":"1. Vorsitzende","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-melanie-seipp","bytes":525138}},{"name":"Uwe Korndörfer","funktion":"2. Vorsitzender","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-uwe-korndorfer","bytes":517113}},{"name":"Wolfgang Schirmer","funktion":"1. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-wolfgang-schirmer","bytes":495840}},{"name":"Bernhard Henrich","funktion":"2. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-bernhard-henrich","bytes":135549}},{"name":"Ralf Schwager","funktion":"1. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-ralf-schwager","bytes":112402}},{"name":"Olgay Özkan","funktion":"2. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-olgay-ozkan","bytes":60038}},{"name":"Marcel Hogg","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-marcel-hogg","bytes":125052}},{"name":"Vassilios Miamis","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-vassilios-miamis","bytes":215395}},{"name":"Florian Müller","funktion":"Kinderschutzbeauftragter","mail":"kinderschutzbeauftragter@sportfreunde04.de","foto":{"quelle":"vorstand-florian-muller","bytes":69465}},{"name":null,"funktion":"Schriftführer","mail":null,"foto":null,"hinweis":"nicht besetzt"},{"name":"Wolfgang Krönung","funktion":"Sportliche Leitung Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Christine Rothe","funktion":"Spielausschuss Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Patrick Krösche","funktion":"Abteilungsleiter Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":{"quelle":"vorstand-patrick-krosche","bytes":221052}},{"name":"Sigrid Weber","funktion":"Kassiererin Abteilung Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null},{"name":"Bettina Leven-Grieb","funktion":"Schriftführerin Abteilung Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null}];
+  // Vorstandsporträts wie auf der Website (einheitlicher Zuschnitt), siehe
+  // Vorstand_v3.html – Rückfall vor dem Worksheet-Bild.
+  var FOTO_BASIS = "https://justolgay.github.io/speuzer-website-prototyp/assets/bilder/erzeugt/";
+  function vereinsFotoUrl(name) {
+    var p = (VORSTAND || []).find(function (x) { return x.name === name; });
+    return p && p.foto && p.foto.quelle ? FOTO_BASIS + p.foto.quelle + "-480.jpg" : null;
+  }
 
+  // Live weiterhin nötig: Trainerporträts (sliderImage1…5) und Logos der
+  // Fußballschulen (sliderImage1/categoryImage) – nie im Repo, siehe
+  // Kopfkommentar. Ausweichquelle für Trainerporträts: dasselbe
+  // Ansprechpartner-Worksheet wie auf Vorstand_v3 (Feld ansImg).
   var UEBERSICHT_ID = "6a1ec5fcf68a05bf129cdb7a";
-  var TRAININGSZEITEN_ID = "6a1ec5fcf68a05bf129cdb7e";
-  var BUTTONS_ID = "6a1ec5fcf68a05bf129cdb82";
-  var KATEGORIEN_ID = "6a1ec5fcf68a05bf129cdb85";
-  var EINSTELLUNGEN_ID = "6a1ec5fcf68a05bf129cdb89";
+  var ANSPRECHPARTNER_ID = "6a1ec5fcf68a05bf129cdb8b";
 
   var ICON_MAIL = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M4 6.5l8 6 8-6"/></svg>';
-  var ICON_PHONE = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.5 3.5h3.2c.5 0 .9.3 1 .8l.9 3a1.1 1.1 0 0 1-.3 1.1L7.8 9.9a13 13 0 0 0 6.3 6.3l1.5-1.5c.3-.3.7-.4 1.1-.3l3 .9c.5.1.8.5.8 1v3.2c0 .8-.7 1.4-1.5 1.3-8-1-14.4-7.4-15.4-15.4-.1-.8.5-1.5 1.3-1.5z"/></svg>';
 
   // Spielplan der Saison/Tabelle/Kalender je Team (Abschnitt B1.3): 1:1 aus
-  // Spielplan-App.html übernommen (GENERATOR_BASIS/KALENDER_BASIS,
-  // TEAMS-Liste, Widget-/Iframe-Bausteine, renderTeam-Logik unten in
-  // renderTeamDetail()).
+  // Spielplan-App.html übernommen (GENERATOR_BASIS, Widget-/Iframe-Bausteine,
+  // renderTeamDetail-Logik unten).
   var GENERATOR_BASIS = "https://justolgay.github.io/speuzer-spielplan/";
-  var KALENDER_BASIS = "https://justolgay.github.io/speuzer-spielplan/";
+  var KALENDER_BASIS = (VEREIN && VEREIN.kalender_basis) || "https://justolgay.github.io/speuzer-spielplan/";
 
-  var TEAMS = [
-    { schluessel: "herren", label: "Herren", kalenderDatei: "herren" },
-    { schluessel: "a-jugend", label: "A-Jugend", kalenderDatei: "a" },
-    { schluessel: "d1", label: "D1", kalenderDatei: "d1" },
-    { schluessel: "d2", label: "D2", kalenderDatei: "d2" },
-    { schluessel: "d3", label: "D3", kalenderDatei: "d3" },
-    { schluessel: "e1", label: "E1", kalenderDatei: "e1" },
-    { schluessel: "e2", label: "E2", kalenderDatei: "e2" },
-    { schluessel: "e3", label: "E3", kalenderDatei: "e3" },
-    { schluessel: "f1", label: "F1", kalenderDatei: "f1", generatorGruppe: "f-jugend" },
-    { schluessel: "f2", label: "F2", kalenderDatei: "f2", generatorGruppe: "f-jugend" },
-    { schluessel: "g-jugend", label: "G1", kalenderDatei: "g1", generatorGruppe: "g-jugend" }
-  ];
+  // Team -> Gruppe des Spielplan-Generators (wie GRUPPE_JE_TEAM in
+  // mannschaften/<team>.mjs) – nur für Teams ohne FUSSBALL.DE-Widget
+  // gebraucht (Kinderfußball: F1, F2, G-Jugend).
+  var GRUPPE_JE_TEAM = {
+    f1: "f-jugend",
+    f2: "f-jugend",
+    "g-jugend": "g-jugend"
+  };
 
-  function teamByKey(schluessel) {
+  var KINDERFESTIVAL_SPIELFORM = { f1: "4 gegen 4 plus Torwart", f2: "4 gegen 4", "g-jugend": "3 gegen 3" };
+
+  function teamBySlug(slug) {
     for (var i = 0; i < TEAMS.length; i++) {
-      if (TEAMS[i].schluessel === schluessel) return TEAMS[i];
+      if (TEAMS[i].slug === slug) return TEAMS[i];
     }
     return null;
   }
 
   function schluesselGueltig(wert) {
     var w = String(wert || "").trim().toLowerCase();
-    return teamByKey(w) ? w : null;
+    return teamBySlug(w) ? w : null;
   }
 
-  // ---------- Worksheet-Teamname -> Schlüssel (robust über den Teamnamen,
-  // Abschnitt B1.4) ----------
-  // Beispiele aus der Spezifikation: "1. Herrenmannschaft" -> herren,
-  // "A-Jugend" -> a-jugend, "D1-Jugend" -> d1, "G-Jugend (Bambinis)" ->
-  // g-jugend. Teams ohne Treffer bekommen keinen Knopf "Spiele & Tabelle"
-  // (siehe baueTeamKarte()).
+  // ---------- Worksheet-Teamname -> Team-Slug (robust über den freien
+  // Teamnamen im Workbook, für die Foto-Zuordnung) ----------
   var SCHLUESSEL_MUSTER = [
     { schluessel: "herren", muster: /herren/i },
     { schluessel: "a-jugend", muster: /\ba[\s-]?jugend\b/i },
@@ -697,31 +776,27 @@ svg { display: block; flex: 0 0 auto; }
     return null;
   }
 
-  // ---------- Hilfsfunktionen (defensiv: Felder können fehlen/null/leer sein,
-  // wie Mannschaften_v3.html) ----------
+  // ---------- Hilfsfunktionen (defensiv: Felder können fehlen/null/leer sein) ----------
 
   function textFeld(zeile, name) {
     var v = zeile && zeile[name];
     return (v === undefined || v === null) ? "" : String(v);
   }
 
-  function hatFeld(zeile, name) {
-    return textFeld(zeile, name) !== "";
+  function bildUrlGueltig(url) {
+    return /^https?:\/\//i.test(url || "");
   }
 
-  function sicheresHtml(html) {
-    var div = document.createElement("div");
-    div.innerHTML = String(html || "");
-    var scripts = div.querySelectorAll("script");
-    for (var i = 0; i < scripts.length; i++) scripts[i].remove();
-    return div.innerHTML;
-  }
-
-  // Kein eigenes Nummernformat, nur Ziffern/"+" extrahieren, wenn vorhanden –
-  // sonst den Rohwert übernehmen (Testfall "tel-platzhalter" o. Ä.).
-  function telHref(nummer) {
-    var extrahiert = String(nummer || "").replace(/[^\d+]/g, "");
-    return "tel:" + (extrahiert || nummer);
+  function bildMitRueckbau(url, klasse, alt) {
+    var bild = document.createElement("img");
+    bild.className = klasse;
+    bild.src = url;
+    bild.alt = alt || "";
+    bild.loading = "lazy";
+    bild.addEventListener("error", function () {
+      if (bild.parentNode) bild.parentNode.removeChild(bild);
+    });
+    return bild;
   }
 
   function ladeWorkbook(id) {
@@ -732,75 +807,50 @@ svg { display: block; flex: 0 0 auto; }
       .then(function (rows) { return Array.isArray(rows) ? rows : []; });
   }
 
-  // ---------- Gruppierung für die Filterpillen (wie Mannschaften_v3.html) ----------
+  // ---------- Jahrgang-Anzeige (wie jahrgangText()/jahrgangPraefix() in
+  // src/vorlagen/hilfen.mjs und mannschaften/index.mjs) ----------
 
-  // Fußballschulen (externes, kostenpflichtiges Zusatzangebot) tragen im
-  // Worksheet dieselbe Kategorie "fussball", zählen aber nicht als
-  // Mannschaft und erscheinen als eigener Abschnitt.
-  function istFussballschule(team) {
-    var t = String(team || "");
-    return /^fu[ßs]{1,2}ballschule/i.test(t) || /academy/i.test(t) || /athletik/i.test(t);
+  function jahrgangPraefix(team) {
+    if (team.kategorie === "Senioren") return "Senioren";
+    return "Jahrgang\u00a0" + (team.jahrgang || "–");
   }
 
-  function gruppeVonTeam(team) {
-    var t = String(team || "");
-    if (istFussballschule(t)) return "schule";
-    if (/herren/i.test(t) || /soma/i.test(t)) return "herren";
-    return "jugend";
-  }
-
-  // ---------- Sortierung: sortNumber aufsteigend (fehlend ans Ende), dann team ----------
-
-  function vergleicheTeams(a, b) {
-    var an = typeof a.sortNumber === "number" ? a.sortNumber : Infinity;
-    var bn = typeof b.sortNumber === "number" ? b.sortNumber : Infinity;
-    if (an !== bn) return an - bn;
-    return textFeld(a, "team").localeCompare(textFeld(b, "team"), "de");
-  }
-
-  // ---------- Trainingszeile (wie Mannschaften_v3.html) ----------
-
-  function trainingszeitenZeilen(team, trainingszeiten) {
-    var id = textFeld(team, "id");
-    return trainingszeiten.filter(function (z) {
-      return textFeld(z, "trainingID") === id && (hatFeld(z, "day") || hatFeld(z, "time"));
-    });
-  }
-
-  function trainingszeitText(z) {
-    var teile = [];
-    if (hatFeld(z, "day")) teile.push(textFeld(z, "day"));
-    if (hatFeld(z, "time")) {
-      var zeitText = textFeld(z, "time");
-      if (!/uhr\s*$/i.test(zeitText)) zeitText += " Uhr";
-      teile.push(zeitText);
+  // Wie ersteZweiSaetze() in mannschaften/index.mjs und
+  // deutscheAnfuehrungszeichen() in src/vorlagen/hilfen.mjs.
+  function ersteZweiSaetze(text) {
+    var bereinigt = String(text || "").replace(/\s+/g, " ").trim();
+    var saetze = [], start = 0, re = /\.(\s+)(?=[A-ZÀ-ÖØ-Þ])/g, t;
+    while (saetze.length < 2 && (t = re.exec(bereinigt))) {
+      saetze.push(bereinigt.slice(start, t.index + 1).trim());
+      start = t.index + 1;
     }
-    var ort = textFeld(z, "locationDescription") || textFeld(z, "location");
-    if (ort) teile.push(ort);
-    return teile.join(" · ");
+    if (saetze.length < 2) { var rest = bereinigt.slice(start).trim(); if (rest) saetze.push(rest); }
+    return saetze.join(" ");
+  }
+  function deutscheAnfuehrungszeichen(text) {
+    return String(text || "").replace(/"([^"]*)"/g, "\u201e$1\u201c");
   }
 
-  // ---------- Trainerporträts in den Kontaktzeilen (W7, Abschnitt 3)
-  // ---------- Bild i (1-basiert im Worksheet, hier 0-basiert im Array)
-  // gehört zu Kontakt i, nur wenn mindestens so viele Bilder wie angezeigte
-  // Kontakte vorhanden sind (nie ein Foto falsch zuordnen). Initialen wie
-  // initialen() in src/vorlagen/hilfen.mjs (Website), hier dupliziert, weil
-  // diese Seite keine Module importiert.
-
-  function bilderFuerZeile(zeile) {
-    var bilder = [];
-    for (var n = 1; n <= 5; n++) {
-      var url = textFeld(zeile, "sliderImage" + n);
-      if (bildUrlGueltig(url)) bilder.push(url);
+  // Wie staffelLesbar() in src/vorlagen/hilfen.mjs: Liga plus Gruppe statt
+  // DFBnet-Kürzel, im Kinderfußball die Spielform ausgeschrieben.
+  function staffelLesbar(staffel) {
+    var roh = String(staffel || "").trim();
+    if (!roh) return "";
+    var teile = roh.split(" · ");
+    var liga = (teile[0] || "").trim();
+    var rest = (teile[1] || "").trim();
+    var g = rest.match(/Gr\.\s*0*(\d+)\s*$/);
+    var gruppe = g ? ", Gruppe\u00a0" + g[1] : "";
+    if (liga === "Kinderfußball") {
+      var plus = rest.match(/(\d+)\+1/);
+      var vs = rest.match(/(\d+)\s*vs\s*(\d+)/i);
+      var form = plus ? plus[1] + " gegen " + plus[1] + " plus Torwart" : (vs ? vs[1] + " gegen " + vs[2] : "");
+      return form ? liga + " · " + form + gruppe : liga + gruppe;
     }
-    return bilder;
+    return liga + gruppe;
   }
 
-  function kontaktAnzahl(zeile) {
-    var k1 = hatFeld(zeile, "firstContactTitle") || hatFeld(zeile, "firstContactName");
-    var k2 = hatFeld(zeile, "secondContactTitle") || hatFeld(zeile, "secondContactName");
-    return (k1 ? 1 : 0) + (k2 ? 1 : 0);
-  }
+  // ---------- Initialen (wie initialen() in src/vorlagen/hilfen.mjs) ----------
 
   function initialenAus(name) {
     var teile = String(name || "").trim().split(/\s+/).filter(Boolean);
@@ -810,9 +860,8 @@ svg { display: block; flex: 0 0 auto; }
   }
 
   // Initialen sofort sichtbar (Platzhalter), Foto ersetzt sie erst nach
-  // erfolgreichem Laden (Rückbau wie bildMitRueckbau: bei Ladefehler bleiben
-  // einfach die Initialen stehen, kein kaputtes Bild).
-  function baueKontaktPortrait(name, bildUrl) {
+  // erfolgreichem Laden (bei Ladefehler bleiben einfach die Initialen stehen).
+  function bauePersonPortrait(name, bildUrl) {
     var platzhalter = document.createElement("span");
     platzhalter.className = "person-mini__bild person-mini__bild--platzhalter";
     platzhalter.setAttribute("aria-hidden", "true");
@@ -833,212 +882,119 @@ svg { display: block; flex: 0 0 auto; }
     return platzhalter;
   }
 
-  // ---------- Kontaktzeile (Trainer/in o. Ä., wie Mannschaften_v3.html) ----------
+  // ---------- Teamkarte (Listenansicht, W8 Befund 1: ganze Karte tippbar,
+  // keine E-Mail-Knöpfe, kein Aufklapper, kein zweiter Knopf) ----------
 
-  function baueKontaktZeile(zeile, titelFeld, nameFeld, mailFeld, phoneFeld, handyFeld, bildUrl) {
-    var titel = textFeld(zeile, titelFeld);
-    var name = textFeld(zeile, nameFeld);
-    if (!titel && !name) return null;
-
-    var kontakt = document.createElement("div");
-    kontakt.className = "team-karte__kontakt";
-
-    var person = document.createElement("span");
-    person.className = "team-karte__kontakt-person";
-    person.appendChild(baueKontaktPortrait(name, bildUrl));
-
-    var text = document.createElement("span");
-    text.className = "team-karte__kontakt-text";
-    // W7b: Name fett, Rolle („Trainer“, „Co-Trainer“) klein darunter –
-    // wie auf der Website; vorher „Trainer Name“ in einer Zeile, der
-    // Mail-Knopf brach bei langen Namen um.
-    var nameEl = document.createElement("span");
-    nameEl.textContent = name || titel;
-    text.appendChild(nameEl);
-    if (name && titel) {
-      var rolleEl = document.createElement("span");
-      rolleEl.className = "team-karte__kontakt-rolle";
-      rolleEl.textContent = titel;
-      text.appendChild(rolleEl);
+  function baueTrainingszeile(t, platz) {
+    var li = document.createElement("li");
+    var tag = document.createElement("span");
+    tag.style.fontWeight = "600";
+    tag.textContent = t.tag + " ";
+    var zeit = document.createElement("span");
+    zeit.className = "zeitspanne";
+    zeit.textContent = t.von + "–" + t.bis + " Uhr";
+    li.appendChild(tag);
+    li.appendChild(zeit);
+    if (platz) {
+      li.appendChild(document.createElement("br"));
+      var ort = document.createElement("span");
+      ort.textContent = platz;
+      li.appendChild(ort);
     }
-    person.appendChild(text);
-    kontakt.appendChild(person);
-
-    var aktionen = document.createElement("span");
-    aktionen.className = "team-karte__kontakt-aktionen";
-
-    var mail = textFeld(zeile, mailFeld);
-    if (mail) {
-      var mailLink = document.createElement("a");
-      mailLink.className = "icon-knopf";
-      mailLink.href = "mailto:" + mail;
-      mailLink.innerHTML = ICON_MAIL + "<span>E-Mail</span>";
-      aktionen.appendChild(mailLink);
-    }
-
-    // Anrufen nur ohne Mail-Adresse: Trainer-Kontakte laufen über die
-    // Vereinsmail, private Handynummern bleiben sonst unsichtbar. Handy vor
-    // Festnetz, falls beides gefüllt ist.
-    var telNummer = textFeld(zeile, handyFeld) || textFeld(zeile, phoneFeld);
-    if (!mail && telNummer) {
-      var telLink = document.createElement("a");
-      telLink.className = "icon-knopf";
-      telLink.href = telHref(telNummer);
-      telLink.innerHTML = ICON_PHONE + "<span>Anrufen</span>";
-      aktionen.appendChild(telLink);
-    }
-
-    if (mail || telNummer) kontakt.appendChild(aktionen);
-    return kontakt;
+    return li;
   }
 
-  // ---------- Buttons (Modul-Buttons-Worksheet, wie Mannschaften_v3.html) ----------
-
-  function baueButtons(team, buttons) {
-    var id = textFeld(team, "id");
-    var passende = buttons.filter(function (b) {
-      if (textFeld(b, "buttonID") !== id) return false;
-      var link = textFeld(b, "buttonLink");
-      return /^(https?:|nav:\/\/|mailto:|tel:)/i.test(link);
-    });
-    if (!passende.length) return null;
-
-    var wrapper = document.createElement("div");
-    wrapper.className = "team-karte__buttons";
-    for (var i = 0; i < passende.length; i++) {
-      var b = passende[i];
-      var buttonLink = textFeld(b, "buttonLink");
-      var link = document.createElement("a");
-      link.className = "knopf knopf--leise";
-      link.href = buttonLink;
-      link.textContent = textFeld(b, "buttonText") || "Mehr";
-      if (b.externalLink === true || /^https?:/i.test(buttonLink)) {
-        link.target = "_blank";
-        link.rel = "noopener";
-      }
-      wrapper.appendChild(link);
-    }
-    return wrapper;
-  }
-
-  // Knopf "Spiele & Tabelle" auf der Teamkarte (Abschnitt B1.2): öffnet die
-  // Detailansicht desselben Teams über location.hash + location.reload()
-  // (die FUSSBALL.DE-Widgets initialisieren nur beim Laden, siehe
-  // Kommentar am Ende der Datei bzw. in Spielplan-App.html).
-  function baueSpieleTabelleKnopf(schluessel) {
-    var wrapper = document.createElement("div");
-    wrapper.className = "team-karte__buttons";
-    var link = document.createElement("a");
-    link.className = "knopf knopf--leise";
-    link.href = "#" + schluessel;
-    link.textContent = "Spiele & Tabelle";
-    link.addEventListener("click", function (event) {
+  function baueTeamKarte(team) {
+    var karte = document.createElement("a");
+    karte.className = "karte team-karte team-karte--link";
+    karte.href = "#" + team.slug;
+    karte.addEventListener("click", function (event) {
       event.preventDefault();
-      window.location.hash = schluessel;
+      window.location.hash = team.slug;
       window.location.reload();
     });
-    wrapper.appendChild(link);
-    return wrapper;
-  }
-
-  // ---------- Bild mit Rückbau (wie Mannschaften_v3.html) ----------
-
-  function bildUrlGueltig(url) {
-    return /^https?:\/\//i.test(url || "");
-  }
-  function bildMitRueckbau(url, klasse, alt) {
-    var bild = document.createElement("img");
-    bild.className = klasse;
-    bild.src = url;
-    bild.alt = alt || "";
-    bild.loading = "lazy";
-    bild.addEventListener("error", function () {
-      if (bild.parentNode) bild.parentNode.removeChild(bild);
-    });
-    return bild;
-  }
-
-  // ---------- Teamkarte (Listenansicht) ----------
-
-  function baueTeamKarte(team, trainingszeiten, buttons, beschreibungOffen, istZusatzangebot) {
-    var karte = document.createElement("div");
-    karte.className = "karte team-karte";
-
-    // W7, Abschnitt 3: das große Kartenbild entfällt bei Mannschaften (wirkte
-    // "reingerotzt", die Trainer-Einzelporträts stehen jetzt stattdessen in
-    // den Kontaktzeilen, siehe baueKontaktZeile()). Fußballschulen-Karten
-    // behalten ihr Logo (contain, .team-karte__bild).
-    if (istZusatzangebot) {
-      var bildUrl = [textFeld(team, "sliderImage1"), textFeld(team, "categoryImage")].filter(bildUrlGueltig)[0];
-      if (bildUrl) {
-        karte.appendChild(bildMitRueckbau(bildUrl, "team-karte__bild", ""));
-      }
-
-      var zusatzTag = document.createElement("span");
-      zusatzTag.className = "tag";
-      zusatzTag.textContent = "Zusatzangebot, kostenpflichtig";
-      karte.appendChild(zusatzTag);
-    }
 
     var titel = document.createElement("p");
     titel.className = "team-karte__titel";
-    titel.textContent = textFeld(team, "team");
+    titel.textContent = team.name;
     karte.appendChild(titel);
 
-    var trainingTitle = textFeld(team, "trainingTitle");
-    if (trainingTitle) {
-      var untertitel = document.createElement("p");
-      untertitel.className = "team-karte__untertitel";
-      untertitel.textContent = trainingTitle;
-      karte.appendChild(untertitel);
-    }
+    var untertitel = document.createElement("p");
+    untertitel.className = "team-karte__untertitel";
+    untertitel.style.margin = "0";
+    untertitel.textContent = jahrgangPraefix(team) + " · " + staffelLesbar(team.staffel);
+    karte.appendChild(untertitel);
 
-    var beschreibung = textFeld(team, "description");
-    if (beschreibung) {
-      var details = document.createElement("details");
-      details.className = "team-karte__details";
-      if (beschreibungOffen) details.open = true;
-      var summary = document.createElement("summary");
-      summary.textContent = "Mehr zur Mannschaft";
-      details.appendChild(summary);
-      var inhalt = document.createElement("div");
-      inhalt.innerHTML = sicheresHtml(beschreibung);
-      details.appendChild(inhalt);
-      karte.appendChild(details);
-    }
-
-    var zeiten = trainingszeitenZeilen(team, trainingszeiten);
-    if (zeiten.length) {
+    if (team.training && team.training.length) {
       var liste = document.createElement("ul");
       liste.className = "team-karte__zeiten";
-      for (var i = 0; i < zeiten.length; i++) {
-        var li = document.createElement("li");
-        li.textContent = trainingszeitText(zeiten[i]);
-        liste.appendChild(li);
+      for (var i = 0; i < team.training.length; i++) {
+        liste.appendChild(baueTrainingszeile(team.training[i], null));
       }
       karte.appendChild(liste);
     }
 
-    // W7, Abschnitt 3: Porträt-Zuordnung Bild i -> Kontakt i, nur wenn
-    // mindestens so viele Bilder wie angezeigte Kontakte vorhanden sind (nie
-    // ein Foto falsch zuordnen, siehe bilderFuerZeile()/kontaktAnzahl()).
-    var bilder = bilderFuerZeile(team);
-    var bilderReichenFuerKontakte = bilder.length >= kontaktAnzahl(team);
-    var kontakt1 = baueKontaktZeile(team, "firstContactTitle", "firstContactName", "firstContactMail", "firstContactPhone", "firstContactHandy", bilderReichenFuerKontakte ? bilder[0] : null);
-    if (kontakt1) karte.appendChild(kontakt1);
-    var kontakt2 = baueKontaktZeile(team, "secondContactTitle", "secondContactName", "secondContactMail", "secondContactPhone", "secondContactHandy", bilderReichenFuerKontakte ? bilder[1] : null);
-    if (kontakt2) karte.appendChild(kontakt2);
+    return karte;
+  }
 
-    var buttonsBlock = baueButtons(team, buttons);
-    if (buttonsBlock) karte.appendChild(buttonsBlock);
+  // ---------- Fußballschulen-Karte (data/zusatzangebote.json, W8 Befund 1:
+  // Badge, Abschnitt "Zusatzangebote", "Leitung: …", "Mehr zum Angebot ›"
+  // statt "Mehr zur Mannschaft", kein Schein-Avatar, Logos einheitlich) ----------
 
-    // W6, Abschnitt B1.2: Knopf "Spiele & Tabelle" auf jeder Mannschaftskarte
-    // (nicht bei den Fußballschulen), nur wenn sich ein Schlüssel zuordnen
-    // lässt (Abschnitt B1.4).
-    if (!istZusatzangebot) {
-      var schluessel = schluesselAusTeamname(textFeld(team, "team"));
-      if (schluessel) karte.appendChild(baueSpieleTabelleKnopf(schluessel));
+  // Wie zusatzangeboteAbschnitt() in mannschaften/index.mjs: Badge, Name,
+  // Beschreibung, Leitung, Kontakt als Textlink – ohne Logo-Kasten (wirkte
+  // in der Liste übergroß, die Website zeigt ebenfalls keins).
+  function baueZusatzangebotKarte(angebot) {
+    var karte = document.createElement("div");
+    karte.className = "karte team-karte angebot-karte";
+
+    // Logo klein neben Badge und Name (Olgay 23.09.2026), dieselbe Datei wie
+    // auf der Website (GitHub Pages, data/zusatzangebote.json logo.quelle).
+    var kopf = document.createElement("div");
+    kopf.className = "angebot-karte__kopf";
+    if (angebot.logo && angebot.logo.quelle) {
+      var logo = document.createElement("img");
+      logo.className = "angebot-karte__logo";
+      logo.src = FOTO_BASIS + angebot.logo.quelle + "-480.jpg";
+      logo.alt = "Logo " + angebot.name;
+      logo.loading = "lazy";
+      logo.addEventListener("error", function () { logo.remove(); });
+      kopf.appendChild(logo);
     }
+    var titelBox = document.createElement("div");
+    titelBox.className = "angebot-karte__titel";
+    var tag = document.createElement("span");
+    tag.className = "tag";
+    tag.textContent = "Externes Angebot · kostenpflichtig";
+    titelBox.appendChild(tag);
+    var titel = document.createElement("p");
+    titel.className = "team-karte__titel";
+    titel.textContent = angebot.name;
+    titelBox.appendChild(titel);
+    kopf.appendChild(titelBox);
+    karte.appendChild(kopf);
+
+    if (angebot.text) {
+      var text = document.createElement("p");
+      text.className = "angebot-karte__text";
+      text.textContent = deutscheAnfuehrungszeichen(ersteZweiSaetze(angebot.text));
+      karte.appendChild(text);
+    }
+
+    // "Leitung" nur mit freigegebenem Namen (Regista: bewusst ohne Namen)
+    if (angebot.leitung) {
+      var leitung = document.createElement("p");
+      leitung.className = "team-karte__untertitel";
+      leitung.textContent = "Leitung: " + angebot.leitung;
+      karte.appendChild(leitung);
+    }
+
+    var mailZiel = angebot.mail || "geschaeftsstelle@sportfreunde04.de";
+    var kontakt = document.createElement("a");
+    kontakt.className = "angebot-karte__mail";
+    kontakt.href = "mailto:" + mailZiel;
+    kontakt.textContent = "E-Mail schreiben ›";
+    karte.appendChild(kontakt);
 
     return karte;
   }
@@ -1049,8 +1005,7 @@ svg { display: block; flex: 0 0 auto; }
   // baueKalenderLink() unverändert; baueTabelleKarte() dort heißt hier
   // baueWidgetKarte() und nimmt zusätzlich Widget-Typ und Wisch-Hinweistext
   // entgegen, damit dieselbe Wrapper-Logik auch für das Vereins-Widget
-  // "club-matches" ganz unten in der Listenansicht gilt, das
-  // Spielplan-App.html noch nicht kannte – sonst unveränderte Logik.) ----------
+  // "club-matches" ganz unten in der Listenansicht gilt.) ----------
 
   function baueWidget(widgetId, widgetType) {
     var container = document.createElement("div");
@@ -1060,10 +1015,6 @@ svg { display: block; flex: 0 0 auto; }
     return container;
   }
 
-  // Das echte FUSSBALL.DE-Widget setzt ein <iframe width="100%"> ein, das
-  // nie horizontal scrollt – der Wischen-Hinweis und der Schatten sollen
-  // deshalb nur erscheinen, wenn die Tabelle nach dem Widget-Resize
-  // tatsaechlich breiter ist als ihr sichtbarer Bereich.
   function aktualisiereWischHinweis(wrapper, hinweis) {
     var brauchtWischen = window.innerWidth < 640 && wrapper.scrollWidth > wrapper.clientWidth;
     wrapper.classList.toggle("ist-wischbar", brauchtWischen);
@@ -1089,12 +1040,6 @@ svg { display: block; flex: 0 0 auto; }
     return karte;
   }
 
-  // W7, Abschnitt 4: wie baueWidgetKarte(), aber zusätzlich auf rund fünf
-  // Spiele geklemmt (.spiele-kasten, kein inneres Scrollen) mit Knopf "Alle
-  // Spiele anzeigen"/"Weniger anzeigen". mitHinweistext steuert den
-  // einleitenden Satz (nur bei der Mannschaftsseite, nicht bei den
-  // vereinsweiten Spielen unten, die schon einen eigenen Lead-Satz haben,
-  // siehe renderVereinsSpiele()).
   function baueSpieleKarte(widgetId, widgetType, mitHinweistext) {
     var karte = document.createElement("div");
     karte.className = "karte";
@@ -1141,12 +1086,12 @@ svg { display: block; flex: 0 0 auto; }
     return karte;
   }
 
-  function baueKinderfestivalIframe(team) {
+  function baueKinderfestivalIframe(team, gruppe) {
     var iframe = document.createElement("iframe");
     iframe.className = "kinderfestival-iframe";
     iframe.loading = "lazy";
-    iframe.title = "Spielplan " + team.label + " (Kinderfestival)";
-    iframe.src = GENERATOR_BASIS + "app-" + team.generatorGruppe + ".html#" + encodeURIComponent(team.label);
+    iframe.title = "Spielplan " + team.kurz + " (Kinderfestival)";
+    iframe.src = GENERATOR_BASIS + "app-" + gruppe + ".html#" + encodeURIComponent(team.kurz);
     window.addEventListener("message", function (event) {
       if (event.origin !== "https://justolgay.github.io") return;
       if (event.source !== iframe.contentWindow) return;
@@ -1166,9 +1111,6 @@ svg { display: block; flex: 0 0 auto; }
     return karte;
   }
 
-  // Umschalter „Spiele | Tabelle“ (W7b): sichtbar ist immer nur ein Kasten;
-  // der verborgene bleibt gerendert (absolut, unsichtbar), damit das
-  // FUSSBALL.DE-Widget seine Breite kennt und seine Höhe melden kann.
   function baueReiter(reiter) {
     var huelle = document.createElement("div");
     huelle.className = "reiter";
@@ -1233,33 +1175,176 @@ svg { display: block; flex: 0 0 auto; }
     return link;
   }
 
-  // ---------- Detailansicht eines Teams (Abschnitt B1.3) ----------
+  // ---------- Route (wie routeUrl() in mannschaften/<team>.mjs) ----------
 
-  function renderTeamDetail(schluessel, zeile) {
-    var team = teamByKey(schluessel);
-    var eintrag = WIDGETS[team.schluessel] || {};
+  function googleMapsUrl(adresse) {
+    return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(adresse);
+  }
 
-    document.getElementById("detail-titel").textContent = textFeld(zeile, "team");
+  function routeUrlFuerTeam(team) {
+    if ((team.heimspiele || "").indexOf("Römerhof") !== -1) {
+      return googleMapsUrl("Am Römerhof 9, 60486 Frankfurt am Main");
+    }
+    var s = (VEREIN && VEREIN.sportstaette) || {};
+    return googleMapsUrl(((s.strasse || "") + ", " + (s.plz || "") + " " + (s.ort || "")).trim());
+  }
 
-    var trainingEl = document.getElementById("detail-training");
-    var trainingTitle = textFeld(zeile, "trainingTitle");
-    if (trainingTitle) {
-      trainingEl.textContent = trainingTitle;
-      trainingEl.hidden = false;
-    } else {
-      trainingEl.hidden = true;
+  // ---------- Weitere Mannschaften (wie weitereMannschaftenAbschnitt() in
+  // mannschaften/<team>.mjs: feste Altersreihenfolge aus data/teams.json,
+  // gleiche Gruppe, Nachbarn zuerst, 4 Stück) ----------
+
+  function weitereMannschaften(team) {
+    var aktuellerIndex = -1;
+    for (var i = 0; i < TEAMS.length; i++) {
+      if (TEAMS[i].slug === team.slug) { aktuellerIndex = i; break; }
+    }
+    var kandidaten = [];
+    for (var j = 0; j < TEAMS.length; j++) {
+      var t = TEAMS[j];
+      if (t.gruppe !== team.gruppe || t.slug === team.slug) continue;
+      kandidaten.push({ t: t, abstand: Math.abs(j - aktuellerIndex) });
+    }
+    kandidaten.sort(function (a, b) { return a.abstand - b.abstand; });
+    return kandidaten.slice(0, 4).map(function (k) { return k.t; });
+  }
+
+  function baueWeitereMannschaftKarte(t) {
+    var a = document.createElement("a");
+    a.className = "karte team-karte team-karte--link team-karte--kompakt";
+    a.href = "#" + t.slug;
+    a.addEventListener("click", function (event) {
+      event.preventDefault();
+      window.location.hash = t.slug;
+      window.location.reload();
+    });
+    var titel = document.createElement("p");
+    titel.className = "team-karte__titel";
+    titel.style.fontSize = "18px";
+    titel.textContent = t.name;
+    a.appendChild(titel);
+    var untertitel = document.createElement("p");
+    untertitel.className = "team-karte__untertitel";
+    untertitel.style.margin = "0";
+    untertitel.textContent = jahrgangPraefix(t);
+    a.appendChild(untertitel);
+    return a;
+  }
+
+  // ---------- Trainerteam (W8 Befund 1: Namen aus data/teams.json,
+  // Porträts aus dem Übersicht-Worksheet [sliderImage i, nur wenn genug
+  // Bilder für alle Trainer vorhanden sind] bzw. Ausweich-Vorstandsfoto
+  // per Namensgleichheit, sonst Initialen; EIN Knopf "E-Mail an das
+  // Trainerteam" mit der Teamadresse aus data/teams.json) ----------
+
+  function bilderFuerUebersichtZeile(zeile) {
+    var bilder = [];
+    for (var n = 1; n <= 5; n++) {
+      var url = textFeld(zeile, "sliderImage" + n);
+      if (bildUrlGueltig(url)) bilder.push(url);
+    }
+    return bilder;
+  }
+
+  function findeUebersichtZeileFuerTeam(uebersicht, slug) {
+    for (var i = 0; i < uebersicht.length; i++) {
+      if (uebersicht[i].isActive === true && schluesselAusTeamname(textFeld(uebersicht[i], "team")) === slug) {
+        return uebersicht[i];
+      }
+    }
+    return null;
+  }
+
+  function findeVorstandsbildFuerName(ansprechpartner, name) {
+    for (var i = 0; i < ansprechpartner.length; i++) {
+      if (textFeld(ansprechpartner[i], "ansName") === name) {
+        var url = textFeld(ansprechpartner[i], "ansImg");
+        if (bildUrlGueltig(url)) return url;
+      }
+    }
+    return null;
+  }
+
+  function renderTrainerteam(team, uebersicht, ansprechpartner) {
+    var namen = team.trainer || [];
+    var titel = document.getElementById("trainerteam-titel");
+    var liste = document.getElementById("trainerteam-liste");
+    liste.innerHTML = "";
+
+    if (!namen.length) {
+      titel.hidden = true;
+      document.getElementById("trainerteam-mail-knopf").parentNode.parentNode.hidden = true;
+      return;
+    }
+    titel.hidden = false;
+    titel.textContent = namen.length === 1 ? "Trainer" : "Trainerteam";
+
+    var zeile = findeUebersichtZeileFuerTeam(uebersicht, team.slug);
+    var uebersichtBilder = zeile ? bilderFuerUebersichtZeile(zeile) : [];
+    var bilderReichen = uebersichtBilder.length >= namen.length;
+
+    for (var i = 0; i < namen.length; i++) {
+      var bildUrl = bilderReichen ? uebersichtBilder[i]
+        : (vereinsFotoUrl(namen[i]) || findeVorstandsbildFuerName(ansprechpartner, namen[i]));
+      var reihe = document.createElement("div");
+      reihe.className = "person-mini";
+      reihe.appendChild(bauePersonPortrait(namen[i], bildUrl));
+      var text = document.createElement("span");
+      text.className = "person-mini__text";
+      var nameEl = document.createElement("span");
+      nameEl.className = "person-mini__name";
+      nameEl.textContent = namen[i];
+      text.appendChild(nameEl);
+      reihe.appendChild(text);
+      liste.appendChild(reihe);
     }
 
-    var kontaktContainer = document.getElementById("detail-kontakt");
-    kontaktContainer.innerHTML = "";
-    // W7, Abschnitt 3: Porträts auch in der Detailansicht (gleiche
-    // Zuordnungslogik wie in der Listenansicht, siehe baueTeamKarte()).
-    var detailBilder = bilderFuerZeile(zeile);
-    var detailBilderReichen = detailBilder.length >= kontaktAnzahl(zeile);
-    var kontakt1 = baueKontaktZeile(zeile, "firstContactTitle", "firstContactName", "firstContactMail", "firstContactPhone", "firstContactHandy", detailBilderReichen ? detailBilder[0] : null);
-    if (kontakt1) kontaktContainer.appendChild(kontakt1);
-    var kontakt2 = baueKontaktZeile(zeile, "secondContactTitle", "secondContactName", "secondContactMail", "secondContactPhone", "secondContactHandy", detailBilderReichen ? detailBilder[1] : null);
-    if (kontakt2) kontaktContainer.appendChild(kontakt2);
+    var mailKnopf = document.getElementById("trainerteam-mail-knopf");
+    mailKnopf.href = "mailto:" + team.mail + "?subject=" + encodeURIComponent(team.kurz + ": Anfrage über die App");
+    var hinweis = document.getElementById("trainerteam-hinweis");
+    hinweis.innerHTML = "Die Nachricht geht an <strong>" + team.mail + "</strong> – keine privaten Handynummern.";
+  }
+
+  // ---------- Training (W8 Befund 1: je Tag mit Ort/Platzteil,
+  // Ferienhinweis, Sonderhinweis Herren/A-Jugend wie auf der Website) ----------
+
+  var SONDERHINWEIS = {
+    herren: "Die Herren trainieren und spielen extern auf der Bezirkssportanlage am Rebstock (Anlage von SW Griesheim), Am Römerhof 9, 60486 Frankfurt.",
+    "a-jugend": "Training auf dem Vereinsplatz, Heimspiele auf der Anlage von SW Griesheim am Rebstock (Am Römerhof 9)."
+  };
+
+  function renderTraining(team) {
+    var liste = document.getElementById("detail-training-liste");
+    liste.innerHTML = "";
+    (team.training || []).forEach(function (t) {
+      liste.appendChild(baueTrainingszeile(t, team.platz || ""));
+    });
+
+    var sonderContainer = document.getElementById("detail-sonderhinweis");
+    sonderContainer.innerHTML = "";
+    var sonderText = SONDERHINWEIS[team.slug];
+    if (sonderText) sonderContainer.appendChild(baueHinweisKarte(sonderText));
+
+    document.getElementById("detail-ferienhinweis").textContent = (VEREIN && VEREIN.hinweise && VEREIN.hinweise.ferien) || "";
+  }
+
+  // ---------- Detailansicht eines Teams ----------
+
+  function renderTeamDetail(team, uebersicht, ansprechpartner) {
+    var eintrag = WIDGETS[team.slug] || {};
+
+    document.getElementById("detail-titel").textContent = team.name;
+    document.getElementById("detail-jahrgang").textContent = jahrgangPraefix(team) + " · " + staffelLesbar(team.staffel);
+    // Teambeschreibung wie auf der Website (data/teams.json, Quelle
+    // Abteilungen-Worksheet); ist der Text im Worksheet inzwischen geändert,
+    // gilt der aktuelle Worksheet-Text.
+    var zeile = findeUebersichtZeileFuerTeam(uebersicht, team.slug);
+    var beschreibung = (zeile && textFeld(zeile, "description").trim()) || team.beschreibung || "";
+    var beschreibungEl = document.getElementById("detail-beschreibung");
+    beschreibungEl.textContent = beschreibung;
+    beschreibungEl.hidden = !beschreibung;
+    document.getElementById("detail-spielbetrieb").textContent = "Spielbetrieb: " + (team.spielbetrieb || "") + ".";
+
+    renderTraining(team);
 
     var inhalt = document.getElementById("team-inhalt");
     inhalt.innerHTML = "";
@@ -1272,33 +1357,39 @@ svg { display: block; flex: 0 0 auto; }
         { titel: "Tabelle", node: baueWidgetKarte(eintrag.tabelle, "table", "Tabelle seitlich wischbar") }
       ])));
     } else if (eintrag.spiele) {
-      // W7, Abschnitt 4: der frühere eigene Abschnitt "Nächstes Spiel"
-      // (next-match-Widget) entfällt – der "Spiele"-Kasten (team-matches)
-      // beginnt ohnehin mit den nächsten Spielen, der Abschnitt war doppelt.
-      // Auf rund fünf Spiele begrenzt (baueSpieleKarte(), kein inneres
-      // Scrollen mehr).
       inhalt.appendChild(baueAbschnitt("Spiele", baueSpieleKarte(eintrag.spiele, "team-matches", true)));
-    } else if (team.generatorGruppe) {
+      if (eintrag.tabelle) inhalt.appendChild(baueAbschnitt("Tabelle", baueWidgetKarte(eintrag.tabelle, "table", "Tabelle seitlich wischbar")));
+    } else if (GRUPPE_JE_TEAM[team.slug]) {
+      // W8, Befund 1: bei Kinderfußball steht der Kinderfestival-Satz VOR
+      // dem Generator-Spielplan (vorher umgekehrt).
+      var spielform = KINDERFESTIVAL_SPIELFORM[team.slug] || "";
+      inhalt.appendChild(baueAbschnitt("Kinderfestivals", baueHinweisKarte((spielform ? spielform + " – " : "") + "Kinderfestivals statt Ligabetrieb. Keine Tabellen, keine Ergebnisse: Spaß und Ballkontakte zählen.")));
       var iframeKarte = document.createElement("div");
       iframeKarte.className = "karte";
-      iframeKarte.appendChild(baueKinderfestivalIframe(team));
+      iframeKarte.appendChild(baueKinderfestivalIframe(team, GRUPPE_JE_TEAM[team.slug]));
       inhalt.appendChild(baueAbschnitt("Spielplan der Saison", iframeKarte));
     }
 
-    if (eintrag.tabelle && !eintrag.spiele) {
-      inhalt.appendChild(baueAbschnitt("Tabelle", baueWidgetKarte(eintrag.tabelle, "table", "Tabelle seitlich wischbar")));
-    } else if (team.generatorGruppe) {
-      // Wie auf der Website (mannschaften-<team>.html): Karte „Kinderfestivals“
-      // statt „Tabelle“, gleiche Sätze.
-      var spielform = { f1: "4 gegen 4 plus Torwart", f2: "4 gegen 4", "g-jugend": "3 gegen 3" }[schluessel] || "";
-      inhalt.appendChild(baueAbschnitt("Kinderfestivals", baueHinweisKarte((spielform ? spielform + " – " : "") + "Kinderfestivals statt Ligabetrieb. Keine Tabellen, keine Ergebnisse: Spaß und Ballkontakte zählen.")));
-    }
+    renderTrainerteam(team, uebersicht, ansprechpartner);
 
-    // Kalender abonnieren
+    document.getElementById("detail-heimspiele").textContent = team.heimspiele || "";
+    document.getElementById("detail-route-knopf").href = routeUrlFuerTeam(team);
+
     var kalenderZeile = document.getElementById("kalender-zeile");
     kalenderZeile.innerHTML = "";
-    kalenderZeile.appendChild(baueKalenderLink("Spielplan " + team.label + " (ICS)", KALENDER_BASIS + team.kalenderDatei + ".ics"));
-    kalenderZeile.appendChild(baueKalenderLink("Trainingszeiten " + team.label + " (ICS)", KALENDER_BASIS + "training-" + team.kalenderDatei + ".ics"));
+    kalenderZeile.appendChild(baueKalenderLink("Spielplan " + team.kurz + " abonnieren", KALENDER_BASIS + team.kalender));
+    kalenderZeile.appendChild(baueKalenderLink("Trainingszeiten " + team.kurz + " abonnieren", KALENDER_BASIS + team.trainingsKalender));
+
+    var weitere = weitereMannschaften(team);
+    var weitereTitel = document.getElementById("weitere-mannschaften-titel");
+    var weitereListe = document.getElementById("weitere-mannschaften-liste");
+    weitereListe.innerHTML = "";
+    if (weitere.length) {
+      weitereTitel.hidden = false;
+      weitere.forEach(function (t) { weitereListe.appendChild(baueWeitereMannschaftKarte(t)); });
+    } else {
+      weitereTitel.hidden = true;
+    }
   }
 
   // ---------- Nächste Spiele des Vereins (Listenansicht, ganz unten,
@@ -1308,14 +1399,17 @@ svg { display: block; flex: 0 0 auto; }
     var container = document.getElementById("verein-spiele-inhalt");
     container.innerHTML = "";
     var widgetId = (WIDGETS.verein || {}).spiele;
-    if (!widgetId) return;
-    // W7, Abschnitt 4: wie auf der Mannschaftsseite auf rund fünf Spiele
-    // begrenzt (kein eigener Lead-Satz – der steht schon statisch über
-    // #verein-spiele-inhalt, siehe Markup).
+    if (!widgetId) {
+      var hinweis = document.createElement("p");
+      hinweis.className = "team-karte__untertitel";
+      hinweis.textContent = "Der Spielplan des Vereins ist derzeit nicht verfügbar.";
+      container.appendChild(hinweis);
+      return;
+    }
     container.appendChild(baueSpieleKarte(widgetId, "club-matches", false));
   }
 
-  // ---------- Fehlerhinweis (wie Mannschaften_v3.html) ----------
+  // ---------- Fehlerhinweis ----------
 
   function zeigeFehler(container) {
     container.innerHTML = "";
@@ -1327,37 +1421,18 @@ svg { display: block; flex: 0 0 auto; }
     container.appendChild(hinweis);
   }
 
-  // ---------- Listenansicht (Filter, Karten – wie Mannschaften_v3.html) ----------
+  // ---------- Listenansicht (Filter, Karten) ----------
 
-  function zeigeListenansicht(teams, trainingszeiten, buttons, beschreibungOffen) {
+  function zeigeListenansicht(uebersicht) {
     var listeContainer = document.getElementById("mannschaften-liste");
     var fussballschulenTitel = document.getElementById("fussballschulen-titel");
     var fussballschulenContainer = document.getElementById("fussballschulen-liste");
     var filterleiste = document.getElementById("filterleiste");
 
-    if (!teams.length) {
-      listeContainer.innerHTML = "";
-      fussballschulenTitel.hidden = true;
-      fussballschulenContainer.innerHTML = "";
-      var hinweis = document.createElement("div");
-      hinweis.className = "hinweis";
-      var p = document.createElement("p");
-      p.textContent = "Aktuell sind keine Mannschaften hinterlegt.";
-      hinweis.appendChild(p);
-      listeContainer.appendChild(hinweis);
-      renderVereinsSpiele();
-      return;
-    }
-
-    // Mannschaften und Fußballschulen (externes, kostenpflichtiges
-    // Zusatzangebot, tragen dieselbe Worksheet-Kategorie "fussball")
-    // getrennt halten.
-    var mannschaften = teams.filter(function (t) { return !istFussballschule(textFeld(t, "team")); });
-    var fussballschulen = teams.filter(function (t) { return istFussballschule(textFeld(t, "team")); });
-
-    // Belegung der drei Filtergruppen für die "≥ 2 Gruppen belegt"-Regel.
-    var zaehler = { herren: 0, jugend: 0, schule: 0 };
-    teams.forEach(function (t) { zaehler[gruppeVonTeam(textFeld(t, "team"))]++; });
+    // Belegung der vier Filtergruppen für die "≥ 2 Gruppen belegt"-Regel
+    // (W8 Befund 1: Filtergruppen wie die Abschnitte der Website).
+    var zaehler = { "Senioren": 0, "Jugend": 0, "Kinderfußball": 0, "schule": ZUSATZANGEBOTE.length };
+    TEAMS.forEach(function (t) { if (zaehler[t.gruppe] !== undefined) zaehler[t.gruppe]++; });
     var belegteGruppen = Object.keys(zaehler).filter(function (g) { return zaehler[g] > 0; }).length;
 
     var aktuellerFilter = "";
@@ -1367,15 +1442,15 @@ svg { display: block; flex: 0 0 auto; }
       fussballschulenContainer.innerHTML = "";
 
       var mannschaftenSichtbar = aktuellerFilter === "schule" ? [] :
-        (aktuellerFilter ? mannschaften.filter(function (t) { return gruppeVonTeam(textFeld(t, "team")) === aktuellerFilter; }) : mannschaften);
+        (aktuellerFilter ? TEAMS.filter(function (t) { return t.gruppe === aktuellerFilter; }) : TEAMS);
       for (var i = 0; i < mannschaftenSichtbar.length; i++) {
-        listeContainer.appendChild(baueTeamKarte(mannschaftenSichtbar[i], trainingszeiten, buttons, beschreibungOffen, false));
+        listeContainer.appendChild(baueTeamKarte(mannschaftenSichtbar[i]));
       }
 
-      var schuleSichtbar = (aktuellerFilter === "" || aktuellerFilter === "schule") ? fussballschulen : [];
+      var schuleSichtbar = (aktuellerFilter === "" || aktuellerFilter === "schule") ? ZUSATZANGEBOTE : [];
       fussballschulenTitel.hidden = schuleSichtbar.length === 0;
       for (var j = 0; j < schuleSichtbar.length; j++) {
-        fussballschulenContainer.appendChild(baueTeamKarte(schuleSichtbar[j], trainingszeiten, buttons, beschreibungOffen, true));
+        fussballschulenContainer.appendChild(baueZusatzangebotKarte(schuleSichtbar[j]));
       }
     }
 
@@ -1385,7 +1460,7 @@ svg { display: block; flex: 0 0 auto; }
       for (var i = 0; i < knoepfe.length; i++) {
         var knopf = knoepfe[i];
         var gruppe = knopf.getAttribute("data-gruppe");
-        if (gruppe && zaehler[gruppe] === 0) continue; // Gruppe ohne Treffer: kein Pill dafür
+        if (gruppe && !zaehler[gruppe]) continue; // Gruppe ohne Treffer: kein Pill dafür
         knopf.hidden = false;
         knopf.addEventListener("click", function () {
           aktuellerFilter = this.getAttribute("data-gruppe");
@@ -1402,41 +1477,17 @@ svg { display: block; flex: 0 0 auto; }
 
   // ---------- Ablauf ----------
 
-  // Gültiger Team-Schlüssel im Hash (z. B. "#d3") -> Detailansicht dieses
-  // Teams; sonst Listenansicht (Abschnitt B1.2/B1.3).
   var angefordertesTeam = schluesselGueltig(window.location.hash.replace(/^#/, ""));
 
   Promise.all([
     ladeWorkbook(UEBERSICHT_ID),
-    ladeWorkbook(TRAININGSZEITEN_ID),
-    ladeWorkbook(BUTTONS_ID),
-    ladeWorkbook(KATEGORIEN_ID),
-    ladeWorkbook(EINSTELLUNGEN_ID)
+    ladeWorkbook(ANSPRECHPARTNER_ID)
   ]).then(function (ergebnisse) {
     var uebersicht = ergebnisse[0];
-    var trainingszeiten = ergebnisse[1];
-    var buttons = ergebnisse[2];
-    var einstellungenZeilen = ergebnisse[4];
-    var einstellungen = einstellungenZeilen[0] || {};
-    var beschreibungOffen = einstellungen.showContent === true;
+    var ansprechpartner = ergebnisse[1];
 
-    var teams = uebersicht
-      .filter(function (z) { return z.isActive === true && String(z.category || "").toLowerCase() === "fussball"; })
-      .slice()
-      .sort(vergleicheTeams);
-
-    var zeileFuerAngefordertesTeam = null;
     if (angefordertesTeam) {
-      for (var i = 0; i < teams.length; i++) {
-        if (istFussballschule(textFeld(teams[i], "team"))) continue;
-        if (schluesselAusTeamname(textFeld(teams[i], "team")) === angefordertesTeam) {
-          zeileFuerAngefordertesTeam = teams[i];
-          break;
-        }
-      }
-    }
-
-    if (zeileFuerAngefordertesTeam) {
+      var team = teamBySlug(angefordertesTeam);
       document.getElementById("listenansicht").hidden = true;
       document.getElementById("detailansicht").hidden = false;
       document.getElementById("zurueck-link").addEventListener("click", function (event) {
@@ -1444,18 +1495,29 @@ svg { display: block; flex: 0 0 auto; }
         window.location.hash = "";
         window.location.reload();
       });
-      renderTeamDetail(angefordertesTeam, zeileFuerAngefordertesTeam);
+      renderTeamDetail(team, uebersicht, ansprechpartner);
       ladeWidgetSkript();
     } else {
-      // Kein Hash gesetzt oder kein passendes (aktives) Team gefunden: die
-      // Listenansicht ist in diesem Fall der sinnvolle Rückfall.
-      zeigeListenansicht(teams, trainingszeiten, buttons, beschreibungOffen);
+      zeigeListenansicht(uebersicht);
       ladeWidgetSkript();
     }
   }).catch(function () {
-    document.getElementById("fussballschulen-titel").hidden = true;
-    document.getElementById("fussballschulen-liste").innerHTML = "";
-    zeigeFehler(document.getElementById("mannschaften-liste"));
+    if (angefordertesTeam) {
+      var team = teamBySlug(angefordertesTeam);
+      document.getElementById("listenansicht").hidden = true;
+      document.getElementById("detailansicht").hidden = false;
+      document.getElementById("zurueck-link").addEventListener("click", function (event) {
+        event.preventDefault();
+        window.location.hash = "";
+        window.location.reload();
+      });
+      renderTeamDetail(team, [], []);
+      ladeWidgetSkript();
+    } else {
+      document.getElementById("fussballschulen-titel").hidden = true;
+      document.getElementById("fussballschulen-liste").innerHTML = "";
+      zeigeFehler(document.getElementById("mannschaften-liste"));
+    }
   });
 
   // FUSSBALL.DE-Widgets: Skript einmal laden, nachdem die Widget-Container
@@ -1463,10 +1525,6 @@ svg { display: block; flex: 0 0 auto; }
   // sofort, wenn das Dokument schon geladen ist) – unbedingt wie in
   // Spielplan-App.html, weil sowohl die Listenansicht (Vereins-Widget) als
   // auch die Detailansicht (Team-Widgets) FUSSBALL.DE-Widgets zeigen können.
-  // (W6 Nachbesserung: das Skript darf erst NACH dem Aufbau der Ansicht
-  // geladen werden – die Container entstehen hier asynchron, nachdem die
-  // Worksheets geladen sind. Vorher geladen, fand widgets.js keine Container
-  // und die Widget-Flächen blieben leer.)
   function ladeWidgetSkript() {
     if (document.getElementById("fussballde-widgets-js")) return;
     var widgetSkript = document.createElement("script");

@@ -31,7 +31,7 @@ function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
     <h1>Verein</h1>
-    <p class="seitenkopf__lead">Frankfurter Fußballverein Sportfreunde 1904 e.V. – im Gallus sagt man einfach „die Speuzer“.</p>
+    <p class="seitenkopf__lead">Frankfurter Fußballverein Sportfreunde 1904&nbsp;e.&nbsp;V. – im Gallus sagt man einfach „die Speuzer“.</p>
   </div>
 </section>`;
 }
@@ -48,27 +48,45 @@ function zeile(titel, untertitel, ziel) {
     </a>`;
 }
 
+// W8-Korrektur: Einträge in vier Gruppen mit kleinen Zwischenüberschriften
+// (".zeilen-liste__kicker", gleicher Stil wie der Kicker auf
+// /verein/karneval/) statt einer einzigen langen Liste. Titel = Seitentitel
+// der Zielseite (siehe dort jeweils title/h1); Downloads-Untertitel an den
+// Inhalt angepasst ("Anträge" statt "Bescheinigungen" – die Seite listet
+// keine Bescheinigungen). Die App bekommt dieselbe Gliederung durch den
+// parallel arbeitenden Agenten (nicht Teil dieser Datei).
+function gruppe(titel, zeilen) {
+  return `<span class="zeilen-liste__kicker">${escapeHtml(titel)}</span>
+    ${zeilen.join("\n    ")}`;
+}
+
 function derVereinAbschnitt() {
-  // Reihenfolge und Wortlaut exakt wie in der App (Verein_v3,
-  // src/app/Verein_v3.html), siehe W3-Spezifikation Abschnitt 1. Die beiden
-  // Website-Zusätze am Ende (Abschnitt 7, verbindliche Entscheidung) sind in
-  // der App noch nicht vorhanden.
-  const zeilen = [
-    zeile("Vorstand & Kontakt", "Wer den Verein führt, wen du erreichst", `${PFAD}verein/vorstand/`),
-    zeile("Mitglied werden", "Beiträge, Ablauf, Antrag", `${PFAD}mitglied-werden/`),
-    zeile("Sponsoren & Partner", "Wer uns unterstützt", `${PFAD}verein/sponsoren/`),
-    zeile("Downloads & Anträge", "Satzung, Beiträge, Bescheinigungen", `${PFAD}verein/downloads/`),
-    // W6 (Entscheidung Olgay 23.09.2026): Spielplan & Tabelle gehören nur
-    // noch zur jeweiligen Mannschaftsseite, keine eigene Seite mehr dafür –
-    // die Zeile "Spielplan & Tabellen" entfällt hier (führte auf /spielplan/,
-    // jetzt eine Weiterleitung, siehe src/seiten/spielplan/index.mjs).
-    zeile("Über uns", "Seit 1904 im Gallus", `${PFAD}verein/ueber-uns/`),
-    // Die Chronik entsteht aus der Word-Datei des Vereins (tools/chronik-bauen.mjs)
-    // und liegt nur im appack-Workspace, nicht im Repo – daher die absolute Adresse.
-    zeile("Vereinschronik", "1904 bis 2026, Kapitel für Kapitel", "https://cdn.appack.de/sportfreunde04/workspace/web/chronik.html"),
-    zeile("Geschäftsstelle & Anfahrt", "Adresse, Zugang, Kontakt", `${PFAD}kontakt/`),
-    zeile("Mach mit · Ehrenamt", "Trainer, Betreuer, Vorstand, Helfer", `${PFAD}verein/mach-mit/`),
-    zeile("Fanshop & Teamshop", "Fanartikel und Teamausstattung", `${PFAD}shop/`),
+  const inhalt = [
+    gruppe("Über den Verein", [
+      zeile("Über uns", "Seit 1904 im Gallus", `${PFAD}verein/ueber-uns/`),
+      // Die Chronik entsteht aus der Word-Datei des Vereins
+      // (tools/chronik-bauen.mjs) und liegt nur im appack-Workspace, nicht im
+      // Repo – daher die absolute Adresse.
+      zeile("Vereinschronik", "1904 bis 2026, Kapitel für Kapitel", "https://cdn.appack.de/sportfreunde04/workspace/web/chronik.html"),
+    ]),
+    gruppe("Kontakt", [
+      zeile("Vorstand & Kontakt", "Wer den Verein führt, wen du erreichst", `${PFAD}verein/vorstand/`),
+      zeile("Geschäftsstelle & Anfahrt", "Adresse, Zugang, Kontakt", `${PFAD}kontakt/`),
+    ]),
+    gruppe("Mitmachen", [
+      zeile("Mitglied werden", "Beiträge, Ablauf, Antrag", `${PFAD}mitglied-werden/`),
+      // W6 (Entscheidung Olgay 23.09.2026): Spielplan & Tabelle gehören nur
+      // noch zur jeweiligen Mannschaftsseite, keine eigene Seite mehr dafür –
+      // die Zeile "Spielplan & Tabellen" entfällt hier (führte auf
+      // /spielplan/, jetzt eine Weiterleitung, siehe
+      // src/seiten/spielplan/index.mjs).
+      zeile("Mach mit · Ehrenamt", "Trainer, Betreuer, Vorstand, Helfer", `${PFAD}verein/mach-mit/`),
+    ]),
+    gruppe("Service", [
+      zeile("Downloads & Anträge", "Satzung, Beiträge, Anträge", `${PFAD}verein/downloads/`),
+      zeile("Sponsoren & Partner", "Wer uns unterstützt", `${PFAD}verein/sponsoren/`),
+      zeile("Fanshop & Teamshop", "Fanartikel und Teamausstattung", `${PFAD}shop/`),
+    ]),
   ].join("\n    ");
 
   // W7: die Überschrift "Der Verein" entfällt – direkt unter dem
@@ -77,7 +95,7 @@ function derVereinAbschnitt() {
   return `<section class="abschnitt--hell abschnitt">
   <div class="container fluss">
     <div class="zeilen-liste">
-    ${zeilen}
+    ${inhalt}
     </div>
   </div>
 </section>`;

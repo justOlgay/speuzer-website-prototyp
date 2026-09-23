@@ -1,18 +1,26 @@
 <h1 class="visually-hidden">Sponsoren &amp; Partner</h1>
 
-<div class="hinweis hinweis--einleitung"><p>Diese Unternehmen und Partner unterstützen den Verein. Danke!</p></div>
+<p class="seitenkopf-lead">Ohne Unterstützung kein Vereinsleben. Danke an alle, die die Sportfreunde tragen.</p>
 
 <div id="sponsoren-bereich"></div>
 
-<div class="liste">
-  <a class="zeile" href="mailto:geschaeftsstelle@sportfreunde04.de?subject=Sponsoring%20FFV%20Sportfreunde%2004">
-    <span class="zeile__text"><span class="zeile__titel">Selbst Sponsor werden</span></span>
-    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
-  </a>
+<h2 class="abschnittstitel">Sponsor werden</h2>
+<div class="karte fluss">
+  <p style="margin:0 0 var(--sp-3);font-size:14px;color:var(--ink-2);">Sie möchten die Sportfreunde 04 unterstützen – als Trikotsponsor, mit einer Bandenwerbung oder als Partner der Jugendabteilung? Schreiben Sie uns, wir melden uns zeitnah.</p>
+  <div class="aktionen">
+    <a class="knopf" href="mailto:geschaeftsstelle@sportfreunde04.de?subject=Sponsoring%20FFV%20Sportfreunde%2004">E-Mail an die Geschäftsstelle</a>
+  </div>
 </div>
 
+<p class="fuss">F.F.V. Sportfreunde 04 · Vereins-App</p>
+
 <style>
-/* Sponsoren_v3.tpl – seitenspezifisch (C1). */
+/* Sponsoren_v3.tpl – seitenspezifisch (C1). W8, Grundsatz Daten: Namen,
+   Kategorie, Ort, Link, Instagram aus __SPONSOREN_JSON__ (data/sponsoren.json)
+   – dieselbe Quelle wie verein/sponsoren.mjs, feste Reihenfolge Partner ›
+   Fußballschule › App-Projektpartner statt der bisherigen dynamischen
+   CMS-Gruppierung. Logos bleiben zur Laufzeit aus dem Sponsoren-Worksheet
+   (Feld sponImg, per Namensgleichheit), nie im Repo. */
 
 .visually-hidden {
   position: absolute;
@@ -26,9 +34,7 @@
   border: 0;
 }
 
-.hinweis--einleitung { margin-top: 0; }
-
-.sponsoren-gruppe { margin-top: var(--sp-5); }
+.sponsoren-gruppe { margin-top: var(--sp-6); }
 .sponsoren-gruppe:first-child { margin-top: 0; }
 
 .sponsoren-raster {
@@ -40,8 +46,6 @@
 .sponsor-karte {
   display: flex;
   flex-direction: column;
-  text-decoration: none;
-  color: inherit;
 }
 
 .sponsor-karte__logo {
@@ -62,35 +66,15 @@
   object-fit: contain;
 }
 
-.sponsor-karte__firma {
+.sponsor-karte__name {
   margin: 0;
   font-family: var(--font-text);
   font-weight: 600;
-  font-size: 15px;
+  font-size: 14px;
   overflow-wrap: break-word;
 }
 
-.sponsor-karte__ort {
-  margin: 2px 0 0;
-  font-size: 13px;
-  color: var(--ink-3);
-  overflow-wrap: break-word;
-}
-
-.sponsor-karte__details {
-  margin-top: var(--sp-2);
-  font-size: 13px;
-  color: var(--ink-2);
-}
-
-.sponsor-karte__details summary {
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--blau-700);
-}
-
-.sponsor-karte__details > div { margin-top: var(--sp-1); }
+.sponsor-karte__name a { color: var(--blau-800); text-decoration: none; }
 
 .sponsor-karte__aktionen {
   display: flex;
@@ -122,44 +106,20 @@
 (function () {
   "use strict";
 
+  var SPONSOREN = __SPONSOREN_JSON__;
   var SPONSOREN_ID = "6a1ec5fcf68a05bf129cdbac";
-  var EINSTELLUNGEN_ID = "6a1ec5fcf68a05bf129cdbb0";
 
   var ICON_GLOBUS = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.5 3.8 5.5 3.8 8.5s-1.3 6-3.8 8.5c-2.5-2.5-3.8-5.5-3.8-8.5s1.3-6 3.8-8.5z"/></svg>';
-  var ICON_MAIL = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M4 6.5l8 6 8-6"/></svg>';
   var ICON_KAMERA = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 8h3l2-2h6l2 2h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg>';
-  var ICON_FACEBOOK = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 21v-7h2.5l.5-3H14V9.2c0-.9.3-1.5 1.6-1.5H17V5.2C16.6 5.1 15.7 5 14.7 5 12.5 5 11 6.3 11 8.8V11H8.5v3H11v7z"/></svg>';
 
-  function textFeld(zeile, name) {
-    var v = zeile && zeile[name];
-    return (v === undefined || v === null) ? "" : String(v);
-  }
-
-  // Platzhalterkarte des Vereins ("Hier könnte Ihre Werbung stehen") nicht
-  // rendern (QA-Befund, C2 Abschnitt 7; Datenpflege-Hinweis in LIESMICH.md).
-  function istPlatzhalter(firma) {
-    return /hier k[öo]nnte/i.test(String(firma || ""));
-  }
-
-  function sicheresHtml(html) {
-    var div = document.createElement("div");
-    div.innerHTML = String(html || "");
-    var scripts = div.querySelectorAll("script");
-    for (var i = 0; i < scripts.length; i++) scripts[i].remove();
-    return div.innerHTML;
+  function bildUrlGueltig(url) {
+    return /^https?:\/\//i.test(url || "");
   }
 
   function mitSchema(url) {
     var u = String(url || "").trim();
     if (!u) return "";
-    return /^(https?:|mailto:|tel:)/i.test(u) ? u : "https://" + u;
-  }
-
-  function instaOderFaceUrl(wert, domain) {
-    var w = String(wert || "").trim();
-    if (!w) return "";
-    if (/^https?:/i.test(w)) return w;
-    return "https://" + domain + "/" + w.replace(/^@/, "");
+    return /^https?:/i.test(u) ? u : "https://" + u;
   }
 
   function ladeWorkbook(id, filter) {
@@ -170,218 +130,115 @@
       .then(function (rows) { return Array.isArray(rows) ? rows : []; });
   }
 
-  function vergleicheSponsoren(a, b) {
-    var an = typeof a.sponSort === "number" ? a.sponSort : Infinity;
-    var bn = typeof b.sponSort === "number" ? b.sponSort : Infinity;
-    if (an !== bn) return an - bn;
-    return textFeld(a, "sponFirma").localeCompare(textFeld(b, "sponFirma"), "de");
-  }
-
-  function gruppenSchluessel(name) {
-    return String(name || "").trim().toLowerCase();
-  }
-
-  function gruppenRang(name) {
-    var n = gruppenSchluessel(name);
-    if (n === "hauptsponsoren") return 0;
-    if (n === "partner") return 1;
-    return 2;
-  }
-
-  function baueAktion(href, innerHtml, beschriftung, extern) {
-    var link = document.createElement("a");
-    link.className = "icon-knopf";
-    link.href = href;
-    link.setAttribute("aria-label", beschriftung);
-    link.innerHTML = innerHtml + "<span>" + beschriftung + "</span>";
-    if (extern) {
-      link.target = "_blank";
-      link.rel = "noopener";
-    }
-    return link;
-  }
-
-  // Bild-URLs aus den Worksheets: nur absolute http(s)-Adressen verwenden
-  // (im Feld stehen gelegentlich Ids oder Reste), und ein Bild, das nicht
-  // laedt, wieder aus der Karte nehmen statt eine leere Flaeche zu lassen.
-  function bildUrlGueltig(url) {
-    return /^https?:\/\//i.test(url || "");
-  }
-  function bildMitRueckbau(url, klasse, alt) {
-    var bild = document.createElement("img");
-    bild.className = klasse;
-    bild.src = url;
-    bild.alt = alt || "";
-    bild.loading = "lazy";
-    bild.addEventListener("error", function () {
-      if (bild.parentNode) bild.parentNode.removeChild(bild);
-    });
-    return bild;
-  }
-
-  function sammleZiele(sponsor) {
-    var ziele = [];
-    var website = mitSchema(textFeld(sponsor, "sponLink"));
-    if (website) ziele.push({ href: website, icon: ICON_GLOBUS, label: "Website", extern: true });
-    var mail = textFeld(sponsor, "sponMail");
-    if (mail) ziele.push({ href: "mailto:" + mail, icon: ICON_MAIL, label: "E-Mail", extern: false });
-    var insta = instaOderFaceUrl(textFeld(sponsor, "sponInst"), "instagram.com");
-    if (insta) ziele.push({ href: insta, icon: ICON_KAMERA, label: "Instagram", extern: true });
-    var face = instaOderFaceUrl(textFeld(sponsor, "sponFace"), "facebook.com");
-    if (face) ziele.push({ href: face, icon: ICON_FACEBOOK, label: "Facebook", extern: true });
-    return ziele;
-  }
-
-  function baueSponsorKarte(sponsor) {
-    var ziele = sammleZiele(sponsor);
-    var beschreibung = textFeld(sponsor, "sponBeschreibung");
-    // Interaktiver Inhalt (<details>) ist in einem <a> ungueltiges HTML,
-    // darum die Karte nur ohne Beschreibung als Link bauen; mit
-    // Beschreibung bleibt das eine Ziel ein Icon-Knopf in den Aktionen.
-    var karteTag = ziele.length === 1 && !beschreibung ? "a" : "div";
-    var karte = document.createElement(karteTag);
-    karte.className = "karte sponsor-karte";
-    if (karteTag === "a") {
-      karte.href = ziele[0].href;
-      if (ziele[0].extern) {
-        karte.target = "_blank";
-        karte.rel = "noopener";
+  function logoUrlFuerFirma(sponsorenZeilen, firma) {
+    for (var i = 0; i < sponsorenZeilen.length; i++) {
+      var z = sponsorenZeilen[i];
+      if (z.sponActive === true && String(z.sponFirma || "") === firma) {
+        var url = String(z.sponImg || "");
+        if (bildUrlGueltig(url)) return url;
       }
     }
+    return null;
+  }
 
-    var logoUrl = textFeld(sponsor, "sponImg");
+  function baueSponsorKarte(sponsor, sponsorenZeilen) {
+    var karte = document.createElement("div");
+    karte.className = "karte sponsor-karte";
+
     var logoBox = document.createElement("div");
     logoBox.className = "sponsor-karte__logo";
+    karte.appendChild(logoBox);
+    var logoUrl = logoUrlFuerFirma(sponsorenZeilen, sponsor.firma);
     if (bildUrlGueltig(logoUrl)) {
-      var img = bildMitRueckbau(logoUrl, "", textFeld(sponsor, "sponFirma"));
-      img.addEventListener("error", function () {
-        if (logoBox.parentNode) logoBox.parentNode.removeChild(logoBox);
-      });
-      logoBox.appendChild(img);
-      karte.appendChild(logoBox);
+      var testbild = new Image();
+      testbild.onload = function () {
+        var img = document.createElement("img");
+        img.src = logoUrl;
+        img.alt = "Logo " + sponsor.firma;
+        img.loading = "lazy";
+        logoBox.appendChild(img);
+      };
+      testbild.src = logoUrl;
     }
 
-    var firma = textFeld(sponsor, "sponFirma");
-    if (firma) {
-      var firmaEl = document.createElement("p");
-      firmaEl.className = "sponsor-karte__firma";
-      firmaEl.textContent = firma;
-      karte.appendChild(firmaEl);
+    var nameText = [sponsor.firma, sponsor.ort].filter(Boolean).join(", ");
+    var nameEl = document.createElement("p");
+    nameEl.className = "sponsor-karte__name";
+    var href = sponsor.link ? mitSchema(sponsor.link) : "";
+    if (href) {
+      var a = document.createElement("a");
+      a.href = href;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = nameText;
+      nameEl.appendChild(a);
+    } else {
+      nameEl.textContent = nameText;
     }
+    karte.appendChild(nameEl);
 
-    var ort = textFeld(sponsor, "sponOrt");
-    if (ort) {
-      var ortEl = document.createElement("p");
-      ortEl.className = "sponsor-karte__ort";
-      ortEl.textContent = ort;
-      karte.appendChild(ortEl);
+    var aktionen = document.createElement("div");
+    aktionen.className = "sponsor-karte__aktionen";
+    if (href) {
+      var globus = document.createElement("a");
+      globus.className = "icon-knopf";
+      globus.href = href;
+      globus.target = "_blank";
+      globus.rel = "noopener";
+      globus.setAttribute("aria-label", "Website");
+      globus.innerHTML = ICON_GLOBUS + "<span>Website</span>";
+      aktionen.appendChild(globus);
     }
-
-    if (beschreibung) {
-      var details = document.createElement("details");
-      details.className = "sponsor-karte__details";
-      var summary = document.createElement("summary");
-      summary.textContent = "Mehr erfahren";
-      details.appendChild(summary);
-      var inhalt = document.createElement("div");
-      inhalt.innerHTML = sicheresHtml(beschreibung);
-      details.appendChild(inhalt);
-      karte.appendChild(details);
+    if (sponsor.instagram) {
+      var insta = document.createElement("a");
+      insta.className = "icon-knopf";
+      insta.href = "https://instagram.com/" + String(sponsor.instagram).replace(/^@/, "");
+      insta.target = "_blank";
+      insta.rel = "noopener";
+      insta.setAttribute("aria-label", "Instagram");
+      insta.innerHTML = ICON_KAMERA + "<span>Instagram</span>";
+      aktionen.appendChild(insta);
     }
-
-    if (karteTag !== "a" && ziele.length > 0) {
-      var aktionen = document.createElement("div");
-      aktionen.className = "sponsor-karte__aktionen";
-      for (var i = 0; i < ziele.length; i++) {
-        var z = ziele[i];
-        aktionen.appendChild(baueAktion(z.href, z.icon, z.label, z.extern));
-      }
-      karte.appendChild(aktionen);
-    }
+    if (aktionen.children.length) karte.appendChild(aktionen);
 
     return karte;
   }
 
+  var GRUPPEN = ["Partner", "Fußballschule", "App-Projektpartner"];
   var bereich = document.getElementById("sponsoren-bereich");
 
-  function zeigeFehler() {
-    bereich.innerHTML = "";
-    var hinweis = document.createElement("div");
-    hinweis.className = "hinweis";
-    var p = document.createElement("p");
-    p.textContent = "Die Sponsoren konnten gerade nicht geladen werden.";
-    hinweis.appendChild(p);
-    bereich.appendChild(hinweis);
-  }
-
-  Promise.all([
-    ladeWorkbook(SPONSOREN_ID, { sponActive: true }),
-    ladeWorkbook(EINSTELLUNGEN_ID)
-  ]).then(function (ergebnisse) {
-    var sponsoren = ergebnisse[0]
-      .filter(function (s) {
-        return s.sponActive === true
-          && (textFeld(s, "sponFirma") || textFeld(s, "sponImg"))
-          && !istPlatzhalter(textFeld(s, "sponFirma"));
-      })
-      .slice()
-      .sort(vergleicheSponsoren);
-    var einstellungenZeilen = ergebnisse[1];
-    var einstellungen = einstellungenZeilen[0] || {};
-    var gruppieren = einstellungen.setGroupByCategory !== false;
-
-    bereich.innerHTML = "";
-
-    if (!sponsoren.length) {
-      var hinweis = document.createElement("div");
-      hinweis.className = "hinweis";
-      var p = document.createElement("p");
-      p.textContent = "Aktuell sind keine Sponsoren hinterlegt.";
-      hinweis.appendChild(p);
-      bereich.appendChild(hinweis);
-      return;
-    }
-
-    if (!gruppieren) {
-      var raster = document.createElement("div");
-      raster.className = "sponsoren-raster";
-      for (var i = 0; i < sponsoren.length; i++) raster.appendChild(baueSponsorKarte(sponsoren[i]));
-      bereich.appendChild(raster);
-      return;
-    }
-
-    var gruppenMap = {};
-    for (var j = 0; j < sponsoren.length; j++) {
-      var s = sponsoren[j];
-      var kategorie = textFeld(s, "sponKategorie") || "Weitere";
-      var schluessel = gruppenSchluessel(kategorie);
-      if (!gruppenMap[schluessel]) gruppenMap[schluessel] = { anzeige: kategorie, sponsoren: [] };
-      gruppenMap[schluessel].sponsoren.push(s);
-    }
-    var gruppenListe = Object.keys(gruppenMap).map(function (k) { return gruppenMap[k]; });
-    gruppenListe.sort(function (a, b) {
-      var ra = gruppenRang(a.anzeige);
-      var rb = gruppenRang(b.anzeige);
-      if (ra !== rb) return ra - rb;
-      return a.anzeige.localeCompare(b.anzeige, "de");
-    });
-
-    for (var g = 0; g < gruppenListe.length; g++) {
-      var gruppe = gruppenListe[g];
+  ladeWorkbook(SPONSOREN_ID, { sponActive: true }).then(function (sponsorenZeilen) {
+    GRUPPEN.forEach(function (kategorie) {
+      var sponsoren = (SPONSOREN || []).filter(function (s) { return s.kategorie === kategorie; });
+      if (!sponsoren.length) return;
       var abschnitt = document.createElement("section");
       abschnitt.className = "sponsoren-gruppe";
       var titel = document.createElement("h2");
       titel.className = "abschnittstitel";
-      titel.textContent = gruppe.anzeige;
+      titel.textContent = kategorie;
       abschnitt.appendChild(titel);
-      var raster2 = document.createElement("div");
-      raster2.className = "sponsoren-raster";
-      for (var k = 0; k < gruppe.sponsoren.length; k++) raster2.appendChild(baueSponsorKarte(gruppe.sponsoren[k]));
-      abschnitt.appendChild(raster2);
+      var raster = document.createElement("div");
+      raster.className = "sponsoren-raster";
+      sponsoren.forEach(function (s) { raster.appendChild(baueSponsorKarte(s, sponsorenZeilen)); });
+      abschnitt.appendChild(raster);
       bereich.appendChild(abschnitt);
-    }
+    });
   }).catch(function () {
-    zeigeFehler();
+    GRUPPEN.forEach(function (kategorie) {
+      var sponsoren = (SPONSOREN || []).filter(function (s) { return s.kategorie === kategorie; });
+      if (!sponsoren.length) return;
+      var abschnitt = document.createElement("section");
+      abschnitt.className = "sponsoren-gruppe";
+      var titel = document.createElement("h2");
+      titel.className = "abschnittstitel";
+      titel.textContent = kategorie;
+      abschnitt.appendChild(titel);
+      var raster = document.createElement("div");
+      raster.className = "sponsoren-raster";
+      sponsoren.forEach(function (s) { raster.appendChild(baueSponsorKarte(s, [])); });
+      abschnitt.appendChild(raster);
+      bereich.appendChild(abschnitt);
+    });
   });
 })();
 </script>

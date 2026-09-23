@@ -154,6 +154,22 @@ svg { display: block; flex: 0 0 auto; }
 
 .inhalt > .abschnittstitel:first-child { margin-top: 0; }
 
+/* Seitenkopf-Baustein (W8, App-weit): einheitlicher, kartenloser
+   Einleitungssatz direkt unter dem (unsichtbaren) h1 jeder Seite – die
+   App-Kopfleiste zeigt den Seitentitel bereits, ein eigener Kartentitel
+   wäre doppelt. Gleicher Abstand nach unten wie ein Abschnittstitel. */
+.seitenkopf-lead {
+  margin: 0 0 var(--sp-5);
+  font-size: 15px;
+  color: var(--ink-2);
+}
+
+/* Aufklapper (W8, App-weit): kein natives Dreieck "▶" vor <summary> – der
+   Chevron/"›" steht stattdessen im Text der jeweiligen Beschriftung. */
+summary { list-style: none; cursor: pointer; }
+summary::-webkit-details-marker { display: none; }
+summary::marker { content: ""; }
+
 .knopf {
   display: inline-flex;
   align-items: center;

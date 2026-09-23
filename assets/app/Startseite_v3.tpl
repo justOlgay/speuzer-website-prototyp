@@ -205,6 +205,8 @@ svg { display: block; flex: 0 0 auto; }
 }
 
 .hinweis p { margin: 0; }
+.hinweis__titel { font-weight: 700; color: var(--blau-950); margin-bottom: 4px !important; }
+.hinweis__datum { font-size: 12px; color: var(--ink-3); margin-top: 6px !important; }
 
 /* Datumsblock (Baustein aus app-konzept.css, dort Teil von .app-termin-karte__datum) */
 
@@ -443,7 +445,11 @@ svg { display: block; flex: 0 0 auto; }
 </a>
 
 <!-- HINWEIS: im CMS-Quelltext pflegen oder leeren -->
-<div class="hinweis"><p>Der Parkplatz am Vereinsgelände ist wegen des Neubaus des Funktionsgebäudes voraussichtlich bis Ende Januar 2027 gesperrt. Der Zugang zum Gelände ist über den Hintereingang am „Haus der Jugend“ (Pavillon) möglich.</p></div>
+<div class="hinweis">
+  <p class="hinweis__titel">Parkplatz gesperrt</p>
+  <p>Der Parkplatz am Vereinsgelände ist wegen des Neubaus des Funktionsgebäudes voraussichtlich bis Ende Januar 2027 gesperrt. Der Zugang zum Gelände ist über den Hintereingang am „Haus der Jugend“ (Pavillon) möglich.</p>
+  <p class="hinweis__datum">Hinweis vom 21.07.2026</p>
+</div>
 
 <div class="aktionen">
   <a class="knopf" href="mailto:jugendleitung@sportfreunde04.de?subject=Probetraining%20beim%20FFV%20Sportfreunde%2004&amp;body=Hallo%2C%0A%0Awir%20interessieren%20uns%20f%C3%BCr%20ein%20Probetraining.%0AJahrgang%20des%20Kindes%3A%20%0AVorerfahrung%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe">Probetraining vereinbaren</a>
@@ -493,9 +499,11 @@ svg { display: block; flex: 0 0 auto; }
     var angemeldet = istAngemeldet();
     var profilKnopf = document.getElementById("profil-knopf");
     var registrieren = document.getElementById("registrieren-pille");
+    // Gast: oben kein Profil-Knopf und keine Registrieren-Pille – einziger
+    // Einstieg ist "Anmelden" unter "Heute und demnächst" (QA W8, Abschnitt 8).
     if (!angemeldet) {
       if (profilKnopf) profilKnopf.hidden = true;
-      if (registrieren) registrieren.hidden = false;
+      if (registrieren) registrieren.hidden = true;
     }
   }
 
@@ -609,7 +617,7 @@ svg { display: block; flex: 0 0 auto; }
     if (!container) return;
     container.innerHTML = "";
     var karte = document.createElement("div");
-    karte.className = "hinweis";
+    karte.className = "karte termine-leer";
     var p = document.createElement("p");
     p.textContent = "Nach der Anmeldung siehst du hier deine Termine.";
     karte.appendChild(p);

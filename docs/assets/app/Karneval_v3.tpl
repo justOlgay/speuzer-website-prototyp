@@ -174,6 +174,22 @@ svg { display: block; flex: 0 0 auto; }
 
 .inhalt > .abschnittstitel:first-child { margin-top: 0; }
 
+/* Seitenkopf-Baustein (W8, App-weit): einheitlicher, kartenloser
+   Einleitungssatz direkt unter dem (unsichtbaren) h1 jeder Seite – die
+   App-Kopfleiste zeigt den Seitentitel bereits, ein eigener Kartentitel
+   wäre doppelt. Gleicher Abstand nach unten wie ein Abschnittstitel. */
+.seitenkopf-lead {
+  margin: 0 0 var(--sp-5);
+  font-size: 15px;
+  color: var(--ink-2);
+}
+
+/* Aufklapper (W8, App-weit): kein natives Dreieck "▶" vor <summary> – der
+   Chevron/"›" steht stattdessen im Text der jeweiligen Beschriftung. */
+summary { list-style: none; cursor: pointer; }
+summary::-webkit-details-marker { display: none; }
+summary::marker { content: ""; }
+
 .knopf {
   display: inline-flex;
   align-items: center;
@@ -238,7 +254,14 @@ svg { display: block; flex: 0 0 auto; }
   text-align: center;
 }
 
-/* Karneval_v3.tpl – seitenspezifisch (C1). */
+/* Karneval_v3.tpl – seitenspezifisch (C1). W8, Grundsatz Daten: Gruppen
+   (Name/Leitung/Übungszeit) aus {"name":"Karnevalabteilung „Die Schnauzer“","mail":"karnevalabteilung@sportfreunde04.de","leitung":"Patrick Krösche (Abteilungsleiter)","gruppen":[{"name":"Dreamboys","leitung":["Alexandra Schrödl (Trainerin)","Melanie Seipp (Co-Trainerin)"],"uebungszeit":"Mittwoch 19:00–21:00 Uhr, Turnhalle Fridtjof-Nansen-Schule","offen":null},{"name":"Little Fruities","leitung":["Stephanie Künstler (Trainerin)","Melanie Seipp (Co-Trainerin)"],"uebungszeit":null,"offen":"Übungszeit nicht belegt"},{"name":"Freaky Fruities","leitung":["Stephanie Künstler (Trainerin)","Melanie Seipp (Co-Trainerin)"],"uebungszeit":null,"offen":"Übungszeit nicht belegt"},{"name":"Flying Fruities","leitung":["Simone Bechstein (Trainerin)"],"uebungszeit":null,"offen":"Übungszeit nicht belegt"},{"name":"Pfläumchen","leitung":["Simone Bechstein (Trainerin)","Stephanie Künstler (Co-Trainerin)"],"uebungszeit":null,"offen":"Übungszeit nicht belegt"}],"hinweis":"Live-Seite nennt 'Fridjof-Nansen-Schule' (Schreibweise der Schule: Fridtjof-Nansen-Schule)"} (data/karneval.json),
+   Ansprechpartner (Abteilungsleiter/Kassiererin/Schriftführerin) aus
+   [{"name":"Melanie Seipp","funktion":"1. Vorsitzende","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-melanie-seipp","bytes":525138}},{"name":"Uwe Korndörfer","funktion":"2. Vorsitzender","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-uwe-korndorfer","bytes":517113}},{"name":"Wolfgang Schirmer","funktion":"1. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-wolfgang-schirmer","bytes":495840}},{"name":"Bernhard Henrich","funktion":"2. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-bernhard-henrich","bytes":135549}},{"name":"Ralf Schwager","funktion":"1. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-ralf-schwager","bytes":112402}},{"name":"Olgay Özkan","funktion":"2. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-olgay-ozkan","bytes":60038}},{"name":"Marcel Hogg","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-marcel-hogg","bytes":125052}},{"name":"Vassilios Miamis","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-vassilios-miamis","bytes":215395}},{"name":"Florian Müller","funktion":"Kinderschutzbeauftragter","mail":"kinderschutzbeauftragter@sportfreunde04.de","foto":{"quelle":"vorstand-florian-muller","bytes":69465}},{"name":null,"funktion":"Schriftführer","mail":null,"foto":null,"hinweis":"nicht besetzt"},{"name":"Wolfgang Krönung","funktion":"Sportliche Leitung Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Christine Rothe","funktion":"Spielausschuss Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Patrick Krösche","funktion":"Abteilungsleiter Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":{"quelle":"vorstand-patrick-krosche","bytes":221052}},{"name":"Sigrid Weber","funktion":"Kassiererin Abteilung Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null},{"name":"Bettina Leven-Grieb","funktion":"Schriftführerin Abteilung Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null}] (data/vorstand.json) – dieselben Daten wie
+   verein/karneval.mjs. Keine Gruppenbilder mehr (uneinheitlich, teils
+   private Porträts, siehe W8-Spezifikation Abschnitt 3) – nur noch das
+   Ansprechpartner-Foto wird zur Laufzeit aus dem Ansprechpartner-Worksheet
+   geladen (Feld ansImg, per Namensgleichheit), nie im Repo. */
 
 .visually-hidden {
   position: absolute;
@@ -252,117 +275,91 @@ svg { display: block; flex: 0 0 auto; }
   border: 0;
 }
 
-.karneval-titel {
-  margin: var(--sp-2) 0 0;
-  font-family: var(--font-head);
-  font-weight: 700;
-  font-size: 26px;
-  text-transform: uppercase;
-  color: var(--blau-950);
-}
-
-.karneval-text {
-  margin: var(--sp-2) 0 0;
-  font-size: 14px;
-  color: var(--ink-2);
-}
-
 .gruppen-liste {
   display: flex;
   flex-direction: column;
   gap: var(--sp-4);
-  margin-top: var(--sp-5);
-}
-
-/* Fotos und Logos vollstaendig zeigen (kein Beschnitt von Koepfen oder
-   Logos): feste Hoehe, Bild eingepasst, ruhige Flaeche in Vereinsblau-50. */
-.gruppe-karte__bild {
-  display: block;
-  width: 100%;
-  height: 200px;
-  object-fit: contain;
-  object-position: center;
-  background: var(--blau-50);
-  border-radius: var(--r-md);
-  margin-bottom: var(--sp-3);
 }
 
 .gruppe-karte__titel {
   font-family: var(--font-head);
   font-weight: 700;
-  font-size: 22px;
+  font-size: 20px;
   margin: 0 0 4px;
   color: var(--blau-950);
 }
 
 .gruppe-karte__untertitel {
-  margin: 0 0 var(--sp-2);
+  margin: 2px 0 0;
   font-size: 13px;
   color: var(--ink-3);
 }
 
-.gruppe-karte__details {
-  margin-top: var(--sp-2);
+.karneval-hinweistext {
+  margin: var(--sp-5) 0 0;
   font-size: 14px;
   color: var(--ink-2);
 }
 
-.gruppe-karte__details summary {
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--blau-700);
+.ansprechpartner-liste {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
 }
 
-.gruppe-karte__details > div {
-  margin-top: var(--sp-2);
+.person-karte {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
 }
 
-.gruppe-karte__kontakt {
+.person-karte__bild {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r-pill);
+  object-fit: cover;
+  object-position: 50% 0%;
+  background: var(--blau-50);
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+.person-karte__initialen {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r-pill);
+  background: var(--blau-100);
+  color: var(--blau-800);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-3);
-  flex-wrap: wrap;
-  margin-top: var(--sp-3);
-  padding-top: var(--sp-3);
-  border-top: 1px solid var(--line);
+  justify-content: center;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 18px;
 }
 
-.gruppe-karte__kontakt-text {
-  font-size: 14px;
+.person-karte__inhalt { flex: 1 1 auto; min-width: 0; }
+
+.person-karte__name {
+  margin: 0;
   font-weight: 600;
+  font-size: 15px;
   overflow-wrap: break-word;
 }
 
-.gruppe-karte__kontakt-aktionen {
-  display: flex;
-  gap: var(--sp-2);
-  flex-wrap: wrap;
+.person-karte__funktion {
+  margin: 2px 0 var(--sp-2);
+  font-size: 13px;
+  color: var(--ink-3);
+  overflow-wrap: break-word;
 }
 
-.icon-knopf {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 44px;
-  padding-inline: var(--sp-3);
-  border-radius: var(--r-md);
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--blau-800);
+.person-karte__link {
+  color: var(--blau-700);
   font-weight: 600;
   font-size: 13px;
   text-decoration: none;
-}
-
-.icon-knopf svg { width: 18px; height: 18px; }
-
-.gruppe-karte__buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-2);
-  margin-top: var(--sp-3);
 }
 </style>
 </head>
@@ -371,21 +368,19 @@ svg { display: block; flex: 0 0 auto; }
 
 <h1 class="visually-hidden">Karneval</h1>
 
-<div class="karte">
-  <span class="tag">Abteilung</span>
-  <p class="karneval-titel">Die Schnauzer</p>
-  <p class="karneval-text">Die Karnevalabteilung der Sportfreunde 04 – Gruppen von den Little Fruities bis zu den Dreamboys.</p>
-</div>
+<p class="seitenkopf-lead">Fünf Gruppen, eine Bühne: Die Karnevalabteilung des Frankfurter Fußballvereins Sportfreunde 1904 e.&nbsp;V.</p>
 
 <div id="gruppen-liste" class="gruppen-liste"></div>
 
+<p class="karneval-hinweistext">Übungszeiten und Ort erfährst du bei der Karnevalabteilung.</p>
 <div class="aktionen">
-  <a class="knopf" href="mailto:karnevalabteilung@sportfreunde04.de">Kontakt Karnevalabteilung</a>
+  <a id="karneval-mail-knopf" class="knopf" href="mailto:karnevalabteilung@sportfreunde04.de">E-Mail an die Karnevalabteilung</a>
 </div>
-<a class="zeile" href="nav://sportfreunde04_Application_1780401660369">
-  <span class="zeile__text"><span class="zeile__titel">Termine</span></span>
-  <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
-</a>
+
+<h2 class="abschnittstitel">Ansprechpartner</h2>
+<div id="ansprechpartner-liste" class="ansprechpartner-liste"></div>
+
+<p class="fuss">F.F.V. Sportfreunde 04 · Vereins-App</p>
 
 </main>
 
@@ -395,28 +390,35 @@ svg { display: block; flex: 0 0 auto; }
 (function () {
   "use strict";
 
-  var UEBERSICHT_ID = "6a1ec5fcf68a05bf129cdb7a";
-  var BUTTONS_ID = "6a1ec5fcf68a05bf129cdb82";
+  var KARNEVAL = {"name":"Karnevalabteilung „Die Schnauzer“","mail":"karnevalabteilung@sportfreunde04.de","leitung":"Patrick Krösche (Abteilungsleiter)","gruppen":[{"name":"Dreamboys","leitung":["Alexandra Schrödl (Trainerin)","Melanie Seipp (Co-Trainerin)"],"uebungszeit":"Mittwoch 19:00–21:00 Uhr, Turnhalle Fridtjof-Nansen-Schule","offen":null},{"name":"Little Fruities","leitung":["Stephanie Künstler (Trainerin)","Melanie Seipp (Co-Trainerin)"],"uebungszeit":null,"offen":"Übungszeit nicht belegt"},{"name":"Freaky Fruities","leitung":["Stephanie Künstler (Trainerin)","Melanie Seipp (Co-Trainerin)"],"uebungszeit":null,"offen":"Übungszeit nicht belegt"},{"name":"Flying Fruities","leitung":["Simone Bechstein (Trainerin)"],"uebungszeit":null,"offen":"Übungszeit nicht belegt"},{"name":"Pfläumchen","leitung":["Simone Bechstein (Trainerin)","Stephanie Künstler (Co-Trainerin)"],"uebungszeit":null,"offen":"Übungszeit nicht belegt"}],"hinweis":"Live-Seite nennt 'Fridjof-Nansen-Schule' (Schreibweise der Schule: Fridtjof-Nansen-Schule)"};
+  var VORSTAND = [{"name":"Melanie Seipp","funktion":"1. Vorsitzende","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-melanie-seipp","bytes":525138}},{"name":"Uwe Korndörfer","funktion":"2. Vorsitzender","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-uwe-korndorfer","bytes":517113}},{"name":"Wolfgang Schirmer","funktion":"1. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-wolfgang-schirmer","bytes":495840}},{"name":"Bernhard Henrich","funktion":"2. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-bernhard-henrich","bytes":135549}},{"name":"Ralf Schwager","funktion":"1. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-ralf-schwager","bytes":112402}},{"name":"Olgay Özkan","funktion":"2. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-olgay-ozkan","bytes":60038}},{"name":"Marcel Hogg","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-marcel-hogg","bytes":125052}},{"name":"Vassilios Miamis","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-vassilios-miamis","bytes":215395}},{"name":"Florian Müller","funktion":"Kinderschutzbeauftragter","mail":"kinderschutzbeauftragter@sportfreunde04.de","foto":{"quelle":"vorstand-florian-muller","bytes":69465}},{"name":null,"funktion":"Schriftführer","mail":null,"foto":null,"hinweis":"nicht besetzt"},{"name":"Wolfgang Krönung","funktion":"Sportliche Leitung Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Christine Rothe","funktion":"Spielausschuss Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Patrick Krösche","funktion":"Abteilungsleiter Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":{"quelle":"vorstand-patrick-krosche","bytes":221052}},{"name":"Sigrid Weber","funktion":"Kassiererin Abteilung Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null},{"name":"Bettina Leven-Grieb","funktion":"Schriftführerin Abteilung Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null}];
+  var ANSPRECHPARTNER_ID = "6a1ec5fcf68a05bf129cdb8b";
 
-  var ICON_MAIL = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M4 6.5l8 6 8-6"/></svg>';
-  var ICON_PHONE = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.5 3.5h3.2c.5 0 .9.3 1 .8l.9 3a1.1 1.1 0 0 1-.3 1.1L7.8 9.9a13 13 0 0 0 6.3 6.3l1.5-1.5c.3-.3.7-.4 1.1-.3l3 .9c.5.1.8.5.8 1v3.2c0 .8-.7 1.4-1.5 1.3-8-1-14.4-7.4-15.4-15.4-.1-.8.5-1.5 1.3-1.5z"/></svg>';
+  // Porträts wie auf der Website: dieselben, einheitlich zugeschnittenen
+  // Vorstandsfotos (data/vorstand.json foto.quelle, Varianten auf GitHub
+  // Pages). Das Bild aus dem Ansprechpartner-Worksheet ist nur Rückfall für
+  // Personen ohne Website-Foto (W8, Olgays Rückmeldung zum Zuschnitt).
+  var FOTO_BASIS = "https://justolgay.github.io/speuzer-website-prototyp/assets/bilder/erzeugt/";
+  function vereinsFotoUrl(name) {
+    var p = (VORSTAND || []).find(function (x) { return x.name === name; });
+    return p && p.foto && p.foto.quelle ? FOTO_BASIS + p.foto.quelle + "-480.jpg" : null;
+  }
+
 
   function textFeld(zeile, name) {
     var v = zeile && zeile[name];
     return (v === undefined || v === null) ? "" : String(v);
   }
 
-  function sicheresHtml(html) {
-    var div = document.createElement("div");
-    div.innerHTML = String(html || "");
-    var scripts = div.querySelectorAll("script");
-    for (var i = 0; i < scripts.length; i++) scripts[i].remove();
-    return div.innerHTML;
+  function bildUrlGueltig(url) {
+    return /^https?:\/\//i.test(url || "");
   }
 
-  function telHref(nummer) {
-    var extrahiert = String(nummer || "").replace(/[^\d+]/g, "");
-    return "tel:" + (extrahiert || nummer);
+  function initialenAus(name) {
+    var teile = String(name || "").trim().split(/\s+/).filter(Boolean);
+    if (!teile.length) return "";
+    if (teile.length === 1) return teile[0].slice(0, 1).toUpperCase();
+    return (teile[0].slice(0, 1) + teile[teile.length - 1].slice(0, 1)).toUpperCase();
   }
 
   function ladeWorkbook(id) {
@@ -427,178 +429,119 @@ svg { display: block; flex: 0 0 auto; }
       .then(function (rows) { return Array.isArray(rows) ? rows : []; });
   }
 
-  function vergleicheGruppen(a, b) {
-    var an = typeof a.sortNumber === "number" ? a.sortNumber : Infinity;
-    var bn = typeof b.sortNumber === "number" ? b.sortNumber : Infinity;
-    if (an !== bn) return an - bn;
-    return textFeld(a, "team").localeCompare(textFeld(b, "team"), "de");
-  }
-
-  function baueKontaktZeile(zeile, titelFeld, nameFeld, mailFeld, phoneFeld, handyFeld) {
-    var titel = textFeld(zeile, titelFeld);
-    var name = textFeld(zeile, nameFeld);
-    if (!titel && !name) return null;
-
-    var kontakt = document.createElement("div");
-    kontakt.className = "gruppe-karte__kontakt";
-
-    var text = document.createElement("span");
-    text.className = "gruppe-karte__kontakt-text";
-    text.textContent = [titel, name].filter(Boolean).join(" ");
-    kontakt.appendChild(text);
-
-    var aktionen = document.createElement("span");
-    aktionen.className = "gruppe-karte__kontakt-aktionen";
-
-    var mail = textFeld(zeile, mailFeld);
-    if (mail) {
-      var mailLink = document.createElement("a");
-      mailLink.className = "icon-knopf";
-      mailLink.href = "mailto:" + mail;
-      mailLink.innerHTML = ICON_MAIL + "<span>E-Mail</span>";
-      aktionen.appendChild(mailLink);
-    }
-
-    // Anrufen nur ohne Mail-Adresse (QA-Befund, C2 Abschnitt 7).
-    var telNummer = textFeld(zeile, handyFeld) || textFeld(zeile, phoneFeld);
-    if (!mail && telNummer) {
-      var telLink = document.createElement("a");
-      telLink.className = "icon-knopf";
-      telLink.href = telHref(telNummer);
-      telLink.innerHTML = ICON_PHONE + "<span>Anrufen</span>";
-      aktionen.appendChild(telLink);
-    }
-
-    if (mail || telNummer) kontakt.appendChild(aktionen);
-    return kontakt;
-  }
-
-  function baueButtons(gruppe, buttons) {
-    var id = textFeld(gruppe, "id");
-    var passende = buttons.filter(function (b) {
-      if (textFeld(b, "buttonID") !== id) return false;
-      var link = textFeld(b, "buttonLink");
-      return /^(https?:|nav:\/\/|mailto:|tel:)/i.test(link);
-    });
-    if (!passende.length) return null;
-
-    var wrapper = document.createElement("div");
-    wrapper.className = "gruppe-karte__buttons";
-    for (var i = 0; i < passende.length; i++) {
-      var b = passende[i];
-      var buttonLink = textFeld(b, "buttonLink");
-      var link = document.createElement("a");
-      link.className = "knopf knopf--leise";
-      link.href = buttonLink;
-      link.textContent = textFeld(b, "buttonText") || "Mehr";
-      if (b.externalLink === true || /^https?:/i.test(buttonLink)) {
-        link.target = "_blank";
-        link.rel = "noopener";
+  function findeBildFuerName(ansprechpartner, name) {
+    for (var i = 0; i < ansprechpartner.length; i++) {
+      if (textFeld(ansprechpartner[i], "ansName") === name) {
+        var url = textFeld(ansprechpartner[i], "ansImg");
+        if (bildUrlGueltig(url)) return url;
       }
-      wrapper.appendChild(link);
     }
-    return wrapper;
+    return null;
   }
 
-  // Bild-URLs aus den Worksheets: nur absolute http(s)-Adressen verwenden
-  // (im Feld stehen gelegentlich Ids oder Reste), und ein Bild, das nicht
-  // laedt, wieder aus der Karte nehmen statt eine leere Flaeche zu lassen.
-  function bildUrlGueltig(url) {
-    return /^https?:\/\//i.test(url || "");
-  }
-  function bildMitRueckbau(url, klasse, alt) {
-    var bild = document.createElement("img");
-    bild.className = klasse;
-    bild.src = url;
-    bild.alt = alt || "";
-    bild.loading = "lazy";
-    bild.addEventListener("error", function () {
-      if (bild.parentNode) bild.parentNode.removeChild(bild);
-    });
-    return bild;
-  }
+  // ---------- Gruppen (wie gruppenKarte() in verein/karneval.mjs: Name,
+  // Leitung mit Komma verbunden, Übungsstunde nur wenn gepflegt) ----------
 
-  function baueGruppenKarte(gruppe, buttons) {
+  var gruppenListe = document.getElementById("gruppen-liste");
+  (KARNEVAL.gruppen || []).forEach(function (g) {
     var karte = document.createElement("div");
-    karte.className = "karte gruppe-karte";
-
-    var bildUrl = [textFeld(gruppe, "sliderImage1"), textFeld(gruppe, "categoryImage")].filter(bildUrlGueltig)[0];
-    if (bildUrl) {
-      karte.appendChild(bildMitRueckbau(bildUrl, "gruppe-karte__bild", ""));
-    }
-
+    karte.className = "karte";
     var titel = document.createElement("p");
     titel.className = "gruppe-karte__titel";
-    titel.textContent = textFeld(gruppe, "team");
+    titel.textContent = g.name;
     karte.appendChild(titel);
+    var leitung = document.createElement("p");
+    leitung.className = "gruppe-karte__untertitel";
+    leitung.textContent = "Leitung: " + (g.leitung || []).join(", ");
+    karte.appendChild(leitung);
+    if (g.uebungszeit) {
+      var zeit = document.createElement("p");
+      zeit.className = "gruppe-karte__untertitel";
+      zeit.textContent = "Übungsstunde: " + g.uebungszeit;
+      karte.appendChild(zeit);
+    }
+    gruppenListe.appendChild(karte);
+  });
 
-    var uebungszeit = textFeld(gruppe, "trainingTitle");
-    if (uebungszeit) {
-      var untertitel = document.createElement("p");
-      untertitel.className = "gruppe-karte__untertitel";
-      untertitel.textContent = uebungszeit;
-      karte.appendChild(untertitel);
+  document.getElementById("karneval-mail-knopf").href = "mailto:" + (KARNEVAL.mail || "karnevalabteilung@sportfreunde04.de");
+
+  // ---------- Ansprechpartner (wie ansprechpartnerAbschnitt() in
+  // verein/karneval.mjs: Abteilungsleiter/Kassiererin/Schriftführerin aus
+  // data/vorstand.json, Foto zur Laufzeit per Namensgleichheit) ----------
+
+  var FUNKTIONEN = ["Abteilungsleiter Karneval", "Kassiererin Abteilung Karneval", "Schriftführerin Abteilung Karneval"];
+  var personen = FUNKTIONEN
+    .map(function (f) { return (VORSTAND || []).find(function (p) { return p.funktion === f; }); })
+    .filter(Boolean);
+
+  var liste = document.getElementById("ansprechpartner-liste");
+
+  function bauePersonKarte(person, bildUrl) {
+    var karte = document.createElement("div");
+    karte.className = "karte person-karte";
+
+    if (bildUrlGueltig(bildUrl)) {
+      var bild = document.createElement("img");
+      bild.className = "person-karte__bild";
+      bild.src = bildUrl;
+      bild.alt = "";
+      bild.loading = "lazy";
+      karte.appendChild(bild);
+    } else {
+      var kreis = document.createElement("div");
+      kreis.className = "person-karte__initialen";
+      kreis.setAttribute("aria-hidden", "true");
+      kreis.textContent = initialenAus(person.name);
+      karte.appendChild(kreis);
     }
 
-    var beschreibung = textFeld(gruppe, "description");
-    if (beschreibung) {
-      var details = document.createElement("details");
-      details.className = "gruppe-karte__details";
-      var summary = document.createElement("summary");
-      summary.textContent = "Mehr zur Gruppe";
-      details.appendChild(summary);
-      var inhalt = document.createElement("div");
-      inhalt.innerHTML = sicheresHtml(beschreibung);
-      details.appendChild(inhalt);
-      karte.appendChild(details);
+    var inhalt = document.createElement("div");
+    inhalt.className = "person-karte__inhalt";
+    var name = document.createElement("p");
+    name.className = "person-karte__name";
+    name.textContent = person.name || "derzeit nicht besetzt";
+    inhalt.appendChild(name);
+    var funktion = document.createElement("p");
+    funktion.className = "person-karte__funktion";
+    funktion.textContent = person.funktion;
+    inhalt.appendChild(funktion);
+    if (person.mail) {
+      var mail = document.createElement("a");
+      mail.className = "person-karte__link";
+      mail.href = "mailto:" + person.mail;
+      mail.textContent = "E-Mail schreiben ›";
+      inhalt.appendChild(mail);
     }
-
-    var kontakt1 = baueKontaktZeile(gruppe, "firstContactTitle", "firstContactName", "firstContactMail", "firstContactPhone", "firstContactHandy");
-    if (kontakt1) karte.appendChild(kontakt1);
-    var kontakt2 = baueKontaktZeile(gruppe, "secondContactTitle", "secondContactName", "secondContactMail", "secondContactPhone", "secondContactHandy");
-    if (kontakt2) karte.appendChild(kontakt2);
-
-    var buttonsBlock = baueButtons(gruppe, buttons);
-    if (buttonsBlock) karte.appendChild(buttonsBlock);
-
+    karte.appendChild(inhalt);
     return karte;
   }
 
-  var listeContainer = document.getElementById("gruppen-liste");
+  personen.forEach(function (p) { liste.appendChild(bauePersonKarte(p, null)); });
 
-  Promise.all([
-    ladeWorkbook(UEBERSICHT_ID),
-    ladeWorkbook(BUTTONS_ID)
-  ]).then(function (ergebnisse) {
-    var uebersicht = ergebnisse[0];
-    var buttons = ergebnisse[1];
+  var karten = liste.querySelectorAll(".person-karte");
+  var hatBild = [];
+  function zeigeBild(i, bildUrl) {
+    var kreis = karten[i] && karten[i].querySelector(".person-karte__initialen");
+    if (!kreis || !bildUrl) return;
+    var bild = document.createElement("img");
+    bild.className = "person-karte__bild";
+    bild.src = bildUrl;
+    bild.alt = "";
+    bild.loading = "lazy";
+    bild.addEventListener("error", function () {
+      if (bild.parentNode) bild.replaceWith(kreis);
+    });
+    kreis.replaceWith(bild);
+    hatBild[i] = true;
+  }
+  personen.forEach(function (p, i) { zeigeBild(i, vereinsFotoUrl(p.name)); });
 
-    var gruppen = uebersicht
-      .filter(function (z) { return z.isActive === true && String(z.category || "").toLowerCase() === "karnevalabteilung"; })
-      .slice()
-      .sort(vergleicheGruppen);
-
-    listeContainer.innerHTML = "";
-    if (!gruppen.length) {
-      var hinweis = document.createElement("div");
-      hinweis.className = "hinweis";
-      var p = document.createElement("p");
-      p.textContent = "Aktuell sind keine Gruppen hinterlegt.";
-      hinweis.appendChild(p);
-      listeContainer.appendChild(hinweis);
-      return;
-    }
-    for (var i = 0; i < gruppen.length; i++) {
-      listeContainer.appendChild(baueGruppenKarte(gruppen[i], buttons));
-    }
+  ladeWorkbook(ANSPRECHPARTNER_ID).then(function (ansprechpartner) {
+    personen.forEach(function (p, i) {
+      if (!hatBild[i]) zeigeBild(i, findeBildFuerName(ansprechpartner, p.name));
+    });
   }).catch(function () {
-    listeContainer.innerHTML = "";
-    var hinweis = document.createElement("div");
-    hinweis.className = "hinweis";
-    var p = document.createElement("p");
-    p.textContent = "Die Gruppen konnten gerade nicht geladen werden.";
-    hinweis.appendChild(p);
-    listeContainer.appendChild(hinweis);
+    // Kein Netz/CORS: Initialen bleiben stehen.
   });
 })();
 </script>

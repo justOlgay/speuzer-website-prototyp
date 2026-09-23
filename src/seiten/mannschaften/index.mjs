@@ -4,7 +4,6 @@
 // Aufruf zum Probetraining.
 
 import {
-  mailLink,
   jahrgangText,
   datumLang,
   naechsteSpiele,
@@ -12,10 +11,14 @@ import {
   FUSSBALLDE_WIDGET_LADER,
   spieleKastenHtml,
   SPIELE_KASTEN_SKRIPT,
+  staffelLesbar,
+  eMailSchreibenLink,
+  deutscheAnfuehrungszeichen,
 } from "../../vorlagen/hilfen.mjs";
 // P15: gemeinsame Bausteine (ursprünglich Startseite, dort gelöscht – siehe
 // src/vorlagen/bausteine.mjs).
 import { trainingszeitenAbschnitt, probetrainingAbschnitt } from "../../vorlagen/bausteine.mjs";
+import { bild } from "../../vorlagen/bild.mjs";
 
 // Diese Seite liegt immer unter "/mannschaften/" (Tiefe 1), daher immer "../"
 // (siehe pfadZurWurzel() in tools/build.mjs).
@@ -37,54 +40,120 @@ function baldSpan(titel, { knopf = false } = {}) {
 }
 
 // "Jahrgang {jahrgang}" – bei den Herren nur "Senioren" (kein "Jahrgang"-
-// Präfix, kein Jahrgangswert; P3, Korrektur A1 abgeleitet aus kategorie
-// über jahrgangText() in hilfen.mjs).
+// Präfix, kein Jahrgangswert; P3, Korrektur A1 abgeleitet aus kategorie über
+// jahrgangText() in hilfen.mjs). W9, Abschnitt 1: geschütztes Leerzeichen
+// zwischen "Jahrgang" und dem Jahr, damit die Zeile nicht dort umbricht –
+// das Ergebnis ist bereits HTML-sicher (escapeHtml auf den Jahrgangswert),
+// an der Einsatzstelle also ohne weiteres escapeHtml() einsetzen.
 function jahrgangPraefix(team) {
   const j = jahrgangText(team);
-  return j === "Senioren" ? j : `Jahrgang ${j}`;
+  return j === "Senioren" ? j : `Jahrgang&nbsp;${escapeHtml(j)}`;
 }
 
 // W3, Abschnitt 7 (verbindliche Entscheidung): Trainingszeiten stehen nur
 // noch in der Tabelle "Trainingszeiten" weiter unten (keine Dopplung mehr) –
 // die Karte zeigt nur noch Jahrgang · Liga/Staffel und den Link.
-function teamKarte(team) {
-  return `<a class="karte karte--link" href="${PFAD}mannschaften/${team.slug}/">
-      <span class="karte__titel">${escapeHtml(team.name)}</span>
-      <span class="karte__meta">${escapeHtml(jahrgangPraefix(team))} · ${escapeHtml(team.staffel ?? "")}</span>
+// W9, Abschnitt 1: Staffel über staffelLesbar() (DFBnet-Kürzel weg, lesbare
+// Liga/Gruppe). `ohneKategoriePraefix` (W9, Abschnitt 1): in der
+// Senioren-Gruppe nennt schon die Gruppenüberschrift "Senioren" – die Karte
+// zeigt dort keinen zusätzlichen Kategorie-Präfix mehr (sonst "Senioren"
+// doppelt). W9, Abschnitt 2: zusätzliches <span class="team-karte__pfeil">
+// für die kompakte Handy-Zeile (siehe .team-karte in komponenten.css) – der
+// volle Text "Zur Mannschaft ›" bleibt für Desktop-Karten erhalten.
+function teamKarte(team, { ohneKategoriePraefix = false } = {}) {
+  const praefix = ohneKategoriePraefix ? "" : jahrgangPraefix(team);
+  const staffel = staffelLesbar(team.staffel);
+  const meta = praefix ? `${praefix} · ${staffel}` : staffel;
+  return `<a class="karte karte--link team-karte" href="${PFAD}mannschaften/${team.slug}/">
+      <span class="team-karte__haupt">
+        <span class="karte__titel">${escapeHtml(team.name)}</span>
+        <span class="karte__meta">${meta}</span>
+      </span>
       <span class="karte__mehr">Zur Mannschaft ›</span>
+      <span class="team-karte__pfeil" aria-hidden="true">›</span>
     </a>`;
 }
 
-function gruppenAbschnitt({ titel, satz, slugs, teamNachSlug, id }) {
+// W9, Abschnitt 2: einheitliches Raster für alle drei Gruppen (auch
+// "Senioren" mit nur einem Team) – .raster--mannschaften ist ab 640px ein
+// 4-spaltiges Grid (wie .raster--4), darunter eine Liste kompakter,
+// tippbarer Zeilen statt großer Karten (siehe komponenten.css).
+function gruppenAbschnitt({ titel, satz, slugs, teamNachSlug, id, ohneKategoriePraefix }) {
   const karten = slugs
     .map((slug) => teamNachSlug[slug])
     .filter(Boolean)
-    .map(teamKarte)
+    .map((team) => teamKarte(team, { ohneKategoriePraefix }))
     .join("\n    ");
   const idAttr = id ? ` id="${escapeHtml(id)}"` : "";
   return `<section class="abschnitt abschnitt--gruppe"${idAttr}>
   <div class="container fluss">
     <h2>${escapeHtml(titel)}</h2>
     <p class="meta">${escapeHtml(satz)}</p>
-    <div class="raster raster--3">
+    <div class="raster raster--mannschaften">
     ${karten}
     </div>
   </div>
 </section>`;
 }
 
+// Erste zwei Sätze eines Rohtexts, ohne dafür die gemeinsam genutzte (an
+// dieser Stelle nicht robuste) teiltSaetze()/absaetze()-Logik aus hilfen.mjs
+// zu ändern – die dort verwendete Abkürzungs-Erkennung erwartet ein
+// Leerzeichen/einen Punkt/den Textanfang direkt vor dem Einzelbuchstaben,
+// nicht eine öffnende Klammer wie in "(u. a." (data/zusatzangebote.json,
+// Regista-Beschreibung) und bricht den Satz dort fälschlich mitten im Wort
+// ab. Lokal hier deshalb ein einfacherer, für diesen Anwendungsfall robuster
+// Test: ein Punkt beendet einen Satz nur, wenn ihm ein Leerzeichen und ein
+// Großbuchstabe folgen (Fortsetzungen wie "u. a." haben danach einen
+// Kleinbuchstaben und werden so schon ausgeschlossen).
+function ersteZweiSaetze(text) {
+  const bereinigt = String(text ?? "").replace(/\s+/g, " ").trim();
+  const saetze = [];
+  let start = 0;
+  const re = /\.(\s+)(?=[A-ZÀ-ÖØ-Þ])/g;
+  let treffer;
+  while (saetze.length < 2 && (treffer = re.exec(bereinigt))) {
+    const ende = treffer.index + 1;
+    saetze.push(bereinigt.slice(start, ende).trim());
+    start = ende;
+  }
+  if (saetze.length < 2) {
+    const rest = bereinigt.slice(start).trim();
+    if (rest) saetze.push(rest);
+  }
+  return saetze.join(" ");
+}
+
+// W9, Abschnitt 3: beide Karten gleich aufgebaut (Name, zwei Sätze,
+// "Leitung: …", gleicher Kontaktknopf). Zwei Sätze über ersteZweiSaetze()
+// oben statt eines neu erfundenen Kürzungstexts. Kontakt einheitlich als
+// "E-Mail schreiben ›"-Textlink (eMailSchreibenLink(), schmale Karte – siehe
+// hilfen.mjs) auf a.mail bzw. die Geschäftsstelle, statt vorher zwei
+// unterschiedlicher mailLink()-Formen (einmal Textlink, einmal nackte
+// Adresse). Deutsche Anführungszeichen über deutscheAnfuehrungszeichen().
+// "kostenpflichtig" steht nur im Badge.
 function zusatzangeboteAbschnitt(daten) {
   const angebote = daten.zusatzangebote ?? [];
   const karten = angebote
     .map((a) => {
-      const kontakt = a.mail
-        ? mailLink(a.mail)
-        : mailLink("geschaeftsstelle@sportfreunde04.de", "Kontakt über die Geschäftsstelle");
-      return `<article class="karte fluss">
-      <span class="tag">Externes Angebot · kostenpflichtig</span>
-      <h3 class="karte__titel">${escapeHtml(a.name)}</h3>
-      <p>${escapeHtml(a.text ?? "")}</p>
-      <p class="meta">Leitung: ${escapeHtml(a.leitung ?? "")}</p>
+      const kontakt = eMailSchreibenLink(a.mail ?? "geschaeftsstelle@sportfreunde04.de");
+      const zweiSaetze = deutscheAnfuehrungszeichen(ersteZweiSaetze(a.text ?? ""));
+      // Logo klein neben Badge und Name (Olgay 23.09.2026: Logos gehören
+      // dazu); "Leitung" nur, wenn ein Name freigegeben ist (Regista: bewusst
+      // ohne Namen, Kontakt über die Geschäftsstelle).
+      const logo = a.logo?.quelle
+        ? `<span class="angebot__logo">${bild({ pfad: PFAD, daten, name: a.logo.quelle, alt: `Logo ${a.name}`, sizes: "80px" })}</span>`
+        : "";
+      return `<article class="karte fluss angebot">
+      <div class="angebot__kopf">
+        ${logo}
+        <div class="angebot__titel">
+          <span class="tag">Externes Angebot · kostenpflichtig</span>
+          <h3 class="karte__titel">${escapeHtml(a.name)}</h3>
+        </div>
+      </div>
+      <p>${escapeHtml(zweiSaetze)}</p>
+      ${a.leitung ? `<p class="meta">Leitung: ${escapeHtml(a.leitung)}</p>` : ""}
       <p>${kontakt}</p>
     </article>`;
     })
@@ -163,7 +232,10 @@ export function seite(daten) {
   const seitenkopf = `<section class="abschnitt seitenkopf">
   <div class="container">
     <h1>Mannschaften</h1>
-    <p class="seitenkopf__lead">Elf Fußballmannschaften von den Herren bis zur G-Jugend. Für jedes Team findest du hier Jahrgang, Trainingszeiten, Ansprechpartner und den Weg zum Spielplan.</p>
+    <!-- W9, Abschnitt 2: "Ansprechpartner" entfernt – die stehen nur auf den
+         einzelnen Teamseiten, nicht auf dieser Übersicht (nichts versprechen,
+         was die Seite nicht bietet). -->
+    <p class="seitenkopf__lead">Elf Fußballmannschaften von den Herren bis zur G-Jugend. Für jedes Team findest du hier Jahrgang, Trainingszeiten und den Weg zum Spielplan.</p>
   </div>
 </section>`;
 
@@ -181,6 +253,10 @@ export function seite(daten) {
       slugs: ["herren"],
       // W3, Abschnitt 4: Sprungziel der Fußball-Abteilungskarte im Kopfbereich.
       id: "mannschaften-liste",
+      // W9, Abschnitt 1: die Gruppenüberschrift "SENIOREN" nennt die
+      // Kategorie schon – die Karte selbst zeigt keinen zusätzlichen
+      // "Senioren"-Präfix mehr (sonst doppelt), nur die lesbare Staffel.
+      ohneKategoriePraefix: true,
     },
     {
       titel: "Jugend",

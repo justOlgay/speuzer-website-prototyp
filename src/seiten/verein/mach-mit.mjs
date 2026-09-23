@@ -14,8 +14,8 @@ function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
     ${ruecklink(`${PFAD}verein/`, "Verein")}
-    <h1>Mach mit</h1>
-    <p class="seitenkopf__lead">Wir brauchen Dich! Werde Teil unseres Vereins-Teams.</p>
+    <h1>Mach mit · Ehrenamt</h1>
+    <p class="seitenkopf__lead">Wir brauchen dich! Werde Teil unseres Vereins-Teams.</p>
   </div>
 </section>`;
 }
@@ -51,14 +51,18 @@ function einleitungAbschnitt() {
 </section>`;
 }
 
+// W8-Korrektur: Aktionsband wie auf den anderen Seiten (Text, dann Knopf –
+// vorher stand der Knopf vor dem Fließtext) und "Deine"/"Du" mittensatz
+// klein geschrieben (Anrede-Regel); Satz endet wie vorgegeben auf "… oder
+// möchtest du mehr erfahren?".
 function aufrufAbschnitt() {
   return `<section class="abschnitt--blau abschnitt abschnitt--eng">
   <div class="container fluss">
-    <h2>Hast Du Interesse oder möchtest mehr erfahren?</h2>
+    <h2>Wir freuen uns auf deine Unterstützung</h2>
+    <p>Gemeinsam sind wir Verein. Gemeinsam bewegen wir mehr – oder möchtest du mehr erfahren?</p>
     <p class="knopfzeile">
       <a class="knopf knopf--weiss" href="mailto:geschaeftsstelle@sportfreunde04.de?subject=Ich%20helfe%20gern">Ich helfe gern – E-Mail schreiben</a>
     </p>
-    <p class="meta" style="color:var(--blau-100);">Wir freuen uns auf Deine Unterstützung! Gemeinsam sind wir Verein. Gemeinsam bewegen wir mehr.</p>
   </div>
 </section>`;
 }
@@ -72,7 +76,9 @@ export function seite() {
 
   return {
     url: "/verein/mach-mit/",
-    title: "Mach mit",
+    // W8-Korrektur: H1/Title an den Verein-Verteiler angeglichen (dort schon
+    // "Mach mit · Ehrenamt" verlinkt, siehe src/seiten/verein/index.mjs).
+    title: "Mach mit · Ehrenamt",
     description:
       "Trainer, Betreuer, Vorstand oder Ehrenamt mit Herz: Der FFV Sportfreunde 04 sucht Menschen, die mit anpacken – eine E-Mail an die Geschäftsstelle genügt.",
     inhalt,
