@@ -381,6 +381,31 @@ weil die Seite im Repo nicht existiert.
 wie die Teamwahl auf `Spielplan-App.html`, Verlauf über `#<slug>`) und neun
 Bilder für die Mediathek.
 
+### Chronik live (23.09.2026)
+
+- **Website:** 15 Seiten im Ordner `web` (`chronik.html`, `chronik-<slug>.html`),
+  verlinkt aus `verein.html` (Zeile „Vereinschronik") und `verein-ueber-uns.html`
+  (Knopf „Vereinschronik lesen" und PDF).
+- **App:** `Chronik-App.html` an der Workspace-Wurzel. Angezeigt über das Modul
+  `sportfreunde04_TextImage_1789020275334`, bisher „Mircowebsite Über uns" mit
+  Seitenlink `Liste - Microwebsite Über uns.tpl`, seit 23.09.2026 Titel
+  **„Vereinschronik"** und Seitenlink `Chronik-App.html`. Neue Module lassen sich
+  im CMS nicht anlegen; dieses gehörte zur alten Website und wurde seit dem
+  Umschalten nicht mehr angezeigt. Verlinkt aus `Verein_v3` und `Ueber-uns_v3`
+  per `nav://sportfreunde04_TextImage_1789020275334`.
+- **Mediathek:** `Chronik-FFV-Sportfreunde-04-2026.pdf` (cdn …/pdf/) und
+  `chronik-image2.jpg` bis `chronik-image10.jpg` (cdn …/images/). Die alte
+  `Chronik Sportfreunde.pdf` bleibt als Archiv liegen, verlinkt ist sie nicht mehr.
+- **Rückweg:** Modul 1789020275334 → Seitenlink `Liste - Microwebsite Über uns.tpl`,
+  Titel „Mircowebsite Über uns". Wichtig bei einem Rückbau der Website auf den
+  alten Stand: ohne diesen Schritt zeigt der alte Menüpunkt „Über uns" die Chronik.
+- **Upload-Weg:** Die Chronik liegt nicht auf GitHub Pages, deshalb geht das
+  Einspielen nicht per `fetch`. Der eingebettete Browser lässt keine lokalen
+  Dateien zu; hochgeladen wurde über Chrome (Claude in Chrome, `file_upload` in
+  das Upload-Feld der Mediathek bzw. in ein selbst angelegtes Dateifeld im
+  Workspace, von dort in den Monaco-Editor). Aktualisierung: Word ändern,
+  `tools/chronik-bauen.mjs` laufen lassen, geänderte Dateien genauso einspielen.
+
 ### Bauweise
 
 Gemeinsame Grundlage `src/app/v3-basis.css` (Schriften, Tokens,
