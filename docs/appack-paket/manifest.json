@@ -77,8 +77,8 @@
     },
     {
       "datei": "web/mannschaften.html",
-      "bytes": 14296,
-      "sha256": "1cf0a6def3f209ef4eb45f80c2c1a87bd9d6b77c593a58037b40ddb69ca3fa10"
+      "bytes": 14350,
+      "sha256": "ebcb9d45eb55aa8bfdf6eb313b4f7fd7535740160951c71874a78ef3e3d1c152"
     },
     {
       "datei": "web/mitglied-werden.html",
@@ -152,8 +152,8 @@
     },
     {
       "datei": "web/tabellen.html",
-      "bytes": 7877,
-      "sha256": "b5fe4e34e1cec6724090508fc679a0804daa4851d0236f3b4892b4664ef82ef3"
+      "bytes": 8029,
+      "sha256": "778c10a1ca1c27419bb3ce04125c95082fc43b1415ae51f07bbdd0edb687205f"
     },
     {
       "datei": "web/verein-downloads.html",
@@ -192,8 +192,8 @@
     },
     {
       "datei": "web/site.css",
-      "bytes": 24889,
-      "sha256": "719dbb0f5f1055a148185a8ddf857b080a85a41032a3f3039d6d6e086cfc4dbf"
+      "bytes": 25255,
+      "sha256": "2f873fac600b9c6aa57d56c15d6436504ca2e50d59885695a04a88a3c64b9df8"
     }
   ]
 }

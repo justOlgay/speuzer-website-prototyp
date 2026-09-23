@@ -53,7 +53,7 @@ function gruppenAbschnitt({ titel, satz, slugs, teamNachSlug, id }) {
     .map(teamKarte)
     .join("\n    ");
   const idAttr = id ? ` id="${escapeHtml(id)}"` : "";
-  return `<section class="abschnitt"${idAttr}>
+  return `<section class="abschnitt abschnitt--gruppe"${idAttr}>
   <div class="container fluss">
     <h2>${escapeHtml(titel)}</h2>
     <p class="meta">${escapeHtml(satz)}</p>
