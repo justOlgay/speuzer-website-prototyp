@@ -38,10 +38,22 @@ const SEITEN = [
 ];
 
 // C2, Abschnitt 5: statische Workspace-Seite (kein ${userTitle}, kein
-// appack-Kopf) – aktuell nur Spielplan-App.html (FUSSBALL.DE-Widgets sind
-// nur für cdn.appack.de freigegeben, siehe LIESMICH.md).
+// appack-Kopf) – FUSSBALL.DE-Widgets sind nur für cdn.appack.de freigegeben,
+// siehe LIESMICH.md. W6: Mannschaften-App.html löst Spielplan-App.html als
+// verlinkte Seite ab (Spielplan & Tabelle stehen jetzt in der Detailansicht
+// je Mannschaft, siehe src/app/Mannschaften-App.html); Spielplan-App.html
+// bleibt als Rückweg im Repo und wird weiterhin mitgebaut.
+// workbook:true (W6, Mannschaften-App): anders als Spielplan-App.html liest
+// diese Seite die Abteilungen-Worksheets zur Laufzeit über die
+// Workbook-API – geprüft am 23.09.2026: cdn.appack.de darf die öffentliche
+// Worksheet-Schnittstelle per POST lesen (CORS erlaubt), Workbook.load aus
+// https://cdn.appack.de/modules/appack.workbook-1.4.1.js funktioniert also
+// auch auf einer statischen Workspace-Seite dort. baueStatischeVorlage()
+// bindet deshalb für solche Seiten zusätzlich jQuery + appack.workbook ein
+// (dieselben zwei <script>-Adressen wie bei den dynamischen _v3.tpl-Seiten).
 const STATISCHE_SEITEN = [
   { name: "Spielplan-App", titel: "Spielplan & Tabellen" },
+  { name: "Mannschaften-App", titel: "Mannschaften", workbook: true },
 ];
 
 // Kopf der Vorlage als Zeilen-Array statt Template-Literal: "${userTitle}"
@@ -180,7 +192,19 @@ function kopfKommentarStatisch(name) {
   ].join("\n");
 }
 
-function baueStatischeVorlage(name, titel, teile) {
+function baueStatischeVorlage(name, titel, teile, braucheWorkbook) {
+  // W6 (Mannschaften-App): braucheWorkbook bindet dieselben zwei
+  // <script>-Adressen ein wie die dynamischen _v3.tpl-Seiten (siehe
+  // baueVorlage() oben) – nötig, weil diese Seite die Übersicht/
+  // Trainingszeiten/Buttons/Kategorien/Einstellungen-Worksheets zur
+  // Laufzeit per Workbook.load() liest (siehe STATISCHE_SEITEN oben).
+  const workbookSkripte = braucheWorkbook
+    ? [
+        '<script src="https://cdn.appack.de/modules/common/jquery-3.4.1.min.js"></script>',
+        '<script src="https://cdn.appack.de/modules/appack.workbook-1.4.1.js"></script>',
+        "",
+      ]
+    : [];
   const teileHtml = [
     KOPF_STATISCH_ZEILEN(titel).join("\n"),
     "",
@@ -197,6 +221,7 @@ function baueStatischeVorlage(name, titel, teile) {
     "",
     "</main>",
     "",
+    ...workbookSkripte,
     "<script>",
     teile.script,
     "</script>",
@@ -222,12 +247,12 @@ function main() {
 
   const widgets = JSON.parse(readFileSync(path.join(DATA_DIR, "widgets.json"), "utf8"));
   delete widgets._hinweis;
-  for (const { name, titel } of STATISCHE_SEITEN) {
+  for (const { name, titel, workbook } of STATISCHE_SEITEN) {
     const quellDatei = path.join(SRC_APP, `${name}.html`);
     let html = readFileSync(quellDatei, "utf8");
     html = html.split("__WIDGETS_JSON__").join(JSON.stringify(widgets));
     const teile = teileQuelle(html, `${name}.html`);
-    const vorlage = baueStatischeVorlage(name, titel, teile);
+    const vorlage = baueStatischeVorlage(name, titel, teile, workbook === true);
     const zielDatei = path.join(ZIEL_APP, `${name}.html`);
     writeFileSync(zielDatei, vorlage, "utf8");
     console.log(`  assets/app/${name}.html geschrieben (${vorlage.length} Zeichen)`);

@@ -88,7 +88,10 @@ function derVereinAbschnitt() {
     zeile("Mitglied werden", "Beiträge, Ablauf, Antrag", `${PFAD}mitglied-werden/`),
     zeile("Sponsoren & Partner", "Wer uns unterstützt", `${PFAD}verein/sponsoren/`),
     zeile("Downloads & Anträge", "Satzung, Beiträge, Bescheinigungen", `${PFAD}verein/downloads/`),
-    zeile("Spielplan & Tabellen", "Alle Mannschaften auf einen Blick", `${PFAD}spielplan/`),
+    // W6 (Entscheidung Olgay 23.09.2026): Spielplan & Tabelle gehören nur
+    // noch zur jeweiligen Mannschaftsseite, keine eigene Seite mehr dafür –
+    // die Zeile "Spielplan & Tabellen" entfällt hier (führte auf /spielplan/,
+    // jetzt eine Weiterleitung, siehe src/seiten/spielplan/index.mjs).
     zeile("Über uns", "Seit 1904 im Gallus", `${PFAD}verein/ueber-uns/`),
     // Die Chronik entsteht aus der Word-Datei des Vereins (tools/chronik-bauen.mjs)
     // und liegt nur im appack-Workspace, nicht im Repo – daher die absolute Adresse.
@@ -114,8 +117,10 @@ export function seite(daten) {
   return {
     url: "/verein/",
     title: "Verein",
+    // W6: "Spielplan & Tabellen" aus der Aufzählung entfernt (Zeile entfällt
+    // auf der Seite selbst, siehe derVereinAbschnitt() oben).
     description:
-      "Verein-Verteiler des FFV Sportfreunde 04: Fußball, Karneval, Vorstand & Kontakt, Mitglied werden, Sponsoren, Downloads, Spielplan & Tabellen, Über uns, Geschäftsstelle",
+      "Verein-Verteiler des FFV Sportfreunde 04: Fußball, Karneval, Vorstand & Kontakt, Mitglied werden, Downloads, Sponsoren, Über uns, Geschäftsstelle",
     inhalt,
   };
 }

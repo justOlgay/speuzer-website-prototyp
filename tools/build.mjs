@@ -343,7 +343,13 @@ async function main() {
   for (const seite of seiten) {
     const url = normUrl(seite.url);
     const name = wsName(url);
-    const canonical = `${BASIS_URL.replace(/\/$/, "")}/ws/${name}.html`;
+    // W6: Weiterleitungsseiten (siehe src/vorlagen/weiterleitung.mjs) setzen
+    // seite.wsZiel (Workspace-Dateiname der Zielseite) – ihr canonical/og:url
+    // zeigt dann auf das Ziel statt auf die Weiterleitungsseite selbst
+    // (Spezifikation A3: "canonical auf das Ziel").
+    const canonical = seite.wsZiel
+      ? `${BASIS_URL.replace(/\/$/, "")}/ws/${seite.wsZiel}`
+      : `${BASIS_URL.replace(/\/$/, "")}/ws/${name}.html`;
     const ogImageAbs = seite.ogImage
       ? (seite.ogImage.startsWith("http") ? seite.ogImage : BASIS_URL.replace(/\/$/, "") + "/" + seite.ogImage.replace(/^\//, ""))
       : BASIS_URL + "assets/og/standard.png";
@@ -367,10 +373,13 @@ async function main() {
       inhalt: inhaltUmgeschrieben,
       bodyclass: seite.bodyclass ?? "",
       stand: standLang,
+      // W6: zusätzliche <meta>-Tags im <head> für Weiterleitungsseiten
+      // (http-equiv="refresh", robots noindex), sonst leer.
+      kopfZusatz: seite.kopfZusatz ?? "",
     });
 
     writeFileSync(path.join(DOCS, "ws", `${name}.html`), html, "utf8");
-    geschrieben.push({ url, name, title: seite.title });
+    geschrieben.push({ url, name, title: seite.title, istWeiterleitung: !!seite.istWeiterleitung });
   }
 
   // P17: Begleitseiten (/vorher-nachher/, /app/) – docs/<url>/index.html,
@@ -530,7 +539,11 @@ async function main() {
     // K1: Sitemap-Eintrag nur für die Rahmenseite (docs/app-konzept/index.html),
     // nicht für die neun Bildschirm-Attrappen (siehe oben).
     `  <url><loc>${BASIS_URL}app-konzept/</loc></url>`,
-    ...geschrieben.map((s) => `  <url><loc>${BASIS_URL.replace(/\/$/, "")}/ws/${s.name}.html</loc></url>`),
+    // W6, Spezifikation A3: Weiterleitungsseiten (spielplan.html,
+    // spielplan-<team>.html, tabellen.html) nicht in der Sitemap.
+    ...geschrieben
+      .filter((s) => !s.istWeiterleitung)
+      .map((s) => `  <url><loc>${BASIS_URL.replace(/\/$/, "")}/ws/${s.name}.html</loc></url>`),
   ].join("\n");
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEintraege}\n</urlset>\n`;
   writeFileSync(path.join(DOCS, "sitemap.xml"), sitemap, "utf8");

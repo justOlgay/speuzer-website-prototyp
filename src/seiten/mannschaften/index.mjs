@@ -3,7 +3,14 @@
 // Zusatzangebote, Ferienhinweis + Karneval (wie auf der Startseite) und ein
 // Aufruf zum Probetraining.
 
-import { mailLink, jahrgangText } from "../../vorlagen/hilfen.mjs";
+import {
+  mailLink,
+  jahrgangText,
+  datumLang,
+  naechsteSpiele,
+  spielZeile,
+  FUSSBALLDE_WIDGET_LADER,
+} from "../../vorlagen/hilfen.mjs";
 // P15: gemeinsame Bausteine (ursprünglich Startseite, dort gelöscht – siehe
 // src/vorlagen/bausteine.mjs).
 import { trainingszeitenAbschnitt, probetrainingAbschnitt } from "../../vorlagen/bausteine.mjs";
@@ -92,6 +99,60 @@ function zusatzangeboteAbschnitt(daten) {
 </section>`;
 }
 
+// ---------- Nächste Spiele des Vereins (W6, ganz unten: Zusatzinformation,
+// keine Kerninfo) ----------
+// Aus dem ehemaligen src/seiten/spielplan/index.mjs übernommen (dort
+// "Nächste Spiele", jetzt hier "Nächste Spiele des Vereins" – Entscheidung
+// Olgay 23.09.2026: Tabellen und Spielpläne nur noch je Mannschaftsseite,
+// die vereinsweite Spielübersicht wandert ganz nach unten auf die Seite
+// "Mannschaften"). appack-Modus zeigt das FUSSBALL.DE-Widget "club-matches"
+// (alle Teams, live aus dem DFBnet, siehe data/widgets.json "verein.spiele"),
+// der Prototyp weiterhin die eingefrorene, nach Tag gruppierte Liste.
+function naechsteSpieleDesVereinsAbschnitt(daten) {
+  const spiele = naechsteSpiele(daten, { anzahl: 12 });
+
+  const gruppen = [];
+  for (const s of spiele) {
+    let gruppe = gruppen.find((g) => g.datum === s.datum);
+    if (!gruppe) {
+      gruppe = { datum: s.datum, spiele: [] };
+      gruppen.push(gruppe);
+    }
+    gruppe.spiele.push(s);
+  }
+
+  const inhalt = gruppen
+    .map((gruppe, gi) => {
+      const zeilen = gruppe.spiele
+        .map((s, i) => spielZeile(s, { pfad: PFAD, mitTeam: true, naechstes: gi === 0 && i === 0, ohneDatum: true }))
+        .join("\n      ");
+      return `<h3>${datumLang(gruppe.datum)}</h3>
+    <ul class="spiele" role="list">
+      ${zeilen}
+    </ul>`;
+    })
+    .join("\n    ");
+
+  const vereinSpieleWidgetId = daten.widgets?.verein?.spiele ?? "";
+
+  return `<section class="abschnitt">
+  <div class="container fluss">
+    <h2>Nächste Spiele des Vereins</h2>
+    <p class="meta">Alle Spiele unserer Mannschaften der nächsten Tage. Spielplan und Tabelle je Team findest du auf der jeweiligen Mannschaftsseite.</p>
+    <div data-nur-appack hidden>
+      <div class="fussballde-wrap fussballde-wrap--hoch">
+        <div class="fussballde_widget" data-id="${escapeHtml(vereinSpieleWidgetId)}" data-type="club-matches"></div>
+      </div>
+      <p class="meta fussballde-hinweis">Spiele seitlich wischbar</p>
+    </div>
+    <div data-nur-prototyp>
+      ${inhalt || `<p class="meta">Keine kommenden Spiele ab dem Build-Datum in data/spiele.json gefunden.</p>`}
+      <p class="meta">Auf der Vereinswebsite kommen die Spiele live aus dem DFBnet.</p>
+    </div>
+  </div>
+</section>`;
+}
+
 export function seite(daten) {
   const teamNachSlug = Object.fromEntries((daten.teams ?? []).map((t) => [t.slug, t]));
 
@@ -146,6 +207,11 @@ export function seite(daten) {
     // src/vorlagen/bausteine.mjs).
     probetrainingAbschnitt(PFAD),
     zusatzangeboteAbschnitt(daten),
+    // W6, ganz unten (Zusatzinformation, keine Kerninfo): vereinsweite
+    // "Nächste Spiele" (ehemals eigener Abschnitt auf /spielplan/, siehe
+    // naechsteSpieleDesVereinsAbschnitt() oben).
+    naechsteSpieleDesVereinsAbschnitt(daten),
+    FUSSBALLDE_WIDGET_LADER,
   ].join("\n");
 
   return {

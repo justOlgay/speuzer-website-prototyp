@@ -580,3 +580,49 @@ hier nur vermerkt statt umgesetzt: eine `Mitglied-werden_v3`-Seite
 (Beitragstabellen/Ablauf/Unterlagen statt des alten appack-Formulars)
 und ein Umbau des Mehr-Menüs (Allgemeine Infos/Medien) – beides
 CMS-Tableiste bzw. neue Seiten außerhalb des zugewiesenen Umfangs.
+
+## W6 – Spielplan und Tabelle gehören zur Mannschaft (23.09.2026)
+
+Entscheidung Olgay: Tabellen und Spielpläne stehen nur noch auf der
+jeweiligen Mannschaftsseite, keine eigene Seite und keine Sammelseite mehr
+dafür. Website und App wurden aus einem Guss umgebaut (Website: siehe
+`src/seiten/mannschaften/team.mjs`, `src/seiten/mannschaften/index.mjs`,
+Weiterleitungen über `src/vorlagen/weiterleitung.mjs`).
+
+### Neue statische Seite `Mannschaften-App.html`
+
+`src/app/Mannschaften-App.html` → `assets/app/Mannschaften-App.html`
+(`npm run tpl-bauen`, `STATISCHE_SEITEN` in
+`tools/app-optik/tpl-bauen.mjs`, wie `Spielplan-App.html`: FUSSBALL.DE-
+Widgets laufen nur auf `cdn.appack.de`, keine dynamische `.tpl`-Seite).
+Ersetzt den heutigen Inhalt von `Mannschaften_v3.tpl` (Teamkarten aus dem
+Abteilungen-Worksheet) UND von `Spielplan-App.html` in einer Seite:
+Listenansicht mit Teamkarten (Knopf „Spiele & Tabelle" je Mannschaft) und
+eine Detailansicht je Team (Nächstes Spiel, Spielplan der Saison, Tabelle
+bzw. Kinderfestival-iframe, Kalender abonnieren) über `location.hash` +
+`location.reload()`. Ganz unten in der Listenansicht: „Nächste Spiele des
+Vereins" mit dem `club-matches`-Widget.
+
+**Modulumstellung (CMS):**
+
+| Modul | Bisheriger Seitenlink | Neuer Seitenlink | Rückweg |
+|---|---|---|---|
+| „Mannschaften" (`sportfreunde04_TextImage_1783343147611`) | `Mannschaften_v3.tpl` | `Mannschaften-App.html` | Seitenlink zurück auf `Mannschaften_v3.tpl` |
+
+Das Modul „Spielplan & Tabellen" (`sportfreunde04_TextImage_1783345459688`,
+bisher `Spielplan-App.html`) ist seit W6 **nicht mehr verlinkt** – die
+Zeile „Spielplan & Tabellen" ist in `Verein_v3.tpl` entfernt (siehe
+`src/app/Verein_v3.html`). `Spielplan-App.html` bleibt unverändert als
+Rückweg im Repo und wird weiterhin mitgebaut, verweist aber von nirgends
+mehr her. `Mannschaften_v3.tpl` bleibt ebenfalls unverändert als Rückweg
+bestehen (Modulverwaltung → Modul „Mannschaften" → Seitenlink → Stift →
+Dateiauswahl → `Mannschaften_v3.tpl` → „Datei wählen" → „Speichern").
+
+### Website: Weiterleitungen
+
+`spielplan.html`, `spielplan-<team>.html` und `tabellen.html` sind seit W6
+schlanke Weiterleitungsseiten (`<meta http-equiv="refresh">`) auf die
+jeweilige Mannschaftsseite (`src/vorlagen/weiterleitung.mjs`) – sie bleiben
+unter demselben Workspace-Namen bestehen (keine toten Links für alte
+Verweise), tragen aber keine Widgets mehr und stehen nicht in
+`docs/sitemap.xml`.

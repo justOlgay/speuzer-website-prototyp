@@ -12,6 +12,16 @@ import {
   FUSSBALLDE_WIDGET_LADER,
 } from "../../vorlagen/hilfen.mjs";
 
+// W6 (Entscheidung Olgay 23.09.2026): "Spielplan der Saison" und "Tabelle"
+// gehören nur noch auf die Mannschaftsseite, keine eigene Seite/Sammelseite
+// mehr dafür (/spielplan/<slug>/ und /tabellen/ wurden zu Weiterleitungen,
+// siehe src/seiten/spielplan/team.mjs, src/seiten/tabellen.mjs und
+// src/vorlagen/weiterleitung.mjs). Die Abschnittslogik unten ist 1:1 aus dem
+// ehemaligen src/seiten/spielplan/team.mjs hierher verschoben (keine doppelte
+// Logik mehr an zwei Stellen) – nur die vormalige "Zur Tabelle"/"Mannschaft"-
+// Karte der Seitenspalte entfällt, weil sie auf genau diese (jetzt schon
+// geöffnete) Seite zurückverlinkt hätte.
+
 // Diese Seiten liegen immer unter "/mannschaften/<slug>/" (Tiefe 2), daher
 // immer "../../" (siehe pfadZurWurzel() in tools/build.mjs).
 const PFAD = "../../";
@@ -89,6 +99,136 @@ function beschreibung(team) {
   return text;
 }
 
+// ---------- Spielplan der Saison (Generator-iframe, W2/W6, aus dem
+// ehemaligen src/seiten/spielplan/team.mjs übernommen) ----------
+
+// Team -> Gruppe des Spielplan-Generators (https://justolgay.github.io/
+// speuzer-spielplan/app-<gruppe>.html). Der Generator bietet keine
+// Team-Vorauswahl per URL (kein #<Team>/?team=<Team> im Quelltext, "aktiv"
+// ist dort fest auf den ersten Tab der Gruppe gesetzt) – deshalb wird immer
+// die ganze Gruppen-Seite eingebettet, siehe spielplanDerSaisonInhalt() unten.
+const GRUPPE_JE_TEAM = {
+  herren: "herren",
+  "a-jugend": "a-jugend",
+  d1: "d-jugend",
+  d2: "d-jugend",
+  d3: "d-jugend",
+  e1: "e-jugend",
+  e2: "e-jugend",
+  e3: "e-jugend",
+  f1: "f-jugend",
+  f2: "f-jugend",
+  "g-jugend": "g-jugend",
+};
+
+const GENERATOR_BASIS = "https://justolgay.github.io/speuzer-spielplan/";
+
+// Im appack-Modus (Live-Website) zeigt "Spielplan der Saison" bei Teams mit
+// FUSSBALL.DE-Widget (alle außer F1, F2, G-Jugend – Kinderfußball, dort gibt
+// es kein Widget) das Widget "team-matches" (vergangene Spiele mit Ergebnis,
+// kommende Spiele, live) statt des Generator-iframes; im Prototyp-Modus
+// bleibt für alle Teams der Generator-iframe (Widgets laden auf GitHub Pages
+// nicht). Ohne Team-Vorauswahl im Generator nennt der Hinweistext die
+// anderen Teams der Gruppe als Geschwister, statt "Tab X wählen" zu
+// schreiben.
+function generatorIframe(team, daten) {
+  const gruppe = GRUPPE_JE_TEAM[team.slug];
+  // Team-Vorauswahl des Generators: #<Reiter> öffnet den Reiter des Teams.
+  const reiter = daten.widgets?.[team.slug]?.reiter ?? "";
+  const generatorUrl = `${GENERATOR_BASIS}app-${gruppe}.html${reiter ? "#" + encodeURIComponent(reiter) : ""}`;
+
+  const gruppenTeams = (daten.teams ?? []).filter((t) => GRUPPE_JE_TEAM[t.slug] === gruppe);
+  const geschwisterHinweis =
+    gruppenTeams.length > 1
+      ? `<p class="meta">Die Übersicht öffnet auf ${escapeHtml(team.kurz)}; die Reiter zeigen die ganze Gruppe (${escapeHtml(
+          gruppenTeams.map((t) => t.kurz).join(", ")
+        )}). Das nächste Spiel ist hervorgehoben.</p>`
+      : `<p class="meta">Das nächste Spiel ist hervorgehoben.</p>`;
+
+  return `<iframe src="${escapeHtml(generatorUrl)}" title="${escapeHtml(`Spielplan ${team.name} (Generator, DFBnet)`)}" loading="lazy" data-generator-iframe style="width:100%;height:640px;border:0;border-radius:var(--r-lg);display:block;"></iframe>
+    ${geschwisterHinweis}
+    <p class="meta">Quelle: DFBnet, täglich aktualisiert. Tippen auf ein Spiel öffnet FUSSBALL.DE.</p>
+    <script>
+    (function () {
+      var iframe = document.querySelector('[data-generator-iframe]');
+      if (!iframe) return;
+      window.addEventListener('message', function (event) {
+        if (event.origin !== 'https://justolgay.github.io') return;
+        if (event.source !== iframe.contentWindow) return;
+        var h = event.data && event.data.speuzerHeight;
+        if (typeof h !== 'number' || h < 200 || h > 20000) return;
+        iframe.style.height = h + 'px';
+      });
+    })();
+    </script>`;
+}
+
+// h2 + Inhalt (kein eigener .fluss-Wrapper): reiht sich als weiterer
+// Abschnitt in denselben .fluss der Hauptspalte ein wie "Training" und
+// "Nächstes Spiel" (siehe hauptspalte() unten, CSS-Regeln ".fluss > * + h2"
+// / ".fluss > h2 + *" in komponenten.css sind genau für mehrere
+// h2-Abschnitte in einem gemeinsamen .fluss gedacht).
+function spielplanDerSaisonInhalt(team, daten) {
+  const spieleWidgetId = daten.widgets?.[team.slug]?.spiele ?? "";
+  const iframeHtml = generatorIframe(team, daten);
+
+  if (!spieleWidgetId) {
+    // Kinderfußball (F1, F2, G-Jugend): kein FUSSBALL.DE-Widget, Generator in
+    // beiden Modi.
+    return `<h2>Spielplan der Saison</h2>
+    ${iframeHtml}`;
+  }
+
+  return `<h2>Spielplan der Saison</h2>
+    <div data-nur-appack hidden>
+      <div class="fussballde-wrap">
+        <div class="fussballde_widget" data-id="${escapeHtml(spieleWidgetId)}" data-type="team-matches"></div>
+      </div>
+      <p class="meta fussballde-hinweis">Spiele seitlich wischbar</p>
+      <p class="meta">Live von FUSSBALL.DE (DFBnet): vergangene Spiele mit Ergebnis, kommende Spiele. Tippen öffnet die Spielseite.</p>
+    </div>
+    <div data-nur-prototyp>
+      ${iframeHtml}
+    </div>`;
+}
+
+// ---------- Tabelle (W2/W6, aus dem ehemaligen src/seiten/spielplan/team.mjs
+// übernommen; die dortige "Zur Tabelle"/"Mannschaft"-Karte entfällt, weil sie
+// auf genau diese Seite zurückverlinkt hätte) ----------
+
+const KINDERFESTIVAL_SPIELFORM = {
+  f1: "4 gegen 4 plus Torwart",
+  f2: "4 gegen 4",
+  "g-jugend": "3 gegen 3",
+};
+
+// Bei F1/F2/G-Jugend ersetzt die Karte "Kinderfestivals" die Tabelle ("Im
+// Kinderfußball gibt es keine Tabellen.") – Spielform je Team, keine
+// Tabellen, keine Ergebnisse, Spaß und Ballkontakte zählen.
+function tabelleInhalt(team, daten) {
+  if (!team.tabelle) {
+    return `<h2>Kinderfestivals</h2>
+    <p>${escapeHtml(KINDERFESTIVAL_SPIELFORM[team.slug] ?? "")} – Kinderfestivals statt Ligabetrieb.</p>
+    <p class="meta">Keine Tabellen, keine Ergebnisse: Spaß und Ballkontakte zählen.</p>`;
+  }
+
+  const tabelleEintrag = daten.tabellen?.teams?.[team.slug];
+  const eigene = tabelleEintrag?.zeilen?.find((z) => z.eigene);
+  const tabelleWidgetId = daten.widgets?.[team.slug]?.tabelle ?? "";
+
+  return `<h2>Tabelle</h2>
+    <div data-nur-appack hidden>
+      <div class="fussballde-wrap">
+        <div class="fussballde_widget" data-id="${escapeHtml(tabelleWidgetId)}" data-type="table"></div>
+      </div>
+      <p class="meta fussballde-hinweis">Tabelle seitlich wischbar</p>
+    </div>
+    <div data-nur-prototyp>
+      ${eigene ? `<p class="meta">Platz ${eigene.platz} von ${tabelleEintrag.zeilen.length} · ${eigene.punkte} Punkte</p>` : ""}
+      <p class="meta">Auf der Vereinswebsite kommen Spielplan und Tabellen live aus dem DFBnet.</p>
+    </div>`;
+}
+
 // ---------- Seitenkopf ----------
 
 function seitenkopfAbschnitt(team) {
@@ -128,10 +268,6 @@ function hauptspalte(team, daten) {
       <p style="margin:0;">Zurzeit sind keine Spiele angesetzt.</p>
     </div>`;
 
-  const tabelleTeil = team.tabelle
-    ? `<a class="knopf knopf--sekundaer" href="${PFAD}tabellen/#${team.slug}">Tabelle</a>`
-    : `<span class="meta">Im Kinderfußball gibt es keine Tabellen.</span>`;
-
   // W3, Abschnitt 5/7 (Prüfer-Befund, Schwere "blocker"): die eingebackenen
   // "Nächste Spiele" veralten ab dem ersten gespielten Termin. Im
   // appack-Modus (Live-Website) ersetzt das FUSSBALL.DE-Widget "next-match"
@@ -164,10 +300,8 @@ function hauptspalte(team, daten) {
       <p style="margin:0;">${escapeHtml(verein.hinweise?.ferien ?? "")}</p>
     </div>
     ${naechsteSpieleAbschnitt}
-    <p class="knopfzeile">
-      <a class="knopf" href="${PFAD}spielplan/${team.slug}/">Spielplan ${escapeHtml(team.kurz)}</a>
-      ${tabelleTeil}
-    </p>
+    ${spielplanDerSaisonInhalt(team, daten)}
+    ${tabelleInhalt(team, daten)}
   </div>`;
 }
 
@@ -266,7 +400,10 @@ function seiteFuerTeam(team, daten) {
   </div>
 </section>`,
     weitereMannschaftenAbschnitt(team, daten),
-    daten.widgets?.[team.slug]?.spiele ? FUSSBALLDE_WIDGET_LADER : "",
+    // W6: jetzt auch die Tabelle (team.tabelle) auf dieser Seite – Lader wie
+    // im ehemaligen src/seiten/spielplan/team.mjs bei Spiel- ODER
+    // Tabellen-Widget einbinden.
+    team.tabelle || daten.widgets?.[team.slug]?.spiele ? FUSSBALLDE_WIDGET_LADER : "",
   ].join("\n");
 
   return {
