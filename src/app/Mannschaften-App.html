@@ -741,7 +741,10 @@
     if (eintrag.tabelle) {
       inhalt.appendChild(baueAbschnitt("Tabelle", baueWidgetKarte(eintrag.tabelle, "table", "Tabelle seitlich wischbar")));
     } else if (team.generatorGruppe) {
-      inhalt.appendChild(baueAbschnitt("Tabelle", baueHinweisKarte("Im Kinderfußball gibt es keine Tabellen.")));
+      // Wie auf der Website (mannschaften-<team>.html): Karte „Kinderfestivals“
+      // statt „Tabelle“, gleiche Sätze.
+      var spielform = { f1: "4 gegen 4 plus Torwart", f2: "4 gegen 4", "g-jugend": "3 gegen 3" }[schluessel] || "";
+      inhalt.appendChild(baueAbschnitt("Kinderfestivals", baueHinweisKarte((spielform ? spielform + " – " : "") + "Kinderfestivals statt Ligabetrieb. Keine Tabellen, keine Ergebnisse: Spaß und Ballkontakte zählen.")));
     }
 
     // Kalender abonnieren
@@ -892,10 +895,12 @@
         window.location.reload();
       });
       renderTeamDetail(angefordertesTeam, zeileFuerAngefordertesTeam);
+      ladeWidgetSkript();
     } else {
       // Kein Hash gesetzt oder kein passendes (aktives) Team gefunden: die
       // Listenansicht ist in diesem Fall der sinnvolle Rückfall.
       zeigeListenansicht(teams, trainingszeiten, buttons, beschreibungOffen);
+      ladeWidgetSkript();
     }
   }).catch(function () {
     document.getElementById("fussballschulen-titel").hidden = true;
@@ -908,8 +913,17 @@
   // sofort, wenn das Dokument schon geladen ist) – unbedingt wie in
   // Spielplan-App.html, weil sowohl die Listenansicht (Vereins-Widget) als
   // auch die Detailansicht (Team-Widgets) FUSSBALL.DE-Widgets zeigen können.
-  var widgetSkript = document.createElement("script");
-  widgetSkript.src = "https://www.fussball.de/widgets.js";
-  document.body.appendChild(widgetSkript);
+  // (W6 Nachbesserung: das Skript darf erst NACH dem Aufbau der Ansicht
+  // geladen werden – die Container entstehen hier asynchron, nachdem die
+  // Worksheets geladen sind. Vorher geladen, fand widgets.js keine Container
+  // und die Widget-Flächen blieben leer.)
+  function ladeWidgetSkript() {
+    if (document.getElementById("fussballde-widgets-js")) return;
+    var widgetSkript = document.createElement("script");
+    widgetSkript.id = "fussballde-widgets-js";
+    widgetSkript.src = "https://www.fussball.de/widgets.js";
+    document.body.appendChild(widgetSkript);
+  }
+  window.__ladeWidgetSkript = ladeWidgetSkript;
 })();
 </script>
