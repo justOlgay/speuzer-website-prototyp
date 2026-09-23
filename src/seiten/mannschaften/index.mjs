@@ -148,7 +148,6 @@ function naechsteSpieleDesVereinsAbschnitt(daten) {
     <p class="meta">Alle Spiele unserer Mannschaften der nächsten Tage. Spielplan und Tabelle je Team findest du auf der jeweiligen Mannschaftsseite.</p>
     <div data-nur-appack hidden>
       ${spieleKastenHtml(widgetHtml)}
-      <p class="meta fussballde-hinweis">Spiele seitlich wischbar</p>
     </div>
     <div data-nur-prototyp>
       ${inhalt || `<p class="meta">Keine kommenden Spiele ab dem Build-Datum in data/spiele.json gefunden.</p>`}

@@ -587,23 +587,18 @@
     }
   },
   "vorstand-vassilios-miamis": {
-    "breite": 1125,
-    "hoehe": 1500,
+    "breite": 645,
+    "hoehe": 860,
     "varianten": {
       "480": {
         "avif": "vorstand-vassilios-miamis-480.avif",
         "webp": "vorstand-vassilios-miamis-480.webp",
         "jpg": "vorstand-vassilios-miamis-480.jpg"
       },
-      "960": {
-        "avif": "vorstand-vassilios-miamis-960.avif",
-        "webp": "vorstand-vassilios-miamis-960.webp",
-        "jpg": "vorstand-vassilios-miamis-960.jpg"
-      },
-      "1125": {
-        "avif": "vorstand-vassilios-miamis-1125.avif",
-        "webp": "vorstand-vassilios-miamis-1125.webp",
-        "jpg": "vorstand-vassilios-miamis-1125.jpg"
+      "645": {
+        "avif": "vorstand-vassilios-miamis-645.avif",
+        "webp": "vorstand-vassilios-miamis-645.webp",
+        "jpg": "vorstand-vassilios-miamis-645.jpg"
       }
     }
   },

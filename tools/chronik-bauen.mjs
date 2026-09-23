@@ -266,6 +266,9 @@ function bilderAufbereiten(temp, zielBilder, genutzte) {
 }
 
 // ---------- HTML: gemeinsame Bausteine ----------
+// Zurück-Link oben wie auf allen Unterseiten der Website (.ruecklink aus
+// assets/css/komponenten.css, W7 23.09.2026); keine Brotkrume, kein
+// Rücklink unten – unten bleibt nur das Blättern zwischen den Kapiteln.
 
 // Tabellen müssen in Dokumentreihenfolge bleiben – dafür ein zweiter Durchlauf,
 // der Absätze und Tabellen gemeinsam behandelt.
@@ -388,17 +391,6 @@ ${inhalt}
 `;
 }
 
-function brotkrumeHtml(teile) {
-  const inner = teile
-    .map((teil, i) => {
-      const eintrag = teil.href
-        ? `<li><a href="${escapeHtml(teil.href)}">${escapeHtml(teil.text)}</a></li>`
-        : `<li><span aria-current="page">${escapeHtml(teil.text)}</span></li>`;
-      return i === 0 ? eintrag : `<li aria-hidden="true">›</li>${eintrag}`;
-    })
-    .join("");
-  return `<nav aria-label="Brotkrumen"><ol class="brotkrumen">${inner}</ol></nav>`;
-}
 
 function seitenkopf(brotkrume, titel, lead) {
   return `<section class="abschnitt seitenkopf">
@@ -711,11 +703,7 @@ function main() {
 </section>`;
     const inhalt = [
       seitenkopf(
-        brotkrumeHtml([
-          { text: "Verein", href: "verein.html" },
-          { text: "Chronik", href: "chronik.html" },
-          { text: k.kurz },
-        ]),
+        `<a class="ruecklink" href="chronik.html">‹ Chronik</a>`,
         k.titel,
         k.lead
       ),
@@ -750,7 +738,7 @@ function main() {
     : "";
   const uebersicht = [
     seitenkopf(
-      brotkrumeHtml([{ text: "Verein", href: "verein.html" }, { text: "Chronik" }]),
+      `<a class="ruecklink" href="verein.html">‹ Verein</a>`,
       "Vereinschronik",
       "1904 bis 2026 – die Geschichte der Speuzer, Kapitel für Kapitel."
     ),
@@ -770,7 +758,6 @@ ${zeitleiste}
     <p class="knopfzeile">
       <a class="knopf knopf--sekundaer" href="${CDN}/pdf/Chronik-FFV-Sportfreunde-04-2026.pdf" target="_blank" rel="noopener">Chronik als PDF (53 Seiten)</a>
     </p>
-    <p><a href="verein-ueber-uns.html">‹ Zurück zu Über uns</a></p>
   </div>
 </section>`,
   ].join("\n");
