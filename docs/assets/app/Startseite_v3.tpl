@@ -158,12 +158,18 @@ svg { display: block; flex: 0 0 auto; }
 
 .inhalt > .abschnittstitel:first-child { margin-top: 0; }
 
+/* W10, Auftrag D (Entscheidung G): Innenabstand oben/unten gilt auch, wenn
+   eine lange Beschriftung umbricht; text-align:center zusätzlich zu
+   justify-content (zählt bei mehrzeiligem Text pro Zeile). Wörtlich wie die
+   Kopie in src/app/v3-basis.css. */
 .knopf {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 44px;
-  padding-inline: var(--sp-4);
+  padding: 12px 20px;
+  line-height: 1.3;
+  text-align: center;
   border-radius: var(--r-md);
   background: var(--blau-700);
   color: var(--weiss);
@@ -335,10 +341,14 @@ svg { display: block; flex: 0 0 auto; }
   padding-inline: var(--sp-3);
 }
 
+/* W10, Auftrag D (app Nr. 12): text-wrap:balance gegen ein einzelnes Wort
+   in der zweiten Zeile bei den beiden Gast-Hinweisen ("… deine Termine."/
+   "… neuesten Meldungen."). */
 .termine-leer p {
   margin: 0;
   font-size: 14px;
   color: var(--ink-2);
+  text-wrap: balance;
 }
 
 /* W9-Nachprüfung D-app Nr. 12 (Entscheidung 15): "Anmelden" innerhalb der

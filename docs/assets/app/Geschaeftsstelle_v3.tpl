@@ -198,12 +198,21 @@ summary { list-style: none; cursor: pointer; }
 summary::-webkit-details-marker { display: none; }
 summary::marker { content: ""; }
 
+/* W10, Auftrag D (Entscheidung G): Innenabstand oben/unten gilt auch, wenn
+   eine lange Beschriftung umbricht (vorher nur min-height + flex-center –
+   ein zweizeiliger Knopf hatte dadurch keinerlei Abstand zur Kante),
+   text-align:center zusätzlich zu justify-content, weil das bei mehrzeiligem
+   Text pro Zeile zählt (justify-content zentriert nur den Textblock als
+   Ganzes). Wörtlich wie Startseite_v3.tpl (siehe Kopfkommentar dieser
+   Datei). */
 .knopf {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 44px;
-  padding-inline: var(--sp-4);
+  padding: 12px 20px;
+  line-height: 1.3;
+  text-align: center;
   border-radius: var(--r-md);
   background: var(--blau-700);
   color: var(--weiss);
@@ -225,9 +234,13 @@ button.knopf {
   font-size: 14px;
 }
 
+/* W10-Nachprüfung (offen 10, Entscheidung 15): 2px Rand in Vereinsblau wie
+   .knopf--sekundaer in base.css (Website) – der bisherige 1px hellgraue Rand
+   war als Knopfkante kaum zu erkennen ("Nebenaktionen umrandet – auf
+   Website und App gleich"). */
 .knopf--leise {
   background: var(--surface);
-  border: 1px solid var(--line);
+  border: 2px solid var(--blau-700);
   color: var(--blau-800);
 }
 
@@ -421,13 +434,17 @@ button.knopf {
   <p style="margin:0;">Verbindung in der <a class="mail-link" href="https://www.rmv.de" target="_blank" rel="noopener">RMV&#8209;Auskunft</a>.</p>
 </div>
 
+<!-- W10, Auftrag D (app Nr. 8): eigene Überschrift, damit die Karte sichtbar
+     vom Hinweiskasten "Zugang & Parken"/"Bus & Bahn" darüber abgesetzt ist,
+     statt optisch noch zu ANFAHRT zu gehören. -->
+<h2 class="abschnittstitel">Verein &amp; Postanschrift</h2>
 <div class="karte">
   <dl class="angaben">
     <dt>Verein</dt>
     <dd id="anfahrt-verein"></dd>
     <dt>Postanschrift</dt>
     <dd id="anfahrt-postanschrift"></dd>
-    <dt>Social</dt>
+    <dt>Soziale Medien</dt>
     <dd>
       <p style="margin:0;"><a class="mail-link" id="anfahrt-instagram-link" href="#" rel="noopener" target="_blank">Instagram @speuzer_ffm</a></p>
       <p style="margin:4px 0 0;"><a class="mail-link" id="anfahrt-facebook-link" href="#" rel="noopener" target="_blank">Facebook-Gruppe</a></p>
@@ -491,7 +508,7 @@ button.knopf {
     { titel: "Beiträge & Rechnungen", mail: mails.kassierer, betreff: "Beiträge" },
     { titel: "Kinder- und Jugendschutz", mail: mails.kinderschutz, betreff: "" },
     { titel: "Sponsoren & Partner", mail: VEREIN.mail, betreff: "Sponsoring" },
-    { titel: "Trainer- und Ehrenamt", mail: VEREIN.mail, betreff: "Ich helfe gern" }
+    { titel: "Mach mit & Ehrenamt", mail: VEREIN.mail, betreff: "Ich helfe gern" }
   ];
 
   var anliegenListe = document.getElementById("anliegen-liste");
@@ -512,19 +529,25 @@ button.knopf {
     untertitelSpan.textContent = a.mail;
     textSpan.appendChild(untertitelSpan);
     zeile.appendChild(textSpan);
+    // W10, Auftrag D (app Nr. 9/quervergleich Nr. 23): Brief-Symbol statt
+    // Pfeil "›" – die Zeile öffnet eine E-Mail, keine Unterseite; wortgleiches
+    // Icon wie ansprechpartnerZeile() in src/seiten/kontakt.mjs.
     var pfeil = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     pfeil.setAttribute("class", "zeile__pfeil");
     pfeil.setAttribute("viewBox", "0 0 24 24");
     pfeil.setAttribute("stroke", "currentColor");
-    pfeil.setAttribute("stroke-width", "1.8");
+    pfeil.setAttribute("stroke-width", "1.6");
     pfeil.setAttribute("fill", "none");
     pfeil.setAttribute("stroke-linecap", "round");
     pfeil.setAttribute("stroke-linejoin", "round");
     pfeil.setAttribute("aria-hidden", "true");
     pfeil.setAttribute("focusable", "false");
-    var pfad = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    pfad.setAttribute("d", "M9 5l7 7-7 7");
-    pfeil.appendChild(pfad);
+    var umschlag = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    umschlag.setAttribute("d", "M3 6h18v12H3z");
+    pfeil.appendChild(umschlag);
+    var klappe = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    klappe.setAttribute("d", "m3 7 9 6 9-6");
+    pfeil.appendChild(klappe);
     zeile.appendChild(pfeil);
     anliegenListe.appendChild(zeile);
   });

@@ -11,7 +11,7 @@
 
 <h2 class="abschnittstitel">Ansprechpartner</h2>
 <div id="ansprechpartner-liste" class="ansprechpartner-liste"></div>
-<p class="karneval-hinweistext">Beiträge der Karnevalabteilung stehen unter „<a href="nav://sportfreunde04_TextImage_1780401660329">Mitglied werden</a>“.</p>
+<p class="karneval-hinweistext">Beiträge der Karnevalabteilung stehen unter „<a class="mail-link" href="nav://sportfreunde04_TextImage_1780401660329">Mitglied werden</a>“.</p>
 
 <p class="fuss">F.F.V. Sportfreunde 04 · Vereins-App</p>
 
@@ -63,6 +63,11 @@
   font-size: 14px;
   color: var(--ink-2);
 }
+
+/* W10, Auftrag D (app Nr. 6): Textlink in der App-Linkfarbe (wie
+   "RMV-Auskunft" auf Kontakt & Anfahrt), nicht in der grauen, unterstrichenen
+   Fließtextfarbe. */
+.mail-link { color: var(--blau-800); text-decoration: none; }
 
 .ansprechpartner-liste {
   display: flex;

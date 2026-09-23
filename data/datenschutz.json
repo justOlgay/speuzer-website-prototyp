@@ -1,7 +1,7 @@
 {
   "stand": "17.07.2026",
   "quelle": "Datenschutzerklärung der Vereins-App (cdn.appack.de), Fassung vom 17.07.2026",
-  "hinweis": "Diese Datenschutzerklärung gilt für die Vereins-App und die Website des Frankfurter Fußballvereins Sportfreunde 1904 e. V. Fragen beantwortet die Geschäftsstelle.",
+  "hinweis": "Fragen beantwortet die Geschäftsstelle.",
   "abschnitte": [
     {
       "titel": "Datenschutzhinweise",
@@ -14,14 +14,14 @@
         "Betriebssystemversion",
         "IP-Adresse",
         "Zeitstempel des Zugriffs",
-        "abgefragte Ressource",
+        "Abgefragte Ressource",
         "Übertragene Datenmenge und Dauer der Datenübertragung",
         "Name und Version der Browsersoftware",
         "§L§ Push-Token je Betriebssystem, APNs Token (iOS) bzw. FCM Token (Android)",
-        "Die hier aufgeführten Daten werden max. 30 Tage in den Server-Log-Dateien gespeichert. Die App kann, ohne weitere Daten zu verarbeiten, genutzt werden. Sofern Eingaben in Formularfeldern abgefragt werden, z.B. zu einer Anmeldung für einen Termin, erfassen wir, was einer Nutzeridentifikation bedarf, insb.:",
+        "Die hier aufgeführten Daten werden max. 30 Tage in den Server-Log-Dateien gespeichert. Die App kann, ohne weitere Daten zu verarbeiten, genutzt werden. Sofern Eingaben in Formularfeldern abgefragt werden, z.B. zu einer Anmeldung für einen Termin, erfassen wir, was einer Nutzeridentifikation bedarf, insb.:",
         "Vorname",
         "Name",
-        "häufig die E-Mail-Adresse",
+        "Häufig die E‑Mail-Adresse",
         "Darüber hinaus werden je nach Anwendungsfall ggf. weitere Informationen abgefragt. Dies können z.B. sein:",
         "Bilder",
         "Audiodaten",
@@ -45,7 +45,7 @@
         "Wir freuen uns über Ihre Nutzung der App und Webservices des Frankfurter Fußballvereins Sportfreunde 1904 e. V. Beim Einsatz von moderner Software und Apps ist nicht nur die Funktionalität, sondern auch der Datenschutz sehr wichtig.",
         "Datenschutz und Datensicherheit haben für uns höchste Priorität. Wir haben deshalb diese App, unsere Webseite, Webangebote und unsere Geschäftsprozesse so gestaltet, dass möglichst wenige personenbezogene Daten erhoben oder verarbeitet werden. Die nachfolgende Datenschutzerklärung erläutert, wie wir den Schutz von personenbezogenen Daten gewährleisten und welche Art von Daten wir zu welchem Zweck erheben und für Sie verarbeiten.",
         "Die Nutzung unserer App ist grundsätzlich ohne Preisgabe Ihrer Identität möglich. Bestimmte technische personenbezogene Daten, wie z.B. eine anonyme App ID oder ggf. IP-Adressen werden automatisch verarbeitet und werden benötigt, um den Betrieb der App zu ermöglichen. Sofern eine betroffene Person besondere Services in Anspruch nehmen möchte, kann bei der Nutzung der App eine Eingabe und Verarbeitung personenbezogener Daten erforderlich werden. Ist dies erforderlich und besteht für eine solche Verarbeitung keine gesetzliche Vorschrift oder kein berechtigtes Interesse oder ist das nicht zur Vertragserfüllung erforderlich, holen wir generell eine Einwilligung der betroffenen Person ein (also von Ihnen als Nutzer).",
-        "Die Verarbeitung personenbezogener Daten, beispielsweise des Namens, der Anschrift, E-Mail-Adresse oder Telefonnummer einer betroffenen Person, erfolgt stets im Einklang mit der Datenschutz-Grundverordnung und in Übereinstimmung mit den geltenden landesspezifischen Datenschutzbestimmungen.",
+        "Die Verarbeitung personenbezogener Daten, beispielsweise des Namens, der Anschrift, E‑Mail-Adresse oder Telefonnummer einer betroffenen Person, erfolgt stets im Einklang mit der Datenschutz-Grundverordnung und in Übereinstimmung mit den geltenden landesspezifischen Datenschutzbestimmungen.",
         "Der für die Verarbeitung Verantwortliche hat zahlreiche technische und organisatorische Maßnahmen umgesetzt, um einen möglichst lückenlosen Schutz der über diese App und Webservices verarbeiteten personenbezogenen Daten sicherzustellen. Dennoch können internetbasierte Datenübertragungen grundsätzlich Sicherheitslücken aufweisen, sodass ein absoluter Schutz nicht gewährleistet werden kann. Aus diesem Grund steht es jeder Person frei, personenbezogene Daten auch auf alternativen Wegen, beispielsweise telefonisch, an uns zu übermitteln."
       ]
     },
@@ -88,11 +88,11 @@
       "liste": [
         "Name des Smartphones",
         "Modellbezeichnung",
-        "das auf dem Smartphone verwendete Betriebssystem",
-        "verwendete Browsertypen und Browserversionen",
+        "Das auf dem Smartphone verwendete Betriebssystem",
+        "Verwendete Browsertypen und Browserversionen",
         "IP-Adresse (i.d.R. pseudonymisiert)",
-        "das Datum und die Uhrzeit des Zugriffs auf die App oder Webservices",
-        "abgefragte Ressource",
+        "Das Datum und die Uhrzeit des Zugriffs auf die App oder Webservices",
+        "Abgefragte Ressource",
         "Übertragene Datenmenge und Dauer der Datenübertragung",
         "Name und Version der Browsersoftware",
         "Push-Token je Betriebssystem, APNs Token (iOS) bzw. FCM Token (Android)"
@@ -115,7 +115,7 @@
       ]
     },
     {
-      "titel": "5. Registrierungs­möglichkeiten / Nutzerprofile in der App",
+      "titel": "5. Registrierungs­möglichkeiten / Nutzerprofile in der App",
       "absaetze": [
         "Wird in der App oder via eingehängten Webservices in der App eine Registrierung angeboten, so hat die betroffene Person die Möglichkeit, sich auf der App oder dem Webservice des für die Verarbeitung Verantwortlichen unter Angabe von personenbezogenen Daten zu registrieren. Welche personenbezogenen Daten dabei an den für die Verarbeitung Verantwortlichen übermittelt werden, ergibt sich aus der jeweiligen Eingabemaske, die für die Registrierung verwendet wird. Die von der betroffenen Person eingegebenen personenbezogenen Daten werden ausschließlich für die interne Verwendung bei dem für die Verarbeitung Verantwortlichen und für eigene Zwecke erhoben und gespeichert. Der für die Verarbeitung Verantwortliche kann die Weitergabe an einen oder mehrere Auftragsverarbeiter veranlassen, der die personenbezogenen Daten ebenfalls ausschließlich für eine interne Verwendung, die dem für die Verarbeitung Verantwortlichen zuzurechnen ist, nutzt.",
         "Durch eine Registrierung des für die Verarbeitung Verantwortlichen wird ggf. ferner die vom Internet-Service-Provider (ISP) der betroffenen Person vergebene IP-Adresse, das Datum sowie die Uhrzeit der Registrierung gespeichert. Die Speicherung dieser Daten erfolgt zur Verhinderung von Missbrauch unserer Dienstleistung. Diese Daten helfen im Bedarfsfall, begangene Straftaten aufzuklären. Insofern ist die Speicherung dieser Daten zur Absicherung des für die Verarbeitung Verantwortlichen erforderlich. Eine Weitergabe dieser Daten an Dritte erfolgt grundsätzlich nicht, sofern keine gesetzliche Pflicht zur Weitergabe besteht oder die Weitergabe der Strafverfolgung dient. Die Registrierung der betroffenen Person unter freiwilliger Angabe personenbezogener Daten dient dem für die Verarbeitung Verantwortlichen dazu, der betroffenen Person Leistungen anzubieten, die aufgrund der Natur der Sache nur registrierten Benutzern angeboten werden können. Registrierten Personen steht die Möglichkeit frei, die bei der Registrierung angegebenen personenbezogenen Daten jederzeit zu ändern oder vollständig aus dem Datenbestand des für die Verarbeitung Verantwortlichen löschen zu lassen. Der für die Verarbeitung Verantwortliche erteilt der betroffenen Person jederzeit auf Anfrage Auskunft darüber, welche personenbezogenen Daten über die betroffene Person gespeichert sind. Ferner berichtigt oder löscht der für die Verarbeitung Verantwortliche personenbezogene Daten auf Wunsch oder Hinweis der betroffenen Person, soweit dem keine gesetzlichen Aufbewahrungspflichten entgegenstehen oder berechtigte Interessen der verantwortlichen Stelle vorliegen, die eine vorübergehende Speicherung notwendig machen. Der in dieser Datenschutzerklärung genannte für den Datenschutz Verantwortliche steht der betroffenen Person in diesem Zusammenhang als Ansprechpartner zur Verfügung."
@@ -137,7 +137,7 @@
         "§L§ das Bestehen eines Rechts auf Berichtigung oder Löschung der sie betreffenden personenbezogenen Daten oder auf Einschränkung der Verarbeitung durch den Verantwortlichen oder eines Widerspruchsrechts gegen diese Verarbeitung",
         "§L§ das Bestehen eines Beschwerderechts bei einer Aufsichtsbehörde",
         "§L§ wenn die personenbezogenen Daten nicht bei der betroffenen Person erhoben werden: Alle verfügbaren Informationen über die Herkunft der Daten",
-        "§L§ das Bestehen einer automatisierten Entscheidungsfindung einschließlich Profiling gemäß Artikel 22 Abs. 1 und 4 DSGVO und — zumindest in diesen Fällen — aussagekräftige Informationen über die involvierte Logik sowie die Tragweite und die angestrebten Auswirkungen einer derartigen Verarbeitung für die betroffene Person",
+        "§L§ das Bestehen einer automatisierten Entscheidungsfindung einschließlich Profiling gemäß Artikel 22 Abs. 1 und 4 DSGVO und – zumindest in diesen Fällen – aussagekräftige Informationen über die involvierte Logik sowie die Tragweite und die angestrebten Auswirkungen einer derartigen Verarbeitung für die betroffene Person",
         "Darüber hinaus steht der betroffenen Person ein Auskunftsrecht darüber zu, ob personenbezogene Daten an ein Drittland oder an eine internationale Organisation übermittelt wurden. Sofern dies der Fall ist, so steht der betroffenen Person im Übrigen das Recht zu, Auskunft über die geeigneten Garantien im Zusammenhang mit der Übermittlung zu erhalten. Möchte eine betroffene Person dieses Auskunftsrecht in Anspruch nehmen, kann sie sich hierzu jederzeit an unseren Ansprechpartner für den Datenschutz oder einen anderen Mitarbeiter des für die Verarbeitung Verantwortlichen wenden.",
         "§H§ Recht auf Berichtigung",
         "Eine von der Verarbeitung personenbezogener Daten betroffene Person hat das vom Europäischen Richtlinien- und Verordnungsgeber gewährte Recht, die unverzügliche Berichtigung sie betreffender unrichtiger personenbezogener Daten zu verlangen. Außerdem steht der betroffenen Person das Recht zu, unter Berücksichtigung der Zwecke der Verarbeitung, die Vervollständigung unvollständiger personenbezogener Daten (auch mittels einer ergänzenden Erklärung) zu verlangen. Möchte eine betroffene Person dieses Berichtigungsrecht in Anspruch nehmen, kann sie sich hierzu jederzeit an unseren Ansprechpartner für den Datenschutz oder einen anderen Mitarbeiter des für die Verarbeitung Verantwortlichen wenden.",
@@ -207,14 +207,25 @@
         "Damit diese Inhalte dargestellt werden können, baut Ihr Gerät beim Aufruf der betreffenden Seiten eine direkte Verbindung zu Servern von FUSSBALL.DE auf. Dabei wird Ihre IP-Adresse an FUSSBALL.DE übermittelt; zusätzlich können technische Angaben wie Geräte- und Browsertyp, Betriebssystem, Datum und Uhrzeit des Zugriffs sowie die aufgerufene Seite verarbeitet werden. FUSSBALL.DE kann hierbei Cookies oder vergleichbare Technologien einsetzen. Auf Art und Umfang dieser Verarbeitung haben wir keinen Einfluss; es gilt insoweit die Datenschutzerklärung von FUSSBALL.DE (www.fussball.de/privacy).",
         "Rechtsgrundlage für die Einbindung ist unser berechtigtes Interesse daran, unseren Mitgliedern, Eltern und Zuschauern Spielpläne, Ergebnisse und Tabellen aktuell und ohne Umwege in der App zugänglich zu machen (Art. 6 Abs. 1 lit. f DSGVO). Eine Verbindung zu FUSSBALL.DE wird nur dann aufgebaut, wenn Sie die entsprechenden Seiten in der App („Spielplan & Tabellen“) öffnen. Alle übrigen Funktionen der App stehen Ihnen unabhängig davon zur Verfügung.",
         "§H§ FUSSBALL.DE-Widgets auf der Website",
-        "Auf der Website nutzen wir Widgets von fussball.de (DFB GmbH, Frankfurt am Main), um Spielpläne und Tabellen unserer Mannschaften anzuzeigen. Beim Aufruf einer Seite mit Widget wird Ihre IP-Adresse an den Server von fussball.de übermittelt. Rechtsgrundlage ist unser berechtigtes Interesse an einer aktuellen Darstellung (Art. 6 Abs. 1 lit. f DSGVO).",
-        "§H§ Hinweis zum Bestehen einer automatisierten Entscheidungsfindung",
+        "Auf der Website nutzen wir Widgets von fussball.de (DFB GmbH, Frankfurt am Main), um Spielpläne und Tabellen unserer Mannschaften anzuzeigen. Beim Aufruf einer Seite mit Widget wird Ihre IP-Adresse an den Server von fussball.de übermittelt. Rechtsgrundlage ist unser berechtigtes Interesse an einer aktuellen Darstellung (Art. 6 Abs. 1 lit. f DSGVO)."
+      ]
+    },
+    {
+      "titel": "Hinweis zum Bestehen einer automatisierten Entscheidungsfindung",
+      "absaetze": [
         "Als Herausgeber der App und verantwortliche Stelle gemäß DSGVO verzichten wir auf eine automatische Entscheidungsfindung oder ein Profiling.",
-        "Die digitale Version dieser Datenschutzerklärung wurde durch die vmapit GmbH barrierefrei gemäß WCAG 2.1 entwickelt. Teile dieser Datenschutzerklärung wurden durch den Datenschutzerklärungsgenerator von Mönchengladbach externer Datenschutzbeauftragter in Kooperation mit der RC GmbH und den Filesharing Rechtsanwälten von WBS-LAW erstellt.",
-        "§H§ Anpassungen der Datenschutzerklärung",
-        "Wir behalten uns vor, bei technischen und/oder rechtlichen Änderungen diese Datenschutzerklärungen anzupassen. Sollten Sie Fragen oder Hinweise zum Datenschutz haben, wenden Sie sich gerne an uns. Kontaktdaten finden Sie unter dem Menüpunkt Kontakt & Anfahrt oder im Impressum.",
-        "§H§ Eckpunkte zum Datenschutz"
-      ],
+        "Die digitale Version dieser Datenschutzerklärung wurde durch die vmapit GmbH barrierefrei gemäß WCAG 2.1 entwickelt. Teile dieser Datenschutzerklärung wurden durch den Datenschutzerklärungsgenerator von Mönchengladbach externer Datenschutzbeauftragter in Kooperation mit der RC GmbH und den Filesharing Rechtsanwälten von WBS-LAW erstellt."
+      ]
+    },
+    {
+      "titel": "Anpassungen der Datenschutzerklärung",
+      "absaetze": [
+        "Wir behalten uns vor, bei technischen und/oder rechtlichen Änderungen diese Datenschutzerklärungen anzupassen. Sollten Sie Fragen oder Hinweise zum Datenschutz haben, wenden Sie sich gerne an uns. Kontaktdaten finden Sie unter dem Menüpunkt Kontakt & Anfahrt oder im Impressum."
+      ]
+    },
+    {
+      "titel": "Eckpunkte zum Datenschutz",
+      "absaetze": [],
       "liste": [
         "Viele der in der App verwendeten Funktionen können anonym genutzt werden. Wir erfassen – wo immer möglich – nur dort personenbezogene Daten, wo dies der konkrete Anwendungsfall auch tatsächlich verlangt.",
         "Wir betreiben die Server für die App in Deutschland. Es gilt deutsches sowie europäisches Datenschutzrecht (insb. die DSGVO).",

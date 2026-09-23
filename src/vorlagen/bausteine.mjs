@@ -3,21 +3,17 @@
 // appack-Rahmen, die Hülle kommt in P16 als docs/index.html). Beide Funktionen
 // 1:1 aus src/seiten/index.mjs übernommen, statt der dortigen Konstante PFAD
 // nehmen sie jetzt den Parameter `pfad` entgegen (siehe pfadZurWurzel() in
-// tools/build.mjs). trainingszeitenAbschnitt() wird jetzt zusätzlich von
-// src/seiten/mannschaften/index.mjs verwendet, ebenso probetrainingAbschnitt().
+// tools/build.mjs). probetrainingAbschnitt() wird zusätzlich von
+// src/seiten/mannschaften/index.mjs verwendet.
+//
+// W10, Entscheidung C (w10-gemeinsam.md, bestätigt durch quervergleich Nr. 2):
+// trainingszeitenAbschnitt() (Tabelle "Trainingszeiten") ist hier entfallen –
+// die einzige Aufrufstelle war die Mannschaften-Übersicht, die die
+// Trainingstage jetzt direkt in den Teamkarten zeigt (teamKarte() in
+// src/seiten/mannschaften/index.mjs) statt in einer zweiten, doppelten Liste.
 
-import { jahrgangText, PROBETRAINING_MAILTO, initialen, eMailSchreibenLink } from "./hilfen.mjs";
+import { PROBETRAINING_MAILTO, initialen, eMailSchreibenLink } from "./hilfen.mjs";
 import { bild } from "./bild.mjs";
-
-const TAG_KUERZEL = {
-  Montag: "Mo",
-  Dienstag: "Di",
-  Mittwoch: "Mi",
-  Donnerstag: "Do",
-  Freitag: "Fr",
-  Samstag: "Sa",
-  Sonntag: "So",
-};
 
 function escapeHtml(text) {
   return String(text ?? "")
@@ -25,64 +21,6 @@ function escapeHtml(text) {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
-}
-
-// ---------- Trainingszeiten (ursprünglich Startseite D3, P2-K/K7) ----------
-
-export function trainingszeitenAbschnitt(daten, pfad, mitKnopf = true) {
-  const verein = daten.verein ?? {};
-  const zeilen = (daten.teams ?? [])
-    .map((team) => {
-      // quervergleich Nr. 10 (geprüft, W9-A): ausgeschriebene Wochentage
-      // ("Montag" statt "Mo", wie auf den Mannschaftsseiten/in der App)
-      // wurden versuchsweise eingesetzt, ließen dabei aber "1. Herrenmannschaft"
-      // mobil zweizeilig umbrechen ("1." allein in der ersten Zeile) – ein
-      // neuer Fehler anstelle des alten. Deshalb bewusst bei der Abkürzung
-      // belassen (siehe Abschlussbericht).
-      const einheiten = (team.training ?? [])
-        .map((t) => `<span>${escapeHtml(TAG_KUERZEL[t.tag] ?? t.tag)} ${escapeHtml(t.von)}–${escapeHtml(t.bis)}</span>`)
-        .join("\n        ");
-      // W9-A-Nachprüfung (mannschaften-a-jugend-390-04.png): die Herren
-      // trugen je nach Liste eine andere Zweitzeile ("–" hier, "Senioren" bei
-      // "Weitere Mannschaften" in team.mjs/index.mjs über jahrgangPraefix()).
-      // Jetzt überall "Senioren" (jahrgangText() liefert das schon für die
-      // Kategorie "Senioren") – ein einziger Ersatzwert für die fehlende
-      // Jahrgangsangabe, konsistent mit allen anderen Stellen der Seite.
-      const jahrgangSpalte = jahrgangText(team);
-      // Nachprüfung web-390 Nr. 24: Name und Jahrgang jetzt EIN Grid-Item
-      // ".trainingsraster__team" (Block, oben ausgerichtet) statt zweier
-      // über die Grid-Zeilen verteilter Items – siehe .trainingsraster__zeile
-      // in komponenten.css für den Hintergrund.
-      return `<li class="trainingsraster__zeile">
-        <span class="trainingsraster__team">
-          <a class="trainingsraster__name" href="${pfad}mannschaften/${team.slug}/">${escapeHtml(team.name)}</a>
-          <span class="trainingsraster__jahrgang meta">${escapeHtml(jahrgangSpalte)}</span>
-        </span>
-        <span class="trainingsraster__einheiten">
-        ${einheiten}
-        </span>
-      </li>`;
-    })
-    .join("\n      ");
-
-  return `<section class="abschnitt--hell abschnitt">
-  <div class="container fluss">
-    <h2>Trainingszeiten</h2>
-    <p class="inhalt">Alle Mannschaften trainieren auf dem Vereinsplatz an der Mainzer Landstraße 480 – nur die Herren auf der Bezirkssportanlage am Rebstock (SW&nbsp;Griesheim).</p>
-    <ul class="trainingsraster" role="list">
-      <li class="trainingsraster__kopf" aria-hidden="true">
-        <span>Mannschaft</span><span>Jahrgang</span><span>Training</span>
-      </li>
-      ${zeilen}
-    </ul>
-    <div class="hinweis hinweis--info" style="max-width:880px;">
-      <p style="margin:0;">${escapeHtml(verein.hinweise?.ferien ?? "")}</p>
-    </div>
-    ${mitKnopf ? `<p class="knopfzeile">
-      <a class="knopf" href="${pfad}mannschaften/">Zu den Mannschaften</a>
-    </p>` : ""}
-  </div>
-</section>`;
 }
 
 // ---------- Probetraining (ursprünglich Startseite D5, P2) ----------
@@ -93,36 +31,37 @@ export function trainingszeitenAbschnitt(daten, pfad, mitKnopf = true) {
 // web-390-mannschaften Nr. 36/web-1440-mannschaften Nr. 25). Schritt 1 nennt
 // zusätzlich das Trainerteam der Herren als Ansprechpartner (die Herren
 // stehen auf derselben Seite /mannschaften/, haben aber keine Jugendleitung).
-// W9-A-Nachprüfung (mannschaften-390-05.png): zwei Korrekturen an Schritt 1 –
-// (a) der Text nennt zwar das Trainerteam der Herren, der einzige Knopf
-// öffnete aber immer eine Mail an die Jugendleitung; `herrenMailtoHref`
-// (von index.mjs übergeben, aus team.mail der Herren in data/teams.json)
-// ergänzt einen eigenen Link dafür. (b) mit dem jetzt dreizeiligen Text stand
-// die große Schrittziffer bei align-items:center (Standard für die
-// einzeiligen Schritte 2/3, siehe .schritte li unten in komponenten.css)
-// mittig statt auf Höhe der ersten Zeile – ".schritt__inhalt" (schon für
-// mehrteilige Schritte vorgesehen, siehe .schritte li:has(.schritt__inhalt)
-// in komponenten.css) bringt hier automatisch align-items:flex-start.
+// W9-A-Nachprüfung (mannschaften-390-05.png): `herrenMailtoHref` (von
+// index.mjs übergeben, aus team.mail der Herren in data/teams.json) ergänzt
+// einen eigenen Mailto-Link dafür, der Standard-Knopf erreicht sonst immer
+// nur die Jugendleitung.
+// W10, Entscheidung D (w10-gemeinsam.md, bestätigt durch web-1440-mannschaften
+// Nr. 6/web-390-mannschaften Nr. 13): die Herren standen bisher doppelt
+// (Satz in Schritt 1 UND eigener Link darunter), der Hauptfall
+// (Jugendleitung) hatte keinen eigenen Link, und der Knopf "Probetraining
+// vereinbaren" sagte nicht, an wen er geht. Jetzt: Schritt 1 kurz (nur
+// Jugendleitung), Hauptknopf "E-Mail an die Jugendleitung" (das Ziel steht
+// jetzt im Knopftext selbst), Textlink für die Herren direkt darunter statt
+// in Schritt 1 – keine doppelte Nennung mehr.
 export function probetrainingAbschnitt(pfad, herrenMailtoHref = "") {
+  // W10-Nachprüfung (offen Nr. 9, zoom/herrenlink-390.png): "Herren ›" brach
+  // auf dem Handy als eigene zweite Zeile ab dem Wort "Herren" ab – Wort und
+  // Pfeil jetzt mit geschützten Leerzeichen zusammengehalten.
   const herrenLink = herrenMailtoHref
-    ? `<p class="meta"><a href="${escapeHtml(herrenMailtoHref)}">Herren: E-Mail an das Trainerteam ›</a></p>`
+    ? `<p class="meta"><a class="probetraining-herrenlink" href="${escapeHtml(herrenMailtoHref)}">Für die Herren: E-Mail an das Trainerteam der&nbsp;Herren&nbsp;›</a></p>`
     : "";
   return `<section class="abschnitt--hell abschnitt">
   <div class="container fluss">
     <h2>Probetraining</h2>
     <ol class="schritte">
-      <li>
-        <div class="schritt__inhalt">
-          <p>E-Mail an die Jugendleitung (Jahrgang, Vorerfahrung) – für die Herren an das Trainerteam der Herren</p>
-          ${herrenLink}
-        </div>
-      </li>
+      <li><p>E-Mail an die Jugendleitung (Jahrgang, Vorerfahrung)</p></li>
       <li><p>Probetraining beim Team</p></li>
       <li><p>Aufnahmeantrag stellen</p></li>
     </ol>
     <p class="knopfzeile">
-      <a class="knopf" href="${escapeHtml(PROBETRAINING_MAILTO)}">Probetraining vereinbaren</a>
+      <a class="knopf" href="${escapeHtml(PROBETRAINING_MAILTO)}">E-Mail an die Jugendleitung</a>
     </p>
+    ${herrenLink}
   </div>
 </section>`;
 }

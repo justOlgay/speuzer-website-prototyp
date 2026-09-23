@@ -96,7 +96,12 @@ function derVereinAbschnitt() {
   // W7: die Überschrift "Der Verein" entfällt – direkt unter dem
   // Seitenkopf-h1 "Verein" wirkte sie redundant (kein Abteilungen-Abschnitt
   // mehr dazwischen, siehe Entfernung oben).
-  return `<section class="abschnitt--hell abschnitt">
+  // W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 16): "Verein" war die
+  // einzige Seite, auf der direkt unter dem getönten Seitenkopf ein weißer
+  // Abschnitt (abschnitt--hell) begann – auf allen Unterseiten und den
+  // übrigen Menüpunkt-Seiten läuft der getönte Grund in den ersten Abschnitt
+  // weiter. Modifikator entfernt, damit der Kopf nahtlos übergeht.
+  return `<section class="abschnitt">
   <div class="container fluss">
     <div class="zeilen-liste">
     ${inhalt}

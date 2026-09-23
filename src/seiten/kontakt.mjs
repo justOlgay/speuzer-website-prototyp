@@ -178,7 +178,11 @@ function ansprechpartner(daten) {
       betreff: "Sponsoring",
     },
     {
-      titel: "Trainer- und Ehrenamt",
+      // W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 19): Begriff an den
+      // Seitennamen "Mach mit & Ehrenamt" angeglichen (verein/index.mjs,
+      // verein/mach-mit.mjs) – "Trainer- und Ehrenamt" gab es sonst nirgends
+      // auf der Website.
+      titel: "Mach mit & Ehrenamt",
       mail: verein.mail,
       text: "Mitmachen als Trainer, Betreuer oder im Vorstand.",
       betreff: "Ich helfe gern",
@@ -292,15 +296,22 @@ function anfahrtAbschnitt(daten) {
 // (Entscheidung 13).
 // W9-B-Nachprüfung (kontakt Website ↔ App, quer-2): Website setzte
 // "Zugang & Parken"/"Bus & Bahn" als große H3-Versalüberschriften in der Box
-// – die App (assets/app/Geschaeftsstelle_v3.tpl) setzt beide als fetten
-// Satzanfang im Fließtext. Jetzt derselbe Baustein wie die App.
+// – die App (assets/app/Geschaeftsstelle_v3.tpl) setzte beide damals als
+// fetten Satzanfang im Fließtext.
+// W10-Nachprüfung (offen 16, quervergleich Nr. 23): die App steht inzwischen
+// wieder auf einer eigenen, betitelten Zwischenzeile ohne Punkt
+// (.hinweis-untertitel) – das trifft auch den Auftragswortlaut "zwei
+// betitelte Absätze" (w10-b.md) genauer als der fette Satzanfang. Jetzt
+// wieder derselbe Baustein wie die App.
 function hinweisAbschnitt(daten) {
   const verein = daten.verein ?? {};
   return `<section class="abschnitt">
   <div class="container fluss">
     <div class="hinweis hinweis--info">
-      <p style="margin:0;"><strong>Zugang &amp; Parken.</strong> ${escapeHtml(verein.anfahrt_hinweis ?? "")}</p>
-      <p style="margin:var(--sp-2) 0 0;"><strong>Bus &amp; Bahn.</strong> Verbindung in der <a href="https://www.rmv.de" target="_blank" rel="noopener">RMV‑Auskunft</a>.</p>
+      <p class="hinweis-untertitel">Zugang &amp; Parken</p>
+      <p style="margin:0;">${escapeHtml(verein.anfahrt_hinweis ?? "")}</p>
+      <p class="hinweis-untertitel" style="margin-top:var(--sp-3);">Bus &amp; Bahn</p>
+      <p style="margin:0;">Verbindung in der <a href="https://www.rmv.de" target="_blank" rel="noopener">RMV‑Auskunft</a>.</p>
     </div>
   </div>
 </section>`;
@@ -312,6 +323,13 @@ function hinweisAbschnitt(daten) {
 // "Sportstätte" (die jetzt in den Anfahrt-Block gewandert ist, siehe oben) –
 // jetzt eine eigene <dl class="angaben">-Gruppe "Verein" mit demselben
 // Gruppenabstand wie Postanschrift und Social.
+// W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 17/web-390-verein-und-rest
+// Nr. 11/quervergleich Nr. 24): der Abschnitt stand als einziger ohne eigene
+// Überschrift da (rund 100px leerer Raum, wo sonst der Titel sitzt) und als
+// einziger auf weißem Grund (abschnitt--hell) – während alle vorherigen
+// Kontakt-Abschnitte getönt sind, verschwand die ebenfalls weiße Karte fast
+// vollständig. Jetzt eine Überschrift und derselbe getönte Grund wie der
+// Rest der Seite. "Social" (Englisch) durch "Soziale Medien" ersetzt.
 function postAbschnitt(daten) {
   const verein = daten.verein ?? {};
   const post = verein.post ?? {};
@@ -319,12 +337,9 @@ function postAbschnitt(daten) {
   const kontakt = geschaeftsstelle.kontakt ?? {};
   const instagram = ausWorksheetOderVerein(kontakt.insta, verein.instagram);
 
-  // W9-B-Nachprüfung (kontakt Website ↔ App, quer-2): Der Schlussblock stand
-  // ohne Überschrift und ohne Karte allein im weißen Abschnitt – die App
-  // fasst denselben Inhalt in einer Karte zusammen (kein eigener Titel
-  // nötig, die Abschnittsfolge macht den Kontext klar).
-  return `<section class="abschnitt--hell abschnitt">
+  return `<section class="abschnitt">
   <div class="container fluss">
+    <h2>Verein &amp; Postanschrift</h2>
     <div class="karte">
       <dl class="angaben">
         <dt>Verein</dt>
@@ -333,7 +348,7 @@ function postAbschnitt(daten) {
         <dt>Postanschrift</dt>
         <dd>${escapeHtml(post.postfach ?? "")}<br>${escapeHtml(post.plz ?? "")} ${escapeHtml(post.ort ?? "")}</dd>
 
-        <dt>Social</dt>
+        <dt>Soziale Medien</dt>
         <dd>
           <p style="margin:0;"><a href="${escapeHtml(instagram ?? "")}" rel="noopener" target="_blank">Instagram @speuzer_ffm</a></p>
           <p style="margin:0;"><a href="${escapeHtml(verein.facebook ?? "")}" rel="noopener" target="_blank">Facebook-Gruppe</a></p>

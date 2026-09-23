@@ -17,14 +17,23 @@ function escapeHtml(text) {
 }
 
 // Logo (bild(), contain, weiße Kachel über .logo-reihe__kachel in
-// komponenten.css), daneben/darunter Firma, ggf. Ort als .meta; Link nur
-// wenn vorhanden (extern, rel="noopener", http:// ergänzt, wenn das Feld
-// ohne Schema geliefert wurde). W9-Korrektur (Entscheidung "Sponsoren"-
-// Raster, w9-b.md): Instagram-Symbol, wenn sponsor.instagram gesetzt ist
-// (vorher gar nicht gerendert, obwohl data/sponsoren.json das Feld führt).
+// komponenten.css), daneben/darunter Firma, ggf. Ort; Link/Instagram nur
+// wenn vorhanden, als kleine Knöpfe mit Symbol und Text (Entscheidung F,
+// w10-gemeinsam.md). W9-Korrektur (Entscheidung "Sponsoren"-Raster,
+// w9-b.md): Instagram-Symbol, wenn sponsor.instagram gesetzt ist (vorher gar
+// nicht gerendert, obwohl data/sponsoren.json das Feld führt).
 const ICON_INSTAGRAM =
   '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>';
+const ICON_WEBSITE =
+  '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.4 4 5.4 4 8.5s-1.4 6.1-4 8.5c-2.6-2.4-4-5.4-4-8.5s1.4-6.1 4-8.5Z"/></svg>';
 
+// W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 27/quervergleich Nr. 9):
+// der Name war bisher entweder ein blauer Link (mit sponsor.link) oder
+// grauer Text – zwei verschiedene Bausteine für dieselbe Angabe. Der Name
+// steht jetzt immer gleich; ein vorhandener Link bzw. das Instagram-Profil
+// erscheinen stattdessen als eigener kleiner Knopf mit Symbol UND Text
+// darunter ("Website"/"Instagram", echtes Instagram-Symbol statt reinem
+// Text-Link).
 function logoEintrag(sponsor, daten) {
   const logoHtml = bild({
     pfad: PFAD,
@@ -37,9 +46,6 @@ function logoEintrag(sponsor, daten) {
   const nameText = [sponsor.firma, sponsor.ort].filter(Boolean).join(", ");
   let href = sponsor.link ?? null;
   if (href && !/^https?:\/\//i.test(href)) href = "http://" + href;
-  const nameHtml = href
-    ? `<a href="${escapeHtml(href)}" rel="noopener" target="_blank">${escapeHtml(nameText)}</a>`
-    : escapeHtml(nameText);
 
   // vmapit: zusätzlicher Satz zur appack-Plattform unter dem Namen. W3,
   // Abschnitt 7: "bisherige Website" irritiert auf der aktuellen Website –
@@ -49,16 +55,23 @@ function logoEintrag(sponsor, daten) {
       ? `<p class="meta">Die Vereins-App und die Website laufen auf der Plattform appack der vmapit GmbH.</p>`
       : "";
 
-  const instagramHtml = sponsor.instagram
-    ? `<p class="meta"><a href="${escapeHtml(`https://instagram.com/${String(sponsor.instagram).replace(/^@/, "")}`)}" rel="noopener" target="_blank" aria-label="Instagram">${ICON_INSTAGRAM} Instagram</a></p>`
+  const websiteKnopf = href
+    ? `<a class="knopf--icon" href="${escapeHtml(href)}" rel="noopener" target="_blank">${ICON_WEBSITE}Website</a>`
     : "";
+  const instagramKnopf = sponsor.instagram
+    ? `<a class="knopf--icon" href="${escapeHtml(`https://instagram.com/${String(sponsor.instagram).replace(/^@/, "")}`)}" rel="noopener" target="_blank">${ICON_INSTAGRAM}Instagram</a>`
+    : "";
+  const aktionenHtml =
+    websiteKnopf || instagramKnopf
+      ? `<p class="logo-reihe__aktionen">${websiteKnopf}${instagramKnopf}</p>`
+      : "";
 
   return `<li>
       <span class="logo-reihe__kachel">${logoHtml}</span>
       <div class="logo-reihe__info">
-        <p class="meta">${nameHtml}</p>
+        <p class="meta logo-reihe__name">${escapeHtml(nameText)}</p>
         ${vmapitZusatz}
-        ${instagramHtml}
+        ${aktionenHtml}
       </div>
     </li>`;
 }
@@ -90,36 +103,42 @@ function partnerAbschnitt(sponsoren, daten) {
 }
 
 // W3, Abschnitt 7 (Datenkorrektur data/sponsoren.json): VM Elite ist eine
-// Fußballschule, kein App-Projektpartner – eigene Kategorie/Abschnitt.
-function fussballschuleAbschnitt(sponsoren, daten) {
-  const eintraege = sponsoren
-    .filter((s) => s.kategorie === "Fußballschule")
-    .map((s) => logoEintrag(s, daten))
+// Fußballschule, kein App-Projektpartner. W10-Korrektur (QA4
+// web-1440-verein-und-rest Nr. 2): "Fußballschule" und "App-Projektpartner"
+// standen bisher in zwei eigenen Abschnitten mit wechselndem Hintergrund,
+// aber jeweils nur einer Karte – auf dem Desktop blieb der Großteil der
+// Breite leer. Beide Kategorien (Namen bleiben) stehen jetzt nebeneinander
+// in einem gemeinsamen Abschnitt (.sponsor-kategorien, komponenten.css).
+// `logo-reihe--einzeln` verhindert, dass eine einzelne Kachel auf einen
+// Bruchteil der (jetzt halbierten) Spaltenbreite gestaucht wird.
+function kategorieSpalte(titel, sponsoren, kategorie, daten) {
+  const eintraege = sponsoren.filter((s) => s.kategorie === kategorie);
+  if (!eintraege.length) return "";
+  const liste = eintraege.map((s) => logoEintrag(s, daten)).join("\n      ");
+  const listenKlasse = eintraege.length === 1 ? "logo-reihe logo-reihe--einzeln" : "logo-reihe";
+
+  return `<div class="sponsor-kategorie fluss">
+      <h2>${escapeHtml(titel)}</h2>
+      <ul class="${listenKlasse}" role="list">
+      ${liste}
+      </ul>
+    </div>`;
+}
+
+function fussballschuleUndPartnerAbschnitt(sponsoren, daten) {
+  const spalten = [
+    kategorieSpalte("Fußballschule", sponsoren, "Fußballschule", daten),
+    kategorieSpalte("App-Projektpartner", sponsoren, "App-Projektpartner", daten),
+  ]
+    .filter(Boolean)
     .join("\n    ");
-  if (!eintraege) return "";
+  if (!spalten) return "";
 
   return `<section class="abschnitt--hell abschnitt">
   <div class="container fluss">
-    <h2>Fußballschule</h2>
-    <ul class="logo-reihe" role="list">
-    ${eintraege}
-    </ul>
-  </div>
-</section>`;
-}
-
-function appProjektpartnerAbschnitt(sponsoren, daten) {
-  const eintraege = sponsoren
-    .filter((s) => s.kategorie === "App-Projektpartner")
-    .map((s) => logoEintrag(s, daten))
-    .join("\n    ");
-
-  return `<section class="abschnitt">
-  <div class="container fluss">
-    <h2>App-Projektpartner</h2>
-    <ul class="logo-reihe" role="list">
-    ${eintraege}
-    </ul>
+    <div class="sponsor-kategorien">
+    ${spalten}
+    </div>
   </div>
 </section>`;
 }
@@ -145,8 +164,7 @@ export function seite(daten) {
   const inhalt = [
     seitenkopfAbschnitt(),
     partnerAbschnitt(sponsoren, daten),
-    fussballschuleAbschnitt(sponsoren, daten),
-    appProjektpartnerAbschnitt(sponsoren, daten),
+    fussballschuleUndPartnerAbschnitt(sponsoren, daten),
     sponsorWerdenAbschnitt(),
   ].join("\n");
 

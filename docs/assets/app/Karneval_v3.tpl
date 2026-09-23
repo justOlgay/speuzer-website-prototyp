@@ -198,12 +198,21 @@ summary { list-style: none; cursor: pointer; }
 summary::-webkit-details-marker { display: none; }
 summary::marker { content: ""; }
 
+/* W10, Auftrag D (Entscheidung G): Innenabstand oben/unten gilt auch, wenn
+   eine lange Beschriftung umbricht (vorher nur min-height + flex-center –
+   ein zweizeiliger Knopf hatte dadurch keinerlei Abstand zur Kante),
+   text-align:center zusätzlich zu justify-content, weil das bei mehrzeiligem
+   Text pro Zeile zählt (justify-content zentriert nur den Textblock als
+   Ganzes). Wörtlich wie Startseite_v3.tpl (siehe Kopfkommentar dieser
+   Datei). */
 .knopf {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 44px;
-  padding-inline: var(--sp-4);
+  padding: 12px 20px;
+  line-height: 1.3;
+  text-align: center;
   border-radius: var(--r-md);
   background: var(--blau-700);
   color: var(--weiss);
@@ -225,9 +234,13 @@ button.knopf {
   font-size: 14px;
 }
 
+/* W10-Nachprüfung (offen 10, Entscheidung 15): 2px Rand in Vereinsblau wie
+   .knopf--sekundaer in base.css (Website) – der bisherige 1px hellgraue Rand
+   war als Knopfkante kaum zu erkennen ("Nebenaktionen umrandet – auf
+   Website und App gleich"). */
 .knopf--leise {
   background: var(--surface);
-  border: 1px solid var(--line);
+  border: 2px solid var(--blau-700);
   color: var(--blau-800);
 }
 
@@ -321,6 +334,11 @@ button.knopf {
   color: var(--ink-2);
 }
 
+/* W10, Auftrag D (app Nr. 6): Textlink in der App-Linkfarbe (wie
+   "RMV-Auskunft" auf Kontakt & Anfahrt), nicht in der grauen, unterstrichenen
+   Fließtextfarbe. */
+.mail-link { color: var(--blau-800); text-decoration: none; }
+
 .ansprechpartner-liste {
   display: flex;
   flex-direction: column;
@@ -399,7 +417,7 @@ button.knopf {
 
 <h2 class="abschnittstitel">Ansprechpartner</h2>
 <div id="ansprechpartner-liste" class="ansprechpartner-liste"></div>
-<p class="karneval-hinweistext">Beiträge der Karnevalabteilung stehen unter „<a href="nav://sportfreunde04_TextImage_1780401660329">Mitglied werden</a>“.</p>
+<p class="karneval-hinweistext">Beiträge der Karnevalabteilung stehen unter „<a class="mail-link" href="nav://sportfreunde04_TextImage_1780401660329">Mitglied werden</a>“.</p>
 
 <p class="fuss">F.F.V. Sportfreunde 04 · Vereins-App</p>
 

@@ -86,14 +86,23 @@ function seitenkopfAbschnitt() {
 // Vorstand_v3.tpl, #vorstand-hinweis). Die frühere Kopfzeile "Anfragen an
 // den Vorstand:" entfällt (die App hat sie auch nicht, die Einleitung
 // darüber gibt den Kontext schon).
+// W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 11/quervergleich Nr. 20):
+// "Vorstand:"/"Geschäftsstelle:" standen als normal große, schwarze Zeile
+// mit Doppelpunkt – anders als das Label/Wert-Muster auf Kontakt und
+// Impressum (kleines graues Label ohne Doppelpunkt, siehe .angaben in
+// komponenten.css) und anders als die App (dort ohne Doppelpunkt). Jetzt
+// derselbe ".angaben"-Baustein wie dort.
 function hinweisAbschnitt() {
   return `<section class="abschnitt">
   <div class="container">
     <div class="hinweis hinweis--info">
-      <p style="margin:0;">Vorstand:</p>
-      <p style="margin:0 0 var(--sp-2); white-space:nowrap;">${mailLink("vorstand@sportfreunde04.de")}</p>
-      <p style="margin:0;">Geschäftsstelle:</p>
-      <p style="margin:0; white-space:nowrap;">${mailLink("geschaeftsstelle@sportfreunde04.de")}</p>
+      <dl class="angaben">
+        <dt>Vorstand</dt>
+        <dd><p style="margin:0; white-space:nowrap;">${mailLink("vorstand@sportfreunde04.de")}</p></dd>
+
+        <dt>Geschäftsstelle</dt>
+        <dd><p style="margin:0; white-space:nowrap;">${mailLink("geschaeftsstelle@sportfreunde04.de")}</p></dd>
+      </dl>
     </div>
   </div>
 </section>`;

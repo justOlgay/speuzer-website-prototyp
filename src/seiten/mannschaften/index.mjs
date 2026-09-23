@@ -18,7 +18,7 @@ import {
 } from "../../vorlagen/hilfen.mjs";
 // P15: gemeinsame Bausteine (ursprünglich Startseite, dort gelöscht – siehe
 // src/vorlagen/bausteine.mjs).
-import { trainingszeitenAbschnitt, probetrainingAbschnitt } from "../../vorlagen/bausteine.mjs";
+import { probetrainingAbschnitt } from "../../vorlagen/bausteine.mjs";
 import { bild } from "../../vorlagen/bild.mjs";
 
 // Diese Seite liegt immer unter "/mannschaften/" (Tiefe 1), daher immer "../"
@@ -64,24 +64,41 @@ function jahrgangPraefix(team) {
   return `Jahrgang&nbsp;${escapeHtml(j).replace(/ /g, "&nbsp;")}`;
 }
 
-// W3, Abschnitt 7 (verbindliche Entscheidung): Trainingszeiten stehen nur
-// noch in der Tabelle "Trainingszeiten" weiter unten (keine Dopplung mehr) –
-// die Karte zeigt nur noch Jahrgang · Liga/Staffel und den Link.
-// W9, Abschnitt 1: Staffel über staffelLesbar() (DFBnet-Kürzel weg, lesbare
-// Liga/Gruppe). `ohneKategoriePraefix` (W9, Abschnitt 1): in der
-// Senioren-Gruppe nennt schon die Gruppenüberschrift "Senioren" – die Karte
-// zeigt dort keinen zusätzlichen Kategorie-Präfix mehr (sonst "Senioren"
-// doppelt). W9, Abschnitt 2: zusätzliches <span class="team-karte__pfeil">
+// W10, Entscheidung C (w10-gemeinsam.md, bestätigt durch quervergleich Nr. 2):
+// die Trainingstage stehen jetzt direkt in jeder Teamkarte (wie in der App),
+// der frühere separate Abschnitt "Trainingszeiten" mit eigener Tabelle
+// entfällt auf dieser Seite (siehe seite() unten) – jedes Team stand vorher
+// zweimal auf der Seite (Gruppenliste + Tabelle), das war eine Dopplung.
+// Wiederverwendet die vorhandene (bisher ungenutzte) .karte__training-Klasse
+// aus P3. Tagesnamen ausgeschrieben (Entscheidung C), nowrap je Zeile über
+// ".karte__training li" (komponenten.css).
+function trainingszeilenKarteHtml(team) {
+  return (team.training ?? [])
+    .map((t) => `<li><strong>${escapeHtml(t.tag)}</strong> ${escapeHtml(t.von)}–${escapeHtml(t.bis)} Uhr</li>`)
+    .join("\n      ");
+}
+
+// W10, Entscheidung A (w10-gemeinsam.md, bestätigt durch web-1440-mannschaften
+// Nr. 4/web-390-mannschaften Nr. 7): Jahrgang und Liga/Staffel jetzt immer als
+// zwei feste Zeilen OHNE Trennpunkt "·" (vorher stand der Punkt bei vielen
+// Karten allein am Zeilenende). `ohneKategoriePraefix` (W9, Abschnitt 1): in
+// der Senioren-Gruppe nennt schon die Gruppenüberschrift "Senioren" – die
+// Karte zeigt dort keine zusätzliche Jahrgangszeile (nur die Staffel, ein
+// Segment). W9, Abschnitt 2: zusätzliches <span class="team-karte__pfeil">
 // für die kompakte Handy-Zeile (siehe .team-karte in komponenten.css) – der
 // volle Text "Zur Mannschaft ›" bleibt für Desktop-Karten erhalten.
 function teamKarte(team, { ohneKategoriePraefix = false } = {}) {
   const praefix = ohneKategoriePraefix ? "" : jahrgangPraefix(team);
-  const staffel = staffelLesbar(team.staffel);
-  const meta = praefix ? `${praefix} · ${staffel}` : staffel;
+  const staffel = `<span class="team-unterzeile-staffel">${staffelLesbar(team.staffel)}</span>`;
+  const meta = praefix ? `<span class="team-unterzeile-jahrgang">${praefix}</span>${staffel}` : staffel;
+  const training = trainingszeilenKarteHtml(team);
   return `<a class="karte karte--link team-karte" href="${PFAD}mannschaften/${team.slug}/">
       <span class="team-karte__haupt">
         <span class="karte__titel">${teamNameHtml(team.name)}</span>
         <span class="karte__meta">${meta}</span>
+        ${training ? `<ul class="karte__training" role="list">
+        ${training}
+        </ul>` : ""}
       </span>
       <span class="karte__mehr">Zur Mannschaft ›</span>
       <span class="team-karte__pfeil" aria-hidden="true">›</span>
@@ -105,6 +122,28 @@ function gruppenAbschnitt({ titel, satz, slugs, teamNachSlug, id, ohneKategorieP
     <p class="meta">${escapeHtml(satz)}</p>
     <div class="raster raster--mannschaften">
     ${karten}
+    </div>
+  </div>
+</section>`;
+}
+
+// W10, Entscheidung C (w10-gemeinsam.md, bestätigt durch quervergleich Nr. 2):
+// ersetzt den früheren Abschnitt "Trainingszeiten" (Tabelle, jetzt
+// entfernt – die Zeiten stehen direkt in den Teamkarten, siehe teamKarte()
+// oben). Übrig bleibt nur der kurze Hinweis zum Trainingsort und der
+// Ferienhinweis, wörtlich wie zuvor im Tabellen-Baustein (bausteine.mjs).
+function trainingshinweisAbschnitt(daten) {
+  const verein = daten.verein ?? {};
+  // W10-Nachprüfung (neu_kaputt): der Satz hatte keine eigene max-width und
+  // lief bei 1440px über die volle Containerbreite (1168px), während der
+  // Ferien-Hinweiskasten direkt darunter schon auf 880px begrenzt war –
+  // gleiche Breite wie der Kasten, damit beide fluchten und der Satz lesbar
+  // bleibt.
+  return `<section class="abschnitt">
+  <div class="container fluss">
+    <p class="meta" style="max-width:880px;">Alle Mannschaften trainieren auf dem Vereinsplatz an der Mainzer Landstraße 480 – nur die Herren auf der Bezirkssportanlage am&nbsp;Rebstock (SW&nbsp;Griesheim).</p>
+    <div class="hinweis hinweis--info" style="max-width:880px;">
+      <p style="margin:0;">${escapeHtml(verein.hinweise?.ferien ?? "")}</p>
     </div>
   </div>
 </section>`;
@@ -154,10 +193,14 @@ function zusatzangeboteAbschnitt(daten) {
   // Sonderzeichen, bleibt also unverändert erhalten).
   // W9-A-Nachprüfung (web-1440 Nr. 18): "TuS Makkabi" (Regista-Beschreibung)
   // bricht bei 1440px zwischen "TuS" und "Makkabi" um – ebenfalls geschützt.
+  // W10-Korrektur (web-1440-mannschaften Nr. 8, bestätigt): "Vassilios
+  // Miamis" (VM-Elite-Beschreibung) trennte den Namen zwischen Vor- und
+  // Nachname – ebenfalls geschützt.
   const vmEliteSchuetzen = (text) =>
     String(text ?? "")
       .replace(/VM Elite/g, "VM\u00A0Elite")
-      .replace(/TuS Makkabi/g, "TuS\u00A0Makkabi");
+      .replace(/TuS Makkabi/g, "TuS\u00A0Makkabi")
+      .replace(/Vassilios Miamis/g, "Vassilios\u00A0Miamis");
   const karten = angebote
     .map((a) => {
       const kontakt = eMailSchreibenLink(a.mail ?? "geschaeftsstelle@sportfreunde04.de");
@@ -246,15 +289,27 @@ function naechsteSpieleDesVereinsAbschnitt(daten) {
   // W9-A-Nachprüfung (Entscheidung 12: "überall"): der Quellsatz fehlte auf
   // dieser Übersichtsseite ganz, obwohl er unter demselben Baustein auf allen
   // Teamseiten steht.
+  // W10, quervergleich Nr. 17 (bestätigt): der Quellsatz steht jetzt wie auf
+  // den Teamseiten ÜBER dem Kasten (spieleKastenHtml()-Parameter, hilfen.mjs)
+  // statt als eigener Absatz danach.
+  // W10-Nachprüfung (neu_kaputt): der Einleitungssatz stand als eigener,
+  // gemeinsamer Absatz VOR dem appack-Block – im appack-Modus kam dadurch
+  // "Live von FUSSBALL.DE." (aus spieleKastenHtml()) als zweiter, eigener
+  // grauer Absatz knapp darunter hinzu ("wirkt wie eine verirrte Zeile").
+  // Der Einleitungssatz ist jetzt je Modus eigenständig: im appack-Modus an
+  // "Live von FUSSBALL.DE." angehängt (ein einziger Satz über dem Kasten,
+  // wie spieleKastenHtml() es auf den Teamseiten schon macht), im
+  // Prototyp-Modus unverändert vor der eingefrorenen Liste.
+  const einleitungssatz =
+    "Alle Spiele unserer Mannschaften der nächsten Tage. Spielplan und Tabelle je Team findest du auf der jeweiligen Mannschaftsseite.";
   return `<section class="abschnitt">
   <div class="container fluss">
     <h2>Nächste Spiele des Vereins</h2>
-    <p class="meta">Alle Spiele unserer Mannschaften der nächsten Tage. Spielplan und Tabelle je Team findest du auf der jeweiligen Mannschaftsseite.</p>
     <div data-nur-appack hidden>
-      ${spieleKastenHtml(widgetHtml)}
-      <p class="meta">Live&nbsp;von&nbsp;FUSSBALL.DE.</p>
+      ${spieleKastenHtml(widgetHtml, `${einleitungssatz} Live&nbsp;von&nbsp;FUSSBALL.DE.`)}
     </div>
     <div data-nur-prototyp>
+      <p class="meta">${einleitungssatz}</p>
       ${inhalt || `<p class="meta">Keine kommenden Spiele ab dem Build-Datum in data/spiele.json gefunden.</p>`}
       <p class="meta">Auf der Vereinswebsite kommen die Spiele live aus dem DFBnet.</p>
     </div>
@@ -309,7 +364,12 @@ export function seite(daten) {
       // W9-A, w9-a.md: "Kreis Frankfurt" stimmte für die A-Jugend nicht (sie
       // spielt Gruppenliga, siehe Prüfbefund web-1440-mannschaften Nr. 27);
       // Quelle einheitlich "FUSSBALL.DE" benannt (Entscheidung 12).
-      satz: "Ligabetrieb in Kreis- und Gruppenliga, Spielplan und Tabellen live von FUSSBALL.DE.",
+      // W10-Korrektur (web-1440-mannschaften Nr. 11/web-390-mannschaften
+      // Nr. 17, bestätigt): "Kreis- und Gruppenliga" passte nicht zu den
+      // Karten darunter – fünf der sieben Jugendteams (D2, D3, E1–E3) spielen
+      // in der 1. Kreisklasse, nur D1 in der Kreisliga A und die A-Jugend in
+      // der Gruppenliga.
+      satz: "Ligabetrieb von der Kreisklasse bis zur Gruppenliga, Spielplan und Tabellen live von FUSSBALL.DE.",
       slugs: ["a-jugend", "d1", "d2", "d3", "e1", "e2", "e3"],
     },
     {
@@ -322,15 +382,18 @@ export function seite(daten) {
   // Olgay 23.09.2026: Karten „Fußball“/„Karneval“ gehören nicht auf die
   // Fußballseite. Karneval hat einen eigenen Menüpunkt, die Abteilungen
   // stehen im Verein-Verteiler (wie in der App). Reihenfolge:
-  // Mannschaftsübersicht → Trainingszeiten → Probetraining → Zusatzangebote.
+  // Mannschaftsübersicht → Trainingsort-/Ferienhinweis → Probetraining →
+  // Zusatzangebote.
   const inhalt = [
     seitenkopf,
     ...gruppen,
-    // P15: Trainingszeiten-Baustein (ursprünglich Startseite) nach der
-    // Mannschaftsübersicht eingefügt (siehe src/vorlagen/bausteine.mjs). Der
-    // Knopf „Zu den Mannschaften“ entfällt hier (mitKnopf=false) – er würde
-    // auf diese Seite selbst verweisen.
-    trainingszeitenAbschnitt(daten, PFAD, false),
+    // W10, Entscheidung C (w10-gemeinsam.md, bestätigt durch quervergleich
+    // Nr. 2): der frühere separate Abschnitt "Trainingszeiten" mit eigener
+    // Tabelle (trainingszeitenAbschnitt() aus bausteine.mjs) entfällt auf
+    // dieser Seite – die Trainingstage stehen jetzt direkt in jeder
+    // Teamkarte (siehe teamKarte() oben). Nur der kurze Trainingsort-Satz und
+    // der Ferienhinweis bleiben, direkt unter den Gruppen.
+    trainingshinweisAbschnitt(daten),
     // P15: ersetzt den vorherigen eigenen Aufruf ("Lust mitzuspielen?") durch
     // denselben Probetraining-Baustein wie auf den anderen Seiten (siehe
     // src/vorlagen/bausteine.mjs).

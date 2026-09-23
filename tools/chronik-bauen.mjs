@@ -30,10 +30,42 @@ import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import os from "node:os";
+// Entscheidung H (w10-gemeinsam.md): PDF-Titel und Meta überall aus
+// derselben Quelle wie "Downloads & Anträge" – nur der bereits vorhandene,
+// gemeinsame Baustein für eine Download-Zeile wird hier wiederverwendet
+// (kein Schreibzugriff auf src/vorlagen/bausteine.mjs, nur Lesen/Importieren;
+// die Datei bleibt unverändert). Erzeugt dieselbe Website-Markup-Zeile wie
+// in "Über uns" (<li class="download">…).
+import { downloadZeile } from "../src/vorlagen/bausteine.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PAGES = "https://justolgay.github.io/speuzer-website-prototyp";
 const CDN = "https://cdn.appack.de/sportfreunde04";
+
+// Entscheidung H (w10-gemeinsam.md): PDF-Titel und Meta ("PDF · Seiten ·
+// Größe") überall aus derselben Quelle wie "Downloads & Anträge" lesen
+// (data/downloads.json, nur lesen – w9-gemeinsam.md: "data/** … tabu (nur
+// lesen)") statt eines eigenen, hier fest eingetragenen Textes ("Chronik
+// als PDF (53 Seiten)"), der auf Über uns/Downloads inzwischen abweicht
+// (W10-Prüfung, PDF-Block).
+function ladeDownloadEintrag(titelTeil) {
+  const downloads = JSON.parse(readFileSync(path.join(ROOT, "data", "downloads.json"), "utf8"));
+  return downloads.find((d) => (d.titel ?? "").includes(titelTeil)) ?? null;
+}
+
+// Dieselbe Meta-Formel wie downloadZeile() in src/vorlagen/bausteine.mjs
+// ("PDF · Seiten · Größe"), hier separat nachgebildet, weil die App eine
+// andere Zeilen-Markup-Struktur braucht (.zeile__untertitel statt
+// .meta) als downloadZeile() liefert.
+function pdfMeta(eintrag) {
+  const teile = ["PDF"];
+  if (eintrag.seiten) teile.push(`${eintrag.seiten} ${eintrag.seiten === 1 ? "Seite" : "Seiten"}`);
+  if (eintrag.kb) {
+    const groesse = eintrag.kb >= 1000 ? `${(eintrag.kb / 1000).toFixed(1).replace(".", ",")} MB` : `${eintrag.kb} KB`;
+    teile.push(groesse);
+  }
+  return teile.join(" · ");
+}
 
 // ---------- Aufrufparameter ----------
 
@@ -110,13 +142,21 @@ function laufHtml(lauf) {
 }
 
 // Quellenverweise [13] oder [1, 2] im Fließtext auf das Quellenkapitel zeigen
-// lassen. Auf der Chronik-Übersicht und in der App bleibt die Nummer stehen,
-// verlinkt wird auf den Abschnitt "Quellen und Anmerkungen".
-function verweiseVerlinken(html, quellenZiel) {
-  if (!quellenZiel) return html;
+// lassen. Auf der Website ist quellenZiel der Dateiname der Quellenseite
+// ("chronik-....html"); in der App (eine einzige Seite) ist quellenZiel die
+// leere Zeichenkette "" – dieselbe Seite, nur der Anker "#quelle-N" – und
+// appKapitelZiel zusätzlich der Kapitel-Slug, den die App vor dem Sprung per
+// JavaScript sichtbar schalten muss (W10, Befund app 4 aus QA4: "[1]" war in
+// der App grau und nicht anklickbar, weil quellenZiel dort bislang "" war
+// und das als "nicht verlinken" galt – jetzt unterscheidet quellenZiel==null
+// "nicht verlinken" von "" "auf dieser Seite verlinken"). Fehlt gar kein
+// Quellenkapitel, übergeben die Aufrufer null statt "".
+function verweiseVerlinken(html, quellenZiel, appKapitelZiel) {
+  if (quellenZiel == null) return html;
   return html.replace(/\[(\d+[0-9a-z]?(?:,\s*\d+[0-9a-z]?)*)\]/g, (treffer, inhalt) => {
     const erste = inhalt.split(",")[0].trim();
-    return `<a class="quellenverweis" href="${quellenZiel}#quelle-${erste}" title="Zu den Quellen">${escapeHtml(treffer)}</a>`;
+    const datenAttr = appKapitelZiel ? ` data-kapitel-ziel="${escapeHtml(appKapitelZiel)}"` : "";
+    return `<a class="quellenverweis" href="${quellenZiel}#quelle-${erste}"${datenAttr} title="Zu den Quellen">${escapeHtml(treffer)}</a>`;
   });
 }
 
@@ -167,16 +207,20 @@ function jugendBindestrichBinden(html) {
 // Bindestriche (U+2011) statt normaler Bindestriche setzen – optisch
 // identisch, aber keine Umbruchstelle mehr.
 const ADRESSE_REGEX = /\b[A-Za-z0-9][A-Za-z0-9._~%+-]*\.(?:de|com|net|org|it|pdf|png|jpe?g|htm|html)\b(?:\/[^\s,;<]*)?/g;
-// Innerhalb einer erkannten Adresse zusätzlich an Pfadgrenzen (nach "/" und
-// "_") sowie vor der Dateiendung eine <wbr>-Umbruchstelle einfügen, damit
-// lange Adressen dort umbrechen statt mitten in der Endung wie ".ht"/"ml"
-// (W9-Nachprüfung, Befund web-chronik 22 auf dem Handy).
+// Innerhalb einer erkannten Adresse zusätzlich an Pfadgrenzen (nach "/")
+// eine <wbr>-Umbruchstelle einfügen, damit lange Adressen dort umbrechen
+// (W9-Nachprüfung, Befund web-chronik 22 auf dem Handy). Bewusst KEINE
+// Umbruchstelle mehr direkt vor der Dateiendung: das ließ die Endung allein
+// am Zeilenanfang stehen, z. B. "Gruendungen1905." / "html" oder
+// "eigen-wappen." / "png" (W10, Befund web-chronik 3 aus QA4). Ebenso bewusst
+// KEINE Umbruchstelle mehr nach "_": das brach Dateinamen jetzt dort mitten
+// im Wort um, z. B. "gallus-kodex_" / "toleranz-respect-fairplay.pdf"
+// (W10-Prüfung, QA4 Nr. 3 fordert Umbruch nur nach "/"). Umbruch ist jetzt
+// nur noch nach "/" erlaubt, der Punkt vor der Endung bleibt am vorigen Wort.
 function adressenUmbruchstellen(treffer) {
   return treffer
     .replaceAll("-", "‑")
-    .replaceAll("/", "/<wbr>")
-    .replaceAll("_", "_<wbr>")
-    .replace(/\.(?=(?:de|com|net|org|it|pdf|png|jpe?g|htm|html)\b)/g, ".<wbr>");
+    .replaceAll("/", "/<wbr>");
 }
 function adressenMarkieren(html) {
   return nurAusserhalbVonLinks(html, (teil) =>
@@ -191,7 +235,29 @@ function nachweisBinden(html) {
   return html.replace(/\s+(<a\b[^>]*>Nachweis<\/a>)/g, "&nbsp;$1");
 }
 
-function absatzHtml(absatz, rels, quellenZiel) {
+// Ein Quellenverweis wie "[1]" soll ebenfalls nie allein an den
+// Zeilenanfang rutschen: mit geschütztem Leerzeichen an das vorige Wort
+// binden, analog zu nachweisBinden (W10, Befund app 4 aus QA4: "Grundlage"
+// / "[1]." brach im Vorwort um).
+function verweisBinden(html) {
+  return html.replace(/\s+(<a class="quellenverweis"[^>]*>)/g, "&nbsp;$1");
+}
+
+// Datum und zugehörige Zahlen nicht mitten auseinanderbrechen lassen (W10,
+// Befund web-chronik 12 aus QA4): "18. September 2026", "04 II" (die zweite
+// Mannschaft, Sportfreunde 04 II) und "Gruppe 8" mit geschütztem Leerzeichen
+// binden.
+const CHRONIK_MONATE = "Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember";
+function datumUndZahlenBinden(html) {
+  return nurAusserhalbVonLinks(html, (teil) =>
+    teil
+      .replace(new RegExp(`\\b(\\d{1,2}\\.) (${CHRONIK_MONATE}) (\\d{4})\\b`, "g"), "$1&nbsp;$2&nbsp;$3")
+      .replace(/\b(0\d) (I{1,3})\b/g, "$1&nbsp;$2")
+      .replace(/\bGruppe (\d+)\b/g, "Gruppe&nbsp;$1")
+  );
+}
+
+function absatzHtml(absatz, rels, quellenZiel, appKapitelZiel) {
   // Hyperlinks zuerst: <w:hyperlink r:id> umschließt eigene Läufe
   let inhalt = "";
   const teile = absatz.split(/(<w:hyperlink[\s\S]*?<\/w:hyperlink>)/);
@@ -215,7 +281,13 @@ function absatzHtml(absatz, rels, quellenZiel) {
     }
   }
   return nachweisBinden(
-    adressenMarkieren(jugendBindestrichBinden(initialenBinden(verweiseVerlinken(inhalt, quellenZiel))))
+    adressenMarkieren(
+      jugendBindestrichBinden(
+        initialenBinden(
+          datumUndZahlenBinden(verweisBinden(verweiseVerlinken(inhalt, quellenZiel, appKapitelZiel)))
+        )
+      )
+    )
   );
 }
 
@@ -259,12 +331,33 @@ function tabelleHtml(tabelle, rels, quellenZiel, { mitKarten = false } = {}) {
   const kopf = zellenVon(zeilen[0]);
   const kopfText = kopf.map((z) => entferneTags(z).trim());
   const rumpf = zeilen.slice(1).map(zellenVon);
-  const kopfHtml = kopf.map((z) => `<th scope="col">${z}</th>`).join("");
+  // Spaltenzahl schon hier bestimmen (nicht erst weiter unten für die
+  // Handy-Karten): die zweispaltigen Tabellen (z. B. Vorstand: Aufgabe/Name)
+  // bekommen eine eigene, schmalere Klasse statt auf volle Breite gezogen zu
+  // werden (W10, Befund web-chronik 9 aus QA4).
+  const spalten = kopfText.length;
+  // Die Spalte "Platz" bekommt eine eigene Klasse, um sie auf Desktop auf
+  // Inhaltsbreite zu bringen (width:1%) statt gleichmäßig mitgestreckt zu
+  // werden (W10-Prüfung, Regression aus dem Fix für web-chronik 9: seit die
+  // Tabelle auf 720px begrenzt ist, brach ein mehrteiliger Liganame mitten
+  // im Wort um, weil zu viel Platz auf "Platz" entfiel).
+  const istPlatz = (i) => kopfText[i] === "Platz";
+  const kopfHtml = kopf.map((z, i) => `<th scope="col"${istPlatz(i) ? ' class="chronik-platz"' : ""}>${z}</th>`).join("");
   const rumpfHtml = rumpf
-    .map((zellen) => `<tr>${zellen.map((z, i) => `<td>${i === 0 ? z : ohneFett(z)}</td>`).join("")}</tr>`)
+    .map(
+      (zellen) =>
+        `<tr>${zellen
+          .map((z, i) => `<td${istPlatz(i) ? ' class="chronik-platz"' : ""}>${i === 0 ? z : ohneFett(z)}</td>`)
+          .join("")}</tr>`
+    )
     .join("\n        ");
-  const tabelleTeil = `<div class="tabelle-wrap">
-      <table class="chronik-tabelle">
+  const schmal = spalten <= 2;
+  // Der Rahmen (.tabelle-wrap) ist ein Block und bliebe ohne eigene Klasse
+  // auch bei schmaler Tabelle auf voller Textspaltenbreite stehen (W10-
+  // Prüfung, Vorstandstabelle: der Rahmen lief trotz width:auto auf der
+  // Tabelle selbst weiter über die volle Breite).
+  const tabelleTeil = `<div class="tabelle-wrap${schmal ? " tabelle-wrap--schmal" : ""}">
+      <table class="chronik-tabelle${schmal ? " chronik-tabelle--schmal" : ""}">
         <thead><tr>${kopfHtml}</tr></thead>
         <tbody>
         ${rumpfHtml}
@@ -281,7 +374,6 @@ function tabelleHtml(tabelle, rels, quellenZiel, { mitKarten = false } = {}) {
   // Spalte als Fließtext darunter (Einordnung/Erfolg). Die Karten liegen
   // zusätzlich im Markup, per CSS ist immer nur eine der beiden Ansichten
   // sichtbar (kein doppelt vorgelesener Inhalt für Screenreader).
-  const spalten = kopfText.length;
   const karten = rumpf
     .map((zellen) => {
       if (spalten <= 1) {
@@ -293,14 +385,21 @@ function tabelleHtml(tabelle, rels, quellenZiel, { mitKarten = false } = {}) {
           <p class="tabelle-karte__haupt">${ohneFett(zellen[1])}</p>
         </li>`;
       }
-      // Geschütztes Leerzeichen vor dem Trennpunkt, normales danach: so
-      // bleibt der Punkt am Ende der vorigen Zeile stehen, statt einen
-      // Zeilenumbruch mit dem Punkt als Aufzählungszeichen zu beginnen
-      // (W9-Nachprüfung, Befund chronik-mannschaften-und-ehrenamt 390).
+      // Normales Leerzeichen vor dem Trennpunkt (Umbruch erlaubt), geschütztes
+      // danach: der Punkt bindet an das FOLGENDE Wort, damit er bei einem
+      // Zeilenumbruch die neue Zeile beginnt statt am Ende der vorigen Zeile
+      // hängen zu bleiben (W10-Prüfung: "… West ·" brach vor "Platz 17" um,
+      // der Punkt blieb allein am Zeilenende stehen – widerspricht dem
+      // Grundsatz aus Entscheidung A, "·" nie am Zeilenende). Jeder Teil
+      // zusätzlich umbruchfrei (white-space:nowrap per Spanne): sonst kann
+      // ein mehrteiliger Liganame selbst mitten im Wort umbrechen
+      // ("Gruppenliga Frankfurt" / "West"), der Umbruch soll nur noch am
+      // Trennpunkt "·" stattfinden (W10, Befund web-chronik 11 aus QA4).
       const meta = zellen
         .slice(0, -1)
         .map((z, i) => (kopfText[i] === "Platz" ? `Platz&nbsp;${ohneFett(z)}` : ohneFett(z)))
-        .join("&nbsp;· ");
+        .map((teil) => `<span class="tabelle-karte__teil">${teil}</span>`)
+        .join(" ·&nbsp;");
       const beschreibung = ohneFett(zellen[zellen.length - 1]);
       return `<li class="tabelle-karte">
           <p class="tabelle-karte__kopf">${meta}</p>
@@ -437,24 +536,36 @@ function bilderAufbereiten(temp, zielBilder, genutzte) {
 // nicht nur je Kapitel (W9-Nachprüfung: 400/467/609/672/690/720 px
 // nebeneinander über die Kapitel hinweg sahen weiterhin zufällig aus, weil
 // jedes Kapitel für sich auf sein schmalstes Foto herunterskaliert wurde).
-// Deshalb eine einzige Regel für die ganze Website statt eines Vergleichs
-// innerhalb des Kapitels: volle Textspaltenbreite (720px), wenn das Foto
-// dafür höchstens rund 10% hochskaliert werden müsste; deutlich kleinere
-// Vorlagen (z. B. D1-Fotos, Hochformate) bleiben als erklärte Ausnahme in
-// ihrer eigenen nativen Breite, statt auf das schmalste Foto im Kapitel
-// heruntergerechnet zu werden.
-const MAX_HOCHSKALIEREN = 1.1;
-function bildbreitenVon(kapitel, bildDaten) {
-  const alle = kapitel.bloecke
-    .filter((b) => b.art === "bild")
-    .map((b) => bildDaten.get(b.datei))
-    .filter(Boolean);
+// Deshalb eine einzige Regel für die GANZE Chronik (alle Kapitel inkl.
+// Vorwort zusammen, nicht mehr je Kapitel einzeln aufgerufen): Fotos mit
+// nativer Breite ab Textspaltenbreite (720px) bekommen die volle
+// Textspaltenbreite (das ist Herunter- bzw. Gleichskalieren, kein
+// Hochskalieren); alle kleineren Originale bekommen dieselbe, gemeinsame
+// feste Breite – und zwar die kleinste in dieser Gruppe vorkommende native
+// Breite, damit KEIN Foto über seine eigene native Breite hinaus
+// hochskaliert werden muss (w10-c.md: "nicht über native Breite hinaus
+// hochskalieren – dann eine feste, einheitliche Breite"). Eine frühere
+// Fassung erlaubte hier noch bis zu 10% Hochskalieren je Kapitel für sich
+// (Bilder mit 667–690px nativer Breite wurden auf 720px gezogen); das verletzte
+// genau diese Vorgabe und ergab trotzdem keine einheitliche Breite, weil die
+// übrigen kleineren Originale weiterhin ihre je eigene native Breite
+// behielten (W10-Prüfung, Chronik-Kapitelseiten Bilder).
+function bildbreitenVonAlle(kapitelListe, bildDaten) {
+  const alle = [];
+  for (const k of kapitelListe) {
+    for (const b of k.bloecke) {
+      if (b.art !== "bild") continue;
+      const d = bildDaten.get(b.datei);
+      if (d && d.breite > d.hoehe) alle.push(d); // nur Querformate
+    }
+  }
+  const kleinereOriginale = alle.filter((d) => d.breite < TEXTSPALTE);
+  const kleineBreite = kleinereOriginale.length
+    ? Math.min(...kleinereOriginale.map((d) => d.breite))
+    : TEXTSPALTE;
   const ergebnis = new Map();
   for (const d of alle) {
-    const istQuer = d.breite > d.hoehe;
-    const breite =
-      istQuer && d.breite * MAX_HOCHSKALIEREN >= TEXTSPALTE ? TEXTSPALTE : Math.min(d.breite, TEXTSPALTE);
-    ergebnis.set(d.name, breite);
+    ergebnis.set(d.name, d.breite >= TEXTSPALTE ? TEXTSPALTE : kleineBreite);
   }
   return ergebnis;
 }
@@ -482,6 +593,18 @@ function fussnotenAufteilen(html) {
   return teile;
 }
 
+// Die FÜHRENDE Nummer "[N]" eines Quelleneintrags verweist sonst auf sich
+// selbst: verweiseVerlinken() (in absatzHtml, das jede "source"-Zeile
+// genauso durchläuft wie normalen Fließtext) verlinkt jede "[N]"-Klammer,
+// auch die eigene am Zeilenanfang. Sie sah dadurch anklickbar aus, ohne eine
+// sinnvolle Wirkung zu haben (W10-Prüfung, Quellenverzeichnis). Nur die
+// führende Nummer wieder in reinen, halbfetten Text auflösen – die
+// id="quelle-N" auf dem <p> bleibt unverändert Ziel für eingehende
+// Verweise, dieser eine Link verweist nur nicht mehr auf sich selbst.
+function fuehrendeNummerEntlinken(html) {
+  return html.replace(/^<a class="quellenverweis"[^>]*>(\[\d+[0-9a-z]?\])<\/a>/, "<strong>$1</strong>");
+}
+
 // Tabellen müssen in Dokumentreihenfolge bleiben – dafür ein zweiter Durchlauf,
 // der Absätze und Tabellen gemeinsam behandelt.
 function kapitelHtml(kapitel, optionen) {
@@ -504,7 +627,7 @@ function kapitelHtml(kapitel, optionen) {
       // herauslösen (das erzeugte randlose Vollbreite-Bilder außerhalb jedes
       // Containers), sondern wie Absätze/Tabellen im Container öffnen.
       oeffne();
-      // Feste Zielbreite auf der figure selbst (siehe bildbreitenVon), damit
+      // Feste Zielbreite auf der figure selbst (siehe bildbreitenVonAlle), damit
       // Foto UND Bildunterschrift exakt dieselbe Breite bekommen; min(100%, …)
       // lässt die figure auf dem Handy trotzdem auf die verfügbare Breite
       // schrumpfen.
@@ -535,8 +658,17 @@ function kapitelHtml(kapitel, optionen) {
     else if (block.art === "zitat") teile.push(`    <blockquote class="chronik-zitat">${html}</blockquote>`);
     else if (block.art === "source") {
       for (const zeile of fussnotenAufteilen(html)) {
-        const zeilenNummer = (zeile.match(/^\[(\d+[0-9a-z]?)\]/) ?? [])[1];
-        teile.push(`    <p class="chronik-quelle"${zeilenNummer ? ` id="quelle-${zeilenNummer}"` : ""}>${zeile}</p>`);
+        // Auf Tag-freiem Text prüfen, nicht auf "zeile" selbst: die eigene
+        // Nummer "[1]" eines Quelleneintrags wird von verweiseVerlinken
+        // ebenfalls verlinkt (derselbe Regex trifft jede "[N]"-Klammer,
+        // unabhängig davon, ob sie eine eigene Fußnote einleitet oder eine
+        // Stelle im Fließtext referenziert). "zeile" begann dadurch mit
+        // "<a class=…>[1]</a>" statt mit "[1]", die alte Prüfung fand nie
+        // eine Nummer und setzte nirgends ein id="quelle-N" – Links auf die
+        // Quellen sprangen ins Leere (Fund beim eigenen Test von Befund
+        // app 4 aus QA4, betraf Website und App gleichermaßen).
+        const zeilenNummer = (entferneTags(zeile).match(/^\[(\d+[0-9a-z]?)\]/) ?? [])[1];
+        teile.push(`    <p class="chronik-quelle"${zeilenNummer ? ` id="quelle-${zeilenNummer}"` : ""}>${fuehrendeNummerEntlinken(zeile)}</p>`);
       }
     } else teile.push(`    <p class="inhalt">${html}</p>`);
   }
@@ -549,7 +681,7 @@ function kapitelHtml(kapitel, optionen) {
 const CHRONIK_CSS = `<style>
 /* Bild bleibt im Satzspiegel: höchstens so breit wie der Fließtext
    (--inhalt, sonst 720px). Die tatsächliche Breite kommt als fester
-   max-width-Wert von bildbreitenVon (inline auf der figure, nie über die
+   max-width-Wert von bildbreitenVonAlle (inline auf der figure, nie über die
    eigene native Breite hinaus hochskaliert) – so bestimmt allein diese
    Zahl die Größe der figure, und img (width:100%) wie figcaption (Block,
    volle Breite) füllen exakt dieselbe Breite. Ein bloßes width:fit-content
@@ -563,24 +695,62 @@ const CHRONIK_CSS = `<style>
 .chronik-bild { margin: var(--sp-6, 32px) 0; width: 100%; max-width: var(--inhalt, 720px); }
 .chronik-bild img { width: 100%; height: auto; border-radius: var(--radius, 12px); background: var(--blau-50, #eef0fb); display: block; }
 .chronik-bild__text { font-size: 0.86rem; line-height: 1.5; color: var(--ink-2, #55607a); margin-top: var(--sp-2); }
-.chronik-zitat { margin: 0 0 var(--sp-3); padding-left: var(--sp-3); border-left: 3px solid var(--blau, #191793); font-style: italic; color: var(--ink-2, #55607a); max-width: var(--inhalt, 720px); }
+/* Abstand oben genauso groß wie der übrige Absatzrhythmus (16px) statt 0:
+   sonst klebte das Zitat fast ohne Zwischenraum an der Einleitungszeile
+   davor, während unten (Bild folgt) deutlich mehr Luft blieb (W10, Befund
+   web-chronik 20 aus QA4). */
+.chronik-zitat { margin: var(--sp-4, 16px) 0 var(--sp-3); padding-left: var(--sp-3); border-left: 3px solid var(--blau, #191793); font-style: italic; color: var(--ink-2, #55607a); max-width: var(--inhalt, 720px); }
 /* Kleindruck (Vorwort-Anmerkung, Quellenangaben): eigener, sichtbarer
    Abstand zum vorigen Absatz – kein margin-top:0 setzen, sonst überschreibt
    das den Fluss-Rhythmus (.fluss > * + *) der Seite und der Absatz klebt am
    vorigen Text. */
 .chronik-quelle { font-size: 0.86rem; line-height: 1.55; color: var(--ink-2, #55607a); margin-bottom: var(--sp-2); max-width: var(--inhalt, 720px); }
 .quellenverweis { text-decoration: none; font-variant-numeric: tabular-nums; white-space: nowrap; }
-/* Roh getippte Adressen/Dateinamen: kleiner und mit overflow-wrap:anywhere
-   statt am eigenen Bindestrich umzubrechen (W9, Befund web-chronik 22). */
-.chronik-adresse { font-size: 0.9em; overflow-wrap: anywhere; }
+/* Roh getippte Adressen/Dateinamen: overflow-wrap:anywhere statt am eigenen
+   Bindestrich umzubrechen (W9, Befund web-chronik 22). Bewusst OHNE eigene,
+   kleinere Schriftgröße: die Auszeichnung endete bisher am ersten
+   Leerzeichen im Dateinamen (z. B. "Chronik Sportfreunde.pdf"), sodass
+   mitten in einer Adresse die Schriftgröße wechselte (W10, Befund
+   web-chronik 1 aus QA4 – dort als gültige Alternative genannt). */
+.chronik-adresse { overflow-wrap: anywhere; }
 /* Oberer Außenabstand wie der übrige Absatzrhythmus der Seite (24px), damit
    Tabelle bzw. Kartenliste nicht ohne Abstand am Einleitungsabsatz kleben
    (W9-Nachprüfung, Befund chronik-mannschaften-und-ehrenamt). */
-.tabelle-wrap { overflow-x: auto; margin: var(--sp-5, 24px) 0 var(--sp-4); }
+/* Auf die Textspaltenbreite begrenzt wie Absätze, Bilder und Blätter-Leiste
+   – sonst hatte die Seite zwei rechte Kanten (Tabellen bis zur vollen
+   Containerbreite, alles andere nur bis 720px), und kurze Werte wie
+   "Spielklasse"/"Platz" wirkten weit auseinandergezogen (W10, Befund
+   web-chronik 9 aus QA4). */
+.tabelle-wrap { overflow-x: auto; margin: var(--sp-5, 24px) 0 var(--sp-4); max-width: var(--inhalt, 720px); }
+/* Der Rahmen selbst ist ein Block und bliebe sonst auf voller
+   Textspaltenbreite stehen, auch wenn die Tabelle darin schmal ist (W10-
+   Prüfung, Vorstandstabelle). */
+.tabelle-wrap--schmal { width: fit-content; }
 .chronik-tabelle { width: 100%; border-collapse: collapse; font-size: 0.94rem; min-width: 420px; }
+/* Mindestens die zweispaltige Vorstandstabelle (Aufgabe/Name) soll schmal
+   bleiben statt auf die volle Textspaltenbreite gezogen zu werden (W10,
+   Befund web-chronik 9 aus QA4): width:auto statt 100%, die Spalten setzen
+   sich auf ihren Inhalt. Selektor mit ".tabelle-wrap" davor (Spezifität
+   0,2,0) statt der Klasse allein (0,1,0): site.css setzt für ALLE Tabellen
+   in ".tabelle-wrap" width:100% über ".tabelle-wrap table" (Klasse+Typ,
+   0,1,1) – das schlug bislang die schwächere Klasse hier, unabhängig von
+   der Regel-Reihenfolge (W10-Prüfung, Vorstandstabelle wirkte weiterhin
+   auf voller Breite). */
+.tabelle-wrap .chronik-tabelle--schmal { width: auto; min-width: 320px; }
 .chronik-tabelle th { background: var(--blau, #191793); color: #fff; text-align: left; padding: 10px 12px; font-weight: 600; }
 .chronik-tabelle td { padding: 9px 12px; border-bottom: 1px solid var(--linie, #e3e6f0); vertical-align: top; }
 .chronik-tabelle tbody tr:nth-child(odd) { background: var(--blau-50, #f4f6fd); }
+/* Alle Spalten außer der letzten umbruchfrei setzen, so wie die Handy-
+   Kartenliste (.tabelle-karte__teil) es schon für den Trennpunkt-Baustein
+   macht: seit die Tabelle auf 720px begrenzt ist (Befund web-chronik 9),
+   brach ein mehrteiliger Liganame sonst mitten im Wort um ("Gruppenliga
+   Frankfurt" / "West"). Nur die letzte Spalte (Einordnung/Erfolg) darf
+   umbrechen (W10-Prüfung, Regression aus dem Fix für Befund web-chronik 9). */
+.chronik-tabelle th:not(:last-child), .chronik-tabelle td:not(:last-child) { white-space: nowrap; }
+.chronik-tabelle th:last-child, .chronik-tabelle td:last-child { text-wrap: pretty; }
+/* "Platz" auf Inhaltsbreite bringen statt gleichmäßig mitgestreckt zu
+   werden (W10-Prüfung). */
+.chronik-tabelle th.chronik-platz, .chronik-tabelle td.chronik-platz { width: 1%; }
 /* Handy (< 600px): Tabelle durch gestapelte Karten ersetzen statt
    abzuschneiden (W9, Befunde web-chronik 1 und 2). Beide Ansichten liegen
    im Markup, aber nie gleichzeitig sichtbar. */
@@ -594,6 +764,9 @@ const CHRONIK_CSS = `<style>
 .tabelle-karte__kopf { font-weight: 600; margin: 0 0 2px; }
 .tabelle-karte__text { color: var(--ink-2, #55607a); margin: 0; }
 .tabelle-karte__zeile { margin: 0; }
+/* Jeder Teil der Kopfzeile umbruchfrei, Umbruch nur am Trennpunkt "·"
+   (W10, Befund web-chronik 11 aus QA4). */
+.tabelle-karte__teil { white-space: nowrap; }
 @media (max-width: 599px) {
   .tabelle-wrap { display: none; }
   .tabelle-karten { display: block; }
@@ -603,6 +776,12 @@ const CHRONIK_CSS = `<style>
    breitere Containerbreite, während die Zeitleiste selbst schmal wirkt
    (W9-Nachprüfung, Befund Chronik-Übersicht). */
 .zeitleiste { list-style: none; margin: 0; padding: 0; max-width: var(--inhalt, 720px); }
+/* Abstand unter der Überschrift "Die Kapitel" auf das Maß der übrigen
+   Abschnittsüberschriften bringen (ca. 24px) – vorher klebte die Zeitleiste
+   fast an der Überschrift (W10, Befund web-chronik 16 aus QA4). Nur die
+   erste Liste direkt nach dem h2 (nicht die Anhang-Liste, die schon ihren
+   eigenen Abstand über das Anhang-Label bekommt). */
+h2 + .zeitleiste { margin-top: var(--sp-5, 24px); }
 .zeitleiste__punkt { position: relative; padding: 0 0 var(--sp-4) var(--sp-4); border-left: 2px solid var(--linie, #e3e6f0); }
 .zeitleiste__punkt:last-child { border-left-color: transparent; padding-bottom: 0; }
 .zeitleiste__punkt::before { content: ""; position: absolute; left: -7px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--blau, #191793); }
@@ -627,28 +806,59 @@ const CHRONIK_CSS = `<style>
 .zeitleiste--anhang .zeitleiste__punkt { border-left: none; padding-left: 0; }
 .zeitleiste--anhang .zeitleiste__punkt::before { content: none; }
 /* Blätter-Leiste: überall derselbe dreiteilige Baustein (Zurück links,
-   "Alle Kapitel" exakt mittig, Weiter rechts). Ein Grid statt
-   justify-content:space-between hält die Mitte fest, unabhängig von der
-   Länge der Kapiteltitel links/rechts (W9, Befunde web-chronik 3, 4, 12).
-   Auf die Textspaltenbreite begrenzt, damit die Leiste nicht über die volle
-   Containerbreite läuft. Bündig mit der Textspalte (margin-left 0, nicht
-   auto/zentriert) – sonst steht die Leiste ab 768px in der Seite zentriert
-   statt an der Textkante (W9-Nachprüfung, neu entdeckt). */
-.kapitelnav { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: var(--sp-2) var(--sp-3); max-width: var(--inhalt, 720px); margin: 0; }
-.kapitelnav a { text-decoration: none; }
-.kapitelnav__weiter { text-align: right; }
-.kapitelnav__alle { text-align: center; white-space: nowrap; }
-/* Handy: Zurück/Weiter als zwei gleich breite Felder nebeneinander, "Alle
-   Kapitel" als eigene Zeile darunter (W9, Befund web-chronik 5). */
+   "Alle Kapitel" exakt mittig, Weiter rechts). Benannte Grid-Bereiche statt
+   reiner Spaltenreihenfolge legen die Position jedes Links fest, unabhängig
+   von seiner Reihenfolge im Markup – das braucht die Handy-Ansicht unten,
+   wo "Weiter" sonst unter "Alle Kapitel" rutschen konnte, wenn "Zurück"
+   fehlte (W9, Befunde web-chronik 3, 4, 12; W10-Prüfung, erstes Kapitel auf
+   dem Handy). Auf die Textspaltenbreite begrenzt, damit die Leiste nicht
+   über die volle Containerbreite läuft. Bündig mit der Textspalte
+   (margin-left 0, nicht auto/zentriert) – sonst steht die Leiste ab 768px
+   in der Seite zentriert statt an der Textkante (W9-Nachprüfung, neu
+   entdeckt). */
+.kapitelnav {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-areas: "zurueck alle weiter";
+  align-items: stretch;
+  gap: var(--sp-2) var(--sp-3);
+  max-width: var(--inhalt, 720px);
+  margin: 0;
+}
+/* Tippfläche mindestens 44px hoch, Text vertikal mittig statt über
+   text-align allein positioniert (W10-Prüfung, Blätter-Leiste: Tippflächen
+   wirkten klein). */
+.kapitelnav a { text-decoration: none; display: flex; align-items: center; min-height: 44px; }
+.kapitelnav__zurueck { grid-area: zurueck; justify-content: flex-start; }
+.kapitelnav__weiter { grid-area: weiter; justify-content: flex-end; }
+.kapitelnav__alle { grid-area: alle; justify-content: center; white-space: nowrap; }
+.kapitelnav__platz--zurueck { grid-area: zurueck; }
+.kapitelnav__platz--weiter { grid-area: weiter; }
+/* Handy: "Zurück" und "Weiter" als zwei gleich breite Felder nebeneinander,
+   "Alle Kapitel" darunter in eigener, voller Zeile (w10-c.md: "auf dem
+   Handy zwei gleich breite Felder für Zurück/Weiter und 'Alle Kapitel' in
+   eigener Zeile darunter"). Die Grid-Bereiche halten "Weiter" auch dann
+   rechts oben, wenn "Zurück" fehlt (erstes Kapitel) – die Reihenfolge im
+   Markup entscheidet nicht mehr über die Position (W10-Prüfung: "Weiter"
+   rutschte im ersten Kapitel unter "Alle Kapitel", weil bislang nur die
+   Dokumentreihenfolge über die gestapelte Position entschied). Die leeren
+   Platzhalter (kein Link vorhanden) halten die Spalte besetzt und werden
+   auf dem Handy ausgeblendet. */
 @media (max-width: 599px) {
-  .kapitelnav { grid-template-columns: 1fr 1fr; }
-  .kapitelnav__zurueck, .kapitelnav__platz--zurueck { grid-column: 1; grid-row: 1; text-align: left; }
-  .kapitelnav__weiter, .kapitelnav__platz--weiter { grid-column: 2; grid-row: 1; text-align: right; }
-  .kapitelnav__alle { grid-column: 1 / -1; grid-row: 2; }
+  .kapitelnav {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "zurueck weiter" "alle alle";
+    row-gap: var(--sp-2);
+  }
+  .kapitelnav__platz { display: none; }
 }
 /* Überschriften nie automatisch trennen, auf dem Handy ausgewogen umbrechen
    statt zufällig (W9, Befund web-chronik 9). */
 .seitenkopf h1, .fluss h2 { hyphens: manual; text-wrap: balance; }
+/* Lange Zwischenüberschriften auf die Textspaltenbreite begrenzen: sie
+   durften bisher breiter sein als Absätze und Bilder darunter, dadurch
+   sprang die rechte Kante der Seite (W10, Befund web-chronik 18 aus QA4). */
+.fluss h2 { max-width: var(--inhalt, 720px); }
 </style>`;
 
 function webSeite({ titel, beschreibung, datei, inhalt }) {
@@ -711,7 +921,7 @@ function seitenkopf(brotkrume, titel, lead) {
 // Eigene Klassen gibt es nur dort, wo die Chronik etwas Neues braucht
 // (Abbildungen, Quellenabsätze, Tabellen).
 
-function appKapitelHtml(kapitel, { rels, bildKarte, bildBasis }) {
+function appKapitelHtml(kapitel, { rels, bildKarte, bildBasis, quellenSlug }) {
   const teile = [];
   let karteOffen = false;
   const schliesse = () => {
@@ -720,15 +930,24 @@ function appKapitelHtml(kapitel, { rels, bildKarte, bildBasis }) {
   const oeffne = () => {
     if (!karteOffen) { teile.push(`      <div class="karte">`); karteOffen = true; }
   };
+  // Quellenverweise "[1]" sollen wie auf der Website blau und anklickbar
+  // sein und zu "Quellen und Anmerkungen" springen. Die App ist aber eine
+  // einzige Seite: quellenZiel ist deshalb "" (derselbe Anker "#quelle-N"
+  // auf dieser Seite statt einer anderen Datei), appKapitelZiel zusätzlich
+  // der Kapitel-Slug, den das Skript unten vor dem Sprung per JavaScript
+  // sichtbar schaltet (W10, Befund app 4 aus QA4). Ohne Quellenkapitel im
+  // Dokument bleibt es unverlinkter Text wie bisher.
+  const quellenZiel = quellenSlug != null ? "" : null;
 
   for (const block of kapitel.bloecke) {
     if (block.art === "tabelle") {
       schliesse();
       // Wie auf der Website: gestapelte Karten für die schmale App statt
       // einer über den Kartenrand hinaus scrollenden Tabelle (W9-Nachprüfung,
-      // App-Gegenstück zu web-chronik 1/2).
+      // App-Gegenstück zu web-chronik 1/2). Verweise in Tabellenzellen bleiben
+      // bewusst unverlinkt (null) – kommen im Dokument nicht vor.
       teile.push(
-        `      <div class="karte tabelle-wrapper">\n        ${tabelleHtml(block.xml, rels, "", { mitKarten: true })}\n      </div>`
+        `      <div class="karte tabelle-wrapper">\n        ${tabelleHtml(block.xml, rels, null, { mitKarten: true })}\n      </div>`
       );
       continue;
     }
@@ -742,7 +961,7 @@ function appKapitelHtml(kapitel, { rels, bildKarte, bildBasis }) {
       </figure>`);
       continue;
     }
-    const html = absatzHtml(block.xml, rels, "");
+    const html = absatzHtml(block.xml, rels, quellenZiel, quellenSlug);
     if (!html) continue;
     if (block.art === "caption") {
       for (let i = teile.length - 1; i >= 0; i--) {
@@ -766,16 +985,27 @@ function appKapitelHtml(kapitel, { rels, bildKarte, bildBasis }) {
     else if (block.art === "source") {
       // Wie auf der Website: jede Fußnote als eigene Zeile (W9-Nachprüfung,
       // web-chronik 17 war bislang nur auf den Website-Kapitelseiten
-      // umgesetzt, nicht in der App).
-      for (const zeile of fussnotenAufteilen(html)) teile.push(`        <p class="chronik-quelle">${zeile}</p>`);
+      // umgesetzt, nicht in der App). Zusätzlich dieselbe id="quelle-N" wie
+      // auf der Website, damit ein Verweis "[1]" auf dieser Seite dorthin
+      // springen kann (W10, Befund app 4 aus QA4). Nummer auf Tag-freiem
+      // Text suchen, nicht auf "zeile" selbst – siehe Kommentar an der
+      // gleichen Stelle in kapitelHtml (derselbe, dort gefundene Fehler).
+      for (const zeile of fussnotenAufteilen(html)) {
+        const zeilenNummer = (entferneTags(zeile).match(/^\[(\d+[0-9a-z]?)\]/) ?? [])[1];
+        teile.push(`        <p class="chronik-quelle"${zeilenNummer ? ` id="quelle-${zeilenNummer}"` : ""}>${fuehrendeNummerEntlinken(zeile)}</p>`);
+      }
     } else teile.push(`        <p>${html}</p>`);
   }
   schliesse();
   return teile.join("\n");
 }
 
-function appSeite({ kapitel, bildKarte, rels, basisCss }) {
+function appSeite({ kapitel, bildKarte, rels, basisCss, chronikDownload }) {
   const bildBasis = `${CDN}/images/`;
+  // Slug des Quellenkapitels, falls vorhanden – siehe appKapitelHtml: nötig,
+  // damit ein Quellenverweis "[1]" im Fließtext dorthin springen kann (W10,
+  // Befund app 4 aus QA4).
+  const quellenSlug = kapitel.find((k) => k.titel.startsWith("Quellen"))?.slug ?? null;
   const pillen = kapitel
     .map(
       (k, i) =>
@@ -784,25 +1014,47 @@ function appSeite({ kapitel, bildKarte, rels, basisCss }) {
     .join("\n");
   // Blättern am Kapitelende wie auf der Website (‹ vorheriges · nächstes ›),
   // damit niemand zum Weiterlesen bis zur Kapitelwahl hochscrollen muss.
-  // Beschriftung mit dem vollen Titel ("1904 bis 1918"), nicht der kurzen
-  // Gedankenstrich-Form – dieselbe Schreibweise wie die Kapitelüberschrift
-  // und die Blätter-Leiste der Website (W9-Nachprüfung, Befund App: die
-  // kompakten Filter-Chips oben dürfen die Kurzform (k.kurz) behalten).
+  // Beschriftung mit dem vollen Titel (k.titel, z. B. "1904 bis 1918"),
+  // dieselbe Schreibweise wie die Kapitelüberschrift, die Blätter-Leiste der
+  // Website und inzwischen auch die Pillen oben (k.kurz, seit W10 ebenfalls
+  // "1904 bis 1918" statt "1904–1918" – W10, Befund app 2 aus QA4). Die
+  // Pillen bleiben trotzdem kürzer als die Blättern-Beschriftung bei
+  // "Mannschaften"/"Quellen" (ohne den Zusatz "und Ehrenamt"/"und
+  // Anmerkungen"), das ist laut Befund vertretbar.
+  // Pfeil und angrenzendes Wort nie trennen, das Pfeilsymbol nie allein in
+  // einer eigenen Zeile lassen (W10-Prüfung, Kapitel 2023 bis 2026: "‹ 2018
+  // BIS / 2023" brach mitten im Zeitraum um, "… EHRENAMT / ›" ließ den
+  // Pfeil allein stehen): geschütztes Leerzeichen zwischen Pfeil und
+  // angrenzendem Wort immer, bei reinen Jahreszahl-Bereichen ("2018 bis
+  // 2023") zusätzlich zwischen allen Wörtern – die sind kurz genug, um nie
+  // sinnvoll umzubrechen. Längere Wortgruppen ("Mannschaften und
+  // Ehrenamt") dürfen laut Entscheidung G (w10-gemeinsam.md) weiterhin
+  // umbrechen, nur eben nicht mehr mit dem Pfeil allein in der Zeile.
+  const istZeitraum = (titel) => /^\d{4}\s+bis\s+\d{4}$/.test(titel);
   const blaettern = (i) => {
     const vorher = kapitel[i - 1];
     const nachher = kapitel[i + 1];
     const knopf = (k, text) =>
       `<button class="tag filter-knopf kapitel-blaettern__knopf" type="button" data-kapitel="${escapeHtml(k.slug)}">${escapeHtml(text)}</button>`;
+    const vorherText = (k) => "‹ " + (istZeitraum(k.titel) ? k.titel.replace(/ /g, " ") : k.titel);
+    const nachherText = (k) => (istZeitraum(k.titel) ? k.titel.replace(/ /g, " ") : k.titel) + " ›";
     return `      <div class="kapitel-blaettern">
-        ${vorher ? knopf(vorher, "‹ " + vorher.titel) : "<span></span>"}
-        ${nachher ? knopf(nachher, nachher.titel + " ›") : "<span></span>"}
+        ${vorher ? knopf(vorher, vorherText(vorher)) : "<span></span>"}
+        ${nachher ? knopf(nachher, nachherText(nachher)) : "<span></span>"}
       </div>`;
   };
   const abschnitte = kapitel
     .map(
       (k, i) => `  <div class="kapitel" id="kapitel-${escapeHtml(k.slug)}"${i === 0 ? "" : " hidden"}>
       <h2 class="abschnittstitel kapitel-titel">${escapeHtml(k.titel)}</h2>
-${k.lead ? `      <p class="kapitel-lead">${escapeHtml(k.lead)}</p>\n` : ""}${appKapitelHtml(k, { rels, bildKarte, bildBasis })}
+${
+        // leadVon(k) statt des rohen k.lead: "Mannschaften und Ehrenamt" und
+        // "Quellen und Anmerkungen" haben im Word-Dokument keinen eigenen
+        // Lead-Absatz, leadVon() liefert dafür den auf der Website schon
+        // verwendeten Ersatztext (ANHANG_UNTERZEILEN) – in der App fehlte die
+        // Unterzeile dadurch bislang ganz (W10-Prüfung, Anhang-Kapitel).
+        leadVon(k) ? `      <p class="kapitel-lead">${escapeHtml(leadVon(k))}</p>\n` : ""
+      }${appKapitelHtml(k, { rels, bildKarte, bildBasis, quellenSlug })}
 ${blaettern(i)}
   </div>`
     )
@@ -840,13 +1092,26 @@ ${basisCss}
 }
 
 /* Kapitelwahl: gleiche Bausteine wie die Teamwahl auf Spielplan-App.html
-   (dort im Seiten-CSS definiert, nicht in v3-basis.css). Die 15 Kapitel
-   brechen bewusst um, damit alle auf einen Blick sichtbar sind. */
+   (dort im Seiten-CSS definiert, nicht in v3-basis.css). Eine Zeile, die
+   horizontal gewischt werden kann, statt fünf Reihen mit 15 Pillen
+   untereinander (W10, Befund app 2 aus QA4 und Entscheidung I aus
+   w10-gemeinsam.md). */
 .filterleiste {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   gap: var(--sp-2);
   margin-bottom: var(--sp-4);
+  padding-bottom: 2px;
+  /* Bis an den Bildschirmrand laufen lassen statt 16px (--sp-4, der
+     Seitenabstand von .inhalt) davor hart abzuschneiden: negativer
+     Außenabstand hebt den Seitenabstand auf, der Innenabstand stellt ihn
+     als Scroll-Polster wieder her, so bleibt die erste/letzte Pille beim
+     Wischen nicht an der Kante kleben (W10-Prüfung, Pillenleiste). */
+  margin-inline: calc(var(--sp-4) * -1);
+  padding-inline: var(--sp-4);
+  scroll-padding-inline: var(--sp-4);
 }
 
 .filter-knopf {
@@ -857,12 +1122,26 @@ ${basisCss}
   font-family: inherit;
 }
 
+/* Nur die Pillen der Kapitelwahl selbst nicht schrumpfen/umbrechen lassen
+   (Voraussetzung für die eine wischbare Zeile) – die längeren
+   Blättern-Knöpfe am Kapitelende (.kapitel-blaettern__knopf, teils mit
+   vollem Kapiteltitel wie "Mannschaften und Ehrenamt") behalten ihr
+   bisheriges, schrumpfendes Verhalten, damit sie auf dem Handy nicht über
+   den Rand hinauslaufen. */
+.filterleiste .filter-knopf { flex: 0 0 auto; white-space: nowrap; }
+
 .filter-knopf--aktiv {
   background: var(--blau-700);
   color: var(--weiss);
 }
 
 .kapitel-lead { color: var(--ink-2); margin: calc(var(--sp-3) * -1) 0 var(--sp-4); }
+/* Der Kapiteltitel (h2.abschnittstitel.kapitel-titel) übernahm bislang
+   dieselbe Größe (20px) wie die Abschnittsüberschriften darunter (ebenfalls
+   .abschnittstitel) – zwei gleich aussehende Überschriften direkt
+   untereinander ("MANNSCHAFTEN UND EHRENAMT" / "DIE ERSTE MANNSCHAFT SEIT
+   2013") ließen die Rangfolge nicht erkennen (W10-Prüfung, Anhang-Kapitel). */
+.kapitel-titel { font-size: 26px; }
 
 /* Abstand oben wie unten (16px) – vorher stieß das Foto ohne Zwischenraum
    an die vorangehende Karte (W9-Nachprüfung, App-Gegenstück zu
@@ -872,12 +1151,18 @@ ${basisCss}
 .chronik-bild__text { font-size: 12px; line-height: 1.5; color: var(--ink-2); margin-top: var(--sp-2); }
 .chronik-zitat { margin: 0 0 var(--sp-3); padding-left: var(--sp-3); border-left: 3px solid var(--blau-700); font-style: italic; color: var(--ink-2); }
 .chronik-quelle { font-size: 12px; line-height: 1.55; color: var(--ink-2); margin: 0 0 var(--sp-2); }
-/* Roh getippte Adressen/Dateinamen: kleiner und mit overflow-wrap:anywhere,
-   wie auf der Website (W9-Nachprüfung, neu entdeckt: ohne diese Regel
-   liefen die neuen .chronik-adresse-Spannen über den Kartenrand hinaus,
-   weil sie hier keinen Umbruch bekamen). */
-.chronik-adresse { font-size: .9em; overflow-wrap: anywhere; }
+/* Quellenverweis "[1]" wie auf der Website blau und ohne Unterstreichung
+   (bislang grau wie der Fließtext, weil a { color: inherit; } griff und
+   hier keine eigene Regel bestand) – W10, Befund app 4 aus QA4. */
+.quellenverweis { color: var(--blau-700); text-decoration: none; white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* Roh getippte Adressen/Dateinamen: overflow-wrap:anywhere, wie auf der
+   Website (W9-Nachprüfung, neu entdeckt: ohne diese Regel liefen die neuen
+   .chronik-adresse-Spannen über den Kartenrand hinaus, weil sie hier keinen
+   Umbruch bekamen). Bewusst OHNE eigene, kleinere Schriftgröße (W10, Befund
+   web-chronik 1 aus QA4 – wie auf der Website). */
+.chronik-adresse { overflow-wrap: anywhere; }
 .chronik-tabelle { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 380px; }
+.chronik-tabelle--schmal { width: auto; min-width: 260px; }
 .chronik-tabelle th { background: var(--blau-700); color: var(--weiss); text-align: left; padding: 8px 10px; font-weight: 600; }
 .chronik-tabelle td { padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
 .chronik-tabelle tbody tr:nth-child(odd) { background: var(--blau-50); }
@@ -888,22 +1173,54 @@ ${basisCss}
 .tabelle-karten { display: none; list-style: none; margin: 0; padding: 0; }
 .tabelle-karte { padding: var(--sp-3) 0; border-bottom: 1px solid var(--line); }
 .tabelle-karte:first-child { padding-top: 0; }
+/* Letzte Zeile ohne eigene Trennlinie: die lag sonst direkt über der
+   unteren Kartenkante und ergab eine doppelte Kante am Kartenende
+   (W10-Prüfung, Kartenlisten in Mannschaften und Ehrenamt). */
+.karte .tabelle-karte:last-child { border-bottom: none; }
 .tabelle-karte__label { font-size: 12px; color: var(--ink-2); margin: 0 0 2px; }
 .tabelle-karte__haupt { font-weight: 600; margin: 0; }
 .tabelle-karte__kopf { font-weight: 600; margin: 0 0 2px; }
 .tabelle-karte__text { color: var(--ink-2); margin: 0; }
 .tabelle-karte__zeile { margin: 0; }
+/* Jeder Teil der Kopfzeile umbruchfrei, Umbruch nur am Trennpunkt "·"
+   (W10, Befund web-chronik 11 aus QA4 – dieselbe Kartenvorlage wie die
+   Website). */
+.tabelle-karte__teil { white-space: nowrap; }
 @media (max-width: 599px) {
   .tabelle-wrapper .tabelle-wrap { display: none; }
   .tabelle-karten { display: block; }
 }
-.chronik-pdf { margin-top: var(--sp-6); }
+/* Kein eigener oberer Abstand mehr auf der Karte selbst: die neue
+   Überschrift "Zum Lesen und Ausdrucken" davor (.abschnittstitel) bringt
+   bereits 32px Abstand zum vorigen Kapitel mit (W10, Befund app 3 aus QA4
+   und Entscheidung I aus w10-gemeinsam.md). Erster/letzter Absatz ohne
+   eigenen Außenrand, sonst addierte sich der Browser-Standardabstand eines
+   <p> zum Karten-Innenabstand (34px oben, aber nur 16px unten). */
+.chronik-pdf > :first-child { margin-top: 0; }
+.chronik-pdf > :last-child { margin-bottom: 0; }
+/* Knopf auf volle Kartenbreite (nur der Ausweichfall ohne gefundenen
+   Downloads-Eintrag), wie der gleichrangige Knopf "Vereinschronik lesen" in
+   Über uns (W10, Befund app 3 aus QA4). */
+.chronik-pdf a.knopf { display: block; width: 100%; text-align: center; }
+/* Titel-/Meta-Zeile wie in Über uns/Downloads & Anträge (Entscheidung H,
+   w10-gemeinsam.md), derselbe Baustein wie dort (.liste--eingebettet,
+   .zeile__untertitel sind dort seitenlokal definiert, nicht in
+   v3-basis.css – hier gleichlautend übernommen). */
+.liste--eingebettet { margin-top: var(--sp-3); }
+.liste--eingebettet .zeile:last-child { border-bottom: none; }
+.zeile__titel, .zeile__untertitel { display: block; }
+.zeile__untertitel { margin: 2px 0 0; font-size: 13px; color: var(--ink-3); overflow-wrap: break-word; }
 /* Gleichmäßige Innenabstände: erster und letzter Absatz ohne Außenrand */
 .kapitel .karte > :first-child { margin-top: 0; }
 .kapitel .karte > :last-child { margin-bottom: 0; }
 .kapitel .karte + .karte { margin-top: var(--sp-3); }
 .kapitel-blaettern { display: flex; justify-content: space-between; gap: var(--sp-3); margin-top: var(--sp-5); }
-.kapitel-blaettern__knopf { min-height: 44px; font-family: inherit; cursor: pointer; }
+/* Innenabstand oben/unten auch bei zweizeiligem Umbruch (Entscheidung G,
+   w10-gemeinsam.md: "padding: 12px 20px; line-height: 1.3; text-align:
+   center", lange Beschriftungen dürfen umbrechen, aber nie an der Kante
+   kleben) – vorher wirkte der Abstand bei zwei Zeilen knapp, ca. 8px statt
+   12px (W10-Prüfung, Kapitel 2023 bis 2026). */
+.kapitel-blaettern__knopf { min-height: 44px; padding: 12px 20px; line-height: 1.3; text-align: center; font-family: inherit; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -919,9 +1236,24 @@ ${pillen}
 
 ${abschnitte}
 
+<h2 class="abschnittstitel">Zum Lesen und Ausdrucken</h2>
 <div class="karte chronik-pdf">
-  <p>Die vollständige Chronik gibt es auch als PDF zum Lesen und Ausdrucken.</p>
-  <a class="knopf" href="${CDN}/pdf/Chronik-FFV-Sportfreunde-04-2026.pdf" target="_blank" rel="noopener">Chronik als PDF öffnen</a>
+  <p>Die vollständige Chronik gibt es auch als PDF mit allen Kapiteln, Tabellen und Bildern.</p>
+  ${
+    // Entscheidung H (w10-gemeinsam.md): Titel und Meta aus derselben
+    // Quelle wie "Downloads & Anträge" (data/downloads.json), derselbe
+    // Baustein (.liste.liste--eingebettet/.zeile) wie in Über uns – statt
+    // des bisherigen, hier eigens formulierten "Chronik als PDF (53
+    // Seiten)" (W10-Prüfung, PDF-Block).
+    chronikDownload
+      ? `<div class="liste liste--eingebettet">
+    <a class="zeile" href="${escapeHtml(chronikDownload.datei)}" target="_blank" rel="noopener">
+      <span class="zeile__text"><span class="zeile__titel">${escapeHtml(chronikDownload.titel)}</span><span class="zeile__untertitel">${escapeHtml(pdfMeta(chronikDownload))}</span></span>
+      <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+    </a>
+  </div>`
+      : `<a class="knopf" href="${CDN}/pdf/Chronik-FFV-Sportfreunde-04-2026.pdf" target="_blank" rel="noopener">Chronik als PDF</a>`
+  }
 </div>
 
 <p class="fuss">F.F.V. Sportfreunde 04 · Vereins-App</p>
@@ -942,11 +1274,19 @@ ${abschnitte}
       if (passt) gefunden = true;
     });
     if (!gefunden) return false;
+    var aktiverKnopf = null;
     knoepfe.forEach(function (b) {
       var passt = b.getAttribute("data-kapitel") === slug;
-      if (passt) b.classList.add("filter-knopf--aktiv");
+      if (passt) { b.classList.add("filter-knopf--aktiv"); aktiverKnopf = b; }
       else b.classList.remove("filter-knopf--aktiv");
     });
+    // Aktive Pille in die wischbare Leiste holen – beim Blättern (Knopf am
+    // Kapitelende) und beim Öffnen per Direktlink (Hash) blieb die Leiste
+    // sonst bei scrollLeft 0 stehen, ohne zu zeigen, in welchem Kapitel man
+    // ist (W10-Prüfung, Pillenleiste).
+    if (aktiverKnopf && aktiverKnopf.scrollIntoView) {
+      aktiverKnopf.scrollIntoView({ inline: "center", block: "nearest" });
+    }
     if (scrollen) {
       var ziel = document.getElementById("kapitel-" + slug);
       var y = ziel ? ziel.getBoundingClientRect().top + window.pageYOffset - 12 : 0;
@@ -963,6 +1303,17 @@ ${abschnitte}
       if (window.history && window.history.replaceState) {
         window.history.replaceState(null, "", "#" + slug);
       }
+    });
+  });
+
+  // Quellenverweis "[1]" im Fließtext: erst das Kapitel "Quellen und
+  // Anmerkungen" sichtbar schalten (es ist bis dahin ggf. per [hidden]
+  // ausgeblendet), dann läuft der normale Linkklick zum Anker "#quelle-N"
+  // weiter und springt dorthin (W10, Befund app 4 aus QA4).
+  var quellenlinks = [].slice.call(document.querySelectorAll(".quellenverweis[data-kapitel-ziel]"));
+  quellenlinks.forEach(function (a) {
+    a.addEventListener("click", function () {
+      zeige(a.getAttribute("data-kapitel-ziel"), false);
     });
   });
 
@@ -998,7 +1349,11 @@ function main() {
       return {
         ...k,
         slug: slugVon(k.titel),
-        kurz: jahre ? `${jahre[1]}–${jahre[2]}` : k.titel.replace(" und Anmerkungen", "").replace(" und Ehrenamt", ""),
+        // Dieselbe Schreibweise wie Kapitelüberschrift, Übersicht und die
+        // App-Blätter-Knöpfe ("1904 bis 1918"), nicht die kurze
+        // Gedankenstrich-Form ("1904–1918") – die App zeigte beides
+        // nebeneinander (W10, Befund app 2 aus QA4).
+        kurz: jahre ? `${jahre[1]} bis ${jahre[2]}` : k.titel.replace(" und Anmerkungen", "").replace(" und Ehrenamt", ""),
         epoche: Boolean(jahre),
       };
     });
@@ -1017,10 +1372,18 @@ function main() {
 
   console.log(`  ${genutzteBilder.size} Bilder aufbereiten …`);
   const bildKarte = bilderAufbereiten(temp, bilderDir, genutzteBilder);
+  // Einheitliche Querformat-Breiten über die GESAMTE Chronik hinweg
+  // bestimmen (Vorwort + alle Kapitel zusammen), nicht mehr je Kapitel
+  // einzeln – siehe bildbreitenVonAlle (W10-Prüfung, Chronik-Kapitelseiten
+  // Bilder).
+  const bildbreitenGlobal = bildbreitenVonAlle(vorwort ? [vorwort, ...kapitel] : kapitel, bildKarte);
 
   const quellenKapitel = kapitel.find((k) => k.titel.startsWith("Quellen"));
-  const quellenDatei = quellenKapitel ? `chronik-${quellenKapitel.slug}.html` : "";
+  const quellenDatei = quellenKapitel ? `chronik-${quellenKapitel.slug}.html` : null;
   const bildBasisWeb = `${CDN}/images/`;
+  // Entscheidung H: Titel/Meta für den PDF-Block auf Übersicht (Website)
+  // und App aus data/downloads.json (nur lesen).
+  const chronikDownload = ladeDownloadEintrag("Vereinschronik");
 
   // Kapitelseiten
   // Blätter-Leiste: überall dieselbe Schreibweise wie in Übersicht und
@@ -1063,7 +1426,7 @@ function main() {
         bildKarte,
         bildBasis: bildBasisWeb,
         quellenZiel: quellenDatei,
-        bildbreiten: bildbreitenVon(k, bildKarte),
+        bildbreiten: bildbreitenGlobal,
       }),
       kapitelnavHtml(vorher, nachher),
     ].join("\n");
@@ -1105,7 +1468,7 @@ function main() {
         bildKarte,
         bildBasis: bildBasisWeb,
         quellenZiel: quellenDatei,
-        bildbreiten: bildbreitenVon(vorwort, bildKarte),
+        bildbreiten: bildbreitenGlobal,
       })
     : "";
   const uebersicht = [
@@ -1135,9 +1498,19 @@ ${anhangListe}
   <div class="container fluss">
     <h2>Zum Lesen und Ausdrucken</h2>
     <p class="inhalt">Die vollständige Chronik gibt es auch als PDF mit allen Kapiteln, Tabellen und Bildern.</p>
-    <p class="knopfzeile">
-      <a class="knopf knopf--sekundaer" href="${CDN}/pdf/Chronik-FFV-Sportfreunde-04-2026.pdf" target="_blank" rel="noopener">Chronik als PDF (53 Seiten)</a>
-    </p>
+    ${
+      // Entscheidung H (w10-gemeinsam.md): derselbe Baustein wie in "Über
+      // uns" (downloadZeile aus src/vorlagen/bausteine.mjs, nur gelesen/
+      // importiert, nicht verändert) statt eines eigenen, hier abweichenden
+      // Textes ("Chronik als PDF (53 Seiten)") – W10-Prüfung, PDF-Block.
+      chronikDownload
+        ? `<ul class="downloads inhalt" role="list">
+      ${downloadZeile(chronikDownload, "")}
+    </ul>`
+        : `<p class="knopfzeile">
+      <a class="knopf knopf--sekundaer" href="${CDN}/pdf/Chronik-FFV-Sportfreunde-04-2026.pdf" target="_blank" rel="noopener">Chronik als PDF</a>
+    </p>`
+    }
   </div>
 </section>`,
   ].join("\n");
@@ -1161,7 +1534,7 @@ ${anhangListe}
     : kapitel;
   writeFileSync(
     path.join(appDir, "Chronik-App.html"),
-    appSeite({ kapitel: appKapitel, bildKarte, rels, basisCss }),
+    appSeite({ kapitel: appKapitel, bildKarte, rels, basisCss, chronikDownload }),
     "utf8"
   );
   dateien.push(path.join("app", "Chronik-App.html"));

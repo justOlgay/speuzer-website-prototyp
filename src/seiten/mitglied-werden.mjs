@@ -38,6 +38,16 @@ function mitSchlusspunkt(text) {
   return /[.!?]$/.test(t) ? t : `${t}.`;
 }
 
+// W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 21/web-390-verein-und-rest
+// Nr. 12): "Fälligkeit" und "Kündigung" (data/beitraege.json, tabu) beginnen
+// im Rohtext klein, "Aufnahmegebühr" und "Doppelmitgliedschaft" groß – reine
+// Anzeige-Korrektur wie bei mitGeschuetzterOrdnungszahl() unten, der
+// Rohwert bleibt unverändert.
+function mitGrossAnfang(text) {
+  const t = String(text ?? "");
+  return t ? t.charAt(0).toUpperCase() + t.slice(1) : t;
+}
+
 // W9-B-Nachprüfung (mitglied-werden 390): "Der Eintritt … erfolgt zum 1.
 // des nächsten Monats." (data/beitraege.json, tabu – nur Anzeige-Korrektur)
 // bricht sonst zwischen der Ordnungszahl und dem Folgewort um. Geschütztes
@@ -50,6 +60,19 @@ function mitGeschuetzterOrdnungszahl(text) {
 // src/seiten/verein/index.mjs.
 function downloadEintrag(daten, titelTeil) {
   return (daten.downloads ?? []).find((d) => (d.titel ?? "").includes(titelTeil));
+}
+
+// W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 3/web-390-verein-und-rest
+// Nr. 4, Entscheidung D, w10-gemeinsam.md): Schritt 1 nannte für erwachsene
+// Spieler (Herren/Senioren) keinen Weg – nur die Jugendleitung war
+// verlinkt, obwohl Kontakt & Anfahrt dafür eine eigene Adresse führt.
+// data/teams.json (Herren, Feld "mail") ist dieselbe Quelle, aus der auch
+// der gleichlautende Textlink auf /mannschaften/ gespeist wird (Entscheidung
+// D gilt für Website-Mannschaften, App-Mannschaften und Mitglied werden
+// gleich).
+function herrenMailtoHref(daten) {
+  const herren = (daten.teams ?? []).find((t) => t.slug === "herren");
+  return herren?.mail ? `mailto:${herren.mail}` : "";
 }
 
 // Link auf einen Download-Eintrag: intern (Pfad beginnt mit "/") ohne
@@ -125,10 +148,10 @@ function gutZuWissenAbschnitt(beitraege) {
         <dd>${escapeHtml(String(beitraege.zuschlag_ohne_sepa ?? ""))} € zusätzlich pro Jahr.</dd>
 
         <dt>Fälligkeit</dt>
-        <dd>${escapeHtml(mitSchlusspunkt(beitraege.faelligkeit))}</dd>
+        <dd>${escapeHtml(mitGrossAnfang(mitSchlusspunkt(beitraege.faelligkeit)))}</dd>
 
         <dt>Kündigung</dt>
-        <dd>${escapeHtml(mitSchlusspunkt(beitraege.kuendigung))}</dd>
+        <dd>${escapeHtml(mitGrossAnfang(mitSchlusspunkt(beitraege.kuendigung)))}</dd>
 
         <dt>Doppelmitgliedschaft</dt>
         <dd>${escapeHtml(mitSchlusspunkt(beitraege.doppelmitgliedschaft))}</dd>
@@ -155,8 +178,11 @@ function beitraegeAbschnitt(daten) {
   // "(PDF)" im Text – widerspricht "ein Download-Baustein für die ganze
   // Website" (Entscheidung, w9-b.md). Jetzt dieselbe downloadZeile() wie auf
   // "Downloads & Anträge" (Titel + "PDF · Seiten · Größe").
+  // W10-Nachprüfung (offen 12): Trennlinie lief über die volle
+  // .container-Breite statt der Lesebreite wie auf /verein/ueber-uns/ –
+  // derselbe Download-Baustein soll überall gleich breit sein.
   const beitragsuebersichtHtml = beitragsuebersicht
-    ? `<ul class="downloads" role="list">
+    ? `<ul class="downloads inhalt" role="list">
       ${downloadZeile(beitragsuebersicht, PFAD)}
     </ul>`
     : "";
@@ -182,22 +208,31 @@ function beitraegeAbschnitt(daten) {
 // Spielerpass, dafür eine eigene Zeile); Schritt 2 enthält beide Antrags-
 // Knöpfe direkt im Schritt (online + PDF), Schritt 3 verweist auf die
 // Unterlagen-Karten weiter unten.
+// W10-Nachprüfung (offen 13): Schritt 1 sagte "eine E-Mail an die
+// Jugendleitung genügt" und widersprach sich direkt mit dem Herren-Link
+// darunter; Wortlaut jetzt an Entscheidung D (w10-gemeinsam.md) angeglichen
+// ("Jahrgang, Vorerfahrung"), wie auf den Mannschaftsseiten.
 function ablaufAbschnitt(daten) {
   const beitraege = daten.beitraege ?? {};
   const karneval = daten.karneval ?? {};
   const karnevalMail = karneval.mail ?? "karnevalabteilung@sportfreunde04.de";
   const aufnahmeantrag = downloadEintrag(daten, "Aufnahmeantrag");
+  const herrenHref = herrenMailtoHref(daten);
+  const herrenLink = herrenHref
+    ? `<p class="meta"><a href="${escapeHtml(herrenHref)}">Für die Herren: E-Mail an das Trainerteam der Herren ›</a></p>`
+    : "";
 
   return `<section class="abschnitt--hell abschnitt">
   <div class="container fluss">
     <h2>So wirst du Mitglied</h2>
-    <ol class="schritte">
+    <ol class="schritte" style="max-width:var(--inhalt);">
       <li>
         <div class="schritt__inhalt">
-          <p>Probetraining vereinbaren – nur Fußball: eine E-Mail an die Jugendleitung genügt.</p>
+          <p>Probetraining vereinbaren (nur Fußball): E-Mail an die Jugendleitung mit Jahrgang und Vorerfahrung.</p>
           <p class="knopfzeile">
             <a class="knopf" href="${escapeHtml(PROBETRAINING_MAILTO)}">E-Mail an die Jugendleitung</a>
           </p>
+          ${herrenLink}
           <p class="meta">Karneval: E-Mail an die <a href="${escapeHtml(`mailto:${karnevalMail}`)}">Karnevalabteilung</a>.</p>
         </div>
       </li>
@@ -242,6 +277,13 @@ const APPACK_FORMULAR_URL = "https://appack.de/rest-api/drender/6a903758337cdc97
 // (Beiträge oben). Kartentitel "Ohne deutschen Pass" statt "Ohne deutsche
 // Staatsangehörigkeit (zusätzlich)" (brach zuvor in drei Zeilen um);
 // "zusätzlich" steht jetzt im Einleitungssatz der Karte.
+// W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 24): "Formulare zum
+// Herunterladen" passte nicht zum Listeninhalt (Info-Blatt, Unterlagenliste,
+// Satzung sind keine Formulare) – Überschrift auf "Zum Herunterladen"
+// verkürzt (dieselbe wie auf /verein/ueber-uns/). Den Aufnahmeantrag
+// zusätzlich in diese Liste aufzunehmen (zweiter Teil des Vorschlags) würde
+// die von QA3/W9 behobene Doppelung (Knopf in Schritt 2 UND PDF-Zeile hier)
+// wieder einführen – bewusst nicht umgesetzt, siehe Abschlussbericht.
 function unterlagenAbschnitt(daten) {
   const unterlagen = daten.unterlagen ?? {};
   // Aufnahmeantrag bewusst ausgenommen: der steht bereits als Knopf in
@@ -270,13 +312,16 @@ function unterlagenAbschnitt(daten) {
   const zeilen = [...anmeldungDownloads.map((d) => downloadZeile(d, PFAD)), downloadZeile(satzung, PFAD)].join(
     "\n      "
   );
+  // W10-Nachprüfung (offen 12): Liste/Überschrift jetzt auf die Lesebreite
+  // (.inhalt) begrenzt statt der vollen .container-Breite – gleich wie auf
+  // /verein/ueber-uns/.
 
   return `<section class="abschnitt">
   <div class="container fluss">
     <h2>Unterlagen (Fußball)</h2>
     ${karten}
-    <h3>Formulare zum Herunterladen</h3>
-    <ul class="downloads" role="list">
+    <h3 class="inhalt">Zum Herunterladen</h3>
+    <ul class="downloads inhalt" role="list">
       ${zeilen}
     </ul>
   </div>

@@ -34,12 +34,21 @@ function seitenkopfAbschnitt() {
 // hilfen.mjs, da außerhalb Mail/Telefon/Download/Personen).
 const APPACK_FORMULAR_URL = "https://appack.de/rest-api/drender/6a903758337cdc97f94f2655";
 
+// W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 29): die Zeile hatte als
+// einzige in der Liste keine graue Metazeile ("PDF · Seiten · Größe") und
+// wirkte dadurch niedriger als ihre Nachbarn – jetzt mit "Online-Formular"
+// im selben Baustein, wie die übrigen Einträge.
 function aufnahmeantragOnlineZeile() {
   return `<li class="download">
       <a href="${escapeHtml(APPACK_FORMULAR_URL)}" target="_blank" rel="noopener">Aufnahmeantrag online ausfüllen ›</a>
+      <span class="meta">Online-Formular</span>
     </li>`;
 }
 
+// W10-Nachprüfung (offen 12): die Liste lief bisher über die volle
+// .container-Breite (bis 1304px), während derselbe Baustein auf
+// /verein/ueber-uns/ auf die Lesebreite (.inhalt, 720px) begrenzt ist – ein
+// Download-Baustein für die ganze Website soll überall gleich breit sein.
 function gruppenAbschnitt(gruppe, downloads, index) {
   const eintraege = downloads.filter((d) => d.gruppe === gruppe);
   if (!eintraege.length) return "";
@@ -55,7 +64,7 @@ function gruppenAbschnitt(gruppe, downloads, index) {
   return `<section class="abschnitt${hellKlasse}">
   <div class="container fluss">
     <h2>${escapeHtml(gruppe)}</h2>
-    <ul class="downloads" role="list">
+    <ul class="downloads inhalt" role="list">
       ${zeilen}
     </ul>
   </div>

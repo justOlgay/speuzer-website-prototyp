@@ -11,14 +11,40 @@
     <button type="button" class="tag filter-knopf" data-gruppe="schule" hidden>Zusatzangebote</button>
   </div>
 
-  <div id="mannschaften-liste" class="mannschaften-liste"></div>
+  <!-- W10, Auftrag D (Entscheidung C, quervergleich Nr. 2): Gruppen-
+       Zwischenüberschriften SENIOREN/JUGEND/KINDERFUSSBALL mit denselben
+       Erklärsätzen wie die Website (gruppen in mannschaften/index.mjs),
+       gefüllt von zeigeListenansicht() je nach aktivem Filter. -->
+  <div id="mannschaften-gruppen"></div>
 
-  <!-- W9, Auftrag D (Entscheidung 9/quervergleich Nr. 9, 22): Reihenfolge
-       Teams › Probetraining › Zusatzangebote › Nächste Spiele des Vereins
-       (ganz unten) – der Knopf stand vorher direkt unter der letzten
-       Fußballschulen-Karte und wirkte wie ein Probetraining bei ihr. -->
-  <div id="probetraining-aktionen" class="aktionen">
-    <a class="knopf" href="mailto:jugendleitung@sportfreunde04.de?subject=Probetraining%20beim%20FFV%20Sportfreunde%2004&amp;body=Hallo%2C%0A%0Awir%20interessieren%20uns%20f%C3%BCr%20ein%20Probetraining.%0AJahrgang%20des%20Kindes%3A%20%0AVorerfahrung%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe">Probetraining vereinbaren</a>
+  <!-- W10-Nachprüfung (offen 4): derselbe Trainingsort-Satz wie auf der
+       Website (trainingshinweisAbschnitt() in mannschaften/index.mjs),
+       direkt über dem Ferienhinweis, wortgleich inklusive geschützter
+       Leerzeichen. Sichtbarkeit folgt derselben Regel wie der Ferienhinweis
+       darunter (ausgeblendet, wenn der Filter "Zusatzangebote" keine
+       Mannschaften zeigt). -->
+  <p id="mannschaften-trainingsort-hinweis" class="team-karte__untertitel" hidden>Alle Mannschaften trainieren auf dem Vereinsplatz an der Mainzer Landstraße 480 – nur die Herren auf der Bezirkssportanlage am&nbsp;Rebstock (SW&nbsp;Griesheim).</p>
+
+  <!-- W10, Auftrag D (Entscheidung C, quervergleich Nr. 3): Ferienhinweis
+       auch auf der Übersicht (vorher nur auf den Teamseiten). -->
+  <div id="mannschaften-ferienhinweis" class="hinweis" hidden><p id="mannschaften-ferienhinweis-text"></p></div>
+
+  <!-- W9, Auftrag D (Entscheidung 9/quervergleich Nr. 9, 22), erweitert W10
+       (Entscheidung D, quervergleich Nr. 3): Reihenfolge Teams › Probetraining
+       › Zusatzangebote › Nächste Spiele des Vereins (ganz unten) – jetzt mit
+       den drei Schritten und dem Herren-Link wie auf der Website
+       (probetrainingAbschnitt() in bausteine.mjs), vorher nur der Knopf. -->
+  <div id="probetraining-abschnitt">
+    <h2 class="abschnittstitel">Probetraining</h2>
+    <ol class="schritte">
+      <li><p>E-Mail an die Jugendleitung (Jahrgang, Vorerfahrung)</p></li>
+      <li><p>Probetraining beim Team</p></li>
+      <li><p>Aufnahmeantrag stellen</p></li>
+    </ol>
+    <div id="probetraining-aktionen" class="aktionen">
+      <a class="knopf" href="mailto:jugendleitung@sportfreunde04.de?subject=Probetraining%20beim%20FFV%20Sportfreunde%2004&amp;body=Hallo%2C%0A%0Awir%20interessieren%20uns%20f%C3%BCr%20ein%20Probetraining.%0AJahrgang%20des%20Kindes%3A%20%0AVorerfahrung%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe">E-Mail an die Jugendleitung</a>
+    </div>
+    <p class="team-karte__untertitel" style="margin-top:var(--sp-2);"><a id="probetraining-herren-link" class="mail-link" href="#">Für die Herren: E-Mail an das Trainerteam der Herren ›</a></p>
   </div>
 
   <div id="fussballschulen-titel" hidden>
@@ -28,7 +54,10 @@
   <div id="fussballschulen-liste" class="mannschaften-liste"></div>
 
   <h2 class="abschnittstitel">Nächste Spiele des Vereins</h2>
-  <p class="team-karte__untertitel">Alle Spiele unserer Mannschaften der nächsten Tage. Spielplan und Tabelle je Team findest du auf der jeweiligen Mannschaftsseite.</p>
+  <!-- W10, Auftrag D (quervergleich Nr. 17, Entscheidung 12): "Live von
+       FUSSBALL.DE." fehlte auf der App-Übersicht, die Website-Übersicht
+       nennt die Quelle an derselben Stelle. -->
+  <p class="team-karte__untertitel">Alle Spiele unserer Mannschaften der nächsten Tage. Spielplan und Tabelle je Team findest du auf der jeweiligen Mannschaftsseite. Live von FUSSBALL.DE.</p>
   <div id="verein-spiele-inhalt">
     <p class="team-karte__untertitel">Spiele werden von FUSSBALL.DE geladen …</p>
   </div>
@@ -49,9 +78,11 @@
        statt der früheren blauen Hinweiskästen bei Herren/A-Jugend – der
        Heimspielort steht nur noch in der Karte "Heimspiele"/"Unser Platz". -->
   <p id="detail-trainingsort" class="team-karte__untertitel"></p>
-  <div class="karte">
-    <ul id="detail-training-liste" class="team-karte__zeiten"></ul>
-  </div>
+  <!-- W10, Auftrag D (Entscheidung E): Zeilenliste ohne Karte, wie Training
+       auf der Website (team.mjs) – vorher in eine .karte gefasst, die
+       einzige der drei Bausteine, die auf beiden Kanälen unterschiedlich
+       aufgebaut war (quervergleich Nr. 13). -->
+  <ul id="detail-training-liste" class="team-karte__zeiten team-karte__zeiten--liste"></ul>
   <div class="hinweis"><p id="detail-ferienhinweis"></p></div>
 
   <div id="team-inhalt"></div>
@@ -78,7 +109,9 @@
   <p class="team-karte__untertitel" style="margin-top:var(--sp-2);">Einmal abonnieren – Verlegungen kommen automatisch&nbsp;an.</p>
 
   <h2 id="weitere-mannschaften-titel" class="abschnittstitel" hidden>Weitere Mannschaften</h2>
-  <div id="weitere-mannschaften-liste" class="mannschaften-liste mannschaften-liste--kompakt"></div>
+  <!-- W10, Auftrag D (Entscheidung E): Listenzeilen statt Karten (wie
+       Kalender abonnieren), quervergleich Nr. 13. -->
+  <div id="weitere-mannschaften-liste" class="liste"></div>
 </div>
 
 <p class="fuss">F.F.V. Sportfreunde 04 · Vereins-App</p>
@@ -234,10 +267,28 @@ a.team-karte--link {
   text-wrap: balance;
 }
 
+/* W9-gemeinsam Entscheidung 13 (App-weit)/W10 (quervergleich Nr. 25):
+   text-wrap:pretty gegen einzelne kurze Wörter in der letzten Zeile, z. B.
+   beim Hinweis unter KALENDER ABONNIEREN ("Einmal abonnieren – Verlegungen
+   kommen automatisch an."). */
 .team-karte__untertitel {
   margin: 0 0 var(--sp-2);
   font-size: 13px;
   color: var(--ink-3);
+  text-wrap: pretty;
+}
+
+/* W10, Auftrag D (Entscheidung E): zweite Zeile in den Listenzeilen
+   "Weitere Mannschaften" (.zeile__titel ist in v3-basis.css "inline",
+   hier lokal auf "block" gestellt, wie schon in den anderen _v3-Dateien). */
+.zeile__titel,
+.zeile__untertitel { display: block; }
+
+.zeile__untertitel {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--ink-3);
+  overflow-wrap: break-word;
 }
 
 /* W9-Nachprüfung D-app Nr. 2: dreizeiliger Adressblock (Platzname / Straße
@@ -304,13 +355,43 @@ a.team-karte--link {
 
 .team-karte__zeiten li:first-child { margin-top: 0; }
 
-/* W9, Auftrag D (Befund "app" Nr. 16): in der Detailansicht ist die Liste
-   allein in ihrer Karte (kein Titel/Text davor, der den oberen
-   Listenabstand bräuchte) – ohne diesen Reset addierte sich der
-   Listenabstand zum Karten-Innenabstand (oben ~37 statt unten ~20 px). */
+/* W9, Auftrag D (Befund "app" Nr. 16), zuletzt W10 (Entscheidung E): die
+   Trainingsliste hat kein Element davor, das den oberen Listenabstand
+   bräuchte (kein Karten-Innenabstand mehr, seit sie ohne .karte steht). */
 #detail-training-liste { margin-top: 0; }
 
+/* W10, Auftrag D (Entscheidung E): Training als Zeilenliste MIT Trennlinien
+   ohne Karte (wie WEITERE MANNSCHAFTEN/Kalender abonnieren – das Muster
+   ".zeile" mit border-bottom, hier auf die vorhandene Zeiten-Liste
+   übertragen, weil ihr Markup keine <a class="zeile"> ist). */
+.team-karte__zeiten--liste {
+  gap: 0;
+}
+
+.team-karte__zeiten--liste li {
+  padding-block: var(--sp-3);
+  border-bottom: 1px solid var(--line);
+}
+
+.team-karte__zeiten--liste li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.team-karte__zeiten--liste li:first-child {
+  padding-top: 0;
+}
+
 .zeitspanne { white-space: nowrap; }
+
+/* W10-Nachprüfung (offen 7): Platzteil ("rechte Hälfte Tor 1", "Rebstock")
+   bisher gleich groß und gleich gefärbt wie Tag/Uhrzeit darüber – dadurch
+   fehlte die Hierarchie (Entscheidung E: "Platzteil darunter klein"), wie
+   auf der Website. Jetzt kleiner und in der helleren Sekundärfarbe. */
+.trainingszeile__platz {
+  font-size: 12px;
+  color: var(--ink-3);
+}
 
 .person-mini-liste {
   display: flex;
@@ -328,11 +409,51 @@ a.team-karte--link {
 .teamtext { margin: var(--sp-2) 0 var(--sp-3); font-size: 15px; line-height: 1.5; color: var(--ink-2); }
 .angebot-karte { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
 .angebot-karte__kopf { display: flex; align-items: center; gap: 12px; }
-.angebot-karte__logo { flex: 0 0 64px; width: 64px; height: 64px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--surface); object-fit: contain; }
+/* W10, Auftrag D (app Nr. 15): Innenabstand wie auf der Sponsorenseite
+   (.sponsor-karte__logo in Sponsoren_v3.html) – ohne ihn füllte das
+   VM-Elite-Logo den Rahmen randlos, während Regista mit Innenabstand stand
+   (das Bild war randlos wählbar, weil object-fit:contain ohne Innenabstand
+   den ganzen Kastenraum ausnutzt). */
+.angebot-karte__logo { flex: 0 0 64px; width: 64px; height: 64px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--surface); padding: 8px; object-fit: contain; }
 .angebot-karte__kopf .team-karte__titel { margin: 0; min-width: 0; }
 .angebot-karte > .tag { align-self: flex-start; }
 .angebot-karte__text { margin: 0; font-size: 14px; color: var(--ink-2); }
 .angebot-karte__mail { font-size: 14px; font-weight: 600; color: var(--blau-800); text-decoration: none; overflow-wrap: anywhere; }
+
+/* W10, Auftrag D (Entscheidung D): nummerierte Schritte wie auf der Website
+   (.schritte in assets/css/komponenten.css), hier lokal für die
+   Probetraining-Übersicht auf "Mannschaften" nachgebaut. */
+.schritte {
+  list-style: none;
+  counter-reset: schritt;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin: var(--sp-3) 0 0;
+  padding: 0;
+}
+
+.schritte li {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.schritte li::before {
+  counter-increment: schritt;
+  content: counter(schritt);
+  flex: none;
+  width: 28px;
+  text-align: left;
+  font-family: var(--font-head);
+  font-size: 22px;
+  line-height: 1;
+  color: var(--blau-700);
+}
+
+.schritte p { margin: 0; font-size: 14px; }
+
+.mail-link { color: var(--blau-800); text-decoration: none; }
 
 .person-mini__bild {
   flex: 0 0 auto;
@@ -691,12 +812,27 @@ a.team-karte--link {
     return liga + gruppe;
   }
 
-  // W9-Nachprüfung D-app Nr. 1: Unterzeile Teamseite/Teamkarte wie
-  // unterzeileTeam() in src/seiten/mannschaften/team.mjs – Herren nur die
-  // Staffel (kein "Senioren" davor), alle anderen Jahrgang · Staffel.
-  function unterzeileTeam(team) {
+  // W9-Nachprüfung D-app Nr. 1 / W10, Auftrag D (Entscheidung A): Unterzeile
+  // Teamseite/Teamkarte wie unterzeileTeam() in
+  // src/seiten/mannschaften/team.mjs – Herren nur die Staffel (kein
+  // "Senioren" davor), alle anderen zweizeilig OHNE Trennpunkt (Zeile 1
+  // Jahrgang, Zeile 2 Liga/Gruppe) – vorher ein Trenner " · ", der am
+  // Zeilenende umbrach (quervergleich Nr. 15, app Nr. 14).
+  function unterzeileZeilen(team) {
     var staffel = staffelLesbar(team.staffel);
-    return team.kategorie === "Senioren" ? staffel : jahrgangPraefix(team) + " · " + staffel;
+    return team.kategorie === "Senioren" ? [staffel] : [jahrgangPraefix(team), staffel];
+  }
+
+  // Füllt ein Element mit den Unterzeilen-Zeilen, getrennt durch <br> statt
+  // eines Trennpunkts (DOM-Aufbau statt innerHTML, wie sonst in dieser
+  // Datei – die Zeileninhalte kommen aus data/teams.json/staffelLesbar()).
+  function fuelleUnterzeileZeilen(el, team) {
+    el.innerHTML = "";
+    var zeilen = unterzeileZeilen(team);
+    for (var i = 0; i < zeilen.length; i++) {
+      if (i > 0) el.appendChild(document.createElement("br"));
+      el.appendChild(document.createTextNode(zeilen[i]));
+    }
   }
 
   // ---------- Initialen (wie initialen() in src/vorlagen/hilfen.mjs) ----------
@@ -747,6 +883,7 @@ a.team-karte--link {
     if (platz) {
       li.appendChild(document.createElement("br"));
       var ort = document.createElement("span");
+      ort.className = "trainingszeile__platz";
       ort.textContent = platz;
       li.appendChild(ort);
     }
@@ -771,7 +908,7 @@ a.team-karte--link {
     var untertitel = document.createElement("p");
     untertitel.className = "team-karte__untertitel";
     untertitel.style.margin = "0";
-    untertitel.textContent = unterzeileTeam(team);
+    fuelleUnterzeileZeilen(untertitel, team);
     karte.appendChild(untertitel);
 
     if (team.training && team.training.length) {
@@ -897,9 +1034,9 @@ a.team-karte--link {
       var lead = document.createElement("p");
       lead.className = "team-karte__untertitel";
       lead.style.margin = "0 0 8px";
-      // W9-Nachprüfung D-app Nr. 4 (Entscheidung 12): Satz wörtlich wie
-      // team.mjs, inklusive "Live von FUSSBALL.DE.".
-      lead.textContent = "Nächste Spiele zuerst – frühere Ergebnisse über die Pfeile im Kasten. Live von FUSSBALL.DE.";
+      // W10-Nachprüfung (offen 8, quervergleich-17): Satz wörtlich wie
+      // team.mjs übernommen (dort ohne "im Kasten").
+      lead.textContent = "Nächste Spiele zuerst, frühere Ergebnisse über die Pfeile. Live von FUSSBALL.DE.";
       karte.appendChild(lead);
     }
 
@@ -1127,26 +1264,30 @@ a.team-karte--link {
     return ausgewaehlt.map(function (k) { return k.t; });
   }
 
+  // W10, Auftrag D (Entscheidung E): Listenzeile statt Karte (Name fett,
+  // Jahrgang klein, "›") – wie baueKalenderLink() unten, aber mit einer
+  // zweiten Zeile für den Jahrgang.
   function baueWeitereMannschaftKarte(t) {
     var a = document.createElement("a");
-    a.className = "karte team-karte team-karte--link team-karte--kompakt";
+    a.className = "zeile";
     a.href = "#" + t.slug;
     a.addEventListener("click", function (event) {
       event.preventDefault();
       window.location.hash = t.slug;
       window.location.reload();
     });
-    var titel = document.createElement("p");
-    titel.className = "team-karte__titel";
-    titel.style.fontSize = "18px";
+    var textSpan = document.createElement("span");
+    textSpan.className = "zeile__text";
+    var titel = document.createElement("span");
+    titel.className = "zeile__titel";
     titel.textContent = t.name;
-    a.appendChild(titel);
-    var untertitel = document.createElement("p");
-    untertitel.className = "team-karte__untertitel";
-    untertitel.style.margin = "0";
+    textSpan.appendChild(titel);
+    var untertitel = document.createElement("span");
+    untertitel.className = "zeile__untertitel";
     untertitel.textContent = jahrgangPraefix(t);
-    a.appendChild(untertitel);
-    a.appendChild(baueChevronSvg("zeile__pfeil team-karte__pfeil"));
+    textSpan.appendChild(untertitel);
+    a.appendChild(textSpan);
+    a.appendChild(baueChevronSvg("zeile__pfeil"));
     return a;
   }
 
@@ -1244,7 +1385,10 @@ a.team-karte--link {
   // ist "Ort, Platzteil" (wie platzAufgeteilt() in src/vorlagen/hilfen.mjs).
   function trainingsortUndTeil(team) {
     if (team.slug === "herren") {
-      return { ort: "Bezirkssportanlage am Rebstock (SW Griesheim)", teil: "Rebstock" };
+      // W10, Auftrag D (app Nr. 16): "am Rebstock" geschützt – ohne das
+      // brach die Zeile zwischen "am" und "Rebstock" (anders als auf Kontakt
+      // & Anfahrt, wo derselbe Name in einer eigenen, breiteren Zeile steht).
+      return { ort: "Bezirkssportanlage am Rebstock (SW Griesheim)", teil: "Rebstock" };
     }
     var roh = String(team.platz || "");
     var komma = roh.indexOf(",");
@@ -1267,19 +1411,31 @@ a.team-karte--link {
     document.getElementById("detail-ferienhinweis").textContent = (VEREIN && VEREIN.hinweise && VEREIN.hinweise.ferien) || "";
   }
 
+  // W10, Auftrag D (Entscheidung B): Sätze der bloßen Form "Das ist unsere
+  // <Team>, Jahrgang <J>." (derzeit F1, F2) sagen nichts, was Name und
+  // Jahrgang im Kopf nicht schon zeigen – Regel im Code (an Name/Jahrgang
+  // des Teams gebaut, nicht an bestimmten Slugs), nicht in den Daten. Teams
+  // mit einem ausführlicheren Satz (z. B. "…, die in der Kreisliga A
+  // spielt.") bleiben unverändert sichtbar.
+  function istBlosserTeamsatz(team) {
+    if (!team.jahrgang) return false;
+    var erwartet = "Das ist unsere " + team.name + ", Jahrgang " + team.jahrgang + ".";
+    return String(team.beschreibung || "").trim() === erwartet;
+  }
+
   // ---------- Detailansicht eines Teams ----------
 
   function renderTeamDetail(team, uebersicht, ansprechpartner) {
     var eintrag = WIDGETS[team.slug] || {};
 
     document.getElementById("detail-titel").textContent = team.name;
-    document.getElementById("detail-jahrgang").textContent = unterzeileTeam(team);
+    fuelleUnterzeileZeilen(document.getElementById("detail-jahrgang"), team);
     // W9, Auftrag D (gemeinsame Entscheidung 1): Teambeschreibung nur noch
     // aus data/teams.json (der erste Satz aus dem CMS) – keine Live-
     // Beschreibung aus dem Worksheet mehr (die war oft länger und
     // wiederholte, was unten in Training/Trainerteam ohnehin steht, app
-    // Nr. 7).
-    var beschreibung = team.beschreibung || "";
+    // Nr. 7). W10 (Entscheidung B): der bloße Name+Jahrgang-Satz entfällt.
+    var beschreibung = istBlosserTeamsatz(team) ? "" : (team.beschreibung || "");
     var beschreibungEl = document.getElementById("detail-beschreibung");
     beschreibungEl.textContent = beschreibung;
     beschreibungEl.hidden = !beschreibung;
@@ -1395,12 +1551,41 @@ a.team-karte--link {
 
   // ---------- Listenansicht (Filter, Karten) ----------
 
+  // W10, Auftrag D (Entscheidung C, quervergleich Nr. 2): dieselben drei
+  // Gruppen samt Erklärsätzen wie die Übersicht der Website (gruppen in
+  // src/seiten/mannschaften/index.mjs, dort wörtlich übernommen).
+  var GRUPPEN_UEBERSICHT = [
+    { gruppe: "Senioren", titel: "Senioren", satz: "Heimspiele auf der Bezirkssportanlage am Rebstock (SW Griesheim)." },
+    { gruppe: "Jugend", titel: "Jugend", satz: "Ligabetrieb von der Kreisklasse bis zur Gruppenliga, Spielplan und Tabellen live von FUSSBALL.DE." },
+    { gruppe: "Kinderfußball", titel: "Kinderfußball", satz: "Kinderfestivals statt Ligabetrieb, keine Tabellen." }
+  ];
+
   function zeigeListenansicht(uebersicht) {
-    var listeContainer = document.getElementById("mannschaften-liste");
+    var gruppenContainer = document.getElementById("mannschaften-gruppen");
     var fussballschulenTitel = document.getElementById("fussballschulen-titel");
     var fussballschulenContainer = document.getElementById("fussballschulen-liste");
     var filterleiste = document.getElementById("filterleiste");
-    var probetrainingAktionen = document.getElementById("probetraining-aktionen");
+    var probetrainingAbschnitt = document.getElementById("probetraining-abschnitt");
+    var ferienhinweis = document.getElementById("mannschaften-ferienhinweis");
+    var trainingsortHinweis = document.getElementById("mannschaften-trainingsort-hinweis");
+
+    // W10, Auftrag D (Entscheidung C, quervergleich Nr. 3): derselbe
+    // Ferienhinweis wie auf den Teamseiten, jetzt auch auf der Übersicht.
+    document.getElementById("mannschaften-ferienhinweis-text").textContent =
+      (VEREIN && VEREIN.hinweise && VEREIN.hinweise.ferien) || "";
+
+    // W10, Auftrag D (quervergleich Nr. 3): Herren-Link wie im Probetraining-
+    // Baustein der Website (probetrainingAbschnitt() in bausteine.mjs) –
+    // team.mail aus data/teams.json, kein zweiter, fest verdrahteter Wert.
+    var herrenTeam = teamBySlug("herren");
+    var herrenLink = document.getElementById("probetraining-herren-link");
+    if (herrenLink) {
+      if (herrenTeam && herrenTeam.mail) {
+        herrenLink.href = "mailto:" + herrenTeam.mail + "?subject=" + encodeURIComponent("Probetraining beim FFV Sportfreunde 04");
+      } else if (herrenLink.parentNode) {
+        herrenLink.parentNode.hidden = true;
+      }
+    }
 
     // Belegung der vier Filtergruppen für die "≥ 2 Gruppen belegt"-Regel
     // (W8 Befund 1: Filtergruppen wie die Abschnitte der Website).
@@ -1411,18 +1596,42 @@ a.team-karte--link {
     var aktuellerFilter = "";
 
     function rendern() {
-      listeContainer.innerHTML = "";
+      gruppenContainer.innerHTML = "";
       fussballschulenContainer.innerHTML = "";
 
       var mannschaftenSichtbar = aktuellerFilter === "schule" ? [] :
         (aktuellerFilter ? TEAMS.filter(function (t) { return t.gruppe === aktuellerFilter; }) : TEAMS);
-      for (var i = 0; i < mannschaftenSichtbar.length; i++) {
-        listeContainer.appendChild(baueTeamKarte(mannschaftenSichtbar[i]));
-      }
-      // W9-Nachprüfung D-app Nr. 9: der Knopf "Probetraining vereinbaren"
-      // gehört zu den Mannschaften, nicht zu den (kostenpflichtigen)
-      // Zusatzangeboten – mit aktivem Filter "Zusatzangebote" nur Teams.
-      if (probetrainingAktionen) probetrainingAktionen.hidden = mannschaftenSichtbar.length === 0;
+
+      // W10, Auftrag D (Entscheidung C): je Gruppe eine eigene Überschrift
+      // mit Erklärsatz – nur für Gruppen, die im aktuellen Filter Teams
+      // zeigen (bei einem Einzelfilter bleiben die anderen beiden leer).
+      GRUPPEN_UEBERSICHT.forEach(function (g) {
+        var teamsDerGruppe = mannschaftenSichtbar.filter(function (t) { return t.gruppe === g.gruppe; });
+        if (!teamsDerGruppe.length) return;
+        var abschnitt = document.createElement("section");
+        var titel = document.createElement("h2");
+        titel.className = "abschnittstitel";
+        titel.textContent = g.titel;
+        abschnitt.appendChild(titel);
+        var satz = document.createElement("p");
+        satz.className = "team-karte__untertitel";
+        satz.textContent = g.satz;
+        abschnitt.appendChild(satz);
+        var liste = document.createElement("div");
+        liste.className = "mannschaften-liste";
+        teamsDerGruppe.forEach(function (t) { liste.appendChild(baueTeamKarte(t)); });
+        abschnitt.appendChild(liste);
+        gruppenContainer.appendChild(abschnitt);
+      });
+
+      // W9-Nachprüfung D-app Nr. 9: Probetraining gehört zu den
+      // Mannschaften, nicht zu den (kostenpflichtigen) Zusatzangeboten – mit
+      // aktivem Filter "Zusatzangebote" nur Teams. W10 (Entscheidung C):
+      // derselbe Ferienhinweis folgt direkt den Gruppen, also dieselbe
+      // Sichtbarkeitsregel.
+      if (probetrainingAbschnitt) probetrainingAbschnitt.hidden = mannschaftenSichtbar.length === 0;
+      if (trainingsortHinweis) trainingsortHinweis.hidden = mannschaftenSichtbar.length === 0;
+      if (ferienhinweis) ferienhinweis.hidden = mannschaftenSichtbar.length === 0;
 
       var schuleSichtbar = (aktuellerFilter === "" || aktuellerFilter === "schule") ? ZUSATZANGEBOTE : [];
       fussballschulenTitel.hidden = schuleSichtbar.length === 0;
@@ -1493,7 +1702,7 @@ a.team-karte--link {
     } else {
       document.getElementById("fussballschulen-titel").hidden = true;
       document.getElementById("fussballschulen-liste").innerHTML = "";
-      zeigeFehler(document.getElementById("mannschaften-liste"));
+      zeigeFehler(document.getElementById("mannschaften-gruppen"));
     }
   });
 

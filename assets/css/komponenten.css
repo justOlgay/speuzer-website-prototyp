@@ -145,6 +145,18 @@
      E-Mail-Adresse) dürfen bei sehr schmalen Breiten (320/360px) nicht zu
      horizontalem Scrollen führen. */
   overflow-wrap: anywhere;
+  /* W10-Korrektur (QA4 web-390-verein-und-rest Nr. 7): das globale
+     "text-wrap: pretty" (base.css, Entscheidung 13) brach bei mehreren
+     langen Absätzen des Rechtstexts ungewöhnlich früh um, mit sehr kurzen
+     Zeilen vor kurzen Wörtern ("Cookies sind Textdateien, / die über einen
+     (Internet)Browser auf / einem Computersystem …", ebenso bei "Ansonsten
+     werden…" und "die Einschränkung…") – deutlich vor dem eigentlichen
+     Spaltenrand. Nur .prosa (ausschließlich auf /datenschutz/ verwendet)
+     bekommt deshalb wieder normalen Zeilenumbruch ("wrap" ist der in der
+     text-wrap-Spezifikation vorgesehene Wert dafür, nicht "normal" – anderer
+     Wortlaut als bei white-space); die "pretty"-Optimierung bleibt für den
+     übrigen (kürzeren) Fließtext der Website unverändert bestehen. */
+  text-wrap: wrap;
 }
 
 /* ==========================================================================
@@ -292,6 +304,14 @@
   margin-left: var(--sp-5);
 }
 
+/* W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 4): "Ihre Rechte als
+   betroffene Person" ist ein Unterpunkt EINES Kapitels (6), nicht der
+   "Unsere Datenschutzerklärung"-Ebene wie die Kapitel 1–11 selbst – noch
+   eine Stufe weiter eingerückt. */
+.inhaltsverzeichnis__unterpunkt--tief {
+  margin-left: var(--sp-8);
+}
+
 /* ==========================================================================
    Raster und Karte
    ========================================================================== */
@@ -349,6 +369,13 @@
    gleich breite Teilspalten – die ersten drei Karten spannen je zwei
    Teilspalten (= drei gleich breite Karten je Zeile), Karte 4 und 5 spannen
    ab Teilspalte 2 bzw. 4 (mittig, gleiche Breite wie die anderen). */
+/* W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 28): Karte 4 und 5 standen
+   in der zweiten Reihe zentriert (grid-column 2/span 2 bzw. 4/span 2, mit
+   leerer Spalte links und rechts), während Hinweissatz und Knopf darunter
+   sowie alle übrigen unvollständigen Reihen der Website linksbündig stehen.
+   Die feste Spaltenzuweisung entfällt – bei "grid-column: span 2" ohne
+   eigene Position platziert der Browser Karte 4 und 5 automatisch an den
+   ersten freien Spalten der zweiten Reihe (1/3 und 3/5), also linksbündig. */
 .raster--karneval-gruppen {
   display: grid;
   grid-template-columns: 1fr;
@@ -361,14 +388,6 @@
 
   .raster--karneval-gruppen > * {
     grid-column: span 2;
-  }
-
-  .raster--karneval-gruppen > *:nth-child(4) {
-    grid-column: 2 / span 2;
-  }
-
-  .raster--karneval-gruppen > *:nth-child(5) {
-    grid-column: 4 / span 2;
   }
 }
 
@@ -400,8 +419,18 @@
   flex-direction: column;
 }
 
+/* W10-Korrektur (QA4 web-390-verein-und-rest Nr. 10/quervergleich Nr. 8):
+   margin-top:auto schiebt die Knopfzeile in der Flex-Spalte nur so weit nach
+   unten, wie in der jeweiligen Karte tatsächlich Platz ist – bei zwei
+   gleichhohen Karten (Raster streckt sie) blieb dadurch oft kaum Luft (auf
+   dem Handy, wo die Karten NICHT gleich hoch sind, sogar nur 4–7px). Ein
+   zusätzlicher padding-top sorgt für einen Mindestabstand vor dem Knopf,
+   unabhängig davon, wie viel der Auto-Rand sonst verschiebt – zugleich damit
+   größer als der reguläre Fluss-Abstand zum "Hier spielen …"-Zusatzsatz
+   darüber, der dadurch sichtbar näher an der Adresse als am Knopf steht. */
 .karte--anliegen .knopfzeile {
   margin-top: auto;
+  padding-top: var(--sp-5);
 }
 
 .karte--link:hover {
@@ -468,6 +497,19 @@
   color: var(--ink-2);
 }
 
+/* W10-Nachprüfung (neu_kaputt): "margin: var(--sp-3) 0 0;" oben griff in
+   Wirklichkeit nie – das <ul class="karte__training" role="list"> (P3,
+   Screenreader-Regel) trifft auch "ul[role='list'] { margin: 0; }" aus
+   base.css, das durch die zusätzliche Typ-Angabe "ul" höhere Spezifität hat
+   als die einfache Klasse ".karte__training" oben und deshalb gewann –
+   berechneter margin-top war 0, die Trainingszeilen klebten an der
+   Unterzeile, obwohl zwischen den Trainingszeilen selbst ein Abstand (gap)
+   sichtbar war. Gleiche Spezifität wie der Reset erzwungen (Klasse +
+   Attribut), ohne base.css anzufassen. */
+.karte__training[role="list"] {
+  margin-top: var(--sp-3);
+}
+
 .karte__training li {
   white-space: nowrap;
 }
@@ -530,6 +572,15 @@
 
   .raster--mannschaften .team-karte {
     max-width: 280px;
+    /* W10-Nachprüfung (offen Nr. 10, zoom/karte-f1-1440b.png): die
+       Staffelzeile der F1-Karte ("4 gegen 4 plus Torwart, Gruppe 2", gemessen
+       ca. 245px Textbreite) passte nicht mehr in die 226px Innenbreite der
+       Karte (280px Kartenbreite − 2×24px Innenabstand) und brach dreizeilig
+       um. Ein Innenabstand von var(--sp-4) (16px) reichte knapp nicht (242px
+       Innenbreite, 3px zu wenig) – var(--sp-3) (280px − 2×12px = 256px
+       Innenbreite, mit Sicherheitsabstand) statt der Schrift – Entscheidung A
+       verlangt hier zwei Zeilen. */
+    padding-inline: var(--sp-3);
   }
 }
 
@@ -586,6 +637,81 @@
     flex: 0 0 auto;
     color: var(--ink-3);
   }
+}
+
+/* W10, Entscheidung E (w10-gemeinsam.md, bestätigt durch quervergleich
+   Nr. 13): "Weitere Mannschaften" (team.mjs, weitereMannschaftenAbschnitt())
+   bleibt auf JEDER Breite eine schlanke Listenzeile (Name fett, Jahrgang
+   klein, "›") statt der großen Versal-Karte, die .team-karte für die
+   Haupt-Teamkarten der Mannschaften-Übersicht zeigt – unterhalb von 640px
+   sieht ".team-karte" dank der Regel oben ohnehin schon wie eine Zeile aus,
+   hier nur die fehlende Ergänzung ab 640px (identische Werte wie oben,
+   bewusst dupliziert statt die Media Query oben zu erweitern, damit die
+   Haupt-Teamkarten der Übersicht unverändert bleiben). Das Desktop-Raster
+   (.raster--mannschaften) ordnet diese Zeilen weiterhin in Spalten an. */
+@media (min-width: 640px) {
+  /* höhere Selektor-Spezifität als ".raster--mannschaften .team-karte"
+     (max-width:280px) oben nötig, sonst gewinnt dort die 280px-Grenze. */
+  .raster--mannschaften .team-karte--zeile {
+    max-width: none;
+  }
+
+  .team-karte--zeile {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    min-height: 64px;
+    padding: var(--sp-3) var(--sp-4);
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .team-karte--zeile:hover {
+    box-shadow: none;
+    transform: none;
+  }
+
+  .team-karte--zeile .team-karte__haupt {
+    min-width: 0;
+  }
+
+  .team-karte--zeile .karte__titel {
+    font-family: inherit;
+    font-size: var(--fs-md);
+    font-weight: 600;
+    text-transform: none;
+    color: inherit;
+    margin: 0;
+  }
+
+  .team-karte--zeile .karte__meta {
+    margin-top: 2px;
+  }
+
+  .team-karte--zeile .karte__mehr {
+    display: none;
+  }
+
+  .team-karte--zeile .team-karte__pfeil {
+    display: block;
+    flex: 0 0 auto;
+    color: var(--ink-3);
+  }
+}
+
+/* W10-Nachprüfung (neu_kaputt): "Weitere Mannschaften" (.team-karte--zeile)
+   erbt von .team-karte den seitlichen Innenabstand var(--sp-4) (16px) – die
+   "Kalender abonnieren"-Zeilen direkt darüber (.zeile, siehe dort) sind
+   dagegen bündig (kein seitlicher Innenabstand). Zwei Listenbausteine
+   derselben Art hatten dadurch verschiedene linke/rechte Kanten. Bündig wie
+   .zeile und wie die Trainingszeilen (.training), auf jeder Breite – gilt
+   nur für die Zeilen-Variante, die großen Haupt-Teamkarten (.team-karte ohne
+   --zeile) auf der Mannschaften-Übersicht bleiben unverändert. */
+.team-karte--zeile {
+  padding-inline: 0;
 }
 
 /* ==========================================================================
@@ -857,6 +983,17 @@
   }
 }
 
+/* W10-Nachprüfung (offen Nr. 3, web-390-mannschaften Nr. 12): die
+   Trainingsort-Zeile ("Trainingsort: Bezirkssportanlage am Rebstock …",
+   team.mjs) brach trotz freien Platzes in Zeile 1 vorzeitig um – Ursache ist
+   das globale "p { text-wrap: pretty; }" (base.css, Entscheidung 13), das für
+   eine ausgewogene letzte Zeile auch schon vorher Wörter nach unten zieht.
+   Lokal auf "normal" (kein Balancing) zurückgesetzt, wie bei .angebot p
+   unten – base.css bleibt unverändert. */
+.trainingsort {
+  text-wrap: wrap;
+}
+
 /* ==========================================================================
    Personen-Karte
    ========================================================================== */
@@ -1116,11 +1253,17 @@
    im quadratischen 64px-Feld nur ca. 46×10px groß und unlesbar – ein
    breiteres Logofeld (96×64, wie im Vorschlag) gibt breiten Wortmarken mehr
    Platz, ohne die Zeile höher zu machen. */
+/* W10-Nachprüfung (offen 2, Rest, quervergleich Nr. 10): die App
+   (.sponsor-karte, assets/app/Sponsoren_v3.tpl) richtet Logo und Name auf
+   dieser Zeile oben bündig aus (align-items:flex-start); die Website
+   zentrierte bisher vertikal – bei Namen mit zweiter Zeile (Ort) oder
+   zusätzlichem Satz (vmapit) stand das Logo dadurch nicht auf gleicher Höhe
+   wie der erste Namenszeile. Jetzt dieselbe Ausrichtung wie die App. */
 .logo-reihe li {
   display: grid;
   grid-template-columns: 96px 1fr;
   column-gap: var(--sp-3);
-  align-items: center;
+  align-items: start;
 }
 
 .logo-reihe__kachel {
@@ -1134,23 +1277,92 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  /* W10-Korrektur (QA4 web-390-verein-und-rest Nr. 2/quervergleich Nr. 10):
+     Sicherheitsnetz gegen das VM-Elite-Logo (siehe .logo-reihe__kachel img
+     unten) – nichts darf über die runde Kachelkante hinausragen. */
+  overflow: hidden;
+}
+
+/* W10-Korrektur (QA4 web-390-verein-und-rest Nr. 2/3, quervergleich Nr. 10):
+   "max-width/max-height:100%; width:auto" (ohne eigenes height) überließ die
+   Höhe dem HTML-Attribut height (aus data/bilder.json, dem Quellbild-Format)
+   – beim quadratischen, aber nicht ganz 1:1 VM-Elite-Logo reichte das nicht,
+   das Bild ragte oben/unten über die Kachel hinaus. width/height:100% mit
+   object-fit:contain füllt IMMER exakt die (gepolsterte) Kachelfläche und
+   skaliert danach hinein – unabhängig vom Seitenverhältnis des Quellbilds.
+   Das behebt zugleich Nr. 3 (390): sehr flache Wortmarken (SK SportConnects,
+   11TeamSports) nutzten die Kachel bisher nur zu einem Bruchteil aus.
+
+   W10-Nachprüfung (offen 1, HOCH): width/height:100% griff am img NICHT,
+   weil bild() das img in ein <picture> ohne eigene Höhe packt – Prozent-
+   angaben auf dem img lösen dann gegen eine unbestimmte Bezugsgröße auf
+   (height wird effektiv "auto") und das VM-Elite-Logo ragte weiterhin über
+   die Kachel hinaus; overflow:hidden (oben) schnitt seither Schildspitze und
+   Sterne/Schriftzug ab. Fix: das <picture> selbst füllt die Kachel exakt
+   (display:block; width/height:100%) – erst dadurch hat das img eine
+   bestimmte Bezugsgröße und object-fit:contain greift wie vorgesehen. */
+.logo-reihe__kachel picture {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .logo-reihe__kachel img {
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 
 .logo-reihe__info { min-width: 0; }
 .logo-reihe__info .meta { text-align: left; margin: 0; }
-.logo-reihe__info .meta + .meta { margin-top: 2px; }
+.logo-reihe__info .meta + .meta,
+.logo-reihe__info .meta + .logo-reihe__aktionen { margin-top: var(--sp-2); }
 
-.logo-reihe__info .meta a {
+/* W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 27/quervergleich Nr. 9,
+   Entscheidung F, w10-gemeinsam.md): der Firmenname war bisher entweder ein
+   blauer Link (wenn ein Link vorhanden war) oder grauer Text (ohne Link) –
+   zwei sichtbar verschiedene Bausteine für dieselbe Angabe. Der Name steht
+   jetzt IMMER gleich (dunkel, halbfett, kein Link mehr auf dem Namen selbst);
+   ein vorhandener Link/Instagram-Profil erscheint stattdessen als eigener
+   kleiner Knopf mit Symbol und Text darunter (.logo-reihe__aktionen unten). */
+.logo-reihe__info .logo-reihe__name {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.logo-reihe__aktionen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin: 0;
+}
+
+/* Kleiner Knopf mit Symbol + Text ("Website", "Instagram") – eigene Klasse
+   statt .knopf (der ist für Primär-/Sekundäraktionen gedacht, volle
+   Zeilenhöhe 44px wäre in der schmalen Logo-Zeile zu groß). */
+.knopf--icon {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--blau-700);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.knopf--icon:hover {
+  background: var(--blau-50);
+  border-color: var(--blau-600);
+  color: var(--blau-600);
+  text-decoration: none;
+}
+
+.knopf--icon svg {
+  flex-shrink: 0;
 }
 
 @media (min-width: 640px) {
@@ -1190,6 +1402,69 @@
   }
 
   .logo-reihe__info .meta { text-align: center; }
+  .logo-reihe__aktionen { justify-content: center; }
+}
+
+/* W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 2): "Fußballschule" und
+   "App-Projektpartner" hatten bisher je einen eigenen Abschnitt mit
+   wechselndem Hintergrund, aber nur einer Karte je Abschnitt – auf dem
+   Desktop blieben rechts rund 790px leer, die Seite wirkte zerrissen. Beide
+   Kategorien stehen jetzt in einem gemeinsamen Abschnitt, ab 640px
+   nebeneinander (die Kategorienamen bleiben als eigene Zwischenüberschrift
+   je Spalte erhalten, siehe sponsoren.mjs). */
+.sponsor-kategorien {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+
+@media (min-width: 640px) {
+  .sponsor-kategorien {
+    flex-direction: row;
+    /* W10-Nachprüfung (offen 3): "flex-start" ließ beide Spalten auf ihrer
+       eigenen (unterschiedlichen) Inhaltshöhe stehen (209 vs. 334 px) –
+       "stretch" gleicht beide Spalten auf die höhere der beiden an. */
+    align-items: stretch;
+  }
+
+  .sponsor-kategorien > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  /* W10-Nachprüfung (offen 3, web-1440-verein-und-rest Nr. 2/27): die
+     Einzelkarten waren durch .logo-reihe--einzeln auf 260 px gedeckelt und
+     standen dadurch links in der (jetzt gleich hohen) Spalte, rechts blieb
+     ein Loch. Innerhalb von .sponsor-kategorien nutzt die Einzelkarte die
+     volle Spaltenbreite und -höhe (Spaltenhöhe kommt vom stretch oben). */
+  .sponsor-kategorien .sponsor-kategorie {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sponsor-kategorien .logo-reihe--einzeln {
+    display: flex;
+    max-width: none;
+    flex: 1 1 auto;
+  }
+
+  .sponsor-kategorien .logo-reihe--einzeln li {
+    flex: 1 1 auto;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Modifikator für eine Logo-Reihe mit nur einem Eintrag (siehe oben): ohne
+   ihn würde das feste 3-Spalten-Raster ab 640px die einzige Kachel auf ein
+   Drittel der (schon halbierten) Spaltenbreite stauchen – hier stattdessen
+   eine einzelne, normal breite Karte. Auf dem Handy (eine Zeile je Eintrag,
+   siehe .logo-reihe li oben) unverändert. */
+@media (min-width: 640px) {
+  .logo-reihe--einzeln {
+    display: block;
+    max-width: 260px;
+  }
 }
 
 /* Zusatzangebote (Mannschaften): Logo klein neben Badge und Name */
@@ -1225,12 +1500,51 @@
    Flex-Spalte + margin-top:auto bei beiden Karten auf gleicher Höhe am
    Kartenfuß, unabhängig davon, ob die optionale Leitungszeile vorkommt
    (Prüfbefund web-1440-mannschaften Nr. 20, web-390-mannschaften Nr. 22). */
+/* W10-Korrektur (web-1440-mannschaften Nr. 9, bestätigt): die weißen
+   Anbieterkarten lagen auf einem Abschnittsgrund derselben Farbe
+   (--surface) – die Oberkante war praktisch unsichtbar. Sichtbare Kontur
+   statt Hintergrundwechsel (der Abschnitt bleibt hell wie das
+   Probetraining darüber). */
 .angebot {
   display: flex;
   flex-direction: column;
+  border: 1px solid var(--line);
 }
+/* W10-Nachprüfung (offen Nr. 8, zoom/angebot1-1440.png): der Regista-Text
+   brach in der Spalte vorzeitig um ("…mit Erfahrung als Scout" bei ca.
+   565px, obwohl die Spalte bis ca. 683px reicht) – Ursache ist das globale
+   "p { text-wrap: pretty; }" (base.css, Entscheidung 13), das eine
+   ausgewogene letzte Zeile sucht und dafür auch früher Wörter nach unten
+   zieht. Lokal auf "normal" (kein Balancing) zurückgesetzt, base.css bleibt
+   unverändert – die Zeilenzahl (6 Zeilen, Kartenhöhe unverändert) ändert
+   sich dadurch nicht, nur die Verteilung der Umbrüche. */
+.angebot p {
+  text-wrap: wrap;
+}
+/* W10-Korrektur (web-1440-mannschaften Nr. 8/web-390-mannschaften Nr. 14,
+   bestätigt): margin-top:auto richtet den Link zwar unten aus, gab aber
+   keinen MINDESTABSTAND, wenn die Karte durch langen Text kaum Restraum
+   ließ (Link "klebte" direkt unter dem Text). Der zusätzliche
+   padding-top garantiert den Abstand in jedem Fall. */
 .angebot > p:last-child {
   margin-top: auto;
+  padding-top: var(--sp-3);
+}
+/* W10-Korrektur (web-1440-mannschaften Nr. 21, bestätigt): der
+   "E-Mail schreiben ›"-Link am Kartenfuß war anders gestaltet (unterstrichen,
+   linksbündig) als "Zur Mannschaft ›" auf den Mannschaftskarten derselben
+   Seite (ohne Unterstrich, rechtsbündig) – hier an .karte__mehr angeglichen,
+   nur innerhalb der Zusatzangebote-Karte (die allgemeine .mail-Klasse
+   bleibt überall sonst unverändert unterstrichen). */
+.angebot .mail {
+  display: block;
+  text-align: right;
+  text-decoration: none;
+  color: var(--blau-700);
+}
+.angebot .mail:hover,
+.angebot .mail:focus-visible {
+  text-decoration: underline;
 }
 /* Teambeschreibung im Seitenkopf (aus dem Abteilungen-Worksheet) */
 .seitenkopf .teamtext { max-width: 62ch; margin-top: var(--sp-3); }
@@ -1244,7 +1558,19 @@
    .mail (overflow-wrap: anywhere) oben: bricht nur, wenn die Zeile bei sehr
    schmalen Breiten sonst seitlich überliefe, bei allen anderen Breiten
    bleibt das Segment eine Zeile. */
+/* W10, Entscheidung A (w10-gemeinsam.md, bestätigt durch quervergleich
+   Nr. 14/web-1440-mannschaften Nr. 4/web-390-mannschaften Nr. 6+7): Jahrgang
+   und Liga/Staffel jetzt immer als zwei eigene Blockzeilen OHNE Trennpunkt
+   "·" (vorher hing der Punkt oft allein am Zeilenende). Beide Klassen kommen
+   sowohl im Teamkopf (team.mjs, unterzeileTeam()) als auch in den
+   Teamkarten (index.mjs, teamKarte()/weitereMannschaftenAbschnitt()) zum
+   Einsatz. */
+.team-unterzeile-jahrgang {
+  display: block;
+}
+
 .team-unterzeile-staffel {
+  display: block;
   overflow-wrap: anywhere;
 }
 
@@ -1252,9 +1578,13 @@
    Hinweiskasten
    ========================================================================== */
 
+/* W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 10): border-radius auf
+   allen vier Ecken rundete auch die obere/untere linke Ecke der 4px breiten
+   linken Kante – dadurch wirkte die Kante wie eine runde Klammer "(" statt
+   einer geraden Linie. Radius jetzt nur rechts, links bleibt eckig. */
 .hinweis {
   border-left: 4px solid var(--line);
-  border-radius: var(--r-md);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
   background: var(--surface);
   padding: var(--sp-4);
 }
@@ -1270,9 +1600,26 @@
   color: var(--ink);
 }
 
+/* W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 10): --blau-50 lag optisch
+   fast auf dem getönten Seitenhintergrund (--bg), der Kasten war kaum zu
+   erkennen. --blau-100 ist deutlicher blau, bleibt aber innerhalb der
+   Palette (keine neue Farbe). */
 .hinweis--info {
   border-left-color: var(--blau-700);
-  background: var(--blau-50);
+  background: var(--blau-100);
+  color: var(--ink);
+}
+
+/* W10-Nachprüfung (offen 16, quervergleich Nr. 23): der Kontakt-Kasten
+   "Zugang & Parken"/"Bus & Bahn" stand fett im Fließtext mit Punkt; die App
+   (assets/app/Geschaeftsstelle_v3.tpl, .hinweis-untertitel) setzt beide
+   Titel als eigene kleine Zwischenzeile ohne Punkt – das trifft auch den
+   Auftragswortlaut "zwei betitelte Absätze" (w10-b.md) genauer. Gleiche
+   Klasse, gleiche Werte wie die App. */
+.hinweis-untertitel {
+  margin: 0 0 var(--sp-2);
+  font-size: var(--fs-sm);
+  font-weight: 700;
   color: var(--ink);
 }
 
@@ -1408,6 +1755,35 @@
   hyphens: none;
 }
 
+/* ==========================================================================
+   Zitat (W10-Korrektur, quervergleich Nr. 12) – hervorgehobener Leitsatz auf
+   /verein/ueber-uns/, App-Vorbild ".leitsatz"/".leitsatz-quelle"
+   (src/app/Ueber-uns_v3.html): kleine graue Quellenzeile über dem Zitat in
+   gut lesbarer, halbfetter Fließschrift statt schmal-kursiver Kopfschrift.
+   ========================================================================== */
+
+/* W10-Nachprüfung (offen, NEU): "margin:0" hob den .fluss-Abstand zum
+   vorherigen Absatz komplett auf (gleiche Selektor-Spezifität wie
+   ".fluss > * + *", später in der Datei gewinnt .zitat) – das Zitat klebte
+   ohne Abstand an "… Frankfurt am Main aus.". Oben jetzt derselbe Abstand
+   wie unten (--sp-5, 24px), den .fluss zum nächsten Absatz bereits liefert. */
+.zitat {
+  margin: var(--sp-5) 0 0;
+  padding-left: var(--sp-4);
+  border-left: 4px solid var(--blau-700);
+}
+
+.zitat__label {
+  margin: 0 0 4px;
+}
+
+.zitat__text {
+  margin: 0;
+  font-weight: 600;
+  font-size: var(--fs-lg);
+  color: var(--blau-950);
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -1475,6 +1851,15 @@
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
+}
+
+/* W10, Entscheidung D (w10-gemeinsam.md, bestätigt durch web-390-mannschaften
+   Nr. 13): der Herren-Textlink im Probetraining-Baustein (bausteine.mjs)
+   war als knapp 13–14px hohe Textzeile ein zu kleines Tippziel – größerer
+   Innenabstand nähert sich der Mindesthöhe von ca. 44px an. */
+.probetraining-herrenlink {
+  display: inline-block;
+  padding-block: var(--sp-3);
 }
 
 /* ==========================================================================
@@ -1715,6 +2100,33 @@ body.tabellen h2 {
    Seite, gleicher Grund wie bei /tabellen/. */
 body.datenschutz h2 {
   scroll-margin-top: var(--sp-6);
+}
+
+/* W10-Korrektur (QA4 web-1440-verein-und-rest Nr. 7): unter den Kapitel-
+   überschriften (h2, erstes Kind im Abschnitt, siehe ".fluss > h2 + *" oben)
+   folgte der Text mit 12px, unter den kleineren Zwischentiteln (h3, siehe
+   unterUeberschriftHtml() in datenschutz.mjs) mit dem allgemeinen
+   Fluss-Abstand von 24px – die kleinere Überschrift hatte also mehr Luft als
+   die größere. Nur auf /datenschutz/ eingegrenzt (body.datenschutz), damit
+   h3-Abstände auf anderen Seiten unverändert bleiben. */
+body.datenschutz .fluss > h3 + * {
+  margin-top: var(--sp-3);
+}
+
+/* W10-Nachprüfung (offen 5/6, NEU): Die Gruppenüberschrift "Ihre Rechte als
+   betroffene Person" (Abschnitt 6) muss erkennbar kleiner als die
+   Kapitel-H2 bleiben, auf beiden Breiten – vorher fest 1.7rem, auf dem Handy
+   (h2 dort auf 1.625rem verkleinert, siehe base.css) größer als die H2
+   selbst. Jetzt an der jeweiligen H2-Größe ausgerichtet (rund 80%). */
+body.datenschutz h3.gruppenueberschrift {
+  font-size: 1.5625rem;
+  margin-top: var(--sp-8);
+}
+
+@media (max-width: 479.98px) {
+  body.datenschutz h3.gruppenueberschrift {
+    font-size: 1.3rem;
+  }
 }
 
 /* ==========================================================================
@@ -2474,6 +2886,16 @@ body.datenschutz h2 {
   min-width: 0;
 }
 
+/* W10-Nachprüfung (neu_kaputt): der Quellensatz ("Die Tabelle lässt sich
+   seitlich wischen. Live von FUSSBALL.DE.") steht in tabelleInhalt()/
+   spieleUndTabelleInhalt() (team.mjs) jetzt wie im Reiter "Spiele"
+   (.spiele-kasten-block, siehe unten) ÜBER dem Kasten statt danach –
+   Abstand zum Kasten darunter, analog zu
+   ".spiele-kasten-block > .meta:first-child" unten. */
+.meta + .fussballde-wrap {
+  margin-top: var(--sp-3);
+}
+
 /* Keine Mindestbreite mehr (W7b): die FUSSBALL.DE-Kästen passen sich
    selbst an die Breite an; mit Mindestbreite wurden sie auf dem Handy rechts
    abgeschnitten. */
@@ -2595,6 +3017,24 @@ body.datenschutz h2 {
 
 .spiele-kasten-block + .meta {
   margin-top: var(--sp-2);
+}
+
+/* W10, quervergleich Nr. 17 (bestätigt): der erklärende Satz steht jetzt wie
+   in der App ÜBER dem Kasten (spieleKastenHtml()-Parameter `hinweisHtml`,
+   hilfen.mjs) statt danach – Abstand zum Kasten darunter. */
+.spiele-kasten-block > .meta:first-child {
+  margin-bottom: var(--sp-3);
+}
+
+/* W10, web-1440-mannschaften Nr. 13 (bestätigt): der Hinweis "Die Tabelle
+   lässt sich seitlich wischen." passt nur auf schmalen/Touch-Bildschirmen –
+   ab 1024px (derselbe Umbruch wie .zweispaltig) sind bei der Tabelle alle
+   Spalten ohnehin ohne Wischen zu sehen, dort bleibt nur "Live von
+   FUSSBALL.DE." stehen (siehe tabelleWischHinweisHtml() in team.mjs). */
+@media (min-width: 1024px) {
+  .tabelle-wisch-hinweis {
+    display: none;
+  }
 }
 
 /* ==========================================================================

@@ -198,12 +198,21 @@ summary { list-style: none; cursor: pointer; }
 summary::-webkit-details-marker { display: none; }
 summary::marker { content: ""; }
 
+/* W10, Auftrag D (Entscheidung G): Innenabstand oben/unten gilt auch, wenn
+   eine lange Beschriftung umbricht (vorher nur min-height + flex-center –
+   ein zweizeiliger Knopf hatte dadurch keinerlei Abstand zur Kante),
+   text-align:center zusätzlich zu justify-content, weil das bei mehrzeiligem
+   Text pro Zeile zählt (justify-content zentriert nur den Textblock als
+   Ganzes). Wörtlich wie Startseite_v3.tpl (siehe Kopfkommentar dieser
+   Datei). */
 .knopf {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 44px;
-  padding-inline: var(--sp-4);
+  padding: 12px 20px;
+  line-height: 1.3;
+  text-align: center;
   border-radius: var(--r-md);
   background: var(--blau-700);
   color: var(--weiss);
@@ -225,9 +234,13 @@ button.knopf {
   font-size: 14px;
 }
 
+/* W10-Nachprüfung (offen 10, Entscheidung 15): 2px Rand in Vereinsblau wie
+   .knopf--sekundaer in base.css (Website) – der bisherige 1px hellgraue Rand
+   war als Knopfkante kaum zu erkennen ("Nebenaktionen umrandet – auf
+   Website und App gleich"). */
 .knopf--leise {
   background: var(--surface);
-  border: 1px solid var(--line);
+  border: 2px solid var(--blau-700);
   color: var(--blau-800);
 }
 
@@ -380,7 +393,11 @@ button.knopf {
       <path d="M4 9.5L1.8 8M20 9.5l2.2-1.5"/>
     </svg>
     <p class="abteilung-karte__titel">Karneval</p>
-    <p class="abteilung-karte__untertitel">Die Schnauzer · <span id="anzahl-karneval">Gruppen</span></p>
+    <!-- W10, Auftrag D (app Nr. 10/quervergleich Nr. 15): "Die Schnauzer"
+         steht schon auf der Karnevalseite selbst – der Zusatz hier brach nur
+         mit einsamem Trennpunkt am Zeilenende um; die Fußball-Karte daneben
+         zeigt ebenfalls nur die reine Zählung ("11 Mannschaften"). -->
+    <p class="abteilung-karte__untertitel"><span id="anzahl-karneval">Gruppen</span></p>
   </a>
 </div>
 
@@ -434,7 +451,7 @@ button.knopf {
        Systembrowser statt im Rahmen) noch nicht geprüft. -->
   <a class="zeile" href="https://cdn.appack.de/sportfreunde04/workspace/web/verein-mach-mit.html">
     <span class="zeile__text">
-      <span class="zeile__titel">Mach mit · Ehrenamt</span>
+      <span class="zeile__titel">Mach mit &amp; Ehrenamt</span>
       <span class="zeile__untertitel">Trainer, Betreuer, Vorstand, Helfer</span>
     </span>
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>

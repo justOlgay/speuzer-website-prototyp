@@ -260,13 +260,17 @@ function spielplanDerSaisonInhalt(team, daten) {
         <div class="fussballde_widget" data-id="${escapeHtml(spieleWidgetId)}" data-type="team-matches"></div>
       </div>`;
 
-  // W9, Abschnitt 5: ein einziger, wörtlicher Satz unter dem Kasten (keine
-  // Bedienungsanleitung mehr davor/danach, siehe spieleUndTabelleInhalt()
-  // unten für denselben Wortlaut).
+  // W9, Abschnitt 5: ein einziger, wörtlicher Satz (keine Bedienungsanleitung
+  // mehr davor/danach, siehe spieleUndTabelleInhalt() unten für denselben
+  // Wortlaut). W10, quervergleich Nr. 17 (bestätigt): der Satz steht jetzt
+  // ÜBER dem Kasten (spieleKastenHtml()-Parameter, hilfen.mjs), wie in der
+  // App, statt als eigener Absatz danach. W10, web-1440-mannschaften Nr. 15
+  // (bestätigt): "im Kasten" gestrichen (unglücklicher Umbruch "im | Kasten"
+  // bei schmaler Spalte) – der Kasten ist ohnehin gemeint, wenn direkt
+  // darunter der Knopf "Alle Spiele anzeigen" folgt.
   return `<h2>Spiele</h2>
     <div data-nur-appack hidden>
-      ${spieleKastenHtml(widgetHtml)}
-      <p class="meta">Nächste Spiele zuerst – frühere Ergebnisse über die Pfeile im Kasten. Live&nbsp;von&nbsp;FUSSBALL.DE.</p>
+      ${spieleKastenHtml(widgetHtml, "Nächste Spiele zuerst, frühere Ergebnisse über die Pfeile. Live&nbsp;von&nbsp;FUSSBALL.DE.")}
     </div>
     <div data-nur-prototyp>
       ${iframeHtml}
@@ -290,6 +294,17 @@ const KINDERFESTIVAL_SPIELFORM = {
 // spieleUndTabelleInhalt() unten) – hierher (nach der Tabelle) gehört sie
 // nicht mehr, tabelleInhalt() behandelt deshalb nur noch Teams mit echter
 // Tabelle (team.tabelle === true).
+// W10, web-1440-mannschaften Nr. 13 (bestätigt): der Wisch-Hinweis passt nur
+// auf schmalen/Touch-Bildschirmen (auf dem Desktop sind bei 1440px alle
+// Tabellenspalten ohnehin ohne Wischen zu sehen). Das "Wischen"-Segment steckt
+// jetzt in einem eigenen <span>, das ab 1024px (derselbe Umbruch wie
+// .zweispaltig, ab dort ist genug Breite für die volle Tabelle) per CSS
+// ausgeblendet wird (siehe .tabelle-wisch-hinweis in komponenten.css) – auf
+// dem Desktop bleibt nur "Live von FUSSBALL.DE." stehen.
+function tabelleWischHinweisHtml() {
+  return `<span class="tabelle-wisch-hinweis">Die Tabelle lässt sich seitlich wischen. </span>Live&nbsp;von&nbsp;FUSSBALL.DE.`;
+}
+
 function tabelleInhalt(team, daten) {
   const tabelleEintrag = daten.tabellen?.teams?.[team.slug];
   const eigene = tabelleEintrag?.zeilen?.find((z) => z.eigene);
@@ -301,12 +316,16 @@ function tabelleInhalt(team, daten) {
   // W9-A, Entscheidung 12 (w9-gemeinsam.md): ein ganzer, wörtlicher Satz
   // "Die Tabelle lässt sich seitlich wischen. Live&nbsp;von&nbsp;FUSSBALL.DE." statt
   // der bisherigen zwei Zeilen (Prüfbefund web-390-mannschaften Nr. 33).
+  // W10-Nachprüfung (neu_kaputt, dieselbe Korrektur wie in
+  // spieleUndTabelleInhalt()/tabelleHtml oben): Quellensatz über dem Kasten,
+  // für Teams, die diesen eigenständigen Tabellen-Abschnitt statt des
+  // Umschalters zeigen (kein Spiele- ODER kein Tabellen-Widget).
   return `<h2>Tabelle</h2>
     <div data-nur-appack hidden>
+      <p class="meta">${tabelleWischHinweisHtml()}</p>
       <div class="fussballde-wrap">
         <div class="fussballde_widget" data-id="${escapeHtml(tabelleWidgetId)}" data-type="table"></div>
       </div>
-      <p class="meta">Die Tabelle lässt sich seitlich wischen. Live&nbsp;von&nbsp;FUSSBALL.DE.</p>
     </div>
     <div data-nur-prototyp>
       ${eigene ? `<p class="meta">Platz ${eigene.platz} von ${tabelleEintrag.zeilen.length} · ${eigene.punkte} Punkte</p>` : ""}
@@ -340,8 +359,16 @@ function spieleUndTabelleInhalt(team, daten) {
     // und der Überschrift "BISHER ANGESETZT" im eingebetteten Generator –
     // beide sagen, dass hier kein voller Saisonplan steht, sondern die bisher
     // angesetzten Termine.
+    // W10, quervergleich Nr. 16 (bestätigt): in der App ist "Bisher
+    // angesetzt" nur eine kleine Unterbeschriftung innerhalb der
+    // Kinderfestival-Karte, auf der Website stand hier zusätzlich ein
+    // eigenes <h3>"Bisher angesetzt"> – das verdoppelte sich mit der
+    // gleichlautenden, kleinen Kopfzeile, die der eingebettete Generator
+    // selbst schon zeigt (W10-Nachprüfung, offen Nr. 1: bestätigt, "wirkt
+    // eher wie ein Echo"). Entfernt: die kleine Kopfzeile des Generators ist
+    // jetzt die einzige Unterbeschriftung innerhalb des Kinderfestival-
+    // Blocks, wie in der App.
     return `${kinderfestivalAbschnitt(team)}
-    <h2>Bisher angesetzt</h2>
     ${generatorIframe(team, daten)}`;
   }
   if (!spieleWidgetId || !tabelleWidgetId) {
@@ -350,14 +377,20 @@ function spieleUndTabelleInhalt(team, daten) {
   }
   const tabelleEintrag = daten.tabellen?.teams?.[team.slug];
   const eigene = tabelleEintrag?.zeilen?.find((z) => z.eigene);
-  const spieleHtml = `${spieleKastenHtml(`<div class="fussballde-wrap">
+  const spieleHtml = spieleKastenHtml(
+    `<div class="fussballde-wrap">
         <div class="fussballde_widget" data-id="${escapeHtml(spieleWidgetId)}" data-type="team-matches"></div>
-      </div>`)}
-        <p class="meta">Nächste Spiele zuerst – frühere Ergebnisse über die Pfeile im Kasten. Live&nbsp;von&nbsp;FUSSBALL.DE.</p>`;
-  const tabelleHtml = `<div class="fussballde-wrap">
+      </div>`,
+    "Nächste Spiele zuerst, frühere Ergebnisse über die Pfeile. Live&nbsp;von&nbsp;FUSSBALL.DE."
+  );
+  // W10-Nachprüfung (neu_kaputt): im Reiter "Tabelle" stand der Quellensatz
+  // bisher UNTER dem Kasten, im Reiter "Spiele" (spieleKastenHtml()) schon
+  // DARÜBER – beim Umschalten sprang die Zeile dadurch von oben nach unten.
+  // Jetzt auch hier über dem Kasten, wie im Reiter "Spiele".
+  const tabelleHtml = `<p class="meta">${tabelleWischHinweisHtml()}</p>
+        <div class="fussballde-wrap">
           <div class="fussballde_widget" data-id="${escapeHtml(tabelleWidgetId)}" data-type="table"></div>
-        </div>
-        <p class="meta">Die Tabelle lässt sich seitlich wischen. Live&nbsp;von&nbsp;FUSSBALL.DE.</p>`;
+        </div>`;
   return `<h2>Spiele &amp; Tabelle</h2>
     <div data-nur-appack hidden>
       ${reiterHtml(team.slug, [
@@ -380,6 +413,12 @@ function spieleUndTabelleInhalt(team, daten) {
 // Jahrgang · Staffel wie bisher (staffelLesbar() lässt bei Kinderfußball-
 // Staffeln seit W9-A das Wort "Kinderfußball" selbst schon weg, siehe
 // hilfen.mjs).
+// W10, Entscheidung A (w10-gemeinsam.md, bestätigt durch quervergleich Nr. 14/
+// web-390-mannschaften Nr. 6): Jahrgang und Liga/Staffel jetzt immer als zwei
+// feste Zeilen OHNE Trennpunkt "·" (vorher stand der Punkt bei vielen Teams
+// allein am Zeilenende). Herren bleiben einzeilig (nur die Staffel, kein
+// Jahrgang). Beide Segmente sind eigene Blockelemente (siehe
+// .team-unterzeile-jahrgang/.team-unterzeile-staffel in komponenten.css).
 function unterzeileTeam(team) {
   // W9-A-Nachprüfung (tools/pruefen.mjs, 320px, mannschaften-f1): das Staffel-
   // Segment in ein eigenes Sicherheitsnetz-Span verpackt (siehe
@@ -388,8 +427,17 @@ function unterzeileTeam(team) {
   // Kombinationen wie F1 ("4 gegen 4 plus Torwart, Gruppe 2") sonst die
   // 320px-Mindestbreite.
   const staffel = `<span class="team-unterzeile-staffel">${staffelLesbar(team.staffel)}</span>`;
-  return team.kategorie === "Senioren" ? staffel : `${jahrgangPraefix(team)} · ${staffel}`;
+  if (team.kategorie === "Senioren") return staffel;
+  return `<span class="team-unterzeile-jahrgang">${jahrgangPraefix(team)}</span>${staffel}`;
 }
+
+// W10, Entscheidung B (w10-gemeinsam.md, bestätigt durch web-1440-mannschaften
+// Nr. 3): ein Teamsatz der Form "Das ist unsere <Team>, Jahrgang <Jahr>."
+// sagt nicht mehr als Name und Jahrgang (die schon in Dachzeile/H1/Unterzeile
+// stehen) – aktuell betrifft das F1 und F2. Regel im Code (nicht in den
+// Daten, data/teams.json bleibt unverändert), der Verein ergänzt die Sätze
+// später.
+const GENERISCHER_TEAMSATZ = /^Das ist unsere [^,]+, Jahrgang [\d/]+( und jünger)?\.$/;
 
 function seitenkopfAbschnitt(team) {
   // W9-A, Entscheidung 8 (w9-gemeinsam.md): "Spielbetrieb: …" entfällt im
@@ -404,13 +452,14 @@ function seitenkopfAbschnitt(team) {
   const spielbetriebZeile = team.tabelle
     ? `<p class="meta">Spielbetrieb: ${escapeHtml(spielbetriebText)}.</p>`
     : "";
+  const teamsatz = team.beschreibung && !GENERISCHER_TEAMSATZ.test(team.beschreibung) ? team.beschreibung : "";
   return `<section class="abschnitt seitenkopf">
   <div class="container">
     ${ruecklink(`${PFAD}mannschaften/`, "Mannschaften")}
     <p class="meta">Mannschaft · ${escapeHtml(team.gruppe ?? "")}</p>
     <h1>${escapeHtml(team.name)}</h1>
     <p class="seitenkopf__lead">${unterzeileTeam(team)}</p>
-    ${team.beschreibung ? `<p class="inhalt teamtext">${escapeHtml(team.beschreibung)}</p>` : ""}
+    ${teamsatz ? `<p class="inhalt teamtext">${escapeHtml(teamsatz)}</p>` : ""}
     ${spielbetriebZeile}
   </div>
 </section>`;
@@ -433,7 +482,14 @@ function hauptspalte(team, daten) {
   let ortHinweis;
   let trainingsPlatzteil;
   if (team.slug === "herren") {
-    ortHinweis = `<p class="meta">Trainingsort: Bezirkssportanlage am Rebstock (SW&nbsp;Griesheim).</p>`;
+    // W10-Nachprüfung (offen Nr. 3, web-390-mannschaften Nr. 12): "am
+    // Rebstock" stand hier mit einem normalen Leerzeichen und brach deshalb
+    // mitten im Namen um, obwohl der gleiche Satz im Trainingsort-Hinweis
+    // der Übersicht (trainingshinweisAbschnitt(), index.mjs) schon
+    // "am&nbsp;Rebstock" verwendet. Zusätzliche Klasse "trainingsort"
+    // (siehe .trainingsort in komponenten.css) schaltet text-wrap:pretty
+    // lokal ab – die Zeile brach sonst trotz freien Platzes vorzeitig um.
+    ortHinweis = `<p class="meta trainingsort">Trainingsort: Bezirkssportanlage am&nbsp;Rebstock (SW&nbsp;Griesheim).</p>`;
     trainingsPlatzteil = "Rebstock";
   } else {
     const { ort, teil } = platzAufgeteilt(team);
@@ -517,13 +573,19 @@ function seitenspalte(team, daten) {
     .map((name, i) => trainerZeileHtml(name, i, "", trainerVorstandsBildHtml(name, i, daten, PFAD)))
     .join("\n        ");
 
+  // W10, Entscheidung E (w10-gemeinsam.md, bestätigt durch quervergleich
+  // Nr. 13): jede Abschnittsüberschrift jetzt als echtes h2 ÜBER der Karte
+  // (vorher ".karte__titel" INNERHALB der Karte) – Website und App sollen
+  // hier gleich aussehen, und die Überschrift bekommt dieselbe Typografie
+  // wie "Training"/"Spiele" auf derselben Seite (globale h2-Regel,
+  // base.css) statt der Karten-eigenen Versal-Schrift.
   // W9-A, Entscheidung 10 (w9-gemeinsam.md): "Die Nachricht geht an:" und die
   // Adresse in einer eigenen Zeile (weißer statt hinter einem Doppelpunkt
   // im Fließtext versteckt), nowrap + größerer text-underline-offset gegen
   // das Umbrechen/die schwer erkennbaren Unterstriche vor dem "@"
   // (Prüfbefunde web-1440-mannschaften Nr. 11, web-390-mannschaften Nr. 16).
-  const ansprechpartnerKarte = `<div class="karte fluss">
-      <h2 class="karte__titel">${escapeHtml(kartenTitel)}</h2>
+  const ansprechpartnerAbschnitt = `<h2>${escapeHtml(kartenTitel)}</h2>
+    <div class="karte fluss">
       <div class="person-mini-liste">
         ${trainerZeilen}
       </div>
@@ -540,30 +602,40 @@ function seitenspalte(team, daten) {
   // Ort), siehe adresseDreizeiligHtml() unten (Prüfbefunde
   // web-390-mannschaften Nr. 17, quervergleich Nr. 28).
   const heimspieleTitel = team.tabelle ? "Heimspiele" : "Unser Platz";
-  const heimspieleKarte = `<div class="karte fluss">
-      <h2 class="karte__titel">${heimspieleTitel}</h2>
+  const heimspieleAbschnitt = `<h2>${heimspieleTitel}</h2>
+    <div class="karte fluss">
       ${adresseDreizeiligHtml(team.heimspiele)}
       <p class="knopfzeile knopfzeile--voll">
         <a class="knopf knopf--sekundaer" href="${escapeHtml(routeUrl(team, verein))}" rel="noopener" target="_blank">Route planen</a>
       </p>
     </div>`;
 
+  // W10, Entscheidung E: "Kalender abonnieren" jetzt zwei Listenzeilen mit
+  // "›" OHNE Karte (vorher Karte mit zwei Textlinks) – wie in der App und
+  // wie die übrigen Listenbausteine der Seite (Training, Weitere
+  // Mannschaften). Wiederverwendet die vorhandene, seitenweite
+  // .zeile/.zeilen-liste-Komponente (W3, /verein/) statt einer neuen.
   // W9-A, Entscheidung 7 (w9-gemeinsam.md): Linktexte ohne Team-Kürzel (die
-  // Seite nennt das Team schon im Titel), dafür mit "›" (Prüfbefunde
-  // web-1440-mannschaften Nr. 22, web-390-mannschaften Nr. 30). Hinweissatz
-  // wörtlich, geschütztes Leerzeichen vor dem letzten Wort.
+  // Seite nennt das Team schon im Titel). Hinweissatz wörtlich, geschütztes
+  // Leerzeichen vor dem letzten Wort.
   const kalenderBasis = verein.kalender_basis ?? "";
-  const kalenderKarte = `<div class="karte fluss">
-      <h2 class="karte__titel">Kalender abonnieren</h2>
-      <p><a href="${escapeHtml(kalenderBasis + (team.kalender ?? ""))}">Spielplan abonnieren ›</a></p>
-      <p><a href="${escapeHtml(kalenderBasis + (team.trainingsKalender ?? ""))}">Trainingszeiten abonnieren ›</a></p>
-      <p class="meta">Einmal abonnieren – Verlegungen kommen automatisch&nbsp;an.</p>
-    </div>`;
+  const kalenderAbschnitt = `<h2>Kalender abonnieren</h2>
+    <div class="zeilen-liste">
+      <a class="zeile" href="${escapeHtml(kalenderBasis + (team.kalender ?? ""))}">
+        <span class="zeile__text"><span class="zeile__titel">Spielplan abonnieren</span></span>
+        <span class="zeile__pfeil" aria-hidden="true">›</span>
+      </a>
+      <a class="zeile" href="${escapeHtml(kalenderBasis + (team.trainingsKalender ?? ""))}">
+        <span class="zeile__text"><span class="zeile__titel">Trainingszeiten abonnieren</span></span>
+        <span class="zeile__pfeil" aria-hidden="true">›</span>
+      </a>
+    </div>
+    <p class="meta">Einmal abonnieren – Verlegungen kommen automatisch&nbsp;an.</p>`;
 
   return `<aside class="fluss">
-    ${ansprechpartnerKarte}
-    ${heimspieleKarte}
-    ${kalenderKarte}
+    ${ansprechpartnerAbschnitt}
+    ${heimspieleAbschnitt}
+    ${kalenderAbschnitt}
   </aside>`;
 }
 
@@ -606,15 +678,28 @@ function weitereMannschaftenAbschnitt(team, daten) {
   // auf der Mannschaften-Übersicht (Name, Jahrgang, "›", ganze Zeile
   // tippbar) statt eigener, unruhiger 137px-Karten (Prüfbefund
   // web-390-mannschaften Nr. 12) – über dieselben Klassen wie teamKarte() in
-  // index.mjs (.team-karte/.raster--mannschaften), auf dem Desktop bleibt
-  // dadurch unverändert das 4-Spalten-Raster (W9, Abschnitt 10: gleicher
-  // Linktext "Zur Mannschaft ›" wie auf der Übersicht).
+  // index.mjs (.team-karte/.raster--mannschaften). W10, Entscheidung E
+  // (w10-gemeinsam.md, bestätigt durch quervergleich Nr. 13): "Weitere
+  // Mannschaften" bleibt auf ALLEN Breiten eine Listenzeile (Name fett,
+  // Jahrgang klein, "›") statt der großen Versal-Karte, die die
+  // Mannschafts-Übersicht für ihre Hauptkarten verwendet – der Zusatz
+  // "team-karte--zeile" schaltet ab 640px auf dieselbe schlanke Zeilenoptik
+  // wie unter 640px um (siehe komponenten.css); das Desktop-Raster
+  // (.raster--mannschaften) ordnet diese Zeilen weiterhin in bis zu vier
+  // Spalten an.
+  // W10-Nachprüfung (offen Nr. 7): Entscheidung 2/A gilt ausdrücklich auch
+  // hier – Teams ohne Jahrgang (die Herren, kategorie "Senioren") zeigen
+  // keine Kategorie-Bezeichnung ("Senioren"), sondern die Staffel ("Kreisliga
+  // A, Gruppe 1"), wie schon auf der eigenen Übersichtskarte derselben
+  // Mannschaft. jahrgangPraefix(t) gäbe hier sonst wörtlich "Senioren" aus
+  // (siehe jahrgangPraefix() oben).
+  const weitereMetaHtml = (t) => (t.kategorie === "Senioren" ? staffelLesbar(t.staffel) : jahrgangPraefix(t));
   const karten = andere
     .map(
-      (t) => `<a class="karte karte--link team-karte" href="${PFAD}mannschaften/${t.slug}/">
+      (t) => `<a class="karte karte--link team-karte team-karte--zeile" href="${PFAD}mannschaften/${t.slug}/">
       <span class="team-karte__haupt">
         <span class="karte__titel">${teamNameHtml(t.name)}</span>
-        <span class="karte__meta">${jahrgangPraefix(t)}</span>
+        <span class="karte__meta">${weitereMetaHtml(t)}</span>
       </span>
       <span class="karte__mehr">Zur Mannschaft ›</span>
       <span class="team-karte__pfeil" aria-hidden="true">›</span>
