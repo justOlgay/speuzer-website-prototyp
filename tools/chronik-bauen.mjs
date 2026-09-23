@@ -481,11 +481,24 @@ function appSeite({ kapitel, bildKarte, rels, basisCss }) {
         `    <button class="tag filter-knopf${i === 0 ? " filter-knopf--aktiv" : ""}" type="button" data-kapitel="${escapeHtml(k.slug)}">${escapeHtml(k.kurz)}</button>`
     )
     .join("\n");
+  // Blättern am Kapitelende wie auf der Website (‹ vorheriges · nächstes ›),
+  // damit niemand zum Weiterlesen bis zur Kapitelwahl hochscrollen muss.
+  const blaettern = (i) => {
+    const vorher = kapitel[i - 1];
+    const nachher = kapitel[i + 1];
+    const knopf = (k, text) =>
+      `<button class="tag filter-knopf kapitel-blaettern__knopf" type="button" data-kapitel="${escapeHtml(k.slug)}">${escapeHtml(text)}</button>`;
+    return `      <div class="kapitel-blaettern">
+        ${vorher ? knopf(vorher, "‹ " + vorher.kurz) : "<span></span>"}
+        ${nachher ? knopf(nachher, nachher.kurz + " ›") : "<span></span>"}
+      </div>`;
+  };
   const abschnitte = kapitel
     .map(
       (k, i) => `  <div class="kapitel" id="kapitel-${escapeHtml(k.slug)}"${i === 0 ? "" : " hidden"}>
-      <h2 class="abschnittstitel">${escapeHtml(k.titel)}</h2>
+      <h2 class="abschnittstitel kapitel-titel">${escapeHtml(k.titel)}</h2>
 ${k.lead ? `      <p class="kapitel-lead">${escapeHtml(k.lead)}</p>\n` : ""}${appKapitelHtml(k, { rels, bildKarte, bildBasis })}
+${blaettern(i)}
   </div>`
     )
     .join("\n");
@@ -556,6 +569,12 @@ ${basisCss}
 .chronik-tabelle td { padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
 .chronik-tabelle tbody tr:nth-child(odd) { background: var(--blau-50); }
 .chronik-pdf { margin-top: var(--sp-6); }
+/* Gleichmäßige Innenabstände: erster und letzter Absatz ohne Außenrand */
+.kapitel .karte > :first-child { margin-top: 0; }
+.kapitel .karte > :last-child { margin-bottom: 0; }
+.kapitel .karte + .karte { margin-top: var(--sp-3); }
+.kapitel-blaettern { display: flex; justify-content: space-between; gap: var(--sp-3); margin-top: var(--sp-5); }
+.kapitel-blaettern__knopf { min-height: 44px; font-family: inherit; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -600,15 +619,17 @@ ${abschnitte}
       var passt = b.getAttribute("data-kapitel") === slug;
       if (passt) b.classList.add("filter-knopf--aktiv");
       else b.classList.remove("filter-knopf--aktiv");
-      if (passt && b.scrollIntoView) {
-        b.scrollIntoView({ block: "nearest", inline: "center" });
-      }
     });
-    if (scrollen) window.scrollTo(0, 0);
+    if (scrollen) {
+      var ziel = document.getElementById("kapitel-" + slug);
+      var y = ziel ? ziel.getBoundingClientRect().top + window.pageYOffset - 12 : 0;
+      window.scrollTo(0, Math.max(0, y));
+    }
     return true;
   }
 
-  knoepfe.forEach(function (b) {
+  var alleWahl = knoepfe.concat([].slice.call(document.querySelectorAll(".kapitel-blaettern__knopf")));
+  alleWahl.forEach(function (b) {
     b.addEventListener("click", function () {
       var slug = b.getAttribute("data-kapitel");
       zeige(slug, true);
