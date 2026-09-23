@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { bild } from "../../vorlagen/bild.mjs";
-import { mailLink, brotkrume, ruecklinkAbschnitt } from "../../vorlagen/hilfen.mjs";
+import { mailLink, ruecklink } from "../../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/verein/ueber-uns/" (Tiefe 2), daher immer
 // "../../" (siehe pfadZurWurzel() in tools/build.mjs).
@@ -73,7 +73,7 @@ function downloadKnopf(eintrag, text) {
 function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
-    ${brotkrume([{ text: "Verein", href: `${PFAD}verein/` }, { text: "Über uns" }])}
+    ${ruecklink(`${PFAD}verein/`, "Verein")}
     <h1>Über uns</h1>
     <p class="seitenkopf__lead">Frankfurter Fußballverein Sportfreunde 1904 e.V. – im Gallus sagt man einfach „die Speuzer“.</p>
   </div>
@@ -152,7 +152,6 @@ export function seite(daten) {
     geschichteAbschnitt(daten),
     zahlenAbschnitt(),
     kinderschutzAbschnitt(daten),
-    ruecklinkAbschnitt(`${PFAD}verein/`, "Verein"),
   ].join("\n");
 
   return {

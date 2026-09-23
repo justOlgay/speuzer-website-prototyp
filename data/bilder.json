@@ -513,23 +513,18 @@
     }
   },
   "vorstand-olgay-ozkan": {
-    "breite": 1000,
-    "hoehe": 1500,
+    "breite": 645,
+    "hoehe": 860,
     "varianten": {
       "480": {
         "avif": "vorstand-olgay-ozkan-480.avif",
         "webp": "vorstand-olgay-ozkan-480.webp",
         "jpg": "vorstand-olgay-ozkan-480.jpg"
       },
-      "960": {
-        "avif": "vorstand-olgay-ozkan-960.avif",
-        "webp": "vorstand-olgay-ozkan-960.webp",
-        "jpg": "vorstand-olgay-ozkan-960.jpg"
-      },
-      "1000": {
-        "avif": "vorstand-olgay-ozkan-1000.avif",
-        "webp": "vorstand-olgay-ozkan-1000.webp",
-        "jpg": "vorstand-olgay-ozkan-1000.jpg"
+      "645": {
+        "avif": "vorstand-olgay-ozkan-645.avif",
+        "webp": "vorstand-olgay-ozkan-645.webp",
+        "jpg": "vorstand-olgay-ozkan-645.jpg"
       }
     }
   },

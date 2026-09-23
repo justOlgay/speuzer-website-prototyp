@@ -1,21 +1,21 @@
-// Verein-Verteiler /verein/ (W3) – "aus einem Guss" mit der App: zwei
-// Abteilungskarten (Fußball, Karneval) und darunter die Liste "Der Verein" in
-// exakt der App-Reihenfolge (Verein_v3, src/app/Verein_v3.html), plus die
-// zwei Website-Zusätze "Mach mit · Ehrenamt" und "Fanshop & Teamshop" am
-// Ende (W3-Spezifikation Abschnitt 1 und 7). Der bisherige Seiteninhalt
-// (Wer wir sind, Zahlen, Kinderschutz) ist vollständig nach
-// /verein/ueber-uns/ umgezogen (src/seiten/verein/ueber-uns.mjs) – hier
-// nichts gelöscht, nur verschoben.
+// Verein-Verteiler /verein/ (W3, Abteilungskarten entfernt in W7) – die
+// Liste "Der Verein" in exakt der App-Reihenfolge (Verein_v3,
+// src/app/Verein_v3.html), plus die zwei Website-Zusätze "Mach mit ·
+// Ehrenamt" und "Fanshop & Teamshop" am Ende (W3-Spezifikation Abschnitt 1
+// und 7). Der bisherige Seiteninhalt (Wer wir sind, Zahlen, Kinderschutz) ist
+// vollständig nach /verein/ueber-uns/ umgezogen
+// (src/seiten/verein/ueber-uns.mjs) – hier nichts gelöscht, nur verschoben.
+//
+// W7 (Entscheidung Olgay 23.09.2026, Abschnitt 2): der frühere Abschnitt
+// "Abteilungen" (Karten Fußball/Karneval) ist entfallen – auf der Website
+// sind Mannschaften und Karneval eigene Hauptmenüpunkte, die Karten
+// verlinkten doppelt auf dieselben Ziele. In der App bleiben die Karten
+// unverändert (src/app/Verein_v3.html), weil dort der Tab "Verein" der
+// einzige Weg zu Fußball und Karneval ist.
 
 // Diese Seite liegt immer unter "/verein/" (Tiefe 1), daher immer "../"
 // (siehe pfadZurWurzel() in tools/build.mjs).
 const PFAD = "../";
-
-function liesVereinIcon() {
-  // Verein-Icon wie im Klick-Prototyp (src/appkonzept/bildschirme.mjs,
-  // ICON.verein): SVG-Raute, viewBox 0 0 24 24, stroke currentColor.
-  return `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 20 12 12 21 4 12z"/></svg>`;
-}
 
 function escapeHtml(text) {
   return String(text ?? "")
@@ -32,36 +32,6 @@ function seitenkopfAbschnitt() {
   <div class="container">
     <h1>Verein</h1>
     <p class="seitenkopf__lead">Frankfurter Fußballverein Sportfreunde 1904 e.V. – im Gallus sagt man einfach „die Speuzer“.</p>
-  </div>
-</section>`;
-}
-
-// ---------- Abteilungen (zwei Karten, wie im App-Konzept) ----------
-
-function abteilungKarte(titel, untertitel, ziel) {
-  return `<a class="karte karte--link karte--abteilung" href="${ziel}">
-      ${liesVereinIcon()}
-      <span class="karte__titel">${escapeHtml(titel)}</span>
-      <span class="karte__meta">${escapeHtml(untertitel)}</span>
-    </a>`;
-}
-
-// W3b, Prüfer-Befund "klein": Untertitel aus den Daten statt fest kodiert
-// (daten.teams.length bzw. daten.karneval.gruppen.length).
-function abteilungenAbschnitt(daten) {
-  const teamAnzahl = daten.teams?.length ?? 0;
-  const gruppenAnzahl = daten.karneval?.gruppen?.length ?? 0;
-  const karten = [
-    abteilungKarte("Fußball", `${teamAnzahl} Mannschaften, Herren bis G-Jugend`, `${PFAD}mannschaften/`),
-    abteilungKarte("Karneval", `Die Schnauzer · ${gruppenAnzahl} Gruppen`, `${PFAD}verein/karneval/`),
-  ].join("\n    ");
-
-  return `<section class="abschnitt">
-  <div class="container fluss">
-    <h2>Abteilungen</h2>
-    <div class="raster raster--2">
-    ${karten}
-    </div>
   </div>
 </section>`;
 }
@@ -101,9 +71,11 @@ function derVereinAbschnitt() {
     zeile("Fanshop & Teamshop", "Fanartikel und Teamausstattung", `${PFAD}shop/`),
   ].join("\n    ");
 
+  // W7: die Überschrift "Der Verein" entfällt – direkt unter dem
+  // Seitenkopf-h1 "Verein" wirkte sie redundant (kein Abteilungen-Abschnitt
+  // mehr dazwischen, siehe Entfernung oben).
   return `<section class="abschnitt--hell abschnitt">
   <div class="container fluss">
-    <h2>Der Verein</h2>
     <div class="zeilen-liste">
     ${zeilen}
     </div>
@@ -112,7 +84,7 @@ function derVereinAbschnitt() {
 }
 
 export function seite(daten) {
-  const inhalt = [seitenkopfAbschnitt(), abteilungenAbschnitt(daten), derVereinAbschnitt()].join("\n");
+  const inhalt = [seitenkopfAbschnitt(), derVereinAbschnitt()].join("\n");
 
   return {
     url: "/verein/",

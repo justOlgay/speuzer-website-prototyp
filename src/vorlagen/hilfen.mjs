@@ -119,6 +119,45 @@ export const FUSSBALLDE_WIDGET_LADER = `<script>
 })();
 </script>`;
 
+// ---------- Spiele-Kasten mit Höhenbegrenzung + Knopf (W7) ----------
+// Ein FUSSBALL.DE-Kasten vom Typ "team-matches"/"club-matches" wächst per
+// postMessage auf seine volle Inhaltshöhe (siehe Nachlader-Skript, das die
+// Widget-iframe-Höhe setzt) – bei vielen Spielen macht das die Seite sehr
+// lang. spieleKastenHtml() klappt den Kasten auf rund fünf Spiele zusammen
+// (kein inneres Scrollen, overflow:hidden auf dem äußeren Kasten, das iframe
+// selbst behält seine volle Höhe unverändert), mit weichem Verlauf unten und
+// einem Knopf "Alle Spiele anzeigen"/"Weniger anzeigen" (W7-Spezifikation
+// Abschnitt 4). widgetHtml ist der fertige .fussballde-wrap-Block.
+export function spieleKastenHtml(widgetHtml) {
+  return `<div class="spiele-kasten-block">
+      <div class="spiele-kasten" data-spiele-kasten>
+        ${widgetHtml}
+      </div>
+      <p class="knopfzeile">
+        <button type="button" class="knopf knopf--sekundaer" data-spiele-knopf aria-expanded="false">Alle Spiele anzeigen</button>
+      </p>
+    </div>`;
+}
+
+// Einmal je Seite einbinden, die spieleKastenHtml() verwendet (wie
+// FUSSBALLDE_WIDGET_LADER). Rein clientseitig: Höhenbegrenzung aufheben,
+// Knopftext und aria-expanded umschalten.
+export const SPIELE_KASTEN_SKRIPT = `<script>
+(function () {
+  document.querySelectorAll('[data-spiele-knopf]').forEach(function (knopf) {
+    var block = knopf.closest('.spiele-kasten-block');
+    var kasten = block && block.querySelector('[data-spiele-kasten]');
+    if (!kasten) return;
+    knopf.addEventListener('click', function () {
+      var offen = kasten.classList.toggle('ist-offen');
+      knopf.textContent = offen ? 'Weniger anzeigen' : 'Alle Spiele anzeigen';
+      knopf.setAttribute('aria-expanded', offen ? 'true' : 'false');
+      if (!offen) kasten.scrollIntoView({ block: 'nearest' });
+    });
+  });
+})();
+</script>`;
+
 // ---------- Mail-Link mit <wbr> vor "@" und vor jedem "." danach ----------
 
 // P7-Korrektur A3: <wbr> nur noch direkt vor dem "@", nicht mehr vor jedem
@@ -138,39 +177,19 @@ export function mailLink(adresse, text) {
   return `<a class="mail" href="mailto:${escapeHtml(adresse ?? "")}">${anzeige}</a>`;
 }
 
-// ---------- Brotkrumen + Rücklink (W3) ----------
+// ---------- Rücklink (W3, umgebaut in W7) ----------
 // Gemeinsamer Baustein für alle Unterseiten (Verein-Unterseiten,
-// Mannschafts- und Spielplan-Teamseiten, Tabellen): oben eine verlinkte
-// Brotkrume ("Verein › Vorstand & Kontakt"), unten ein Rücklink
-// ("‹ Zurück zu Verein"). Pfeil-Glyphen einheitlich "‹"/"›", keine Emojis
-// (Prüfer-Befund, W3-Spezifikation Abschnitt 7).
-
-// teile: Array von { text, href? } – href fehlt beim letzten (aktuellen)
-// Eintrag. Wird direkt in den Seitenkopf-Container eingesetzt (vor dem h1).
-// Jeder Eintrag steht in einem eigenen <li> (Tippziel-Ausnahme in
-// tools/pruefen.mjs gilt für Fließtext-Links in p/li – ein reiner
-// Brotkrumen-Link ist kein 44×44px-Tippziel wie ein Knopf).
-export function brotkrume(teile) {
-  const eintraege = teile
-    .map((t, i) => {
-      const istLetztes = i === teile.length - 1;
-      const inhalt =
-        t.href && !istLetztes
-          ? `<a href="${escapeHtml(t.href)}">${escapeHtml(t.text)}</a>`
-          : `<span aria-current="page">${escapeHtml(t.text)}</span>`;
-      return `<li>${inhalt}</li>`;
-    })
-    .join('<li aria-hidden="true">›</li>');
-  return `<nav aria-label="Brotkrumen"><ol class="brotkrumen">${eintraege}</ol></nav>`;
-}
-
-// Rücklink-Abschnitt "‹ Zurück zu …" ans Ende einer Seite.
-export function ruecklinkAbschnitt(href, ziel) {
-  return `<section class="abschnitt">
-  <div class="container fluss">
-    <p><a href="${escapeHtml(href)}">‹ Zurück zu ${escapeHtml(ziel)}</a></p>
-  </div>
-</section>`;
+// Mannschaftsseiten, Kontakt, Shop): ein einzelner, gut sichtbarer
+// Zurück-Link oben links über der Überschrift, z. B. "‹ Mannschaften" oder
+// "‹ Verein". Ersetzt seit W7 die zweiteilige Lösung aus W3 (Brotkrume oben
+// + eigener Rücklink-Abschnitt unten) – beides zusammen wirkte doppelt.
+// Vorbild ist der Rücklink in der App ("‹ Alle Mannschaften",
+// src/app/Mannschaften-App.html). Kein Rücklink auf Seiten, die selbst
+// Menüpunkte der Website sind (dort wird diese Funktion nicht aufgerufen).
+// Pfeil-Glyph einheitlich "‹", keine Emojis (Prüfer-Befund, W3-Spezifikation
+// Abschnitt 7 gilt weiter).
+export function ruecklink(href, ziel) {
+  return `<a class="ruecklink" href="${escapeHtml(href)}">‹ ${escapeHtml(ziel)}</a>`;
 }
 
 // ---------- Nächste Spiele ----------
@@ -396,4 +415,137 @@ export function absaetze(text) {
   }
   if (laufend.length) ergebnis.push(laufend.join(" "));
   return ergebnis;
+}
+
+// ---------- Trainerporträts (W7, Abschnitt 3) ----------
+// Quelle: das öffentliche Abteilungen-Worksheet 6a1ec5fcf68a05bf129cdb7a
+// (appack.de erlaubt CORS von cdn.appack.de und github.io aus – also sowohl
+// auf der Live-Website als auch auf den GitHub-Pages-Vorschauseiten dieses
+// Prototyps). Die Felder sliderImage1…sliderImage5 enthalten je Team
+// Einzelporträts der Trainer in Trainer-Reihenfolge. Keine Bilddateien und
+// keine Bild-URLs landen im Repo – alles wird erst zur Laufzeit im Browser
+// geladen (progressive enhancement: statisch stehen nur Initialen).
+
+const TRAINERFOTOS_WORKSHEET_ID = "6a1ec5fcf68a05bf129cdb7a";
+
+// Wie SCHLUESSEL_MUSTER/schluesselAusTeamname() in
+// src/app/Mannschaften-App.html – hier als [Schlüssel, Regex-Quelltext],
+// damit sich das Muster per JSON.stringify() in den clientseitigen
+// Nachlader einbetten lässt (siehe trainerFotosSkript()).
+const TEAM_SCHLUESSEL_MUSTER = [
+  ["herren", "herren"],
+  ["a-jugend", "\\ba[\\s-]?jugend\\b"],
+  ["d1", "\\bd[\\s-]?1\\b"],
+  ["d2", "\\bd[\\s-]?2\\b"],
+  ["d3", "\\bd[\\s-]?3\\b"],
+  ["e1", "\\be[\\s-]?1\\b"],
+  ["e2", "\\be[\\s-]?2\\b"],
+  ["e3", "\\be[\\s-]?3\\b"],
+  ["f1", "\\bf[\\s-]?1\\b"],
+  ["f2", "\\bf[\\s-]?2\\b"],
+  ["g-jugend", "\\bg[\\s-]?jugend\\b"],
+];
+
+// "Martin Reyschmidt" -> "MR", ein einzelner Name -> erster Buchstabe.
+export function initialen(name) {
+  const teile = String(name ?? "").trim().split(/\s+/).filter(Boolean);
+  if (teile.length === 0) return "";
+  if (teile.length === 1) return teile[0].slice(0, 1).toUpperCase();
+  return (teile[0].slice(0, 1) + teile[teile.length - 1].slice(0, 1)).toUpperCase();
+}
+
+// Statischer (build-seitiger) Rollentext je Trainer-Zeile: data/teams.json
+// kennt nur Namen, kein Geschlecht/keine Rolle je Person (anders als das
+// Worksheet mit firstContactTitle/secondContactTitle, z. B. "Trainerin"). Um
+// nie eine falsche Anrede zu raten, bleibt es bei der neutralen, bereits
+// vorher verwendeten Bezeichnung "Trainerteam" – nur bei genau einer Person
+// eindeutig "Trainer" (W7-Spezifikation Abschnitt 3: "'Trainer' … sonst
+// 'Trainerteam'"; die zusätzlichen Varianten "Trainerin"/"Co-Trainer" sind
+// eine offene Frage, siehe Abschlussbericht).
+export function trainerRolleText(anzahl) {
+  return anzahl === 1 ? "Trainer" : "Trainerteam";
+}
+
+// Ein <span> je Trainer:in mit Initialen-Platzhalter (data-trainer-foto ist
+// der Index für trainerFotosSkript() unten), Name (fett) und Rolle (klein).
+export function trainerZeileHtml(name, index, rolleText) {
+  return `<div class="person-mini">
+      <span class="person-mini__bild person-mini__bild--platzhalter" data-trainer-foto="${index}" aria-hidden="true">${escapeHtml(initialen(name))}</span>
+      <span class="person-mini__text">
+        <span class="person-mini__name">${escapeHtml(name)}</span>
+        <span class="person-mini__rolle meta">${escapeHtml(rolleText)}</span>
+      </span>
+    </div>`;
+}
+
+// Einmal je Teamseite: lädt zur Laufzeit das Worksheet, sucht die zum
+// team.slug passende Zeile über denselben Namens-Abgleich wie in der App
+// (schluesselAusTeamname) und ersetzt die Initialen-Platzhalter durch echte
+// Porträts – aber nur, wenn mindestens so viele Bilder wie Trainer:innen
+// vorhanden sind (nie ein Foto falsch zuordnen). Bild i (1-basiert) gehört
+// zu Trainer:in i. Schlägt der Abruf fehl (z. B. CORS auf localhost, kein
+// Netz) bleiben einfach die Initialen stehen – kein Fehler, kein Crash.
+export function trainerFotosSkript(team) {
+  const namen = team?.trainer ?? [];
+  if (!namen.length) return "";
+
+  return `<script>
+(function () {
+  var TEAM_SCHLUESSEL = ${JSON.stringify(team.slug)};
+  var ANZAHL_TRAINER = ${JSON.stringify(namen.length)};
+  var MUSTER = ${JSON.stringify(TEAM_SCHLUESSEL_MUSTER)};
+
+  function schluesselAusTeamname(name) {
+    var t = String(name || "");
+    for (var i = 0; i < MUSTER.length; i++) {
+      if (new RegExp(MUSTER[i][1], "i").test(t)) return MUSTER[i][0];
+    }
+    return null;
+  }
+
+  fetch("https://appack.de/rest-api/public/workbook/worksheet/${TRAINERFOTOS_WORKSHEET_ID}", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({}),
+  })
+    .then(function (antwort) { return antwort.ok ? antwort.json() : []; })
+    .then(function (zeilen) {
+      if (!Array.isArray(zeilen)) return;
+      var zeile = null;
+      for (var i = 0; i < zeilen.length; i++) {
+        if (schluesselAusTeamname(zeilen[i] && zeilen[i].team) === TEAM_SCHLUESSEL) {
+          zeile = zeilen[i];
+          break;
+        }
+      }
+      if (!zeile) return;
+
+      var bilder = [];
+      for (var n = 1; n <= 5; n++) {
+        var url = zeile["sliderImage" + n];
+        if (typeof url === "string" && /^https?:\\/\\//.test(url)) bilder.push(url);
+      }
+      if (bilder.length < ANZAHL_TRAINER) return;
+
+      document.querySelectorAll("[data-trainer-foto]").forEach(function (platzhalter) {
+        var idx = Number(platzhalter.getAttribute("data-trainer-foto"));
+        var url = bilder[idx];
+        if (!url) return;
+        var testbild = new Image();
+        testbild.onload = function () {
+          var echtesBild = document.createElement("img");
+          echtesBild.src = url;
+          echtesBild.alt = "";
+          echtesBild.loading = "lazy";
+          echtesBild.className = "person-mini__bild";
+          platzhalter.replaceWith(echtesBild);
+        };
+        testbild.src = url;
+      });
+    })
+    .catch(function () {
+      // Kein Netz/CORS (z. B. lokaler Prototyp) – Initialen bleiben stehen.
+    });
+})();
+</script>`;
 }

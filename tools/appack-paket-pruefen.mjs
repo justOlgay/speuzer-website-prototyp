@@ -14,7 +14,7 @@
 // W2: fehlgeschlagene Requests und HTTP-Fehler (>= 400) von fussball.de-
 // Adressen (die FUSSBALL.DE-Widgets sind dort nur für cdn.appack.de
 // freigegeben, siehe LIESMICH) sind erwartet und zählen nicht als Fehler –
-// siehe istFussballdeAdresse() unten. Alles andere bleibt ein echter Fehler.
+// siehe istDomainFreigabeAdresse() unten. Alles andere bleibt ein echter Fehler.
 
 import puppeteer from "puppeteer-core";
 import { readFileSync, readdirSync, existsSync } from "node:fs";
@@ -92,10 +92,17 @@ function starteMiniServer() {
 // next.fussball.de/widget/…) – das ist erwartet (Domain-Freigabe) und kein
 // Seitenfehler. Alle anderen Fehler (auch von justolgay.github.io, dem
 // Spielplan-Generator) bleiben echte Fehler.
-function istFussballdeAdresse(url) {
+//
+// W7, Abschnitt 3: dieselbe Domain-Freigabe gilt für den öffentlichen
+// appack.de-REST-Aufruf der Trainerfotos (trainerFotosSkript(), siehe
+// hilfen.mjs) – auch die appack-API ist per CORS nur für cdn.appack.de und
+// github.io freigegeben, lokal also erwartet ein HTTP-403/CORS-Fehler.
+function istDomainFreigabeAdresse(url) {
   try {
     const host = new URL(url).hostname;
-    return host === "fussball.de" || host.endsWith(".fussball.de");
+    if (host === "fussball.de" || host.endsWith(".fussball.de")) return true;
+    if (host === "appack.de" || host.endsWith(".appack.de")) return true;
+    return false;
   } catch {
     return false;
   }
@@ -109,7 +116,7 @@ async function pruefeSeiteBeiBreite(browser, dateiname, breite) {
   page.on("pageerror", (err) => fehler.push(`pageerror: ${err.message}`));
   page.on("requestfailed", (req) => {
     const eintrag = `requestfailed: ${req.url()} (${req.failure()?.errorText ?? "unbekannt"})`;
-    if (istFussballdeAdresse(req.url())) {
+    if (istDomainFreigabeAdresse(req.url())) {
       erwartet.push(`erwartet (Domain-Freigabe): ${eintrag}`);
     } else {
       fehler.push(eintrag);
@@ -118,7 +125,7 @@ async function pruefeSeiteBeiBreite(browser, dateiname, breite) {
   page.on("response", (resp) => {
     if (resp.status() >= 400) {
       const eintrag = `HTTP ${resp.status()}: ${resp.url()}`;
-      if (istFussballdeAdresse(resp.url())) {
+      if (istDomainFreigabeAdresse(resp.url())) {
         erwartet.push(`erwartet (Domain-Freigabe): ${eintrag}`);
       } else {
         fehler.push(eintrag);

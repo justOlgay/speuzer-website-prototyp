@@ -44,9 +44,10 @@
    Ersetzt in der App den bisherigen Weg über das Modul "Mannschaften"
    (Mannschaften_v3.tpl) + das separate Modul "Spielplan & Tabellen"
    (Spielplan-App.html): eine Seite mit Listenansicht (Teamkarten aus dem
-   Abteilungen-Worksheet) und Detailansicht je Team (Nächstes Spiel,
-   Spielplan der Saison, Tabelle bzw. Kinderfestival – wie bisher auf
-   Spielplan-App.html), Wechsel über location.hash + location.reload() (die
+   Abteilungen-Worksheet) und Detailansicht je Team (Spiele, Tabelle bzw.
+   Kinderfestival – "Nächstes Spiel" als eigener Abschnitt ist seit W7
+   entfallen, siehe baueSpieleKarte()), Wechsel über location.hash +
+   location.reload() (die
    FUSSBALL.DE-Widgets initialisieren nur beim Laden, siehe Kommentar unten).
    Wird von tools/app-optik/tpl-bauen.mjs (Ausgabeart "statisch") NICHT mit
    dem appack-FreeMarker-Titelausdruck versehen (fester <title>), sondern 1:1
@@ -159,6 +160,37 @@
   border-top: 1px solid var(--line);
 }
 
+/* W7, Abschnitt 3: Trainerporträt (40px, kleiner als die 48px auf der
+   Website) + Name/Titel nebeneinander, als gemeinsamer erster Flex-Kind von
+   .team-karte__kontakt (zweites Kind bleibt .team-karte__kontakt-aktionen,
+   space-between wie bisher). */
+.team-karte__kontakt-person {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+
+.person-mini__bild {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 22%;
+  border: 1px solid var(--line);
+}
+
+.person-mini__bild--platzhalter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--blau-50);
+  color: var(--blau-700);
+  font-weight: 700;
+  font-size: 13px;
+}
+
 .team-karte__kontakt-text {
   font-size: 14px;
   font-weight: 600;
@@ -242,6 +274,44 @@
 
 .tabelle-wischen-hinweis.ist-sichtbar {
   display: block;
+}
+
+/* W7, Abschnitt 4: "Spiele"-Kasten (team-matches/club-matches) auf rund fünf
+   Spiele begrenzt statt der ganzen Saison – kein inneres Scrollen, das
+   Widget-iframe wächst unverändert per postMessage auf seine volle Höhe
+   (siehe baueSpieleKarte()). 1250px = gemessener Kopf des echten Widgets
+   (Banner+Titel+Pfeile, ~300px) + 5 × echte Spielzeile (~190px), gemessen
+   über scratchpad/app-echt.mjs unter der echten cdn.appack.de-Adresse
+   (siehe Abschlussbericht) – der Plan-Schätzwert 660px war zu niedrig.
+   Gradient endet in var(--surface), weil der Kasten in einer .karte steckt
+   (anders als auf der Website). */
+.spiele-kasten {
+  position: relative;
+  max-height: 1250px;
+  overflow: hidden;
+}
+
+.spiele-kasten.ist-offen {
+  max-height: none;
+}
+
+.spiele-kasten::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--sp-6);
+  background: linear-gradient(to bottom, transparent, var(--surface));
+  pointer-events: none;
+}
+
+.spiele-kasten.ist-offen::after {
+  display: none;
+}
+
+.spiele-kasten-knopf {
+  margin-top: var(--sp-3);
 }
 
 .kinderfestival-iframe {
@@ -414,9 +484,62 @@
     return teile.join(" · ");
   }
 
+  // ---------- Trainerporträts in den Kontaktzeilen (W7, Abschnitt 3)
+  // ---------- Bild i (1-basiert im Worksheet, hier 0-basiert im Array)
+  // gehört zu Kontakt i, nur wenn mindestens so viele Bilder wie angezeigte
+  // Kontakte vorhanden sind (nie ein Foto falsch zuordnen). Initialen wie
+  // initialen() in src/vorlagen/hilfen.mjs (Website), hier dupliziert, weil
+  // diese Seite keine Module importiert.
+
+  function bilderFuerZeile(zeile) {
+    var bilder = [];
+    for (var n = 1; n <= 5; n++) {
+      var url = textFeld(zeile, "sliderImage" + n);
+      if (bildUrlGueltig(url)) bilder.push(url);
+    }
+    return bilder;
+  }
+
+  function kontaktAnzahl(zeile) {
+    var k1 = hatFeld(zeile, "firstContactTitle") || hatFeld(zeile, "firstContactName");
+    var k2 = hatFeld(zeile, "secondContactTitle") || hatFeld(zeile, "secondContactName");
+    return (k1 ? 1 : 0) + (k2 ? 1 : 0);
+  }
+
+  function initialenAus(name) {
+    var teile = String(name || "").trim().split(/\s+/).filter(Boolean);
+    if (!teile.length) return "";
+    if (teile.length === 1) return teile[0].slice(0, 1).toUpperCase();
+    return (teile[0].slice(0, 1) + teile[teile.length - 1].slice(0, 1)).toUpperCase();
+  }
+
+  // Initialen sofort sichtbar (Platzhalter), Foto ersetzt sie erst nach
+  // erfolgreichem Laden (Rückbau wie bildMitRueckbau: bei Ladefehler bleiben
+  // einfach die Initialen stehen, kein kaputtes Bild).
+  function baueKontaktPortrait(name, bildUrl) {
+    var platzhalter = document.createElement("span");
+    platzhalter.className = "person-mini__bild person-mini__bild--platzhalter";
+    platzhalter.setAttribute("aria-hidden", "true");
+    platzhalter.textContent = initialenAus(name);
+
+    if (bildUrlGueltig(bildUrl)) {
+      var testbild = new Image();
+      testbild.onload = function () {
+        var echtesBild = document.createElement("img");
+        echtesBild.src = bildUrl;
+        echtesBild.alt = "";
+        echtesBild.loading = "lazy";
+        echtesBild.className = "person-mini__bild";
+        if (platzhalter.parentNode) platzhalter.replaceWith(echtesBild);
+      };
+      testbild.src = bildUrl;
+    }
+    return platzhalter;
+  }
+
   // ---------- Kontaktzeile (Trainer/in o. Ä., wie Mannschaften_v3.html) ----------
 
-  function baueKontaktZeile(zeile, titelFeld, nameFeld, mailFeld, phoneFeld, handyFeld) {
+  function baueKontaktZeile(zeile, titelFeld, nameFeld, mailFeld, phoneFeld, handyFeld, bildUrl) {
     var titel = textFeld(zeile, titelFeld);
     var name = textFeld(zeile, nameFeld);
     if (!titel && !name) return null;
@@ -424,10 +547,15 @@
     var kontakt = document.createElement("div");
     kontakt.className = "team-karte__kontakt";
 
+    var person = document.createElement("span");
+    person.className = "team-karte__kontakt-person";
+    person.appendChild(baueKontaktPortrait(name, bildUrl));
+
     var text = document.createElement("span");
     text.className = "team-karte__kontakt-text";
     text.textContent = [titel, name].filter(Boolean).join(" ");
-    kontakt.appendChild(text);
+    person.appendChild(text);
+    kontakt.appendChild(person);
 
     var aktionen = document.createElement("span");
     aktionen.className = "team-karte__kontakt-aktionen";
@@ -529,12 +657,16 @@
     var karte = document.createElement("div");
     karte.className = "karte team-karte";
 
-    var bildUrl = [textFeld(team, "sliderImage1"), textFeld(team, "categoryImage")].filter(bildUrlGueltig)[0];
-    if (bildUrl) {
-      karte.appendChild(bildMitRueckbau(bildUrl, "team-karte__bild", ""));
-    }
-
+    // W7, Abschnitt 3: das große Kartenbild entfällt bei Mannschaften (wirkte
+    // "reingerotzt", die Trainer-Einzelporträts stehen jetzt stattdessen in
+    // den Kontaktzeilen, siehe baueKontaktZeile()). Fußballschulen-Karten
+    // behalten ihr Logo (contain, .team-karte__bild).
     if (istZusatzangebot) {
+      var bildUrl = [textFeld(team, "sliderImage1"), textFeld(team, "categoryImage")].filter(bildUrlGueltig)[0];
+      if (bildUrl) {
+        karte.appendChild(bildMitRueckbau(bildUrl, "team-karte__bild", ""));
+      }
+
       var zusatzTag = document.createElement("span");
       zusatzTag.className = "tag";
       zusatzTag.textContent = "Zusatzangebot, kostenpflichtig";
@@ -580,9 +712,14 @@
       karte.appendChild(liste);
     }
 
-    var kontakt1 = baueKontaktZeile(team, "firstContactTitle", "firstContactName", "firstContactMail", "firstContactPhone", "firstContactHandy");
+    // W7, Abschnitt 3: Porträt-Zuordnung Bild i -> Kontakt i, nur wenn
+    // mindestens so viele Bilder wie angezeigte Kontakte vorhanden sind (nie
+    // ein Foto falsch zuordnen, siehe bilderFuerZeile()/kontaktAnzahl()).
+    var bilder = bilderFuerZeile(team);
+    var bilderReichenFuerKontakte = bilder.length >= kontaktAnzahl(team);
+    var kontakt1 = baueKontaktZeile(team, "firstContactTitle", "firstContactName", "firstContactMail", "firstContactPhone", "firstContactHandy", bilderReichenFuerKontakte ? bilder[0] : null);
     if (kontakt1) karte.appendChild(kontakt1);
-    var kontakt2 = baueKontaktZeile(team, "secondContactTitle", "secondContactName", "secondContactMail", "secondContactPhone", "secondContactHandy");
+    var kontakt2 = baueKontaktZeile(team, "secondContactTitle", "secondContactName", "secondContactMail", "secondContactPhone", "secondContactHandy", bilderReichenFuerKontakte ? bilder[1] : null);
     if (kontakt2) karte.appendChild(kontakt2);
 
     var buttonsBlock = baueButtons(team, buttons);
@@ -642,6 +779,59 @@
       if (typ !== "fussballde_widget:resize") return;
       aktualisiereWischHinweis(wrapper, hinweis);
     });
+    return karte;
+  }
+
+  // W7, Abschnitt 4: wie baueWidgetKarte(), aber zusätzlich auf rund fünf
+  // Spiele geklemmt (.spiele-kasten, kein inneres Scrollen) mit Knopf "Alle
+  // Spiele anzeigen"/"Weniger anzeigen". mitHinweistext steuert den
+  // einleitenden Satz (nur bei der Mannschaftsseite, nicht bei den
+  // vereinsweiten Spielen unten, die schon einen eigenen Lead-Satz haben,
+  // siehe renderVereinsSpiele()).
+  function baueSpieleKarte(widgetId, widgetType, mitHinweistext) {
+    var karte = document.createElement("div");
+    karte.className = "karte";
+
+    if (mitHinweistext) {
+      var lead = document.createElement("p");
+      lead.className = "team-karte__untertitel";
+      lead.style.margin = "0 0 8px";
+      lead.textContent = "Nächste Spiele zuerst, frühere Ergebnisse über die Pfeile im Kasten.";
+      karte.appendChild(lead);
+    }
+
+    var kasten = document.createElement("div");
+    kasten.className = "spiele-kasten";
+    var wrapper = document.createElement("div");
+    wrapper.className = "tabelle-wrapper";
+    wrapper.appendChild(baueWidget(widgetId, widgetType));
+    kasten.appendChild(wrapper);
+    karte.appendChild(kasten);
+
+    var hinweis = document.createElement("p");
+    hinweis.className = "tabelle-wischen-hinweis";
+    hinweis.textContent = "Spiele seitlich wischbar";
+    karte.appendChild(hinweis);
+
+    var knopf = document.createElement("button");
+    knopf.type = "button";
+    knopf.className = "knopf knopf--leise spiele-kasten-knopf";
+    knopf.textContent = "Alle Spiele anzeigen";
+    knopf.setAttribute("aria-expanded", "false");
+    knopf.addEventListener("click", function () {
+      var offen = kasten.classList.toggle("ist-offen");
+      knopf.textContent = offen ? "Weniger anzeigen" : "Alle Spiele anzeigen";
+      knopf.setAttribute("aria-expanded", offen ? "true" : "false");
+      if (!offen) kasten.scrollIntoView({ block: "nearest" });
+    });
+    karte.appendChild(knopf);
+
+    window.addEventListener("message", function (event) {
+      var typ = event.data && typeof event.data === "object" ? event.data.type : event.data;
+      if (typ !== "fussballde_widget:resize") return;
+      aktualisiereWischHinweis(wrapper, hinweis);
+    });
+
     return karte;
   }
 
@@ -713,24 +903,25 @@
 
     var kontaktContainer = document.getElementById("detail-kontakt");
     kontaktContainer.innerHTML = "";
-    var kontakt1 = baueKontaktZeile(zeile, "firstContactTitle", "firstContactName", "firstContactMail", "firstContactPhone", "firstContactHandy");
+    // W7, Abschnitt 3: Porträts auch in der Detailansicht (gleiche
+    // Zuordnungslogik wie in der Listenansicht, siehe baueTeamKarte()).
+    var detailBilder = bilderFuerZeile(zeile);
+    var detailBilderReichen = detailBilder.length >= kontaktAnzahl(zeile);
+    var kontakt1 = baueKontaktZeile(zeile, "firstContactTitle", "firstContactName", "firstContactMail", "firstContactPhone", "firstContactHandy", detailBilderReichen ? detailBilder[0] : null);
     if (kontakt1) kontaktContainer.appendChild(kontakt1);
-    var kontakt2 = baueKontaktZeile(zeile, "secondContactTitle", "secondContactName", "secondContactMail", "secondContactPhone", "secondContactHandy");
+    var kontakt2 = baueKontaktZeile(zeile, "secondContactTitle", "secondContactName", "secondContactMail", "secondContactPhone", "secondContactHandy", detailBilderReichen ? detailBilder[1] : null);
     if (kontakt2) kontaktContainer.appendChild(kontakt2);
 
     var inhalt = document.getElementById("team-inhalt");
     inhalt.innerHTML = "";
 
     if (eintrag.spiele) {
-      var naechstesKarte = document.createElement("div");
-      naechstesKarte.className = "karte";
-      naechstesKarte.appendChild(baueWidget(eintrag.spiele, "next-match"));
-      inhalt.appendChild(baueAbschnitt("Nächstes Spiel", naechstesKarte));
-
-      var saisonKarte = document.createElement("div");
-      saisonKarte.className = "karte";
-      saisonKarte.appendChild(baueWidget(eintrag.spiele, "team-matches"));
-      inhalt.appendChild(baueAbschnitt("Spielplan der Saison", saisonKarte));
+      // W7, Abschnitt 4: der frühere eigene Abschnitt "Nächstes Spiel"
+      // (next-match-Widget) entfällt – der "Spiele"-Kasten (team-matches)
+      // beginnt ohnehin mit den nächsten Spielen, der Abschnitt war doppelt.
+      // Auf rund fünf Spiele begrenzt (baueSpieleKarte(), kein inneres
+      // Scrollen mehr).
+      inhalt.appendChild(baueAbschnitt("Spiele", baueSpieleKarte(eintrag.spiele, "team-matches", true)));
     } else if (team.generatorGruppe) {
       var iframeKarte = document.createElement("div");
       iframeKarte.className = "karte";
@@ -762,7 +953,10 @@
     container.innerHTML = "";
     var widgetId = (WIDGETS.verein || {}).spiele;
     if (!widgetId) return;
-    container.appendChild(baueWidgetKarte(widgetId, "club-matches", "Spiele seitlich wischbar"));
+    // W7, Abschnitt 4: wie auf der Mannschaftsseite auf rund fünf Spiele
+    // begrenzt (kein eigener Lead-Satz – der steht schon statisch über
+    // #verein-spiele-inhalt, siehe Markup).
+    container.appendChild(baueSpieleKarte(widgetId, "club-matches", false));
   }
 
   // ---------- Fehlerhinweis (wie Mannschaften_v3.html) ----------

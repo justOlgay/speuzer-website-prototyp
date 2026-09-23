@@ -17,68 +17,68 @@
     },
     {
       "datei": "web/kontakt.html",
-      "bytes": 9146,
-      "sha256": "e6845be9de9d2dea1b0e2e120b086159190e3fffacd98556b2246d85eb0ceb78"
+      "bytes": 8854,
+      "sha256": "7fce536e377281b44dcf64e3098f2e7c3641c34c318d5542d3d35ab4cc6de279"
     },
     {
       "datei": "web/mannschaften-a-jugend.html",
-      "bytes": 7555,
-      "sha256": "1a27dc63fb7c0241ab4e4af40d88ef99045d60be633daede6c19797b67f1f666"
+      "bytes": 10845,
+      "sha256": "30b75e9e1e5ea801aaca252fcfc3151f240d8b8ad06e49ef9cec98fd9656a8c6"
     },
     {
       "datei": "web/mannschaften-d1.html",
-      "bytes": 7551,
-      "sha256": "4706ffb68ee7dc98bf0c178eaef86c617798cda3d66dcb0c62586c92e02132ce"
+      "bytes": 10834,
+      "sha256": "ecc925c23a7402a35629aa00a96328e1f2659ff54dd04f42a361e8bdace69bb9"
     },
     {
       "datei": "web/mannschaften-d2.html",
-      "bytes": 7550,
-      "sha256": "c2d19f37ec9e328cf9940793588d7afced68bee256b733efd6ab2b2f0eea11a9"
+      "bytes": 10833,
+      "sha256": "0acfba81f4651197ce068d89ff63c78d2cde2e1ca1fd261c5695d0fb7cd9e9bb"
     },
     {
       "datei": "web/mannschaften-d3.html",
-      "bytes": 7358,
-      "sha256": "15c0aa837a4a92f5a82ed95cc9bf958b6ec576d6f9f7963dc868177002009682"
+      "bytes": 10955,
+      "sha256": "c91329ecce771cc3c3d0b55b3134db250e9c9338b3331bc6561388bc86b25036"
     },
     {
       "datei": "web/mannschaften-e1.html",
-      "bytes": 7602,
-      "sha256": "39969d2cb2fb2baa46bed1dc0f60132c8f421061cc2e1354a5824f66bc98d2a6"
+      "bytes": 11198,
+      "sha256": "6a12214876bf11a955b319cf54f18f1893ffd7f699a4b8e185fc5db99b40abba"
     },
     {
       "datei": "web/mannschaften-e2.html",
-      "bytes": 7584,
-      "sha256": "7e4b96cacb74174b51614467dd69ccee4330590351505553ffdcae721b604c89"
+      "bytes": 10867,
+      "sha256": "70eb8559b29373f4fdf306ba326819a76204b31ee779da05f13247d30fa280e0"
     },
     {
       "datei": "web/mannschaften-e3.html",
-      "bytes": 7324,
-      "sha256": "120f044f6a5f5a8217372a28ad6b9cc5c9ba4279536336789285c06155eae95f"
+      "bytes": 10291,
+      "sha256": "86b75b7e74d1f39f67b83e470e169e33c18b3dd30231f5ba153406af3afb4570"
     },
     {
       "datei": "web/mannschaften-f1.html",
-      "bytes": 6994,
-      "sha256": "4315b71bd640b034246d7c026f9d48e9e7af138019694b4c080fcb815919a42b"
+      "bytes": 9249,
+      "sha256": "93f29ccaa18152dab9de2d5e7a33eba58cecb6a9b740002890f081c07cabdb71"
     },
     {
       "datei": "web/mannschaften-f2.html",
-      "bytes": 6997,
-      "sha256": "4c6436ec923be20ea3a83a6c8b21c443d2e267af322a6ea6b9c72b2fa9b1204e"
+      "bytes": 9569,
+      "sha256": "2b102fd9531bd2ddf03768a753d386baa057feabeb386239825c90401abe3c82"
     },
     {
       "datei": "web/mannschaften-g-jugend.html",
-      "bytes": 6679,
-      "sha256": "c9db65e785be87f587cb8bb69fb29cf861f27e4c0db0ff406f7b626f772ccf72"
+      "bytes": 8930,
+      "sha256": "c6492d3283b7286ab5309df4a33bdf405007057ca444c0f6ea431504493aa680"
     },
     {
       "datei": "web/mannschaften-herren.html",
-      "bytes": 6926,
-      "sha256": "9be36ea1821d0159c46ac0af2b16e474f619c6689d8d6d87e678fce094fc5dc8"
+      "bytes": 10203,
+      "sha256": "f35250448f0a28bfd9895c95aed0d7fab1177d159f4ed8d8e72874a00e713e43"
     },
     {
       "datei": "web/mannschaften.html",
-      "bytes": 15207,
-      "sha256": "51022c732b61f8659af273d5c246ddad6b8b8e761b75d8e1ffd6d34ea5bf271b"
+      "bytes": 16075,
+      "sha256": "55b40ea7c7e27dcd377d730e2d39f68bd71d2b23d2e495fafa0d9674858c7396"
     },
     {
       "datei": "web/mitglied-werden.html",
@@ -87,8 +87,8 @@
     },
     {
       "datei": "web/shop.html",
-      "bytes": 4190,
-      "sha256": "31bdb19c04d0267e7ed417063b741b701e7a918e41d9c7e4ab25cab1ac098f9c"
+      "bytes": 3924,
+      "sha256": "882b3335b6c0369f0c72ff1fb6976c2a6e9be752587fe66d7f9861ade9b1411f"
     },
     {
       "datei": "web/spielplan-a-jugend.html",
@@ -157,43 +157,43 @@
     },
     {
       "datei": "web/verein-downloads.html",
-      "bytes": 5983,
-      "sha256": "47d192d59a58e97648ab7d511c0884e8b9c37639639df9a873054407e920d210"
+      "bytes": 5697,
+      "sha256": "463e4713b158406c1d023b17b35cef11c33a61d18660051fd6a97ed9a96fcfd5"
     },
     {
       "datei": "web/verein-karneval.html",
-      "bytes": 34683,
-      "sha256": "bcff29f2e0918926931cf8511b32ff02e78253093ba6ab0dd6651197c7c73502"
+      "bytes": 34354,
+      "sha256": "60aed4bd1cb3edf0d8932c2e3648dcc2595f2bc8013900edbdcabe2bb700f689"
     },
     {
       "datei": "web/verein-mach-mit.html",
-      "bytes": 5053,
-      "sha256": "069a0f18b8ead541864f345be0059a5bfc88dc8d792f1e5b1817be3856ea6f5d"
+      "bytes": 4783,
+      "sha256": "afe05aff52804f6f8a9ff964bb1449b39bd3228cd03051d6b102dad584a4145b"
     },
     {
       "datei": "web/verein-sponsoren.html",
-      "bytes": 11722,
-      "sha256": "bcd045f66a0899d9052bde1fcaef2b3fb6a03836bf056d6f12aa041df47b9594"
+      "bytes": 11437,
+      "sha256": "eda003d284677cb2df54d1a5b3956862933aae1f170fd75d9c84dd8c87255ada"
     },
     {
       "datei": "web/verein-ueber-uns.html",
-      "bytes": 7203,
-      "sha256": "0411ce43534e0655b7c777889af440f0c9432ab43890a198b71d2b99d6643849"
+      "bytes": 6932,
+      "sha256": "3e1393aecd969eb71b7fa634b1a89ecacedc7df0357e9e67f561003684bf9393"
     },
     {
       "datei": "web/verein-vorstand.html",
-      "bytes": 90704,
-      "sha256": "9be98516b4356747dc0f0083ef41ef0a9bd1cf425cce3767738df78a1d6b66d9"
+      "bytes": 90080,
+      "sha256": "d6a0c53088314b0fccc4b3e118d7c59b08aeeed8b49729580eb821371de795af"
     },
     {
       "datei": "web/verein.html",
-      "bytes": 7954,
-      "sha256": "8e710ead65abfa01794143932feded43c8df005a5736261273107f5458596479"
+      "bytes": 6946,
+      "sha256": "6f0513e8181445afe9721fe996b9a2561826b9745ee5fe788991c2384ada78b4"
     },
     {
       "datei": "web/site.css",
-      "bytes": 25255,
-      "sha256": "2f873fac600b9c6aa57d56c15d6436504ca2e50d59885695a04a88a3c64b9df8"
+      "bytes": 26016,
+      "sha256": "d11206b9274b7b15f5cf080a4d0a4c397c63abb42a88f2ae0d136c88ee9b7c39"
     }
   ]
 }

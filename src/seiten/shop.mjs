@@ -2,7 +2,7 @@
 // eigene Bestellstrecke. Ab P9-Korrektur A5 zusätzlich ein Hinweisabschnitt
 // zur Mannschafts-Vereinskleidung (Bestellung über das Trainerteam).
 
-import { brotkrume, ruecklinkAbschnitt } from "../vorlagen/hilfen.mjs";
+import { ruecklink } from "../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/shop/" (Tiefe 1), daher immer "../"
 // (siehe pfadZurWurzel() in tools/build.mjs).
@@ -19,7 +19,7 @@ function escapeHtml(text) {
 function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
-    ${brotkrume([{ text: "Verein", href: `${PFAD}verein/` }, { text: "Shop" }])}
+    ${ruecklink(`${PFAD}verein/`, "Verein")}
     <h1>Shop</h1>
     <p class="seitenkopf__lead">Fanartikel und Teamausstattung – zwei Partner, ein Ort.</p>
   </div>
@@ -68,7 +68,6 @@ export function seite(daten) {
     seitenkopfAbschnitt(),
     shopsAbschnitt(daten),
     vereinskleidungAbschnitt(),
-    ruecklinkAbschnitt(`${PFAD}verein/`, "Verein"),
   ].join("\n");
 
   return {
