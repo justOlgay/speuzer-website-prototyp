@@ -3,7 +3,7 @@
 // Sportplatz Mainzer Landstraße (kein Kartenbild, kein externer Dienst
 // eingebettet).
 
-import { mailLink, brotkrume, ruecklinkAbschnitt } from "../vorlagen/hilfen.mjs";
+import { mailLink, ruecklink } from "../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/kontakt/" (Tiefe 1), daher immer "../"
 // (siehe pfadZurWurzel() in tools/build.mjs).
@@ -49,7 +49,7 @@ function erreichbarkeitHtml() {
 function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
-    ${brotkrume([{ text: "Verein", href: `${PFAD}verein/` }, { text: "Geschäftsstelle & Anfahrt" }])}
+    ${ruecklink(`${PFAD}verein/`, "Verein")}
     <h1>Geschäftsstelle &amp; Anfahrt</h1>
     <p class="seitenkopf__lead">So erreichst du uns – per E-Mail an die passende Vereinsadresse oder telefonisch in der Geschäftsstelle.</p>
   </div>
@@ -261,7 +261,6 @@ export function seite(daten) {
     ansprechpartnerAbschnitt(daten),
     geschaeftsstelleAbschnitt(daten),
     anfahrtAbschnitt(daten),
-    ruecklinkAbschnitt(`${PFAD}verein/`, "Verein"),
   ].join("\n");
 
   return {

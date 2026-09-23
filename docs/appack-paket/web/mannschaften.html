@@ -256,9 +256,16 @@
     <h2>Nächste Spiele des Vereins</h2>
     <p class="meta">Alle Spiele unserer Mannschaften der nächsten Tage. Spielplan und Tabelle je Team findest du auf der jeweiligen Mannschaftsseite.</p>
     <div data-nur-appack>
-      <div class="fussballde-wrap fussballde-wrap--hoch">
+      <div class="spiele-kasten-block">
+      <div class="spiele-kasten" data-spiele-kasten>
+        <div class="fussballde-wrap">
         <div class="fussballde_widget" data-id="49e9745b-dc1c-4ae2-9292-b06c0f7a6c6e" data-type="club-matches"></div>
       </div>
+      </div>
+      <p class="knopfzeile">
+        <button type="button" class="knopf knopf--sekundaer" data-spiele-knopf aria-expanded="false">Alle Spiele anzeigen</button>
+      </p>
+    </div>
       <p class="meta fussballde-hinweis">Spiele seitlich wischbar</p>
     </div>
     
@@ -272,6 +279,21 @@
     s.defer = true;
     document.head.appendChild(s);
   }
+})();
+</script>
+<script>
+(function () {
+  document.querySelectorAll('[data-spiele-knopf]').forEach(function (knopf) {
+    var block = knopf.closest('.spiele-kasten-block');
+    var kasten = block && block.querySelector('[data-spiele-kasten]');
+    if (!kasten) return;
+    knopf.addEventListener('click', function () {
+      var offen = kasten.classList.toggle('ist-offen');
+      knopf.textContent = offen ? 'Weniger anzeigen' : 'Alle Spiele anzeigen';
+      knopf.setAttribute('aria-expanded', offen ? 'true' : 'false');
+      if (!offen) kasten.scrollIntoView({ block: 'nearest' });
+    });
+  });
 })();
 </script>
 </main>

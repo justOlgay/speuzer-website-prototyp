@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { bild } from "../../vorlagen/bild.mjs";
-import { mailLink, brotkrume, ruecklinkAbschnitt } from "../../vorlagen/hilfen.mjs";
+import { mailLink } from "../../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/verein/karneval/" (Tiefe 2), daher immer
 // "../../" (siehe pfadZurWurzel() in tools/build.mjs).
@@ -58,7 +58,6 @@ function personKarte(person, daten) {
 function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
-    ${brotkrume([{ text: "Verein", href: `${PFAD}verein/` }, { text: "Karneval" }])}
     <span class="seitenkopf__kicker">Zweite Abteilung des Vereins</span>
     <h1>Karneval – Die Schnauzer</h1>
     <p class="seitenkopf__lead">Fünf Gruppen, eine Bühne: Die Karnevalabteilung des Frankfurter Fußballvereins Sportfreunde 1904 e.V.</p>
@@ -143,7 +142,6 @@ export function seite(daten) {
     gruppenAbschnitt(karneval),
     ansprechpartnerAbschnitt(daten),
     hinweisAbschnitt(),
-    ruecklinkAbschnitt(`${PFAD}verein/`, "Verein"),
   ].join("\n");
 
   return {

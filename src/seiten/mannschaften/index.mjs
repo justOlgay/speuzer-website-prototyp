@@ -10,6 +10,8 @@ import {
   naechsteSpiele,
   spielZeile,
   FUSSBALLDE_WIDGET_LADER,
+  spieleKastenHtml,
+  SPIELE_KASTEN_SKRIPT,
 } from "../../vorlagen/hilfen.mjs";
 // P15: gemeinsame Bausteine (ursprünglich Startseite, dort gelöscht – siehe
 // src/vorlagen/bausteine.mjs).
@@ -134,15 +136,18 @@ function naechsteSpieleDesVereinsAbschnitt(daten) {
     .join("\n    ");
 
   const vereinSpieleWidgetId = daten.widgets?.verein?.spiele ?? "";
+  const widgetHtml = `<div class="fussballde-wrap">
+        <div class="fussballde_widget" data-id="${escapeHtml(vereinSpieleWidgetId)}" data-type="club-matches"></div>
+      </div>`;
 
+  // W7, Abschnitt 4: wie auf der Mannschaftsseite auf rund fünf Spiele
+  // begrenzt (spieleKastenHtml(), kein inneres Scrollen mehr).
   return `<section class="abschnitt">
   <div class="container fluss">
     <h2>Nächste Spiele des Vereins</h2>
     <p class="meta">Alle Spiele unserer Mannschaften der nächsten Tage. Spielplan und Tabelle je Team findest du auf der jeweiligen Mannschaftsseite.</p>
     <div data-nur-appack hidden>
-      <div class="fussballde-wrap fussballde-wrap--hoch">
-        <div class="fussballde_widget" data-id="${escapeHtml(vereinSpieleWidgetId)}" data-type="club-matches"></div>
-      </div>
+      ${spieleKastenHtml(widgetHtml)}
       <p class="meta fussballde-hinweis">Spiele seitlich wischbar</p>
     </div>
     <div data-nur-prototyp>
@@ -212,6 +217,7 @@ export function seite(daten) {
     // naechsteSpieleDesVereinsAbschnitt() oben).
     naechsteSpieleDesVereinsAbschnitt(daten),
     FUSSBALLDE_WIDGET_LADER,
+    SPIELE_KASTEN_SKRIPT,
   ].join("\n");
 
   return {

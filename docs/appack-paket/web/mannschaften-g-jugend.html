@@ -26,7 +26,7 @@
 <main id="inhalt">
 <section class="abschnitt seitenkopf">
   <div class="container">
-    <nav aria-label="Brotkrumen"><ol class="brotkrumen"><li><a href="mannschaften.html">Mannschaften</a></li><li aria-hidden="true">›</li><li><span aria-current="page">G-Jugend (Bambinis)</span></li></ol></nav>
+    <a class="ruecklink" href="mannschaften.html">‹ Mannschaften</a>
     <p class="meta">Mannschaft · Kinderfußball</p>
     <h1>G-Jugend (Bambinis)</h1>
     <p class="seitenkopf__lead">Jahrgang 2021 und jünger · Kinderfußball · G-Junioren 3vs3 Gr. 4</p>
@@ -74,10 +74,15 @@
       <aside class="fluss">
     <div class="karte fluss">
       <h2 class="karte__titel">Ansprechpartner</h2>
-      <p class="meta" style="margin:0;">Trainerteam</p>
-      <ul role="list">
-        <li>Biljana Trninic</li>
-      </ul>
+      <div class="person-mini-liste">
+        <div class="person-mini">
+      <span class="person-mini__bild person-mini__bild--platzhalter" data-trainer-foto="0" aria-hidden="true">BT</span>
+      <span class="person-mini__text">
+        <span class="person-mini__name">Biljana Trninic</span>
+        <span class="person-mini__rolle meta">Trainer</span>
+      </span>
+    </div>
+      </div>
       <p><a class="mail" href="mailto:trainer_g_jugend@sportfreunde04.de">trainer_g_jugend<wbr>@sportfreunde04.de</a></p>
       <p class="knopfzeile">
         <a class="knopf" href="mailto:trainer_g_jugend@sportfreunde04.de?subject=G-Jugend%3A%20Anfrage%20%C3%BCber%20die%20Website">E-Mail an das Trainerteam</a>
@@ -114,10 +119,69 @@
       <span class="karte__meta">Jahrgang 2018</span>
     </a>
     </div>
-    <p><a href="mannschaften.html">‹ Zurück zu Mannschaften</a></p>
   </div>
 </section>
 
+
+<script>
+(function () {
+  var TEAM_SCHLUESSEL = "g-jugend";
+  var ANZAHL_TRAINER = 1;
+  var MUSTER = [["herren","herren"],["a-jugend","\\ba[\\s-]?jugend\\b"],["d1","\\bd[\\s-]?1\\b"],["d2","\\bd[\\s-]?2\\b"],["d3","\\bd[\\s-]?3\\b"],["e1","\\be[\\s-]?1\\b"],["e2","\\be[\\s-]?2\\b"],["e3","\\be[\\s-]?3\\b"],["f1","\\bf[\\s-]?1\\b"],["f2","\\bf[\\s-]?2\\b"],["g-jugend","\\bg[\\s-]?jugend\\b"]];
+
+  function schluesselAusTeamname(name) {
+    var t = String(name || "");
+    for (var i = 0; i < MUSTER.length; i++) {
+      if (new RegExp(MUSTER[i][1], "i").test(t)) return MUSTER[i][0];
+    }
+    return null;
+  }
+
+  fetch("https://appack.de/rest-api/public/workbook/worksheet/6a1ec5fcf68a05bf129cdb7a", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({}),
+  })
+    .then(function (antwort) { return antwort.ok ? antwort.json() : []; })
+    .then(function (zeilen) {
+      if (!Array.isArray(zeilen)) return;
+      var zeile = null;
+      for (var i = 0; i < zeilen.length; i++) {
+        if (schluesselAusTeamname(zeilen[i] && zeilen[i].team) === TEAM_SCHLUESSEL) {
+          zeile = zeilen[i];
+          break;
+        }
+      }
+      if (!zeile) return;
+
+      var bilder = [];
+      for (var n = 1; n <= 5; n++) {
+        var url = zeile["sliderImage" + n];
+        if (typeof url === "string" && /^https?:\/\//.test(url)) bilder.push(url);
+      }
+      if (bilder.length < ANZAHL_TRAINER) return;
+
+      document.querySelectorAll("[data-trainer-foto]").forEach(function (platzhalter) {
+        var idx = Number(platzhalter.getAttribute("data-trainer-foto"));
+        var url = bilder[idx];
+        if (!url) return;
+        var testbild = new Image();
+        testbild.onload = function () {
+          var echtesBild = document.createElement("img");
+          echtesBild.src = url;
+          echtesBild.alt = "";
+          echtesBild.loading = "lazy";
+          echtesBild.className = "person-mini__bild";
+          platzhalter.replaceWith(echtesBild);
+        };
+        testbild.src = url;
+      });
+    })
+    .catch(function () {
+      // Kein Netz/CORS (z. B. lokaler Prototyp) – Initialen bleiben stehen.
+    });
+})();
+</script>
 </main>
 <footer class="ws-fuss">
   

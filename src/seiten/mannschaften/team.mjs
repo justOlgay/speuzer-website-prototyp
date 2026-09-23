@@ -8,8 +8,13 @@ import {
   naechsteSpiele,
   spielZeile,
   trainingsZeilen,
-  brotkrume,
+  ruecklink,
   FUSSBALLDE_WIDGET_LADER,
+  spieleKastenHtml,
+  SPIELE_KASTEN_SKRIPT,
+  trainerZeileHtml,
+  trainerRolleText,
+  trainerFotosSkript,
 } from "../../vorlagen/hilfen.mjs";
 
 // W6 (Entscheidung Olgay 23.09.2026): "Spielplan der Saison" und "Tabelle"
@@ -165,27 +170,38 @@ function generatorIframe(team, daten) {
 
 // h2 + Inhalt (kein eigener .fluss-Wrapper): reiht sich als weiterer
 // Abschnitt in denselben .fluss der Hauptspalte ein wie "Training" und
-// "Nächstes Spiel" (siehe hauptspalte() unten, CSS-Regeln ".fluss > * + h2"
+// "Nächste Spiele" (siehe hauptspalte() unten, CSS-Regeln ".fluss > * + h2"
 // / ".fluss > h2 + *" in komponenten.css sind genau für mehrere
 // h2-Abschnitte in einem gemeinsamen .fluss gedacht).
+//
+// W7 (Entscheidung Olgay 23.09.2026, Abschnitt 4): der frühere eigene
+// "Nächstes Spiel"-Abschnitt (next-match-Widget) entfällt – der Kasten hier
+// (team-matches) beginnt ohnehin mit den nächsten Spielen. Deshalb heißt der
+// Abschnitt jetzt "Spiele" statt "Spielplan der Saison" und ist auf rund
+// fünf Spiele begrenzt (spieleKastenHtml(), kein inneres Scrollen). Für
+// Teams ohne Widget (Kinderfußball F1, F2, G-Jugend) bleibt der
+// Generator-Spielplan unter der alten Überschrift unverändert.
 function spielplanDerSaisonInhalt(team, daten) {
   const spieleWidgetId = daten.widgets?.[team.slug]?.spiele ?? "";
   const iframeHtml = generatorIframe(team, daten);
 
   if (!spieleWidgetId) {
     // Kinderfußball (F1, F2, G-Jugend): kein FUSSBALL.DE-Widget, Generator in
-    // beiden Modi.
+    // beiden Modi – bleibt wie bisher (W7-Spezifikation Abschnitt 4).
     return `<h2>Spielplan der Saison</h2>
     ${iframeHtml}`;
   }
 
-  return `<h2>Spielplan der Saison</h2>
-    <div data-nur-appack hidden>
-      <div class="fussballde-wrap">
+  const widgetHtml = `<div class="fussballde-wrap">
         <div class="fussballde_widget" data-id="${escapeHtml(spieleWidgetId)}" data-type="team-matches"></div>
-      </div>
+      </div>`;
+
+  return `<h2>Spiele</h2>
+    <div data-nur-appack hidden>
+      <p class="meta">Nächste Spiele zuerst, frühere Ergebnisse über die Pfeile im Kasten.</p>
+      ${spieleKastenHtml(widgetHtml)}
       <p class="meta fussballde-hinweis">Spiele seitlich wischbar</p>
-      <p class="meta">Live von FUSSBALL.DE (DFBnet): vergangene Spiele mit Ergebnis, kommende Spiele. Tippen öffnet die Spielseite.</p>
+      <p class="meta">Live von FUSSBALL.DE (DFBnet). Tippen öffnet die Spielseite.</p>
     </div>
     <div data-nur-prototyp>
       ${iframeHtml}
@@ -216,12 +232,17 @@ function tabelleInhalt(team, daten) {
   const eigene = tabelleEintrag?.zeilen?.find((z) => z.eigene);
   const tabelleWidgetId = daten.widgets?.[team.slug]?.tabelle ?? "";
 
+  // W7, Abschnitt 4: die Tabelle bleibt vollständig (eigene Platzierung darf
+  // nie abgeschnitten sein) und ohne zusätzliche Karte/Schatten um das
+  // Widget herum – nur die Beschriftungszeile ist wie bei "Spiele" klein und
+  // einheitlich ("Live von FUSSBALL.DE …").
   return `<h2>Tabelle</h2>
     <div data-nur-appack hidden>
       <div class="fussballde-wrap">
         <div class="fussballde_widget" data-id="${escapeHtml(tabelleWidgetId)}" data-type="table"></div>
       </div>
       <p class="meta fussballde-hinweis">Tabelle seitlich wischbar</p>
+      <p class="meta">Live von FUSSBALL.DE (DFBnet).</p>
     </div>
     <div data-nur-prototyp>
       ${eigene ? `<p class="meta">Platz ${eigene.platz} von ${tabelleEintrag.zeilen.length} · ${eigene.punkte} Punkte</p>` : ""}
@@ -234,7 +255,7 @@ function tabelleInhalt(team, daten) {
 function seitenkopfAbschnitt(team) {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
-    ${brotkrume([{ text: "Mannschaften", href: `${PFAD}mannschaften/` }, { text: team.name }])}
+    ${ruecklink(`${PFAD}mannschaften/`, "Mannschaften")}
     <p class="meta">Mannschaft · ${escapeHtml(team.gruppe ?? "")}</p>
     <h1>${escapeHtml(team.name)}</h1>
     <p class="seitenkopf__lead">${escapeHtml(jahrgangPraefix(team))} · ${escapeHtml(team.staffel ?? "")}</p>
@@ -268,24 +289,14 @@ function hauptspalte(team, daten) {
       <p style="margin:0;">Zurzeit sind keine Spiele angesetzt.</p>
     </div>`;
 
-  // W3, Abschnitt 5/7 (Prüfer-Befund, Schwere "blocker"): die eingebackenen
-  // "Nächste Spiele" veralten ab dem ersten gespielten Termin. Im
-  // appack-Modus (Live-Website) ersetzt das FUSSBALL.DE-Widget "next-match"
-  // des Teams die Liste, wie schon auf spielplan-<team>.html; Teams ohne
-  // Widget (Kinderfußball F1, F2, G-Jugend) behalten die Liste in beiden
-  // Modi. Im Prototyp bleibt für alle Teams die eingefrorene Liste.
-  const spieleWidgetId = daten.widgets?.[team.slug]?.spiele ?? "";
-  const naechsteSpieleAbschnitt = spieleWidgetId
-    ? `<div data-nur-appack hidden>
-      <h2>Nächstes Spiel</h2>
-      <div class="fussballde_widget" data-id="${escapeHtml(spieleWidgetId)}" data-type="next-match"></div>
-      <p class="meta">Live von FUSSBALL.DE (DFBnet). Tippen öffnet die Spielseite.</p>
-    </div>
-    <div data-nur-prototyp>
-      <h2>Nächste Spiele</h2>
-      ${spieleHtml}
-    </div>`
-    : `<div data-nur-prototyp>
+  // W7 (Entscheidung Olgay 23.09.2026, Abschnitt 4): der frühere eigene
+  // Appack-Abschnitt "Nächstes Spiel" (next-match-Widget) entfällt – der
+  // "Spiele"-Kasten weiter unten (team-matches) beginnt ohnehin mit den
+  // nächsten Spielen, der Abschnitt war doppelt und machte die Seite
+  // widgetlastig. Die eingefrorene Liste bleibt wie bisher nur im Prototyp
+  // (dort gibt es keine Widgets); auf der Live-Website übernimmt allein der
+  // "Spiele"-Kasten (siehe spielplanDerSaisonInhalt()).
+  const naechsteSpieleAbschnitt = `<div data-nur-prototyp>
       <h2>Nächste Spiele</h2>
       ${spieleHtml}
     </div>`;
@@ -309,16 +320,21 @@ function hauptspalte(team, daten) {
 
 function seitenspalte(team, daten) {
   const verein = daten.verein ?? {};
+  // W7, Abschnitt 3: Trainer als Zeilen mit Porträt (Initialen statisch
+  // gebaut, echte Fotos lädt trainerFotosSkript() zur Laufzeit nach – siehe
+  // hilfen.mjs). Die frühere feste Überschrift "Trainerteam" über der Liste
+  // entfällt, weil jede Zeile jetzt ihre eigene (statisch ermittelte) Rolle
+  // zeigt.
+  const rolleText = trainerRolleText((team.trainer ?? []).length);
   const trainerZeilen = (team.trainer ?? [])
-    .map((name) => `<li>${escapeHtml(name)}</li>`)
+    .map((name, i) => trainerZeileHtml(name, i, rolleText))
     .join("\n        ");
 
   const ansprechpartnerKarte = `<div class="karte fluss">
       <h2 class="karte__titel">Ansprechpartner</h2>
-      <p class="meta" style="margin:0;">Trainerteam</p>
-      <ul role="list">
+      <div class="person-mini-liste">
         ${trainerZeilen}
-      </ul>
+      </div>
       <p>${mailLink(team.mail)}</p>
       <p class="knopfzeile">
         <a class="knopf" href="${escapeHtml(trainerMailtoHref(team))}">E-Mail an das Trainerteam</a>
@@ -349,7 +365,11 @@ function seitenspalte(team, daten) {
   </aside>`;
 }
 
-// ---------- Weitere Mannschaften derselben Gruppe + Zurück-Link ----------
+// ---------- Weitere Mannschaften derselben Gruppe (W7: bleibt als natürliche
+// Navigation unten auf der Seite; der frühere zusätzliche "‹ Zurück zu
+// Mannschaften"-Link direkt darunter entfällt – der Rücklink oben im
+// Seitenkopf reicht, siehe ruecklink() und W7-Spezifikation Abschnitt 1)
+// ----------
 
 // P4, Korrektur A2: Reihenfolge nach Nähe im Alter statt Dateireihenfolge –
 // sortiert nach Abstand des Index in teams.json zum aktuellen Team
@@ -383,7 +403,6 @@ function weitereMannschaftenAbschnitt(team, daten) {
   return `<section class="abschnitt">
   <div class="container fluss">
     ${weitereBlock}
-    <p><a href="${PFAD}mannschaften/">‹ Zurück zu Mannschaften</a></p>
   </div>
 </section>`;
 }
@@ -404,6 +423,12 @@ function seiteFuerTeam(team, daten) {
     // im ehemaligen src/seiten/spielplan/team.mjs bei Spiel- ODER
     // Tabellen-Widget einbinden.
     team.tabelle || daten.widgets?.[team.slug]?.spiele ? FUSSBALLDE_WIDGET_LADER : "",
+    // W7: der Spiele-Kasten-Knopf braucht sein Skript nur bei Teams mit
+    // Spiele-Widget (spieleKastenHtml() wird nur dort verwendet).
+    daten.widgets?.[team.slug]?.spiele ? SPIELE_KASTEN_SKRIPT : "",
+    // W7, Abschnitt 3: lädt bei Bedarf echte Trainerporträts nach (Initialen
+    // sind schon statisch gebaut, siehe seitenspalte()).
+    trainerFotosSkript(team),
   ].join("\n");
 
   return {

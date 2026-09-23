@@ -1,7 +1,7 @@
 // Downloads /verein/downloads/ (P5) – Gruppen aus data/downloads.json in
 // fester Reihenfolge (Anmeldung, Verein, Kinder- und Jugendschutz).
 
-import { brotkrume, ruecklinkAbschnitt } from "../../vorlagen/hilfen.mjs";
+import { ruecklink } from "../../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/verein/downloads/" (Tiefe 2), daher immer
 // "../../" (siehe pfadZurWurzel() in tools/build.mjs).
@@ -42,7 +42,7 @@ function downloadZeile(eintrag) {
 function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
-    ${brotkrume([{ text: "Verein", href: `${PFAD}verein/` }, { text: "Downloads & Anträge" }])}
+    ${ruecklink(`${PFAD}verein/`, "Verein")}
     <h1>Downloads &amp; Anträge</h1>
     <p class="seitenkopf__lead">Satzung, Beiträge, Anmeldung und Schutzkonzept als PDF.</p>
   </div>
@@ -82,7 +82,6 @@ export function seite(daten) {
     seitenkopfAbschnitt(),
     ...GRUPPEN_REIHENFOLGE.map((g, i) => gruppenAbschnitt(g, downloads, i)),
     hinweisAbschnitt(),
-    ruecklinkAbschnitt(`${PFAD}verein/`, "Verein"),
   ].join("\n");
 
   return {

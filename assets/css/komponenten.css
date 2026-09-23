@@ -199,47 +199,31 @@
 }
 
 /* ==========================================================================
-   Brotkrumen (W3) – oben im Seitenkopf jeder Unterseite ("Verein ›
-   Vorstand & Kontakt"), Pfeil-Glyph "›" statt Emoji. Eigene Zeile über dem
-   h1, kein zusätzliches Tippziel-Raster nötig (reiner Fließtext-Link).
+   Rücklink (W3, umgebaut in W7) – ein einzelner Zurück-Link oben links im
+   Seitenkopf jeder Unterseite ("‹ Mannschaften", "‹ Verein"), ruhige Pille in
+   Vereinsblau statt der früheren mehrteiligen Brotkrume. Ersetzt die alte
+   Brotkrume (oben) und den Rücklink-Abschnitt (unten) aus W3 – beides
+   zusammen wirkte doppelt (W7-Spezifikation Abschnitt 1). Gleicher Abstand
+   auf allen Seiten: eine Zeile über dem h1 im .seitenkopf.
    ========================================================================== */
 
-.brotkrumen {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-1);
-  font-size: var(--fs-sm);
-  color: var(--ink-3);
-  margin: 0 0 var(--sp-3);
-  padding: 0;
-  list-style: none;
-}
-
-.brotkrumen li {
-  display: flex;
-  align-items: center;
-}
-
-.brotkrumen a {
-  color: var(--ink-3);
-  text-decoration: underline;
-  text-decoration-color: var(--line);
-  /* W3b, Prüfer-Befund "klein": Brotkrumen-Links waren nur 23-24px hoch
-     (die Fließtext-Ausnahme im Tippziel-Gate, tools/pruefen.mjs, ließ das
-     durch) – Abschnitt 6 verlangt ≥44px Tippziel für geänderte Seiten. */
+.ruecklink {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-}
-
-.brotkrumen a:hover,
-.brotkrumen a:focus-visible {
+  padding: var(--sp-2) var(--sp-3);
+  margin: calc(var(--sp-2) * -1) 0 var(--sp-2) calc(var(--sp-3) * -1);
+  border-radius: var(--r-pill);
   color: var(--blau-700);
-  text-decoration-color: currentColor;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  text-decoration: none;
 }
 
-.brotkrumen [aria-current="page"] {
-  color: var(--ink-2);
+.ruecklink:hover,
+.ruecklink:focus-visible {
+  background: var(--blau-50);
+  text-decoration: underline;
 }
 
 /* ==========================================================================
@@ -729,6 +713,61 @@
 .person__mail .mail {
   overflow-wrap: anywhere;
   word-break: normal;
+}
+
+/* ==========================================================================
+   Trainerporträt-Zeile "person-mini" (W7) – runde 48px-Porträts mit Name und
+   Rolle daneben, für die Ansprechpartner-Zeilen auf den Mannschaftsseiten
+   (statisch mit Initialen gebaut, Fotos werden per trainerFotosSkript() aus
+   hilfen.mjs zur Laufzeit nachgeladen, siehe dort). Kleineres 40px-Vorbild
+   in der App: .team-karte__kontakt in src/app/Mannschaften-App.html.
+   ========================================================================== */
+
+.person-mini-liste {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.person-mini {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.person-mini__bild {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 22%;
+  border: 1px solid var(--line);
+}
+
+.person-mini__bild--platzhalter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--blau-100);
+  color: var(--blau-700);
+  font-family: var(--font-head);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+
+.person-mini__text {
+  display: flex;
+  flex-direction: column;
+}
+
+.person-mini__name {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.person-mini__rolle {
+  margin: 0;
 }
 
 /* ==========================================================================
@@ -1867,9 +1906,9 @@ body.datenschutz h2 {
    FUSSBALL.DE-Widget-Container (W3) – Tabellen- und Spiele-Widgets skalieren
    nicht selbst (scrolling="no" im Widget-iframe, siehe Prüfer-Befund); ein
    Wrapper mit overflow-x:auto und Mindestbreite macht sie wenigstens seitlich
-   wischbar, dazu ein Kurzhinweis unter 640px. Für hoch werdende Widgets
-   (club-matches auf /spielplan/) zusätzlich .fussballde-wrap--hoch mit
-   max-height + overflow-y:auto (kein 500px-Leerraum mehr unter dem Inhalt).
+   wischbar, dazu ein Kurzhinweis unter 640px. Für hoch werdende
+   Spiele-Kästen (team-matches, club-matches) siehe .spiele-kasten unten
+   statt eines eigenen Scrollbereichs (W7: kein inneres Scrollen mehr).
    ========================================================================== */
 
 .fussballde-wrap {
@@ -1881,11 +1920,6 @@ body.datenschutz h2 {
   min-width: 420px;
 }
 
-.fussballde-wrap--hoch {
-  max-height: 720px;
-  overflow-y: auto;
-}
-
 .fussballde-hinweis {
   display: none;
   margin: var(--sp-2) 0 0;
@@ -1895,6 +1929,44 @@ body.datenschutz h2 {
   .fussballde-hinweis {
     display: block;
   }
+}
+
+/* ==========================================================================
+   Spiele-Kasten (W7) – FUSSBALL.DE-Kästen "team-matches"/"club-matches" auf
+   rund fünf Spiele begrenzt statt der ganzen Saison: der äußere Kasten
+   klemmt auf eine feste Höhe (kein inneres Scrollen, das Widget-iframe
+   selbst wächst unverändert per postMessage auf seine volle Höhe), ein
+   weicher Verlauf zeigt weitere Spiele an, ein Knopf öffnet den Kasten ganz
+   (siehe spieleKastenHtml()/SPIELE_KASTEN_SKRIPT in hilfen.mjs). 1250px =
+   gemessener Kopf des echten Widgets (Banner+Titel+Pfeile, ~300px) + 5 ×
+   echte Spielzeile (~190px) – gemessen am echten Widget über
+   scratchpad/app-echt.mjs (siehe Abschlussbericht); der ursprüngliche
+   Plan-Schätzwert 660px (Kopf ~140px + Zeile ~105px) war zu niedrig.
+   ========================================================================== */
+
+.spiele-kasten {
+  position: relative;
+  max-height: 1250px;
+  overflow: hidden;
+}
+
+.spiele-kasten.ist-offen {
+  max-height: none;
+}
+
+.spiele-kasten::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--sp-7);
+  background: linear-gradient(to bottom, transparent, var(--bg));
+  pointer-events: none;
+}
+
+.spiele-kasten.ist-offen::after {
+  display: none;
 }
 
 /* ==========================================================================

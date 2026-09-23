@@ -4,7 +4,7 @@
 // Vorstand & Kontakt, dafür jetzt PFAD nötig (siehe pfadZurWurzel() in
 // tools/build.mjs).
 
-import { brotkrume, ruecklinkAbschnitt } from "../../vorlagen/hilfen.mjs";
+import { ruecklink } from "../../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/verein/mach-mit/" (Tiefe 2), daher immer
 // "../../" (siehe pfadZurWurzel() in tools/build.mjs).
@@ -13,7 +13,7 @@ const PFAD = "../../";
 function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
-    ${brotkrume([{ text: "Verein", href: `${PFAD}verein/` }, { text: "Mach mit" }])}
+    ${ruecklink(`${PFAD}verein/`, "Verein")}
     <h1>Mach mit</h1>
     <p class="seitenkopf__lead">Wir brauchen Dich! Werde Teil unseres Vereins-Teams.</p>
   </div>
@@ -68,7 +68,6 @@ export function seite() {
     seitenkopfAbschnitt(),
     einleitungAbschnitt(),
     aufrufAbschnitt(),
-    ruecklinkAbschnitt(`${PFAD}verein/`, "Verein"),
   ].join("\n");
 
   return {

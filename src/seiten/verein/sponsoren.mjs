@@ -2,7 +2,7 @@
 // App-Projektpartner) aus data/sponsoren.json plus Aufruf "Sponsor werden".
 
 import { bild } from "../../vorlagen/bild.mjs";
-import { brotkrume, ruecklinkAbschnitt } from "../../vorlagen/hilfen.mjs";
+import { ruecklink } from "../../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/verein/sponsoren/" (Tiefe 2), daher immer
 // "../../" (siehe pfadZurWurzel() in tools/build.mjs).
@@ -54,7 +54,7 @@ function logoEintrag(sponsor, daten) {
 function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
-    ${brotkrume([{ text: "Verein", href: `${PFAD}verein/` }, { text: "Sponsoren & Partner" }])}
+    ${ruecklink(`${PFAD}verein/`, "Verein")}
     <h1>Sponsoren &amp; Partner</h1>
     <p class="seitenkopf__lead">Ohne Unterstützung kein Vereinsleben. Danke an alle, die die Sportfreunde tragen.</p>
   </div>
@@ -133,7 +133,6 @@ export function seite(daten) {
     fussballschuleAbschnitt(sponsoren, daten),
     appProjektpartnerAbschnitt(sponsoren, daten),
     sponsorWerdenAbschnitt(),
-    ruecklinkAbschnitt(`${PFAD}verein/`, "Verein"),
   ].join("\n");
 
   return {
