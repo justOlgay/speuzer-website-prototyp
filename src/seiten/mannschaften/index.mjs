@@ -20,12 +20,6 @@ function escapeHtml(text) {
     .replaceAll('"', "&quot;");
 }
 
-// Verein-Icon wie im Klick-Prototyp (src/appkonzept/bildschirme.mjs,
-// ICON.verein): SVG-Raute.
-function liesVereinIcon() {
-  return `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 20 12 12 21 4 12z"/></svg>`;
-}
-
 // Platzhalter für Seiten, die im aktuellen Paket noch nicht existieren –
 // gleiches Muster wie header.mjs/footer.mjs/index.mjs (siehe navigation.mjs).
 function baldSpan(titel, { knopf = false } = {}) {
@@ -65,32 +59,6 @@ function gruppenAbschnitt({ titel, satz, slugs, teamNachSlug, id }) {
     <p class="meta">${escapeHtml(satz)}</p>
     <div class="raster raster--3">
     ${karten}
-    </div>
-  </div>
-</section>`;
-}
-
-// ---------- Abteilungen im Kopfbereich (W3, Abschnitt 4) ----------
-// Karneval-Karte rückt in den Kopfbereich, als zweite "Abteilung" neben
-// einem Verweis auf die Fußball-Mannschaften weiter unten auf derselben
-// Seite – kürzerer Weg zu den Schnauzern.
-// W3b, Prüfer-Befund "klein": Untertitel aus den Daten statt fest kodiert
-// (daten.karneval.gruppen.length statt "5").
-function abteilungenKopfAbschnitt(daten) {
-  const gruppenAnzahl = daten.karneval?.gruppen?.length ?? 0;
-  return `<section class="abschnitt">
-  <div class="container fluss">
-    <div class="raster raster--2">
-      <a class="karte karte--link karte--abteilung" href="#mannschaften-liste">
-        ${liesVereinIcon()}
-        <span class="karte__titel">Fußball</span>
-        <span class="karte__meta">Die Mannschaften unten</span>
-      </a>
-      <a class="karte karte--link karte--abteilung" href="${PFAD}verein/karneval/">
-        ${liesVereinIcon()}
-        <span class="karte__titel">Karneval</span>
-        <span class="karte__meta">Die Schnauzer · ${gruppenAnzahl} Gruppen</span>
-      </a>
     </div>
   </div>
 </section>`;
@@ -161,14 +129,12 @@ export function seite(daten) {
     },
   ].map((g) => gruppenAbschnitt({ ...g, teamNachSlug }));
 
-  // W3, Abschnitt 4: die Karneval-Karte ist in den Kopfbereich gewandert
-  // (abteilungenKopfAbschnitt(), direkt unter dem Lead) – die vorherige
-  // Karneval-Karte weiter unten entfällt, kein doppelter Weg zu den
-  // Schnauzern. Reihenfolge sonst wie zuvor: Mannschaftsübersicht →
-  // Trainingszeiten → Probetraining → Zusatzangebote.
+  // Olgay 23.09.2026: Karten „Fußball“/„Karneval“ gehören nicht auf die
+  // Fußballseite. Karneval hat einen eigenen Menüpunkt, die Abteilungen
+  // stehen im Verein-Verteiler (wie in der App). Reihenfolge:
+  // Mannschaftsübersicht → Trainingszeiten → Probetraining → Zusatzangebote.
   const inhalt = [
     seitenkopf,
-    abteilungenKopfAbschnitt(daten),
     ...gruppen,
     // P15: Trainingszeiten-Baustein (ursprünglich Startseite) nach der
     // Mannschaftsübersicht eingefügt (siehe src/vorlagen/bausteine.mjs). Der
