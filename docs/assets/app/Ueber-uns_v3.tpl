@@ -353,8 +353,12 @@ svg { display: block; flex: 0 0 auto; }
 </div>
 
 <div class="liste">
-  <a class="zeile" href="https://cdn.appack.de/sportfreunde04/pdf/Chronik%20Sportfreunde.pdf" target="_blank" rel="noopener">
-    <span class="zeile__text"><span class="zeile__titel">Chronik (PDF)</span></span>
+  <a class="zeile" href="nav://sportfreunde04_TextImage_1789020275334">
+    <span class="zeile__text"><span class="zeile__titel">Vereinschronik lesen</span></span>
+    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+  </a>
+  <a class="zeile" href="https://cdn.appack.de/sportfreunde04/pdf/Chronik-FFV-Sportfreunde-04-2026.pdf" target="_blank" rel="noopener">
+    <span class="zeile__text"><span class="zeile__titel">Chronik als PDF (53 Seiten)</span></span>
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
   </a>
   <a class="zeile" href="https://cdn.appack.de/sportfreunde04/pdf/vereinsphilosophie-und-zukunftskonzept.pdf" target="_blank" rel="noopener">
