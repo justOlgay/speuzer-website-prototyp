@@ -101,7 +101,7 @@ function teamAbschnitt(team, daten, index) {
 
   const widgetId = daten.widgets?.[team.slug]?.tabelle ?? "";
 
-  return `<section class="abschnitt${hellKlasse}">
+  return `<section class="abschnitt abschnitt--kompakt${hellKlasse}">
   <div class="container fluss">
     <h2 id="${team.slug}">${escapeHtml(team.name)}</h2>
     <p class="meta">${escapeHtml(eintrag?.staffel ?? team.staffel ?? "")}</p>

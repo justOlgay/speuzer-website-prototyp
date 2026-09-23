@@ -32,6 +32,31 @@
   padding-block: var(--sektion);
 }
 
+/* Abschnittsrhythmus (Olgay 23.09.2026, „Lücke zu groß“): Folgen zwei
+   Abschnitte mit gleichem Hintergrund aufeinander, addierten sich bisher
+   unterer und oberer Rand (bis 192 px). Jetzt trennt sie ein Abstand. Bei
+   wechselndem Hintergrund (hell/blau) bleiben beide Ränder, dort sieht man
+   die Kante. Der Seitenkopf hat eigene, kleinere Regeln (siehe .seitenkopf). */
+.abschnitt:not(.abschnitt--hell):not(.abschnitt--blau):not(.seitenkopf)
+  + .abschnitt:not(.abschnitt--hell):not(.abschnitt--blau),
+.abschnitt--hell + .abschnitt--hell,
+.abschnitt--blau + .abschnitt--blau {
+  padding-top: 0;
+}
+
+/* Lange Listen in abwechselnden Bändern (je Team ein Abschnitt, z. B.
+   „Tabellen“): halber Abschnittsrand, sonst wirkt jede Zeile wie ein
+   eigenes Kapitel. */
+.abschnitt--kompakt {
+  padding-block: calc(var(--sektion) * 0.5);
+}
+
+/* Gruppen derselben Liste (Senioren, Jugend, Kinderfußball auf
+   „Mannschaften“) rücken noch enger zusammen. */
+.abschnitt--gruppe:has(+ .abschnitt--gruppe) {
+  padding-bottom: calc(var(--sektion) * 0.5);
+}
+
 .abschnitt--hell {
   background: var(--surface);
 }
