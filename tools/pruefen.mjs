@@ -148,6 +148,52 @@ function pruefe404Seite() {
   return fehler;
 }
 
+// --- W6: Weiterleitungsseiten (spielplan.html, spielplan-<team>.html,
+// tabellen.html – siehe src/vorlagen/weiterleitung.mjs) sind bewusst NICHT
+// in der Sitemap (tools/build.mjs, W6-Spezifikation A3: "Weiterleitungsseiten
+// nicht in docs/sitemap.xml") und laufen deshalb nicht durch die
+// sitemap-gesteuerte pruefeSeite()-Schleife oben – Inhaltsregeln (genau eine
+// h1 mit "richtigem" Seiteninhalt, description 50–170 Zeichen, axe-core,
+// Tippziele …) gelten für sie nicht. Geprüft wird stattdessen nur, dass jede
+// Weiterleitungsseite tatsächlich auf ein existierendes Ziel zeigt: liest
+// docs/ws/*.html direkt (ohne Server/Puppeteer), erkennt Weiterleitungsseiten
+// an "<meta http-equiv=\"refresh\"" und prüft Ziel-Existenz, robots noindex,
+// die sichtbare "Diese Seite ist umgezogen"-h1 sowie einen sichtbaren Link
+// auf dasselbe Ziel wie die Weiterleitung selbst. ---
+function pruefeWeiterleitungsseiten() {
+  const fehler = [];
+  const wsDir = path.join(DOCS, "ws");
+  if (!existsSync(wsDir)) return { fehler, anzahl: 0 };
+
+  const dateien = readdirSync(wsDir).filter((d) => d.endsWith(".html"));
+  let anzahl = 0;
+  for (const datei of dateien) {
+    const html = readFileSync(path.join(wsDir, datei), "utf8");
+    if (!html.includes('<meta http-equiv="refresh"')) continue;
+    anzahl += 1;
+
+    const treffer = html.match(/<meta http-equiv="refresh" content="0; url=([^"]+)">/);
+    if (!treffer) {
+      fehler.push(`${datei}: <meta http-equiv="refresh"> ohne erkennbares content="0; url=…"`);
+      continue;
+    }
+    const ziel = treffer[1];
+    if (!existsSync(path.join(wsDir, ziel))) {
+      fehler.push(`${datei}: Weiterleitungsziel '${ziel}' existiert nicht unter docs/ws/`);
+    }
+    if (!html.includes('<meta name="robots" content="noindex">')) {
+      fehler.push(`${datei}: kein <meta name="robots" content="noindex">`);
+    }
+    if (!html.includes(">Diese Seite ist umgezogen<")) {
+      fehler.push(`${datei}: h1 "Diese Seite ist umgezogen" nicht gefunden`);
+    }
+    if (!html.includes(`href="${ziel}"`)) {
+      fehler.push(`${datei}: kein sichtbarer Link auf dasselbe Ziel ('href="${ziel}"' nicht gefunden)`);
+    }
+  }
+  return { fehler, anzahl };
+}
+
 async function pruefeSeite(browser, seitenPfad, axeSkript, bericht) {
   const page = await browser.newPage();
   const url = BASIS + seitenPfad;
@@ -717,6 +763,11 @@ async function main() {
     bericht.seite404 = { fehler: fehler404 };
     if (fehler404.length) allesOk = false;
 
+    // --- W6: Weiterleitungsseiten (nicht in der Sitemap, siehe oben) ---
+    const weiterleitung = pruefeWeiterleitungsseiten();
+    bericht.weiterleitung = weiterleitung;
+    if (weiterleitung.fehler.length) allesOk = false;
+
     // --- Bildgrößen ---
     const bilderDir = path.join(DOCS, "assets");
     if (existsSync(bilderDir)) {
@@ -757,6 +808,12 @@ async function main() {
     for (const f of bericht.seite404.fehler) console.log(`  - ${f}`);
   } else {
     console.log("404-Seite: alle Referenzen absolut.");
+  }
+  if (bericht.weiterleitung.fehler.length) {
+    console.log(`Weiterleitungsseiten (${bericht.weiterleitung.anzahl} geprüft) – Verstöße:`);
+    for (const f of bericht.weiterleitung.fehler) console.log(`  - ${f}`);
+  } else {
+    console.log(`Weiterleitungsseiten: alle ${bericht.weiterleitung.anzahl} zeigen auf ein existierendes Ziel.`);
   }
   console.log(`\nBericht: tools/cache/pruefbericht.json`);
 

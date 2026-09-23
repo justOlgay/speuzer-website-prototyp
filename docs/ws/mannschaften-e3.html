@@ -74,10 +74,43 @@
     </li>
   </ul>
     </div>
-    <p class="knopfzeile">
-      <a class="knopf" href="spielplan-e3.html">Spielplan E3</a>
-      <a class="knopf knopf--sekundaer" href="tabellen.html#e3">Tabelle</a>
-    </p>
+    <h2>Spielplan der Saison</h2>
+    <div data-nur-appack hidden>
+      <div class="fussballde-wrap">
+        <div class="fussballde_widget" data-id="15839ff7-ac56-422d-9853-b240229822ec" data-type="team-matches"></div>
+      </div>
+      <p class="meta fussballde-hinweis">Spiele seitlich wischbar</p>
+      <p class="meta">Live von FUSSBALL.DE (DFBnet): vergangene Spiele mit Ergebnis, kommende Spiele. Tippen öffnet die Spielseite.</p>
+    </div>
+    <div data-nur-prototyp>
+      <iframe src="https://justolgay.github.io/speuzer-spielplan/app-e-jugend.html#E3" title="Spielplan E3-Jugend (Generator, DFBnet)" loading="lazy" data-generator-iframe style="width:100%;height:640px;border:0;border-radius:var(--r-lg);display:block;"></iframe>
+    <p class="meta">Die Übersicht öffnet auf E3; die Reiter zeigen die ganze Gruppe (E1, E2, E3). Das nächste Spiel ist hervorgehoben.</p>
+    <p class="meta">Quelle: DFBnet, täglich aktualisiert. Tippen auf ein Spiel öffnet FUSSBALL.DE.</p>
+    <script>
+    (function () {
+      var iframe = document.querySelector('[data-generator-iframe]');
+      if (!iframe) return;
+      window.addEventListener('message', function (event) {
+        if (event.origin !== 'https://justolgay.github.io') return;
+        if (event.source !== iframe.contentWindow) return;
+        var h = event.data && event.data.speuzerHeight;
+        if (typeof h !== 'number' || h < 200 || h > 20000) return;
+        iframe.style.height = h + 'px';
+      });
+    })();
+    </script>
+    </div>
+    <h2>Tabelle</h2>
+    <div data-nur-appack hidden>
+      <div class="fussballde-wrap">
+        <div class="fussballde_widget" data-id="8a18ef30-e4ac-4936-8049-18dfd14d08f4" data-type="table"></div>
+      </div>
+      <p class="meta fussballde-hinweis">Tabelle seitlich wischbar</p>
+    </div>
+    <div data-nur-prototyp>
+      <p class="meta">Platz 4 von 5 · 0 Punkte</p>
+      <p class="meta">Auf der Vereinswebsite kommen Spielplan und Tabellen live aus dem DFBnet.</p>
+    </div>
   </div>
       <aside class="fluss">
     <div class="karte fluss">

@@ -63,11 +63,15 @@ function telefoneAbschnitt() {
       titel: "Mannschaft D2 als Workspace-Seite in der App",
       beschriftung: "Mannschaft D2 als Workspace-Seite in der App",
     }),
+    // W6 (Entscheidung Olgay 23.09.2026): /spielplan/ ist jetzt eine
+    // Weiterleitung auf /mannschaften/ (Spielplan & Tabelle stehen nur noch
+    // je Mannschaftsseite) – das Beispiel zeigt deshalb die
+    // Mannschaften-Übersicht statt der (sofort weiterleitenden) alten Seite.
     telefonEintrag({
-      zurueck: "Spielplan",
-      ziel: `${PFAD}ws/spielplan.html`,
-      titel: "Spielplan als Workspace-Seite in der App",
-      beschriftung: "Spielplan als Workspace-Seite in der App",
+      zurueck: "Mannschaften",
+      ziel: `${PFAD}ws/mannschaften.html`,
+      titel: "Mannschaften als Workspace-Seite in der App",
+      beschriftung: "Mannschaften als Workspace-Seite in der App",
     }),
   ].join("\n      ");
 

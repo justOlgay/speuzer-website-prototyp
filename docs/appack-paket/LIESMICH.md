@@ -35,8 +35,8 @@ gebaut werden.
 
 ## Zwei Ausgabemodi (W2)
 
-Die Seitenvorlagen (`src/vorlagen/workspace.html`, `src/seiten/spielplan/
-index.mjs`, `src/seiten/spielplan/team.mjs`, `src/seiten/tabellen.mjs`)
+Die Seitenvorlagen (`src/vorlagen/workspace.html`,
+`src/seiten/mannschaften/index.mjs`, `src/seiten/mannschaften/team.mjs`)
 markieren Inhalt, der nur in einem der beiden Ausgabemodi erscheinen soll:
 
 - `data-nur-appack` – nur für die Live-Website. Dieses Skript macht den
@@ -48,24 +48,31 @@ markieren Inhalt, der nur in einem der beiden Ausgabemodi erscheinen soll:
   GitHub-Pages-Prototyp (eingefrorene Daten mit Stand-Angabe). Dieses Skript
   entfernt den ganzen Block.
 
-Damit enthält `web/` ausschließlich Live-Inhalt: FUSSBALL.DE-Widgets für die
-Vereinsspiele (`spielplan.html`, Typ `club-matches`), das nächste Spiel und
-die Spiele der Saison je Team (`spielplan-<team>.html` UND
-`mannschaften-<team>.html`, Typen `next-match`/`team-matches`, IDs aus
-`data/widgets.json`) sowie die Tabellen (`spielplan-<team>.html`,
-`tabellen.html`, Typ `table`). Das betrifft acht der elf Mannschaften; nur
-die drei Teams ohne FUSSBALL.DE-Widget (F1, F2, G-Jugend – Kinderfußball,
-kein Ligabetrieb) behalten die `<iframe>`-Einbettung der Gruppen-Seite des
-Spielplan-Generators (`https://justolgay.github.io/speuzer-spielplan/
-app-<gruppe>.html`) auch im Live-Paket, auf `spielplan-<team>.html` wie
-bisher. Das FUSSBALL.DE-Skript `widgets.js` wird clientseitig nur
-nachgeladen, wenn ein sichtbares FUSSBALL.DE-Widget – gleich welchen Typs
-(`next-match`, `team-matches`, `table`, `club-matches`) – im Dokument
-steht (siehe `FUSSBALLDE_WIDGET_LADER` in `src/vorlagen/hilfen.mjs`). Die
-FUSSBALL.DE-Widgets sind bei FUSSBALL.DE nur für die Domain `cdn.appack.de`
-freigegeben – lokal oder auf GitHub Pages zeigen sie eine Fehlermeldung von
-FUSSBALL.DE, das ist kein Seitenfehler (siehe
-`tools/appack-paket-pruefen.mjs`).
+Seit W6 (Entscheidung Olgay 23.09.2026: Tabellen und Spielpläne nur noch je
+Mannschaftsseite, keine eigene Seite/Sammelseite dafür) enthält `web/`
+ausschließlich Live-Inhalt: FUSSBALL.DE-Widgets für die Vereinsspiele
+(`mannschaften.html`, ganz unten, Typ `club-matches`), das nächste Spiel
+und die Spiele der Saison je Team (`mannschaften-<team>.html`, Typen
+`next-match`/`team-matches`, IDs aus `data/widgets.json`) sowie die
+Tabellen (ebenfalls `mannschaften-<team>.html`, Typ `table`). Das betrifft
+acht der elf Mannschaften; nur die drei Teams ohne FUSSBALL.DE-Widget (F1,
+F2, G-Jugend – Kinderfußball, kein Ligabetrieb) behalten die
+`<iframe>`-Einbettung der Gruppen-Seite des Spielplan-Generators
+(`https://justolgay.github.io/speuzer-spielplan/app-<gruppe>.html`) auch im
+Live-Paket, auf `mannschaften-<team>.html` wie bisher auf
+`spielplan-<team>.html`. Die früheren Seiten `spielplan.html`,
+`spielplan-<team>.html` und `tabellen.html` sind seit W6 schlanke
+Weiterleitungen (`<meta http-equiv="refresh">`) auf die jeweilige
+Mannschaftsseite (siehe `src/vorlagen/weiterleitung.mjs`) – sie bleiben unter
+demselben Workspace-Namen bestehen, damit alte Verweise nicht ins Leere
+laufen, tragen aber keine Widgets mehr und stehen nicht in `docs/sitemap.xml`.
+Das FUSSBALL.DE-Skript `widgets.js` wird clientseitig nur nachgeladen, wenn
+ein sichtbares FUSSBALL.DE-Widget – gleich welchen Typs (`next-match`,
+`team-matches`, `table`, `club-matches`) – im Dokument steht (siehe
+`FUSSBALLDE_WIDGET_LADER` in `src/vorlagen/hilfen.mjs`). Die FUSSBALL.DE-
+Widgets sind bei FUSSBALL.DE nur für die Domain `cdn.appack.de` freigegeben –
+lokal oder auf GitHub Pages zeigen sie eine Fehlermeldung von FUSSBALL.DE, das
+ist kein Seitenfehler (siehe `tools/appack-paket-pruefen.mjs`).
 
 ## Datenschutz
 
