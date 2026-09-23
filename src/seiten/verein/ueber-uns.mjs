@@ -84,7 +84,7 @@ function seitenkopfAbschnitt() {
 
 function geschichteAbschnitt(daten) {
   const philosophie = downloadEintrag(daten, "Vereinsphilosophie");
-  const chronik = downloadEintrag(daten, "Chronik");
+  const chronik = downloadEintrag(daten, "Vereinschronik");
 
   return `<section class="abschnitt">
   <div class="container fluss">
