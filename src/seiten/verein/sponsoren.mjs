@@ -116,7 +116,7 @@ function sponsorWerdenAbschnitt() {
   return `<section class="abschnitt--blau abschnitt abschnitt--eng">
   <div class="container fluss">
     <h2>Sponsor werden</h2>
-    <p>Sie möchten die Sportfreunde 04 unterstützen – als Trikotsponsor, mit einer Bandenwerbung oder als Partner der Jugendabteilung? Schreiben Sie uns, wir melden uns zeitnah.</p>
+    <p>Möchtest du die Sportfreunde 04 unterstützen – als Trikotsponsor, mit einer Bandenwerbung oder als Partner der Jugendabteilung? Schreib uns, wir melden uns zeitnah.</p>
     <p class="knopfzeile">
       <a class="knopf knopf--weiss" href="mailto:geschaeftsstelle@sportfreunde04.de?subject=Sponsoring%20FFV%20Sportfreunde%2004">E-Mail an die Geschäftsstelle</a>
     </p>

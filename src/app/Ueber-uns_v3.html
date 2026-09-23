@@ -1,9 +1,6 @@
 <h1 class="visually-hidden">Über uns</h1>
 
-<div class="karte">
-  <p class="ueber-uns-titel">Wer wir sind</p>
-  <p class="ueber-uns-lead">Frankfurter Fußballverein Sportfreunde 1904 e.&nbsp;V. – im Gallus sagt man einfach „die Speuzer“.</p>
-</div>
+<p class="seitenkopf-lead">Frankfurter Fußballverein Sportfreunde 1904&nbsp;e.&nbsp;V. – im Gallus sagt man einfach „die Speuzer“.</p>
 
 <h2 class="abschnittstitel">Gründung 1904</h2>
 <div class="karte">
@@ -31,6 +28,7 @@
 
 <h2 class="abschnittstitel">Unsere Werte</h2>
 <div class="karte">
+  <p class="leitsatz-quelle">Unser Leitsatz aus der Vereinsphilosophie:</p>
   <p class="leitsatz">„Wir wollen nicht nur erfolgreiche Mannschaften entwickeln, sondern erfolgreiche Menschen und einen starken Verein für kommende Generationen.“</p>
   <p>Unsere Werte sind Gemeinschaft, Respekt, Wertschätzung, Verantwortung, Fairness, Entwicklung und Kinderschutz.</p>
 </div>
@@ -45,7 +43,7 @@
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
   </a>
   <a class="zeile" href="https://cdn.appack.de/sportfreunde04/pdf/vereinsphilosophie-und-zukunftskonzept.pdf" target="_blank" rel="noopener">
-    <span class="zeile__text"><span class="zeile__titel">Vereinsphilosophie (PDF)</span></span>
+    <span class="zeile__text"><span class="zeile__titel">Vereinsphilosophie lesen (PDF, 50 Seiten)</span></span>
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
   </a>
   <a class="zeile" href="nav://sportfreunde04_Application_1783064196311">
@@ -97,13 +95,20 @@
 .karte p { margin: 0 0 var(--sp-2); font-size: 14px; color: var(--ink-2); }
 .karte p:last-child { margin-bottom: 0; }
 
+.leitsatz-quelle {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+/* W8, Befund 7: Zitat gut lesbar (normale Fließschrift, nicht schmal
+   kursiv) statt der kondensierten, kursiven Kopfschrift. */
 .leitsatz {
-  font-family: var(--font-head);
-  font-weight: 700;
-  font-size: 18px;
-  text-transform: none;
+  font-family: var(--font-text);
+  font-weight: 600;
+  font-size: 16px;
+  font-style: normal;
   color: var(--blau-950);
-  font-style: italic;
 }
 
 .zahlen-raster {

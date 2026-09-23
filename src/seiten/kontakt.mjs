@@ -3,7 +3,8 @@
 // Sportplatz Mainzer Landstraße (kein Kartenbild, kein externer Dienst
 // eingebettet).
 
-import { mailLink, ruecklink } from "../vorlagen/hilfen.mjs";
+import { mailLink, ruecklink, telefonAnzeige } from "../vorlagen/hilfen.mjs";
+import { probetrainingAbschnitt } from "../vorlagen/bausteine.mjs";
 
 // Diese Seite liegt immer unter "/kontakt/" (Tiefe 1), daher immer "../"
 // (siehe pfadZurWurzel() in tools/build.mjs).
@@ -27,12 +28,11 @@ function googleMapsUrl(adresse) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adresse)}`;
 }
 
-// mailto-Knopf mit optionalem Betreff (Plan-Abschnitt C nennt Betreffs nur
+// mailto-Href mit optionalem Betreff (Plan-Abschnitt C nennt Betreffs nur
 // für einen Teil der Ansprechpartner – ohne Angabe kein erfundener Betreff).
-function mailKnopf({ adresse, betreff }) {
+function mailHref({ adresse, betreff }) {
   if (!adresse) return "";
-  const href = betreff ? `mailto:${adresse}?subject=${encodeURIComponent(betreff)}` : `mailto:${adresse}`;
-  return `<a class="knopf knopf--sekundaer" href="${escapeHtml(href)}">E-Mail schreiben</a>`;
+  return betreff ? `mailto:${adresse}?subject=${encodeURIComponent(betreff)}` : `mailto:${adresse}`;
 }
 
 // ---------- Erreichbarkeit ----------
@@ -46,12 +46,15 @@ function erreichbarkeitHtml() {
 
 // ---------- Seitenkopf ----------
 
+// W8-Korrektur: Einleitung widersprach dem Hinweiskasten weiter unten
+// ("telefonisch in der Geschäftsstelle" vs. "keine festen Öffnungszeiten …
+// telefonisch nach Vereinbarung") – jetzt derselbe Zusatz wie dort.
 function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
     ${ruecklink(`${PFAD}verein/`, "Verein")}
     <h1>Geschäftsstelle &amp; Anfahrt</h1>
-    <p class="seitenkopf__lead">So erreichst du uns – per E-Mail an die passende Vereinsadresse oder telefonisch in der Geschäftsstelle.</p>
+    <p class="seitenkopf__lead">So erreichst du uns – per E-Mail an die passende Adresse, telefonisch nach Vereinbarung.</p>
   </div>
 </section>`;
 }
@@ -97,13 +100,13 @@ function ansprechpartner(daten) {
       betreff: "Beiträge",
     },
     {
-      titel: "Kinderschutz",
+      titel: "Kinder- und Jugendschutz",
       mail: mails.kinderschutz,
       text: "Vertraulicher Kontakt zum Kinderschutzbeauftragten.",
       // Bewusst kein Betreff (vertraulich, Plan-Abschnitt A1).
     },
     {
-      titel: "Sponsoring & Partner",
+      titel: "Sponsoren & Partner",
       mail: verein.mail,
       text: "Trikot- und Bandenwerbung, Partnerschaften mit der Jugendabteilung.",
       betreff: "Sponsoring",
@@ -117,27 +120,26 @@ function ansprechpartner(daten) {
   ];
 }
 
-// P9-Korrektur A1: Karte als Flex-Spalte (.karte--anliegen in
-// komponenten.css), Knopfzeile mit margin-top:auto unten ausgerichtet –
-// dadurch sind alle acht Karten im Raster gleich hoch, unabhängig von der
-// Satzlänge.
-function ansprechpartnerKarte(eintrag) {
-  return `<div class="karte karte--anliegen fluss">
-      <span class="karte__titel">${escapeHtml(eintrag.titel)}</span>
-      <p>${escapeHtml(eintrag.text)}</p>
-      <p class="knopfzeile">
-        ${mailKnopf({ adresse: eintrag.mail, betreff: eintrag.betreff })}
-      </p>
-    </div>`;
+// W8-Korrektur: acht ungleich hohe Karten (unterschiedlich lange Sätze) →
+// kompakte Liste "Anliegen – adresse@… ›", ganze Zeile als Link (".zeile",
+// gleicher Baustein wie /verein/ und der Mach-mit-Verweis unten).
+function ansprechpartnerZeile(eintrag) {
+  if (!eintrag.mail) return "";
+  return `<a class="zeile" href="${escapeHtml(mailHref({ adresse: eintrag.mail, betreff: eintrag.betreff }))}">
+      <span class="zeile__text">
+        <span class="zeile__titel">${escapeHtml(eintrag.titel)} – ${escapeHtml(eintrag.mail)}</span>
+      </span>
+      <svg class="zeile__pfeil" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+    </a>`;
 }
 
 function ansprechpartnerAbschnitt(daten) {
-  const karten = ansprechpartner(daten).map(ansprechpartnerKarte).join("\n    ");
+  const zeilen = ansprechpartner(daten).map(ansprechpartnerZeile).join("\n    ");
   return `<section class="abschnitt">
   <div class="container fluss">
     <h2>Ansprechpartner nach Anliegen</h2>
-    <div class="raster raster--3">
-    ${karten}
+    <div class="zeilen-liste">
+    ${zeilen}
     </div>
   </div>
 </section>`;
@@ -151,14 +153,16 @@ function ansprechpartnerAbschnitt(daten) {
 // komponenten.css und /impressum/). Der Hinweiskasten rechts bekommt über
 // align-items:start (statt des Grid-Standards stretch) nur noch die Höhe
 // seines eigenen Inhalts (siehe .anfahrt__raster in komponenten.css).
-// Kontaktzeile (Telefon, E-Mail, Website, Instagram): W3-Spezifikation
-// Abschnitt 7 verlangt, dass kontakt.html aus data/geschaeftsstelle.json
-// "die Öffnungszeiten … und die Kontaktzeile" rendert (W3b, Prüfer-Befund
-// "wichtig" – bislang kamen diese vier Felder nur aus data/verein.json).
+// Kontaktzeile (Telefon, E-Mail, Instagram): W3-Spezifikation Abschnitt 7
+// verlangt, dass kontakt.html aus data/geschaeftsstelle.json "die
+// Öffnungszeiten … und die Kontaktzeile" rendert (W3b, Prüfer-Befund
+// "wichtig" – bislang kamen diese Felder nur aus data/verein.json).
 // data/verein.json bleibt Fallback, falls das appack-Worksheet ein Feld
 // nicht liefert. Facebook: Der Verein hat keine Facebook-Seite, nur die
 // Gruppe (Entscheidung Olgay 22.09.2026); data/verein.json und das
-// Worksheet nennen dieselbe Gruppen-Adresse.
+// Worksheet nennen dieselbe Gruppen-Adresse. Die eigene Website wird hier
+// bewusst nicht mehr verlinkt (W8-Korrektur: Selbstverweis auf die Seite,
+// auf der man gerade liest, ergab keinen Sinn).
 function ausWorksheetOderVerein(wert, fallback) {
   const text = String(wert ?? "").trim();
   return text || fallback;
@@ -173,7 +177,6 @@ function geschaeftsstelleAbschnitt(daten) {
 
   const telefonGeschaeftsstelle = ausWorksheetOderVerein(kontakt.phoneNumber, verein.tel_geschaeftsstelle);
   const email = ausWorksheetOderVerein(kontakt.email, verein.mail ?? "geschaeftsstelle@sportfreunde04.de");
-  const website = ausWorksheetOderVerein(kontakt.website, "");
   const instagram = ausWorksheetOderVerein(kontakt.insta, verein.instagram);
 
   return `<section class="abschnitt--hell abschnitt">
@@ -194,21 +197,14 @@ function geschaeftsstelleAbschnitt(daten) {
 
           <dt>Telefon</dt>
           <dd>
-            <p style="margin:0;"><a href="${telHref(telefonGeschaeftsstelle)}">Geschäftsstelle ${escapeHtml(telefonGeschaeftsstelle ?? "")}</a></p>
-            <p style="margin:0;"><a href="${telHref(verein.tel_platzwart)}">Platzwart ${escapeHtml(verein.tel_platzwart ?? "")}</a></p>
+            <p style="margin:0;"><a href="${telHref(telefonGeschaeftsstelle)}">Geschäftsstelle ${escapeHtml(telefonAnzeige(telefonGeschaeftsstelle))}</a></p>
+            <p style="margin:0;"><a href="${telHref(verein.tel_platzwart)}">Platzwart ${escapeHtml(telefonAnzeige(verein.tel_platzwart))}</a></p>
           </dd>
-
-          ${
-            website
-              ? `<dt>Website</dt>
-          <dd><p style="margin:0;"><a href="${escapeHtml(website)}" rel="noopener" target="_blank">${escapeHtml(website.replace(/^https?:\/\//, ""))}</a></p></dd>`
-              : ""
-          }
 
           <dt>Social</dt>
           <dd>
             <p style="margin:0;"><a href="${escapeHtml(instagram ?? "")}" rel="noopener" target="_blank">Instagram @speuzer_ffm</a></p>
-            <p style="margin:0;"><a href="${escapeHtml(verein.facebook ?? "")}" rel="noopener" target="_blank">Facebook</a></p>
+            <p style="margin:0;"><a href="${escapeHtml(verein.facebook ?? "")}" rel="noopener" target="_blank">Facebook-Gruppe</a></p>
           </dd>
         </dl>
       </div>
@@ -225,20 +221,19 @@ function geschaeftsstelleAbschnitt(daten) {
 // P9-Korrektur A2: Adresse ebenfalls als <dl class="angaben"> (gleiche
 // Korrektur wie im Abschnitt Geschäftsstelle) statt als <address> ohne
 // Zeilenabstände.
+// W8-Korrektur: Vereinsname und Sportstätten-Adresse standen hier ein
+// zweites Mal (direkt darüber im Abschnitt "Geschäftsstelle" bereits
+// vollständig genannt) – hier jetzt nur noch die Routen-Knöpfe und die
+// Rebstock-Adresse (Herren + A-Jugend, einheitliche Schreibweise wie unter
+// "Über uns").
 function anfahrtAbschnitt(daten) {
   const verein = daten.verein ?? {};
-  const sportstaette = verein.sportstaette ?? {};
   const karten = verein.karten ?? {};
   const rebstockUrl = googleMapsUrl("Am Römerhof 9, 60486 Frankfurt am Main");
 
   return `<section class="abschnitt">
   <div class="container fluss">
     <h2>Anfahrt</h2>
-    <p>${escapeHtml(verein.name_register ?? "")}</p>
-    <dl class="angaben">
-      <dt>Sportstätte</dt>
-      <dd>${escapeHtml(sportstaette.strasse ?? "")}<br>${escapeHtml(sportstaette.plz ?? "")} ${escapeHtml(sportstaette.ort ?? "")}</dd>
-    </dl>
     <p class="knopfzeile">
       <a class="knopf knopf--sekundaer" href="${escapeHtml(karten.apple ?? "")}" rel="noopener" target="_blank">Route in Apple Karten</a>
       <a class="knopf knopf--sekundaer" href="${escapeHtml(karten.google ?? "")}" rel="noopener" target="_blank">Route in Google Maps</a>
@@ -250,7 +245,7 @@ function anfahrtAbschnitt(daten) {
     <div class="hinweis hinweis--info">
       <p style="margin:0;">Mit Bus und Bahn: <a href="https://www.rmv.de" target="_blank" rel="noopener">Verbindung in der RMV-Auskunft</a></p>
     </div>
-    <p>Die Herren spielen ihre Heimspiele auf der Anlage von SW Griesheim am Rebstock, Am Römerhof 9, 60486 Frankfurt. <a href="${escapeHtml(rebstockUrl)}" rel="noopener" target="_blank">Route</a></p>
+    <p>Die Herren und die A-Jugend tragen ihre Heimspiele auf der Bezirkssportanlage am Rebstock aus (Anlage von SW Griesheim, Am Römerhof 9, 60486 Frankfurt). <a href="${escapeHtml(rebstockUrl)}" rel="noopener" target="_blank">Route</a></p>
   </div>
 </section>`;
 }
@@ -259,6 +254,10 @@ export function seite(daten) {
   const inhalt = [
     seitenkopfAbschnitt(),
     ansprechpartnerAbschnitt(daten),
+    // W8-Korrektur: derselbe Probetraining-Baustein wie auf /mannschaften/
+    // und /mitglied-werden/ (siehe src/vorlagen/bausteine.mjs) – direkt nach
+    // der Anliegen-Liste, in der "Probetraining & Jugend" schon verlinkt ist.
+    probetrainingAbschnitt(PFAD),
     geschaeftsstelleAbschnitt(daten),
     anfahrtAbschnitt(daten),
   ].join("\n");

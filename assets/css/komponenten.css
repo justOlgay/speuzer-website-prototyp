@@ -116,6 +116,15 @@
   margin-top: var(--sp-3);
 }
 
+/* W8-Korrektur: mindestens 24px (--sp-5) Abstand zwischen einer Überschrift
+   (auch über ein Zwischenelement hinweg) und dem nächsten Knopf – die
+   allgemeine Fluss-Regel (".fluss > * + *", 16px) bzw. "h2 + *" (12px) waren
+   dafür zu knapp. Höhere Spezifität als beide, siehe unten die noch
+   großzügigere Ausnahme für ul/ol/.tabelle-wrap/.hinweis (32px). */
+.fluss > * + .knopfzeile {
+  margin-top: var(--sp-5);
+}
+
 .fluss > :is(ul, ol, .tabelle-wrap, .hinweis) + .knopfzeile {
   margin-top: var(--sp-6);
 }
@@ -188,14 +197,24 @@
 }
 
 /* Kicker im (hellen) Seitenkopf (P5, /verein/karneval/) – wie .hero__kicker,
-   aber in --ink-3 statt --blau-100 (das wäre auf hellem Grund unlesbar). */
-.seitenkopf__kicker {
+   aber in --ink-3 statt --blau-100 (das wäre auf hellem Grund unlesbar).
+   W8-Korrektur: dieselbe Klasse jetzt auch als kleine Zwischenüberschrift
+   innerhalb einer .zeilen-liste (Verein-Verteiler, /verein/) – "Eyebrow/
+   Kicker überall im selben Stil" statt einer zweiten, abweichenden Variante. */
+.seitenkopf__kicker,
+.zeilen-liste__kicker {
   display: block;
   font-size: var(--fs-xs);
   text-transform: uppercase;
   letter-spacing: .08em;
   color: var(--ink-3);
   margin: 0 0 var(--sp-2);
+}
+
+/* Mehrere Gruppen in einer .zeilen-liste (W8, /verein/): Abstand vor jeder
+   weiteren Gruppen-Überschrift, nicht vor der ersten. */
+.zeilen-liste__kicker:not(:first-child) {
+  margin-top: var(--sp-6);
 }
 
 /* ==========================================================================
@@ -361,6 +380,12 @@
   text-transform: uppercase;
   color: var(--blau-900);
   margin: 0 0 var(--sp-1);
+  /* W8-Korrektur: ".karte__titel" ist ein <span>, erbt also nicht das
+     engere line-height der echten Überschriften (h1–h4, --lh-head 1.1) –
+     ohne eigenen Wert stand hier stattdessen das lockere Fließtext-
+     line-height (--lh-text, 1.55), bei zweizeiligen Karten-Überschriften
+     sichtbar zu großzügig. */
+  line-height: 1.15;
 }
 
 .karte__meta {
@@ -398,6 +423,92 @@
   font-size: var(--fs-sm);
   color: var(--blau-700);
   text-align: right;
+}
+
+/* ==========================================================================
+   Mannschaften-Übersicht (W9, Abschnitt 2) – ein einheitliches Raster für
+   alle drei Gruppen (Senioren, Jugend, Kinderfußball), auch für eine Gruppe
+   mit nur einem Team ("Senioren"): ab 640px ein 4-spaltiges Grid wie
+   .raster--4, darunter eine Liste kompakter, ganz tippbarer Zeilen statt
+   großer Karten (Name, Jahrgang · Liga, ›, ~64px – wie .zeile, siehe dort).
+   .team-karte begrenzt zusätzlich die Kartenbreite ab 640px auf ~280px
+   (ähnliche Lehre wie .person--einzeln oben: ein Grid mit auto-fit/1fr
+   streckt eine einzelne Karte in einer dünn besetzten Reihe sonst auf die
+   volle Breite). Dieser Block steht bewusst NACH .karte--link/.karte__titel/
+   .karte__meta/.karte__mehr oben (gleiche Selektor-Spezifität, in der Kaskade
+   gewinnt sonst die spätere, hier ungewollt die falsche Regel – u. a. deshalb
+   griff eine frühere Fassung dieses Blocks vor .karte--link nicht). */
+
+.raster--mannschaften {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 640px) {
+  .raster--mannschaften {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    gap: var(--sp-5);
+  }
+
+  .raster--mannschaften .team-karte {
+    max-width: 280px;
+  }
+}
+
+.team-karte .team-karte__pfeil {
+  display: none;
+}
+
+@media (max-width: 639.98px) {
+  .team-karte {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    min-height: 64px;
+    padding: var(--sp-3) var(--sp-4);
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .team-karte:hover {
+    box-shadow: none;
+    transform: none;
+  }
+
+  .team-karte:last-child {
+    border-bottom: none;
+  }
+
+  .team-karte .team-karte__haupt {
+    min-width: 0;
+  }
+
+  .team-karte .karte__titel {
+    font-family: inherit;
+    font-size: var(--fs-md);
+    font-weight: 600;
+    text-transform: none;
+    color: inherit;
+    margin: 0;
+  }
+
+  .team-karte .karte__meta {
+    margin-top: 2px;
+  }
+
+  .team-karte .karte__mehr {
+    display: none;
+  }
+
+  .team-karte .team-karte__pfeil {
+    display: block;
+    flex: 0 0 auto;
+    color: var(--ink-3);
+  }
 }
 
 /* ==========================================================================
@@ -651,6 +762,15 @@
   gap: var(--sp-2);
 }
 
+/* W8-Korrektur: eine einzelne Personen-Karte außerhalb eines Mehrspalten-
+   Rasters (z. B. Kinderschutzbeauftragter auf /verein/ueber-uns/) – ohne
+   Begrenzung nimmt sie in einem Grid mit nur einem Kind die volle
+   Containerbreite ein (auto-fit/1fr strecken das einzige Element), das
+   Porträt wirkte dadurch riesig statt wie eine kompakte Karte. */
+.person--einzeln {
+  max-width: 260px;
+}
+
 .person__bild {
   display: block;
   width: 100%;
@@ -669,21 +789,27 @@
   object-position: center top;
 }
 
-/* Platzhalter ohne Foto (Vorstand/Karneval, P5): Fläche --blau-100 mit dem
-   Wappen bei 36% Breite (P5-Korrektur A1: von 40% auf 36% verkleinert, damit
-   das Wappen im jetzt auf max. 260px begrenzten .raster--personen nicht zu
-   groß wirkt), zentriert. */
-.person__bild--platzhalter {
+/* W8-Korrektur: Platzhalter ohne Foto (Vorstand/Karneval/Kinderschutz) war
+   die volle 3:4-Fläche mit dem Wappen bei 36% Breite – Prüfer-Befund "kein
+   großes Wappen", "kompakte Karte mit Initialen-Kreis (gleicher Stil wie
+   Trainer, aber passend zur Kartengröße)". Ersetzt die volle Bildfläche
+   durch einen zentrierten Kreis in Kartenbreite (kein festes 48px wie bei
+   .person-mini__bild--platzhalter – die Personen-Karte ist deutlich größer). */
+.person__bild--initialen {
+  width: 96px;
+  height: 96px;
+  align-self: center;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--blau-100);
-}
-
-.person__bild--platzhalter svg {
-  width: 36%;
-  height: auto;
   color: var(--blau-700);
+  font-family: var(--font-head);
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  margin-block: var(--sp-3);
 }
 
 .person__name {
@@ -743,6 +869,20 @@
   object-fit: cover;
   object-position: 50% 22%;
   border: 1px solid var(--line);
+  /* W9, Abschnitt 7: der Vorstandsfoto-Rückfall setzt diese Klasse auf ein
+     <picture> (bild()-Baustein aus bild.mjs, mehrere <source>+<img>) statt
+     wie bisher direkt auf ein <img> (trainerFotosSkript()/Initialen-Kreis) –
+     overflow:hidden clippt dessen inneres <img> auf den Kreis, siehe die
+     Nachbarregel unten. Für den direkten <img>-Fall (object-fit:cover)
+     ändert overflow:hidden nichts sichtbar. */
+  overflow: hidden;
+}
+
+.person-mini__bild img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 22%;
 }
 
 .person-mini__bild--platzhalter {
@@ -798,6 +938,31 @@
   width: auto;
   object-fit: contain;
 }
+
+/* Zusatzangebote (Mannschaften): Logo klein neben Badge und Name */
+.angebot__kopf {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+.angebot__logo {
+  flex: 0 0 72px;
+  width: 72px;
+  height: 72px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.angebot__logo picture { display: contents; }
+.angebot__logo img { width: 100%; height: 100%; object-fit: contain; }
+.angebot__titel { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-2); min-width: 0; }
+.angebot__titel .karte__titel { margin: 0; }
+/* Teambeschreibung im Seitenkopf (aus dem Abteilungen-Worksheet) */
+.seitenkopf .teamtext { max-width: 62ch; margin-top: var(--sp-3); }
 
 /* ==========================================================================
    Hinweiskasten
@@ -1000,20 +1165,14 @@
    Adresse & Anfahrt – zweispaltiges Raster (P2)
    ========================================================================== */
 
+/* W8-Korrektur: vorher ab 768px zweispaltig (Adresse links, Hinweiskasten
+   rechts) – die rechte Spalte blieb dabei deutlich kürzer als die linke
+   (Prüfer-Befund: "zweite Spalte sinnvoll füllen oder einspaltig"). Jetzt
+   einspaltig: ohne eigene grid-template-columns bleibt es bei der
+   Grid-Vorgabe (ein impliziter Spalte, Kinder stapeln sich). */
 .anfahrt__raster {
   display: grid;
-  gap: var(--sp-6);
-  /* P9-Korrektur A2 (/kontakt/, Geschäftsstelle): ohne diese Zeile streckt
-     der Grid-Standard (align-items: stretch) den Hinweiskasten
-     "Öffnungszeiten" auf die volle Höhe der Adress-Spalte – er soll aber nur
-     so hoch wie sein eigener Inhalt sein. */
-  align-items: start;
-}
-
-@media (min-width: 768px) {
-  .anfahrt__raster {
-    grid-template-columns: 1fr 1fr;
-  }
+  gap: var(--sp-5);
 }
 
 /* ==========================================================================
@@ -1215,7 +1374,20 @@ body.datenschutz h2 {
    ========================================================================== */
 
 .zahl {
-  text-align: center;
+  /* W8-Korrektur: Überschrift des Abschnitts ("Der Verein in Zahlen") ist wie
+     überall sonst linksbündig – zentrierte Kacheln wirkten dagegen
+     "verrutscht"; jetzt gleich ausgerichtet. */
+  text-align: left;
+}
+
+/* W8-Korrektur: 2×2-Raster auf dem Handy statt einer einspaltigen Liste (vier
+   Kacheln wirken einzeln untereinander unnötig lang) – eigene Klasse statt
+   .raster--4 selbst zu ändern, das an anderer Stelle (z. B. /verein/mach-mit/)
+   bewusst einspaltig beginnt. */
+@media (max-width: 639.98px) {
+  .raster--2-mobil {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .zahl__wert {
@@ -1230,6 +1402,11 @@ body.datenschutz h2 {
   display: block;
   font-size: var(--fs-md);
   color: var(--blau-100);
+  /* W8-Korrektur: im 2×2-Mobilraster (.raster--2-mobil) ist die Spalte für
+     lange, nicht trennbare Komposita wie "Fußballmannschaften" zu schmal –
+     ohne Trennhilfe horizontales Scrollen der ganzen Seite bei 320px. */
+  hyphens: auto;
+  overflow-wrap: break-word;
 }
 
 /* ==========================================================================
@@ -1434,12 +1611,16 @@ body.datenschutz h2 {
 /* ==========================================================================
    Angaben-Liste (.angaben, P8) – /impressum/: Definitionsliste mit
    Beschriftung (dt, --fs-sm/600/--ink-3) und Wert (dd, --fs-md).
+   W8-Korrektur: Label knapp über seinem Wert (--sp-1, 4px), aber deutlicher
+   Abstand zum nächsten Beschriftung/Wert-Paar (--sp-5, 24px) – über
+   margin auf dt/dd statt eines einzigen gleichmäßigen gap, weil ein
+   flex-gap zwischen allen Kindern nicht zwischen "eigenem Paar" und
+   "nächstem Paar" unterscheiden kann.
    ========================================================================== */
 
 .angaben {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-4);
   margin: 0;
 }
 
@@ -1447,10 +1628,15 @@ body.datenschutz h2 {
   font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--ink-3);
+  margin-top: var(--sp-5);
+}
+
+.angaben dt:first-child {
+  margin-top: 0;
 }
 
 .angaben dd {
-  margin: 0;
+  margin: var(--sp-1) 0 0;
   font-size: var(--fs-md);
 }
 
@@ -2009,6 +2195,50 @@ body.datenschutz h2 {
 
 .spiele-kasten.ist-offen::after {
   display: none;
+}
+
+/* W9, Abschnitt 5: Abstand Knopf "Alle Spiele anzeigen" zum Kasten (≥16px)
+   und zum erklärenden Satz darunter (≥8px). .spiele-kasten-block liegt oft
+   nicht als direktes Kind in einem .fluss (z. B. in einem Reiter-Panel,
+   siehe reiterHtml() in hilfen.mjs) – die allgemeinen .fluss-Abstandsregeln
+   (".fluss > * + .knopfzeile" oben) griffen dort nicht, hier deshalb eine
+   eigene, gezielte Regel statt jene zu ändern. */
+.spiele-kasten-block > .knopfzeile {
+  margin-top: var(--sp-4);
+}
+
+.spiele-kasten-block + .meta {
+  margin-top: var(--sp-2);
+}
+
+/* ==========================================================================
+   Ladehinweis FUSSBALL.DE-Widgets (W9, Abschnitt 5) – bis das iframe des
+   Widgets da ist (von fussballde.de per JS nachgeladen, siehe
+   FUSSBALLDE_WIDGET_LADER in hilfen.mjs), steht in der reservierten Fläche
+   zentriert ein Ladehinweis statt einer stummen leeren Fläche. Sobald das
+   Widget sein iframe einsetzt, verschwinden Platzhalter-Text und
+   Mindesthöhe automatisch (":not(:has(iframe))" trifft dann nicht mehr) –
+   keine feste Mindesthöhe danach, die Höhe kommt dann allein vom iframe.
+   ========================================================================== */
+
+.fussballde_widget:not(:has(iframe)) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  padding: var(--sp-4);
+  text-align: center;
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+}
+
+.fussballde_widget[data-type="team-matches"]:not(:has(iframe))::before,
+.fussballde_widget[data-type="club-matches"]:not(:has(iframe))::before {
+  content: "Spiele werden von FUSSBALL.DE geladen …";
+}
+
+.fussballde_widget[data-type="table"]:not(:has(iframe))::before {
+  content: "Tabelle wird geladen …";
 }
 
 /* ==========================================================================

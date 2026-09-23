@@ -1,7 +1,7 @@
 // Impressum /impressum/ (P8) – Angaben gemäß § 5 DDG. Kein appack/DOSB-
 // Werbeblock (das ist der Live-App-Fußtext, nicht Teil dieses Prototyps).
 
-import { mailLink } from "../vorlagen/hilfen.mjs";
+import { mailLink, telefonAnzeige } from "../vorlagen/hilfen.mjs";
 
 function escapeHtml(text) {
   return String(text ?? "")
@@ -47,14 +47,14 @@ function angabenAbschnitt(daten) {
 
       <dt>Telefon</dt>
       <dd>
-        <p style="margin:0;"><a href="${telHref(verein.tel_geschaeftsstelle)}">Geschäftsstelle ${escapeHtml(verein.tel_geschaeftsstelle ?? "")}</a></p>
-        <p style="margin:0;"><a href="${telHref(verein.tel_platzwart)}">Platzwart ${escapeHtml(verein.tel_platzwart ?? "")}</a></p>
+        <p style="margin:0;"><a href="${telHref(verein.tel_geschaeftsstelle)}">Geschäftsstelle ${escapeHtml(telefonAnzeige(verein.tel_geschaeftsstelle))}</a></p>
+        <p style="margin:0;"><a href="${telHref(verein.tel_platzwart)}">Platzwart ${escapeHtml(telefonAnzeige(verein.tel_platzwart))}</a></p>
       </dd>
 
       <dt>E-Mail</dt>
       <dd><p style="margin:0;">${mailLink(verein.mail ?? "geschaeftsstelle@sportfreunde04.de")}</p></dd>
 
-      <dt>Webseite</dt>
+      <dt>Website</dt>
       <dd>www.sportfreunde04.de</dd>
 
       <dt>Vertretungsberechtigter Vorstand</dt>
@@ -112,7 +112,7 @@ export function seite(daten) {
     url: "/impressum/",
     title: "Impressum",
     description:
-      "Impressum des Frankfurter Fußballvereins Sportfreunde 1904 e.V.: Anschrift, Vertretung, Registergericht und Kontakt der Geschäftsstelle.",
+      "Impressum des Frankfurter Fußballvereins Sportfreunde 1904 e. V.: Anschrift, Vertretung, Registergericht und Kontakt der Geschäftsstelle.",
     inhalt,
     bodyclass: "impressum",
   };

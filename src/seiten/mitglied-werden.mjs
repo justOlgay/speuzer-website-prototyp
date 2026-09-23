@@ -4,7 +4,7 @@
 // (speichert in ein Worksheet, Bestätigung per E-Mail an die
 // Geschäftsstelle), siehe antragOnlineAbschnitt() unten.
 
-import { PROBETRAINING_MAILTO } from "../vorlagen/hilfen.mjs";
+import { probetrainingAbschnitt, downloadZeile } from "../vorlagen/bausteine.mjs";
 
 // Diese Seite liegt immer unter "/mitglied-werden/" (Tiefe 1), daher immer
 // "../" (siehe pfadZurWurzel() in tools/build.mjs).
@@ -113,7 +113,7 @@ function beitraegeAbschnitt(daten) {
         <p style="margin:0;">Ohne SEPA-Lastschrift: ${escapeHtml(String(beitraege.zuschlag_ohne_sepa ?? ""))} € zusätzlich pro Jahr.</p>
       </div>
       <div class="hinweis hinweis--info">
-        <p style="margin:0;">Fälligkeit: ${escapeHtml(beitraege.faelligkeit ?? "")}</p>
+        <p style="margin:0;">Fälligkeit: ${escapeHtml(mitSchlusspunkt(beitraege.faelligkeit))}</p>
       </div>
     </div>`;
 
@@ -122,7 +122,8 @@ function beitraegeAbschnitt(daten) {
     <h2>Beiträge</h2>
     ${karten}
     ${hinweise}
-    <p class="meta">Kündigung: ${escapeHtml(mitSchlusspunkt(beitraege.kuendigung))} · Doppelmitgliedschaft: ${escapeHtml(mitSchlusspunkt(beitraege.doppelmitgliedschaft))}</p>
+    <p class="meta">Kündigung: ${escapeHtml(mitSchlusspunkt(beitraege.kuendigung))}</p>
+    <p class="meta">Doppelmitgliedschaft: ${escapeHtml(mitSchlusspunkt(beitraege.doppelmitgliedschaft))}</p>
     <p class="meta">Beiträge laut Beitragsordnung 2026; verbindlich ist der Aufnahmeantrag.</p>
     <p class="knopfzeile">
       ${downloadKnopf(beitragsuebersicht, "Beitragsübersicht (PDF)")}
@@ -133,15 +134,18 @@ function beitraegeAbschnitt(daten) {
 
 // ---------- So wird man Mitglied ----------
 
+// W8-Korrektur: Schritt 1 nannte dieselben drei Probetraining-Schritte noch
+// einmal ausformuliert, die jetzt (weiter oben auf der Seite) als
+// gemeinsamer Baustein probetrainingAbschnitt() stehen – hier nur noch ein
+// kurzer Verweis, kein zweites Mal derselbe Ablauf.
 function ablaufAbschnitt(daten) {
-  const unterlagen = daten.unterlagen ?? {};
   const beitraege = daten.beitraege ?? {};
 
   return `<section class="abschnitt--hell abschnitt">
   <div class="container fluss">
     <h2>So wird man Mitglied</h2>
     <ol class="schritte">
-      <li><p>Probetraining: ${escapeHtml(unterlagen.probetraining ?? "")} <a href="${escapeHtml(PROBETRAINING_MAILTO)}">Probetraining vereinbaren</a></p></li>
+      <li><p>Probetraining vereinbaren (siehe oben)</p></li>
       <li><p>Aufnahmeantrag ausfüllen – online oder als PDF.</p></li>
       <li><p>Unterlagen abgeben: im Vereinsheim oder beim Trainerteam. Was dazugehört, steht unten.</p></li>
       <li><p>Spielerpass: Der Verein beantragt die Spielerlaubnis beim HFV. ${escapeHtml(beitraege.eintritt ?? "")}</p></li>
@@ -165,16 +169,20 @@ function unterlagenKarte(titel, liste, extraHtml = "") {
 
 function unterlagenAbschnitt(daten) {
   const unterlagen = daten.unterlagen ?? {};
-  const anmeldungDownloads = (daten.downloads ?? []).filter((d) => d.gruppe === "Anmeldung");
+  // Aufnahmeantrag bewusst ausgenommen: der steht bereits als Knopf im
+  // Abschnitt "Aufnahmeantrag online stellen" weiter oben (jede PDF nur
+  // einmal auf der Seite).
+  const anmeldungDownloads = (daten.downloads ?? []).filter(
+    (d) => d.gruppe === "Anmeldung" && !d.titel.startsWith("Aufnahmeantrag")
+  );
   const satzung = downloadEintrag(daten, "Satzung");
 
   // Gekürzte Beschriftungen laut Plan, zugeordnet über den exakten Titel aus
   // data/downloads.json (keine erfundenen Titel).
   const ANMELDUNG_TITEL_KURZ = {
-    "Aufnahmeantrag / Vereinsanmeldung (Stand 9/2026)": "Aufnahmeantrag (PDF)",
-    "Info-Blatt zur Anmeldung": "Info-Blatt (PDF)",
-    "Wichtige Unterlagen, die mitzubringen sind": "Wichtige Unterlagen (PDF)",
-    "Zusatzerklärung für Spieler zwischen 12 und 18 Jahren ohne deutsche Staatsbürgerschaft": "Zusatzerklärung 12–18 (PDF)",
+    "Info-Blatt zur Anmeldung": "Info-Blatt",
+    "Wichtige Unterlagen, die mitzubringen sind": "Wichtige Unterlagen",
+    "Zusatzerklärung für Spieler zwischen 12 und 18 Jahren ohne deutsche Staatsangehörigkeit": "Zusatzerklärung 12–18",
   };
 
   const karten = `<div class="raster raster--3">
@@ -187,18 +195,18 @@ function unterlagenAbschnitt(daten) {
       )}
     </div>`;
 
-  const knoepfe = [
-    ...anmeldungDownloads.map((d) => downloadKnopf(d, ANMELDUNG_TITEL_KURZ[d.titel] ?? d.titel)),
-    downloadKnopf(satzung, "Satzung (PDF)"),
+  const zeilen = [
+    ...anmeldungDownloads.map((d) => downloadZeile(d, PFAD, ANMELDUNG_TITEL_KURZ[d.titel])),
+    downloadZeile(satzung, PFAD, "Satzung"),
   ].join("\n      ");
 
   return `<section class="abschnitt">
   <div class="container fluss">
     <h2>Unterlagen</h2>
     ${karten}
-    <p class="knopfzeile">
-      ${knoepfe}
-    </p>
+    <ul class="downloads" role="list">
+      ${zeilen}
+    </ul>
   </div>
 </section>`;
 }
@@ -222,7 +230,7 @@ function antragOnlineAbschnitt(daten) {
     <div class="karte fluss">
       <p>Der Antrag läuft über das Formular des Vereins: Angaben, Abteilung, Beitragsgruppe, SEPA-Mandat und Unterschrift in einem Schritt. Die Geschäftsstelle bestätigt per E-Mail.</p>
       <p class="knopfzeile">
-        <a class="knopf knopf--gross" href="${escapeHtml(APPACK_FORMULAR_URL)}" target="_blank" rel="noopener">Antrag online ausfüllen</a>
+        <a class="knopf" href="${escapeHtml(APPACK_FORMULAR_URL)}" target="_blank" rel="noopener">Antrag online ausfüllen</a>
         ${downloadKnopf(aufnahmeantrag, "Aufnahmeantrag (PDF)")}
       </p>
     </div>
@@ -230,33 +238,17 @@ function antragOnlineAbschnitt(daten) {
 </section>`;
 }
 
-// ---------- Mach mit (W3b, Prüfer-Befund "wichtig") ----------
-
-// Spezifikation Abschnitt 1: am Ende der Seite auf verein-mach-mit.html
-// verweisen, Baustein wie ".zeile" in src/seiten/verein/index.mjs.
-function machMitAbschnitt() {
-  return `<section class="abschnitt">
-  <div class="container fluss">
-    <div class="zeilen-liste">
-      <a class="zeile" href="${PFAD}verein/mach-mit/">
-        <span class="zeile__text">
-          <span class="zeile__titel">Mach mit: Trainer, Betreuer, Helfer</span>
-          <span class="zeile__untertitel">So kannst du den Verein unterstützen</span>
-        </span>
-        <svg class="zeile__pfeil" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
-      </a>
-    </div>
-  </div>
-</section>`;
-}
-
 // ---------- Abschluss ----------
 
+// W8-Korrektur: Der Mach-mit-Verweis (W3b, Prüfer-Befund "wichtig") stand als
+// eigener, grauer Abschnitt ganz am Seitenende – jetzt als zusätzlicher Satz
+// im ohnehin letzten Abschnitt "Fragen zur Mitgliedschaft?" statt eines
+// weiteren eigenen Blocks.
 function abschlussAbschnitt() {
   return `<section class="abschnitt--blau abschnitt abschnitt--eng">
   <div class="container fluss">
     <h2>Fragen zur Mitgliedschaft?</h2>
-    <p>Die Geschäftsstelle hilft weiter.</p>
+    <p>Die Geschäftsstelle hilft weiter. Oder möchtest du dich als Trainer, Betreuer oder Helfer <a href="${PFAD}verein/mach-mit/">einbringen</a>?</p>
     <p class="knopfzeile">
       <a class="knopf knopf--weiss" href="mailto:geschaeftsstelle@sportfreunde04.de?subject=Mitgliedschaft">E-Mail an die Geschäftsstelle</a>
     </p>
@@ -265,14 +257,16 @@ function abschlussAbschnitt() {
 }
 
 export function seite(daten) {
+  // W8-Korrektur: Online-Antrag weit nach oben (direkt nach Beiträgen), statt
+  // erst nach dem gesamten Ablauf/Unterlagen-Block ganz unten.
   const inhalt = [
     seitenkopfAbschnitt(),
     beitraegeAbschnitt(daten),
+    probetrainingAbschnitt(PFAD),
+    antragOnlineAbschnitt(daten),
     ablaufAbschnitt(daten),
     unterlagenAbschnitt(daten),
-    antragOnlineAbschnitt(daten),
     abschlussAbschnitt(),
-    machMitAbschnitt(),
   ].join("\n");
 
   return {

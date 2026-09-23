@@ -174,6 +174,22 @@ svg { display: block; flex: 0 0 auto; }
 
 .inhalt > .abschnittstitel:first-child { margin-top: 0; }
 
+/* Seitenkopf-Baustein (W8, App-weit): einheitlicher, kartenloser
+   Einleitungssatz direkt unter dem (unsichtbaren) h1 jeder Seite – die
+   App-Kopfleiste zeigt den Seitentitel bereits, ein eigener Kartentitel
+   wäre doppelt. Gleicher Abstand nach unten wie ein Abschnittstitel. */
+.seitenkopf-lead {
+  margin: 0 0 var(--sp-5);
+  font-size: 15px;
+  color: var(--ink-2);
+}
+
+/* Aufklapper (W8, App-weit): kein natives Dreieck "▶" vor <summary> – der
+   Chevron/"›" steht stattdessen im Text der jeweiligen Beschriftung. */
+summary { list-style: none; cursor: pointer; }
+summary::-webkit-details-marker { display: none; }
+summary::marker { content: ""; }
+
 .knopf {
   display: inline-flex;
   align-items: center;
@@ -238,7 +254,16 @@ svg { display: block; flex: 0 0 auto; }
   text-align: center;
 }
 
-/* Geschaeftsstelle_v3.tpl – seitenspezifisch (C2). */
+/* Geschaeftsstelle_v3.tpl – seitenspezifisch (C2). W8, Grundsatz Daten:
+   Bausteine/Reihenfolge wie kontakt.html der Website, Inhalte aus
+   {"name_register":"Frankfurter Fußballverein Sportfreunde 1904 e. V.","name_kurz":"FFV Sportfreunde 04","spitzname":"Speuzer","gegruendet":"15. Mai 1904","gruendungsname":"Frankfurter FC Britannia","umbenannt":"1919","stadtteil":"Gallus","sportstaette":{"strasse":"Mainzer Landstraße 480","plz":"60326","ort":"Frankfurt am Main"},"post":{"postfach":"Postfach 190442","plz":"60091","ort":"Frankfurt am Main"},"mail":"geschaeftsstelle@sportfreunde04.de","tel_geschaeftsstelle":"+49 69 736868","tel_platzwart":"+49 69 732193","register":"Amtsgericht Frankfurt am Main, VR 4727","vorsitz":["Melanie Seipp (1. Vorsitzende)","Uwe Korndörfer (2. Vorsitzender)"],"vertretung":["Melanie Seipp (1. Vorsitzende)","Uwe Korndörfer (2. Vorsitzender)"],"instagram":"https://www.instagram.com/speuzer_ffm/","facebook":"https://www.facebook.com/groups/223133414377924/","fanshop":"https://sportfreunde04.fan12.de/","teamshop":"https://www.11teamsports.com/de-de/clubshop/frankfurter-fussballvereine-sportfreunde-04/","mails":{"jugendleitung":"jugendleitung@sportfreunde04.de","kassierer":"kassierer@sportfreunde04.de","kinderschutz":"kinderschutzbeauftragter@sportfreunde04.de","karneval":"karnevalabteilung@sportfreunde04.de","senioren":"spielausschuss_senioren@sportfreunde04.de","vorstand":"vorstand@sportfreunde04.de"},"hinweise":{"parken":"Der Parkplatz am Vereinsgelände ist wegen des Neubaus des Funktionsgebäudes voraussichtlich bis Ende Januar 2027 gesperrt. Der Zugang zum Gelände ist über den Hintereingang am „Haus der Jugend“ (Pavillon) möglich.","parken_quelle":"App-News vom 21.07.2026","ferien":"In den hessischen Schulferien und an Feiertagen findet in der Regel kein Training statt. Ausnahmen sagt das Trainerteam an."},"oepnv":null,"anfahrt_hinweis":"Zugang zum Vereinsgelände derzeit über den Hintereingang am „Haus der Jugend“ (Pavillon); der Parkplatz ist wegen des Neubaus bis voraussichtlich Ende Januar 2027 gesperrt.","gruendung_jahr":1904,"anzahl_mannschaften":11,"karten":{"apple":"https://maps.apple.com/?q=Mainzer+Landstra%C3%9Fe+480,+60326+Frankfurt+am+Main","google":"https://www.google.com/maps/search/?api=1&query=Mainzer+Landstra%C3%9Fe+480%2C+60326+Frankfurt+am+Main"},"kalender_basis":"https://justolgay.github.io/speuzer-spielplan/"} (data/verein.json) und {"_quelle":"appack public workbook API, Worksheet 6a1ec5fcf68a05bf129cdb9b (Kontakt der Geschäftsstelle), geholt am 2026-09-22 mit tools/appack-daten.mjs. Nur Adresse/Telefon/E-Mail/Website/Social; keine Personendaten, \"mobileNumber\" bewusst nicht übernommen. Öffnungszeiten werden seit 22.09.2026 nicht mehr übernommen (Entscheidung Olgay: es gibt keine festen Öffnungszeiten).","kontakt":{"address":" Postfach 190442 (postalisch)","postalCode":"60091","city":"Frankfurt","phoneNumber":"069-736868","email":"geschaeftsstelle@sportfreunde04.de","website":"https://www.sportfreunde04.de","insta":"https://www.instagram.com/speuzer_ffm/","face":"https://www.facebook.com/groups/223133414377924/"}}
+   (data/geschaeftsstelle.json) – dieselbe Quelle wie die Website, von
+   tools/app-optik/tpl-bauen.mjs zur Bauzeit eingesetzt. Kein Workbook-Aufruf
+   mehr auf dieser Seite (die frühere rohe "Hinweis:"-Karte aus dem
+   Beschreibung-Worksheet, die dynamische Öffnungszeiten-Tabelle, die
+   generischen Kontakt-Icons und die generische Ansprechpartner-Liste
+   entfallen – ersetzt durch Erreichbarkeit/Anliegen/Anfahrt wie auf der
+   Website, siehe W8-Spezifikation Abschnitt 2). */
 
 .visually-hidden {
   position: absolute;
@@ -252,48 +277,30 @@ svg { display: block; flex: 0 0 auto; }
   border: 0;
 }
 
-.karte + .karte,
-.abschnittstitel + .karte { margin-top: 0; }
-
-.beschreibung-titel {
-  margin: 0 0 var(--sp-2);
-  font-family: var(--font-head);
-  font-weight: 700;
-  font-size: 22px;
-  text-transform: uppercase;
-  color: var(--blau-950);
+/* Bezeichnung über dem Wert: so bricht die lange Mailadresse nicht mitten
+   im Wort um (W8-Sichtprüfung 390 px). */
+.angaben {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px 0;
 }
+.angaben dd + dt { margin-top: var(--sp-3); }
 
-.beschreibung-text { font-size: 14px; color: var(--ink-2); }
-.beschreibung-text p { margin: 0 0 var(--sp-2); }
-.beschreibung-text p:last-child { margin-bottom: 0; }
-
-.oeffnungszeiten-tabelle {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
-.oeffnungszeiten-tabelle td {
-  padding: var(--sp-2) 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.oeffnungszeiten-tabelle tr:last-child td { border-bottom: none; }
-
-.oeffnungszeiten-tabelle td:first-child { color: var(--ink-2); }
-.oeffnungszeiten-tabelle td:last-child { text-align: right; font-weight: 600; }
-
-.oeffnungszeiten-heute td {
-  color: var(--blau-800);
-  font-weight: 700;
-}
-
-.oeffnungszeiten-hinweistext {
-  margin: var(--sp-3) 0 0;
+.angaben dt {
   font-size: 13px;
   color: var(--ink-3);
 }
+
+.angaben dd {
+  margin: 0;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: break-word;
+}
+
+.mail-link { display: inline-block; max-width: 100%; overflow-wrap: break-word; color: var(--blau-800); text-decoration: none; }
 
 .adresse-text {
   margin: 0 0 var(--sp-3);
@@ -309,84 +316,13 @@ svg { display: block; flex: 0 0 auto; }
   margin-bottom: var(--sp-4);
 }
 
-.hinweis--parkplatz { margin-top: var(--sp-4); }
-
-.kontakt-aktionen {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-2);
-}
-
-.icon-knopf {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 44px;
-  padding-inline: var(--sp-3);
-  border-radius: var(--r-md);
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--blau-800);
-  font-weight: 600;
-  font-size: 13px;
-  text-decoration: none;
-}
-
-.icon-knopf svg { width: 18px; height: 18px; }
-
-.ansprechpartner-liste {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-3);
-}
-
-.ansprechpartner-zeile {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-}
-
-.ansprechpartner-zeile__bild {
-  flex: 0 0 auto;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--r-pill);
-  object-fit: cover;
-}
-
-.ansprechpartner-zeile__initialen {
-  flex: 0 0 auto;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--r-pill);
-  background: var(--blau-100);
-  color: var(--blau-800);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-head);
-  font-weight: 700;
-  font-size: 14px;
-}
-
-.ansprechpartner-zeile__text { flex: 1 1 auto; min-width: 0; }
-
-.ansprechpartner-zeile__name {
-  margin: 0;
-  font-weight: 600;
-  font-size: 14px;
-  overflow-wrap: break-word;
-}
-
-.ansprechpartner-zeile__funktion {
+.zeile__untertitel {
+  display: block;
   margin: 2px 0 0;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--ink-3);
   overflow-wrap: break-word;
 }
-
-.ansprechpartner-zeile .icon-knopf { flex: 0 0 auto; padding-inline: var(--sp-2); min-width: 44px; justify-content: center; }
-.ansprechpartner-zeile .icon-knopf span { display: none; }
 </style>
 </head>
 <body>
@@ -394,41 +330,52 @@ svg { display: block; flex: 0 0 auto; }
 
 <h1 class="visually-hidden">Geschäftsstelle &amp; Anfahrt</h1>
 
-<div id="beschreibung-karte" class="karte" hidden>
-  <p class="beschreibung-titel">Geschäftsstelle</p>
-  <div id="beschreibung-text" class="beschreibung-text"></div>
-</div>
+<p class="seitenkopf-lead">So erreichst du uns – per E-Mail an die passende Vereinsadresse oder telefonisch in der Geschäftsstelle.</p>
 
-<h2 id="oeffnungszeiten-titel" class="abschnittstitel" hidden>Öffnungszeiten</h2>
-<div id="oeffnungszeiten-karte" class="karte" hidden>
-  <table class="oeffnungszeiten-tabelle">
-    <tbody id="oeffnungszeiten-tabelle-body"></tbody>
-  </table>
-  <p id="openingtext-hinweis" class="oeffnungszeiten-hinweistext" hidden></p>
-</div>
-
-<h2 class="abschnittstitel">Adresse &amp; Anfahrt</h2>
+<h2 class="abschnittstitel">Erreichbarkeit</h2>
 <div class="karte">
-  <p id="adresse-text" class="adresse-text"></p>
+  <p style="margin:0 0 var(--sp-3);"><strong>Keine festen Öffnungszeiten.</strong> Die Geschäftsstelle ist per E-Mail erreichbar, telefonisch nach Vereinbarung.</p>
+  <dl class="angaben">
+    <dt>E-Mail Geschäftsstelle</dt>
+    <dd><a class="mail-link" id="gs-mail-link" href="#"></a></dd>
+    <dt>Telefon Geschäftsstelle</dt>
+    <dd><a class="mail-link" id="gs-tel-link" href="#"></a></dd>
+  </dl>
+</div>
+
+<h2 class="abschnittstitel">Anliegen</h2>
+<div id="anliegen-liste" class="liste"></div>
+
+<h2 class="abschnittstitel">Anfahrt</h2>
+<div class="karte">
+  <p id="anfahrt-adresse" class="adresse-text"></p>
   <div class="aktionen aktionen--inline">
-    <a id="route-knopf" class="knopf" href="#" target="_blank" rel="noopener" hidden>Route</a>
+    <a id="route-apple-knopf" class="knopf knopf--leise" href="#" target="_blank" rel="noopener">Route in Apple Karten</a>
+    <a id="route-google-knopf" class="knopf knopf--leise" href="#" target="_blank" rel="noopener">Route in Google Maps</a>
   </div>
   <a class="zeile" href="nav://sportfreunde04_Map_1783059375623">
-    <span class="zeile__text"><span class="zeile__titel">Karte in der App</span></span>
+    <span class="zeile__text"><span class="zeile__titel">Karte anzeigen</span></span>
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
   </a>
-  <!-- HINWEIS Parkplatz: statisch im Quelltext gepflegt, wie auf Startseite_v3.tpl
-       (dieselbe Formulierung); im CMS-Quelltext pflegen oder leeren. -->
-  <div class="hinweis hinweis--parkplatz"><p>Der Parkplatz am Vereinsgelände ist wegen des Neubaus des Funktionsgebäudes voraussichtlich bis Ende Januar 2027 gesperrt. Der Zugang zum Gelände ist über den Hintereingang am „Haus der Jugend“ (Pavillon) möglich.</p></div>
 </div>
 
-<h2 id="kontakt-titel" class="abschnittstitel" hidden>Kontakt</h2>
-<div id="kontakt-aktionen" class="kontakt-aktionen" hidden></div>
+<div class="karte">
+  <p class="beschreibung-titel" style="font-size:16px;margin:0 0 var(--sp-2);">Postanschrift</p>
+  <p id="anfahrt-postanschrift" class="adresse-text" style="margin-bottom:0;"></p>
+</div>
 
-<h2 id="ansprechpartner-titel" class="abschnittstitel" hidden>Ansprechpartner</h2>
-<div id="ansprechpartner-liste" class="ansprechpartner-liste"></div>
-
-<div id="fehler-bereich"></div>
+<div class="hinweis">
+  <p><strong>Zugang &amp; Parken.</strong> <span id="anfahrt-zugang-text"></span></p>
+</div>
+<div class="hinweis">
+  <p>Mit Bus und Bahn: <a href="https://www.rmv.de" target="_blank" rel="noopener">Verbindung in der RMV-Auskunft</a></p>
+</div>
+<div class="hinweis">
+  <p id="anfahrt-rebstock-text"></p>
+  <div class="aktionen" style="margin-top:var(--sp-3);">
+    <a id="route-rebstock-knopf" class="knopf knopf--leise" href="#" target="_blank" rel="noopener">Route</a>
+  </div>
+</div>
 
 <p class="fuss">F.F.V. Sportfreunde 04 · Vereins-App</p>
 
@@ -440,309 +387,91 @@ svg { display: block; flex: 0 0 auto; }
 (function () {
   "use strict";
 
-  var BESCHREIBUNG_ID = "6a1ec5fcf68a05bf129cdb97";
-  var KONTAKT_ID = "6a1ec5fcf68a05bf129cdb9b";
-  var OEFFNUNGSZEITEN_ID = "6a1ec5fcf68a05bf129cdb9d";
-  var ANSPRECHPARTNER_ID = "6a1ec5fcf68a05bf129cdb9f";
-  var EINSTELLUNGEN_ID = "6a1ec5fcf68a05bf129cdba2";
+  var VEREIN = {"name_register":"Frankfurter Fußballverein Sportfreunde 1904 e. V.","name_kurz":"FFV Sportfreunde 04","spitzname":"Speuzer","gegruendet":"15. Mai 1904","gruendungsname":"Frankfurter FC Britannia","umbenannt":"1919","stadtteil":"Gallus","sportstaette":{"strasse":"Mainzer Landstraße 480","plz":"60326","ort":"Frankfurt am Main"},"post":{"postfach":"Postfach 190442","plz":"60091","ort":"Frankfurt am Main"},"mail":"geschaeftsstelle@sportfreunde04.de","tel_geschaeftsstelle":"+49 69 736868","tel_platzwart":"+49 69 732193","register":"Amtsgericht Frankfurt am Main, VR 4727","vorsitz":["Melanie Seipp (1. Vorsitzende)","Uwe Korndörfer (2. Vorsitzender)"],"vertretung":["Melanie Seipp (1. Vorsitzende)","Uwe Korndörfer (2. Vorsitzender)"],"instagram":"https://www.instagram.com/speuzer_ffm/","facebook":"https://www.facebook.com/groups/223133414377924/","fanshop":"https://sportfreunde04.fan12.de/","teamshop":"https://www.11teamsports.com/de-de/clubshop/frankfurter-fussballvereine-sportfreunde-04/","mails":{"jugendleitung":"jugendleitung@sportfreunde04.de","kassierer":"kassierer@sportfreunde04.de","kinderschutz":"kinderschutzbeauftragter@sportfreunde04.de","karneval":"karnevalabteilung@sportfreunde04.de","senioren":"spielausschuss_senioren@sportfreunde04.de","vorstand":"vorstand@sportfreunde04.de"},"hinweise":{"parken":"Der Parkplatz am Vereinsgelände ist wegen des Neubaus des Funktionsgebäudes voraussichtlich bis Ende Januar 2027 gesperrt. Der Zugang zum Gelände ist über den Hintereingang am „Haus der Jugend“ (Pavillon) möglich.","parken_quelle":"App-News vom 21.07.2026","ferien":"In den hessischen Schulferien und an Feiertagen findet in der Regel kein Training statt. Ausnahmen sagt das Trainerteam an."},"oepnv":null,"anfahrt_hinweis":"Zugang zum Vereinsgelände derzeit über den Hintereingang am „Haus der Jugend“ (Pavillon); der Parkplatz ist wegen des Neubaus bis voraussichtlich Ende Januar 2027 gesperrt.","gruendung_jahr":1904,"anzahl_mannschaften":11,"karten":{"apple":"https://maps.apple.com/?q=Mainzer+Landstra%C3%9Fe+480,+60326+Frankfurt+am+Main","google":"https://www.google.com/maps/search/?api=1&query=Mainzer+Landstra%C3%9Fe+480%2C+60326+Frankfurt+am+Main"},"kalender_basis":"https://justolgay.github.io/speuzer-spielplan/"};
+  var GESCHAEFTSSTELLE = {"_quelle":"appack public workbook API, Worksheet 6a1ec5fcf68a05bf129cdb9b (Kontakt der Geschäftsstelle), geholt am 2026-09-22 mit tools/appack-daten.mjs. Nur Adresse/Telefon/E-Mail/Website/Social; keine Personendaten, \"mobileNumber\" bewusst nicht übernommen. Öffnungszeiten werden seit 22.09.2026 nicht mehr übernommen (Entscheidung Olgay: es gibt keine festen Öffnungszeiten).","kontakt":{"address":" Postfach 190442 (postalisch)","postalCode":"60091","city":"Frankfurt","phoneNumber":"069-736868","email":"geschaeftsstelle@sportfreunde04.de","website":"https://www.sportfreunde04.de","insta":"https://www.instagram.com/speuzer_ffm/","face":"https://www.facebook.com/groups/223133414377924/"}};
+  var kontakt = (GESCHAEFTSSTELLE && GESCHAEFTSSTELLE.kontakt) || {};
 
-  var ICON_MAIL = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M4 6.5l8 6 8-6"/></svg>';
-  var ICON_PHONE = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.5 3.5h3.2c.5 0 .9.3 1 .8l.9 3a1.1 1.1 0 0 1-.3 1.1L7.8 9.9a13 13 0 0 0 6.3 6.3l1.5-1.5c.3-.3.7-.4 1.1-.3l3 .9c.5.1.8.5.8 1v3.2c0 .8-.7 1.4-1.5 1.3-8-1-14.4-7.4-15.4-15.4-.1-.8.5-1.5 1.3-1.5z"/></svg>';
-  var ICON_GLOBUS = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.5 3.8 5.5 3.8 8.5s-1.3 6-3.8 8.5c-2.5-2.5-3.8-5.5-3.8-8.5s1.3-6 3.8-8.5z"/></svg>';
-  var ICON_KAMERA = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 8h3l2-2h6l2 2h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg>';
-  var ICON_FACEBOOK = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 21v-7h2.5l.5-3H14V9.2c0-.9.3-1.5 1.6-1.5H17V5.2C16.6 5.1 15.7 5 14.7 5 12.5 5 11 6.3 11 8.8V11H8.5v3H11v7z"/></svg>';
+  // ---------- Erreichbarkeit ----------
 
-  // ---------- Hilfsfunktionen (defensiv: Felder können fehlen/null/leer sein) ----------
+  var email = kontakt.email || VEREIN.mail || "";
+  var gsMailLink = document.getElementById("gs-mail-link");
+  gsMailLink.href = "mailto:" + email;
+  gsMailLink.textContent = email;
 
-  function textFeld(zeile, name) {
-    var v = zeile && zeile[name];
-    return (v === undefined || v === null) ? "" : String(v);
-  }
+  var telefon = kontakt.phoneNumber || VEREIN.tel_geschaeftsstelle || "";
+  var gsTelLink = document.getElementById("gs-tel-link");
+  gsTelLink.href = "tel:" + telefon.replace(/[^\d+]/g, "");
+  gsTelLink.textContent = telefon;
 
-  function sicheresHtml(html) {
-    var div = document.createElement("div");
-    div.innerHTML = String(html || "");
-    var scripts = div.querySelectorAll("script");
-    for (var i = 0; i < scripts.length; i++) scripts[i].remove();
-    return div.innerHTML;
-  }
+  // ---------- Anliegen (wie ansprechpartnerAbschnitt() in kontakt.mjs,
+  // als kompakte Liste statt Karten mit eigenem Knopf – W8, Befund 2) ----------
 
-  function telHref(nummer) {
-    var extrahiert = String(nummer || "").replace(/[^\d+]/g, "");
-    return "tel:" + (extrahiert || nummer);
-  }
-
-  function mitSchema(url) {
-    var u = String(url || "").trim();
-    if (!u) return "";
-    return /^(https?:|mailto:|tel:)/i.test(u) ? u : "https://" + u;
-  }
-
-  function instaOderFaceUrl(wert, domain) {
-    var w = String(wert || "").trim();
-    if (!w) return "";
-    if (/^https?:/i.test(w)) return w;
-    return "https://" + domain + "/" + w.replace(/^@/, "");
-  }
-
-  function initialen(name) {
-    var teile = String(name || "").trim().split(/\s+/).filter(Boolean);
-    if (!teile.length) return "";
-    var erste = teile[0].charAt(0);
-    var letzte = teile.length > 1 ? teile[teile.length - 1].charAt(0) : "";
-    return (erste + letzte).toUpperCase();
-  }
-
-  function bildUrlGueltig(url) {
-    return /^https?:\/\//i.test(url || "");
-  }
-  function bildMitRueckbau(url, klasse, alt) {
-    var bild = document.createElement("img");
-    bild.className = klasse;
-    bild.src = url;
-    bild.alt = alt || "";
-    bild.loading = "lazy";
-    bild.addEventListener("error", function () {
-      if (bild.parentNode) bild.parentNode.removeChild(bild);
-    });
-    return bild;
-  }
-
-  function ladeWorkbook(id, limit) {
-    if (!window.Workbook || typeof Workbook.load !== "function") {
-      return Promise.reject(new Error("Workbook-API fehlt"));
-    }
-    return Workbook.load({ workbook: id, filter: {}, offset: 0, limit: limit || 5, sort: "_id", direction: "asc" })
-      .then(function (rows) { return Array.isArray(rows) ? rows : []; });
-  }
-
-  function baueAktion(href, innerHtml, beschriftung, extern) {
-    var link = document.createElement("a");
-    link.className = "icon-knopf";
-    link.href = href;
-    link.setAttribute("aria-label", beschriftung);
-    link.innerHTML = innerHtml + "<span>" + beschriftung + "</span>";
-    if (extern) {
-      link.target = "_blank";
-      link.rel = "noopener";
-    }
-    return link;
-  }
-
-  function fehlerKarte(text) {
-    var hinweis = document.createElement("div");
-    hinweis.className = "hinweis";
-    var p = document.createElement("p");
-    p.textContent = text;
-    hinweis.appendChild(p);
-    return hinweis;
-  }
-
-  // ---------- Beschreibung ----------
-
-  function zeigeBeschreibung(zeilen, einstellungen) {
-    if (einstellungen.descriptionActive !== true) return;
-    var zeile = zeilen[0] || {};
-    var text = textFeld(zeile, "description");
-    if (!text) return;
-    var karte = document.getElementById("beschreibung-karte");
-    var textEl = document.getElementById("beschreibung-text");
-    textEl.innerHTML = sicheresHtml(text);
-    karte.hidden = false;
-  }
-
-  // ---------- Öffnungszeiten ----------
-
-  var WOCHENTAGE = [
-    { feld: "monday", label: "Montag" },
-    { feld: "tuesday", label: "Dienstag" },
-    { feld: "wednesday", label: "Mittwoch" },
-    { feld: "thursday", label: "Donnerstag" },
-    { feld: "friday", label: "Freitag" },
-    { feld: "saturday", label: "Samstag", hiderFeld: "saturdayhider" },
-    { feld: "sunday", label: "Sonntag", hiderFeld: "sundayhider" },
+  var mails = VEREIN.mails || {};
+  var ANLIEGEN = [
+    { titel: "Allgemeine Fragen", text: "Alles, was sonst nirgends passt – die Geschäftsstelle leitet weiter.", mail: VEREIN.mail, betreff: "Anfrage über die Website" },
+    { titel: "Probetraining & Jugend", text: "Für Kinder und Jugendliche von der A- bis zur G-Jugend.", mail: mails.jugendleitung, betreff: "Probetraining" },
+    { titel: "Herren & Senioren", text: "Fragen zur 1. Herrenmannschaft, Spielausschuss und Seniorenfußball.", mail: mails.senioren, betreff: "Herren" },
+    { titel: "Karnevalabteilung", text: "Die Schnauzer: Gruppen, Übungsstunden, Auftritte.", mail: mails.karneval, betreff: "Karnevalabteilung" },
+    { titel: "Beiträge & Rechnungen", text: "Beiträge, Lastschrift, Bescheinigungen für Bildung und Teilhabe.", mail: mails.kassierer, betreff: "Beiträge" },
+    { titel: "Kinderschutz", text: "Vertraulicher Kontakt zum Kinderschutzbeauftragten.", mail: mails.kinderschutz, betreff: "" },
+    { titel: "Sponsoring & Partner", text: "Trikot- und Bandenwerbung, Partnerschaften mit der Jugendabteilung.", mail: VEREIN.mail, betreff: "Sponsoring" },
+    { titel: "Trainer- und Ehrenamt", text: "Mitmachen als Trainer, Betreuer oder im Vorstand.", mail: VEREIN.mail, betreff: "Ich helfe gern" }
   ];
 
-  function zeitTextFuerTag(zeile, feld) {
-    var open = textFeld(zeile, feld + "open");
-    var close = textFeld(zeile, feld + "close");
-    var midStart = textFeld(zeile, feld + "midstart");
-    var midEnd = textFeld(zeile, feld + "midend");
-    if (!open) return "geschlossen";
-    if (close && midStart && midEnd) return open + "–" + midStart + " und " + midEnd + "–" + close;
-    if (close) return open + "–" + close;
-    return "ab " + open;
-  }
-
-  function zeigeOeffnungszeiten(zeilen, einstellungen) {
-    if (einstellungen.openingActive !== true) return;
-    var zeile = zeilen[0];
-    if (!zeile) return;
-    var titel = document.getElementById("oeffnungszeiten-titel");
-    var karte = document.getElementById("oeffnungszeiten-karte");
-    var tbody = document.getElementById("oeffnungszeiten-tabelle-body");
-    // Montag = 0 … Sonntag = 6 (JS: Sonntag = 0)
-    var heuteIndex = (new Date().getDay() + 6) % 7;
-    for (var i = 0; i < WOCHENTAGE.length; i++) {
-      var tag = WOCHENTAGE[i];
-      if (tag.hiderFeld && zeile[tag.hiderFeld] === true) continue;
-      var tr = document.createElement("tr");
-      if (i === heuteIndex) tr.className = "oeffnungszeiten-heute";
-      var tdTag = document.createElement("td");
-      tdTag.textContent = tag.label;
-      var tdZeit = document.createElement("td");
-      tdZeit.textContent = zeitTextFuerTag(zeile, tag.feld);
-      tr.appendChild(tdTag);
-      tr.appendChild(tdZeit);
-      tbody.appendChild(tr);
-    }
-    var hinweisText = textFeld(zeile, "openingtext");
-    if (hinweisText) {
-      var hinweisEl = document.getElementById("openingtext-hinweis");
-      hinweisEl.textContent = hinweisText;
-      hinweisEl.hidden = false;
-    }
-    titel.hidden = false;
-    karte.hidden = false;
-  }
-
-  // ---------- Adresse & Anfahrt ----------
-
-  function zeigeAdresse(zeilen) {
-    var kontakt = zeilen[0] || {};
-    var strasse = textFeld(kontakt, "address");
-    var ort = [textFeld(kontakt, "postalCode"), textFeld(kontakt, "city")].filter(Boolean).join(" ");
-    var teile = [strasse, ort].filter(Boolean);
-    var adresseText = document.getElementById("adresse-text");
-    adresseText.textContent = teile.join(", ");
-    var routeKnopf = document.getElementById("route-knopf");
-    if (teile.length) {
-      routeKnopf.href = "https://maps.apple.com/?q=" + encodeURIComponent(teile.join(", "));
-      routeKnopf.hidden = false;
-    }
-  }
-
-  // ---------- Kontakt ----------
-
-  function zeigeKontakt(zeilen, einstellungen) {
-    if (einstellungen.contactActive !== true) return;
-    var kontakt = zeilen[0] || {};
-    if (kontakt.contactActive === false) return;
-    var bereich = document.getElementById("kontakt-aktionen");
-    var titel = document.getElementById("kontakt-titel");
-
-    var email = textFeld(kontakt, "email");
-    if (email) bereich.appendChild(baueAktion("mailto:" + email, ICON_MAIL, "E-Mail", false));
-
-    var telNummer = textFeld(kontakt, "mobileNumber") || textFeld(kontakt, "phoneNumber");
-    if (telNummer) bereich.appendChild(baueAktion(telHref(telNummer), ICON_PHONE, "Anrufen", false));
-
-    var website = textFeld(kontakt, "website");
-    if (website) bereich.appendChild(baueAktion(mitSchema(website), ICON_GLOBUS, "Website", true));
-
-    var insta = instaOderFaceUrl(textFeld(kontakt, "insta"), "instagram.com");
-    if (insta) bereich.appendChild(baueAktion(insta, ICON_KAMERA, "Instagram", true));
-
-    var face = instaOderFaceUrl(textFeld(kontakt, "face"), "facebook.com");
-    if (face) bereich.appendChild(baueAktion(face, ICON_FACEBOOK, "Facebook", true));
-
-    if (bereich.children.length) {
-      titel.hidden = false;
-      bereich.hidden = false;
-    }
-  }
-
-  // ---------- Ansprechpartner ----------
-
-  function vergleicheAnsprechpartner(a, b) {
-    var an = typeof a.ansSortNumber === "number" ? a.ansSortNumber : Infinity;
-    var bn = typeof b.ansSortNumber === "number" ? b.ansSortNumber : Infinity;
-    if (an !== bn) return an - bn;
-    return textFeld(a, "ansName").localeCompare(textFeld(b, "ansName"), "de");
-  }
-
-  function baueAnsprechpartnerZeile(person) {
-    var zeile = document.createElement("div");
-    zeile.className = "ansprechpartner-zeile";
-
-    var bildUrl = textFeld(person, "ansImg");
-    var kreis = document.createElement("div");
-    kreis.className = "ansprechpartner-zeile__initialen";
-    kreis.setAttribute("aria-hidden", "true");
-    kreis.textContent = initialen(textFeld(person, "ansName"));
-    if (bildUrlGueltig(bildUrl)) {
-      var bild = bildMitRueckbau(bildUrl, "ansprechpartner-zeile__bild", "");
-      bild.addEventListener("error", function () {
-        if (!kreis.parentNode) zeile.insertBefore(kreis, zeile.firstChild);
-      });
-      zeile.appendChild(bild);
-    } else {
-      zeile.appendChild(kreis);
-    }
-
-    var text = document.createElement("div");
-    text.className = "ansprechpartner-zeile__text";
-    var name = document.createElement("p");
-    name.className = "ansprechpartner-zeile__name";
-    name.textContent = textFeld(person, "ansName");
-    text.appendChild(name);
-    var funktion = textFeld(person, "ansATitle");
-    if (funktion) {
-      var funktionEl = document.createElement("p");
-      funktionEl.className = "ansprechpartner-zeile__funktion";
-      funktionEl.textContent = funktion;
-      text.appendChild(funktionEl);
-    }
-    zeile.appendChild(text);
-
-    var mail = textFeld(person, "ansMail");
-    if (mail) zeile.appendChild(baueAktion("mailto:" + mail, ICON_MAIL, "E-Mail", false));
-
-    return zeile;
-  }
-
-  function zeigeAnsprechpartner(zeilen, einstellungen) {
-    if (einstellungen.ansActive !== true) return;
-    var aktive = zeilen.filter(function (p) { return p.ansActive !== false && textFeld(p, "ansName"); }).slice().sort(vergleicheAnsprechpartner);
-    if (!aktive.length) return;
-    var titel = document.getElementById("ansprechpartner-titel");
-    var liste = document.getElementById("ansprechpartner-liste");
-    for (var i = 0; i < aktive.length; i++) liste.appendChild(baueAnsprechpartnerZeile(aktive[i]));
-    titel.hidden = false;
-  }
-
-  // ---------- Hauptablauf ----------
-  // Jeder Datenblock wird einzeln geladen; scheitert einer, bleibt sein
-  // Abschnitt einfach leer/verborgen statt die ganze Seite zu blockieren
-  // ("Fehler -> .hinweis" gilt nur, wenn ALLE Blöcke scheitern).
-
-  var fehlerBereich = document.getElementById("fehler-bereich");
-
-  Promise.all([
-    ladeWorkbook(EINSTELLUNGEN_ID, 1).catch(function () { return []; }),
-    ladeWorkbook(BESCHREIBUNG_ID, 1).catch(function () { return null; }),
-    ladeWorkbook(OEFFNUNGSZEITEN_ID, 1).catch(function () { return null; }),
-    ladeWorkbook(KONTAKT_ID, 1).catch(function () { return null; }),
-    ladeWorkbook(ANSPRECHPARTNER_ID, 200).catch(function () { return null; }),
-  ]).then(function (ergebnisse) {
-    var einstellungen = (ergebnisse[0] && ergebnisse[0][0]) || {};
-    var beschreibung = ergebnisse[1];
-    var oeffnungszeiten = ergebnisse[2];
-    var kontakt = ergebnisse[3];
-    var ansprechpartner = ergebnisse[4];
-
-    if (beschreibung) zeigeBeschreibung(beschreibung, einstellungen);
-    if (oeffnungszeiten) zeigeOeffnungszeiten(oeffnungszeiten, einstellungen);
-    if (kontakt) zeigeAdresse(kontakt);
-    if (kontakt) zeigeKontakt(kontakt, einstellungen);
-    if (ansprechpartner) zeigeAnsprechpartner(ansprechpartner, einstellungen);
-
-    if (!beschreibung && !oeffnungszeiten && !kontakt && !ansprechpartner) {
-      fehlerBereich.appendChild(fehlerKarte("Die Geschäftsstelle-Angaben konnten gerade nicht geladen werden."));
-    }
-  }).catch(function () {
-    fehlerBereich.appendChild(fehlerKarte("Die Geschäftsstelle-Angaben konnten gerade nicht geladen werden."));
+  var anliegenListe = document.getElementById("anliegen-liste");
+  ANLIEGEN.forEach(function (a) {
+    if (!a.mail) return;
+    var href = "mailto:" + a.mail + (a.betreff ? "?subject=" + encodeURIComponent(a.betreff) : "");
+    var zeile = document.createElement("a");
+    zeile.className = "zeile";
+    zeile.href = href;
+    var textSpan = document.createElement("span");
+    textSpan.className = "zeile__text";
+    var titelSpan = document.createElement("span");
+    titelSpan.className = "zeile__titel";
+    titelSpan.textContent = a.titel;
+    textSpan.appendChild(titelSpan);
+    var untertitelSpan = document.createElement("span");
+    untertitelSpan.className = "zeile__untertitel";
+    untertitelSpan.textContent = a.text;
+    textSpan.appendChild(untertitelSpan);
+    zeile.appendChild(textSpan);
+    var pfeil = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    pfeil.setAttribute("class", "zeile__pfeil");
+    pfeil.setAttribute("viewBox", "0 0 24 24");
+    pfeil.setAttribute("stroke", "currentColor");
+    pfeil.setAttribute("stroke-width", "1.8");
+    pfeil.setAttribute("fill", "none");
+    pfeil.setAttribute("stroke-linecap", "round");
+    pfeil.setAttribute("stroke-linejoin", "round");
+    pfeil.setAttribute("aria-hidden", "true");
+    pfeil.setAttribute("focusable", "false");
+    var pfad = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    pfad.setAttribute("d", "M9 5l7 7-7 7");
+    pfeil.appendChild(pfad);
+    zeile.appendChild(pfeil);
+    anliegenListe.appendChild(zeile);
   });
+
+  // ---------- Anfahrt ----------
+
+  function googleMapsUrl(adresse) {
+    return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(adresse);
+  }
+
+  var s = VEREIN.sportstaette || {};
+  var sportstaetteAdresse = (s.strasse || "") + ", " + (s.plz || "") + " " + (s.ort || "");
+  document.getElementById("anfahrt-adresse").textContent = sportstaetteAdresse;
+  document.getElementById("route-apple-knopf").href = VEREIN.karten && VEREIN.karten.apple ? VEREIN.karten.apple : "https://maps.apple.com/?q=" + encodeURIComponent(sportstaetteAdresse);
+  document.getElementById("route-google-knopf").href = VEREIN.karten && VEREIN.karten.google ? VEREIN.karten.google : googleMapsUrl(sportstaetteAdresse);
+
+  var post = VEREIN.post || {};
+  document.getElementById("anfahrt-postanschrift").textContent = (post.postfach || "") + ", " + (post.plz || "") + " " + (post.ort || "");
+
+  document.getElementById("anfahrt-zugang-text").textContent = VEREIN.anfahrt_hinweis || "";
+
+  document.getElementById("anfahrt-rebstock-text").textContent = "Die Herren und die A-Jugend spielen ihre Heimspiele auf der Anlage von SW Griesheim am Rebstock, Am Römerhof 9, 60486 Frankfurt am Main.";
+  document.getElementById("route-rebstock-knopf").href = googleMapsUrl("Am Römerhof 9, 60486 Frankfurt am Main");
 })();
 </script>
 </body>

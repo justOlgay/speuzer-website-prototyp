@@ -58,6 +58,11 @@ h1, h2, h3, h4 {
      /datenschutz/) dürfen bei 320/360px nicht zu horizontalem Scrollen
      führen – Wortlaut bleibt unverändert, nur die Umbruch-Erlaubnis ist neu. */
   overflow-wrap: anywhere;
+  /* W8-Korrektur: Überschriften sollen bei Bedarf sauber trennen können
+     (Seiten sind lang="de", siehe src/vorlagen/workspace.html/begleit.html) –
+     .seitenkopf h1 überschreibt dies gezielt auf "manual" für den
+     &shy;-Trick auf /datenschutz/ (komponenten.css), das bleibt unberührt. */
+  hyphens: auto;
 }
 
 h1 { font-size: var(--fs-3xl); }
@@ -66,8 +71,9 @@ h3 { font-size: var(--fs-xl); }
 h4 { font-size: var(--fs-lg); }
 
 /* Ausgewogenerer Zeilenumbruch (P2-K/K1); .hero h1 bricht damit z. B. bei
-   1440px sauber „FUSSBALL IM GALLUS – / SEIT 1904.“ statt zufällig. */
-h1, h2, h3 {
+   1440px sauber „FUSSBALL IM GALLUS – / SEIT 1904.“ statt zufällig. W8-
+   Korrektur: auch h4 (z. B. Karten-Überschriften), nicht nur h1–h3. */
+h1, h2, h3, h4 {
   text-wrap: balance;
 }
 

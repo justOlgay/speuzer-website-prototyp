@@ -16,7 +16,13 @@ import {
   trainerZeileHtml,
   trainerRolleText,
   trainerFotosSkript,
+  staffelLesbar,
+  platzAufgeteilt,
 } from "../../vorlagen/hilfen.mjs";
+// W9, Abschnitt 7: bild() wird hier direkt importiert (nicht über hilfen.mjs,
+// das bewusst ohne Abhängigkeit zu bild.mjs bleibt, siehe Kopf dieser Datei)
+// für den Vorstandsfoto-Rückfall der Trainerkarte.
+import { bild } from "../../vorlagen/bild.mjs";
 
 // W6 (Entscheidung Olgay 23.09.2026): "Spielplan der Saison" und "Tabelle"
 // gehören nur noch auf die Mannschaftsseite, keine eigene Seite/Sammelseite
@@ -61,10 +67,12 @@ const TAG_KUERZEL = {
 };
 
 // "Jahrgang {jahrgang}" – bei den Herren nur "Senioren" (P3, Korrektur A1
-// abgeleitet aus kategorie über jahrgangText() in hilfen.mjs).
+// abgeleitet aus kategorie über jahrgangText() in hilfen.mjs). W9,
+// Abschnitt 1: geschütztes Leerzeichen zwischen "Jahrgang" und dem Jahr
+// (Ergebnis bereits HTML-sicher, siehe staffelLesbar() in hilfen.mjs).
 function jahrgangPraefix(team) {
   const j = jahrgangText(team);
-  return j === "Senioren" ? j : `Jahrgang ${j}`;
+  return j === "Senioren" ? j : `Jahrgang&nbsp;${escapeHtml(j)}`;
 }
 
 function googleMapsUrl(adresse) {
@@ -93,8 +101,14 @@ function trainingVollListe(team) {
 
 // Meta-description: voller Trainingsteil, sonst (wenn > 170 Zeichen) auf
 // "Training n-mal pro Woche" gekürzt (P3). Herren: "Senioren" statt Jahrgang.
+// W9-Hinweis: bewusst NICHT jahrgangPraefix() (die enthält seit W9,
+// Abschnitt 1, ein geschütztes Leerzeichen als HTML-Entity "&nbsp;" und ist
+// schon escapeHtml()-sicher) – die Meta-description ist reiner Text, den
+// tools/build.mjs selbst noch escapeHtml()t (sonst stünde dort sichtbar
+// "&amp;nbsp;" statt eines Leerzeichens).
 function beschreibung(team) {
-  const jahrgangTeil = jahrgangPraefix(team);
+  const j = jahrgangText(team);
+  const jahrgangTeil = j === "Senioren" ? j : `Jahrgang ${j}`;
   const bauen = (trainingTeil) =>
     `${team.name} des FFV Sportfreunde 04 (Frankfurt-Gallus): ${jahrgangTeil}, Training ${trainingTeil}, Ansprechpartner per Vereinsmail, Spielplan und Tabelle.`;
   let text = bauen(trainingVollListe(team));
@@ -134,26 +148,24 @@ const GENERATOR_BASIS = "https://justolgay.github.io/speuzer-spielplan/";
 // es kein Widget) das Widget "team-matches" (vergangene Spiele mit Ergebnis,
 // kommende Spiele, live) statt des Generator-iframes; im Prototyp-Modus
 // bleibt für alle Teams der Generator-iframe (Widgets laden auf GitHub Pages
-// nicht). Ohne Team-Vorauswahl im Generator nennt der Hinweistext die
-// anderen Teams der Gruppe als Geschwister, statt "Tab X wählen" zu
-// schreiben.
+// nicht).
+// W9, Abschnitt 6: der frühere Hinweissatz "Die Übersicht öffnet auf …; die
+// Reiter zeigen …" beschrieb, WIE der Generator zu bedienen ist (klang wie
+// ein technischer Hinweis, der in den Nutzertext gerutscht ist) – entfernt
+// (globale Regel: keine Bedienungsanleitungen für fremde Widgets). Ebenso
+// entfernt: der eigene Quellenhinweis "Quelle: DFBnet, täglich
+// aktualisiert. Tippen auf ein Spiel öffnet FUSSBALL.DE." – der eingebettete
+// Generator zeigt seine Quelle selbst an, ein zweiter Hinweis darunter wäre
+// doppelt. Übrig bleibt nur der kurze, einmalige Hinweis auf das
+// hervorgehobene nächste Spiel.
 function generatorIframe(team, daten) {
   const gruppe = GRUPPE_JE_TEAM[team.slug];
   // Team-Vorauswahl des Generators: #<Reiter> öffnet den Reiter des Teams.
   const reiter = daten.widgets?.[team.slug]?.reiter ?? "";
   const generatorUrl = `${GENERATOR_BASIS}app-${gruppe}.html${reiter ? "#" + encodeURIComponent(reiter) : ""}`;
 
-  const gruppenTeams = (daten.teams ?? []).filter((t) => GRUPPE_JE_TEAM[t.slug] === gruppe);
-  const geschwisterHinweis =
-    gruppenTeams.length > 1
-      ? `<p class="meta">Die Übersicht öffnet auf ${escapeHtml(team.kurz)}; die Reiter zeigen die ganze Gruppe (${escapeHtml(
-          gruppenTeams.map((t) => t.kurz).join(", ")
-        )}). Das nächste Spiel ist hervorgehoben.</p>`
-      : `<p class="meta">Das nächste Spiel ist hervorgehoben.</p>`;
-
-  return `<iframe src="${escapeHtml(generatorUrl)}" title="${escapeHtml(`Spielplan ${team.name} (Generator, DFBnet)`)}" loading="lazy" data-generator-iframe style="width:100%;height:640px;border:0;border-radius:var(--r-lg);display:block;"></iframe>
-    ${geschwisterHinweis}
-    <p class="meta">Quelle: DFBnet, täglich aktualisiert. Tippen auf ein Spiel öffnet FUSSBALL.DE.</p>
+  return `<iframe src="${escapeHtml(generatorUrl)}" title="${escapeHtml(`Spielplan ${team.name} (Generator, DFBnet)`)}" loading="lazy" data-generator-iframe style="width:100%;border:0;border-radius:var(--r-lg);display:block;"></iframe>
+    <p class="meta">Das nächste Spiel ist hervorgehoben.</p>
     <script>
     (function () {
       var iframe = document.querySelector('[data-generator-iframe]');
@@ -197,11 +209,13 @@ function spielplanDerSaisonInhalt(team, daten) {
         <div class="fussballde_widget" data-id="${escapeHtml(spieleWidgetId)}" data-type="team-matches"></div>
       </div>`;
 
+  // W9, Abschnitt 5: ein einziger, wörtlicher Satz unter dem Kasten (keine
+  // Bedienungsanleitung mehr davor/danach, siehe spieleUndTabelleInhalt()
+  // unten für denselben Wortlaut).
   return `<h2>Spiele</h2>
     <div data-nur-appack hidden>
-      <p class="meta">Nächste Spiele zuerst, frühere Ergebnisse über die Pfeile im Kasten.</p>
       ${spieleKastenHtml(widgetHtml)}
-      <p class="meta">Live von FUSSBALL.DE (DFBnet). Tippen öffnet die Spielseite.</p>
+      <p class="meta">Nächste Spiele zuerst – frühere Ergebnisse über die Pfeile im Kasten. Live von FUSSBALL.DE (DFBnet).</p>
     </div>
     <div data-nur-prototyp>
       ${iframeHtml}
@@ -218,16 +232,12 @@ const KINDERFESTIVAL_SPIELFORM = {
   "g-jugend": "3 gegen 3",
 };
 
-// Bei F1/F2/G-Jugend ersetzt die Karte "Kinderfestivals" die Tabelle ("Im
-// Kinderfußball gibt es keine Tabellen.") – Spielform je Team, keine
-// Tabellen, keine Ergebnisse, Spaß und Ballkontakte zählen.
+// W9, Abschnitt 6: die Kinderfestival-Erklärung (F1/F2/G-Jugend) steht jetzt
+// EINMAL, VOR dem Spielplan (siehe kinderfestivalAbschnitt() und
+// spieleUndTabelleInhalt() unten) – hierher (nach der Tabelle) gehört sie
+// nicht mehr, tabelleInhalt() behandelt deshalb nur noch Teams mit echter
+// Tabelle (team.tabelle === true).
 function tabelleInhalt(team, daten) {
-  if (!team.tabelle) {
-    return `<h2>Kinderfestivals</h2>
-    <p>${escapeHtml(KINDERFESTIVAL_SPIELFORM[team.slug] ?? "")} – Kinderfestivals statt Ligabetrieb.</p>
-    <p class="meta">Keine Tabellen, keine Ergebnisse: Spaß und Ballkontakte zählen.</p>`;
-  }
-
   const tabelleEintrag = daten.tabellen?.teams?.[team.slug];
   const eigene = tabelleEintrag?.zeilen?.find((z) => z.eigene);
   const tabelleWidgetId = daten.widgets?.[team.slug]?.tabelle ?? "";
@@ -250,15 +260,30 @@ function tabelleInhalt(team, daten) {
     </div>`;
 }
 
+// W9, Abschnitt 6: Kinderfestival-Erklärung einmal, mit Spielform, VOR dem
+// Spielplan (Wortlaut-Vorschlag aus der Prüf-Spezifikation übernommen).
+function kinderfestivalAbschnitt(team) {
+  const spielform = KINDERFESTIVAL_SPIELFORM[team.slug] ?? "";
+  return `<h2>Kinderfestivals</h2>
+    <p>Kinderfestivals statt Ligabetrieb: mehrere Vereine treffen sich zu einem Spieltag, ${escapeHtml(spielform)} wird gespielt.</p>
+    <p class="meta">Keine Tabellen, keine Ergebnisse: Spaß und Ballkontakte zählen.</p>`;
+}
+
 // ---------- Spiele & Tabelle mit Umschalter (W7b, Olgay 23.09.2026) ----------
 // Beide FUSSBALL.DE-Kästen untereinander waren „zu groß und zu präsent“.
 // Teams mit Spiele- UND Tabellen-Widget bekommen einen Abschnitt mit
 // Umschalter; sichtbar ist immer nur ein Kasten, „Spiele“ zuerst und auf
-// rund drei Spiele begrenzt. Kinderfußball (kein Widget) bleibt wie bisher.
+// rund drei Spiele begrenzt. Kinderfußball (kein Widget) bleibt wie bisher,
+// mit der Kinderfestival-Erklärung einmal vor dem Spielplan (W9, Abschnitt 6).
 function spieleUndTabelleInhalt(team, daten) {
   const spieleWidgetId = daten.widgets?.[team.slug]?.spiele ?? "";
   const tabelleWidgetId = daten.widgets?.[team.slug]?.tabelle ?? "";
-  if (!spieleWidgetId || !team.tabelle || !tabelleWidgetId) {
+  if (!team.tabelle) {
+    return `${kinderfestivalAbschnitt(team)}
+    <h2>Spielplan der Saison</h2>
+    ${generatorIframe(team, daten)}`;
+  }
+  if (!spieleWidgetId || !tabelleWidgetId) {
     return `${spielplanDerSaisonInhalt(team, daten)}
     ${tabelleInhalt(team, daten)}`;
   }
@@ -267,7 +292,7 @@ function spieleUndTabelleInhalt(team, daten) {
   const spieleHtml = `${spieleKastenHtml(`<div class="fussballde-wrap">
         <div class="fussballde_widget" data-id="${escapeHtml(spieleWidgetId)}" data-type="team-matches"></div>
       </div>`)}
-        <p class="meta">Nächste Spiele zuerst, frühere Ergebnisse über die Pfeile im Kasten. Live von FUSSBALL.DE (DFBnet).</p>`;
+        <p class="meta">Nächste Spiele zuerst – frühere Ergebnisse über die Pfeile im Kasten. Live von FUSSBALL.DE (DFBnet).</p>`;
   const tabelleHtml = `<div class="fussballde-wrap">
           <div class="fussballde_widget" data-id="${escapeHtml(tabelleWidgetId)}" data-type="table"></div>
         </div>
@@ -294,8 +319,9 @@ function seitenkopfAbschnitt(team) {
     ${ruecklink(`${PFAD}mannschaften/`, "Mannschaften")}
     <p class="meta">Mannschaft · ${escapeHtml(team.gruppe ?? "")}</p>
     <h1>${escapeHtml(team.name)}</h1>
-    <p class="seitenkopf__lead">${escapeHtml(jahrgangPraefix(team))} · ${escapeHtml(team.staffel ?? "")}</p>
-    <p class="inhalt">Spielbetrieb: ${escapeHtml(team.spielbetrieb ?? "")}.</p>
+    <p class="seitenkopf__lead">${jahrgangPraefix(team)} · ${staffelLesbar(team.staffel)}</p>
+    ${team.beschreibung ? `<p class="inhalt teamtext">${escapeHtml(team.beschreibung)}</p>` : ""}
+    <p class="meta">Spielbetrieb: ${escapeHtml(team.spielbetrieb ?? "")}.</p>
   </div>
 </section>`;
 }
@@ -305,16 +331,34 @@ function seitenkopfAbschnitt(team) {
 function hauptspalte(team, daten) {
   const verein = daten.verein ?? {};
 
-  const sonderHinweis =
-    team.slug === "herren"
-      ? `<div class="hinweis hinweis--info">
+  // W9, Abschnitt 4: der gemeinsame Trainingsort steht einmal oberhalb der
+  // Liste, die einzelnen Zeilen zeigen nur noch "Tag · Uhrzeit · Platzteil"
+  // (siehe platzAufgeteilt()/trainingsZeilen() in hilfen.mjs). Herren: die
+  // volle Rebstock-Adresse steht nur im Hinweiskasten, die Zeilen zeigen nur
+  // das Kurzwort "Rebstock" (team.platz hat hier keinen Komma-getrennten
+  // Platzteil, eigene externe Anlage ohne Halb-/Tor-Aufteilung). A-Jugend:
+  // die zwei bisherigen Hinweiskästen (der allgemeine Trainingsort-Hinweis
+  // und der bestehende Heimspiele/Rebstock-Hinweis) sind zu einem
+  // zusammengefasst – der bestehende Kasten nennt jetzt zusätzlich die volle
+  // Vereinsplatz-Adresse (schon in team.platz vorhanden), statt einen
+  // zweiten, eigenen Ort-Absatz danach zu zeigen.
+  let ortHinweis;
+  let trainingsPlatzteil;
+  if (team.slug === "herren") {
+    ortHinweis = `<div class="hinweis hinweis--info">
       <p style="margin:0;">Die Herren trainieren und spielen extern auf der Bezirkssportanlage am Rebstock (Anlage von SW Griesheim), Am Römerhof 9, 60486 Frankfurt.</p>
-    </div>`
-      : team.slug === "a-jugend"
-        ? `<div class="hinweis hinweis--info">
-      <p style="margin:0;">Training auf dem Vereinsplatz, Heimspiele auf der Anlage von SW Griesheim am Rebstock (Am Römerhof 9).</p>
-    </div>`
-        : "";
+    </div>`;
+    trainingsPlatzteil = "Rebstock";
+  } else if (team.slug === "a-jugend") {
+    ortHinweis = `<div class="hinweis hinweis--info">
+      <p style="margin:0;">Training auf dem Vereinsplatz Mainzer Landstraße 480, Heimspiele auf der Anlage von SW Griesheim am Rebstock (Am Römerhof 9).</p>
+    </div>`;
+    trainingsPlatzteil = platzAufgeteilt(team).teil;
+  } else {
+    const { ort, teil } = platzAufgeteilt(team);
+    ortHinweis = ort ? `<p class="meta">Trainingsort: ${escapeHtml(ort)}.</p>` : "";
+    trainingsPlatzteil = teil;
+  }
 
   const spiele = naechsteSpiele(daten, { team: team.slug, anzahl: 3 });
   const spieleHtml = spiele.length
@@ -339,9 +383,9 @@ function hauptspalte(team, daten) {
 
   return `<div class="fluss">
     <h2>Training</h2>
-    ${sonderHinweis}
+    ${ortHinweis}
     <ul class="trainings" role="list">
-    ${trainingsZeilen(team)}
+    ${trainingsZeilen(team, trainingsPlatzteil)}
     </ul>
     <div class="hinweis hinweis--info">
       <p style="margin:0;">${escapeHtml(verein.hinweise?.ferien ?? "")}</p>
@@ -349,6 +393,28 @@ function hauptspalte(team, daten) {
     ${naechsteSpieleAbschnitt}
     ${spieleUndTabelleInhalt(team, daten)}
   </div>`;
+}
+
+// W9, Abschnitt 7: Rückfall-Platzhalter fürs Trainerfoto – Vorstandsfoto
+// derselben Person (voller Namensabgleich gegen data/vorstand.json), sofern
+// eines hinterlegt ist. Über den vorhandenen bild()-Baustein (kleine
+// Variante, 48px wie .person-mini__bild), mit data-trainer-foto="index" wie
+// der Initialen-Platzhalter, damit trainerFotosSkript() ein echtes
+// Worksheet-Foto zur Laufzeit weiterhin bevorzugt einsetzen kann (Reihenfolge
+// Worksheet-Bild → Vorstandsfoto → Initialen). Ohne Treffer: null (dann
+// bleibt es bei den Initialen, siehe trainerZeileHtml() in hilfen.mjs).
+function trainerVorstandsBildHtml(name, index, daten, pfad) {
+  const eintrag = (daten.vorstand ?? []).find((p) => p.name === name && p.foto);
+  if (!eintrag) return null;
+  const html = bild({
+    pfad,
+    daten,
+    name: eintrag.foto.quelle,
+    alt: "",
+    sizes: "48px",
+    klasse: "person-mini__bild",
+  });
+  return html.replace("<picture", `<picture data-trainer-foto="${index}" aria-hidden="true"`);
 }
 
 // ---------- Seitenspalte: Ansprechpartner, Heimspiele, Kalender ----------
@@ -363,9 +429,11 @@ function seitenspalte(team, daten) {
   // W7b: Rolle einmal als Kartentitel („Trainer“ bzw. „Trainerteam“) statt
   // unter jedem Namen; die Mailadresse steht einmal im Hinweissatz, der Knopf
   // öffnet sie (vorher doppelt als Link und Knopf).
+  // W9, Abschnitt 7: Kartentitel jetzt immer "Trainerteam" (trainerRolleText()
+  // in hilfen.mjs), auch bei einer Person.
   const kartenTitel = trainerRolleText((team.trainer ?? []).length);
   const trainerZeilen = (team.trainer ?? [])
-    .map((name, i) => trainerZeileHtml(name, i, ""))
+    .map((name, i) => trainerZeileHtml(name, i, "", trainerVorstandsBildHtml(name, i, daten, PFAD)))
     .join("\n        ");
 
   const ansprechpartnerKarte = `<div class="karte fluss">
@@ -376,7 +444,7 @@ function seitenspalte(team, daten) {
       <p class="knopfzeile">
         <a class="knopf" href="${escapeHtml(trainerMailtoHref(team))}">E-Mail an das Trainerteam</a>
       </p>
-      <p class="meta">Die Nachricht geht an ${mailLink(team.mail)} – keine privaten Handynummern.</p>
+      <p class="meta">Die Nachricht geht an ${mailLink(team.mail)}.</p>
     </div>`;
 
   const heimspieleKarte = `<div class="karte fluss">
@@ -387,12 +455,15 @@ function seitenspalte(team, daten) {
       </p>
     </div>`;
 
+  // W9, Abschnitt 9: Linktexte ohne Fachkürzel ("(ICS)" ist für Laien
+  // unverständlich), stattdessen "… {Kürzel} abonnieren". Hinweissatz
+  // wörtlich, geschütztes Leerzeichen vor dem letzten Wort.
   const kalenderBasis = verein.kalender_basis ?? "";
   const kalenderKarte = `<div class="karte fluss">
       <h2 class="karte__titel">Kalender abonnieren</h2>
-      <p><a href="${escapeHtml(kalenderBasis + (team.kalender ?? ""))}">Spielplan ${escapeHtml(team.kurz)} (ICS)</a></p>
-      <p><a href="${escapeHtml(kalenderBasis + (team.trainingsKalender ?? ""))}">Trainingszeiten ${escapeHtml(team.kurz)} (ICS)</a></p>
-      <p class="meta">Einmal abonnieren – Verlegungen kommen automatisch an.</p>
+      <p><a href="${escapeHtml(kalenderBasis + (team.kalender ?? ""))}">Spielplan ${escapeHtml(team.kurz)} abonnieren</a></p>
+      <p><a href="${escapeHtml(kalenderBasis + (team.trainingsKalender ?? ""))}">Trainingszeiten ${escapeHtml(team.kurz)} abonnieren</a></p>
+      <p class="meta">Einmal abonnieren – Verlegungen kommen automatisch&nbsp;an.</p>
     </div>`;
 
   return `<aside class="fluss">
@@ -408,24 +479,36 @@ function seitenspalte(team, daten) {
 // Seitenkopf reicht, siehe ruecklink() und W7-Spezifikation Abschnitt 1)
 // ----------
 
-// P4, Korrektur A2: Reihenfolge nach Nähe im Alter statt Dateireihenfolge –
-// sortiert nach Abstand des Index in teams.json zum aktuellen Team
-// (aufsteigend), dann die ersten vier.
+// P4, Korrektur A2 / W9, Abschnitt 10: feste Reihenfolge nach Alter wie auf
+// der Übersicht (Herren, A, D1, D2, D3, E1, E2, E3, F1, F2, G – exakt die
+// Reihenfolge in data/teams.json, geprüft). Nachbarn zuerst: sortiert nach
+// Abstand des Index zum aktuellen Team (aufsteigend, stabil – bei gleichem
+// Abstand bleibt die Array-Reihenfolge erhalten, das bringt "vorheriges vor
+// nächstes" bei Gleichstand), dann die ersten vier. W9-Korrektur: die frühere
+// Beschränkung auf dieselbe Gruppe (t.gruppe === team.gruppe) entfiel – sie
+// ließ diesen Abschnitt auf der Herrenseite komplett leer (die Herren sind
+// die einzigen in ihrer Gruppe "Senioren", "andere" war dort immer leer).
+// Jetzt zeigt jede Teamseite ihre vier Alters-Nachbarn unabhängig von der
+// Gruppe, auch die Herren (dort: A-Jugend, D1, D2, D3 – kein "vorheriges"
+// Team, da die Herren die ältesten sind).
 function weitereMannschaftenAbschnitt(team, daten) {
   const alleTeams = daten.teams ?? [];
   const aktuellerIndex = alleTeams.findIndex((t) => t.slug === team.slug);
   const andere = alleTeams
     .map((t, index) => ({ t, abstand: Math.abs(index - aktuellerIndex) }))
-    .filter(({ t }) => t.gruppe === team.gruppe && t.slug !== team.slug)
+    .filter(({ t }) => t.slug !== team.slug)
     .sort((a, b) => a.abstand - b.abstand)
     .slice(0, 4)
     .map(({ t }) => t);
 
+  // W9, Abschnitt 10: gleicher Linktext wie auf der Übersicht ("Zur
+  // Mannschaft ›", siehe teamKarte() in index.mjs).
   const karten = andere
     .map(
       (t) => `<a class="karte karte--link" href="${PFAD}mannschaften/${t.slug}/">
       <span class="karte__titel">${escapeHtml(t.name)}</span>
-      <span class="karte__meta">${escapeHtml(jahrgangPraefix(t))}</span>
+      <span class="karte__meta">${jahrgangPraefix(t)}</span>
+      <span class="karte__mehr">Zur Mannschaft ›</span>
     </a>`
     )
     .join("\n    ");

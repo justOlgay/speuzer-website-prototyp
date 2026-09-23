@@ -22,7 +22,7 @@ function seitenkopfAbschnitt(datenschutz) {
   <div class="container">
     <h1>Datenschutz&shy;erklärung</h1>
     <p class="seitenkopf__lead">Fassung der Vereins-App und Website vom ${escapeHtml(datenschutz.stand ?? "")}</p>
-    <div class="hinweis hinweis--offen">
+    <div class="hinweis hinweis--info">
       <p style="margin:0;">${escapeHtml(datenschutz.hinweis ?? "")}</p>
     </div>
   </div>
@@ -59,23 +59,34 @@ function inhaltsverzeichnisAbschnitt(abschnitte) {
 // ≤ 60 Zeichen und ohne Satzzeichen am Ende werden zu einer <ul>
 // zusammengefasst (Schwellenwert und Zeichentest exakt wie im Plan
 // beschrieben). Bewusst nur für den namentlich genannten Abschnitt
-// angewendet, nicht global auf alle 13 Abschnitte: dieselbe rein mechanische
-// Regel würde in Abschnitt "6. Routinemäßige Löschung …" die beiden
-// aufeinanderfolgenden Kurzzeilen "Ihre Rechte als betroffene Person" /
-// "Recht auf Bestätigung" ebenfalls zu einer <ul> zusammenfassen – dort sind
-// das aber Zwischenüberschriften vor einem langen Absatz, keine Aufzählung.
-// Siehe Abschlussbericht, Abschnitt "Offene Fragen".
+// angewendet, nicht global auf alle 13 Abschnitte.
 const ABSAETZE_GRUPPIEREN_TITEL = "Datenschutzhinweise";
+
+// W8-Korrektur: "Zwischenfragen/Unterbegriffe als h3" (z. B. die Glossarbegriffe
+// in "1. Begrifflichkeiten", die "Recht auf …"-Zwischentitel in "6. Routinemäßige
+// Löschung …" oder "Auf welche Weise erheben wir Ihre Daten?" in
+// "Datenschutzhinweise"). Löst die frühere Ungenauigkeit der reinen
+// Längen-Heuristik auf (sie hätte "Ihre Rechte als betroffene Person" /
+// "Recht auf Bestätigung" fälschlich zu einer <ul> gruppiert): diese Zeilen
+// werden jetzt in data/datenschutz.json explizit mit dem Präfix "§H§ "
+// markiert, statt aus Länge/Interpunktion geraten zu werden.
+const UEBERSCHRIFT_PRAEFIX = "§H§ ";
+
+function alsUeberschrift(text) {
+  return text.startsWith(UEBERSCHRIFT_PRAEFIX) ? text.slice(UEBERSCHRIFT_PRAEFIX.length) : null;
+}
 
 function qualifiziertFuerListe(text) {
   const t = text.trim();
   return t.length > 0 && t.length <= 60 && !/[.!?:;,]$/.test(t);
 }
 
-// Baut aus einem absaetze-Array eine Liste von Blöcken ({typ:"absatz"} oder
-// {typ:"liste"}) – aufeinanderfolgende qualifizierende Einträge (mindestens
-// zwei) werden zu einem "liste"-Block zusammengefasst, ein einzelner
-// qualifizierender Eintrag ohne Nachbarn bleibt ein normaler Absatz.
+// Baut aus einem absaetze-Array eine Liste von Blöcken ({typ:"absatz"},
+// {typ:"liste"} oder {typ:"ueberschrift"}) – aufeinanderfolgende
+// qualifizierende Einträge (mindestens zwei) werden zu einem "liste"-Block
+// zusammengefasst, ein einzelner qualifizierender Eintrag ohne Nachbarn bleibt
+// ein normaler Absatz. Mit "§H§ " markierte Einträge unterbrechen einen
+// laufenden Listenblock immer und werden nie gruppiert.
 function gruppiereAbsaetze(absaetze) {
   const bloecke = [];
   let lauf = [];
@@ -90,7 +101,11 @@ function gruppiereAbsaetze(absaetze) {
   }
 
   for (const p of absaetze) {
-    if (qualifiziertFuerListe(p)) {
+    const ueberschrift = alsUeberschrift(p);
+    if (ueberschrift !== null) {
+      laufSchliessen();
+      bloecke.push({ typ: "ueberschrift", text: ueberschrift });
+    } else if (qualifiziertFuerListe(p)) {
       lauf.push(p);
     } else {
       laufSchliessen();
@@ -104,16 +119,25 @@ function gruppiereAbsaetze(absaetze) {
 function absaetzeHtml(abschnitt) {
   const absaetze = abschnitt.absaetze ?? [];
   if (abschnitt.titel !== ABSAETZE_GRUPPIEREN_TITEL) {
-    return absaetze.map((p) => `<p>${escapeHtml(p)}</p>`).join("\n      ");
+    return absaetze
+      .map((p) => {
+        const ueberschrift = alsUeberschrift(p);
+        return ueberschrift !== null ? `<h3>${escapeHtml(ueberschrift)}</h3>` : `<p>${escapeHtml(p)}</p>`;
+      })
+      .join("\n      ");
   }
   return gruppiereAbsaetze(absaetze)
-    .map((block) =>
-      block.typ === "liste"
-        ? `<ul>
+    .map((block) => {
+      if (block.typ === "liste") {
+        return `<ul>
         ${block.eintraege.map((li) => `<li>${escapeHtml(li)}</li>`).join("\n        ")}
-      </ul>`
-        : `<p>${escapeHtml(block.text)}</p>`
-    )
+      </ul>`;
+      }
+      if (block.typ === "ueberschrift") {
+        return `<h3>${escapeHtml(block.text)}</h3>`;
+      }
+      return `<p>${escapeHtml(block.text)}</p>`;
+    })
     .join("\n      ");
 }
 
@@ -124,6 +148,13 @@ function abschnittSection(abschnitt, index) {
         ${abschnitt.liste.map((li) => `<li>${escapeHtml(li)}</li>`).join("\n        ")}
       </ul>`
     : "";
+  // "absaetzeNachListe" (z. B. Abschnitt "2. Erfassung von allgemeinen Daten /
+  // Informationen"): Absätze, die inhaltlich erst nach der Aufzählung folgen
+  // ("Erfasst werden können …" muss direkt vor seiner Liste stehen) – ohne
+  // dieses Feld unverändert leer.
+  const absaetzeNachListeHtml = (abschnitt.absaetzeNachListe ?? [])
+    .map((p) => `<p>${escapeHtml(p)}</p>`)
+    .join("\n      ");
 
   return `<section id="abschnitt-${index + 1}" class="abschnitt">
   <div class="container fluss">
@@ -131,6 +162,7 @@ function abschnittSection(abschnitt, index) {
     <h2>${escapeHtml(abschnitt.titel)}</h2>
     ${absaetze}
     ${listeHtml}
+    ${absaetzeNachListeHtml}
     </div>
   </div>
 </section>`;

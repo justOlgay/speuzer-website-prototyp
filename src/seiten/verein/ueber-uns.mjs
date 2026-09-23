@@ -5,21 +5,12 @@
 // (W3-Spezifikation Abschnitt 1). Inhalt unverändert übernommen, nur der
 // Seitenkopf (Brotkrume statt Verteiler-Lead) und der Rücklink sind neu.
 
-import { readFileSync } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { bild } from "../../vorlagen/bild.mjs";
-import { mailLink, ruecklink } from "../../vorlagen/hilfen.mjs";
+import { ruecklink } from "../../vorlagen/hilfen.mjs";
+import { personKarte, downloadZeile } from "../../vorlagen/bausteine.mjs";
 
 // Diese Seite liegt immer unter "/verein/ueber-uns/" (Tiefe 2), daher immer
 // "../../" (siehe pfadZurWurzel() in tools/build.mjs).
 const PFAD = "../../";
-
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
-
-function liesWappenBlau() {
-  return readFileSync(path.join(ROOT, "assets", "logo", "wappen-blau.svg"), "utf8");
-}
 
 function escapeHtml(text) {
   return String(text ?? "")
@@ -27,29 +18,6 @@ function escapeHtml(text) {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
-}
-
-function personKarte(person, daten) {
-  const bildHtml = person?.foto
-    ? bild({
-        pfad: PFAD,
-        daten,
-        name: person.foto.quelle,
-        alt: person.name ? `Porträt ${person.name}` : "",
-        sizes: "(min-width: 640px) 260px, 50vw",
-        klasse: "person__bild",
-        prioritaet: true,
-      })
-    : `<span class="person__bild person__bild--platzhalter" aria-hidden="true">${liesWappenBlau()}</span>`;
-  const nameHtml = person?.name ? escapeHtml(person.name) : "derzeit nicht besetzt";
-  const mailHtml = person?.mail ? `<p class="person__mail">${mailLink(person.mail)}</p>` : "";
-
-  return `<div class="person" style="max-width:260px;">
-      ${bildHtml}
-      <p class="person__name">${nameHtml}</p>
-      <p class="person__funktion">${escapeHtml(person?.funktion ?? "")}</p>
-      ${mailHtml}
-    </div>`;
 }
 
 function downloadEintrag(daten, titelTeil) {
@@ -75,7 +43,7 @@ function seitenkopfAbschnitt() {
   <div class="container">
     ${ruecklink(`${PFAD}verein/`, "Verein")}
     <h1>Über uns</h1>
-    <p class="seitenkopf__lead">Frankfurter Fußballverein Sportfreunde 1904 e.V. – im Gallus sagt man einfach „die Speuzer“.</p>
+    <p class="seitenkopf__lead">Seit 1904 im Frankfurter Gallus zu Hause: unsere Geschichte, unsere Werte und der Verein in Zahlen.</p>
   </div>
 </section>`;
 }
@@ -88,14 +56,16 @@ function geschichteAbschnitt(daten) {
 
   return `<section class="abschnitt">
   <div class="container fluss">
-    <p class="inhalt">Gegründet wurde der Verein am 15. Mai 1904 als Frankfurter FC Britannia. Nach dem Ersten Weltkrieg erhielt er 1919 seinen heutigen Namen. Der sportliche Höhepunkt war die Saison 1955/56 in der 1. Amateurliga Hessen; seit den 1960er Jahren spielen die Sportfreunde in den Klassen des Fußballkreises Frankfurt.</p>
-    <p class="inhalt">Heute stellt der Verein elf Fußballmannschaften – von der 1. Herrenmannschaft bis zur G-Jugend – und die Karnevalabteilung „Die Schnauzer“ mit fünf Gruppen. Trainiert und gespielt wird auf dem eigenen Platz an der Mainzer Landstraße 480; die Herren tragen ihre Heimspiele auf der Anlage am Rebstock aus.</p>
+    <p class="inhalt">Gegründet wurde der Verein am 15.&nbsp;Mai 1904 als Frankfurter FC Britannia. Nach dem Ersten Weltkrieg erhielt er 1919 seinen heutigen Namen. Der sportliche Höhepunkt war die Saison 1955/56 in der 1.&nbsp;Amateurliga Hessen; seit den 1960er Jahren spielen die Sportfreunde in den Klassen des Fußballkreises Frankfurt.</p>
+    <p class="inhalt">Heute stellt der Verein elf Fußballmannschaften – von der 1.&nbsp;Herrenmannschaft bis zur G-Jugend – und die Karnevalabteilung „Die Schnauzer“ mit fünf Gruppen. Trainiert und gespielt wird auf dem eigenen Platz an der Mainzer Landstraße 480. Die Herren und die A-Jugend tragen ihre Heimspiele auf der Bezirkssportanlage am Rebstock aus (Anlage von SW Griesheim, Am Römerhof 9, 60486 Frankfurt).</p>
     <p class="inhalt">Unser Leitsatz aus der Vereinsphilosophie: „Wir wollen nicht nur erfolgreiche Mannschaften entwickeln, sondern erfolgreiche Menschen und einen starken Verein für kommende Generationen.“ Unsere Werte sind Gemeinschaft, Respekt, Wertschätzung, Verantwortung, Fairness, Entwicklung und Kinderschutz.</p>
     <p class="knopfzeile">
       <a class="knopf" href="https://cdn.appack.de/sportfreunde04/workspace/web/chronik.html">Vereinschronik lesen</a>
-      ${downloadKnopf(philosophie, "Vereinsphilosophie lesen (PDF, 50 Seiten)")}
-      ${downloadKnopf(chronik, "Chronik als PDF (53 Seiten)")}
     </p>
+    <ul class="downloads" role="list">
+      ${downloadZeile(chronik, PFAD, "Chronik (PDF)")}
+      ${downloadZeile(philosophie, PFAD, "Vereinsphilosophie (PDF)")}
+    </ul>
   </div>
 </section>`;
 }
@@ -121,7 +91,7 @@ function zahlenAbschnitt() {
   return `<section class="abschnitt--blau abschnitt">
   <div class="container fluss">
     <h2>Der Verein in Zahlen</h2>
-    <div class="raster raster--4">
+    <div class="raster raster--4 raster--2-mobil">
       ${kacheln}
     </div>
   </div>
@@ -130,15 +100,18 @@ function zahlenAbschnitt() {
 
 // ---------- Kinderschutz ----------
 
+// W8-Korrektur: dieselbe Personen-Karte wie Vorstand/Karneval
+// (personKarte() aus bausteine.mjs) statt eines einzelnen großen Porträts
+// mit viel Leerraum daneben.
 function kinderschutzAbschnitt(daten) {
   const beauftragter = (daten.vorstand ?? []).find((p) => p.funktion === "Kinderschutzbeauftragter");
   const konzept = downloadEintrag(daten, "Präventions- und Schutzkonzept");
 
   return `<section class="abschnitt--hell abschnitt">
   <div class="container fluss">
-    <h2>Kinderschutz</h2>
+    <h2>Kinder- und Jugendschutz</h2>
     <p class="inhalt">Das Wohl von Kindern und Jugendlichen steht für uns über allem. Unser Präventions- und Schutzkonzept sowie die Vorgaben von HFV und DFB bilden den verbindlichen Rahmen.</p>
-    ${personKarte(beauftragter, daten)}
+    ${personKarte(beauftragter, daten, { pfad: PFAD, prioritaet: true, einzeln: true })}
     <p class="knopfzeile">
       ${downloadKnopf(konzept, "Präventions- und Schutzkonzept (PDF)")}
     </p>

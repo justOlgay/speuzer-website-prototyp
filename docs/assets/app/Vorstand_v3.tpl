@@ -174,6 +174,22 @@ svg { display: block; flex: 0 0 auto; }
 
 .inhalt > .abschnittstitel:first-child { margin-top: 0; }
 
+/* Seitenkopf-Baustein (W8, App-weit): einheitlicher, kartenloser
+   Einleitungssatz direkt unter dem (unsichtbaren) h1 jeder Seite – die
+   App-Kopfleiste zeigt den Seitentitel bereits, ein eigener Kartentitel
+   wäre doppelt. Gleicher Abstand nach unten wie ein Abschnittstitel. */
+.seitenkopf-lead {
+  margin: 0 0 var(--sp-5);
+  font-size: 15px;
+  color: var(--ink-2);
+}
+
+/* Aufklapper (W8, App-weit): kein natives Dreieck "▶" vor <summary> – der
+   Chevron/"›" steht stattdessen im Text der jeweiligen Beschriftung. */
+summary { list-style: none; cursor: pointer; }
+summary::-webkit-details-marker { display: none; }
+summary::marker { content: ""; }
+
 .knopf {
   display: inline-flex;
   align-items: center;
@@ -238,7 +254,12 @@ svg { display: block; flex: 0 0 auto; }
   text-align: center;
 }
 
-/* Vorstand_v3.tpl – seitenspezifisch (C1). */
+/* Vorstand_v3.tpl – seitenspezifisch (C1). W8, Grundsatz Daten: Personen
+   und Gruppierung aus [{"name":"Melanie Seipp","funktion":"1. Vorsitzende","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-melanie-seipp","bytes":525138}},{"name":"Uwe Korndörfer","funktion":"2. Vorsitzender","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-uwe-korndorfer","bytes":517113}},{"name":"Wolfgang Schirmer","funktion":"1. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-wolfgang-schirmer","bytes":495840}},{"name":"Bernhard Henrich","funktion":"2. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-bernhard-henrich","bytes":135549}},{"name":"Ralf Schwager","funktion":"1. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-ralf-schwager","bytes":112402}},{"name":"Olgay Özkan","funktion":"2. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-olgay-ozkan","bytes":60038}},{"name":"Marcel Hogg","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-marcel-hogg","bytes":125052}},{"name":"Vassilios Miamis","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-vassilios-miamis","bytes":215395}},{"name":"Florian Müller","funktion":"Kinderschutzbeauftragter","mail":"kinderschutzbeauftragter@sportfreunde04.de","foto":{"quelle":"vorstand-florian-muller","bytes":69465}},{"name":null,"funktion":"Schriftführer","mail":null,"foto":null,"hinweis":"nicht besetzt"},{"name":"Wolfgang Krönung","funktion":"Sportliche Leitung Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Christine Rothe","funktion":"Spielausschuss Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Patrick Krösche","funktion":"Abteilungsleiter Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":{"quelle":"vorstand-patrick-krosche","bytes":221052}},{"name":"Sigrid Weber","funktion":"Kassiererin Abteilung Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null},{"name":"Bettina Leven-Grieb","funktion":"Schriftführerin Abteilung Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null}] (data/vorstand.json) – dieselbe
+   Zuordnung wie GRUPPEN_DEFINITION in verein/vorstand.mjs, vier feste
+   Abschnitte statt umbrechender Filterchips. Fotos bleiben zur Laufzeit aus
+   dem Ansprechpartner-Worksheet (Feld ansImg, per Namensgleichheit), nie im
+   Repo. */
 
 .visually-hidden {
   position: absolute;
@@ -252,30 +273,13 @@ svg { display: block; flex: 0 0 auto; }
   border: 0;
 }
 
-.filterleiste {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-2);
-  margin-bottom: var(--sp-4);
-}
-
-.filter-knopf {
-  min-height: 44px;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.filter-knopf--aktiv {
-  background: var(--blau-700);
-  color: var(--weiss);
-}
+.gruppe-abschnitt { margin-top: var(--sp-6); }
+.gruppe-abschnitt:first-child { margin-top: 0; }
 
 .kontakte-liste {
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
-  margin-bottom: var(--sp-5);
 }
 
 .person-karte {
@@ -290,6 +294,9 @@ svg { display: block; flex: 0 0 auto; }
   height: 56px;
   border-radius: var(--r-pill);
   object-fit: cover;
+  object-position: 50% 0%;
+  background: var(--blau-50);
+  box-shadow: 0 0 0 1px var(--line);
 }
 
 .person-karte__initialen {
@@ -307,48 +314,44 @@ svg { display: block; flex: 0 0 auto; }
   font-size: 18px;
 }
 
-.person-karte__inhalt {
-  flex: 1 1 auto;
-  min-width: 0;
-}
+.person-karte__inhalt { flex: 1 1 auto; min-width: 0; }
 
 .person-karte__name {
-  margin: var(--sp-1) 0 0;
-  font-family: var(--font-text);
+  margin: 0;
   font-weight: 600;
   font-size: 16px;
   overflow-wrap: break-word;
 }
 
-.person-karte__info {
-  margin: 4px 0 0;
+/* W8, Befund 4: Rolle als kleine Textzeile unter dem Namen statt Pille
+   (bricht bei langen Funktionsnamen sonst zum Oval um). */
+.person-karte__funktion {
+  margin: 2px 0 var(--sp-2);
   font-size: 13px;
-  color: var(--ink-2);
+  color: var(--ink-3);
+  overflow-wrap: break-word;
 }
 
-.person-karte__aktionen {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-2);
-  margin-top: var(--sp-3);
-}
-
-.icon-knopf {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 44px;
-  padding-inline: var(--sp-3);
-  border-radius: var(--r-md);
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--blau-800);
+.person-karte__link {
+  color: var(--blau-700);
   font-weight: 600;
   font-size: 13px;
   text-decoration: none;
 }
 
-.icon-knopf svg { width: 18px; height: 18px; }
+/* W8, Befund 4: unbesetztes Amt ohne Initialen-Avatar – reine Textzeile mit
+   Verweis auf "Mach mit". */
+.person-zeile-unbesetzt {
+  padding: var(--sp-2) 0;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.person-zeile-unbesetzt a {
+  color: var(--blau-700);
+  font-weight: 600;
+  text-decoration: none;
+}
 </style>
 </head>
 <body>
@@ -356,9 +359,13 @@ svg { display: block; flex: 0 0 auto; }
 
 <h1 class="visually-hidden">Vorstand &amp; Kontakt</h1>
 
-<div id="filterleiste" class="filterleiste" hidden></div>
+<p class="seitenkopf-lead">Wer den Verein führt. Der Kontakt läuft über die Vereinsadressen – ohne private Handynummern.</p>
 
-<div id="kontakte-liste" class="kontakte-liste"></div>
+<div id="gruppen-bereich"></div>
+
+<div class="hinweis">
+  <p id="vorstand-hinweis"></p>
+</div>
 
 <div class="liste">
   <a class="zeile" href="nav://sportfreunde04_TextImage_1780401660324">
@@ -371,6 +378,8 @@ svg { display: block; flex: 0 0 auto; }
   </a>
 </div>
 
+<p class="fuss">F.F.V. Sportfreunde 04 · Vereins-App</p>
+
 </main>
 
 <script src="https://cdn.appack.de/modules/common/jquery-3.4.1.min.js"></script>
@@ -379,45 +388,49 @@ svg { display: block; flex: 0 0 auto; }
 (function () {
   "use strict";
 
-  var KONTAKTE_ID = "6a1ec5fcf68a05bf129cdb8b";
-  var KATEGORIEN_ID = "6a1ec5fcf68a05bf129cdb90";
+  var VORSTAND = [{"name":"Melanie Seipp","funktion":"1. Vorsitzende","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-melanie-seipp","bytes":525138}},{"name":"Uwe Korndörfer","funktion":"2. Vorsitzender","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-uwe-korndorfer","bytes":517113}},{"name":"Wolfgang Schirmer","funktion":"1. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-wolfgang-schirmer","bytes":495840}},{"name":"Bernhard Henrich","funktion":"2. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-bernhard-henrich","bytes":135549}},{"name":"Ralf Schwager","funktion":"1. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-ralf-schwager","bytes":112402}},{"name":"Olgay Özkan","funktion":"2. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-olgay-ozkan","bytes":60038}},{"name":"Marcel Hogg","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-marcel-hogg","bytes":125052}},{"name":"Vassilios Miamis","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-vassilios-miamis","bytes":215395}},{"name":"Florian Müller","funktion":"Kinderschutzbeauftragter","mail":"kinderschutzbeauftragter@sportfreunde04.de","foto":{"quelle":"vorstand-florian-muller","bytes":69465}},{"name":null,"funktion":"Schriftführer","mail":null,"foto":null,"hinweis":"nicht besetzt"},{"name":"Wolfgang Krönung","funktion":"Sportliche Leitung Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Christine Rothe","funktion":"Spielausschuss Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Patrick Krösche","funktion":"Abteilungsleiter Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":{"quelle":"vorstand-patrick-krosche","bytes":221052}},{"name":"Sigrid Weber","funktion":"Kassiererin Abteilung Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null},{"name":"Bettina Leven-Grieb","funktion":"Schriftführerin Abteilung Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null}];
+  var VEREIN = {"name_register":"Frankfurter Fußballverein Sportfreunde 1904 e. V.","name_kurz":"FFV Sportfreunde 04","spitzname":"Speuzer","gegruendet":"15. Mai 1904","gruendungsname":"Frankfurter FC Britannia","umbenannt":"1919","stadtteil":"Gallus","sportstaette":{"strasse":"Mainzer Landstraße 480","plz":"60326","ort":"Frankfurt am Main"},"post":{"postfach":"Postfach 190442","plz":"60091","ort":"Frankfurt am Main"},"mail":"geschaeftsstelle@sportfreunde04.de","tel_geschaeftsstelle":"+49 69 736868","tel_platzwart":"+49 69 732193","register":"Amtsgericht Frankfurt am Main, VR 4727","vorsitz":["Melanie Seipp (1. Vorsitzende)","Uwe Korndörfer (2. Vorsitzender)"],"vertretung":["Melanie Seipp (1. Vorsitzende)","Uwe Korndörfer (2. Vorsitzender)"],"instagram":"https://www.instagram.com/speuzer_ffm/","facebook":"https://www.facebook.com/groups/223133414377924/","fanshop":"https://sportfreunde04.fan12.de/","teamshop":"https://www.11teamsports.com/de-de/clubshop/frankfurter-fussballvereine-sportfreunde-04/","mails":{"jugendleitung":"jugendleitung@sportfreunde04.de","kassierer":"kassierer@sportfreunde04.de","kinderschutz":"kinderschutzbeauftragter@sportfreunde04.de","karneval":"karnevalabteilung@sportfreunde04.de","senioren":"spielausschuss_senioren@sportfreunde04.de","vorstand":"vorstand@sportfreunde04.de"},"hinweise":{"parken":"Der Parkplatz am Vereinsgelände ist wegen des Neubaus des Funktionsgebäudes voraussichtlich bis Ende Januar 2027 gesperrt. Der Zugang zum Gelände ist über den Hintereingang am „Haus der Jugend“ (Pavillon) möglich.","parken_quelle":"App-News vom 21.07.2026","ferien":"In den hessischen Schulferien und an Feiertagen findet in der Regel kein Training statt. Ausnahmen sagt das Trainerteam an."},"oepnv":null,"anfahrt_hinweis":"Zugang zum Vereinsgelände derzeit über den Hintereingang am „Haus der Jugend“ (Pavillon); der Parkplatz ist wegen des Neubaus bis voraussichtlich Ende Januar 2027 gesperrt.","gruendung_jahr":1904,"anzahl_mannschaften":11,"karten":{"apple":"https://maps.apple.com/?q=Mainzer+Landstra%C3%9Fe+480,+60326+Frankfurt+am+Main","google":"https://www.google.com/maps/search/?api=1&query=Mainzer+Landstra%C3%9Fe+480%2C+60326+Frankfurt+am+Main"},"kalender_basis":"https://justolgay.github.io/speuzer-spielplan/"};
+  var ANSPRECHPARTNER_ID = "6a1ec5fcf68a05bf129cdb8b";
 
-  var ICON_MAIL = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M4 6.5l8 6 8-6"/></svg>';
-  var ICON_PHONE = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.5 3.5h3.2c.5 0 .9.3 1 .8l.9 3a1.1 1.1 0 0 1-.3 1.1L7.8 9.9a13 13 0 0 0 6.3 6.3l1.5-1.5c.3-.3.7-.4 1.1-.3l3 .9c.5.1.8.5.8 1v3.2c0 .8-.7 1.4-1.5 1.3-8-1-14.4-7.4-15.4-15.4-.1-.8.5-1.5 1.3-1.5z"/></svg>';
-  var ICON_CHAT = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h16v11H8l-4 3z"/></svg>';
-  var ICON_KAMERA = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 8h3l2-2h6l2 2h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg>';
-  var ICON_GLOBUS = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.5 3.8 5.5 3.8 8.5s-1.3 6-3.8 8.5c-2.5-2.5-3.8-5.5-3.8-8.5s1.3-6 3.8-8.5z"/></svg>';
+  // Porträts wie auf der Website: dieselben, einheitlich zugeschnittenen
+  // Vorstandsfotos (data/vorstand.json foto.quelle, Varianten auf GitHub
+  // Pages). Das Bild aus dem Ansprechpartner-Worksheet ist nur Rückfall für
+  // Personen ohne Website-Foto (W8, Olgays Rückmeldung zum Zuschnitt).
+  var FOTO_BASIS = "https://justolgay.github.io/speuzer-website-prototyp/assets/bilder/erzeugt/";
+  function vereinsFotoUrl(name) {
+    var p = (VORSTAND || []).find(function (x) { return x.name === name; });
+    return p && p.foto && p.foto.quelle ? FOTO_BASIS + p.foto.quelle + "-480.jpg" : null;
+  }
+
+  var MACH_MIT_URL = "https://cdn.appack.de/sportfreunde04/workspace/web/verein-mach-mit.html";
+
+  // Textzeile für ein unbesetztes Amt (W8, Befund 4) – "Schriftführer" (die
+  // einzige derzeit unbesetzte Funktion in data/vorstand.json) wird zur
+  // Tätigkeit "Schriftführung"; sonst die Funktion unverändert.
+  var UNBESETZT_LABEL = { "Schriftführer": "Schriftführung" };
+
+  // Wie GRUPPEN_DEFINITION in verein/vorstand.mjs (wörtlich übernommen).
+  var GRUPPEN_DEFINITION = [
+    { titel: "Geschäftsführender Vorstand", funktionen: ["1. Vorsitzende", "2. Vorsitzender", "1. Kassierer", "2. Kassierer", "Schriftführer"] },
+    { titel: "Jugendleitung", funktionen: ["1. Jugendleiter", "2. Jugendleiter", "Team Jugendleitung", "Kinderschutzbeauftragter"] },
+    { titel: "Senioren", funktionen: ["Sportliche Leitung Senioren", "Spielausschuss Senioren"] },
+    { titel: "Karnevalabteilung", funktionen: ["Abteilungsleiter Karneval", "Kassiererin Abteilung Karneval", "Schriftführerin Abteilung Karneval"] }
+  ];
 
   function textFeld(zeile, name) {
     var v = zeile && zeile[name];
     return (v === undefined || v === null) ? "" : String(v);
   }
 
-  function sicheresHtml(html) {
-    var div = document.createElement("div");
-    div.innerHTML = String(html || "");
-    var scripts = div.querySelectorAll("script");
-    for (var i = 0; i < scripts.length; i++) scripts[i].remove();
-    return div.innerHTML;
+  function bildUrlGueltig(url) {
+    return /^https?:\/\//i.test(url || "");
   }
 
-  function telHref(nummer) {
-    var extrahiert = String(nummer || "").replace(/[^\d+]/g, "");
-    return "tel:" + (extrahiert || nummer);
-  }
-
-  function initialen(name) {
+  function initialenAus(name) {
     var teile = String(name || "").trim().split(/\s+/).filter(Boolean);
     if (!teile.length) return "";
-    var erste = teile[0].charAt(0);
-    var letzte = teile.length > 1 ? teile[teile.length - 1].charAt(0) : "";
-    return (erste + letzte).toUpperCase();
-  }
-
-  function mitSchema(url) {
-    var u = String(url || "").trim();
-    if (!u) return "";
-    return /^(https?:|mailto:|tel:)/i.test(u) ? u : "https://" + u;
+    if (teile.length === 1) return teile[0].slice(0, 1).toUpperCase();
+    return (teile[0].slice(0, 1) + teile[teile.length - 1].slice(0, 1)).toUpperCase();
   }
 
   function ladeWorkbook(id) {
@@ -428,215 +441,115 @@ svg { display: block; flex: 0 0 auto; }
       .then(function (rows) { return Array.isArray(rows) ? rows : []; });
   }
 
-  function vergleichePersonen(a, b) {
-    var an = typeof a.ansSortNumber === "number" ? a.ansSortNumber : Infinity;
-    var bn = typeof b.ansSortNumber === "number" ? b.ansSortNumber : Infinity;
-    if (an !== bn) return an - bn;
-    return textFeld(a, "ansName").localeCompare(textFeld(b, "ansName"), "de");
-  }
-
-  function kategorieReihenfolge(kontakte, kategorienZeilen) {
-    var vorhandene = {};
-    kontakte.forEach(function (k) {
-      var kat = textFeld(k, "ansKat");
-      if (kat) vorhandene[kat] = true;
-    });
-    var geordnet = [];
-    if (vorhandene["Vorstand"]) geordnet.push("Vorstand");
-    kategorienZeilen.forEach(function (k) {
-      var name = textFeld(k, "katName");
-      if (name && vorhandene[name] && geordnet.indexOf(name) === -1) geordnet.push(name);
-    });
-    Object.keys(vorhandene).forEach(function (name) {
-      if (geordnet.indexOf(name) === -1) geordnet.push(name);
-    });
-    return geordnet;
-  }
-
-  function baueAktion(href, innerHtml, beschriftung, extern) {
-    var link = document.createElement("a");
-    link.className = "icon-knopf";
-    link.href = href;
-    link.innerHTML = innerHtml + "<span>" + beschriftung + "</span>";
-    if (extern) {
-      link.target = "_blank";
-      link.rel = "noopener";
+  function findeBildFuerName(ansprechpartner, name) {
+    for (var i = 0; i < ansprechpartner.length; i++) {
+      if (textFeld(ansprechpartner[i], "ansName") === name) {
+        var url = textFeld(ansprechpartner[i], "ansImg");
+        if (bildUrlGueltig(url)) return url;
+      }
     }
-    return link;
-  }
-
-  // Bild-URLs aus den Worksheets: nur absolute http(s)-Adressen verwenden
-  // (im Feld stehen gelegentlich Ids oder Reste), und ein Bild, das nicht
-  // laedt, wieder aus der Karte nehmen statt eine leere Flaeche zu lassen.
-  function bildUrlGueltig(url) {
-    return /^https?:\/\//i.test(url || "");
-  }
-  function bildMitRueckbau(url, klasse, alt) {
-    var bild = document.createElement("img");
-    bild.className = klasse;
-    bild.src = url;
-    bild.alt = alt || "";
-    bild.loading = "lazy";
-    bild.addEventListener("error", function () {
-      if (bild.parentNode) bild.parentNode.removeChild(bild);
-    });
-    return bild;
+    return null;
   }
 
   function bauePersonKarte(person) {
     var karte = document.createElement("div");
     karte.className = "karte person-karte";
 
-    var bildUrl = textFeld(person, "ansImg");
     var kreis = document.createElement("div");
     kreis.className = "person-karte__initialen";
     kreis.setAttribute("aria-hidden", "true");
-    kreis.textContent = initialen(textFeld(person, "ansName"));
-    if (bildUrlGueltig(bildUrl)) {
-      var bild = bildMitRueckbau(bildUrl, "person-karte__bild", "");
-      // Laedt das Foto nicht, treten die Initialen an seine Stelle.
-      bild.addEventListener("error", function () {
-        if (!kreis.parentNode) karte.insertBefore(kreis, karte.firstChild);
-      });
-      karte.appendChild(bild);
-    } else {
-      karte.appendChild(kreis);
-    }
+    kreis.textContent = initialenAus(person.name);
+    karte.appendChild(kreis);
 
     var inhalt = document.createElement("div");
     inhalt.className = "person-karte__inhalt";
-
-    var funktion = textFeld(person, "ansFunc");
-    if (funktion) {
-      var tag = document.createElement("span");
-      tag.className = "tag";
-      tag.textContent = funktion;
-      inhalt.appendChild(tag);
-    }
-
     var name = document.createElement("p");
     name.className = "person-karte__name";
-    name.textContent = textFeld(person, "ansName");
+    name.textContent = person.name;
     inhalt.appendChild(name);
-
-    var info = textFeld(person, "ansInfo");
-    if (info) {
-      var infoEl = document.createElement("div");
-      infoEl.className = "person-karte__info";
-      infoEl.innerHTML = sicheresHtml(info);
-      inhalt.appendChild(infoEl);
+    var funktion = document.createElement("p");
+    funktion.className = "person-karte__funktion";
+    funktion.textContent = person.funktion;
+    inhalt.appendChild(funktion);
+    if (person.mail) {
+      var mail = document.createElement("a");
+      mail.className = "person-karte__link";
+      mail.href = "mailto:" + person.mail;
+      mail.textContent = "E-Mail schreiben ›";
+      inhalt.appendChild(mail);
     }
-
-    var aktionen = document.createElement("div");
-    aktionen.className = "person-karte__aktionen";
-
-    var mail = textFeld(person, "ansMail");
-    if (mail) aktionen.appendChild(baueAktion("mailto:" + mail, ICON_MAIL, "E-Mail"));
-
-    // Anrufen nur ohne Mail-Adresse: Vorstandsämter laufen über
-    // Vereinsadressen, private Handynummern bleiben sonst unsichtbar
-    // (QA-Befund, C2 Abschnitt 7).
-    var telNummer = textFeld(person, "ansHandy") || textFeld(person, "ansTel");
-    if (!mail && telNummer) aktionen.appendChild(baueAktion(telHref(telNummer), ICON_PHONE, "Anrufen"));
-
-    // WhatsApp nur ohne Mail-Adresse: private Handynummern bleiben sonst
-    // ueber die wa.me-Nummer sichtbar (QA-Befund, C2b).
-    var whatsapp = textFeld(person, "ansWhatsApp");
-    if (!mail && whatsapp) {
-      var ziffern = whatsapp.replace(/\D/g, "");
-      aktionen.appendChild(baueAktion("https://wa.me/" + (ziffern || whatsapp), ICON_CHAT, "WhatsApp", true));
-    }
-
-    var insta = textFeld(person, "ansInsta");
-    if (insta) {
-      var instaUrl = /^https?:/i.test(insta) ? insta : "https://instagram.com/" + insta.replace(/^@/, "");
-      aktionen.appendChild(baueAktion(instaUrl, ICON_KAMERA, "Instagram", true));
-    }
-
-    var link = textFeld(person, "ansLink");
-    if (link) aktionen.appendChild(baueAktion(mitSchema(link), ICON_GLOBUS, "Website", true));
-
-    if (aktionen.children.length) inhalt.appendChild(aktionen);
     karte.appendChild(inhalt);
     return karte;
   }
 
-  var listeContainer = document.getElementById("kontakte-liste");
-  var filterleiste = document.getElementById("filterleiste");
-
-  function zeigeFehler() {
-    listeContainer.innerHTML = "";
-    var hinweis = document.createElement("div");
-    hinweis.className = "hinweis";
+  function baueUnbesetztZeile(person) {
     var p = document.createElement("p");
-    p.textContent = "Die Ansprechpartner konnten gerade nicht geladen werden.";
-    hinweis.appendChild(p);
-    listeContainer.appendChild(hinweis);
+    p.className = "person-zeile-unbesetzt";
+    var label = UNBESETZT_LABEL[person.funktion] || person.funktion;
+    p.innerHTML = label + ": derzeit nicht besetzt – Interesse? <a href=\"" + MACH_MIT_URL + "\">Mach mit ›</a>";
+    return p;
   }
 
-  Promise.all([
-    ladeWorkbook(KONTAKTE_ID),
-    ladeWorkbook(KATEGORIEN_ID)
-  ]).then(function (ergebnisse) {
-    var kontakte = ergebnisse[0].slice().sort(vergleichePersonen);
-    var kategorienZeilen = ergebnisse[1];
+  var bereich = document.getElementById("gruppen-bereich");
+  var alleKarten = []; // { person, karteEl, kreisEl } – für den Foto-Nachlader
 
-    if (!kontakte.length) {
-      zeigeFehler();
-      listeContainer.querySelector(".hinweis p").textContent = "Aktuell sind keine Ansprechpartner hinterlegt.";
-      return;
-    }
+  GRUPPEN_DEFINITION.forEach(function (gruppe) {
+    var personen = [];
+    gruppe.funktionen.forEach(function (f) {
+      var treffer = (VORSTAND || []).filter(function (p) { return p.funktion === f; });
+      personen = personen.concat(treffer);
+    });
+    if (!personen.length) return;
 
-    var kategorien = kategorieReihenfolge(kontakte, kategorienZeilen);
-    var aktuellerFilter = "";
-
-    function rendern() {
-      listeContainer.innerHTML = "";
-      var sichtbar = aktuellerFilter
-        ? kontakte.filter(function (k) { return textFeld(k, "ansKat") === aktuellerFilter; })
-        : kontakte;
-      for (var i = 0; i < sichtbar.length; i++) {
-        listeContainer.appendChild(bauePersonKarte(sichtbar[i]));
+    var abschnitt = document.createElement("section");
+    abschnitt.className = "gruppe-abschnitt";
+    var titel = document.createElement("h2");
+    titel.className = "abschnittstitel";
+    titel.textContent = gruppe.titel;
+    abschnitt.appendChild(titel);
+    var liste = document.createElement("div");
+    liste.className = "kontakte-liste";
+    personen.forEach(function (person) {
+      if (!person.name) {
+        liste.appendChild(baueUnbesetztZeile(person));
+        return;
       }
-    }
+      var karte = bauePersonKarte(person);
+      liste.appendChild(karte);
+      alleKarten.push({ person: person, karteEl: karte });
+    });
+    abschnitt.appendChild(liste);
+    bereich.appendChild(abschnitt);
+  });
 
-    if (kategorien.length >= 2) {
-      filterleiste.hidden = false;
-      var alleKnopf = document.createElement("button");
-      alleKnopf.type = "button";
-      alleKnopf.className = "tag filter-knopf filter-knopf--aktiv";
-      alleKnopf.textContent = "Alle";
-      filterleiste.appendChild(alleKnopf);
+  var vorstandMail = (VEREIN.mails && VEREIN.mails.vorstand) || "vorstand@sportfreunde04.de";
+  var gsMail = VEREIN.mail || "geschaeftsstelle@sportfreunde04.de";
+  document.getElementById("vorstand-hinweis").innerHTML =
+    "Anfragen an den Vorstand: <a href=\"mailto:" + vorstandMail + "\">" + vorstandMail + "</a> · Geschäftsstelle: <a href=\"mailto:" + gsMail + "\">" + gsMail + "</a>";
 
-      var knoepfe = [alleKnopf];
-      kategorien.forEach(function (kat) {
-        var knopf = document.createElement("button");
-        knopf.type = "button";
-        knopf.className = "tag filter-knopf";
-        knopf.textContent = kat;
-        filterleiste.appendChild(knopf);
-        knoepfe.push(knopf);
-      });
+  function zeigeBild(eintrag, bildUrl) {
+    var kreis = eintrag.karteEl.querySelector(".person-karte__initialen");
+    if (!kreis || !bildUrl) return;
+    var bild = document.createElement("img");
+    bild.className = "person-karte__bild";
+    bild.src = bildUrl;
+    bild.alt = "";
+    bild.loading = "lazy";
+    bild.addEventListener("error", function () {
+      if (bild.parentNode) bild.replaceWith(kreis);
+    });
+    kreis.replaceWith(bild);
+    eintrag.hatBild = true;
+  }
 
-      alleKnopf.addEventListener("click", function () {
-        aktuellerFilter = "";
-        knoepfe.forEach(function (k) { k.classList.remove("filter-knopf--aktiv"); });
-        alleKnopf.classList.add("filter-knopf--aktiv");
-        rendern();
-      });
-      kategorien.forEach(function (kat, index) {
-        knoepfe[index + 1].addEventListener("click", function () {
-          aktuellerFilter = kat;
-          knoepfe.forEach(function (k) { k.classList.remove("filter-knopf--aktiv"); });
-          knoepfe[index + 1].classList.add("filter-knopf--aktiv");
-          rendern();
-        });
-      });
-    }
+  alleKarten.forEach(function (eintrag) { zeigeBild(eintrag, vereinsFotoUrl(eintrag.person.name)); });
 
-    rendern();
+  ladeWorkbook(ANSPRECHPARTNER_ID).then(function (ansprechpartner) {
+    alleKarten.forEach(function (eintrag) {
+      if (!eintrag.hatBild) zeigeBild(eintrag, findeBildFuerName(ansprechpartner, eintrag.person.name));
+    });
   }).catch(function () {
-    zeigeFehler();
+    // Kein Netz/CORS: Initialen bleiben stehen.
   });
 })();
 </script>

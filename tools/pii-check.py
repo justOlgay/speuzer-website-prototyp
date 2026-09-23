@@ -31,6 +31,11 @@ WHITELIST_TELEFON = {
     # P8: dieselbe Platzwart-Nummer, wörtlich so in der App-Datenschutzerklärung
     # (data/datenschutz.json) geschrieben – "(0)" nach der Landesvorwahl.
     "+49 (0) 69 732193",
+    # W8: dieselbe Geschäftsstellen-Nummer, in derselben "(0)"-Schreibweise – die
+    # App-Datenschutzerklärung (data/datenschutz.json, Abschnitt "1.
+    # Begrifflichkeiten") nannte hier fälschlich die Platzwart-Nummer statt der
+    # Geschäftsstelle; W8-Korrektur (Prüfer-Befund) ersetzt sie.
+    "+49 (0) 69 736868",
     # W3: dieselbe Geschäftsstellen-Nummer, so wie sie die appack-Worksheet-API
     # liefert (data/geschaeftsstelle.json, tools/appack-daten.mjs) – mit
     # Bindestrich statt Leerzeichen.

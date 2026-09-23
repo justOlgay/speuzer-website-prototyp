@@ -1,0 +1,27 @@
+/* Speuzer: Schriften und Kopf der Hülle wie Website und App (23.09.2026).
+   Schriftdateien von GitHub Pages (CORS freigegeben), gleiche Schnitte wie
+   assets/css/fonts.css der Website. */
+@font-face { font-family: 'Barlow Condensed'; font-style: normal; font-weight: 600; font-display: swap;
+  src: url("https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/barlow-condensed-600.woff2") format('woff2'); }
+@font-face { font-family: 'Barlow Condensed'; font-style: normal; font-weight: 700; font-display: swap;
+  src: url("https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/barlow-condensed-700.woff2") format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400 600; font-display: swap;
+  src: url("https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/inter.woff2") format('woff2'); }
+body { font-family: "Inter", system-ui, Arial, sans-serif; }
+.menuBarElement, .menuElement, .menuMore { font-family: "Inter", system-ui, Arial, sans-serif; font-weight: 600; letter-spacing: 0; }
+/* Kopfleiste bündig oben (vorher 1vh Versatz, darüber ein dunkler Streifen) */
+.headerBar { top: 0; }
+.headerLogo { top: .6vh; transform: none; }
+/* Startsatz in der Überschriftenschrift, ausgeglichen umbrochen */
+.textOverlay {
+  font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .01em;
+  line-height: 1.02;
+  text-wrap: balance;
+  max-width: 14ch;
+}
+@media only screen and (max-width: 768px) {
+  .textOverlay { max-width: 11ch; }
+}
