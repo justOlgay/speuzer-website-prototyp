@@ -12,6 +12,7 @@ import {
   FUSSBALLDE_WIDGET_LADER,
   spieleKastenHtml,
   SPIELE_KASTEN_SKRIPT,
+  reiterHtml,
   trainerZeileHtml,
   trainerRolleText,
   trainerFotosSkript,
@@ -200,7 +201,6 @@ function spielplanDerSaisonInhalt(team, daten) {
     <div data-nur-appack hidden>
       <p class="meta">Nächste Spiele zuerst, frühere Ergebnisse über die Pfeile im Kasten.</p>
       ${spieleKastenHtml(widgetHtml)}
-      <p class="meta fussballde-hinweis">Spiele seitlich wischbar</p>
       <p class="meta">Live von FUSSBALL.DE (DFBnet). Tippen öffnet die Spielseite.</p>
     </div>
     <div data-nur-prototyp>
@@ -247,6 +247,42 @@ function tabelleInhalt(team, daten) {
     <div data-nur-prototyp>
       ${eigene ? `<p class="meta">Platz ${eigene.platz} von ${tabelleEintrag.zeilen.length} · ${eigene.punkte} Punkte</p>` : ""}
       <p class="meta">Auf der Vereinswebsite kommen Spielplan und Tabellen live aus dem DFBnet.</p>
+    </div>`;
+}
+
+// ---------- Spiele & Tabelle mit Umschalter (W7b, Olgay 23.09.2026) ----------
+// Beide FUSSBALL.DE-Kästen untereinander waren „zu groß und zu präsent“.
+// Teams mit Spiele- UND Tabellen-Widget bekommen einen Abschnitt mit
+// Umschalter; sichtbar ist immer nur ein Kasten, „Spiele“ zuerst und auf
+// rund drei Spiele begrenzt. Kinderfußball (kein Widget) bleibt wie bisher.
+function spieleUndTabelleInhalt(team, daten) {
+  const spieleWidgetId = daten.widgets?.[team.slug]?.spiele ?? "";
+  const tabelleWidgetId = daten.widgets?.[team.slug]?.tabelle ?? "";
+  if (!spieleWidgetId || !team.tabelle || !tabelleWidgetId) {
+    return `${spielplanDerSaisonInhalt(team, daten)}
+    ${tabelleInhalt(team, daten)}`;
+  }
+  const tabelleEintrag = daten.tabellen?.teams?.[team.slug];
+  const eigene = tabelleEintrag?.zeilen?.find((z) => z.eigene);
+  const spieleHtml = `${spieleKastenHtml(`<div class="fussballde-wrap">
+        <div class="fussballde_widget" data-id="${escapeHtml(spieleWidgetId)}" data-type="team-matches"></div>
+      </div>`)}
+        <p class="meta">Nächste Spiele zuerst, frühere Ergebnisse über die Pfeile im Kasten. Live von FUSSBALL.DE (DFBnet).</p>`;
+  const tabelleHtml = `<div class="fussballde-wrap">
+          <div class="fussballde_widget" data-id="${escapeHtml(tabelleWidgetId)}" data-type="table"></div>
+        </div>
+        <p class="meta fussballde-hinweis">Tabelle seitlich wischbar</p>
+        <p class="meta">Live von FUSSBALL.DE (DFBnet).</p>`;
+  return `<h2>Spiele &amp; Tabelle</h2>
+    <div data-nur-appack hidden>
+      ${reiterHtml(team.slug, [
+        { id: "spiele", titel: "Spiele", inhalt: spieleHtml },
+        { id: "tabelle", titel: "Tabelle", inhalt: tabelleHtml },
+      ])}
+    </div>
+    <div data-nur-prototyp>
+      ${generatorIframe(team, daten)}
+      ${eigene ? `<p class="meta">Tabelle: Platz ${eigene.platz} von ${tabelleEintrag.zeilen.length} · ${eigene.punkte} Punkte</p>` : ""}
     </div>`;
 }
 
@@ -311,8 +347,7 @@ function hauptspalte(team, daten) {
       <p style="margin:0;">${escapeHtml(verein.hinweise?.ferien ?? "")}</p>
     </div>
     ${naechsteSpieleAbschnitt}
-    ${spielplanDerSaisonInhalt(team, daten)}
-    ${tabelleInhalt(team, daten)}
+    ${spieleUndTabelleInhalt(team, daten)}
   </div>`;
 }
 
@@ -325,21 +360,23 @@ function seitenspalte(team, daten) {
   // hilfen.mjs). Die frühere feste Überschrift "Trainerteam" über der Liste
   // entfällt, weil jede Zeile jetzt ihre eigene (statisch ermittelte) Rolle
   // zeigt.
-  const rolleText = trainerRolleText((team.trainer ?? []).length);
+  // W7b: Rolle einmal als Kartentitel („Trainer“ bzw. „Trainerteam“) statt
+  // unter jedem Namen; die Mailadresse steht einmal im Hinweissatz, der Knopf
+  // öffnet sie (vorher doppelt als Link und Knopf).
+  const kartenTitel = trainerRolleText((team.trainer ?? []).length);
   const trainerZeilen = (team.trainer ?? [])
-    .map((name, i) => trainerZeileHtml(name, i, rolleText))
+    .map((name, i) => trainerZeileHtml(name, i, ""))
     .join("\n        ");
 
   const ansprechpartnerKarte = `<div class="karte fluss">
-      <h2 class="karte__titel">Ansprechpartner</h2>
+      <h2 class="karte__titel">${escapeHtml(kartenTitel)}</h2>
       <div class="person-mini-liste">
         ${trainerZeilen}
       </div>
-      <p>${mailLink(team.mail)}</p>
       <p class="knopfzeile">
         <a class="knopf" href="${escapeHtml(trainerMailtoHref(team))}">E-Mail an das Trainerteam</a>
       </p>
-      <p class="meta">Der Kontakt läuft über die Vereinsadresse – keine privaten Handynummern.</p>
+      <p class="meta">Die Nachricht geht an ${mailLink(team.mail)} – keine privaten Handynummern.</p>
     </div>`;
 
   const heimspieleKarte = `<div class="karte fluss">

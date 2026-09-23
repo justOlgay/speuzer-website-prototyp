@@ -139,6 +139,35 @@ export function spieleKastenHtml(widgetHtml) {
     </div>`;
 }
 
+// ---------- Umschalter „Spiele | Tabelle“ (W7b, Olgay 23.09.2026) ----------
+// Die FUSSBALL.DE-Kästen sind sehr hoch; untereinander dominierten sie die
+// Mannschaftsseite. Der Umschalter zeigt immer nur einen Kasten. Der
+// verborgene bleibt gerendert (absolut unter dem sichtbaren, unsichtbar),
+// damit das Widget seine Breite kennt und seine Höhe per postMessage setzen
+// kann – mit display:none meldet FUSSBALL.DE sonst 0 px.
+export function reiterHtml(name, reiter) {
+  const knoepfe = reiter
+    .map(
+      (r, i) =>
+        `<button type="button" role="tab" class="reiter__knopf" id="reiter-${name}-${r.id}" aria-controls="panel-${name}-${r.id}" aria-selected="${i === 0 ? "true" : "false"}" data-reiter-knopf="${r.id}">${escapeHtml(r.titel)}</button>`
+    )
+    .join("");
+  const panels = reiter
+    .map(
+      (r, i) =>
+        `<div class="reiter__panel${i === 0 ? "" : " ist-versteckt"}" role="tabpanel" id="panel-${name}-${r.id}" aria-labelledby="reiter-${name}-${r.id}" data-reiter-panel="${r.id}"${i === 0 ? "" : ' aria-hidden="true"'}>
+        ${r.inhalt}
+      </div>`
+    )
+    .join("\n      ");
+  return `<div class="reiter" data-reiter>
+      <div class="reiter__leiste" role="tablist" aria-label="Ansicht wählen">${knoepfe}</div>
+      <div class="reiter__panels">
+      ${panels}
+      </div>
+    </div>`;
+}
+
 // Einmal je Seite einbinden, die spieleKastenHtml() verwendet (wie
 // FUSSBALLDE_WIDGET_LADER). Rein clientseitig: Höhenbegrenzung aufheben,
 // Knopftext und aria-expanded umschalten.
@@ -153,6 +182,21 @@ export const SPIELE_KASTEN_SKRIPT = `<script>
       knopf.textContent = offen ? 'Weniger anzeigen' : 'Alle Spiele anzeigen';
       knopf.setAttribute('aria-expanded', offen ? 'true' : 'false');
       if (!offen) kasten.scrollIntoView({ block: 'nearest' });
+    });
+  });
+  document.querySelectorAll('[data-reiter]').forEach(function (reiter) {
+    var knoepfe = reiter.querySelectorAll('[data-reiter-knopf]');
+    var panels = reiter.querySelectorAll('[data-reiter-panel]');
+    knoepfe.forEach(function (knopf) {
+      knopf.addEventListener('click', function () {
+        var ziel = knopf.getAttribute('data-reiter-knopf');
+        knoepfe.forEach(function (k) { k.setAttribute('aria-selected', k === knopf ? 'true' : 'false'); });
+        panels.forEach(function (p) {
+          var an = p.getAttribute('data-reiter-panel') === ziel;
+          p.classList.toggle('ist-versteckt', !an);
+          if (an) p.removeAttribute('aria-hidden'); else p.setAttribute('aria-hidden', 'true');
+        });
+      });
     });
   });
 })();
@@ -473,7 +517,7 @@ export function trainerZeileHtml(name, index, rolleText) {
       <span class="person-mini__bild person-mini__bild--platzhalter" data-trainer-foto="${index}" aria-hidden="true">${escapeHtml(initialen(name))}</span>
       <span class="person-mini__text">
         <span class="person-mini__name">${escapeHtml(name)}</span>
-        <span class="person-mini__rolle meta">${escapeHtml(rolleText)}</span>
+        ${rolleText ? `<span class="person-mini__rolle meta">${escapeHtml(rolleText)}</span>` : ""}
       </span>
     </div>`;
 }

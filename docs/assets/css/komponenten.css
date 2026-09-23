@@ -1916,9 +1916,9 @@ body.datenschutz h2 {
   min-width: 0;
 }
 
-.fussballde-wrap .fussballde_widget {
-  min-width: 420px;
-}
+/* Keine Mindestbreite mehr (W7b): die FUSSBALL.DE-Kästen passen sich
+   selbst an die Breite an; mit Mindestbreite wurden sie auf dem Handy rechts
+   abgeschnitten. */
 
 .fussballde-hinweis {
   display: none;
@@ -1944,10 +1944,52 @@ body.datenschutz h2 {
    Plan-Schätzwert 660px (Kopf ~140px + Zeile ~105px) war zu niedrig.
    ========================================================================== */
 
+/* W7b: rund drei Spiele sichtbar (gemessen am echten Widget: Kopf ~300 px,
+   je Spiel ~190 px bei Handybreite, ~165 px ab 641 px Breite). */
 .spiele-kasten {
   position: relative;
-  max-height: 1250px;
+  max-height: 880px;
   overflow: hidden;
+}
+@media (min-width: 641px) {
+  .spiele-kasten { max-height: 760px; }
+}
+
+/* Umschalter „Spiele | Tabelle“ (W7b) */
+.reiter__leiste {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: var(--sp-3);
+  background: var(--blau-100);
+  border-radius: var(--r-pill);
+}
+.reiter__knopf {
+  min-height: 40px;
+  min-width: 96px;
+  padding: 0 var(--sp-4);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--blau-800);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.reiter__knopf[aria-selected="true"] {
+  background: var(--surface);
+  color: var(--blau-950);
+  box-shadow: var(--sh-1);
+}
+.reiter__knopf:focus-visible { outline: 2px solid var(--blau-600); outline-offset: 2px; }
+.reiter__panels { position: relative; }
+.reiter__panel.ist-versteckt {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .spiele-kasten.ist-offen {

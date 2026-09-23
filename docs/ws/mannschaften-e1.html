@@ -74,10 +74,13 @@
     </li>
   </ul>
     </div>
-    <h2>Spiele</h2>
+    <h2>Spiele &amp; Tabelle</h2>
     <div data-nur-appack hidden>
-      <p class="meta">Nächste Spiele zuerst, frühere Ergebnisse über die Pfeile im Kasten.</p>
-      <div class="spiele-kasten-block">
+      <div class="reiter" data-reiter>
+      <div class="reiter__leiste" role="tablist" aria-label="Ansicht wählen"><button type="button" role="tab" class="reiter__knopf" id="reiter-e1-spiele" aria-controls="panel-e1-spiele" aria-selected="true" data-reiter-knopf="spiele">Spiele</button><button type="button" role="tab" class="reiter__knopf" id="reiter-e1-tabelle" aria-controls="panel-e1-tabelle" aria-selected="false" data-reiter-knopf="tabelle">Tabelle</button></div>
+      <div class="reiter__panels">
+      <div class="reiter__panel" role="tabpanel" id="panel-e1-spiele" aria-labelledby="reiter-e1-spiele" data-reiter-panel="spiele">
+        <div class="spiele-kasten-block">
       <div class="spiele-kasten" data-spiele-kasten>
         <div class="fussballde-wrap">
         <div class="fussballde_widget" data-id="946f72f6-9ef2-4199-8b9d-6051948a2103" data-type="team-matches"></div>
@@ -87,8 +90,17 @@
         <button type="button" class="knopf knopf--sekundaer" data-spiele-knopf aria-expanded="false">Alle Spiele anzeigen</button>
       </p>
     </div>
-      <p class="meta fussballde-hinweis">Spiele seitlich wischbar</p>
-      <p class="meta">Live von FUSSBALL.DE (DFBnet). Tippen öffnet die Spielseite.</p>
+        <p class="meta">Nächste Spiele zuerst, frühere Ergebnisse über die Pfeile im Kasten. Live von FUSSBALL.DE (DFBnet).</p>
+      </div>
+      <div class="reiter__panel ist-versteckt" role="tabpanel" id="panel-e1-tabelle" aria-labelledby="reiter-e1-tabelle" data-reiter-panel="tabelle" aria-hidden="true">
+        <div class="fussballde-wrap">
+          <div class="fussballde_widget" data-id="210e4f4f-cd22-4771-ae3b-423b6061afe1" data-type="table"></div>
+        </div>
+        <p class="meta fussballde-hinweis">Tabelle seitlich wischbar</p>
+        <p class="meta">Live von FUSSBALL.DE (DFBnet).</p>
+      </div>
+      </div>
+    </div>
     </div>
     <div data-nur-prototyp>
       <iframe src="https://justolgay.github.io/speuzer-spielplan/app-e-jugend.html#E1" title="Spielplan E1-Jugend (Generator, DFBnet)" loading="lazy" data-generator-iframe style="width:100%;height:640px;border:0;border-radius:var(--r-lg);display:block;"></iframe>
@@ -107,51 +119,39 @@
       });
     })();
     </script>
-    </div>
-    <h2>Tabelle</h2>
-    <div data-nur-appack hidden>
-      <div class="fussballde-wrap">
-        <div class="fussballde_widget" data-id="210e4f4f-cd22-4771-ae3b-423b6061afe1" data-type="table"></div>
-      </div>
-      <p class="meta fussballde-hinweis">Tabelle seitlich wischbar</p>
-      <p class="meta">Live von FUSSBALL.DE (DFBnet).</p>
-    </div>
-    <div data-nur-prototyp>
-      <p class="meta">Platz 1 von 6 · 9 Punkte</p>
-      <p class="meta">Auf der Vereinswebsite kommen Spielplan und Tabellen live aus dem DFBnet.</p>
+      <p class="meta">Tabelle: Platz 1 von 6 · 9 Punkte</p>
     </div>
   </div>
       <aside class="fluss">
     <div class="karte fluss">
-      <h2 class="karte__titel">Ansprechpartner</h2>
+      <h2 class="karte__titel">Trainerteam</h2>
       <div class="person-mini-liste">
         <div class="person-mini">
       <span class="person-mini__bild person-mini__bild--platzhalter" data-trainer-foto="0" aria-hidden="true">MB</span>
       <span class="person-mini__text">
         <span class="person-mini__name">Mohamed Bardouch</span>
-        <span class="person-mini__rolle meta">Trainerteam</span>
+        
       </span>
     </div>
         <div class="person-mini">
       <span class="person-mini__bild person-mini__bild--platzhalter" data-trainer-foto="1" aria-hidden="true">MO</span>
       <span class="person-mini__text">
         <span class="person-mini__name">Mario Orsolic</span>
-        <span class="person-mini__rolle meta">Trainerteam</span>
+        
       </span>
     </div>
         <div class="person-mini">
       <span class="person-mini__bild person-mini__bild--platzhalter" data-trainer-foto="2" aria-hidden="true">BH</span>
       <span class="person-mini__text">
         <span class="person-mini__name">Bernhard Henrich</span>
-        <span class="person-mini__rolle meta">Trainerteam</span>
+        
       </span>
     </div>
       </div>
-      <p><a class="mail" href="mailto:trainer_e_jugend@sportfreunde04.de">trainer_e_jugend<wbr>@sportfreunde04.de</a></p>
       <p class="knopfzeile">
         <a class="knopf" href="mailto:trainer_e_jugend@sportfreunde04.de?subject=E1%3A%20Anfrage%20%C3%BCber%20die%20Website">E-Mail an das Trainerteam</a>
       </p>
-      <p class="meta">Der Kontakt läuft über die Vereinsadresse – keine privaten Handynummern.</p>
+      <p class="meta">Die Nachricht geht an <a class="mail" href="mailto:trainer_e_jugend@sportfreunde04.de">trainer_e_jugend<wbr>@sportfreunde04.de</a> – keine privaten Handynummern.</p>
     </div>
     <div class="karte fluss">
       <h2 class="karte__titel">Heimspiele</h2>
@@ -214,6 +214,21 @@
       knopf.textContent = offen ? 'Weniger anzeigen' : 'Alle Spiele anzeigen';
       knopf.setAttribute('aria-expanded', offen ? 'true' : 'false');
       if (!offen) kasten.scrollIntoView({ block: 'nearest' });
+    });
+  });
+  document.querySelectorAll('[data-reiter]').forEach(function (reiter) {
+    var knoepfe = reiter.querySelectorAll('[data-reiter-knopf]');
+    var panels = reiter.querySelectorAll('[data-reiter-panel]');
+    knoepfe.forEach(function (knopf) {
+      knopf.addEventListener('click', function () {
+        var ziel = knopf.getAttribute('data-reiter-knopf');
+        knoepfe.forEach(function (k) { k.setAttribute('aria-selected', k === knopf ? 'true' : 'false'); });
+        panels.forEach(function (p) {
+          var an = p.getAttribute('data-reiter-panel') === ziel;
+          p.classList.toggle('ist-versteckt', !an);
+          if (an) p.removeAttribute('aria-hidden'); else p.setAttribute('aria-hidden', 'true');
+        });
+      });
     });
   });
 })();

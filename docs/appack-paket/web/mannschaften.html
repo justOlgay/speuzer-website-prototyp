@@ -266,7 +266,6 @@
         <button type="button" class="knopf knopf--sekundaer" data-spiele-knopf aria-expanded="false">Alle Spiele anzeigen</button>
       </p>
     </div>
-      <p class="meta fussballde-hinweis">Spiele seitlich wischbar</p>
     </div>
     
   </div>
@@ -292,6 +291,21 @@
       knopf.textContent = offen ? 'Weniger anzeigen' : 'Alle Spiele anzeigen';
       knopf.setAttribute('aria-expanded', offen ? 'true' : 'false');
       if (!offen) kasten.scrollIntoView({ block: 'nearest' });
+    });
+  });
+  document.querySelectorAll('[data-reiter]').forEach(function (reiter) {
+    var knoepfe = reiter.querySelectorAll('[data-reiter-knopf]');
+    var panels = reiter.querySelectorAll('[data-reiter-panel]');
+    knoepfe.forEach(function (knopf) {
+      knopf.addEventListener('click', function () {
+        var ziel = knopf.getAttribute('data-reiter-knopf');
+        knoepfe.forEach(function (k) { k.setAttribute('aria-selected', k === knopf ? 'true' : 'false'); });
+        panels.forEach(function (p) {
+          var an = p.getAttribute('data-reiter-panel') === ziel;
+          p.classList.toggle('ist-versteckt', !an);
+          if (an) p.removeAttribute('aria-hidden'); else p.setAttribute('aria-hidden', 'true');
+        });
+      });
     });
   });
 })();

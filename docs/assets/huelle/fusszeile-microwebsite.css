@@ -1,0 +1,75 @@
+/* Speuzer: kompakte Fußzeile (23.09.2026). Ersetzt die absolut positionierten
+   Blöcke der Vorlage durch ein Raster: breit eine flache Zeile, schmal ein
+   zentrierter Block. Farben kommen weiter aus dem FOOTER-Worksheet. */
+.footer {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+  grid-template-areas:
+    "logo adr mail social impr"
+    "logo adr tel  social dsgvo";
+  align-items: center;
+  column-gap: 32px;
+  row-gap: 6px;
+  padding: 22px 40px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.footer .footerTextfield { display: contents; }
+.footer .footerLogo {
+  grid-area: logo;
+  position: static; transform: none; width: auto;
+  display: flex; flex-direction: row; align-items: center; gap: 12px;
+  margin: 0; padding: 0;
+}
+.footer .footerlogoImage { width: 44px; height: 44px; object-fit: contain; }
+.footer .footerCopy { width: auto; text-align: left; white-space: nowrap; opacity: .85; }
+.footer .footerText { grid-area: adr; opacity: .9; }
+.footer .footerText br:nth-last-of-type(1),
+.footer .footerText br:nth-last-of-type(2) { display: none; }
+.footer .footerMail { grid-area: mail; white-space: nowrap; }
+.footer .footerTel { grid-area: tel; white-space: nowrap; }
+.footer .socialMedia {
+  grid-area: social;
+  position: static; transform: none; width: auto;
+  display: flex; gap: 16px; font-size: 20px; justify-content: center; margin: 0; padding: 0;
+}
+.footer .socialElement { float: none; margin: 0; padding: 0; }
+.footer .socialMedia > div[style] { display: none; }
+.footer .footerImprint, .footer .DSGVO {
+  width: auto; margin: 0; padding: 5px 16px; font-size: 13px; line-height: 1.4;
+  border-radius: 999px; white-space: nowrap; justify-content: center;
+}
+.footer .footerImprint { grid-area: impr; }
+.footer .DSGVO { grid-area: dsgvo; }
+.footer .appBanner { display: none; }
+
+@media only screen and (max-width: 1100px) {
+  .footer {
+    grid-template-columns: auto auto;
+    grid-template-areas:
+      "logo  logo"
+      "adr   adr"
+      "mail  tel"
+      "social social"
+      "impr  dsgvo";
+    justify-content: center;
+    justify-items: center;
+    column-gap: 16px;
+    row-gap: 10px;
+    padding: 24px 16px 28px;
+    text-align: center;
+  }
+  .footer .footerLogo { flex-direction: column; gap: 6px; }
+  .footer .footerCopy { white-space: normal; text-align: center; }
+  .footer .footerMail { justify-self: end; }
+  .footer .footerTel { justify-self: start; }
+  .footer .footerImprint { justify-self: end; }
+  .footer .DSGVO { justify-self: start; }
+}
+@media only screen and (max-width: 480px) {
+  .footer {
+    grid-template-areas: "logo logo" "adr adr" "mail mail" "tel tel" "social social" "impr dsgvo";
+  }
+  .footer .footerMail, .footer .footerTel { justify-self: center; white-space: normal; }
+}

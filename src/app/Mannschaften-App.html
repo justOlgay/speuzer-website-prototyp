@@ -154,7 +154,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--sp-3);
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* W7b: Knopf bleibt rechts neben dem Namen */
   margin-top: var(--sp-3);
   padding-top: var(--sp-3);
   border-top: 1px solid var(--line);
@@ -167,8 +167,9 @@
 .team-karte__kontakt-person {
   display: flex;
   align-items: center;
-  gap: var(--sp-2);
+  gap: var(--sp-3);
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 .person-mini__bild {
@@ -192,10 +193,20 @@
 }
 
 .team-karte__kontakt-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
   font-size: 14px;
   font-weight: 600;
+  line-height: 1.3;
   overflow-wrap: break-word;
 }
+.team-karte__kontakt-rolle {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-2);
+}
+.team-karte__kontakt-aktionen { flex: 0 0 auto; }
 
 .team-karte__kontakt-aktionen {
   display: flex;
@@ -287,8 +298,44 @@
    (anders als auf der Website). */
 .spiele-kasten {
   position: relative;
-  max-height: 1250px;
+  max-height: 880px; /* W7b: rund drei Spiele (Kopf ~300 px + je Spiel ~190 px) */
   overflow: hidden;
+}
+
+/* Umschalter „Spiele | Tabelle“ (W7b, wie auf der Website) */
+.reiter__leiste {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: var(--sp-3);
+  background: var(--blau-100);
+  border-radius: var(--r-pill);
+}
+.reiter__knopf {
+  min-height: 40px;
+  min-width: 96px;
+  padding: 0 var(--sp-4);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--blau-800);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.reiter__knopf[aria-selected="true"] {
+  background: var(--surface);
+  color: var(--blau-950);
+  box-shadow: var(--sh-1);
+}
+.reiter__panels { position: relative; }
+.reiter__panel.ist-versteckt {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .spiele-kasten.ist-offen {
@@ -553,7 +600,18 @@
 
     var text = document.createElement("span");
     text.className = "team-karte__kontakt-text";
-    text.textContent = [titel, name].filter(Boolean).join(" ");
+    // W7b: Name fett, Rolle („Trainer“, „Co-Trainer“) klein darunter –
+    // wie auf der Website; vorher „Trainer Name“ in einer Zeile, der
+    // Mail-Knopf brach bei langen Namen um.
+    var nameEl = document.createElement("span");
+    nameEl.textContent = name || titel;
+    text.appendChild(nameEl);
+    if (name && titel) {
+      var rolleEl = document.createElement("span");
+      rolleEl.className = "team-karte__kontakt-rolle";
+      rolleEl.textContent = titel;
+      text.appendChild(rolleEl);
+    }
     person.appendChild(text);
     kontakt.appendChild(person);
 
@@ -810,8 +868,7 @@
 
     var hinweis = document.createElement("p");
     hinweis.className = "tabelle-wischen-hinweis";
-    hinweis.textContent = "Spiele seitlich wischbar";
-    karte.appendChild(hinweis);
+    hinweis.textContent = "";
 
     var knopf = document.createElement("button");
     knopf.type = "button";
@@ -858,6 +915,49 @@
     p.textContent = text;
     karte.appendChild(p);
     return karte;
+  }
+
+  // Umschalter „Spiele | Tabelle“ (W7b): sichtbar ist immer nur ein Kasten;
+  // der verborgene bleibt gerendert (absolut, unsichtbar), damit das
+  // FUSSBALL.DE-Widget seine Breite kennt und seine Höhe melden kann.
+  function baueReiter(reiter) {
+    var huelle = document.createElement("div");
+    huelle.className = "reiter";
+    var leiste = document.createElement("div");
+    leiste.className = "reiter__leiste";
+    leiste.setAttribute("role", "tablist");
+    leiste.setAttribute("aria-label", "Ansicht wählen");
+    var panels = document.createElement("div");
+    panels.className = "reiter__panels";
+    var knoepfe = [];
+    var inhalte = [];
+    reiter.forEach(function (r, i) {
+      var knopf = document.createElement("button");
+      knopf.type = "button";
+      knopf.className = "reiter__knopf";
+      knopf.setAttribute("role", "tab");
+      knopf.setAttribute("aria-selected", i === 0 ? "true" : "false");
+      knopf.textContent = r.titel;
+      var panel = document.createElement("div");
+      panel.className = "reiter__panel" + (i === 0 ? "" : " ist-versteckt");
+      panel.setAttribute("role", "tabpanel");
+      if (i !== 0) panel.setAttribute("aria-hidden", "true");
+      panel.appendChild(r.node);
+      knopf.addEventListener("click", function () {
+        knoepfe.forEach(function (k, j) { k.setAttribute("aria-selected", j === i ? "true" : "false"); });
+        inhalte.forEach(function (p, j) {
+          p.classList.toggle("ist-versteckt", j !== i);
+          if (j === i) p.removeAttribute("aria-hidden"); else p.setAttribute("aria-hidden", "true");
+        });
+      });
+      knoepfe.push(knopf);
+      inhalte.push(panel);
+      leiste.appendChild(knopf);
+      panels.appendChild(panel);
+    });
+    huelle.appendChild(leiste);
+    huelle.appendChild(panels);
+    return huelle;
   }
 
   function baueAbschnitt(titel, inhaltNode) {
@@ -915,7 +1015,14 @@
     var inhalt = document.getElementById("team-inhalt");
     inhalt.innerHTML = "";
 
-    if (eintrag.spiele) {
+    if (eintrag.spiele && eintrag.tabelle) {
+      // W7b (Olgay 23.09.2026): Spiele und Tabelle untereinander waren „zu
+      // groß und zu präsent“ – ein Abschnitt mit Umschalter wie auf der Website.
+      inhalt.appendChild(baueAbschnitt("Spiele & Tabelle", baueReiter([
+        { titel: "Spiele", node: baueSpieleKarte(eintrag.spiele, "team-matches", true) },
+        { titel: "Tabelle", node: baueWidgetKarte(eintrag.tabelle, "table", "Tabelle seitlich wischbar") }
+      ])));
+    } else if (eintrag.spiele) {
       // W7, Abschnitt 4: der frühere eigene Abschnitt "Nächstes Spiel"
       // (next-match-Widget) entfällt – der "Spiele"-Kasten (team-matches)
       // beginnt ohnehin mit den nächsten Spielen, der Abschnitt war doppelt.
@@ -929,7 +1036,7 @@
       inhalt.appendChild(baueAbschnitt("Spielplan der Saison", iframeKarte));
     }
 
-    if (eintrag.tabelle) {
+    if (eintrag.tabelle && !eintrag.spiele) {
       inhalt.appendChild(baueAbschnitt("Tabelle", baueWidgetKarte(eintrag.tabelle, "table", "Tabelle seitlich wischbar")));
     } else if (team.generatorGruppe) {
       // Wie auf der Website (mannschaften-<team>.html): Karte „Kinderfestivals“
