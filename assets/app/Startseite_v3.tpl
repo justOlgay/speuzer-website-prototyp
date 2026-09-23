@@ -341,6 +341,12 @@ svg { display: block; flex: 0 0 auto; }
   color: var(--ink-2);
 }
 
+/* W9-Nachprüfung D-app Nr. 12 (Entscheidung 15): "Anmelden" innerhalb der
+   Karte volle Breite, wie "Details"/"E-Mail an …" auf anderen Karten. */
+.termine-leer .knopf {
+  width: 100%;
+}
+
 /* === 7. Aktuelles (News-Widget-Vorlage im Stil .karte) === */
 
 .aktuelles { display: flex; flex-direction: column; gap: var(--sp-3); }
@@ -677,10 +683,24 @@ svg { display: block; flex: 0 0 auto; }
   // Skript-Fehler). Den Widget-Container deshalb vor dem
   // DOMContentLoaded-Lauf von component-news-widget.js entfernen; die Zeile
   // "Alle Meldungen" bleibt stehen (QA-Befund, C2 Abschnitt 7).
+  // W9, Auftrag D (Entscheidung "Startseite (Gast)", app Nr. 13): "Aktuelles"
+  // bekommt für Gäste denselben Aufbau wie "Heute und demnächst" – eine
+  // Hinweiskarte an der Stelle des Widgets (gleicher Stil wie die
+  // Termin-Hinweiskarte, aber ohne zweiten Anmelden-Knopf, der Knopf unter
+  // "Heute und demnächst" reicht), danach wie zuvor "Alle Meldungen ›".
+  // Vorher stand hier für Gäste gar keine Karte – "Alle Meldungen ›" folgte
+  // direkt auf die leere Überschrift, und der Parkplatzhinweis darunter
+  // wirkte dadurch wie ein loser Teil von "Aktuelles".
   function entferneNewsWidgetFuerGast() {
     if (istAngemeldet()) return;
     var widget = document.querySelector(".news.aktuelles[news-widget]");
-    if (widget && widget.parentNode) widget.parentNode.removeChild(widget);
+    if (!widget || !widget.parentNode) return;
+    var karte = document.createElement("div");
+    karte.className = "karte termine-leer";
+    var p = document.createElement("p");
+    p.textContent = "Nach der Anmeldung siehst du hier die neuesten Meldungen.";
+    karte.appendChild(p);
+    widget.parentNode.replaceChild(karte, widget);
   }
 
   begruessung();

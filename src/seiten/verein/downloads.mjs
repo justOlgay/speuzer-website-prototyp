@@ -28,10 +28,28 @@ function seitenkopfAbschnitt() {
 </section>`;
 }
 
+// W9-Korrektur (QA3 1440-32): Die Seite heißt "Downloads & Anträge", verlinkt
+// aber bisher nirgends den Online-Antrag aus /mitglied-werden/ (dort als
+// APPACK_FORMULAR_URL). Gleicher Link, hier lokal (kein Helfer in
+// hilfen.mjs, da außerhalb Mail/Telefon/Download/Personen).
+const APPACK_FORMULAR_URL = "https://appack.de/rest-api/drender/6a903758337cdc97f94f2655";
+
+function aufnahmeantragOnlineZeile() {
+  return `<li class="download">
+      <a href="${escapeHtml(APPACK_FORMULAR_URL)}" target="_blank" rel="noopener">Aufnahmeantrag online ausfüllen ›</a>
+    </li>`;
+}
+
 function gruppenAbschnitt(gruppe, downloads, index) {
   const eintraege = downloads.filter((d) => d.gruppe === gruppe);
   if (!eintraege.length) return "";
-  const zeilen = eintraege.map((d) => downloadZeile(d, PFAD)).join("\n      ");
+  const zeilenListe = eintraege.map((d) => downloadZeile(d, PFAD));
+  // Direkt nach dem PDF-Aufnahmeantrag, in derselben Gruppe "Anmeldung".
+  if (gruppe === "Anmeldung") {
+    const pdfIndex = eintraege.findIndex((d) => d.titel.startsWith("Aufnahmeantrag"));
+    zeilenListe.splice(pdfIndex === -1 ? 0 : pdfIndex + 1, 0, aufnahmeantragOnlineZeile());
+  }
+  const zeilen = zeilenListe.join("\n      ");
   const hellKlasse = index % 2 === 1 ? " abschnitt--hell" : "";
 
   return `<section class="abschnitt${hellKlasse}">

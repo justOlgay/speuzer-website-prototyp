@@ -3,9 +3,9 @@
     "name": "Fußballschule Regista Academy",
     "art": "kostenpflichtiges Zusatzangebot, auch für Externe",
     "leitung": null,
-    "text": "Das ist die Regista Academy, ein kostenpflichtiges Zusatzangebot für Spieler – nicht nur aus unserem Verein. Geleitet wird sie von einem erfahrenen Trainer mit Erfahrung als Scout und Jugendtrainer (u. a. bei Eintracht Frankfurt und TuS Makkabi Frankfurt) sowie einem Bachelor in International Sports Management. Das Angebot umfasst individuelles Fördertraining zur gezielten technischen, taktischen und persönlichen Weiterentwicklung sowie ergänzende Formate wie Feriencamps und Talentetage. Die Trainingszeiten finden mehrfach wöchentlich statt und werden individuell nach Absprache vereinbart.",
+    "text": "Die Regista Academy bietet individuelles Fördertraining für Spielerinnen und Spieler – nicht nur aus unserem Verein. Geleitet wird sie von einem Trainer mit Erfahrung als Scout und Jugendtrainer (u. a. bei Eintracht Frankfurt und TuS Makkabi Frankfurt) und einem Bachelor in International Sports Management. Dazu kommen Formate wie Feriencamps und Talentetage; die Trainingszeiten werden individuell vereinbart.",
     "mail": null,
-    "quelle": "Beschreibung aus dem Worksheet Abteilungen_db der Vereins-App (Stand 21.09.2026), eine Quelle für App und Website",
+    "quelle": "Nach der Beschreibung im Worksheet Abteilungen_db (Stand 23.09.2026), sprachlich geglättet (W9, 23.09.2026); eine Quelle für App und Website",
     "logo": {
       "quelle": "angebot-regista-academy"
     },
@@ -14,10 +14,10 @@
   {
     "name": "Fußballschule-Athletik VM Elite",
     "art": "kostenpflichtiges Zusatzangebot, auch für Externe",
-    "leitung": "Vassilios Miamis",
-    "text": "Das ist die Fußballschule-Athletik \"VM ELITE\", unser Zusatzangebot für individuelles Athletik- und Performancetraining. Geleitet wird sie von Vassilios Miamis, C-Lizenz-Trainer, Cheftrainer unserer D1-Jugend und Fitnessstudio-Trainer sowie Athletik-Coach. Das Training richtet sich an Kinder, Jugendliche und Erwachsene aller Leistungsstufen – vom Anfänger bis zum Fortgeschrittenen – und steht auch Teilnehmern von außerhalb unseres Vereins offen. Die Trainingszeiten werden individuell nach Absprache vereinbart.",
+    "leitung": null,
+    "text": "Die Fußballschule-Athletik „VM Elite“ bietet individuelles Athletik- und Performancetraining für Kinder, Jugendliche und Erwachsene aller Leistungsstufen. Geleitet wird sie von Vassilios Miamis, C-Lizenz-Trainer, Cheftrainer unserer D1-Jugend, Fitnessstudio-Trainer und Athletik-Coach. Die Trainingszeiten werden individuell vereinbart.",
     "mail": "geschaeftsstelle@sportfreunde04.de",
-    "quelle": "Beschreibung aus dem Worksheet Abteilungen_db der Vereins-App (Stand 21.09.2026), eine Quelle für App und Website",
+    "quelle": "Nach der Beschreibung im Worksheet Abteilungen_db (Stand 23.09.2026), sprachlich geglättet (W9, 23.09.2026); eine Quelle für App und Website",
     "logo": {
       "quelle": "sponsor-fuballschule-vm-elite"
     }

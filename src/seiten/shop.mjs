@@ -21,7 +21,7 @@ function seitenkopfAbschnitt() {
   <div class="container">
     ${ruecklink(`${PFAD}verein/`, "Verein")}
     <h1>Fanshop &amp; Teamshop</h1>
-    <p class="seitenkopf__lead">Fanartikel und Teamausstattung – zwei getrennte Online-Shops unserer Partner.</p>
+    <p class="seitenkopf__lead">Fanartikel und Teamausstattung – zwei getrennte Online-Shops unserer Partner.</p>
   </div>
 </section>`;
 }
@@ -30,6 +30,10 @@ function seitenkopfAbschnitt() {
 // "mehr"-Text ("sportfreunde04.fan12.de ›") – jetzt ein Knopf mit dem Namen
 // des Partners statt der Domain (Prüfer-Befund). Die Karte selbst ist damit
 // kein Link mehr (sonst verschachtelte Links), der Knopf trägt die Adresse.
+// W9-Korrektur (QA3 390-10): "Zum Teamshop bei 11TeamSports" brach auf zwei
+// Zeilen um, "Zum Fanshop bei fan12" blieb einzeilig – beide Knöpfe sahen
+// dadurch unterschiedlich aus. Kürzere Beschriftung (der Anbieter steht
+// schon im Fließtext darüber), white-space:nowrap, gleich gebaut.
 function shopsAbschnitt(daten) {
   const verein = daten.verein ?? {};
   return `<section class="abschnitt">
@@ -38,15 +42,15 @@ function shopsAbschnitt(daten) {
       <div class="karte fluss">
         <span class="karte__titel">Fanshop</span>
         <p>Schals, Shirts und mehr mit dem Wappen der Sportfreunde. Betrieben von fan12.</p>
-        <p class="knopfzeile">
-          <a class="knopf knopf--sekundaer" href="${escapeHtml(verein.fanshop ?? "")}" rel="noopener" target="_blank">Zum Fanshop bei fan12</a>
+        <p class="knopfzeile knopfzeile--voll">
+          <a class="knopf knopf--sekundaer" style="white-space:nowrap;" href="${escapeHtml(verein.fanshop ?? "")}" rel="noopener" target="_blank">Zum Fanshop</a>
         </p>
       </div>
       <div class="karte fluss">
         <span class="karte__titel">Teamshop</span>
         <p>Trikots, Trainingskleidung und Ausrüstung im Vereinsdesign für Spielerinnen, Spieler und Eltern. Betrieben von 11TeamSports.</p>
-        <p class="knopfzeile">
-          <a class="knopf knopf--sekundaer" href="${escapeHtml(verein.teamshop ?? "")}" rel="noopener" target="_blank">Zum Teamshop bei 11TeamSports</a>
+        <p class="knopfzeile knopfzeile--voll">
+          <a class="knopf knopf--sekundaer" style="white-space:nowrap;" href="${escapeHtml(verein.teamshop ?? "")}" rel="noopener" target="_blank">Zum Teamshop</a>
         </p>
       </div>
     </div>
@@ -58,12 +62,16 @@ function shopsAbschnitt(daten) {
 }
 
 // P9-Korrektur A5: Seite war sehr kurz (Fußbereich ab 650px) – Ergänzung
-// unter den beiden Shop-Karten, Wortlaut wörtlich aus dem Plan.
+// unter den beiden Shop-Karten. W9-Korrektur (QA3 1440-31): Der Satz stand
+// im Widerspruch zur Teamshop-Karte oben ("Trikots … für Spielerinnen,
+// Spieler und Eltern" klang nach Bestellung im Teamshop, dieser Absatz sagte
+// "über das Trainerteam gesammelt bestellt") – jetzt klar getrennt, exakter
+// Wortlaut aus w9-b.md.
 function vereinskleidungAbschnitt() {
   return `<section class="abschnitt--hell abschnitt">
   <div class="container fluss">
     <h2>Vereinskleidung für Mannschaften</h2>
-    <p>Trikots und Trainingsanzüge der Mannschaften werden über das Trainerteam gesammelt bestellt – Fragen dazu an das Trainerteam der jeweiligen Mannschaft oder an die Geschäftsstelle.</p>
+    <p>Mannschaftstrikots bestellt das Trainerteam gesammelt; einzelne Teile und Ersatz gibt es im Teamshop.</p>
     <p class="knopfzeile">
       <a class="knopf knopf--sekundaer" href="${PFAD}mannschaften/">Zu den Mannschaften</a>
     </p>

@@ -170,7 +170,15 @@ svg { display: block; flex: 0 0 auto; }
   text-transform: uppercase;
   color: var(--blau-950);
   margin: var(--sp-6) 0 var(--sp-3);
+  /* W9, Auftrag D (Entscheidung 13, App-weit): Überschriften nie
+     automatisch trennen. */
+  hyphens: manual;
+  text-wrap: balance;
 }
+
+/* W9, Auftrag D (Entscheidung 13, App-weit): Fließtext mit ausgewogenerem
+   Umbruch (unterstützende Browser; ohne Unterstützung normaler Umbruch). */
+p { text-wrap: pretty; }
 
 .inhalt > .abschnittstitel:first-child { margin-top: 0; }
 
@@ -204,6 +212,17 @@ summary::marker { content: ""; }
   text-decoration: none;
   border: none;
   cursor: pointer;
+}
+
+/* W9-Nachprüfung D-app Nr. 5: ein <button class="knopf"> erbt ohne
+   font-family: inherit nicht die App-Schrift (User-Agent-Standard, z. B.
+   Arial), anders als ein <a class="knopf"> – "font: inherit" setzt Familie/
+   Größe/Gewicht zurück, deshalb Gewicht/Größe direkt danach wie .knopf
+   erneut gesetzt. */
+button.knopf {
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .knopf--leise {
@@ -341,7 +360,7 @@ summary::marker { content: ""; }
 
 <h1 class="visually-hidden">Verein</h1>
 
-<p class="seitenkopf-lead">Frankfurter Fußballverein Sportfreunde 1904 e.&nbsp;V. – im Gallus sagt man einfach „die Speuzer“.</p>
+<p class="seitenkopf-lead">Frankfurter Fußballverein Sportfreunde 1904&nbsp;e.&nbsp;V.&nbsp;– im Gallus sagt man einfach „die Speuzer“.</p>
 
 <h2 class="abschnittstitel">Abteilungen</h2>
 <div class="abteilungen-raster">
@@ -387,15 +406,15 @@ summary::marker { content: ""; }
 <div class="liste">
   <a class="zeile" href="nav://sportfreunde04_TextImage_1780401660340">
     <span class="zeile__text">
-      <span class="zeile__titel">Vorstand &amp; Kontakt</span>
-      <span class="zeile__untertitel">Wer den Verein führt, wen du erreichst</span>
+      <span class="zeile__titel">Vorstand</span>
+      <span class="zeile__untertitel">Wer den Verein führt</span>
     </span>
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
   </a>
   <a class="zeile" href="nav://sportfreunde04_TextImage_1780401660324">
     <span class="zeile__text">
-      <span class="zeile__titel">Geschäftsstelle &amp; Anfahrt</span>
-      <span class="zeile__untertitel">Adresse, Zugang, Kontakt</span>
+      <span class="zeile__titel">Kontakt &amp; Anfahrt</span>
+      <span class="zeile__untertitel">Adresse, E-Mail, Anfahrt</span>
     </span>
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
   </a>
@@ -427,7 +446,7 @@ summary::marker { content: ""; }
   <a class="zeile" href="nav://sportfreunde04_Application_1783064196311">
     <span class="zeile__text">
       <span class="zeile__titel">Downloads &amp; Anträge</span>
-      <span class="zeile__untertitel">Satzung, Beiträge, Bescheinigungen</span>
+      <span class="zeile__untertitel">Satzung, Beiträge, Anträge</span>
     </span>
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
   </a>

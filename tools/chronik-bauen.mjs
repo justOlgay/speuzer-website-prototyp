@@ -120,6 +120,77 @@ function verweiseVerlinken(html, quellenZiel) {
   });
 }
 
+// Eine Textersetzung nur außerhalb bestehender <a>-Links anwenden – sonst
+// könnte ein Treffer mitten in einem href oder Linktext ein <span> einfügen
+// und das Markup zerbrechen (W9, Befunde web-chronik 8 und 22).
+function nurAusserhalbVonLinks(html, ersetzung) {
+  return html
+    .split(/(<a\b[\s\S]*?<\/a>)/g)
+    .map((teil, i) => (i % 2 === 1 ? teil : ersetzung(teil)))
+    .join("");
+}
+
+// Initialen/Namenskürzel ("B.", "Gg.", "Fr.") nicht vom folgenden Namen
+// trennen lassen (W9, Befund web-chronik 8): geschütztes Leerzeichen statt
+// normalem Leerzeichen. Bewusst auf ein bis zwei Buchstaben vor dem Punkt
+// begrenzt, damit normale, zufällig kurze Wörter am Satzende nicht
+// mitgetroffen werden.
+function initialenBinden(html) {
+  return nurAusserhalbVonLinks(html, (teil) =>
+    teil.replace(/\b([A-ZÄÖÜ][a-zäöüß]?\.) (?=[A-ZÄÖÜ])/g, "$1&nbsp;")
+  );
+}
+
+// "A-Jugend" bis "G-Jugend"/"-Junioren" nicht am Bindestrich trennen lassen
+// (W9-Nachprüfung, Befund zu chronik-1945-1969/chronik-quellen-und-anmerkungen,
+// Entscheidung 13 aus w9-gemeinsam.md gilt auch hier): geschützter
+// Bindestrich (U+2011) statt normalem Bindestrich, analog zu
+// initialenBinden(). Auch abgeleitete Formen wie "B-Jugendlicher" oder
+// "A-Juniorenmannschaft" (Wortende erst nach weiteren Kleinbuchstaben)
+// sind vom selben Umbruchproblem betroffen, deshalb kein \b direkt nach
+// "Jugend"/"Junioren", sondern optionale Kleinbuchstaben mit anschließender
+// Wortgrenze.
+function jugendBindestrichBinden(html) {
+  return nurAusserhalbVonLinks(html, (teil) =>
+    teil.replace(/\b([A-G])-(Jugend[a-zäöüß]*|Junioren[a-zäöüß]*)\b/g, "$1‑$2")
+  );
+}
+
+// Roh im Fließtext getippte Adressen und Dateinamen (kein Word-Hyperlink,
+// nur eingetippter Text) als eigenes Element mit kleinerer Schrift und
+// overflow-wrap:anywhere setzen, statt sie am eigenen Bindestrich umbrechen
+// zu lassen (W9, Befund web-chronik 22). overflow-wrap:anywhere allein
+// verhindert das nicht: ein vorhandener Bindestrich ("eintracht-archiv.de")
+// bleibt für den Browser eine gültige Umbruchstelle, unabhängig von
+// overflow-wrap (das nur greift, wenn es sonst KEINE Umbruchstelle gibt).
+// Deshalb zusätzlich, nur innerhalb dieser Adress-Spanne, geschützte
+// Bindestriche (U+2011) statt normaler Bindestriche setzen – optisch
+// identisch, aber keine Umbruchstelle mehr.
+const ADRESSE_REGEX = /\b[A-Za-z0-9][A-Za-z0-9._~%+-]*\.(?:de|com|net|org|it|pdf|png|jpe?g|htm|html)\b(?:\/[^\s,;<]*)?/g;
+// Innerhalb einer erkannten Adresse zusätzlich an Pfadgrenzen (nach "/" und
+// "_") sowie vor der Dateiendung eine <wbr>-Umbruchstelle einfügen, damit
+// lange Adressen dort umbrechen statt mitten in der Endung wie ".ht"/"ml"
+// (W9-Nachprüfung, Befund web-chronik 22 auf dem Handy).
+function adressenUmbruchstellen(treffer) {
+  return treffer
+    .replaceAll("-", "‑")
+    .replaceAll("/", "/<wbr>")
+    .replaceAll("_", "_<wbr>")
+    .replace(/\.(?=(?:de|com|net|org|it|pdf|png|jpe?g|htm|html)\b)/g, ".<wbr>");
+}
+function adressenMarkieren(html) {
+  return nurAusserhalbVonLinks(html, (teil) =>
+    teil.replace(ADRESSE_REGEX, (treffer) => `<span class="chronik-adresse">${adressenUmbruchstellen(treffer)}</span>`)
+  );
+}
+
+// Der Linktext "Nachweis" (Quellenverzeichnis, über 30-mal) soll nie allein
+// in einer Zeile stehen: mit geschütztem Leerzeichen an das vorige Wort
+// binden (W9, Befund web-chronik 23).
+function nachweisBinden(html) {
+  return html.replace(/\s+(<a\b[^>]*>Nachweis<\/a>)/g, "&nbsp;$1");
+}
+
 function absatzHtml(absatz, rels, quellenZiel) {
   // Hyperlinks zuerst: <w:hyperlink r:id> umschließt eigene Läufe
   let inhalt = "";
@@ -143,7 +214,9 @@ function absatzHtml(absatz, rels, quellenZiel) {
       inhalt += urlAlsLink(stueck);
     }
   }
-  return verweiseVerlinken(inhalt, quellenZiel);
+  return nachweisBinden(
+    adressenMarkieren(jugendBindestrichBinden(initialenBinden(verweiseVerlinken(inhalt, quellenZiel))))
+  );
 }
 
 // Roh im Fließtext getippte Adressen (kein Word-Hyperlinkfeld, sondern eine
@@ -166,7 +239,14 @@ function bildVon(absatz, rels) {
 
 // ---------- Tabellen ----------
 
-function tabelleHtml(tabelle, rels, quellenZiel) {
+// Ein Wort komplett fett gesetzte Word-Zellen (Artefakt der Vorlage) auf
+// normale Schriftstärke zurücksetzen (W9, Befund web-chronik 18): nur die
+// erste Spalte bleibt halbfett.
+function ohneFett(html) {
+  return html.replace(/<\/?strong>/g, "");
+}
+
+function tabelleHtml(tabelle, rels, quellenZiel, { mitKarten = false } = {}) {
   const zeilen = [...tabelle.matchAll(/<w:tr\b[\s\S]*?<\/w:tr>/g)].map((m) => m[0]);
   if (!zeilen.length) return "";
   const zellenVon = (zeile) =>
@@ -177,12 +257,13 @@ function tabelleHtml(tabelle, rels, quellenZiel) {
         .join("<br>")
     );
   const kopf = zellenVon(zeilen[0]);
+  const kopfText = kopf.map((z) => entferneTags(z).trim());
   const rumpf = zeilen.slice(1).map(zellenVon);
   const kopfHtml = kopf.map((z) => `<th scope="col">${z}</th>`).join("");
   const rumpfHtml = rumpf
-    .map((zellen) => `<tr>${zellen.map((z) => `<td>${z}</td>`).join("")}</tr>`)
+    .map((zellen) => `<tr>${zellen.map((z, i) => `<td>${i === 0 ? z : ohneFett(z)}</td>`).join("")}</tr>`)
     .join("\n        ");
-  return `<div class="tabelle-wrap">
+  const tabelleTeil = `<div class="tabelle-wrap">
       <table class="chronik-tabelle">
         <thead><tr>${kopfHtml}</tr></thead>
         <tbody>
@@ -190,6 +271,47 @@ function tabelleHtml(tabelle, rels, quellenZiel) {
         </tbody>
       </table>
     </div>`;
+  if (!mitKarten) return tabelleTeil;
+
+  // Handy (< 600 px): Zeilen als Karten statt einer abgeschnittenen Tabelle
+  // (W9, Befunde web-chronik 1 und 2). Zwei Spalten (z. B. Aufgabe/Name):
+  // erste Spalte klein als Label, zweite darunter. Drei oder mehr Spalten
+  // (Saisontabellen): alle außer der letzten zu einer Kopfzeile zusammen-
+  // gefasst ("2013/14 · Kreisoberliga Frankfurt · Platz 7"), die letzte
+  // Spalte als Fließtext darunter (Einordnung/Erfolg). Die Karten liegen
+  // zusätzlich im Markup, per CSS ist immer nur eine der beiden Ansichten
+  // sichtbar (kein doppelt vorgelesener Inhalt für Screenreader).
+  const spalten = kopfText.length;
+  const karten = rumpf
+    .map((zellen) => {
+      if (spalten <= 1) {
+        return `<li class="tabelle-karte">${zellen.map((z) => `<p class="tabelle-karte__zeile">${ohneFett(z)}</p>`).join("")}</li>`;
+      }
+      if (spalten === 2) {
+        return `<li class="tabelle-karte">
+          <p class="tabelle-karte__label">${ohneFett(zellen[0])}</p>
+          <p class="tabelle-karte__haupt">${ohneFett(zellen[1])}</p>
+        </li>`;
+      }
+      // Geschütztes Leerzeichen vor dem Trennpunkt, normales danach: so
+      // bleibt der Punkt am Ende der vorigen Zeile stehen, statt einen
+      // Zeilenumbruch mit dem Punkt als Aufzählungszeichen zu beginnen
+      // (W9-Nachprüfung, Befund chronik-mannschaften-und-ehrenamt 390).
+      const meta = zellen
+        .slice(0, -1)
+        .map((z, i) => (kopfText[i] === "Platz" ? `Platz&nbsp;${ohneFett(z)}` : ohneFett(z)))
+        .join("&nbsp;· ");
+      const beschreibung = ohneFett(zellen[zellen.length - 1]);
+      return `<li class="tabelle-karte">
+          <p class="tabelle-karte__kopf">${meta}</p>
+          <p class="tabelle-karte__text">${beschreibung}</p>
+        </li>`;
+    })
+    .join("\n        ");
+  return `${tabelleTeil}
+    <ul class="tabelle-karten">
+        ${karten}
+    </ul>`;
 }
 
 // ---------- Dokument in Kapitel zerlegen ----------
@@ -257,7 +379,27 @@ function slugVon(titel) {
     .replace(/^-|-$/g, "");
 }
 
+// "Mannschaften und Ehrenamt" und "Quellen und Anmerkungen" haben in der
+// Word-Chronik keine Lead-Unterzeile (kein eigener Lead-Absatz angelegt),
+// die Spezifikation (W9-C) verlangt für den Anhang aber ausdrücklich "je
+// mit kurzer Unterzeile" – auf der Zeitleiste der Übersicht UND unter der
+// H1 der beiden Kapitelseiten. Solange das Word-Dokument dafür keinen Lead
+// liefert, fest hinterlegt (W9-Nachprüfung, Befund Chronik-Übersicht/
+// -Kapitelseiten).
+const ANHANG_UNTERZEILEN = {
+  "Mannschaften und Ehrenamt": "Saisonübersichten und Vorstand",
+  "Quellen und Anmerkungen": "Nachweise und Korrekturen",
+};
+function leadVon(kapitel) {
+  return kapitel.lead ?? ANHANG_UNTERZEILEN[kapitel.titel] ?? null;
+}
+
 // ---------- Bilder ----------
+
+// Textspaltenbreite der Website (assets/css/tokens.css, --inhalt: 720px) –
+// bestimmt, ab welcher nativen Breite ein Querformat-Foto die volle Spalte
+// füllen kann (W9, Befund web-chronik 7).
+const TEXTSPALTE = 720;
 
 function bilderAufbereiten(temp, zielBilder, genutzte) {
   mkdirSync(zielBilder, { recursive: true });
@@ -274,9 +416,47 @@ function bilderAufbereiten(temp, zielBilder, genutzte) {
     const breite = Number(masse.match(/pixelWidth:\s*(\d+)/)?.[1] ?? 1100);
     const zielBreite = Math.min(1100, breite);
     execFileSync("sips", ["-s", "format", "jpeg", "-s", "formatOptions", "72", "-Z", String(zielBreite), quelle, "--out", ziel], { stdio: "ignore" });
-    karte.set(datei, name);
+    // Tatsächliche Maße der geschriebenen Datei merken (nicht nur die
+    // angeforderte Breite): daraus bestimmt kapitelHtml später eine
+    // einheitliche Anzeigebreite für Querformat-Fotos im selben Kapitel.
+    const ausMasse = execFileSync("sips", ["-g", "pixelWidth", "-g", "pixelHeight", ziel], { encoding: "utf8" });
+    const ausBreite = Number(ausMasse.match(/pixelWidth:\s*(\d+)/)?.[1] ?? zielBreite);
+    const ausHoehe = Number(ausMasse.match(/pixelHeight:\s*(\d+)/)?.[1] ?? zielBreite);
+    karte.set(datei, { name, breite: ausBreite, hoehe: ausHoehe });
   }
   return karte;
+}
+
+// Jedes Foto bekommt eine feste Zielbreite auf der figure selbst (nicht nur
+// auf dem img): Nur so bestimmt allein diese Breite die Größe der figure,
+// und die Bildunterschrift – deren Textlänge sonst bei einem width:
+// fit-content ebenfalls in die Breitenberechnung der figure eingeht und sie
+// breiter als das Foto ziehen kann – füllt exakt dieselbe Breite (W9,
+// Befund web-chronik 7: "Bildunterschrift so breit wie das Bild").
+// Querformat-Fotos (breiter als hoch) sollen websiteweit einheitlich wirken,
+// nicht nur je Kapitel (W9-Nachprüfung: 400/467/609/672/690/720 px
+// nebeneinander über die Kapitel hinweg sahen weiterhin zufällig aus, weil
+// jedes Kapitel für sich auf sein schmalstes Foto herunterskaliert wurde).
+// Deshalb eine einzige Regel für die ganze Website statt eines Vergleichs
+// innerhalb des Kapitels: volle Textspaltenbreite (720px), wenn das Foto
+// dafür höchstens rund 10% hochskaliert werden müsste; deutlich kleinere
+// Vorlagen (z. B. D1-Fotos, Hochformate) bleiben als erklärte Ausnahme in
+// ihrer eigenen nativen Breite, statt auf das schmalste Foto im Kapitel
+// heruntergerechnet zu werden.
+const MAX_HOCHSKALIEREN = 1.1;
+function bildbreitenVon(kapitel, bildDaten) {
+  const alle = kapitel.bloecke
+    .filter((b) => b.art === "bild")
+    .map((b) => bildDaten.get(b.datei))
+    .filter(Boolean);
+  const ergebnis = new Map();
+  for (const d of alle) {
+    const istQuer = d.breite > d.hoehe;
+    const breite =
+      istQuer && d.breite * MAX_HOCHSKALIEREN >= TEXTSPALTE ? TEXTSPALTE : Math.min(d.breite, TEXTSPALTE);
+    ergebnis.set(d.name, breite);
+  }
+  return ergebnis;
 }
 
 // ---------- HTML: gemeinsame Bausteine ----------
@@ -284,10 +464,28 @@ function bilderAufbereiten(temp, zielBilder, genutzte) {
 // assets/css/komponenten.css, W7 23.09.2026); keine Brotkrume, kein
 // Rücklink unten – unten bleibt nur das Blättern zwischen den Kapiteln.
 
+// Manche Word-Absätze enthalten mehrere Fußnoten in einem Fließtext
+// ("* Satz eins. ** Satz zwei."), weil im Original kein eigener Absatz
+// dafür angelegt wurde. Jede Fußnote bekommt eine eigene Zeile, das
+// Sternchen wird mit &nbsp; an das erste Wort gebunden (W9, Befund
+// web-chronik 17).
+function fussnotenAufteilen(html) {
+  const treffer = [...html.matchAll(/(?<=^|\s)\*+(?=\s)/g)];
+  if (treffer.length < 2) return [html];
+  const grenzen = treffer.map((m) => m.index);
+  grenzen.push(html.length);
+  const teile = [];
+  for (let i = 0; i < grenzen.length - 1; i++) {
+    const stueck = html.slice(grenzen[i], grenzen[i + 1]).trim();
+    if (stueck) teile.push(stueck.replace(/^(\*+)\s+/, "$1&nbsp;"));
+  }
+  return teile;
+}
+
 // Tabellen müssen in Dokumentreihenfolge bleiben – dafür ein zweiter Durchlauf,
 // der Absätze und Tabellen gemeinsam behandelt.
 function kapitelHtml(kapitel, optionen) {
-  const { rels, bildKarte, bildBasis, quellenZiel } = optionen;
+  const { rels, bildKarte, bildBasis, quellenZiel, bildbreiten } = optionen;
   const teile = [];
   let offen = false;
   const schliesse = () => { if (offen) { teile.push(`  </div>\n</section>`); offen = false; } };
@@ -296,18 +494,24 @@ function kapitelHtml(kapitel, optionen) {
   for (const block of kapitel.bloecke) {
     if (block.art === "tabelle") {
       oeffne();
-      teile.push("    " + tabelleHtml(block.xml, rels, quellenZiel));
+      teile.push("    " + tabelleHtml(block.xml, rels, quellenZiel, { mitKarten: true }));
       continue;
     }
     if (block.art === "bild") {
-      const name = bildKarte.get(block.datei);
-      if (!name) continue;
+      const daten = bildKarte.get(block.datei);
+      if (!daten) continue;
       // Bild bleibt im Satzspiegel: nicht aus dem offenen .container.fluss
       // herauslösen (das erzeugte randlose Vollbreite-Bilder außerhalb jedes
       // Containers), sondern wie Absätze/Tabellen im Container öffnen.
       oeffne();
-      teile.push(`    <figure class="chronik-bild">
-      <img src="${bildBasis}${name}" alt="Historische Aufnahme aus der Vereinschronik" loading="lazy" decoding="async">
+      // Feste Zielbreite auf der figure selbst (siehe bildbreitenVon), damit
+      // Foto UND Bildunterschrift exakt dieselbe Breite bekommen; min(100%, …)
+      // lässt die figure auf dem Handy trotzdem auf die verfügbare Breite
+      // schrumpfen.
+      const breite = bildbreiten.get(daten.name);
+      const stil = breite ? ` style="max-width:min(100%,${breite}px)"` : "";
+      teile.push(`    <figure class="chronik-bild"${stil}>
+      <img src="${bildBasis}${daten.name}" alt="Historische Aufnahme aus der Vereinschronik" loading="lazy" decoding="async">
       <figcaption class="chronik-bild__text" data-leer="ja"></figcaption>
     </figure>`);
       continue;
@@ -327,12 +531,14 @@ function kapitelHtml(kapitel, optionen) {
       continue;
     }
     oeffne();
-    const quellenNummer = (html.match(/^\[(\d+[0-9a-z]?)\]/) ?? [])[1];
     if (block.art === "h2") teile.push(`    <h2>${html}</h2>`);
     else if (block.art === "zitat") teile.push(`    <blockquote class="chronik-zitat">${html}</blockquote>`);
-    else if (block.art === "source")
-      teile.push(`    <p class="chronik-quelle"${quellenNummer ? ` id="quelle-${quellenNummer}"` : ""}>${html}</p>`);
-    else teile.push(`    <p class="inhalt">${html}</p>`);
+    else if (block.art === "source") {
+      for (const zeile of fussnotenAufteilen(html)) {
+        const zeilenNummer = (zeile.match(/^\[(\d+[0-9a-z]?)\]/) ?? [])[1];
+        teile.push(`    <p class="chronik-quelle"${zeilenNummer ? ` id="quelle-${zeilenNummer}"` : ""}>${zeile}</p>`);
+      }
+    } else teile.push(`    <p class="inhalt">${html}</p>`);
   }
   schliesse();
   return teile.join("\n");
@@ -342,11 +548,20 @@ function kapitelHtml(kapitel, optionen) {
 
 const CHRONIK_CSS = `<style>
 /* Bild bleibt im Satzspiegel: höchstens so breit wie der Fließtext
-   (--inhalt, sonst 720px) und nie breiter als seine eigene, native Breite
-   (die Scans sind 400 bis 690px breit) – deshalb width:auto statt
-   width:100%, das schmale Bilder sonst hochskaliert hätte. */
-.chronik-bild { margin: 0 0 var(--sp-4); max-width: var(--inhalt, 720px); }
-.chronik-bild img { width: auto; max-width: 100%; height: auto; border-radius: var(--radius, 12px); background: var(--blau-50, #eef0fb); display: block; }
+   (--inhalt, sonst 720px). Die tatsächliche Breite kommt als fester
+   max-width-Wert von bildbreitenVon (inline auf der figure, nie über die
+   eigene native Breite hinaus hochskaliert) – so bestimmt allein diese
+   Zahl die Größe der figure, und img (width:100%) wie figcaption (Block,
+   volle Breite) füllen exakt dieselbe Breite. Ein bloßes width:fit-content
+   auf der figure hätte stattdessen die – oft längere – Bildunterschrift
+   mit in die Breitenberechnung einbezogen (W9, Befund web-chronik 7:
+   "Bildunterschrift so breit wie das Bild"). Außenabstand oben UND unten
+   mindestens im Absatzabstand (32px, wie die übrigen großzügigen
+   Ausnahmen vom 16px-Fluss-Rhythmus in komponenten.css) – kein
+   margin-top:0, das ließ Fotos bislang am vorangehenden Text kleben (W9,
+   Befund web-chronik 6). */
+.chronik-bild { margin: var(--sp-6, 32px) 0; width: 100%; max-width: var(--inhalt, 720px); }
+.chronik-bild img { width: 100%; height: auto; border-radius: var(--radius, 12px); background: var(--blau-50, #eef0fb); display: block; }
 .chronik-bild__text { font-size: 0.86rem; line-height: 1.5; color: var(--ink-2, #55607a); margin-top: var(--sp-2); }
 .chronik-zitat { margin: 0 0 var(--sp-3); padding-left: var(--sp-3); border-left: 3px solid var(--blau, #191793); font-style: italic; color: var(--ink-2, #55607a); max-width: var(--inhalt, 720px); }
 /* Kleindruck (Vorwort-Anmerkung, Quellenangaben): eigener, sichtbarer
@@ -354,13 +569,40 @@ const CHRONIK_CSS = `<style>
    das den Fluss-Rhythmus (.fluss > * + *) der Seite und der Absatz klebt am
    vorigen Text. */
 .chronik-quelle { font-size: 0.86rem; line-height: 1.55; color: var(--ink-2, #55607a); margin-bottom: var(--sp-2); max-width: var(--inhalt, 720px); }
-.quellenverweis { text-decoration: none; font-variant-numeric: tabular-nums; }
-.tabelle-wrap { overflow-x: auto; margin: 0 0 var(--sp-4); }
+.quellenverweis { text-decoration: none; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* Roh getippte Adressen/Dateinamen: kleiner und mit overflow-wrap:anywhere
+   statt am eigenen Bindestrich umzubrechen (W9, Befund web-chronik 22). */
+.chronik-adresse { font-size: 0.9em; overflow-wrap: anywhere; }
+/* Oberer Außenabstand wie der übrige Absatzrhythmus der Seite (24px), damit
+   Tabelle bzw. Kartenliste nicht ohne Abstand am Einleitungsabsatz kleben
+   (W9-Nachprüfung, Befund chronik-mannschaften-und-ehrenamt). */
+.tabelle-wrap { overflow-x: auto; margin: var(--sp-5, 24px) 0 var(--sp-4); }
 .chronik-tabelle { width: 100%; border-collapse: collapse; font-size: 0.94rem; min-width: 420px; }
 .chronik-tabelle th { background: var(--blau, #191793); color: #fff; text-align: left; padding: 10px 12px; font-weight: 600; }
 .chronik-tabelle td { padding: 9px 12px; border-bottom: 1px solid var(--linie, #e3e6f0); vertical-align: top; }
 .chronik-tabelle tbody tr:nth-child(odd) { background: var(--blau-50, #f4f6fd); }
-.zeitleiste { list-style: none; margin: 0; padding: 0; }
+/* Handy (< 600px): Tabelle durch gestapelte Karten ersetzen statt
+   abzuschneiden (W9, Befunde web-chronik 1 und 2). Beide Ansichten liegen
+   im Markup, aber nie gleichzeitig sichtbar. */
+/* Oberer Außenabstand wie .tabelle-wrap, dazu eine Linie am Anfang der
+   Liste (wie zwischen den Karten), damit die erste Karte nicht wie eine
+   Fortsetzung des Einleitungsabsatzes wirkt (W9-Nachprüfung). */
+.tabelle-karten { display: none; list-style: none; margin: var(--sp-5, 24px) 0 var(--sp-4); padding: 0; border-top: 1px solid var(--linie, #e3e6f0); }
+.tabelle-karte { padding: var(--sp-3) 0; border-bottom: 1px solid var(--linie, #e3e6f0); }
+.tabelle-karte__label { font-size: 0.82rem; color: var(--ink-2, #55607a); margin: 0 0 2px; }
+.tabelle-karte__haupt { font-weight: 600; margin: 0; }
+.tabelle-karte__kopf { font-weight: 600; margin: 0 0 2px; }
+.tabelle-karte__text { color: var(--ink-2, #55607a); margin: 0; }
+.tabelle-karte__zeile { margin: 0; }
+@media (max-width: 599px) {
+  .tabelle-wrap { display: none; }
+  .tabelle-karten { display: block; }
+}
+/* Auf die Textspaltenbreite begrenzt: sonst läuft die Trennlinie des
+   Anhangs (.zeitleiste--anhang) am Desktop über die volle, deutlich
+   breitere Containerbreite, während die Zeitleiste selbst schmal wirkt
+   (W9-Nachprüfung, Befund Chronik-Übersicht). */
+.zeitleiste { list-style: none; margin: 0; padding: 0; max-width: var(--inhalt, 720px); }
 .zeitleiste__punkt { position: relative; padding: 0 0 var(--sp-4) var(--sp-4); border-left: 2px solid var(--linie, #e3e6f0); }
 .zeitleiste__punkt:last-child { border-left-color: transparent; padding-bottom: 0; }
 .zeitleiste__punkt::before { content: ""; position: absolute; left: -7px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--blau, #191793); }
@@ -372,8 +614,41 @@ const CHRONIK_CSS = `<style>
 .abschnitt--blau .zeitleiste__punkt::before { background: #fff; }
 .abschnitt--blau .zeitleiste__jahre { color: #fff; }
 .abschnitt--blau .zeitleiste__text { color: rgba(255,255,255,0.82); }
-.kapitelnav { display: flex; flex-wrap: wrap; gap: var(--sp-3); justify-content: space-between; }
+/* "Mannschaften und Ehrenamt" / "Quellen und Anmerkungen" sind keine
+   Zeiträume: abgesetzt als "Anhang", ohne Punkt auf der Achse (W9, Befund
+   web-chronik 14). */
+/* Mindestens 32px Abstand nach oben – mehr als zwischen den Epochen –
+   damit das Label nicht wie ein Teil der letzten Epoche wirkt
+   (W9-Nachprüfung, Befund Chronik-Übersicht). */
+.zeitleiste__anhang-label { margin: var(--sp-6, 32px) 0 var(--sp-2); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--ink-2, #55607a); }
+.abschnitt--blau .zeitleiste__anhang-label { color: rgba(255,255,255,0.7); }
+.zeitleiste--anhang { padding-top: var(--sp-2); border-top: 1px solid var(--linie, #e3e6f0); }
+.abschnitt--blau .zeitleiste--anhang { border-top-color: rgba(255,255,255,0.28); }
+.zeitleiste--anhang .zeitleiste__punkt { border-left: none; padding-left: 0; }
+.zeitleiste--anhang .zeitleiste__punkt::before { content: none; }
+/* Blätter-Leiste: überall derselbe dreiteilige Baustein (Zurück links,
+   "Alle Kapitel" exakt mittig, Weiter rechts). Ein Grid statt
+   justify-content:space-between hält die Mitte fest, unabhängig von der
+   Länge der Kapiteltitel links/rechts (W9, Befunde web-chronik 3, 4, 12).
+   Auf die Textspaltenbreite begrenzt, damit die Leiste nicht über die volle
+   Containerbreite läuft. Bündig mit der Textspalte (margin-left 0, nicht
+   auto/zentriert) – sonst steht die Leiste ab 768px in der Seite zentriert
+   statt an der Textkante (W9-Nachprüfung, neu entdeckt). */
+.kapitelnav { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: var(--sp-2) var(--sp-3); max-width: var(--inhalt, 720px); margin: 0; }
 .kapitelnav a { text-decoration: none; }
+.kapitelnav__weiter { text-align: right; }
+.kapitelnav__alle { text-align: center; white-space: nowrap; }
+/* Handy: Zurück/Weiter als zwei gleich breite Felder nebeneinander, "Alle
+   Kapitel" als eigene Zeile darunter (W9, Befund web-chronik 5). */
+@media (max-width: 599px) {
+  .kapitelnav { grid-template-columns: 1fr 1fr; }
+  .kapitelnav__zurueck, .kapitelnav__platz--zurueck { grid-column: 1; grid-row: 1; text-align: left; }
+  .kapitelnav__weiter, .kapitelnav__platz--weiter { grid-column: 2; grid-row: 1; text-align: right; }
+  .kapitelnav__alle { grid-column: 1 / -1; grid-row: 2; }
+}
+/* Überschriften nie automatisch trennen, auf dem Handy ausgewogen umbrechen
+   statt zufällig (W9, Befund web-chronik 9). */
+.seitenkopf h1, .fluss h2 { hyphens: manual; text-wrap: balance; }
 </style>`;
 
 function webSeite({ titel, beschreibung, datei, inhalt }) {
@@ -449,15 +724,20 @@ function appKapitelHtml(kapitel, { rels, bildKarte, bildBasis }) {
   for (const block of kapitel.bloecke) {
     if (block.art === "tabelle") {
       schliesse();
-      teile.push(`      <div class="karte tabelle-wrapper">\n        ${tabelleHtml(block.xml, rels, "")}\n      </div>`);
+      // Wie auf der Website: gestapelte Karten für die schmale App statt
+      // einer über den Kartenrand hinaus scrollenden Tabelle (W9-Nachprüfung,
+      // App-Gegenstück zu web-chronik 1/2).
+      teile.push(
+        `      <div class="karte tabelle-wrapper">\n        ${tabelleHtml(block.xml, rels, "", { mitKarten: true })}\n      </div>`
+      );
       continue;
     }
     if (block.art === "bild") {
-      const name = bildKarte.get(block.datei);
-      if (!name) continue;
+      const daten = bildKarte.get(block.datei);
+      if (!daten) continue;
       schliesse();
       teile.push(`      <figure class="chronik-bild">
-        <img src="${bildBasis}${name}" alt="Historische Aufnahme aus der Vereinschronik" loading="lazy" decoding="async">
+        <img src="${bildBasis}${daten.name}" alt="Historische Aufnahme aus der Vereinschronik" loading="lazy" decoding="async">
         <figcaption class="chronik-bild__text" data-leer="ja"></figcaption>
       </figure>`);
       continue;
@@ -483,8 +763,12 @@ function appKapitelHtml(kapitel, { rels, bildKarte, bildBasis }) {
     }
     oeffne();
     if (block.art === "zitat") teile.push(`        <blockquote class="chronik-zitat">${html}</blockquote>`);
-    else if (block.art === "source") teile.push(`        <p class="chronik-quelle">${html}</p>`);
-    else teile.push(`        <p>${html}</p>`);
+    else if (block.art === "source") {
+      // Wie auf der Website: jede Fußnote als eigene Zeile (W9-Nachprüfung,
+      // web-chronik 17 war bislang nur auf den Website-Kapitelseiten
+      // umgesetzt, nicht in der App).
+      for (const zeile of fussnotenAufteilen(html)) teile.push(`        <p class="chronik-quelle">${zeile}</p>`);
+    } else teile.push(`        <p>${html}</p>`);
   }
   schliesse();
   return teile.join("\n");
@@ -500,14 +784,18 @@ function appSeite({ kapitel, bildKarte, rels, basisCss }) {
     .join("\n");
   // Blättern am Kapitelende wie auf der Website (‹ vorheriges · nächstes ›),
   // damit niemand zum Weiterlesen bis zur Kapitelwahl hochscrollen muss.
+  // Beschriftung mit dem vollen Titel ("1904 bis 1918"), nicht der kurzen
+  // Gedankenstrich-Form – dieselbe Schreibweise wie die Kapitelüberschrift
+  // und die Blätter-Leiste der Website (W9-Nachprüfung, Befund App: die
+  // kompakten Filter-Chips oben dürfen die Kurzform (k.kurz) behalten).
   const blaettern = (i) => {
     const vorher = kapitel[i - 1];
     const nachher = kapitel[i + 1];
     const knopf = (k, text) =>
       `<button class="tag filter-knopf kapitel-blaettern__knopf" type="button" data-kapitel="${escapeHtml(k.slug)}">${escapeHtml(text)}</button>`;
     return `      <div class="kapitel-blaettern">
-        ${vorher ? knopf(vorher, "‹ " + vorher.kurz) : "<span></span>"}
-        ${nachher ? knopf(nachher, nachher.kurz + " ›") : "<span></span>"}
+        ${vorher ? knopf(vorher, "‹ " + vorher.titel) : "<span></span>"}
+        ${nachher ? knopf(nachher, nachher.titel + " ›") : "<span></span>"}
       </div>`;
   };
   const abschnitte = kapitel
@@ -576,15 +864,39 @@ ${basisCss}
 
 .kapitel-lead { color: var(--ink-2); margin: calc(var(--sp-3) * -1) 0 var(--sp-4); }
 
-.chronik-bild { margin: 0 0 var(--sp-4); }
+/* Abstand oben wie unten (16px) – vorher stieß das Foto ohne Zwischenraum
+   an die vorangehende Karte (W9-Nachprüfung, App-Gegenstück zu
+   web-chronik 6). */
+.chronik-bild { margin: var(--sp-4) 0; }
 .chronik-bild img { width: 100%; height: auto; border-radius: var(--r-md); background: var(--blau-50); display: block; }
 .chronik-bild__text { font-size: 12px; line-height: 1.5; color: var(--ink-2); margin-top: var(--sp-2); }
 .chronik-zitat { margin: 0 0 var(--sp-3); padding-left: var(--sp-3); border-left: 3px solid var(--blau-700); font-style: italic; color: var(--ink-2); }
 .chronik-quelle { font-size: 12px; line-height: 1.55; color: var(--ink-2); margin: 0 0 var(--sp-2); }
+/* Roh getippte Adressen/Dateinamen: kleiner und mit overflow-wrap:anywhere,
+   wie auf der Website (W9-Nachprüfung, neu entdeckt: ohne diese Regel
+   liefen die neuen .chronik-adresse-Spannen über den Kartenrand hinaus,
+   weil sie hier keinen Umbruch bekamen). */
+.chronik-adresse { font-size: .9em; overflow-wrap: anywhere; }
 .chronik-tabelle { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 380px; }
 .chronik-tabelle th { background: var(--blau-700); color: var(--weiss); text-align: left; padding: 8px 10px; font-weight: 600; }
 .chronik-tabelle td { padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
 .chronik-tabelle tbody tr:nth-child(odd) { background: var(--blau-50); }
+/* Wie auf der Website: Tabelle auf der schmalen App durch gestapelte Karten
+   ersetzen statt sie über den Kartenrand hinauslaufen zu lassen
+   (W9-Nachprüfung, App-Gegenstück zu web-chronik 1/2). */
+.tabelle-wrapper .tabelle-wrap { overflow-x: auto; margin: 0; }
+.tabelle-karten { display: none; list-style: none; margin: 0; padding: 0; }
+.tabelle-karte { padding: var(--sp-3) 0; border-bottom: 1px solid var(--line); }
+.tabelle-karte:first-child { padding-top: 0; }
+.tabelle-karte__label { font-size: 12px; color: var(--ink-2); margin: 0 0 2px; }
+.tabelle-karte__haupt { font-weight: 600; margin: 0; }
+.tabelle-karte__kopf { font-weight: 600; margin: 0 0 2px; }
+.tabelle-karte__text { color: var(--ink-2); margin: 0; }
+.tabelle-karte__zeile { margin: 0; }
+@media (max-width: 599px) {
+  .tabelle-wrapper .tabelle-wrap { display: none; }
+  .tabelle-karten { display: block; }
+}
 .chronik-pdf { margin-top: var(--sp-6); }
 /* Gleichmäßige Innenabstände: erster und letzter Absatz ohne Außenrand */
 .kapitel .karte > :first-child { margin-top: 0; }
@@ -599,9 +911,7 @@ ${basisCss}
 
 <h1 class="visually-hidden">Vereinschronik</h1>
 
-<div class="karte">
-  <p>1904 bis 2026 – die Geschichte der Speuzer. Kapitel wählen und lesen.</p>
-</div>
+<p class="seitenkopf-lead">1904 bis 2026 – die Geschichte der Speuzer. Kapitel wählen und lesen.</p>
 
 <div class="filterleiste" aria-label="Kapitel">
 ${pillen}
@@ -713,44 +1023,49 @@ function main() {
   const bildBasisWeb = `${CDN}/images/`;
 
   // Kapitelseiten
-  // Blätter-Leiste: Epochenkapitel (Jahresspannen) bekommen wie überall in
-  // Knöpfen/Navigationselementen die kurze Gedankenstrich-Form (z. B.
-  // "1919–1933"); die beiden Nicht-Epochenkapitel "Mannschaften und
-  // Ehrenamt" sowie "Quellen und Anmerkungen" dürfen dort nicht gekürzt
-  // werden (k.kurz entfernt bei denen den Titelzusatz) und erscheinen mit
-  // vollem Titel.
-  const navTitel = (k) => (k.epoche ? k.kurz : k.titel);
+  // Blätter-Leiste: überall dieselbe Schreibweise wie in Übersicht und
+  // Kapitelüberschrift ("1919 bis 1933"), nicht die kurze
+  // Gedankenstrich-Form (W9, Befund web-chronik 13).
+  const navTitel = (k) => k.titel;
+  // Immer derselbe dreiteilige Baustein (Zurück / Alle Kapitel / Weiter):
+  // fehlt eine Seite (erstes bzw. letztes Kapitel), bleibt die Position als
+  // unsichtbarer Platzhalter leer, statt auf einen doppelten oder anderen
+  // Baustein auszuweichen (W9, Befunde web-chronik 3 und 4).
+  const kapitelnavHtml = (vorher, nachher) => {
+    const links = vorher
+      ? `<a class="kapitelnav__zurueck" href="chronik-${vorher.slug}.html">‹ ${escapeHtml(navTitel(vorher))}</a>`
+      : `<span class="kapitelnav__platz kapitelnav__platz--zurueck" aria-hidden="true"></span>`;
+    const rechts = nachher
+      ? `<a class="kapitelnav__weiter" href="chronik-${nachher.slug}.html">${escapeHtml(navTitel(nachher))} ›</a>`
+      : `<span class="kapitelnav__platz kapitelnav__platz--weiter" aria-hidden="true"></span>`;
+    return `<section class="abschnitt">
+  <div class="container">
+    <p class="kapitelnav">
+      ${links}
+      <a class="kapitelnav__alle" href="chronik.html">Alle Kapitel</a>
+      ${rechts}
+    </p>
+  </div>
+</section>`;
+  };
   const dateien = [];
   kapitel.forEach((k, i) => {
     const vorher = kapitel[i - 1];
     const nachher = kapitel[i + 1];
-    // Letztes Kapitel (kein "nachher"): nicht mit einem Link auf die
-    // fremde Seite "Über uns" enden, sondern zurück zur Kapitelübersicht.
-    const nav = nachher
-      ? `<section class="abschnitt">
-  <div class="container">
-    <p class="kapitelnav">
-      ${vorher ? `<a href="chronik-${vorher.slug}.html">‹ ${escapeHtml(navTitel(vorher))}</a>` : `<a href="chronik.html">‹ Übersicht</a>`}
-      <a href="chronik.html">Alle Kapitel</a>
-      <a href="chronik-${nachher.slug}.html">${escapeHtml(navTitel(nachher))} ›</a>
-    </p>
-  </div>
-</section>`
-      : `<section class="abschnitt">
-  <div class="container">
-    <p class="kapitelnav">
-      <span>${vorher ? `<a href="chronik-${vorher.slug}.html">‹ ${escapeHtml(navTitel(vorher))}</a> · ` : ""}<a href="chronik.html">Alle Kapitel</a></span>
-    </p>
-  </div>
-</section>`;
     const inhalt = [
       seitenkopf(
         `<a class="ruecklink" href="chronik.html">‹ Vereinschronik</a>`,
         k.titel,
-        k.lead
+        leadVon(k)
       ),
-      kapitelHtml(k, { rels, bildKarte, bildBasis: bildBasisWeb, quellenZiel: quellenDatei }),
-      nav,
+      kapitelHtml(k, {
+        rels,
+        bildKarte,
+        bildBasis: bildBasisWeb,
+        quellenZiel: quellenDatei,
+        bildbreiten: bildbreitenVon(k, bildKarte),
+      }),
+      kapitelnavHtml(vorher, nachher),
     ].join("\n");
     const datei = `chronik-${k.slug}.html`;
     writeFileSync(
@@ -769,16 +1084,29 @@ function main() {
   // Übersichtsseite mit Vorwort und Zeitleiste
   // "›" macht jeden Eintrag als Link erkennbar (CD-Glyphe statt "→", siehe
   // auch die Blätter-Leiste), statt sich allein auf :hover zu verlassen.
-  const zeitleiste = kapitel
-    .map(
-      (k) => `      <li class="zeitleiste__punkt">
+  // "Mannschaften und Ehrenamt" und "Quellen und Anmerkungen" sind keine
+  // Zeiträume: eigene Liste unter der Zeitachse, abgesetzt als "Anhang"
+  // (W9, Befund web-chronik 14).
+  const epochenKapitel = kapitel.filter((k) => k.epoche);
+  const anhangKapitel = kapitel.filter((k) => !k.epoche);
+  // Dieselbe Vorlage für Epochen UND Anhang: beide Listen bekommen je eine
+  // Unterzeile (leadVon liefert für den Anhang den festen Ersatztext, siehe
+  // ANHANG_UNTERZEILEN), zuvor fehlte sie beim Anhang (W9-Nachprüfung,
+  // Befund Chronik-Übersicht).
+  const zeitleisteEintrag = (k) => `      <li class="zeitleiste__punkt">
         <a class="zeitleiste__jahre" href="chronik-${k.slug}.html">${escapeHtml(k.titel)} ›</a>
-        <span class="zeitleiste__text">${escapeHtml(k.lead ?? "")}</span>
-      </li>`
-    )
-    .join("\n");
+        <span class="zeitleiste__text">${escapeHtml(leadVon(k) ?? "")}</span>
+      </li>`;
+  const zeitleiste = epochenKapitel.map(zeitleisteEintrag).join("\n");
+  const anhangListe = anhangKapitel.map(zeitleisteEintrag).join("\n");
   const vorwortHtml = vorwort
-    ? kapitelHtml(vorwort, { rels, bildKarte, bildBasis: bildBasisWeb, quellenZiel: quellenDatei })
+    ? kapitelHtml(vorwort, {
+        rels,
+        bildKarte,
+        bildBasis: bildBasisWeb,
+        quellenZiel: quellenDatei,
+        bildbreiten: bildbreitenVon(vorwort, bildKarte),
+      })
     : "";
   const uebersicht = [
     seitenkopf(
@@ -796,6 +1124,10 @@ function main() {
     <h2>Die Kapitel</h2>
     <ul class="zeitleiste">
 ${zeitleiste}
+    </ul>
+    <p class="zeitleiste__anhang-label">Anhang</p>
+    <ul class="zeitleiste zeitleiste--anhang">
+${anhangListe}
     </ul>
   </div>
 </section>`,
@@ -833,7 +1165,7 @@ ${zeitleiste}
     "utf8"
   );
   dateien.push(path.join("app", "Chronik-App.html"));
-  for (const name of bildKarte.values()) dateien.push(path.join("bilder", name));
+  for (const { name } of bildKarte.values()) dateien.push(path.join("bilder", name));
 
   // Manifest
   const manifest = {

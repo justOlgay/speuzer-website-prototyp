@@ -45,31 +45,28 @@
 .footer .appBanner { display: none; }
 
 @media only screen and (max-width: 1199px) {
+  /* Schmal: umbrechende Flex-Zeilen statt Raster, damit Kontaktzeile und
+     Knopfgruppe jeweils für sich mittig stehen (im Raster teilten sie sich
+     Spalten unterschiedlicher Breite und saßen versetzt). */
   .footer {
-    grid-template-columns: auto auto;
-    grid-template-areas:
-      "logo  logo"
-      "adr   adr"
-      "mail  tel"
-      "social social"
-      "impr  dsgvo";
+    display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    justify-items: center;
+    align-items: center;
     column-gap: 16px;
     row-gap: 10px;
     padding: 24px 16px 28px;
     text-align: center;
   }
-  .footer .footerLogo { flex-direction: column; gap: 6px; }
+  .footer .footerLogo { order: 1; flex: 0 0 100%; flex-direction: column; justify-content: center; gap: 6px; }
   .footer .footerCopy { white-space: normal; text-align: center; }
-  .footer .footerMail { justify-self: end; }
-  .footer .footerTel { justify-self: start; }
-  .footer .footerImprint { justify-self: end; }
-  .footer .DSGVO { justify-self: start; }
+  .footer .footerText { order: 2; flex: 0 0 100%; }
+  .footer .footerMail { order: 3; }
+  .footer .footerTel { order: 4; }
+  .footer .socialMedia { order: 5; flex: 0 0 100%; }
+  .footer .footerImprint { order: 6; }
+  .footer .DSGVO { order: 7; }
 }
 @media only screen and (max-width: 480px) {
-  .footer {
-    grid-template-areas: "logo logo" "adr adr" "mail mail" "tel tel" "social social" "impr dsgvo";
-  }
-  .footer .footerMail, .footer .footerTel { justify-self: center; white-space: normal; }
+  .footer .footerMail, .footer .footerTel { flex: 0 0 100%; white-space: normal; }
 }

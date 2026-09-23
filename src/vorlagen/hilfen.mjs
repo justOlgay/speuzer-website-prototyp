@@ -54,20 +54,51 @@ export function staffelLesbar(staffel) {
 
   const gruppeMatch = rest.match(/Gr\.\s*0*(\d+)\s*$/);
   const gruppe = gruppeMatch ? gruppeMatch[1] : null;
-  const gruppeHtml = gruppe ? `, Gruppe&nbsp;${escapeHtml(gruppe)}` : "";
+  // W9-A-Nachprüfung (web-390 Nr. 14): geschütztes Leerzeichen auch NACH dem
+  // Komma, nicht nur innerhalb von "Gruppe N" – sonst bricht die Zeile genau
+  // an der Komma-Leerstelle, "Gruppe 4"/"Gruppe 22" landeten dadurch allein
+  // in Zeile 2 (Entscheidung 2 verlangt Umbruch nur an " · ", nicht an jedem
+  // Komma innerhalb eines Segments).
+  const gruppeHtml = gruppe ? `,&nbsp;Gruppe&nbsp;${escapeHtml(gruppe)}` : "";
 
   if (ligaTeil === "Kinderfußball") {
     const plusEins = rest.match(/(\d+)\+1/);
     const vsMatch = rest.match(/(\d+)\s*vs\s*(\d+)/i);
     let spielform = "";
-    if (plusEins) spielform = `${plusEins[1]} gegen ${plusEins[1]} plus Torwart`;
-    else if (vsMatch) spielform = `${vsMatch[1]} gegen ${vsMatch[2]}`;
-    return spielform
-      ? `${escapeHtml(ligaTeil)} · ${escapeHtml(spielform)}${gruppeHtml}`
-      : `${escapeHtml(ligaTeil)}${gruppeHtml}`;
+    // W9-A, Entscheidung 2 (w9-gemeinsam.md): geschützte Leerzeichen, damit
+    // "4 gegen 4"/"plus Torwart" nicht am Zeilenende auseinanderbricht.
+    // Ziffern aus dem Regex-Treffer enthalten keine HTML-Sonderzeichen,
+    // deshalb hier ohne escapeHtml() direkt mit &nbsp;-Entities gebaut (ein
+    // escapeHtml() danach würde die Entities kaputt-escapen).
+    if (plusEins) spielform = `${plusEins[1]}&nbsp;gegen&nbsp;${plusEins[1]}&nbsp;plus&nbsp;Torwart`;
+    else if (vsMatch) spielform = `${vsMatch[1]}&nbsp;gegen&nbsp;${vsMatch[2]}`;
+    // W9-A, Entscheidung 2: das Wort "Kinderfußball" steht in der
+    // Unterzeile/Teamkarte nicht mehr (es steht schon in der Dachzeile bzw.
+    // der Gruppenüberschrift "Kinderfußball") – nur noch Spielform + Gruppe.
+    return spielform ? `${spielform}${gruppeHtml}` : `${escapeHtml(ligaTeil)}${gruppeHtml}`;
   }
 
-  return `${escapeHtml(ligaTeil)}${gruppeHtml}`;
+  // W9-A-Nachprüfung (web-390 Nr. 14): ALLE Leerzeichen im Liga-Namen
+  // geschützt (nicht nur nach einer Ordnungszahl wie "1." in "1.
+  // Kreisklasse") – sonst bricht z. B. "Kreisliga A" bei den Herren zwischen
+  // "Kreisliga" und "A" um. Liga-Namen sind kurz genug, um als Ganzes nicht
+  // umzubrechen; der einzige erlaubte Umbruchpunkt bleibt " · " zwischen den
+  // Segmenten (Entscheidung 2).
+  const ligaHtml = escapeHtml(ligaTeil).replace(/ /g, "&nbsp;");
+  return `${ligaHtml}${gruppeHtml}`;
+}
+
+// ---------- Team-Name geschützt (W9-A-Nachprüfung, neu_kaputt) ----------
+// Team-Karten (teamKarte() in index.mjs, "Weitere Mannschaften" in team.mjs)
+// bekamen durch die auf 260px erhöhte Mindestspurbreite von
+// .raster--mannschaften (komponenten.css) wieder genug Platz für die
+// meisten Titel – "1. Herrenmannschaft" blieb aber die längste Ordnungszahl
+// im Bestand und brach in schmaleren Karten weiterhin nach der Ordnungszahl
+// um ("1." / "HERRENMANNSCHAFT"). Geschütztes Leerzeichen nach einer
+// führenden Ordnungszahl wie "1.", analog zur Liga-Zeile in staffelLesbar()
+// oben.
+export function teamNameHtml(name) {
+  return escapeHtml(name ?? "").replace(/^(\d+)\.\s/, "$1.&nbsp;");
 }
 
 // ---------- Trainingsplatz aufgeteilt (W9, Abschnitt 4) ----------
@@ -226,6 +257,29 @@ export function reiterHtml(name, reiter) {
 // Knopftext und aria-expanded umschalten.
 export const SPIELE_KASTEN_SKRIPT = `<script>
 (function () {
+  // W9-A, Entscheidung 11 (w9-gemeinsam.md): Verlauf und Knopf nur zeigen,
+  // wenn der Inhalt die feste Höchsthöhe (.spiele-kasten max-height)
+  // tatsächlich überschreitet – per Messung nach der Höhenmeldung des
+  // FUSSBALL.DE-Widgets (das seine Höhe erst nach dem Laden per eigenem
+  // postMessage-Mechanismus setzt, siehe widgets.js). scrollHeight bleibt
+  // dabei die volle Inhaltshöhe, clientHeight die durch overflow:hidden
+  // geklemmte sichtbare Höhe – passt beides zusammen, gibt es nichts zu
+  // verbergen. ResizeObserver auf dem ersten Kind (.fussballde-wrap statt
+  // .spiele-kasten selbst, das dank overflow:hidden seine eigene Höhe nicht
+  // ändert) meldet jede spätere Höhenänderung des Widgets nach.
+  document.querySelectorAll('[data-spiele-kasten]').forEach(function (kasten) {
+    var block = kasten.closest('.spiele-kasten-block');
+    if (!block) return;
+    function pruefen() {
+      if (kasten.classList.contains('ist-offen')) return;
+      var passtVollstaendig = kasten.scrollHeight <= kasten.clientHeight + 2;
+      block.classList.toggle('spiele-kasten-block--kurz', passtVollstaendig);
+    }
+    if (window.ResizeObserver) {
+      new ResizeObserver(pruefen).observe(kasten.firstElementChild || kasten);
+    }
+    pruefen();
+  });
   document.querySelectorAll('[data-spiele-knopf]').forEach(function (knopf) {
     var block = knopf.closest('.spiele-kasten-block');
     var kasten = block && block.querySelector('[data-spiele-kasten]');

@@ -18,6 +18,7 @@ import {
   trainerFotosSkript,
   staffelLesbar,
   platzAufgeteilt,
+  teamNameHtml,
 } from "../../vorlagen/hilfen.mjs";
 // W9, Abschnitt 7: bild() wird hier direkt importiert (nicht über hilfen.mjs,
 // das bewusst ohne Abhängigkeit zu bild.mjs bleibt, siehe Kopf dieser Datei)
@@ -72,21 +73,54 @@ const TAG_KUERZEL = {
 // (Ergebnis bereits HTML-sicher, siehe staffelLesbar() in hilfen.mjs).
 function jahrgangPraefix(team) {
   const j = jahrgangText(team);
-  return j === "Senioren" ? j : `Jahrgang&nbsp;${escapeHtml(j)}`;
+  if (j === "Senioren") return j;
+  // W9-A-Nachprüfung (web-390 Nr. 14): auch Leerzeichen INNERHALB des
+  // Jahrgangswerts schützen (z. B. "2021 und jünger" bei der G-Jugend), sonst
+  // bricht die Zeile mitten im Wert um ("Jahrgang 2021 und" / "jünger").
+  return `Jahrgang&nbsp;${escapeHtml(j).replace(/ /g, "&nbsp;")}`;
 }
 
-function googleMapsUrl(adresse) {
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adresse)}`;
+// W9-A-Nachprüfung (Entscheidung 15/quervergleich Nr. 14): Google-Maps-
+// RICHTUNGSlink ("Route planen") statt des bisherigen Suchlinks – wie auf der
+// Website-Seite Kontakt (routePlanenUrl() in kontakt.mjs) und in der App.
+function routePlanenUrl(adresse) {
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(adresse)}`;
 }
 
 // Herren und A-Jugend spielen ihre Heimspiele am Römerhof (Anlage SW
 // Griesheim), alle anderen auf dem Vereinsplatz Mainzer Landstraße 480.
 function routeUrl(team, verein) {
   if ((team.heimspiele ?? "").includes("Römerhof")) {
-    return googleMapsUrl("Am Römerhof 9, 60486 Frankfurt am Main");
+    return routePlanenUrl("Am Römerhof 9, 60486 Frankfurt am Main");
   }
   const s = verein.sportstaette ?? {};
-  return googleMapsUrl(`${s.strasse ?? ""}, ${s.plz ?? ""} ${s.ort ?? ""}`.trim());
+  return routePlanenUrl(`${s.strasse ?? ""}, ${s.plz ?? ""} ${s.ort ?? ""}`.trim());
+}
+
+// W9-A, Entscheidung 4 (w9-gemeinsam.md): Adresse dreizeilig (Platzname /
+// Straße Nr. / PLZ Ort), PLZ und Ort sowie "SW Griesheim" mit geschütztem
+// Leerzeichen, damit nichts an ungünstiger Stelle umbricht (Prüfbefunde
+// web-390-mannschaften Nr. 17, quervergleich Nr. 28). data/teams.json hat
+// "heimspiele" seit der Datenaktualisierung einheitlich als "Platzname,
+// Straße Nr., PLZ Ort" (Entscheidung 3) – genau drei durch ", " getrennte
+// Teile. Nur lokal in team.mjs (kein Mannschafts-Helfer aus hilfen.mjs), die
+// Karte "Heimspiele"/"Unser Platz" ist die einzige Stelle in diesem Auftrag,
+// die eine vollständige Adresse zeigt.
+function adresseDreizeiligHtml(adresse) {
+  const teile = String(adresse ?? "").split(", ").map((t) => t.trim());
+  if (teile.length !== 3) {
+    return `<p>${escapeHtml(adresse ?? "")}</p>`;
+  }
+  const [platz, strasse, plzOrt] = teile;
+  const platzHtml = escapeHtml(platz).replace(/SW Griesheim/, "SW&nbsp;Griesheim");
+  const plzOrtHtml = escapeHtml(plzOrt)
+    .replace(/^(\d{5})\s/, "$1&nbsp;")
+    .replace(/\sam\s(Main)\b/, "&nbsp;am&nbsp;$1");
+  return `<p class="adresse-dreizeilig">
+        <span>${platzHtml}</span>
+        <span>${escapeHtml(strasse)}</span>
+        <span>${plzOrtHtml}</span>
+      </p>`;
 }
 
 function trainerMailtoHref(team) {
@@ -109,8 +143,16 @@ function trainingVollListe(team) {
 function beschreibung(team) {
   const j = jahrgangText(team);
   const jahrgangTeil = j === "Senioren" ? j : `Jahrgang ${j}`;
+  // W9-A-Nachprüfung (mannschaften-f1-1440-01.png): Kinderfußball (F1, F2,
+  // G-Jugend) hat laut Seite ausdrücklich weder Ligaspielplan noch Tabelle
+  // (siehe kinderfestivalAbschnitt() unten) – die Meta-description endete
+  // trotzdem auf "Spielplan und Tabelle.", das widerspricht der Seite selbst.
+  // "Kinderfestivals." statt des längeren "Kinderfestival-Termine." (bei der
+  // G-Jugend – Jahrgang "2021 und jünger", nur ein Trainingstermin – reißt
+  // sonst das 170-Zeichen-Gate in tools/pruefen.mjs, siehe Abschlussbericht).
+  const schluss = team.tabelle ? "Spielplan und Tabelle." : "Kinderfestivals.";
   const bauen = (trainingTeil) =>
-    `${team.name} des FFV Sportfreunde 04 (Frankfurt-Gallus): ${jahrgangTeil}, Training ${trainingTeil}, Ansprechpartner per Vereinsmail, Spielplan und Tabelle.`;
+    `${team.name} des FFV Sportfreunde 04 (Frankfurt-Gallus): ${jahrgangTeil}, Training ${trainingTeil}, Ansprechpartner per Vereinsmail, ${schluss}`;
   let text = bauen(trainingVollListe(team));
   if (text.length > 170) {
     const n = (team.training ?? []).length;
@@ -162,10 +204,19 @@ function generatorIframe(team, daten) {
   const gruppe = GRUPPE_JE_TEAM[team.slug];
   // Team-Vorauswahl des Generators: #<Reiter> öffnet den Reiter des Teams.
   const reiter = daten.widgets?.[team.slug]?.reiter ?? "";
-  const generatorUrl = `${GENERATOR_BASIS}app-${gruppe}.html${reiter ? "#" + encodeURIComponent(reiter) : ""}`;
+  // W9-A, Entscheidung 8 (w9-gemeinsam.md): "?einzeln" zeigt nur dieses Team
+  // (ohne Umschalter/Kopfzeile/eigenen Kinderfestival-Hinweis des Generators)
+  // – behebt auch den F1/F2-Umschalter, der bisher jeweils den Plan des
+  // anderen Teams öffnete (Prüfbefund web-1440-mannschaften Nr. 14).
+  const generatorUrl = `${GENERATOR_BASIS}app-${gruppe}.html?einzeln${reiter ? "#" + encodeURIComponent(reiter) : ""}`;
+  // W9-A, Entscheidung 8: eigene Legende je nach Team – "Termin" im
+  // Kinderfußball (Kinderfestival statt Spiel), sonst "Spiel".
+  const legende = team.tabelle
+    ? "Das nächste Spiel ist hervorgehoben."
+    : "Der nächste Termin ist hervorgehoben. Kurzfristige Absagen kommen vom Trainerteam.";
 
   return `<iframe src="${escapeHtml(generatorUrl)}" title="${escapeHtml(`Spielplan ${team.name} (Generator, DFBnet)`)}" loading="lazy" data-generator-iframe style="width:100%;border:0;border-radius:var(--r-lg);display:block;"></iframe>
-    <p class="meta">Das nächste Spiel ist hervorgehoben.</p>
+    <p class="meta">${legende}</p>
     <script>
     (function () {
       var iframe = document.querySelector('[data-generator-iframe]');
@@ -215,7 +266,7 @@ function spielplanDerSaisonInhalt(team, daten) {
   return `<h2>Spiele</h2>
     <div data-nur-appack hidden>
       ${spieleKastenHtml(widgetHtml)}
-      <p class="meta">Nächste Spiele zuerst – frühere Ergebnisse über die Pfeile im Kasten. Live von FUSSBALL.DE (DFBnet).</p>
+      <p class="meta">Nächste Spiele zuerst – frühere Ergebnisse über die Pfeile im Kasten. Live&nbsp;von&nbsp;FUSSBALL.DE.</p>
     </div>
     <div data-nur-prototyp>
       ${iframeHtml}
@@ -226,10 +277,12 @@ function spielplanDerSaisonInhalt(team, daten) {
 // übernommen; die dortige "Zur Tabelle"/"Mannschaft"-Karte entfällt, weil sie
 // auf genau diese Seite zurückverlinkt hätte) ----------
 
+// W9-A, Entscheidung 8 (w9-gemeinsam.md): geschützte Leerzeichen, fertige
+// HTML-Fragmente (kein escapeHtml() mehr nötig, reine Ziffern/Wörter).
 const KINDERFESTIVAL_SPIELFORM = {
-  f1: "4 gegen 4 plus Torwart",
-  f2: "4 gegen 4",
-  "g-jugend": "3 gegen 3",
+  f1: "4&nbsp;gegen&nbsp;4&nbsp;plus&nbsp;Torwart",
+  f2: "4&nbsp;gegen&nbsp;4",
+  "g-jugend": "3&nbsp;gegen&nbsp;3",
 };
 
 // W9, Abschnitt 6: die Kinderfestival-Erklärung (F1/F2/G-Jugend) steht jetzt
@@ -244,15 +297,16 @@ function tabelleInhalt(team, daten) {
 
   // W7, Abschnitt 4: die Tabelle bleibt vollständig (eigene Platzierung darf
   // nie abgeschnitten sein) und ohne zusätzliche Karte/Schatten um das
-  // Widget herum – nur die Beschriftungszeile ist wie bei "Spiele" klein und
-  // einheitlich ("Live von FUSSBALL.DE …").
+  // Widget herum.
+  // W9-A, Entscheidung 12 (w9-gemeinsam.md): ein ganzer, wörtlicher Satz
+  // "Die Tabelle lässt sich seitlich wischen. Live&nbsp;von&nbsp;FUSSBALL.DE." statt
+  // der bisherigen zwei Zeilen (Prüfbefund web-390-mannschaften Nr. 33).
   return `<h2>Tabelle</h2>
     <div data-nur-appack hidden>
       <div class="fussballde-wrap">
         <div class="fussballde_widget" data-id="${escapeHtml(tabelleWidgetId)}" data-type="table"></div>
       </div>
-      <p class="meta fussballde-hinweis">Tabelle seitlich wischbar</p>
-      <p class="meta">Live von FUSSBALL.DE (DFBnet).</p>
+      <p class="meta">Die Tabelle lässt sich seitlich wischen. Live&nbsp;von&nbsp;FUSSBALL.DE.</p>
     </div>
     <div data-nur-prototyp>
       ${eigene ? `<p class="meta">Platz ${eigene.platz} von ${tabelleEintrag.zeilen.length} · ${eigene.punkte} Punkte</p>` : ""}
@@ -260,13 +314,15 @@ function tabelleInhalt(team, daten) {
     </div>`;
 }
 
-// W9, Abschnitt 6: Kinderfestival-Erklärung einmal, mit Spielform, VOR dem
-// Spielplan (Wortlaut-Vorschlag aus der Prüf-Spezifikation übernommen).
+// W9-A, Entscheidung 8 (w9-gemeinsam.md): EINE Kinderfestival-Erklärung im
+// verbindlichen Wortlaut statt der bisherigen zwei Sätze – das Thema stand
+// sonst bis zu dreimal auf derselben Seite (Kopf, dieser Abschnitt,
+// Kleingedrucktes unter dem Plan; Prüfbefunde web-1440-mannschaften Nr. 15,
+// web-390-mannschaften Nr. 21).
 function kinderfestivalAbschnitt(team) {
   const spielform = KINDERFESTIVAL_SPIELFORM[team.slug] ?? "";
   return `<h2>Kinderfestivals</h2>
-    <p>Kinderfestivals statt Ligabetrieb: mehrere Vereine treffen sich zu einem Spieltag, ${escapeHtml(spielform)} wird gespielt.</p>
-    <p class="meta">Keine Tabellen, keine Ergebnisse: Spaß und Ballkontakte zählen.</p>`;
+    <p>Im Kinderfußball gibt es keine Ligaspiele und keine Tabellen, sondern Kinderfestivals – bei uns oder bei einem anderen Verein. Gespielt wird ${spielform}. Der Kreis setzt die Termine in Blöcken an, deshalb reicht der Plan nur wenige Wochen voraus.</p>`;
 }
 
 // ---------- Spiele & Tabelle mit Umschalter (W7b, Olgay 23.09.2026) ----------
@@ -279,8 +335,13 @@ function spieleUndTabelleInhalt(team, daten) {
   const spieleWidgetId = daten.widgets?.[team.slug]?.spiele ?? "";
   const tabelleWidgetId = daten.widgets?.[team.slug]?.tabelle ?? "";
   if (!team.tabelle) {
+    // W9-A-Nachprüfung (web-1440 Nr. 15): "Spielplan der Saison" widersprach
+    // dem Satz direkt darüber ("… reicht der Plan nur wenige Wochen voraus")
+    // und der Überschrift "BISHER ANGESETZT" im eingebetteten Generator –
+    // beide sagen, dass hier kein voller Saisonplan steht, sondern die bisher
+    // angesetzten Termine.
     return `${kinderfestivalAbschnitt(team)}
-    <h2>Spielplan der Saison</h2>
+    <h2>Bisher angesetzt</h2>
     ${generatorIframe(team, daten)}`;
   }
   if (!spieleWidgetId || !tabelleWidgetId) {
@@ -292,12 +353,11 @@ function spieleUndTabelleInhalt(team, daten) {
   const spieleHtml = `${spieleKastenHtml(`<div class="fussballde-wrap">
         <div class="fussballde_widget" data-id="${escapeHtml(spieleWidgetId)}" data-type="team-matches"></div>
       </div>`)}
-        <p class="meta">Nächste Spiele zuerst – frühere Ergebnisse über die Pfeile im Kasten. Live von FUSSBALL.DE (DFBnet).</p>`;
+        <p class="meta">Nächste Spiele zuerst – frühere Ergebnisse über die Pfeile im Kasten. Live&nbsp;von&nbsp;FUSSBALL.DE.</p>`;
   const tabelleHtml = `<div class="fussballde-wrap">
           <div class="fussballde_widget" data-id="${escapeHtml(tabelleWidgetId)}" data-type="table"></div>
         </div>
-        <p class="meta fussballde-hinweis">Tabelle seitlich wischbar</p>
-        <p class="meta">Live von FUSSBALL.DE (DFBnet).</p>`;
+        <p class="meta">Die Tabelle lässt sich seitlich wischen. Live&nbsp;von&nbsp;FUSSBALL.DE.</p>`;
   return `<h2>Spiele &amp; Tabelle</h2>
     <div data-nur-appack hidden>
       ${reiterHtml(team.slug, [
@@ -313,15 +373,45 @@ function spieleUndTabelleInhalt(team, daten) {
 
 // ---------- Seitenkopf ----------
 
+// W9-A, Entscheidung 2 (w9-gemeinsam.md): Unterzeile Teamseite. Herren nur
+// die Staffel (kein "Senioren" davor, die Dachzeile "Mannschaft · Senioren"
+// direkt darüber nennt die Kategorie schon, siehe Prüfbefunde
+// web-1440-mannschaften Nr. 34/web-390-mannschaften Nr. 32). Alle anderen:
+// Jahrgang · Staffel wie bisher (staffelLesbar() lässt bei Kinderfußball-
+// Staffeln seit W9-A das Wort "Kinderfußball" selbst schon weg, siehe
+// hilfen.mjs).
+function unterzeileTeam(team) {
+  // W9-A-Nachprüfung (tools/pruefen.mjs, 320px, mannschaften-f1): das Staffel-
+  // Segment in ein eigenes Sicherheitsnetz-Span verpackt (siehe
+  // .team-unterzeile-staffel in komponenten.css) – die Segmente sind jetzt
+  // vollständig umbruchfrei (web-390 Nr. 14), das reißt bei sehr langen
+  // Kombinationen wie F1 ("4 gegen 4 plus Torwart, Gruppe 2") sonst die
+  // 320px-Mindestbreite.
+  const staffel = `<span class="team-unterzeile-staffel">${staffelLesbar(team.staffel)}</span>`;
+  return team.kategorie === "Senioren" ? staffel : `${jahrgangPraefix(team)} · ${staffel}`;
+}
+
 function seitenkopfAbschnitt(team) {
+  // W9-A, Entscheidung 8 (w9-gemeinsam.md): "Spielbetrieb: …" entfällt im
+  // Kinderfußball (F1/F2/G-Jugend) – dort gibt es keinen Ligabetrieb, die
+  // Spielform steht schon in der Unterzeile, siehe Prüfbefund
+  // web-390-mannschaften Nr. 21. Sonst fester Abstand von 12px zum Teamsatz
+  // (.seitenkopf .teamtext + .meta in komponenten.css), unabhängig vom
+  // aktiven Reiter weiter unten (siehe Prüfbefund web-390-mannschaften
+  // Nr. 26). "ab Oktober" geschützt (w9-a.md), damit "Oktober" nicht allein
+  // in der zweiten Zeile steht (Prüfbefund web-390-mannschaften Nr. 26).
+  const spielbetriebText = String(team.spielbetrieb ?? "").replace(/ab Oktober/, "ab Oktober");
+  const spielbetriebZeile = team.tabelle
+    ? `<p class="meta">Spielbetrieb: ${escapeHtml(spielbetriebText)}.</p>`
+    : "";
   return `<section class="abschnitt seitenkopf">
   <div class="container">
     ${ruecklink(`${PFAD}mannschaften/`, "Mannschaften")}
     <p class="meta">Mannschaft · ${escapeHtml(team.gruppe ?? "")}</p>
     <h1>${escapeHtml(team.name)}</h1>
-    <p class="seitenkopf__lead">${jahrgangPraefix(team)} · ${staffelLesbar(team.staffel)}</p>
+    <p class="seitenkopf__lead">${unterzeileTeam(team)}</p>
     ${team.beschreibung ? `<p class="inhalt teamtext">${escapeHtml(team.beschreibung)}</p>` : ""}
-    <p class="meta">Spielbetrieb: ${escapeHtml(team.spielbetrieb ?? "")}.</p>
+    ${spielbetriebZeile}
   </div>
 </section>`;
 }
@@ -331,29 +421,20 @@ function seitenkopfAbschnitt(team) {
 function hauptspalte(team, daten) {
   const verein = daten.verein ?? {};
 
-  // W9, Abschnitt 4: der gemeinsame Trainingsort steht einmal oberhalb der
-  // Liste, die einzelnen Zeilen zeigen nur noch "Tag · Uhrzeit · Platzteil"
-  // (siehe platzAufgeteilt()/trainingsZeilen() in hilfen.mjs). Herren: die
-  // volle Rebstock-Adresse steht nur im Hinweiskasten, die Zeilen zeigen nur
-  // das Kurzwort "Rebstock" (team.platz hat hier keinen Komma-getrennten
-  // Platzteil, eigene externe Anlage ohne Halb-/Tor-Aufteilung). A-Jugend:
-  // die zwei bisherigen Hinweiskästen (der allgemeine Trainingsort-Hinweis
-  // und der bestehende Heimspiele/Rebstock-Hinweis) sind zu einem
-  // zusammengefasst – der bestehende Kasten nennt jetzt zusätzlich die volle
-  // Vereinsplatz-Adresse (schon in team.platz vorhanden), statt einen
-  // zweiten, eigenen Ort-Absatz danach zu zeigen.
+  // W9-A, Entscheidung 9 (w9-gemeinsam.md): überall dieselbe graue Zeile
+  // "Trainingsort: …" – keine zusätzlichen blauen Hinweiskästen mehr für
+  // Herren/A-Jugend (Prüfbefunde web-1440-mannschaften Nr. 10, Nr. 16;
+  // web-390-mannschaften Nr. 29). Der Heimspielort steht nur noch in der
+  // Karte "Heimspiele" (siehe heimspieleKarte() unten) – die A-Jugend
+  // trainiert wie alle Jugendteams auf dem Vereinsplatz und braucht deshalb
+  // keinen Sonderfall mehr, nur die Herren trainieren extern am Rebstock
+  // (team.platz hat dort keinen Komma-getrennten Platzteil, eigene externe
+  // Anlage ohne Halb-/Tor-Aufteilung, siehe platzAufgeteilt()).
   let ortHinweis;
   let trainingsPlatzteil;
   if (team.slug === "herren") {
-    ortHinweis = `<div class="hinweis hinweis--info">
-      <p style="margin:0;">Die Herren trainieren und spielen extern auf der Bezirkssportanlage am Rebstock (Anlage von SW Griesheim), Am Römerhof 9, 60486 Frankfurt.</p>
-    </div>`;
+    ortHinweis = `<p class="meta">Trainingsort: Bezirkssportanlage am Rebstock (SW&nbsp;Griesheim).</p>`;
     trainingsPlatzteil = "Rebstock";
-  } else if (team.slug === "a-jugend") {
-    ortHinweis = `<div class="hinweis hinweis--info">
-      <p style="margin:0;">Training auf dem Vereinsplatz Mainzer Landstraße 480, Heimspiele auf der Anlage von SW Griesheim am Rebstock (Am Römerhof 9).</p>
-    </div>`;
-    trainingsPlatzteil = platzAufgeteilt(team).teil;
   } else {
     const { ort, teil } = platzAufgeteilt(team);
     ortHinweis = ort ? `<p class="meta">Trainingsort: ${escapeHtml(ort)}.</p>` : "";
@@ -436,33 +517,46 @@ function seitenspalte(team, daten) {
     .map((name, i) => trainerZeileHtml(name, i, "", trainerVorstandsBildHtml(name, i, daten, PFAD)))
     .join("\n        ");
 
+  // W9-A, Entscheidung 10 (w9-gemeinsam.md): "Die Nachricht geht an:" und die
+  // Adresse in einer eigenen Zeile (weißer statt hinter einem Doppelpunkt
+  // im Fließtext versteckt), nowrap + größerer text-underline-offset gegen
+  // das Umbrechen/die schwer erkennbaren Unterstriche vor dem "@"
+  // (Prüfbefunde web-1440-mannschaften Nr. 11, web-390-mannschaften Nr. 16).
   const ansprechpartnerKarte = `<div class="karte fluss">
       <h2 class="karte__titel">${escapeHtml(kartenTitel)}</h2>
       <div class="person-mini-liste">
         ${trainerZeilen}
       </div>
-      <p class="knopfzeile">
+      <p class="knopfzeile knopfzeile--voll">
         <a class="knopf" href="${escapeHtml(trainerMailtoHref(team))}">E-Mail an das Trainerteam</a>
       </p>
-      <p class="meta">Die Nachricht geht an ${mailLink(team.mail)}.</p>
+      <p class="meta">Die Nachricht geht an:<br><span class="trainerteam-adresse">${mailLink(team.mail)}</span></p>
     </div>`;
 
+  // W9-A, Entscheidung 8: die Karte heißt im Kinderfußball (kein Ligabetrieb,
+  // kein "Heimspiel") "Unser Platz" statt "Heimspiele" (Prüfbefund
+  // web-1440-mannschaften Nr. 29).
+  // W9-A, Entscheidung 4: Adresse dreizeilig (Platzname / Straße Nr. / PLZ
+  // Ort), siehe adresseDreizeiligHtml() unten (Prüfbefunde
+  // web-390-mannschaften Nr. 17, quervergleich Nr. 28).
+  const heimspieleTitel = team.tabelle ? "Heimspiele" : "Unser Platz";
   const heimspieleKarte = `<div class="karte fluss">
-      <h2 class="karte__titel">Heimspiele</h2>
-      <p>${escapeHtml(team.heimspiele ?? "")}</p>
-      <p class="knopfzeile">
-        <a class="knopf knopf--sekundaer" href="${escapeHtml(routeUrl(team, verein))}" rel="noopener" target="_blank">Route</a>
+      <h2 class="karte__titel">${heimspieleTitel}</h2>
+      ${adresseDreizeiligHtml(team.heimspiele)}
+      <p class="knopfzeile knopfzeile--voll">
+        <a class="knopf knopf--sekundaer" href="${escapeHtml(routeUrl(team, verein))}" rel="noopener" target="_blank">Route planen</a>
       </p>
     </div>`;
 
-  // W9, Abschnitt 9: Linktexte ohne Fachkürzel ("(ICS)" ist für Laien
-  // unverständlich), stattdessen "… {Kürzel} abonnieren". Hinweissatz
+  // W9-A, Entscheidung 7 (w9-gemeinsam.md): Linktexte ohne Team-Kürzel (die
+  // Seite nennt das Team schon im Titel), dafür mit "›" (Prüfbefunde
+  // web-1440-mannschaften Nr. 22, web-390-mannschaften Nr. 30). Hinweissatz
   // wörtlich, geschütztes Leerzeichen vor dem letzten Wort.
   const kalenderBasis = verein.kalender_basis ?? "";
   const kalenderKarte = `<div class="karte fluss">
       <h2 class="karte__titel">Kalender abonnieren</h2>
-      <p><a href="${escapeHtml(kalenderBasis + (team.kalender ?? ""))}">Spielplan ${escapeHtml(team.kurz)} abonnieren</a></p>
-      <p><a href="${escapeHtml(kalenderBasis + (team.trainingsKalender ?? ""))}">Trainingszeiten ${escapeHtml(team.kurz)} abonnieren</a></p>
+      <p><a href="${escapeHtml(kalenderBasis + (team.kalender ?? ""))}">Spielplan abonnieren ›</a></p>
+      <p><a href="${escapeHtml(kalenderBasis + (team.trainingsKalender ?? ""))}">Trainingszeiten abonnieren ›</a></p>
       <p class="meta">Einmal abonnieren – Verlegungen kommen automatisch&nbsp;an.</p>
     </div>`;
 
@@ -494,28 +588,43 @@ function seitenspalte(team, daten) {
 function weitereMannschaftenAbschnitt(team, daten) {
   const alleTeams = daten.teams ?? [];
   const aktuellerIndex = alleTeams.findIndex((t) => t.slug === team.slug);
+  // W9-A, Entscheidung 6 (w9-gemeinsam.md): Auswahl bleibt wie bisher (vier
+  // Alters-Nachbarn, nach Abstand sortiert), aber angezeigt in der
+  // Reihenfolge der Übersicht (zweiter, stabiler Sortierschritt nach dem
+  // ursprünglichen Index) – vorher sprang die Reihenfolge abwechselnd
+  // −1/+1/−2/+2 (Prüfbefunde web-1440-mannschaften Nr. 8, web-390-
+  // mannschaften Nr. 13, quervergleich Nr. 23).
   const andere = alleTeams
-    .map((t, index) => ({ t, abstand: Math.abs(index - aktuellerIndex) }))
+    .map((t, index) => ({ t, index, abstand: Math.abs(index - aktuellerIndex) }))
     .filter(({ t }) => t.slug !== team.slug)
     .sort((a, b) => a.abstand - b.abstand)
     .slice(0, 4)
+    .sort((a, b) => a.index - b.index)
     .map(({ t }) => t);
 
-  // W9, Abschnitt 10: gleicher Linktext wie auf der Übersicht ("Zur
-  // Mannschaft ›", siehe teamKarte() in index.mjs).
+  // W9-A, Entscheidung 6: auf dem Handy dieselben kompakten Listenzeilen wie
+  // auf der Mannschaften-Übersicht (Name, Jahrgang, "›", ganze Zeile
+  // tippbar) statt eigener, unruhiger 137px-Karten (Prüfbefund
+  // web-390-mannschaften Nr. 12) – über dieselben Klassen wie teamKarte() in
+  // index.mjs (.team-karte/.raster--mannschaften), auf dem Desktop bleibt
+  // dadurch unverändert das 4-Spalten-Raster (W9, Abschnitt 10: gleicher
+  // Linktext "Zur Mannschaft ›" wie auf der Übersicht).
   const karten = andere
     .map(
-      (t) => `<a class="karte karte--link" href="${PFAD}mannschaften/${t.slug}/">
-      <span class="karte__titel">${escapeHtml(t.name)}</span>
-      <span class="karte__meta">${jahrgangPraefix(t)}</span>
+      (t) => `<a class="karte karte--link team-karte" href="${PFAD}mannschaften/${t.slug}/">
+      <span class="team-karte__haupt">
+        <span class="karte__titel">${teamNameHtml(t.name)}</span>
+        <span class="karte__meta">${jahrgangPraefix(t)}</span>
+      </span>
       <span class="karte__mehr">Zur Mannschaft ›</span>
+      <span class="team-karte__pfeil" aria-hidden="true">›</span>
     </a>`
     )
     .join("\n    ");
 
   const weitereBlock = andere.length
     ? `<h2>Weitere Mannschaften</h2>
-    <div class="raster raster--4">
+    <div class="raster raster--mannschaften">
     ${karten}
     </div>`
     : "";
