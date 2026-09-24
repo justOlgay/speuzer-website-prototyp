@@ -511,60 +511,41 @@ svg { display: block; flex: 0 0 auto; }
 /* === 6. Parkplatzhinweis === */
 
 /* HINWEIS-Baustein: im CMS-Quelltext pflegen oder samt <aside> entfernen.
-   Getönte Fläche mit umrandetem "P" statt vollflächigem Schild (Jury-
-   Empfehlung aus Entwurf C: ruhiger als die kräftigste Farbfläche der
-   Seite). Eigene Gültigkeitszeile, damit sie leicht zu pflegen ist. */
+   Seit 24.09.2026 bewusst leise (Rückmeldung der Jugendleitung am iPhone:
+   die getönte Karte war „deutlich zu prominent und groß“): keine Fläche,
+   kein Rahmen, nur ein Absatz wie eine Fußnote über den Knöpfen, links von
+   einer feinen Linie in Vereinsblau abgesetzt. Das „P“ steht klein im Satz,
+   die Gültigkeit am Satzende. Textlänge: heute gut 130 Zeichen = 3 Zeilen
+   ab 360 px Breite; deutlich länger wird vierzeilig. */
 .hinweis-karte {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding: var(--sp-4);
-  background: var(--blau-50);
-  border: 1px solid var(--blau-100);
-  border-radius: var(--r-lg);
-}
-
-.p-schild {
-  flex: 0 0 auto;
-  width: 34px;
-  height: 34px;
-  border: 2px solid var(--blau-700);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--blau-700);
-  font-family: var(--font-head);
-  font-weight: 700;
-  font-size: 20px;
-  line-height: 30px;
-  text-align: center;
-}
-
-.hinweis__titel {
-  font-weight: 600;
-  font-size: 15px;
-  line-height: 1.3;
-  color: var(--blau-950);
-  text-wrap: balance;
-}
-
-.hinweis__text {
-  margin-top: 3px;
-  font-size: 14px;
-  line-height: 1.45;
+  padding: 1px 0 1px var(--sp-3);
+  border-left: 2px solid var(--blau-500);
+  font-size: 13px;
+  line-height: 1.5;
   color: var(--ink-2);
   text-wrap: pretty;
 }
 
-.hinweis__gueltig {
-  display: flex;
-  align-items: flex-start;
-  gap: 5px;
-  margin-top: 6px;
-  font-size: 13px;
-  color: var(--ink-3);
+.p-schild {
+  display: inline-block;
+  width: 17px;
+  height: 17px;
+  margin-right: 6px;
+  border: 1.5px solid var(--blau-700);
+  border-radius: 4px;
+  color: var(--blau-700);
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 12.5px;
+  line-height: 14px;
+  text-align: center;
+  vertical-align: -3px;
 }
 
-.hinweis__gueltig svg { flex: 0 0 auto; width: 15px; height: 15px; margin-top: 1px; }
+.hinweis__titel {
+  font-weight: 600;
+  color: var(--blau-950);
+}
 
 /* === 7. Handlungen === */
 
@@ -692,12 +673,7 @@ svg { display: block; flex: 0 0 auto; }
 
     <!-- HINWEIS: im CMS-Quelltext pflegen oder samt <aside> entfernen -->
     <aside class="hinweis-karte" aria-label="Hinweis">
-      <span class="p-schild" aria-hidden="true">P</span>
-      <div>
-        <p class="hinweis__titel">Parkplatz wegen Neubau gesperrt</p>
-        <p class="hinweis__text">Zugang über den Hintereingang am „Haus der Jugend“ (Pavillon).</p>
-        <p class="hinweis__gueltig"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span>Voraussichtlich bis Ende&nbsp;Januar&nbsp;2027</span></p>
-      </div>
+      <p><span class="p-schild" aria-hidden="true">P</span><strong class="hinweis__titel">Parkplatz wegen Neubau gesperrt.</strong> Zugang über den Hintereingang am „Haus&nbsp;der&nbsp;Jugend“ (Pavillon), voraussichtlich bis&nbsp;Ende&nbsp;Januar&nbsp;2027.</p>
     </aside>
 
     <div class="aktionen">
