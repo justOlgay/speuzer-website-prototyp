@@ -524,7 +524,7 @@ function druckeMesstabelle(ergebnisse) {
 
 // ---------- Startseite_v3.tpl (B1) – bestehendes Verhalten, unverändert ----------
 
-async function renderStartseite(browser, ergebnisse, bilderFuerKontaktbogen) {
+async function renderStartseite(browser, ergebnisse, bilderFuerKontaktbogen, mockWorksheets) {
   const tplPfad = path.join(APP_DIR, "Startseite_v3.tpl");
   if (!existsSync(tplPfad)) {
     console.warn("  Startseite_v3.tpl fehlt, übersprungen.");
@@ -547,12 +547,12 @@ async function renderStartseite(browser, ergebnisse, bilderFuerKontaktbogen) {
   const htmlGast = await rendereUndSpeichere(tplPfad, scopeGast, "_start-v3-gast.html");
 
   console.log("Rendere Startseite_v3.tpl (angemeldet) …");
-  const eAngemeldet = await screenshotTpl(browser, htmlAngemeldet, "start-v3", {});
+  const eAngemeldet = await screenshotTpl(browser, htmlAngemeldet, "start-v3", mockWorksheets || {});
   ergebnisse.push(eAngemeldet);
   bilderFuerKontaktbogen.push({ beschriftung: "Startseite_v3.tpl (angemeldet)", pfad: eAngemeldet.zielViewport });
 
   console.log("Rendere Startseite_v3.tpl (Gast) …");
-  const eGast = await screenshotTpl(browser, htmlGast, "start-v3-gast", {});
+  const eGast = await screenshotTpl(browser, htmlGast, "start-v3-gast", mockWorksheets || {});
   ergebnisse.push(eGast);
   bilderFuerKontaktbogen.push({ beschriftung: "Startseite_v3.tpl (Gast)", pfad: eGast.zielViewport });
 
@@ -602,6 +602,12 @@ async function renderSpielplanApp(browser, ergebnisse, bilderFuerKontaktbogen) {
 async function main() {
   if (!existsSync(APP_DIR)) throw new Error(`Ordner fehlt: ${APP_DIR}`);
   const mockWorksheets = existsSync(MOCK_WORKSHEETS_PFAD) ? JSON.parse(readFileSync(MOCK_WORKSHEETS_PFAD, "utf8")) : {};
+  // 24.09.2026: echte Worksheet-Zeilen (z. B. Sponsoren fürs Laufband der
+  // Startseite) per TPL_VORSCHAU_WORKSHEETS=<json> über die Mocks legen
+  // (gleiche Schlüssel = Workbook-ID ersetzen). Datei liegt in tools/cache/.
+  if (process.env.TPL_VORSCHAU_WORKSHEETS) {
+    Object.assign(mockWorksheets, JSON.parse(readFileSync(path.resolve(process.env.TPL_VORSCHAU_WORKSHEETS), "utf8")));
+  }
   mkdirSync(ZIEL, { recursive: true });
 
   const arg = process.argv[2];
@@ -619,7 +625,7 @@ async function main() {
   try {
     for (const dateiname of tplDateien) {
       if (dateiname === "Startseite_v3.tpl") {
-        await renderStartseite(browser, ergebnisse, bilderFuerKontaktbogen);
+        await renderStartseite(browser, ergebnisse, bilderFuerKontaktbogen, mockWorksheets);
       } else {
         await renderVereinsseite(browser, dateiname, mockWorksheets, ergebnisse, bilderFuerKontaktbogen);
       }

@@ -258,6 +258,27 @@
       }
     }
   },
+  "sponsor-koehler": {
+    "breite": 1477,
+    "hoehe": 586,
+    "varianten": {
+      "480": {
+        "avif": "sponsor-koehler-480.avif",
+        "webp": "sponsor-koehler-480.webp",
+        "jpg": "sponsor-koehler-480.jpg"
+      },
+      "960": {
+        "avif": "sponsor-koehler-960.avif",
+        "webp": "sponsor-koehler-960.webp",
+        "jpg": "sponsor-koehler-960.jpg"
+      },
+      "1440": {
+        "avif": "sponsor-koehler-1440.avif",
+        "webp": "sponsor-koehler-1440.webp",
+        "jpg": "sponsor-koehler-1440.jpg"
+      }
+    }
+  },
   "sponsor-sk-sportconnects-gbr": {
     "breite": 1500,
     "hoehe": 418,
