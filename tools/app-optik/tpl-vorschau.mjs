@@ -35,11 +35,12 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-const APP_DIR = path.join(ROOT, "assets", "app");
+// Für parallele Entwürfe: Quell- und Zielordner per Umgebung überschreibbar.
+const APP_DIR = process.env.TPL_VORSCHAU_APP_DIR ? path.resolve(process.env.TPL_VORSCHAU_APP_DIR) : path.join(ROOT, "assets", "app");
 const MOCK_START_PFAD = path.join(ROOT, "tools", "app-optik", "mock-start.json");
 const MOCK_WORKSHEETS_PFAD = path.join(ROOT, "tools", "app-optik", "mock-worksheets.json");
 const VERGLEICH_PFAD = path.join(ROOT, "docs", "app-konzept", "start.html");
-const ZIEL = path.join(ROOT, "tools", "cache", "app-optik", "tpl-vorschau");
+const ZIEL = process.env.TPL_VORSCHAU_ZIEL ? path.resolve(process.env.TPL_VORSCHAU_ZIEL) : path.join(ROOT, "tools", "cache", "app-optik", "tpl-vorschau");
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 
 const BREITE = 390;
