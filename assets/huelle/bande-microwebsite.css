@@ -1,0 +1,214 @@
+/* Speuzer: Sponsoren-„Bande“ auf der Website-Startseite (24.09.2026).
+   Stilblock für Microwebsite.tpl (<style id="speuzer-bande"> vor </head>),
+   Gegenstück zur Bande der App-Startseite (assets/app/Startseite_v3.tpl,
+   Abschnitt 4a). Das Skript (bande-microwebsite.js) hängt die Bande an den
+   unteren Rand des Startbilds (.wide); sie ist nur auf „Start“ zu sehen –
+   sobald die Hülle eine Seite im Rahmen #showFrame zeigt (Inline-Stil
+   display: block), blendet die Geschwisterregel unten sie aus. */
+
+/* Bezugsrahmen für die Bande; .wide ist so groß wie der erste Bildschirm,
+   der zentrierte Startsatz bleibt dadurch an derselben Stelle. */
+.wide { position: relative; }
+
+/* Startsatz eine halbe Bandenhöhe höher, damit er auch auf niedrigen
+   Bildschirmen nicht in die Bande ragt. */
+.wide.speuzer-mit-bande .textOverlay {
+  top: calc(50% - var(--sb-platz, 0px) / 2) !important;
+}
+
+.speuzer-bande {
+  --sb-rand: clamp(16px, 5vw, 40px);
+  --sb-logo-max-hoehe: 44px;
+  --sb-logo-max-breite: 150px;
+  --sb-logo-flaeche: 3300;
+  --sb-tafel-luft: 8px;
+  --sb-tafel-hoehe: calc(var(--sb-logo-max-hoehe) + 2 * var(--sb-tafel-luft));
+  --sb-tafel-abstand: 10px;
+  --sb-schiene-luft: 9px;
+  --sb-kopf: 20px;
+  --sb-luft: 10px;
+  --sb-unten: clamp(20px, 4vh, 40px);
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--sb-unten);
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 360ms ease-out;
+  font-family: "Inter", system-ui, Arial, sans-serif;
+  color: #FFFFFF;
+}
+
+@media (min-width: 900px) {
+  .speuzer-bande {
+    --sb-logo-max-hoehe: 52px;
+    --sb-logo-max-breite: 180px;
+    --sb-logo-flaeche: 4600;
+    --sb-tafel-luft: 10px;
+    --sb-tafel-abstand: 14px;
+    --sb-schiene-luft: 12px;
+    --sb-kopf: 22px;
+    --sb-luft: 12px;
+  }
+}
+
+.speuzer-bande--bereit { opacity: 1; }
+
+/* Seite im Rahmen offen (Menüpunkt, Impressum, Datenschutz): Bande weg. */
+#showFrame[style*="display: block"] ~ .speuzer-bande { display: none; }
+
+/* Sehr niedrige Fenster (Telefon quer): kein Platz neben dem Startsatz. */
+@media (max-height: 520px) {
+  .speuzer-bande { display: none; }
+  .wide.speuzer-mit-bande .textOverlay { top: 50% !important; }
+}
+
+.speuzer-bande__link {
+  display: block;
+  color: #FFFFFF;
+  text-decoration: none;
+}
+
+.speuzer-bande:not(.speuzer-bande--bereit) .speuzer-bande__link { pointer-events: none; }
+
+.speuzer-bande__link:focus-visible {
+  outline: 3px solid #FFFFFF;
+  outline-offset: -3px;
+}
+
+.speuzer-bande__kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: var(--sb-kopf);
+  max-width: calc(1200px + 2 * var(--sb-rand));
+  margin-inline: auto;
+  padding-inline: var(--sb-rand);
+}
+
+.speuzer-bande__titel {
+  margin: 0;
+  font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .84);
+}
+
+.speuzer-bande__alle {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  margin-right: -4px;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.speuzer-bande__alle svg { display: block; width: 16px; height: 16px; }
+
+@media (min-width: 900px) {
+  .speuzer-bande__titel { font-size: 15px; }
+  .speuzer-bande__alle { font-size: 15px; }
+}
+
+/* Die Schiene wie der Rahmen einer Bandenanlage */
+.speuzer-bande__schiene {
+  margin-top: var(--sb-luft);
+  padding-block: var(--sb-schiene-luft);
+  background: rgba(4, 5, 38, .34);
+  border-top: 1px solid rgba(255, 255, 255, .12);
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+
+.speuzer-bande__fenster { overflow: hidden; }
+
+/* Spur = zwei gleiche Hälften; -50 % ist genau eine Hälfte (nahtlos).
+   Abstand über margin-right je Tafel, Dauer setzt das Skript. */
+.speuzer-bande__spur {
+  display: flex;
+  width: max-content;
+}
+
+.speuzer-bande__spur--laeuft {
+  animation: speuzer-bande-lauf 30s linear infinite;
+  will-change: transform;
+}
+
+.speuzer-bande__haelfte {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+@keyframes speuzer-bande-lauf {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+.speuzer-bande__link:active .speuzer-bande__spur,
+.speuzer-bande__link:focus-visible .speuzer-bande__spur { animation-play-state: paused; }
+
+@media (hover: hover) {
+  .speuzer-bande__link:hover .speuzer-bande__spur { animation-play-state: paused; }
+}
+
+.speuzer-tafel {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--sb-tafel-hoehe);
+  min-width: 84px;
+  padding-inline: 16px;
+  margin-right: var(--sb-tafel-abstand);
+  background: #FFFFFF;
+  border-radius: 8px;
+  transition: opacity 120ms ease-out;
+}
+
+.speuzer-bande__link:active .speuzer-tafel { opacity: .8; }
+
+.speuzer-tafel img {
+  display: block;
+  max-width: none;
+  object-fit: contain;
+}
+
+/* Stillstand: nur ein Sponsor oder „Bewegung reduzieren“ – jedes Logo
+   einmal, bündig mit der Kopfzeile, wischbar. */
+.speuzer-bande--still .speuzer-bande__spur {
+  padding-inline: max(var(--sb-rand), calc(50% - 600px)) calc(var(--sb-rand) - var(--sb-tafel-abstand));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .speuzer-bande, .speuzer-tafel { transition: none; }
+  .speuzer-bande__spur--laeuft { animation: none; }
+  .speuzer-bande__fenster {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: max(var(--sb-rand), calc(50% - 600px));
+    scrollbar-width: none;
+  }
+  .speuzer-bande__fenster::-webkit-scrollbar { display: none; }
+  .speuzer-bande__haelfte[aria-hidden="true"],
+  .speuzer-tafel--wdh { display: none; }
+  .speuzer-bande__spur {
+    padding-inline: max(var(--sb-rand), calc(50% - 600px)) calc(var(--sb-rand) - var(--sb-tafel-abstand));
+  }
+  .speuzer-tafel { scroll-snap-align: start; }
+}
+
+/* nur für Bildschirmleser */
+.speuzer-vh {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
