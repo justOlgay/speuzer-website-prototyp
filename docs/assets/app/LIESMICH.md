@@ -115,10 +115,30 @@ Cache-Ordner und werden nie committet oder zitiert.
 
 **`Startseite_v3.tpl`** → wird als **dynamische Seite** im appack-CMS
 angelegt, nicht in den Workspace hochgeladen. Sie ergibt die neue
-Startseite der Vereins-App (Begrüßung, „Heute und demnächst" mit echten
-Kalenderterminen, „Aktuelles" mit echten Meldungen, Hinweis, zwei Knöpfe) –
-ohne Foto, Kacheln oder Sponsorenleiste. Kopf- und Tab-Leiste kommen von
-der App-Hülle; die Vorlage liefert nur den Inhalt.
+Startseite der Vereins-App: blaue Bühne (Begrüßung, Profil-Knopf bzw. für
+Gäste die Pille „Anmelden“, Claim) mit der Sponsoren-„Bande“ am Fuß,
+darunter „Aktuelles“ (eine Meldung), Parkplatzhinweis und zwei Knöpfe –
+ohne Foto und Kacheln. Kopf und Menü kommen von der App-Hülle (seit
+24.09.2026 auf iOS Seitenmenü statt Tab-Leiste); die Vorlage liefert nur
+den Inhalt.
+
+### Stand 24.09.2026: „Als Nächstes“ entfällt, Sponsoren-Bande
+
+- Termin-Block „Als Nächstes“ samt Kalender-Abruf entfernt (Wunsch Olgay,
+  Rückmeldung der Vorsitzenden). Der Anmelde-Einstieg für Gäste steckte
+  bisher in der Termin-Karte und ist jetzt die Pille „Anmelden“ in der
+  Bühne.
+- Die Bande liest das Sponsoren-Worksheet `6a1ec5fcf68a05bf129cdbac`
+  (`sponActive` und Häkchen `showSlider`, sortiert nach `sponSort`) –
+  welche Sponsoren durchlaufen, steuert der Verein also selbst im CMS.
+  Logos bevorzugt von GitHub Pages (`assets/bilder/erzeugt/<quelle>-480.jpg`,
+  Zuordnung über den Namen), sonst `sponImg`. Tippen öffnet „Sponsoren &
+  Partner“ (`nav://sportfreunde04_TextImage_1780401660337`). Leere Liste
+  oder Fehler: Bande klappt weg. Bewegung reduzieren: wischbare Reihe.
+- Gewählt im Entwurfsvergleich (A Band unter der Bühne, B eigener
+  Abschnitt im Blatt, C Bande am Fuß der Bühne; Sieger C). Entwurf B
+  bleibt als ruhigere Alternative in `tools/cache/app-optik/startseite-entwurf-B/`
+  (nicht im Repo).
 
 ### Anlegen im CMS
 
@@ -165,6 +185,9 @@ muss dafür nicht gelöscht werden.
 npm run tpl-vorschau
 ```
 
+Mit `TPL_VORSCHAU_WORKSHEETS=<json>` lassen sich echte Worksheet-Zeilen
+(z. B. die Sponsoren für die Bande) über die Mocks legen.
+
 Rendert `Startseite_v3.tpl` lokal ohne appack: ersetzt die appack-
 FreeMarker-Konstrukte der Vorlage gegen Mock-Daten aus
 `tools/app-optik/mock-start.json` (angemeldeter Test-Nutzer ohne echten
@@ -192,9 +215,6 @@ Viewport + fullPage), einen Kontaktbogen (`vergleich.png`, Vergleich mit
   belegt; ob zusätzliche Felder (etwa Team-/Gruppenzugehörigkeit)
   existieren, ist ungeprüft – die Vorlage zeigt deshalb bewusst keine
   Gruppen-Tags (anders als der Klick-Prototyp `docs/app-konzept/start.html`).
-- Ob `graphApi.calendar.listUpcomingCalendarEvents` bei 0 sichtbaren
-  Kalendern tatsächlich ein leeres Array liefert (und nicht einen Fehler),
-  ist nur am echten Kalendermodul zu prüfen.
 
 ## Stufe C – Vereinsseiten (C1)
 

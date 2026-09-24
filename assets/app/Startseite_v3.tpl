@@ -16,10 +16,15 @@
    App-Hülle und sind NICHT Teil dieser Vorlage – kein eigenes Menü, keine
    Tab-Leiste, keine Fußzeile. Aufbau: oben eine ruhige Bühne in Vereinsblau
    wie die Website-Startseite (Wappen als Wasserzeichen, Satz „Fußball im
-   Gallus – seit 1904.“), darin klein die Begrüßung; darunter auf hellem
-   Grund je höchstens ein Termin, eine Meldung, der Parkplatzhinweis und
-   zwei Handlungen. Farben/Schrift aus assets/css/tokens.css. Kein Rot,
-   kein Grün, kein dekoratives Grau. */
+   Gallus – seit 1904.“), darin klein die Begrüßung (Gäste: Pille
+   „Anmelden“); am Fuß der Bühne die „Bande“ (Entwurf C, 24.09.2026): weiße
+   Logo-Tafeln der Sponsoren laufen wie Bandenwerbung im Stadion durch
+   (Wunsch der 1. Vorsitzenden: „Sponsorenbilder, die durchlaufen“; Daten
+   aus dem Sponsoren-Worksheet, siehe Skript „Bande“). Darunter auf hellem
+   Grund eine Meldung, der Parkplatzhinweis und zwei Handlungen. „Als
+   Nächstes“ (Termin-Karte, Gast-Karte „Deine Termine“) ist entfallen
+   (Entscheidung der Jugendleitung, 24.09.2026). Farben/Schrift aus
+   assets/css/tokens.css. Kein Rot, kein Grün, kein dekoratives Grau. */
 
 /* === 1. Schriften (absolute GitHub-Pages-Adressen, siehe assets/app/styles.css) === */
 
@@ -86,6 +91,20 @@
   --rand: clamp(16px, 5vw, 24px);
   /* Übergang Bühne → heller Grund */
   --blatt-radius: 24px;
+
+  /* Bande: Logo-Höchstmaß NUR HIER pflegen. Das Skript liest
+     --logo-max-hoehe und --logo-max-breite (logoMass()); Tafelhöhe und die
+     von Anfang an reservierte Höhe der Bande ergeben sich daraus. */
+  --logo-max-hoehe: 44px;
+  --logo-max-breite: 150px;
+  --tafel-luft: 8px;
+  --tafel-hoehe: calc(var(--logo-max-hoehe) + 2 * var(--tafel-luft));
+  --tafel-abstand: 10px;
+  --schiene-luft: 9px;
+  --bande-kopf: 20px;
+  --bande-luft: 10px;
+  /* Kopf + Luft + Schiene (Innenabstand oben/unten, Tafel, 2 × 1px Haarlinie) */
+  --bande-hoehe: calc(var(--bande-kopf) + var(--bande-luft) + var(--tafel-hoehe) + 2 * var(--schiene-luft) + 2px);
 }
 
 /* === 3. Grundregeln === */
@@ -109,13 +128,16 @@ p { margin: 0; }
 svg { display: block; flex: 0 0 auto; }
 
 /* [hidden] muss auch gegen die eigenen display:flex/inline-flex-Regeln unten
-   gewinnen (Profil-Knopf/Registrieren-Pille, Schritt 1.1). */
+   gewinnen (Profil-Knopf/Anmelden-Pille, Bande). */
 [hidden] { display: none !important; }
 
 :focus-visible {
   outline: 3px solid var(--blau-500);
   outline-offset: 2px;
 }
+
+/* Auf der blauen Bühne wäre der blaue Fokusrahmen kaum zu sehen. */
+.buehne :focus-visible { outline-color: var(--weiss); }
 
 /* nur für Bildschirmleser */
 .vh {
@@ -136,20 +158,32 @@ svg { display: block; flex: 0 0 auto; }
 
 /* Oben beginnt die Bühne exakt im Blau der nativen Kopfleiste
    (--appack-color-main #191793), damit Kopfleiste und Bühne eine Fläche
-   bilden; nach unten dunkelt sie wie das Startbild der Website ab. */
+   bilden; nach unten dunkelt sie wie das Startbild der Website ab. Unter
+   der Bande bleibt ein blauer Saum in der Breite des Seitenrands, dann
+   schiebt sich das Blatt darüber. */
 .buehne {
   position: relative;
   overflow: hidden;
   isolation: isolate;
   color: var(--weiss);
   background: linear-gradient(180deg, var(--blau-800) 0%, #13137A 50%, #0E0F5E 100%);
-  padding: var(--sp-2) var(--rand) calc(clamp(32px, 6.5vh, 52px) + var(--blatt-radius));
+  padding: var(--sp-2) var(--rand) calc(var(--bande-saum) + var(--blatt-radius));
+  /* Abstand Satz → Bande, Saum unter der Bande und Platz der Bande (für
+     das Wasserzeichen); ohne Bande wie früher (Klasse buehne--ohne-bande,
+     siehe bandeAusblenden). */
+  --bande-abstand: clamp(24px, 4.5vh, 40px);
+  --bande-saum: clamp(22px, 3.2vh, 28px);
+  --bande-zone: calc(var(--bande-abstand) + var(--bande-hoehe));
 }
+
+.buehne--ohne-bande { --bande-zone: 0px; --bande-saum: clamp(32px, 6.5vh, 52px); }
 
 /* Wappen als Wasserzeichen: weiße Silhouette, sehr zurückgenommen,
    angeschnitten am rechten Rand (wie auf der Website). Ein radialer
    Ausblend-Rahmen (mask-image) verhindert, dass die rechteckige Bildkante
-   sichtbar wird, wenn die Bühne breiter ist als das Motiv (z. B. Tablet). */
+   sichtbar wird, wenn die Bühne breiter ist als das Motiv (z. B. Tablet).
+   Mittelpunkt wie bisher in der Mitte der Bühne – aber ohne die Bande
+   gerechnet, damit das Wappen hinter dem Satz bleibt. */
 .buehne::after {
   content: "";
   position: absolute;
@@ -157,7 +191,7 @@ svg { display: block; flex: 0 0 auto; }
   width: clamp(460px, 140vw, 640px);
   height: clamp(460px, 140vw, 640px);
   left: 58%;
-  top: calc(50% - var(--blatt-radius) / 2);
+  top: calc((100% - var(--bande-zone) - var(--blatt-radius)) / 2);
   transform: translateY(-50%);
   background: url("https://justolgay.github.io/speuzer-website-prototyp/assets/huelle/wappen-512.png") center / contain no-repeat;
   opacity: .1;
@@ -210,21 +244,41 @@ svg { display: block; flex: 0 0 auto; }
 
 .profil-knopf__kreis svg { width: 19px; height: 19px; }
 
-/* Wird von der Vorlage nie eingeblendet (siehe profilKnopfUmschalten),
-   bleibt aber als Element erhalten. */
+/* Anmelde-Einstieg für Gäste (vorher nur in der Karte „Deine Termine“, die
+   mit „Als Nächstes“ entfallen ist): an der Stelle des Profil-Knopfs, in
+   derselben Formensprache (weißer Umriss auf Blau), aber mit Wort – ein
+   Kreis allein wäre für Gäste nicht eindeutig. Tippfläche 44px hoch, die
+   sichtbare Pille 36px wie der Profil-Kreis. Die Id bleibt
+   "registrieren-pille" (Vorschau-Messung tpl-vorschau.mjs, QA-Verweise). */
 .registrieren-pille {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  padding-inline: var(--sp-4);
-  border-radius: var(--r-pill);
-  background: var(--weiss);
-  color: var(--blau-800);
-  font-weight: 600;
-  font-size: 14px;
+  margin-right: -4px;
+  color: var(--weiss);
   text-decoration: none;
 }
+
+.registrieren-pille__form {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px 0 11px;
+  border-radius: var(--r-pill);
+  border: 1.5px solid rgba(255, 255, 255, .45);
+  background: rgba(255, 255, 255, .06);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background-color 120ms ease-out;
+}
+
+.registrieren-pille__form svg { width: 17px; height: 17px; }
+
+.registrieren-pille:active .registrieren-pille__form { background: rgba(255, 255, 255, .16); }
 
 .buehne__satz {
   margin-top: clamp(28px, 7vh, 64px);
@@ -252,21 +306,188 @@ svg { display: block; flex: 0 0 auto; }
 
 .buehne__claim span { display: block; }
 
+/* === 4a. Bande (Sponsoren-Laufband am Fuß der Bühne) === */
+
+/* Bandenwerbung wie im Stadion: eine dunkle, randlose Schiene über die
+   ganze Breite, darin weiße Logo-Tafeln, die ruhig nach links laufen. Weiß
+   ist bewusst: die Logos sind JPGs mit weißem Grund und sehr
+   unterschiedlich (farbig, schwarz, dunkelblau) – auf Weiß bleiben alle
+   lesbar. Kopfzeile und Tafeln sind EIN Link auf „Sponsoren & Partner“
+   (ein Tab-Stopp); die Überschrift ist eine echte h2, damit
+   Bildschirmleser per Überschrift hierher springen.
+   Der Platz ist von Anfang an reserviert (feste Höhe, unsichtbar, nicht
+   antippbar), die Tafeln blenden erst ein, wenn Daten und Logos da sind –
+   kein Platzhalter, kein Sprung. Kommt nichts (Workbook fehlt, leere
+   Liste, Fehler, keine Logos, Frist abgelaufen), klappt die Bande ganz weg
+   (.bande--aus, danach hidden). */
+.bande {
+  height: var(--bande-hoehe);
+  margin: var(--bande-abstand) calc(-1 * var(--rand)) 0;
+  opacity: 0;
+  transition: opacity 360ms ease-out, height 240ms ease-out, margin-top 240ms ease-out;
+}
+
+.bande--bereit { opacity: 1; }
+
+.bande.bande--aus {
+  height: 0;
+  margin-top: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+.bande__link {
+  display: block;
+  color: var(--weiss);
+  text-decoration: none;
+}
+
+/* Solange die Bande unsichtbar ist, führt ein Tippen in die blaue Fläche
+   nirgendwohin. */
+.bande:not(.bande--bereit) .bande__link { pointer-events: none; }
+
+.bande__link:focus-visible { outline-offset: -3px; }
+
+.bande__kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  height: var(--bande-kopf);
+  max-width: calc(600px + 2 * var(--rand));
+  margin-inline: auto;
+  padding-inline: var(--rand);
+}
+
+.bande__titel {
+  margin: 0;
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .84);
+}
+
+.bande__alle {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  margin-right: -4px;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--weiss);
+}
+
+.bande__alle svg { width: 16px; height: 16px; }
+
+/* Die Schiene: leicht abgedunkelt, oben und unten eine Haarlinie – wie der
+   Rahmen einer Bandenanlage. */
+.bande__schiene {
+  margin-top: var(--bande-luft);
+  padding-block: var(--schiene-luft);
+  background: rgba(4, 5, 38, .34);
+  border-top: 1px solid rgba(255, 255, 255, .12);
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+
+/* Fenster: die Tafeln laufen hart an der Bildschirmkante aus wie eine
+   echte Bande (ein weicher Verlauf ließ die weißen Tafeln verschmiert
+   wirken). */
+.bande__fenster { overflow: hidden; }
+
+/* Spur = zwei gleiche Hälften nebeneinander; -50 % ist genau eine Hälfte,
+   dadurch schließt die Schleife nahtlos. Abstand über margin-right je
+   Tafel (nicht gap), damit auch zwischen den Hälften derselbe Abstand
+   steht und -50 % exakt stimmt. Dauer setzt das Skript aus der Breite. */
+.bande__spur {
+  display: flex;
+  width: max-content;
+}
+
+.bande__spur--laeuft {
+  animation: bande-lauf 30s linear infinite;
+  will-change: transform;
+}
+
+.bande__haelfte {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+@keyframes bande-lauf {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Anhalten, solange der Finger/Zeiger auf der Bande liegt oder sie den
+   Tastaturfokus hat (ein Tippen öffnet die Sponsorenseite). :active
+   braucht in iOS-WebViews einen touchstart-Listener (siehe Skript). Maus:
+   Anhalten beim Darüberfahren – nur bei echtem Zeiger, damit das Band auf
+   Touch-Geräten nach dem Zurückkehren nicht stehen bleibt. */
+.bande__link:active .bande__spur,
+.bande__link:focus-visible .bande__spur { animation-play-state: paused; }
+
+@media (hover: hover) {
+  .bande__link:hover .bande__spur { animation-play-state: paused; }
+}
+
+.tafel {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--tafel-hoehe);
+  min-width: 84px;
+  padding-inline: 16px;
+  margin-right: var(--tafel-abstand);
+  background: var(--weiss);
+  border-radius: 8px;
+  transition: opacity 120ms ease-out;
+}
+
+/* Tipp-Rückmeldung zusätzlich zum Anhalten */
+.bande__link:active .tafel { opacity: .8; }
+
+.tafel img {
+  display: block;
+  max-width: none;
+  object-fit: contain;
+}
+
+/* Stillstand – nur ein Laufband-Sponsor (.bande--still) oder „Bewegung
+   reduzieren“ (Regel am Ende): keine Animation, jedes Logo genau einmal,
+   bündig mit dem Seitenrand der Kopfzeile (auch auf dem Tablet) und mit
+   Endabstand; mehrere Logos lassen sich waagerecht wischen. */
+.bande--still .bande__spur {
+  padding-inline: max(var(--rand), calc(50% - 300px)) calc(var(--rand) - var(--tafel-abstand));
+}
+
 /* Auf niedrigen Bildschirmen (kleine Telefone, Querformat) die Bühne
-   straffen, damit Termin, Meldung und Parkplatz näher an die Falz rücken
+   straffen, damit Meldung und Parkplatz näher an die Falz rücken
    (Rückmeldung der Jury zu Entwurf A). Zwei Stufen: ab 900px Bauhöhe leicht
    enger, ab 620px (z. B. 320×568) deutlich enger. Die Begrüßungszeile
    bleibt bei 44px Mindesthöhe (Tippziel Profil-Knopf). */
 @media (max-height: 900px) {
-  .buehne { padding-bottom: calc(24px + var(--blatt-radius)); }
-  .buehne__satz { margin-top: clamp(18px, 5vh, 40px); }
+  .buehne { --bande-abstand: clamp(22px, 3.6vh, 30px); --bande-saum: 22px; }
+  .buehne--ohne-bande { --bande-saum: 24px; }
+  .buehne__satz { margin-top: clamp(18px, 4.4vh, 36px); }
   .buehne__claim { font-size: clamp(34px, 11vw, 50px); }
 }
 
 @media (max-height: 620px) {
-  .buehne { padding-bottom: calc(16px + var(--blatt-radius)); }
+  .buehne { --bande-abstand: 18px; --bande-saum: 16px; }
+  .buehne--ohne-bande { --bande-saum: 16px; }
   .buehne__satz { margin-top: 14px; }
   .buehne__claim { font-size: 30px; }
+}
+
+/* Querformat auf dem Telefon: der Satz in einer Zeile, sonst bestünde der
+   erste Bildschirm fast nur aus Bühne und Bande. */
+@media (max-height: 620px) and (min-width: 560px) {
+  .buehne__claim span { display: inline; }
 }
 
 /* === 5. Heller Grund („Blatt“) === */
@@ -323,7 +544,7 @@ svg { display: block; flex: 0 0 auto; }
 
 .kopf__link svg { width: 18px; height: 18px; }
 
-/* === 6. Karten (Termin, Meldung, Gast-Einstieg) === */
+/* === 6. Karten (Meldung, Gast-Karte, Leerzustand) === */
 
 .karte {
   display: flex;
@@ -347,54 +568,6 @@ a.karte:active,
   min-width: 0;
 }
 
-.pfeil {
-  width: 20px;
-  height: 20px;
-  color: var(--ink-3);
-}
-
-/* Termin */
-
-.termin-karte { gap: var(--sp-3); }
-
-.ohne-umbruch { white-space: nowrap; }
-
-.datum {
-  flex: 0 0 auto;
-  width: 46px;
-  padding-right: var(--sp-3);
-  border-right: 1px solid var(--line);
-  text-align: center;
-}
-
-.datum__tag {
-  display: block;
-  font-family: var(--font-head);
-  font-weight: 700;
-  font-size: 30px;
-  line-height: 1;
-  color: var(--blau-950);
-}
-
-.datum__monat {
-  display: block;
-  margin-top: 3px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-}
-
-.termin__art {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .07em;
-  text-transform: uppercase;
-  color: var(--blau-700);
-  margin-bottom: 2px;
-}
-
 .karte__titel {
   font-weight: 600;
   font-size: 16px;
@@ -403,15 +576,9 @@ a.karte:active,
   overflow-wrap: anywhere;
 }
 
-.karte__zeile {
-  margin-top: 2px;
-  font-size: 14px;
-  color: var(--ink-2);
-}
-
-/* Kleiner Titel vor einem leisen Satz (Gast-Karten, Leerzustand Termine):
+/* Kleiner Titel vor einem leisen Satz (Gast-Karte, Leerzustand Meldungen):
    gibt der Karte mehr Gewicht als ein einzelner Satz (Jury-Empfehlung aus
-   Entwurf B: „Deine Termine“ / „Neues aus dem Verein“ / „Nichts geplant“). */
+   Entwurf B: „Neues aus dem Verein“ / „Keine neuen Meldungen“). */
 .karte__minititel {
   font-weight: 600;
   font-size: 15px;
@@ -438,21 +605,10 @@ a.karte:active,
 
 .karte__aufforderung svg { width: 16px; height: 16px; }
 
-/* Platzhalter, solange Termine/Meldungen laden (ruhig, ohne Animation) */
-.platzhalter-balken {
-  display: block;
-  height: 12px;
-  border-radius: 6px;
-  background: var(--blau-50);
-}
-
-.platzhalter-balken + .platzhalter-balken { margin-top: 10px; }
-
 /* Meldung (Vorlage für das News-Widget; das Widget klont .card.mb-3.relative
    und legt den Klick auf die ganze Karte) */
 .news-karte { cursor: pointer; }
 
-.termin-karte .karte__titel,
 .news-karte .news-karte__titel {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -479,8 +635,7 @@ a.karte:active,
 .news-karte .newsWallTitle:empty::before { width: 72%; margin: 4px 0 6px; }
 .news-karte .newsWallDate:empty::before { width: 32%; }
 
-/* Leerzustand/Fehlerfall der Meldungen: siehe pruefeMeldungen() im Skript
-   (Karte im gleichen Aufbau wie „Nichts geplant“ bei den Terminen). */
+/* Leerzustand/Fehlerfall der Meldungen: siehe pruefeMeldungen() im Skript. */
 
 /* === 7. Parkplatzhinweis === */
 
@@ -577,12 +732,32 @@ a.karte:active,
 
 .knopf--leise:active { background: var(--blau-50); }
 
+/* Bewegung reduzieren: keine Animation, auch nicht in der Bande. Die Bande
+   wird rein per CSS zur wischbaren Reihe (greift auch, wenn die
+   Einstellung erst nach dem Laden umgestellt wird): Wiederholungen und
+   zweite Hälfte aus, jedes Logo genau einmal, Einrasten am Seitenrand,
+   Endabstand wie bei .bande--still. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     transition: none !important;
     animation: none !important;
     scroll-behavior: auto !important;
   }
+  .bande__fenster {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: max(var(--rand), calc(50% - 300px));
+    scrollbar-width: none;
+  }
+  .bande__fenster::-webkit-scrollbar { display: none; }
+  .bande__haelfte[aria-hidden="true"],
+  .tafel--wdh { display: none; }
+  .bande__spur {
+    padding-inline: max(var(--rand), calc(50% - 300px)) calc(var(--rand) - var(--tafel-abstand));
+  }
+  .tafel { scroll-snap-align: start; }
 }
 </style>
 </head>
@@ -597,34 +772,52 @@ a.karte:active,
       <a id="profil-knopf" class="profil-knopf" href="nav://sportfreunde04_Profile_1783059427823" aria-label="Profil">
         <span class="profil-knopf__kreis"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c0-4.1 3.4-6.5 7.5-6.5s7.5 2.4 7.5 6.5"/></svg></span>
       </a>
-      <a id="registrieren-pille" class="registrieren-pille" href="nav://sportfreunde04_Profile_1783059427823" hidden>Registrieren</a>
+      <a id="registrieren-pille" class="registrieren-pille" href="nav://sportfreunde04_Profile_1783059427823" hidden>
+        <span class="registrieren-pille__form"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c0-4.1 3.4-6.5 7.5-6.5s7.5 2.4 7.5 6.5"/></svg>Anmelden</span>
+      </a>
     </div>
+    <script>
+    // Profil / Anmelden sofort umschalten, nicht erst nach den cdn-Skripten
+    // am Seitenende – sonst sähen Gäste kurz den Profil-Kreis. Angemeldet:
+    // runder Profil-Knopf. Gast (ohne profileJSON.id): an seiner Stelle die
+    // Pille „Anmelden“ (gleiches Ziel, die Profilseite führt zu Anmeldung
+    // und Registrierung) – einziger Anmelde-Einstieg der Seite, seit „Als
+    // Nächstes“ mit der Karte „Deine Termine“ entfallen ist.
+    (function () {
+      "use strict";
+      var angemeldet = !!(window.profileJSON && window.profileJSON.id);
+      var profilKnopf = document.getElementById("profil-knopf");
+      var anmelden = document.getElementById("registrieren-pille");
+      if (profilKnopf) profilKnopf.hidden = !angemeldet;
+      if (anmelden) anmelden.hidden = angemeldet;
+    })();
+    </script>
     <div class="buehne__satz">
       <span class="buehne__strich" aria-hidden="true"></span>
       <p class="buehne__claim"><span>Fußball</span> <span>im Gallus</span> <span>– seit 1904.</span></p>
     </div>
   </div>
+
+  <!-- BANDE: Logos aus dem Sponsoren-Worksheet (CMS, Häkchen „showSlider“,
+       Reihenfolge „sponSort“), pflegt die 1. Vorsitzende selbst. Tippen
+       öffnet „Sponsoren & Partner“. Ohne Treffer klappt die Bande weg. -->
+  <section id="bande" class="bande" aria-labelledby="bande-titel" aria-hidden="true">
+    <a id="bande-link" class="bande__link" href="nav://sportfreunde04_TextImage_1780401660337" tabindex="-1">
+      <div class="bande__kopf">
+        <h2 id="bande-titel" class="bande__titel">Sponsoren &amp; Partner</h2>
+        <span class="bande__alle">Alle<span class="vh"> ansehen</span><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></span>
+      </div>
+      <div class="bande__schiene">
+        <div class="bande__fenster">
+          <div id="bande-spur" class="bande__spur"></div>
+        </div>
+      </div>
+    </a>
+  </section>
 </section>
 
 <div class="blatt">
   <div class="rahmen">
-
-    <section class="abschnitt" aria-labelledby="titel-naechstes">
-      <div class="kopf">
-        <h2 id="titel-naechstes" class="kopf__titel">Als Nächstes</h2>
-        <a id="termine-kopflink" class="kopf__link" href="nav://sportfreunde04_Application_1780401660369">Alle Termine<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></a>
-      </div>
-      <!-- Zu-/Absage passiert im Kalendermodul; die Vorlage kann sie nicht selbst auslösen. -->
-      <div id="termine" class="termine">
-        <div class="karte" aria-busy="true">
-          <div class="karte__text">
-            <span class="platzhalter-balken" style="width:68%"></span>
-            <span class="platzhalter-balken" style="width:44%"></span>
-            <span class="vh">Termine werden geladen</span>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <section class="abschnitt" aria-labelledby="titel-aktuelles">
       <div class="kopf">
@@ -671,24 +864,57 @@ a.karte:active,
 </main>
 
 <script src="https://cdn.appack.de/modules/common/jquery-3.4.1.min.js"></script>
+<!-- graph-api.js bleibt für das News-Widget eingebunden (Termine sind entfallen). -->
 <script src="https://cdn.appack.de/modules/graph-api.js"></script>
 <script src="https://cdn.appack.de/modules/widgets/component-news-widget.js"></script>
+<!-- Workbook-API (braucht jQuery) für die Sponsoren-Bande -->
+<script src="https://cdn.appack.de/modules/appack.workbook-1.4.1.js"></script>
 <script>
 (function () {
   "use strict";
 
-  var KALENDER_ID = "sportfreunde04_Application_1780401660369";
   var NEWS_ID = "sportfreunde04_Application_1780401660371";
-  var PROFIL_ID = "sportfreunde04_Profile_1783059427823";
-  var MONATE = ["JAN", "FEB", "MÄR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEZ"];
-  var PFEIL_SVG = '<svg class="pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>';
   var PFEIL_KLEIN_SVG = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>';
+
+  // Sponsoren-Worksheet (pflegt die 1. Vorsitzende selbst im CMS). Der
+  // öffentliche Endpunkt liefert auch ohne Anmeldung (geprüft 24.09.2026):
+  // showSlider/sponActive als Boolean, sponSort als Zahl.
+  var SPONSOREN_ID = "6a1ec5fcf68a05bf129cdbac";
+  // Saubere Website-Logos (GitHub Pages, data/sponsoren.json logo.quelle):
+  // [Namensteil, Quelle]. Zuordnung: der Firmenname aus dem Worksheet muss
+  // den Namensteil als GANZE Wörter enthalten (normalisiert, Leerzeichen
+  // egal: „SK SportConnects GbR“, „SKSportConnects“ passen; „Sport Elite“
+  // oder „Köhlerei“ nicht). Nur in diese Richtung – eine neue Firma bekommt
+  // nie das Logo eines anderen Sponsors, sondern ihr eigenes sponImg.
+  var LOGO_BASIS = "https://justolgay.github.io/speuzer-website-prototyp/assets/bilder/erzeugt/";
+  var WEBSITE_LOGOS = [
+    ["SK SportConnects", "sponsor-sk-sportconnects-gbr"],
+    ["vmapit", "sponsor-vmapit-gmbh"],
+    ["Bundeswehr", "sponsor-bundeswehr"],
+    ["VM Elite", "sponsor-fuballschule-vm-elite"],
+    ["11TeamSports", "sponsor-11teamsports"],
+    ["Köhler", "sponsor-koehler"]
+  ];
+  // Logo-Maße: gleiche optische Fläche für alle Logos (Wurzel-Regel), damit
+  // das sehr breite 11TeamSports (≈ 6,7 : 1) nicht riesig und die fast
+  // quadratischen Bundeswehr/VM Elite nicht winzig wirken. Höchstmaße
+  // kommen aus dem CSS (--logo-max-hoehe/--logo-max-breite), die Zahlen
+  // hier sind nur der Rückfall, falls das CSS sie nicht liefert.
+  var LOGO_FLAECHE = 3300;     // px²
+  var TEMPO = 28;              // px pro Sekunde – ruhig, Logos bleiben lesbar
+  var BILD_WARTEZEIT = 6000;   // ms je Logo-Versuch
+  var BANDE_WARTEZEIT = 8000;  // ms insgesamt (Daten + Logos); danach wird nichts mehr nachgeschoben
+
+  // iOS-WebViews setzen :active (Anhalten der Bande, Tipp-Rückmeldung der
+  // Knöpfe) nur, wenn ein touchstart-Listener existiert.
+  document.addEventListener("touchstart", function () {}, { passive: true });
 
   // ---------- Begrüßung ----------
 
   // Ob ein Gast (ohne profileJSON.id) unterwegs ist: einmal zentral
-  // bestimmen, damit Termine/Aktuelles denselben Gast-Fall behandeln
-  // (QA-Befund, C2 Abschnitt 7 – keine graphql-Aufrufe/401 für Gäste).
+  // bestimmen, damit Kopfzeile (Skript oben, gleiche Regel) und Aktuelles
+  // denselben Gast-Fall behandeln (QA-Befund, C2 Abschnitt 7 – keine
+  // graphql-Aufrufe/401 für Gäste).
   function istAngemeldet() {
     var profil = window.profileJSON || {};
     return !!profil.id;
@@ -704,83 +930,6 @@ a.karte:active,
     el.textContent = gruss + name + "!";
   }
 
-  // ---------- Profil / Registrieren ----------
-
-  function profilKnopfUmschalten() {
-    var angemeldet = istAngemeldet();
-    var profilKnopf = document.getElementById("profil-knopf");
-    var registrieren = document.getElementById("registrieren-pille");
-    // Gast: oben kein Profil-Knopf und keine Registrieren-Pille – einziger
-    // Einstieg ist "Anmelden" unter "Als Nächstes" (QA W8, Abschnitt 8).
-    if (!angemeldet) {
-      if (profilKnopf) profilKnopf.hidden = true;
-      if (registrieren) registrieren.hidden = true;
-    }
-  }
-
-  // ---------- Termine ----------
-
-  function zweistellig(zahl) {
-    return (zahl < 10 ? "0" : "") + zahl;
-  }
-
-  function uhrzeit(datum) {
-    return zweistellig(datum.getHours()) + ":" + zweistellig(datum.getMinutes());
-  }
-
-  // Vollständige Zeile (Wochentag, Datum, Uhrzeit) – für Bildschirmleser.
-  function terminZeile(termin) {
-    var start = new Date(termin.dateStart);
-    var wochentag = new Intl.DateTimeFormat("de-DE", { weekday: "long" }).format(start);
-    var datumText = new Intl.DateTimeFormat("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }).format(start);
-    if (termin.allDay) {
-      return wochentag + ", " + datumText + " · ganztags";
-    }
-    var zeit = uhrzeit(start);
-    if (termin.dateEnd) {
-      zeit += "–" + uhrzeit(new Date(termin.dateEnd));
-    }
-    return wochentag + ", " + datumText + " · " + zeit + " Uhr";
-  }
-
-  // Sichtbare Kurzzeile: "Heute · 17:30–19:30 Uhr", "Morgen · …" oder der
-  // Wochentag – das Datum selbst steht schon im Datumsblock.
-  function tagesWort(start, kurzform) {
-    var heute = new Date();
-    heute.setHours(0, 0, 0, 0);
-    var tag = new Date(start.getTime());
-    tag.setHours(0, 0, 0, 0);
-    var abstand = Math.round((tag.getTime() - heute.getTime()) / 86400000);
-    if (abstand === 0) return "Heute";
-    if (abstand === 1) return "Morgen";
-    return new Intl.DateTimeFormat("de-DE", { weekday: kurzform ? "short" : "long" }).format(start);
-  }
-
-  // [Tag, " · Zeit"] – der Trennpunkt steht zusammen mit der Uhrzeit in
-  // einem Block, der nie umbricht: so kann nie nur "Mittwoch ·" mit
-  // hängendem Punkt am Zeilenende stehen (bei 320 px), sondern bricht bei
-  // Bedarf der ganze " · Zeit"-Block in die nächste Zeile.
-  function terminKurz(termin) {
-    var start = new Date(termin.dateStart);
-    if (termin.allDay) return [tagesWort(start), "ganztags"];
-    var zeit = uhrzeit(start);
-    if (termin.dateEnd) zeit += "–" + uhrzeit(new Date(termin.dateEnd));
-    return [tagesWort(start), zeit + " Uhr"];
-  }
-
-  // Derzeit ungenutzt (siehe Termin-Karte): App.navigate öffnete im Test nichts.
-  function oeffneTermin(id) {
-    if (window.App) {
-      if (App.isNativeAndroid && App.isNativeAndroid()) {
-        App.navigate(KALENDER_ID, JSON.stringify({ event: id }), "Application");
-      } else {
-        App.navigate(KALENDER_ID, { event: id });
-      }
-    } else {
-      window.location.href = "nav://" + KALENDER_ID;
-    }
-  }
-
   function element(tag, klasse, text) {
     var el = document.createElement(tag);
     if (klasse) el.className = klasse;
@@ -788,116 +937,239 @@ a.karte:active,
     return el;
   }
 
-  // Die ganze Karte ist der Link ins Kalendermodul (vorher ein eigener
-  // "Details"-Knopf). Test in der echten App (21.09.2026): App.navigate(...)
-  // aus einem Skript öffnete nichts, ein nav://-Link dagegen zuverlässig;
-  // der Termin steht dort als nächster Eintrag. Zu-/Absage bewusst nicht
-  // auf der Startseite (Entscheidung 21.09.2026).
-  function baueTerminKarte(termin) {
-    var start = new Date(termin.dateStart);
-    var kategorie = (termin.categories && termin.categories.length && termin.categories[0].title) || "Termin";
+  // ---------- Bande (Sponsoren-Laufband) ----------
 
-    var karte = element("a", "karte termin-karte");
-    karte.href = "nav://" + KALENDER_ID;
-    karte.setAttribute("data-termin", termin.id || "");
+  // Ablauf: Workbook.load (Filter sponActive: true) -> nur Zeilen mit
+  // Häkchen showSlider, nach sponSort -> je Firma Website-Logo, sonst
+  // sponImg (nur http/https) -> alle Logos vorladen -> Bande einblenden.
+  // Kommt nichts oder läuft die Frist ab: Bande ausblenden.
 
-    var datum = element("div", "datum");
-    datum.setAttribute("aria-hidden", "true");
-    datum.appendChild(element("span", "datum__tag", zweistellig(start.getDate())));
-    datum.appendChild(element("span", "datum__monat", MONATE[start.getMonth()]));
-
-    var text = element("div", "karte__text");
-    text.appendChild(element("p", "termin__art", kategorie));
-    text.appendChild(element("p", "karte__titel", termin.title || ""));
-    var teile = terminKurz(termin);
-    var kurz = element("p", "karte__zeile", teile[0]);
-    kurz.setAttribute("data-kurzform", tagesWort(start, true));
-    kurz.appendChild(element("span", "ohne-umbruch", " · " + teile[1]));
-    kurz.setAttribute("aria-hidden", "true");
-    text.appendChild(kurz);
-    text.appendChild(element("span", "vh", terminZeile(termin)));
-
-    karte.appendChild(datum);
-    karte.appendChild(text);
-    karte.insertAdjacentHTML("beforeend", PFEIL_SVG);
-    return karte;
+  function bildUrlGueltig(url) {
+    return /^https?:\/\//i.test(url || "");
   }
 
-  // Gast (nicht angemeldet): keine Kalender vorhanden, also kein
-  // graphApi-Aufruf (der ohne Anmeldung mit HTTP 401 scheitert) – stattdessen
-  // ein kleiner Titel plus dezenter Satz (Jury-Empfehlung aus Entwurf B), die
-  // ganze Karte führt zur Anmeldung (Profil-Link wie bisher; einziger
-  // Anmelde-Einstieg der Seite). Der gleichlautende Kopflink "Alle Termine"
-  // wird für Gäste ausgeblendet, damit er nicht doppelt steht.
-  function zeigeTermineHinweisGast() {
-    var container = document.getElementById("termine");
-    if (!container) return;
-    container.innerHTML = "";
-    var karte = element("a", "karte gast-karte");
-    karte.href = "nav://" + PROFIL_ID;
-    var text = element("div", "karte__text");
-    text.appendChild(element("p", "karte__minititel", "Deine Termine"));
-    text.appendChild(element("p", "karte__leise", "Nach der Anmeldung steht hier dein nächster Termin."));
-    var auff = element("span", "karte__aufforderung", "Anmelden");
-    auff.insertAdjacentHTML("beforeend", PFEIL_KLEIN_SVG);
-    text.appendChild(auff);
-    karte.appendChild(text);
-    container.appendChild(karte);
-    var kopflink = document.getElementById("termine-kopflink");
-    if (kopflink) kopflink.hidden = true;
-  }
-
-  // Bricht "Mittwoch · 17:30–19:30 Uhr" um (z. B. bei 320 px), steht dort
-  // stattdessen "Mi. · 17:30–19:30 Uhr" – kein Punkt am Zeilenende.
-  function kuerzeWochentag(container) {
-    var zeile = container.querySelector(".karte__zeile[data-kurzform]");
-    if (!zeile || !zeile.firstChild) return;
-    var zeilenhoehe = parseFloat(window.getComputedStyle(zeile).lineHeight) || 20;
-    if (zeile.offsetHeight > zeilenhoehe * 1.5) {
-      zeile.firstChild.nodeValue = zeile.getAttribute("data-kurzform");
+  // Liest ein Pixelmaß aus den CSS-Tokens (:root), sonst der Rückfall.
+  function cssPixel(name, ersatz) {
+    try {
+      var wert = parseFloat(window.getComputedStyle(document.documentElement).getPropertyValue(name));
+      return isFinite(wert) && wert > 0 ? wert : ersatz;
+    } catch (e) {
+      return ersatz;
     }
   }
 
-  function zeigeTermine(termine) {
-    var container = document.getElementById("termine");
-    if (!container) return;
-    container.innerHTML = "";
-    if (!termine || !termine.length) {
-      var leer = element("div", "karte termine-leer");
-      var text = element("div", "karte__text");
-      text.appendChild(element("p", "karte__minititel", "Nichts geplant"));
-      text.appendChild(element("p", "karte__leise", "In deinen Kalendern stehen gerade keine Termine an."));
-      leer.appendChild(text);
-      container.appendChild(leer);
-      return;
-    }
-    // Höchstens EIN Termin auf der Startseite; alle weiteren über "Alle Termine".
-    container.appendChild(baueTerminKarte(termine[0]));
-    kuerzeWochentag(container);
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(function () { kuerzeWochentag(container); });
-    }
+  // Wörter eines Namens, normalisiert: "Köhler" = "Koehler" -> ["kohler"],
+  // "SK SportConnects GbR" -> ["sk", "sportconnects", "gbr"]. NFC zuerst:
+  // das CMS kann Umlaute zerlegt liefern (o + Trema).
+  function woerter(text) {
+    var s = String(text || "");
+    if (s.normalize) s = s.normalize("NFC");
+    return s.toLowerCase()
+      .replace(/ä|ae/g, "a").replace(/ö|oe/g, "o").replace(/ü|ue/g, "u").replace(/ß/g, "ss")
+      .split(/[^a-z0-9]+/)
+      .filter(Boolean);
   }
 
-  function ladeTermine() {
-    if (!istAngemeldet()) {
-      // Gast ohne eigene Kalender: kein graphApi-Aufruf (401), stattdessen
-      // Hinweis + Anmelden.
-      zeigeTermineHinweisGast();
-      return;
+  // true, wenn aufeinanderfolgende ganze Wörter des Firmennamens zusammen
+  // genau den Namensteil ergeben.
+  function enthaeltNamensteil(firma, namensteil) {
+    var name = woerter(firma);
+    var teil = woerter(namensteil).join("");
+    if (!teil) return false;
+    for (var i = 0; i < name.length; i++) {
+      var zusammen = "";
+      for (var j = i; j < name.length && zusammen.length < teil.length; j++) {
+        zusammen += name[j];
+        if (zusammen === teil) return true;
+      }
     }
-    if (!window.graphApi) {
-      zeigeTermine([]);
-      return;
+    return false;
+  }
+
+  function websiteLogo(firma) {
+    for (var i = 0; i < WEBSITE_LOGOS.length; i++) {
+      if (enthaeltNamensteil(firma, WEBSITE_LOGOS[i][0])) {
+        return LOGO_BASIS + WEBSITE_LOGOS[i][1] + "-480.jpg";
+      }
     }
-    graphApi.calendar
-      .listUpcomingCalendarEvents(KALENDER_ID, 3, ["id", "title", "dateStart", "subTitle", "dateEnd", "allDay", "categories{title, color}"])
-      .then(function (r) { return r.json(); })
-      .then(function (antwort) {
-        var termine = (antwort && antwort.data && antwort.data.listUpcomingCalendarEvents) || [];
-        zeigeTermine(termine);
+    return "";
+  }
+
+  function sortWert(wert) {
+    var zahl = Number(wert);
+    return (wert === null || wert === undefined || wert === "" || !isFinite(zahl)) ? Infinity : zahl;
+  }
+
+  // Nur Zeilen mit Häkchen „showSlider“ (und nicht ausdrücklich inaktiv –
+  // Schutz, falls der Server den Filter sponActive einmal nicht anwendet;
+  // die Platzhalterzeile „Hier könnte Ihre Werbung stehen“ hat
+  // showSlider=true, sponActive=false), aufsteigend nach „sponSort“ (ohne
+  // Wert ans Ende, bei Gleichstand Reihenfolge des Worksheets).
+  function sponsorenFuerBande(zeilen) {
+    return (Array.isArray(zeilen) ? zeilen : [])
+      .map(function (zeile, i) { return { zeile: zeile || {}, i: i }; })
+      .filter(function (e) {
+        return e.zeile.showSlider === true && e.zeile.sponActive !== false && String(e.zeile.sponFirma || "").trim() !== "";
       })
-      .catch(function () { zeigeTermine([]); });
+      .sort(function (a, b) {
+        var sa = sortWert(a.zeile.sponSort);
+        var sb = sortWert(b.zeile.sponSort);
+        if (sa !== sb) return sa < sb ? -1 : 1;
+        return a.i - b.i;
+      })
+      .map(function (e) {
+        return { firma: String(e.zeile.sponFirma).trim(), bild: String(e.zeile.sponImg || "").trim() };
+      });
+  }
+
+  // Lädt ein Bild vor; liefert { url, breite, hoehe } oder null (Fehler,
+  // Zeitüberschreitung, keine http(s)-Adresse).
+  function ladeBild(url) {
+    return new Promise(function (fertig) {
+      if (!bildUrlGueltig(url)) { fertig(null); return; }
+      var bild = new Image();
+      var erledigt = false;
+      function ende(ergebnis) {
+        if (erledigt) return;
+        erledigt = true;
+        clearTimeout(uhr);
+        fertig(ergebnis);
+      }
+      var uhr = setTimeout(function () { ende(null); }, BILD_WARTEZEIT);
+      bild.onload = function () {
+        ende(bild.naturalWidth && bild.naturalHeight ? { url: url, breite: bild.naturalWidth, hoehe: bild.naturalHeight } : null);
+      };
+      bild.onerror = function () { ende(null); };
+      bild.src = url;
+    });
+  }
+
+  // Erst das Website-Logo, bei Fehler das Worksheet-Bild; ohne beides
+  // entfällt der Sponsor in der Bande (kein leeres Feld).
+  function ladeLogo(sponsor, mass) {
+    var website = websiteLogo(sponsor.firma);
+    var ersatz = bildUrlGueltig(sponsor.bild) ? sponsor.bild : "";
+    return ladeBild(website || ersatz)
+      .then(function (ergebnis) {
+        if (ergebnis || !website || !ersatz) return ergebnis;
+        return ladeBild(ersatz);
+      })
+      .then(function (ergebnis) {
+        if (!ergebnis) return null;
+        var verhaeltnis = ergebnis.breite / ergebnis.hoehe;
+        var hoehe = Math.sqrt(LOGO_FLAECHE / verhaeltnis);
+        hoehe = Math.min(hoehe, mass.hoehe, mass.breite / verhaeltnis);
+        return { firma: sponsor.firma, url: ergebnis.url, breite: Math.round(hoehe * verhaeltnis), hoehe: Math.round(hoehe) };
+      });
+  }
+
+  // Eine weiße Tafel; "stumm" = Wiederholung für die Endlosschleife (für
+  // Bildschirmleser unsichtbar, jedes Logo wird nur einmal vorgelesen; bei
+  // reduzierter Bewegung per CSS ausgeblendet).
+  function baueTafel(logo, stumm) {
+    var tafel = element("span", stumm ? "tafel tafel--wdh" : "tafel");
+    var bild = document.createElement("img");
+    bild.src = logo.url;
+    bild.alt = stumm ? "" : "Logo " + logo.firma;
+    bild.width = logo.breite;
+    bild.height = logo.hoehe;
+    bild.decoding = "async";
+    bild.draggable = false;
+    if (stumm) tafel.setAttribute("aria-hidden", "true");
+    tafel.appendChild(bild);
+    return tafel;
+  }
+
+  function bandeAusblenden() {
+    var bande = document.getElementById("bande");
+    var link = document.getElementById("bande-link");
+    if (!bande) return;
+    if (bande.parentNode && bande.parentNode.classList) bande.parentNode.classList.add("buehne--ohne-bande");
+    bande.classList.remove("bande--bereit");
+    bande.classList.add("bande--aus");
+    bande.setAttribute("aria-hidden", "true");
+    if (link) link.setAttribute("tabindex", "-1");
+    setTimeout(function () { bande.hidden = true; }, 260);
+  }
+
+  function zeigeBande(logos) {
+    var bande = document.getElementById("bande");
+    var link = document.getElementById("bande-link");
+    var spur = document.getElementById("bande-spur");
+    if (!bande || !spur) return;
+    if (!logos.length) { bandeAusblenden(); return; }
+
+    var haelfte = element("div", "bande__haelfte");
+    logos.forEach(function (logo) { haelfte.appendChild(baueTafel(logo, false)); });
+    spur.appendChild(haelfte);
+
+    if (logos.length === 1) {
+      // Ein einzelnes Logo läuft nicht endlos im Kreis, es steht still.
+      bande.classList.add("bande--still");
+    } else {
+      // Eine Hälfte muss mindestens so breit sein wie der breiteste
+      // denkbare Bildschirm (auch nach dem Drehen), sonst läuft bei
+      // wenigen Sponsoren eine Lücke durchs Bild.
+      var satzBreite = haelfte.offsetWidth;
+      var noetig = Math.max(window.innerWidth || 0, (window.screen && Math.max(screen.width, screen.height)) || 0, 600);
+      for (var runde = 1; satzBreite > 0 && satzBreite * runde < noetig && runde < 12; runde++) {
+        logos.forEach(function (logo) { haelfte.appendChild(baueTafel(logo, true)); });
+      }
+      var zweite = haelfte.cloneNode(true);
+      zweite.setAttribute("aria-hidden", "true");
+      [].forEach.call(zweite.querySelectorAll("img"), function (bild) { bild.alt = ""; });
+      spur.appendChild(zweite);
+      var dauer = Math.max(12, Math.round(haelfte.offsetWidth / TEMPO));
+      spur.style.animationDuration = dauer + "s";
+      // Zufälliger Einstieg in die Schleife (Reihenfolge bleibt sponSort):
+      // bei jedem Öffnen stehen andere Sponsoren vorn, nicht immer Platz 1.
+      spur.style.animationDelay = "-" + (Math.random() * dauer).toFixed(1) + "s";
+      spur.classList.add("bande__spur--laeuft");
+    }
+
+    bande.removeAttribute("aria-hidden");
+    if (link) link.removeAttribute("tabindex");
+    // erst im nächsten Bild einblenden, damit der Übergang greift
+    var einblenden = function () { bande.classList.add("bande--bereit"); };
+    if (window.requestAnimationFrame) window.requestAnimationFrame(einblenden); else setTimeout(einblenden, 16);
+  }
+
+  // Daten + Logos laden; die Bande erscheint, wenn alles da ist oder
+  // spätestens nach BANDE_WARTEZEIT mit den bis dahin geladenen Logos
+  // (keine geladen: klappt weg). Gäste sehen die Bande genauso (Worksheet ist öffentlich,
+  // wie auf der Seite „Sponsoren & Partner“).
+  function ladeBande() {
+    if (!window.Workbook || typeof Workbook.load !== "function") {
+      bandeAusblenden();
+      return;
+    }
+    var mass = {
+      hoehe: cssPixel("--logo-max-hoehe", 44),
+      breite: cssPixel("--logo-max-breite", 150)
+    };
+    var erledigt = false;
+    function fertig(logos) {
+      if (erledigt) return;
+      erledigt = true;
+      clearTimeout(uhr);
+      try { zeigeBande(logos); } catch (e) { bandeAusblenden(); }
+    }
+    // Bei Fristablauf zählen die Logos, die bis dahin geladen sind (in
+    // sponSort-Reihenfolge) – ein einzelnes hängendes Logo verhindert so
+    // nicht die ganze Bande.
+    var geladen = [];
+    var uhr = setTimeout(function () { fertig(geladen.filter(Boolean)); }, BANDE_WARTEZEIT);
+    Promise.resolve()
+      .then(function () {
+        return Workbook.load({ workbook: SPONSOREN_ID, filter: { sponActive: true }, offset: 0, limit: 500, sort: "_id", direction: "asc" });
+      })
+      .then(function (zeilen) {
+        return Promise.all(sponsorenFuerBande(zeilen).map(function (sponsor, i) {
+          return ladeLogo(sponsor, mass).then(function (logo) { geladen[i] = logo; return logo; });
+        }));
+      })
+      .then(function (logos) { fertig(logos.filter(Boolean)); })
+      .catch(function () { fertig([]); });
   }
 
   // ---------- Aktuelles (News-Widget) ----------
@@ -929,15 +1201,15 @@ a.karte:active,
   }
 
   // Angemeldet: Kommt vom News-Widget nach kurzer Zeit keine Meldung (keine
-  // Treffer, abgelaufene Anmeldung, offline), stehen statt der Lade-Balken
-  // ein ruhiger Leerzustand in derselben Kartenform wie bei den Terminen.
+  // Treffer, abgelaufene Anmeldung, offline), steht statt der Lade-Balken
+  // ein ruhiger Leerzustand in Kartenform.
   function pruefeMeldungen(versuch) {
     var widget = document.querySelector(".news.aktuelles[news-widget]");
     if (!widget) return;
     var gefuellt = [].some.call(widget.querySelectorAll(".newsWallTitle"), function (t) { return t.textContent.trim() !== ""; });
     if (gefuellt) return;
     if (versuch < 8) { setTimeout(function () { pruefeMeldungen(versuch + 1); }, 1000); return; }
-    var leer = element("div", "karte termine-leer");
+    var leer = element("div", "karte meldungen-leer");
     var text = element("div", "karte__text");
     text.appendChild(element("p", "karte__minititel", "Keine neuen Meldungen"));
     text.appendChild(element("p", "karte__leise", "Ältere Berichte findest du unter „Alle Meldungen“."));
@@ -946,8 +1218,7 @@ a.karte:active,
   }
 
   begruessung();
-  profilKnopfUmschalten();
-  ladeTermine();
+  ladeBande();
   entferneNewsWidgetFuerGast();
   if (istAngemeldet()) pruefeMeldungen(0);
 })();
