@@ -282,7 +282,7 @@ function anfahrtAbschnitt(daten) {
         "Bezirkssportanlage am Rebstock (SW Griesheim)",
         "Am Römerhof 9",
         rebstockOrt,
-        `<p class="meta">Hier spielen die Herren (und die A‑Jugend) ihre Heimspiele.</p>`
+        `<p class="meta">Hier spielen die Herren und die A‑Jugend ihre Heimspiele.</p>`
       )}
     </div>
   </div>

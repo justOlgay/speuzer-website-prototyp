@@ -1405,7 +1405,9 @@ a.team-karte--link {
     var liste = document.getElementById("detail-training-liste");
     liste.innerHTML = "";
     (team.training || []).forEach(function (t) {
-      liste.appendChild(baueTrainingszeile(t, stelle.teil));
+      // Platzteil je Trainingstag (data/teams.json training[].platz, aus der
+      // Platzaufteilung 26/27), sonst der gemeinsame Teil (Herren: "Rebstock").
+      liste.appendChild(baueTrainingszeile(t, t.platz || stelle.teil));
     });
 
     document.getElementById("detail-ferienhinweis").textContent = (VEREIN && VEREIN.hinweise && VEREIN.hinweise.ferien) || "";
