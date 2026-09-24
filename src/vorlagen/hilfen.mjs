@@ -502,7 +502,7 @@ export function trainingsZeilen(team, teilOverride) {
       (t) => `<li class="training">
       <span class="training__tag">${escapeHtml(t.tag)}</span>
       <span class="training__zeit">${escapeHtml(t.von)}–${escapeHtml(t.bis)} Uhr</span>
-      <span class="training__platz">${escapeHtml(teil)}</span>
+      <span class="training__platz">${escapeHtml(t.platz ?? teil)}</span>
     </li>`
     )
     .join("\n    ");

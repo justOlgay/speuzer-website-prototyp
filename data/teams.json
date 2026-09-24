@@ -33,10 +33,10 @@
     "staffel": "Gruppenliga · AJGL Frankfurt",
     "spielbetrieb": "Meisterschaft, Kreispokal",
     "training": [
-      { "tag": "Montag", "von": "19:00", "bis": "21:00" },
-      { "tag": "Mittwoch", "von": "19:00", "bis": "20:30" }
+      { "tag": "Montag", "von": "19:00", "bis": "21:00", "platz": "ganzer Platz" },
+      { "tag": "Mittwoch", "von": "19:00", "bis": "20:30", "platz": "ganzer Platz" }
     ],
-    "platz": "Vereinsplatz Mainzer Landstraße 480, linke Hälfte Tor 1",
+    "platz": "Vereinsplatz Mainzer Landstraße 480",
     "heimspiele": "Bezirkssportanlage am Rebstock (SW Griesheim), Am Römerhof 9, 60486 Frankfurt am Main",
     "trainer": ["Ahmed Douzi", "Hüseyin Ulutürk"],
     "mail": "trainer_a_jugend@sportfreunde04.de",
@@ -57,11 +57,11 @@
     "staffel": "Kreisliga A · DJKL F Gr. 1",
     "spielbetrieb": "Meisterschaft, Kreispokal",
     "training": [
-      { "tag": "Dienstag", "von": "17:30", "bis": "19:30" },
-      { "tag": "Mittwoch", "von": "17:30", "bis": "19:00" },
-      { "tag": "Freitag", "von": "17:30", "bis": "19:30" }
+      { "tag": "Dienstag", "von": "17:30", "bis": "19:30", "platz": "Tor 1" },
+      { "tag": "Mittwoch", "von": "17:30", "bis": "19:00", "platz": "Tor 1" },
+      { "tag": "Freitag", "von": "17:30", "bis": "19:30", "platz": "Tor 1" }
     ],
-    "platz": "Vereinsplatz Mainzer Landstraße 480, linke Hälfte Tor 1",
+    "platz": "Vereinsplatz Mainzer Landstraße 480",
     "heimspiele": "Vereinsplatz, Mainzer Landstraße 480, 60326 Frankfurt am Main",
     "trainer": ["Vassilios Miamis", "Daniel Heyer"],
     "mail": "trainer_d_jugend@sportfreunde04.de",
@@ -82,13 +82,13 @@
     "staffel": "1. Kreisklasse · DJ KK F Gr. 05",
     "spielbetrieb": "Meisterschaft",
     "training": [
-      { "tag": "Dienstag", "von": "17:30", "bis": "19:30" },
-      { "tag": "Mittwoch", "von": "17:30", "bis": "19:00" },
-      { "tag": "Freitag", "von": "17:30", "bis": "19:30" }
+      { "tag": "Dienstag", "von": "17:30", "bis": "19:30", "platz": "Tor 2" },
+      { "tag": "Mittwoch", "von": "17:30", "bis": "19:00", "platz": "Tor 2" },
+      { "tag": "Freitag", "von": "17:30", "bis": "19:30", "platz": "Tor 2" }
     ],
-    "platz": "Vereinsplatz Mainzer Landstraße 480, linke Hälfte Tor 2",
+    "platz": "Vereinsplatz Mainzer Landstraße 480",
     "heimspiele": "Vereinsplatz, Mainzer Landstraße 480, 60326 Frankfurt am Main",
-    "trainer": ["Beyhun Gelberi", "Damian Porombka-Kepa"],
+    "trainer": ["Beyhun Gelberi", "Damin Porombka-Kepa"],
     "mail": "trainer_d_jugend@sportfreunde04.de",
     "fussballde_id": "011MIF9LDC000000VTVG0001VTR8C1K7",
     "csv": "D2",
@@ -107,10 +107,10 @@
     "staffel": "1. Kreisklasse · DJ KK F Gr. 04",
     "spielbetrieb": "Meisterschaft",
     "training": [
-      { "tag": "Dienstag", "von": "17:30", "bis": "19:30" },
-      { "tag": "Freitag", "von": "17:30", "bis": "19:30" }
+      { "tag": "Dienstag", "von": "17:30", "bis": "19:30", "platz": "rechte Hälfte" },
+      { "tag": "Freitag", "von": "17:30", "bis": "19:30", "platz": "rechte Hälfte" }
     ],
-    "platz": "Vereinsplatz Mainzer Landstraße 480, rechte Hälfte Tor 1",
+    "platz": "Vereinsplatz Mainzer Landstraße 480",
     "heimspiele": "Vereinsplatz, Mainzer Landstraße 480, 60326 Frankfurt am Main",
     "trainer": ["Olgay Özkan", "Marcel Hogg", "Flo Lehr"],
     "mail": "trainer_d_jugend@sportfreunde04.de",
@@ -131,11 +131,11 @@
     "staffel": "1. Kreisklasse · EJ Quali Gr. 08",
     "spielbetrieb": "Qualifikationsrunde, Kreispokal; Hauptrunde ab Oktober",
     "training": [
-      { "tag": "Montag", "von": "17:30", "bis": "19:00" },
-      { "tag": "Mittwoch", "von": "17:30", "bis": "19:00" },
-      { "tag": "Donnerstag", "von": "17:30", "bis": "19:00" }
+      { "tag": "Montag", "von": "17:30", "bis": "19:00", "platz": "rechte Hälfte" },
+      { "tag": "Mittwoch", "von": "17:30", "bis": "19:00", "platz": "Tor 3" },
+      { "tag": "Donnerstag", "von": "17:30", "bis": "19:00", "platz": "linke Hälfte" }
     ],
-    "platz": "Vereinsplatz Mainzer Landstraße 480, rechte Hälfte",
+    "platz": "Vereinsplatz Mainzer Landstraße 480",
     "heimspiele": "Vereinsplatz, Mainzer Landstraße 480, 60326 Frankfurt am Main",
     "trainer": ["Mohamed Bardouch", "Mario Orsolic", "Bernhard Henrich"],
     "mail": "trainer_e_jugend@sportfreunde04.de",
@@ -156,11 +156,11 @@
     "staffel": "1. Kreisklasse · EJ Quali Gr. 18",
     "spielbetrieb": "Qualifikationsrunde; Hauptrunde ab Oktober",
     "training": [
-      { "tag": "Montag", "von": "17:30", "bis": "19:00" },
-      { "tag": "Dienstag", "von": "16:30", "bis": "18:00" },
-      { "tag": "Donnerstag", "von": "17:30", "bis": "19:00" }
+      { "tag": "Montag", "von": "17:30", "bis": "19:00", "platz": "Tor 2" },
+      { "tag": "Dienstag", "von": "16:30", "bis": "18:00", "platz": "rechte Hälfte" },
+      { "tag": "Donnerstag", "von": "17:30", "bis": "19:00", "platz": "Tor 3" }
     ],
-    "platz": "Vereinsplatz Mainzer Landstraße 480, linke bzw. rechte Hälfte",
+    "platz": "Vereinsplatz Mainzer Landstraße 480",
     "heimspiele": "Vereinsplatz, Mainzer Landstraße 480, 60326 Frankfurt am Main",
     "trainer": ["Markus Rees", "Samson Tesfay"],
     "mail": "trainer_e_jugend@sportfreunde04.de",
@@ -181,10 +181,10 @@
     "staffel": "1. Kreisklasse · EJ Quali Gr. 22",
     "spielbetrieb": "Qualifikationsrunde; Hauptrunde ab Oktober",
     "training": [
-      { "tag": "Montag", "von": "16:00", "bis": "17:30" },
-      { "tag": "Mittwoch", "von": "16:00", "bis": "17:30" }
+      { "tag": "Montag", "von": "16:00", "bis": "17:30", "platz": "rechte Hälfte" },
+      { "tag": "Mittwoch", "von": "16:00", "bis": "17:30", "platz": "rechte Hälfte" }
     ],
-    "platz": "Vereinsplatz Mainzer Landstraße 480, rechte Hälfte",
+    "platz": "Vereinsplatz Mainzer Landstraße 480",
     "heimspiele": "Vereinsplatz, Mainzer Landstraße 480, 60326 Frankfurt am Main",
     "trainer": ["Ümit Maras"],
     "mail": "trainer_e_jugend@sportfreunde04.de",
@@ -205,10 +205,10 @@
     "staffel": "Kinderfußball · F-Junioren 4+1 Gr. 2",
     "spielbetrieb": "Kinderfestivals (keine Tabelle)",
     "training": [
-      { "tag": "Montag", "von": "17:30", "bis": "19:00" },
-      { "tag": "Mittwoch", "von": "17:30", "bis": "19:00" }
+      { "tag": "Montag", "von": "17:30", "bis": "19:00", "platz": "Tor 1" },
+      { "tag": "Mittwoch", "von": "17:30", "bis": "19:00", "platz": "Tor 4" }
     ],
-    "platz": "Vereinsplatz Mainzer Landstraße 480, linke Hälfte Tor 1 bzw. rechte Hälfte",
+    "platz": "Vereinsplatz Mainzer Landstraße 480",
     "heimspiele": "Vereinsplatz, Mainzer Landstraße 480, 60326 Frankfurt am Main",
     "trainer": ["Ralf Schwager"],
     "mail": "trainer_f_jugend@sportfreunde04.de",
@@ -229,10 +229,10 @@
     "staffel": "Kinderfußball · F-Junioren 4vs4 Gr. 4",
     "spielbetrieb": "Kinderfestivals (keine Tabelle)",
     "training": [
-      { "tag": "Dienstag", "von": "17:30", "bis": "19:00" },
-      { "tag": "Donnerstag", "von": "17:30", "bis": "19:00" }
+      { "tag": "Dienstag", "von": "17:30", "bis": "19:00", "platz": "Käfig" },
+      { "tag": "Donnerstag", "von": "17:30", "bis": "19:00", "platz": "Tor 4" }
     ],
-    "platz": "Vereinsplatz Mainzer Landstraße 480, Käfig bzw. rechte Hälfte",
+    "platz": "Vereinsplatz Mainzer Landstraße 480",
     "heimspiele": "Vereinsplatz, Mainzer Landstraße 480, 60326 Frankfurt am Main",
     "trainer": ["Martin Gehn", "Ercan Mutlu"],
     "mail": "trainer_f_jugend@sportfreunde04.de",
@@ -253,9 +253,9 @@
     "staffel": "Kinderfußball · G-Junioren 3vs3 Gr. 4",
     "spielbetrieb": "Kinderfestivals (keine Tabelle)",
     "training": [
-      { "tag": "Montag", "von": "17:30", "bis": "19:00" }
+      { "tag": "Montag", "von": "17:30", "bis": "19:00", "platz": "Court und Käfig" }
     ],
-    "platz": "Vereinsplatz Mainzer Landstraße 480, Court",
+    "platz": "Vereinsplatz Mainzer Landstraße 480",
     "heimspiele": "Vereinsplatz, Mainzer Landstraße 480, 60326 Frankfurt am Main",
     "trainer": ["Biljana Trninic"],
     "mail": "trainer_g_jugend@sportfreunde04.de",

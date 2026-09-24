@@ -83,6 +83,9 @@ function angabenAbschnitt(daten) {
 
       <dt>Registergericht / Registernummer</dt>
       <dd>${escapeHtml(verein.register ?? "")}</dd>
+
+      <dt>Verantwortlich für den Inhalt nach §&nbsp;18 Abs.&nbsp;2 MStV</dt>
+      <dd>${escapeHtml(vertretung[0] ?? "")}<br>${escapeHtml(sportstaette.strasse ?? "")}<br>${escapeHtml(sportstaette.plz ?? "")} ${escapeHtml(sportstaette.ort ?? "")}</dd>
     </dl>
     </div>
   </div>
