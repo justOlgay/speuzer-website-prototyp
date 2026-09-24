@@ -21,9 +21,10 @@
    Logo-Tafeln der Sponsoren laufen wie Bandenwerbung im Stadion durch
    (Wunsch der 1. Vorsitzenden: „Sponsorenbilder, die durchlaufen“; Daten
    aus dem Sponsoren-Worksheet, siehe Skript „Bande“). Darunter auf hellem
-   Grund eine Meldung, der Parkplatzhinweis und zwei Handlungen. „Als
-   Nächstes“ (Termin-Karte, Gast-Karte „Deine Termine“) ist entfallen
-   (Entscheidung der Jugendleitung, 24.09.2026). Farben/Schrift aus
+   Grund nur der Parkplatzhinweis und zwei Handlungen. „Als Nächstes“
+   (Termin-Karte, Gast-Karte „Deine Termine“) und „Aktuelles“
+   (News-Widget) sind entfallen (Entscheidung der Jugendleitung,
+   24.09.2026). Farben/Schrift aus
    assets/css/tokens.css. Kein Rot, kein Grün, kein dekoratives Grau. */
 
 /* === 1. Schriften (absolute GitHub-Pages-Adressen, siehe assets/app/styles.css) === */
@@ -466,7 +467,7 @@ svg { display: block; flex: 0 0 auto; }
 }
 
 /* Auf niedrigen Bildschirmen (kleine Telefone, Querformat) die Bühne
-   straffen, damit Meldung und Parkplatz näher an die Falz rücken
+   straffen, damit Parkplatzhinweis und Knöpfe näher an die Falz rücken
    (Rückmeldung der Jury zu Entwurf A). Zwei Stufen: ab 900px Bauhöhe leicht
    enger, ab 620px (z. B. 320×568) deutlich enger. Die Begrüßungszeile
    bleibt bei 44px Mindesthöhe (Tippziel Profil-Knopf). */
@@ -498,146 +499,16 @@ svg { display: block; flex: 0 0 auto; }
   margin-top: calc(-1 * var(--blatt-radius));
   border-radius: var(--blatt-radius) var(--blatt-radius) 0 0;
   background: var(--bg);
-  padding: var(--sp-3) var(--rand) calc(24px + env(safe-area-inset-bottom));
+  /* oben gleicher Luftraum wie seitlich: erster Baustein ist seit dem
+     Wegfall von „Aktuelles“ die Hinweis-Karte ohne eigenen Kopf */
+  padding: var(--sp-5) var(--rand) calc(24px + env(safe-area-inset-bottom));
 }
 
-.abschnitt + .abschnitt,
-.abschnitt + .hinweis-karte,
-.hinweis-karte + .abschnitt,
 .hinweis-karte + .aktionen {
   margin-top: var(--sp-5);
 }
 
-.kopf {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-3);
-  min-height: 44px;
-  margin-bottom: var(--sp-1);
-}
-
-.kopf__titel {
-  margin: 0;
-  font-family: var(--font-head);
-  font-weight: 700;
-  font-size: 16px;
-  line-height: 1.1;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-}
-
-.kopf__link {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  min-height: 44px;
-  padding-left: var(--sp-3);
-  margin-right: -6px;
-  color: var(--blau-700);
-  font-weight: 600;
-  font-size: 14px;
-  text-decoration: none;
-}
-
-.kopf__link svg { width: 18px; height: 18px; }
-
-/* === 6. Karten (Meldung, Gast-Karte, Leerzustand) === */
-
-.karte {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-height: 64px;
-  padding: 14px 12px 14px var(--sp-4);
-  background: var(--surface);
-  border-radius: var(--r-lg);
-  box-shadow: var(--sh-1);
-  color: var(--ink);
-  text-decoration: none;
-  transition: background-color 120ms ease-out;
-}
-
-a.karte:active,
-.news-karte:active { background: var(--blau-50); }
-
-.karte__text {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.karte__titel {
-  font-weight: 600;
-  font-size: 16px;
-  line-height: 1.3;
-  color: var(--ink);
-  overflow-wrap: anywhere;
-}
-
-/* Kleiner Titel vor einem leisen Satz (Gast-Karte, Leerzustand Meldungen):
-   gibt der Karte mehr Gewicht als ein einzelner Satz (Jury-Empfehlung aus
-   Entwurf B: „Neues aus dem Verein“ / „Keine neuen Meldungen“). */
-.karte__minititel {
-  font-weight: 600;
-  font-size: 15px;
-  line-height: 1.3;
-  color: var(--ink);
-  margin-bottom: 2px;
-}
-
-.karte__leise {
-  font-size: 14px;
-  color: var(--ink-2);
-  text-wrap: pretty;
-}
-
-.karte__aufforderung {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  margin-top: 6px;
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--blau-700);
-}
-
-.karte__aufforderung svg { width: 16px; height: 16px; }
-
-/* Meldung (Vorlage für das News-Widget; das Widget klont .card.mb-3.relative
-   und legt den Klick auf die ganze Karte) */
-.news-karte { cursor: pointer; }
-
-.news-karte .news-karte__titel {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-}
-
-.news-karte__datum {
-  margin-top: 2px;
-  font-size: 13px;
-  color: var(--ink-3);
-}
-
-/* leere Vorlage vor dem Laden: zwei ruhige Balken statt einer leeren Karte */
-.news-karte .newsWallTitle:empty::before,
-.news-karte .newsWallDate:empty::before {
-  content: "";
-  display: block;
-  height: 12px;
-  border-radius: 6px;
-  background: var(--blau-50);
-}
-
-.news-karte .newsWallTitle:empty::before { width: 72%; margin: 4px 0 6px; }
-.news-karte .newsWallDate:empty::before { width: 32%; }
-
-/* Leerzustand/Fehlerfall der Meldungen: siehe pruefeMeldungen() im Skript. */
-
-/* === 7. Parkplatzhinweis === */
+/* === 6. Parkplatzhinweis === */
 
 /* HINWEIS-Baustein: im CMS-Quelltext pflegen oder samt <aside> entfernen.
    Getönte Fläche mit umrandetem "P" statt vollflächigem Schild (Jury-
@@ -695,7 +566,7 @@ a.karte:active,
 
 .hinweis__gueltig svg { flex: 0 0 auto; width: 15px; height: 15px; margin-top: 1px; }
 
-/* === 8. Handlungen === */
+/* === 7. Handlungen === */
 
 .aktionen {
   display: grid;
@@ -819,27 +690,6 @@ a.karte:active,
 <div class="blatt">
   <div class="rahmen">
 
-    <section class="abschnitt" aria-labelledby="titel-aktuelles">
-      <div class="kopf">
-        <h2 id="titel-aktuelles" class="kopf__titel">Aktuelles</h2>
-        <a id="meldungen-kopflink" class="kopf__link" href="nav://sportfreunde04_Application_1780401660371">Alle Meldungen<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></a>
-      </div>
-      <div
-        class="news aktuelles"
-        applicationId="sportfreunde04_Application_1780401660371"
-        limit="1"
-        sourceTag="false"
-        maxBodyLength="90"
-        news-widget>
-        <div class="card mb-3 relative karte news-karte">
-          <div class="karte__text">
-            <div class="newsWallTitle karte__titel news-karte__titel"></div>
-            <div class="newsWallDate news-karte__datum"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- HINWEIS: im CMS-Quelltext pflegen oder samt <aside> entfernen -->
     <aside class="hinweis-karte" aria-label="Hinweis">
       <span class="p-schild" aria-hidden="true">P</span>
@@ -864,17 +714,11 @@ a.karte:active,
 </main>
 
 <script src="https://cdn.appack.de/modules/common/jquery-3.4.1.min.js"></script>
-<!-- graph-api.js bleibt für das News-Widget eingebunden (Termine sind entfallen). -->
-<script src="https://cdn.appack.de/modules/graph-api.js"></script>
-<script src="https://cdn.appack.de/modules/widgets/component-news-widget.js"></script>
 <!-- Workbook-API (braucht jQuery) für die Sponsoren-Bande -->
 <script src="https://cdn.appack.de/modules/appack.workbook-1.4.1.js"></script>
 <script>
 (function () {
   "use strict";
-
-  var NEWS_ID = "sportfreunde04_Application_1780401660371";
-  var PFEIL_KLEIN_SVG = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>';
 
   // Sponsoren-Worksheet (pflegt die 1. Vorsitzende selbst im CMS). Der
   // öffentliche Endpunkt liefert auch ohne Anmeldung (geprüft 24.09.2026):
@@ -910,15 +754,6 @@ a.karte:active,
   document.addEventListener("touchstart", function () {}, { passive: true });
 
   // ---------- Begrüßung ----------
-
-  // Ob ein Gast (ohne profileJSON.id) unterwegs ist: einmal zentral
-  // bestimmen, damit Kopfzeile (Skript oben, gleiche Regel) und Aktuelles
-  // denselben Gast-Fall behandeln (QA-Befund, C2 Abschnitt 7 – keine
-  // graphql-Aufrufe/401 für Gäste).
-  function istAngemeldet() {
-    var profil = window.profileJSON || {};
-    return !!profil.id;
-  }
 
   function begruessung() {
     var el = document.getElementById("gruss");
@@ -1172,55 +1007,8 @@ a.karte:active,
       .catch(function () { fertig([]); });
   }
 
-  // ---------- Aktuelles (News-Widget) ----------
-
-  // Gast ohne Anmeldung: das News-Widget-Skript ruft beim Start selbst eine
-  // graphql-API auf, die ohne Anmeldung 401 liefert (leere Karte,
-  // Skript-Fehler). Den Widget-Container deshalb vor dem
-  // DOMContentLoaded-Lauf von component-news-widget.js entfernen. An seine
-  // Stelle tritt eine Karte mit kleinem Titel (Jury-Empfehlung aus Entwurf
-  // B: „Neues aus dem Verein“) plus "Alle Meldungen"-Aufforderung, damit der
-  // Abschnitt nicht leer wirkt; der gleichlautende Link im Abschnittskopf
-  // wird für Gäste ausgeblendet, damit er nicht doppelt steht.
-  function entferneNewsWidgetFuerGast() {
-    if (istAngemeldet()) return;
-    var widget = document.querySelector(".news.aktuelles[news-widget]");
-    if (!widget || !widget.parentNode) return;
-    var karte = element("a", "karte gast-karte");
-    karte.href = "nav://" + NEWS_ID;
-    var text = element("div", "karte__text");
-    text.appendChild(element("p", "karte__minititel", "Neues aus dem Verein"));
-    text.appendChild(element("p", "karte__leise", "Berichte und Neuigkeiten aus dem Vereinsleben."));
-    var auff = element("span", "karte__aufforderung", "Alle Meldungen");
-    auff.insertAdjacentHTML("beforeend", PFEIL_KLEIN_SVG);
-    text.appendChild(auff);
-    karte.appendChild(text);
-    widget.parentNode.replaceChild(karte, widget);
-    var kopflink = document.getElementById("meldungen-kopflink");
-    if (kopflink) kopflink.hidden = true;
-  }
-
-  // Angemeldet: Kommt vom News-Widget nach kurzer Zeit keine Meldung (keine
-  // Treffer, abgelaufene Anmeldung, offline), steht statt der Lade-Balken
-  // ein ruhiger Leerzustand in Kartenform.
-  function pruefeMeldungen(versuch) {
-    var widget = document.querySelector(".news.aktuelles[news-widget]");
-    if (!widget) return;
-    var gefuellt = [].some.call(widget.querySelectorAll(".newsWallTitle"), function (t) { return t.textContent.trim() !== ""; });
-    if (gefuellt) return;
-    if (versuch < 8) { setTimeout(function () { pruefeMeldungen(versuch + 1); }, 1000); return; }
-    var leer = element("div", "karte meldungen-leer");
-    var text = element("div", "karte__text");
-    text.appendChild(element("p", "karte__minititel", "Keine neuen Meldungen"));
-    text.appendChild(element("p", "karte__leise", "Ältere Berichte findest du unter „Alle Meldungen“."));
-    leer.appendChild(text);
-    widget.parentNode.replaceChild(leer, widget);
-  }
-
   begruessung();
   ladeBande();
-  entferneNewsWidgetFuerGast();
-  if (istAngemeldet()) pruefeMeldungen(0);
 })();
 </script>
 </body>
