@@ -155,6 +155,38 @@ svg { display: block; flex: 0 0 auto; }
   margin-inline: auto;
 }
 
+/* Bildschirm füllen (24.09.2026, Rückmeldung am iPhone: leere helle
+   Fläche unter den Knöpfen „sieht unprofessionell aus“). Die Seite ist
+   kürzer als ein Telefon-Bildschirm; statt das Blatt nach unten leer
+   auslaufen zu lassen, wächst die Bühne, und das Blatt mit Hinweis und
+   Knöpfen sitzt bündig am unteren Rand. Der zusätzliche Platz landet
+   über dem Satz (der Satz bleibt direkt über der Bande). Ist der
+   Bildschirm zu klein, greift nichts davon – die Seite scrollt wie
+   bisher. */
+.inhalt {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.inhalt > .buehne {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.buehne > .rahmen {
+  width: 100%;
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.buehne > .rahmen > .gruss-zeile { margin-bottom: auto; }
+
+.inhalt > .blatt { flex: 0 0 auto; }
+
 /* === 4. Bühne (wie die Website-Startseite) === */
 
 /* Oben beginnt die Bühne exakt im Blau der nativen Kopfleiste
