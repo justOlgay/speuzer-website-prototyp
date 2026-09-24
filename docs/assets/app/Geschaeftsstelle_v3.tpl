@@ -420,7 +420,7 @@ button.knopf {
 
   <div class="karte">
     <p class="adresse-block"><strong>Bezirkssportanlage am Rebstock (SW&nbsp;Griesheim)</strong>Am Römerhof 9<br>60486&nbsp;Frankfurt am&nbsp;Main</p>
-    <p style="margin:0 0 var(--sp-3);">Hier spielen die Herren (und die A&#8209;Jugend) ihre Heimspiele.</p>
+    <p style="margin:0 0 var(--sp-3);">Hier spielen die Herren und die A&#8209;Jugend ihre Heimspiele.</p>
     <div class="aktionen">
       <a id="route-rebstock-knopf" class="knopf knopf--leise" href="#" target="_blank" rel="noopener">Route planen</a>
     </div>
