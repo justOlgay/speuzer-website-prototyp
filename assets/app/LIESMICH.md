@@ -117,8 +117,9 @@ Cache-Ordner und werden nie committet oder zitiert.
 angelegt, nicht in den Workspace hochgeladen. Sie ergibt die neue
 Startseite der Vereins-App: blaue Bühne (Begrüßung, Profil-Knopf bzw. für
 Gäste die Pille „Anmelden“, Claim) mit der Sponsoren-„Bande“ am Fuß,
-darunter „Aktuelles“ (eine Meldung), Parkplatzhinweis und zwei Knöpfe –
-ohne Foto und Kacheln. Kopf und Menü kommen von der App-Hülle (seit
+darunter nur Parkplatzhinweis und zwei Knöpfe – ohne Foto, Kacheln und
+Meldungen („Aktuelles“ entfällt seit 24.09.2026 abends, die News stehen im
+Menüpunkt „News“). Kopf und Menü kommen von der App-Hülle (seit
 24.09.2026 auf iOS Seitenmenü statt Tab-Leiste); die Vorlage liefert nur
 den Inhalt.
 
