@@ -4,7 +4,7 @@
 // Vorstand & Kontakt, dafür jetzt PFAD nötig (siehe pfadZurWurzel() in
 // tools/build.mjs).
 
-import { ruecklink } from "../../vorlagen/hilfen.mjs";
+import { ruecklink, APP_MODUS_SKRIPT } from "../../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/verein/mach-mit/" (Tiefe 2), daher immer
 // "../../" (siehe pfadZurWurzel() in tools/build.mjs).
@@ -83,6 +83,8 @@ export function seite() {
 
   return {
     url: "/verein/mach-mit/",
+    // App-Modus (?app=1): Links führen in die App-Seiten, siehe hilfen.mjs
+    kopfZusatz: APP_MODUS_SKRIPT,
     // W9-Korrektur (QA3 390-30/quer-33): Trenner einheitlich "&" statt "·"
     // (alle übrigen Seitentitel/Verteiler-Einträge trennen mit "&"), H1/Title
     // weiter an den Verein-Verteiler angeglichen (src/seiten/verein/index.mjs).

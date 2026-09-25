@@ -767,3 +767,65 @@ export function trainerFotosSkript(team) {
 })();
 </script>`;
 }
+
+// ---------- App-Modus (25.09.2026) ----------
+
+// Öffnet die Vereins-App eine Website-Seite mit ?app=1 (z. B. „Beiträge,
+// Ablauf & Unterlagen“ aus dem App-Aufnahmeantrag, „Mach mit“ und „Shop“ aus
+// der App-Seite Verein), führen die Links zurück in die App-Seiten (nav://)
+// statt in die Website-Navigation; Website-Seiten ohne eigenes App-Modul
+// bleiben im App-Modus (app=1 wird angehängt), externe Adressen öffnen über
+// ext:// außerhalb der App. Der Online-Aufnahmeantrag führt in der App auf
+// das App-Formular (Modul „Mitglied werden“, mit Foto-Upload und Profil-
+// Vorbelegung). Ohne ?app=1 passiert nichts. Wird über kopfZusatz nur in die
+// Seiten eingebunden, die die App öffnet.
+export const APP_MODUS_SKRIPT = `
+<script>
+(function () {
+  "use strict";
+  if (!/(^|[?&])app=1(&|$)/.test(location.search)) return;
+  var NAV = {
+    "mannschaften": "sportfreunde04_TextImage_1783343147611",
+    "verein": "sportfreunde04_TextImage_1783060935192",
+    "verein-karneval": "sportfreunde04_TextImage_1780401660343",
+    "verein-vorstand": "sportfreunde04_TextImage_1780401660340",
+    "verein-sponsoren": "sportfreunde04_TextImage_1780401660337",
+    "verein-ueber-uns": "sportfreunde04_TextImage_1784295208452",
+    "kontakt": "sportfreunde04_TextImage_1780401660324",
+    "mitglied-werden": "sportfreunde04_TextImage_1780401660329",
+    "chronik": "sportfreunde04_TextImage_1789020275334"
+  };
+  var FORMULAR_WEB = "6a903758337cdc97f94f2655";
+  function umschreiben() {
+    [].forEach.call(document.querySelectorAll("a[href]"), function (a) {
+      var href = a.getAttribute("href");
+      if (/^(mailto:|tel:|#|nav:|ext:|javascript:)/i.test(href)) return;
+      var url;
+      try { url = new URL(href, location.href); } catch (e) { return; }
+      if (url.pathname.indexOf(FORMULAR_WEB) !== -1) {
+        a.href = "nav://" + NAV["mitglied-werden"];
+        a.removeAttribute("target");
+        return;
+      }
+      if (url.hostname === location.hostname && /\\/workspace\\/web\\//.test(url.pathname)) {
+        var name = url.pathname.split("/").pop().replace(/\\.html$/, "");
+        var modul = NAV[name] || (/^mannschaften-/.test(name) ? NAV.mannschaften : null) || (/^chronik/.test(name) ? NAV.chronik : null);
+        if (modul && !url.hash) {
+          a.href = "nav://" + modul;
+        } else {
+          url.searchParams.set("app", "1");
+          a.href = url.toString();
+        }
+        a.removeAttribute("target");
+        return;
+      }
+      if (/^https?:$/.test(url.protocol)) {
+        a.href = "ext://" + url.toString();
+        a.removeAttribute("target");
+      }
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", umschreiben);
+  else umschreiben();
+})();
+</script>`;

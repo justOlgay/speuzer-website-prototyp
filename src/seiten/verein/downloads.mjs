@@ -1,7 +1,7 @@
 // Downloads /verein/downloads/ (P5) – Gruppen aus data/downloads.json in
 // fester Reihenfolge (Anmeldung, Verein, Kinder- und Jugendschutz).
 
-import { ruecklink } from "../../vorlagen/hilfen.mjs";
+import { ruecklink, APP_MODUS_SKRIPT } from "../../vorlagen/hilfen.mjs";
 import { downloadZeile } from "../../vorlagen/bausteine.mjs";
 
 // Diese Seite liegt immer unter "/verein/downloads/" (Tiefe 2), daher immer
@@ -85,6 +85,8 @@ export function seite(daten) {
 
   return {
     url: "/verein/downloads/",
+    // App-Modus (?app=1): Links führen in die App-Seiten, siehe hilfen.mjs
+    kopfZusatz: APP_MODUS_SKRIPT,
     title: "Downloads & Anträge",
     description:
       "Downloads & Anträge des FFV Sportfreunde 04: Aufnahmeantrag, Beitragsübersicht, Satzung 2025, Präventions- und Schutzkonzept, Vereinsphilosophie und Chronik als PDF.",

@@ -7,13 +7,13 @@
   "dateien": [
     {
       "datei": "web/datenschutz.html",
-      "bytes": 59731,
-      "sha256": "2d9a942a60eacae0de2b33859a36702ef2cf949cd0010970c6c1cbfb8fdd0c70"
+      "bytes": 61749,
+      "sha256": "74a91de4fea9351c083eb361d4f2ef094c5a99aca1a7e624f008e787e9019901"
     },
     {
       "datei": "web/impressum.html",
-      "bytes": 4087,
-      "sha256": "3577aabd56e87efb738edf3f396298158185a13c0da7b824795aeb1fda2ef548"
+      "bytes": 6105,
+      "sha256": "a99ed2d9cacf84197bb9654f706e8ceff69370d1e1cad85316b614d8ecf4e72d"
     },
     {
       "datei": "web/kontakt.html",
@@ -82,13 +82,13 @@
     },
     {
       "datei": "web/mitglied-werden.html",
-      "bytes": 11636,
-      "sha256": "f519f0a77d6672caaca9fda34f513bdfe80ecbda2ff00b244644e82cf00c9335"
+      "bytes": 13654,
+      "sha256": "c6b45d69602b6ffe858a2cf04939bbcb715597aa28beaa93920bbc100ca42697"
     },
     {
       "datei": "web/shop.html",
-      "bytes": 4082,
-      "sha256": "38959f8a98dba85aa52fa3968c4ba9adba2b994a7d012d45ab1e9235411351bb"
+      "bytes": 6100,
+      "sha256": "f8bc4f8d47e86712daf30cf1e07c867da2173cdf09cd51a7ca93df5e2569e347"
     },
     {
       "datei": "web/spielplan-a-jugend.html",
@@ -157,8 +157,8 @@
     },
     {
       "datei": "web/verein-downloads.html",
-      "bytes": 5774,
-      "sha256": "e5e1a3e1fde7b4d806bdb901dbca9d328955e8c14eb0842c149368806826f0c3"
+      "bytes": 7792,
+      "sha256": "f43ffb233425be16f498799ed8abba7c0e7c3038551bffc635d7b1e0f55e32d8"
     },
     {
       "datei": "web/verein-karneval.html",
@@ -167,8 +167,8 @@
     },
     {
       "datei": "web/verein-mach-mit.html",
-      "bytes": 4586,
-      "sha256": "2f2003bb3c7cce6dc32d06e31a8c2ce2be380420e838d91437771e8b6edacf7e"
+      "bytes": 6604,
+      "sha256": "0cedf3d5bd2ce3d77faeb78db465991ffaf10b66080787ea62f448d590fd4095"
     },
     {
       "datei": "web/verein-sponsoren.html",
