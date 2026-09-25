@@ -7,13 +7,13 @@
   "dateien": [
     {
       "datei": "web/datenschutz.html",
-      "bytes": 59896,
-      "sha256": "1b8002ac1fb206b3e7c201a620f1db4fd7be6580b40915ef0727b9bed9c263e3"
+      "bytes": 59731,
+      "sha256": "2d9a942a60eacae0de2b33859a36702ef2cf949cd0010970c6c1cbfb8fdd0c70"
     },
     {
       "datei": "web/impressum.html",
-      "bytes": 4036,
-      "sha256": "37868fa8971b172e1a94e975ac93832a28738a456daddb6b475e168bfb727ac5"
+      "bytes": 4087,
+      "sha256": "3577aabd56e87efb738edf3f396298158185a13c0da7b824795aeb1fda2ef548"
     },
     {
       "datei": "web/kontakt.html",
