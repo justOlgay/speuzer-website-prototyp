@@ -1,0 +1,112 @@
+/* Speuzer: Hinweis „Vereins-App laden“ auf der Website (25.09.2026, Wunsch
+   der 1. Vorsitzenden: „Info/Hinweis zum Download per QR-Code“).
+   Stilblock „speuzer-app-hinweis-stil“ für Microwebsite.tpl (am Ende des
+   head-Bereichs); das Skript (app-hinweis-microwebsite.js) setzt den Abschnitt
+   direkt über die Fußzeile, er steht damit auf jeder Seite. Am Rechner mit
+   QR-Code je Store (mit der Handykamera scannen), auf dem Handy nur die
+   antippbaren Store-Badges. */
+
+.speuzer-app {
+  background: #F2F3FA;
+  color: #0F1640;
+  font-family: "Inter", system-ui, Arial, sans-serif;
+  border-top: 1px solid rgba(25, 23, 147, .10);
+}
+
+.speuzer-app__rahmen {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: 28px 40px;
+}
+
+.speuzer-app__text { max-width: 560px; }
+
+.speuzer-app__titel {
+  margin: 0 0 6px;
+  font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.05;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+  color: #191793;
+}
+
+.speuzer-app__satz {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #3A4166;
+  text-wrap: pretty;
+}
+
+.speuzer-app__stores {
+  display: flex;
+  gap: 24px;
+  flex: 0 0 auto;
+}
+
+.speuzer-app__store {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.speuzer-app__qr {
+  display: block;
+  width: 112px;
+  height: 112px;
+  padding: 6px;
+  background: #FFFFFF;
+  border: 1px solid rgba(25, 23, 147, .14);
+  border-radius: 10px;
+}
+
+.speuzer-app__badge {
+  display: block;
+  height: 40px;
+  width: auto;
+}
+
+/* Das offizielle Google-Play-Badge hat rundum einen transparenten Rand
+   (sichtbar nur 67 % der Bildhöhe) – größer setzen und den Rand per
+   negativem Außenabstand ausgleichen, damit beide Badges gleich hoch
+   wirken und bündig stehen. */
+.speuzer-app__badge--rand {
+  height: 59.5px;
+  margin: -9.75px -9.75px;
+}
+
+.speuzer-app__hinweis {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #5A6189;
+}
+
+.speuzer-app__store:focus-visible {
+  outline: 3px solid #191793;
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
+/* Handy/Tablet schmal: untereinander, ohne QR-Code (man scannt nicht das
+   eigene Display), Badges nebeneinander. */
+@media (max-width: 899px) {
+  .speuzer-app__rahmen {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 24px 16px 26px;
+  }
+  .speuzer-app__qr,
+  .speuzer-app__hinweis { display: none; }
+  .speuzer-app__stores { gap: 12px; flex-wrap: wrap; }
+  .speuzer-app__titel { font-size: 24px; }
+}

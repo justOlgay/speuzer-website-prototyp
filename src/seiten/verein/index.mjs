@@ -15,6 +15,8 @@
 
 // Diese Seite liegt immer unter "/verein/" (Tiefe 1), daher immer "../"
 // (siehe pfadZurWurzel() in tools/build.mjs).
+import { PROBETRAINING_MAILTO } from "../../vorlagen/hilfen.mjs";
+
 const PFAD = "../";
 
 function escapeHtml(text) {
@@ -88,6 +90,10 @@ function derVereinAbschnitt() {
     ]),
     gruppe("Service", [
       zeile("Downloads & Anträge", "Satzung, Beiträge, Anträge", `${PFAD}verein/downloads/`),
+      // 25.09.2026 (Wunsch der 1. Vorsitzenden, gleich in der App): das
+      // appack-Formular und die öffentliche Ansicht des Schwarzen Bretts.
+      zeile("Mitgliedsbescheinigung", "Per Formular anfordern", "https://appack.de/rest-api/drender/6a9952db5d989f94800fc246"),
+      zeile("Schwarzes Brett", "Aushänge, Fundsachen, Gesuche", "https://shorturl.appack.de/sportfreunde04_Application_1780401660387"),
       zeile("Sponsoren & Partner", "Wer uns unterstützt", `${PFAD}verein/sponsoren/`),
       zeile("Fanshop & Teamshop", "Fanartikel und Teamausstattung", `${PFAD}shop/`),
     ]),
@@ -101,11 +107,16 @@ function derVereinAbschnitt() {
   // Abschnitt (abschnitt--hell) begann – auf allen Unterseiten und den
   // übrigen Menüpunkt-Seiten läuft der getönte Grund in den ersten Abschnitt
   // weiter. Modifikator entfernt, damit der Kopf nahtlos übergeht.
+  // 25.09.2026: Knopf „Probetraining vereinbaren“ wie am Ende der App-Seite
+  // Verein (gleiche Mailvorlage wie auf /mannschaften/).
   return `<section class="abschnitt">
   <div class="container fluss">
     <div class="zeilen-liste">
     ${inhalt}
     </div>
+    <p class="knopfzeile">
+      <a class="knopf" href="${escapeHtml(PROBETRAINING_MAILTO)}">Probetraining vereinbaren</a>
+    </p>
   </div>
 </section>`;
 }
