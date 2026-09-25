@@ -52,7 +52,9 @@ function mitGeschuetztemBindestrich(text) {
 function mitGeschuetzterUebungszeit(text) {
   return escapeHtml(text)
     .replace(/(\d{1,2}:\d{2}–\d{1,2}:\d{2}\s*Uhr)/, '<span style="white-space:nowrap;">$1</span>')
-    .replaceAll("Fridtjof-Nansen-Schule", "Fridtjof‑Nansen‑Schule");
+    .replaceAll("Fridtjof-Nansen-Schule", "Fridtjof‑Nansen‑Schule")
+    .replaceAll("Friedrich-List-Schule", "Friedrich‑List‑Schule")
+    .replace(/(\S+straße) (\d+)/, "$1&nbsp;$2");
 }
 
 // Je Gruppe: Titel, Leitung (mit Komma verbunden), Übungszeit – wenn noch
@@ -90,7 +92,7 @@ function gruppenAbschnitt(karneval) {
     <div class="raster raster--karneval-gruppen">
     ${karten}
     </div>
-    <p class="meta">Übungszeiten und Ort erfährst du bei der Karnevalabteilung.</p>
+    <p class="meta">Fragen zu den Gruppen und zum Schnuppern beantwortet die Karnevalabteilung.</p>
     <p class="knopfzeile">
       <a class="knopf" href="${escapeHtml(`mailto:${karneval.mail ?? "karnevalabteilung@sportfreunde04.de"}`)}">E-Mail an die Karnevalabteilung</a>
     </p>
