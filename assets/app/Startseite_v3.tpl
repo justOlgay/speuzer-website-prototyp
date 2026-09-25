@@ -14,18 +14,27 @@
    Webseite“). appack-Vorlage fuer die Seite "Start" (Datenquelle "Start" im
    CMS). Kopfleiste und Menü (Navigationsstil "Sidebar") kommen von der
    App-Hülle und sind NICHT Teil dieser Vorlage – kein eigenes Menü, keine
-   Tab-Leiste, keine Fußzeile. Aufbau: oben eine ruhige Bühne in Vereinsblau
-   wie die Website-Startseite (Wappen als Wasserzeichen, Satz „Fußball im
-   Gallus – seit 1904.“), darin klein die Begrüßung (Gäste: Pille
-   „Anmelden“); am Fuß der Bühne die „Bande“ (Entwurf C, 24.09.2026): weiße
-   Logo-Tafeln der Sponsoren laufen wie Bandenwerbung im Stadion durch
-   (Wunsch der 1. Vorsitzenden: „Sponsorenbilder, die durchlaufen“; Daten
-   aus dem Sponsoren-Worksheet, siehe Skript „Bande“). Darunter auf hellem
-   Grund nur der Parkplatzhinweis und zwei Handlungen. „Als Nächstes“
-   (Termin-Karte, Gast-Karte „Deine Termine“) und „Aktuelles“
-   (News-Widget) sind entfallen (Entscheidung der Jugendleitung,
-   24.09.2026). Farben/Schrift aus
-   assets/css/tokens.css. Kein Rot, kein Grün, kein dekoratives Grau. */
+   Tab-Leiste, keine Navigations-Fußzeile. Aufbau seit 25.09.2026 (Wunsch
+   der 1. Vorsitzenden, Reihenfolge von oben nach unten; Termine-Entwurf C
+   „Info-Panel“ mit den Nachbesserungen der Jury):
+   1. ruhige Bühne in Vereinsblau wie die Website-Startseite (Wappen als
+      Wasserzeichen, Satz „Fußball im Gallus – seit 1904.“), darin klein die
+      Begrüßung (Gäste: Pille „Anmelden“);
+   2. „Termine“: weiße Karte mit den nächsten drei Spielen/Veranstaltungen
+      (ohne Trainings) in kompakten Zeilen, die über die gerundete
+      Oberkante des hellen Blatts in die Bühne ragt (Info-Panel). Daten aus
+      dem öffentlichen appack-Kalender mit dem Embedded-Token (gültig bis
+      21.08.2027, Erneuern siehe Skript „Termine“); bei Ausfall nur die
+      Zeile „Alle Termine im Kalender ›“;
+   3. auf dem hellen Blatt der leise Parkplatzhinweis und zwei Handlungen;
+   4. ganz unten die „Bande“ auf einem Fußstreifen im Blau der Bühne (das
+      Blatt liegt unten genauso gerundet darauf): weiße Logo-Tafeln der
+      Sponsoren laufen wie Bandenwerbung im Stadion durch (Daten aus dem
+      Sponsoren-Worksheet, siehe Skript „Bande“); ohne Sponsoren klappt der
+      Streifen weg.
+   „Aktuelles“ (News-Widget) bleibt entfallen (Entscheidung der
+   Jugendleitung, 24.09.2026). Farben/Schrift aus assets/css/tokens.css.
+   Kein Rot, kein Grün, kein dekoratives Grau. */
 
 /* === 1. Schriften (absolute GitHub-Pages-Adressen, siehe assets/app/styles.css) === */
 
@@ -90,8 +99,16 @@
 
   /* Seitenrand: 16px bei 320, wächst bis 24px */
   --rand: clamp(16px, 5vw, 24px);
-  /* Übergang Bühne → heller Grund */
+  /* Übergänge Bühne → Blatt → Fußstreifen: das helle Blatt liegt mit
+     gerundeten Ecken oben auf der Bühne und unten auf dem Fußstreifen
+     (--blatt-radius). Die Termine-Karte ragt zusätzlich um --ueberlappung
+     über die Oberkante des Blatts in die Bühne (Info-Panel); die Bühne hält
+     dafür unten genau diesen Platz frei (siehe .buehne). */
   --blatt-radius: 24px;
+  --ueberlappung: 28px;
+  /* Schatten der schwebenden Karte: weich, nach unten, im Vereinsblau
+     getönt – ein Panel über der Bühne, keine Kachel. */
+  --sh-panel: 0 14px 32px -14px rgba(11, 14, 74, .5), 0 2px 6px rgba(11, 14, 74, .08);
 
   /* Bande: Logo-Höchstmaß NUR HIER pflegen. Das Skript liest
      --logo-max-hoehe und --logo-max-breite (logoMass()); Tafelhöhe und die
@@ -106,12 +123,22 @@
   --bande-luft: 10px;
   /* Kopf + Luft + Schiene (Innenabstand oben/unten, Tafel, 2 × 1px Haarlinie) */
   --bande-hoehe: calc(var(--bande-kopf) + var(--bande-luft) + var(--tafel-hoehe) + 2 * var(--schiene-luft) + 2px);
+  /* Fußstreifen um die Bande: Luft oben und unten (unten zusätzlich der
+     Safe-Area-Bereich, siehe .bande) */
+  --fuss-oben: 22px;
+  --fuss-unten: 20px;
 }
 
 /* === 3. Grundregeln === */
 
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
+
+/* Grund hinter der Seite (iOS-Überziehen oben und unten): Vereinsblau wie
+   die Kopfleiste, die Oberkante der Bühne und die Unterkante des
+   Fußstreifens – beim Ziehen blitzt kein heller Streifen auf. Die Seite
+   selbst (body) bleibt hell und ist nie kürzer als der Bildschirm. */
+html { background: var(--blau-800); }
 
 body {
   background: var(--bg);
@@ -137,8 +164,10 @@ svg { display: block; flex: 0 0 auto; }
   outline-offset: 2px;
 }
 
-/* Auf der blauen Bühne wäre der blaue Fokusrahmen kaum zu sehen. */
-.buehne :focus-visible { outline-color: var(--weiss); }
+/* Auf der blauen Bühne und im blauen Fußstreifen wäre der blaue
+   Fokusrahmen kaum zu sehen. */
+.buehne :focus-visible,
+.bande :focus-visible { outline-color: var(--weiss); }
 
 /* nur für Bildschirmleser */
 .vh {
@@ -156,13 +185,16 @@ svg { display: block; flex: 0 0 auto; }
 }
 
 /* Bildschirm füllen (24.09.2026, Rückmeldung am iPhone: leere helle
-   Fläche unter den Knöpfen „sieht unprofessionell aus“). Die Seite ist
-   kürzer als ein Telefon-Bildschirm; statt das Blatt nach unten leer
-   auslaufen zu lassen, wächst die Bühne, und das Blatt mit Hinweis und
-   Knöpfen sitzt bündig am unteren Rand. Der zusätzliche Platz landet
-   über dem Satz (der Satz bleibt direkt über der Bande). Ist der
-   Bildschirm zu klein, greift nichts davon – die Seite scrollt wie
-   bisher. */
+   Fläche unter den Knöpfen „sieht unprofessionell aus“). Ist die Seite
+   kürzer als der Bildschirm (große Telefone, Tablet), wächst die Bühne,
+   und Termine, Hinweis, Knöpfe und Fußstreifen sitzen bündig am unteren
+   Rand – unter dem letzten Element ist nie leere helle Fläche: mit
+   Sponsoren schließt der blaue Fußstreifen die Seite ab, ohne Sponsoren
+   das Blatt mit den Knöpfen. Der zusätzliche Platz der Bühne wird geteilt
+   (25.09.2026, Jury): zwei Teile über dem Satz, ein Teil darunter – so
+   steht auf hohen Bildschirmen nicht alles leere Blau zwischen Gruß und
+   Satz. Ist der Bildschirm zu klein, greift nichts davon – die Seite
+   scrollt. */
 .inhalt {
   display: flex;
   flex-direction: column;
@@ -183,40 +215,47 @@ svg { display: block; flex: 0 0 auto; }
   flex-direction: column;
 }
 
-.buehne > .rahmen > .gruss-zeile { margin-bottom: auto; }
+/* über dem Satz: der Satz selbst wächst (Inhalt unten bündig) */
+.buehne > .rahmen > .buehne__satz {
+  flex: 2 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
 
-.inhalt > .blatt { flex: 0 0 auto; }
+/* unter dem Satz: ein leerer Rest (ein Teil) */
+.buehne > .rahmen::after {
+  content: "";
+  flex: 1 0 0px;
+}
+
+.inhalt > .blatt,
+.inhalt > .bande { flex: 0 0 auto; }
 
 /* === 4. Bühne (wie die Website-Startseite) === */
 
 /* Oben beginnt die Bühne exakt im Blau der nativen Kopfleiste
    (--appack-color-main #191793), damit Kopfleiste und Bühne eine Fläche
-   bilden; nach unten dunkelt sie wie das Startbild der Website ab. Unter
-   der Bande bleibt ein blauer Saum in der Breite des Seitenrands, dann
-   schiebt sich das Blatt darüber. */
+   bilden; nach unten dunkelt sie wie das Startbild der Website ab. Unten
+   schiebt sich das Blatt mit gerundeten Ecken darüber (--blatt-radius),
+   die Termine-Karte ragt noch --ueberlappung höher. Zwischen Satz und
+   Karte bleibt ein blauer Saum (--buehne-saum). */
 .buehne {
   position: relative;
   overflow: hidden;
   isolation: isolate;
   color: var(--weiss);
   background: linear-gradient(180deg, var(--blau-800) 0%, #13137A 50%, #0E0F5E 100%);
-  padding: var(--sp-2) var(--rand) calc(var(--bande-saum) + var(--blatt-radius));
-  /* Abstand Satz → Bande, Saum unter der Bande und Platz der Bande (für
-     das Wasserzeichen); ohne Bande wie früher (Klasse buehne--ohne-bande,
-     siehe bandeAusblenden). */
-  --bande-abstand: clamp(24px, 4.5vh, 40px);
-  --bande-saum: clamp(22px, 3.2vh, 28px);
-  --bande-zone: calc(var(--bande-abstand) + var(--bande-hoehe));
+  padding: var(--sp-2) var(--rand) calc(var(--buehne-saum) + var(--ueberlappung) + var(--blatt-radius));
+  --buehne-saum: clamp(28px, 4.6vh, 40px);
 }
-
-.buehne--ohne-bande { --bande-zone: 0px; --bande-saum: clamp(32px, 6.5vh, 52px); }
 
 /* Wappen als Wasserzeichen: weiße Silhouette, sehr zurückgenommen,
    angeschnitten am rechten Rand (wie auf der Website). Ein radialer
    Ausblend-Rahmen (mask-image) verhindert, dass die rechteckige Bildkante
    sichtbar wird, wenn die Bühne breiter ist als das Motiv (z. B. Tablet).
-   Mittelpunkt wie bisher in der Mitte der Bühne – aber ohne die Bande
-   gerechnet, damit das Wappen hinter dem Satz bleibt. */
+   Mittelpunkt in der Mitte der sichtbaren Bühne (ohne den Teil unter der
+   Karte), damit das Wappen hinter dem Satz bleibt. */
 .buehne::after {
   content: "";
   position: absolute;
@@ -224,7 +263,7 @@ svg { display: block; flex: 0 0 auto; }
   width: clamp(460px, 140vw, 640px);
   height: clamp(460px, 140vw, 640px);
   left: 58%;
-  top: calc((100% - var(--bande-zone) - var(--blatt-radius)) / 2);
+  top: calc((100% - var(--ueberlappung) - var(--blatt-radius)) / 2);
   transform: translateY(-50%);
   background: url("https://justolgay.github.io/speuzer-website-prototyp/assets/huelle/wappen-512.png") center / contain no-repeat;
   opacity: .1;
@@ -339,7 +378,7 @@ svg { display: block; flex: 0 0 auto; }
 
 .buehne__claim span { display: block; }
 
-/* === 4a. Bande (Sponsoren-Laufband am Fuß der Bühne) === */
+/* === 4a. Bande (Sponsoren-Laufband im Fußstreifen) === */
 
 /* Bandenwerbung wie im Stadion: eine dunkle, randlose Schiene über die
    ganze Breite, darin weiße Logo-Tafeln, die ruhig nach links laufen. Weiß
@@ -348,35 +387,48 @@ svg { display: block; flex: 0 0 auto; }
    lesbar. Kopfzeile und Tafeln sind EIN Link auf „Sponsoren & Partner“
    (ein Tab-Stopp); die Überschrift ist eine echte h2, damit
    Bildschirmleser per Überschrift hierher springen.
-   Der Platz ist von Anfang an reserviert (feste Höhe, unsichtbar, nicht
-   antippbar), die Tafeln blenden erst ein, wenn Daten und Logos da sind –
-   kein Platzhalter, kein Sprung. Kommt nichts (Workbook fehlt, leere
-   Liste, Fehler, keine Logos, Frist abgelaufen), klappt die Bande ganz weg
-   (.bande--aus, danach hidden). */
+   Ort (25.09.2026, Wunsch der 1. Vorsitzenden: Sponsoren „eher unten“):
+   der Fußstreifen am Seitenende, vollbreit, im Blau der Bühne (Verlauf
+   gespiegelt: dunkel am Blatt, heller zum Bildschirmrand) – das helle
+   Blatt mit Terminen und Knöpfen liegt so zwischen zwei blauen Flächen und
+   ist oben wie unten gleich gerundet (es schiebt sich um --blatt-radius
+   über den Streifen). Der Streifen reicht bis in den Safe-Area-Bereich
+   (Home-Indikator). Der Platz ist von Anfang an reserviert (feste Höhe),
+   der Streifen steht sofort in Blau, Kopfzeile und Tafeln blenden erst
+   ein, wenn Daten und Logos da sind – kein Platzhalter, kein Sprung. Kommt
+   nichts (Workbook fehlt, leere Liste, Fehler, keine Logos, Frist
+   abgelaufen), klappt der ganze Streifen weg (.bande--aus, danach hidden);
+   dann schließt das Blatt mit den Knöpfen die Seite ab
+   (.inhalt--ohne-bande). */
 .bande {
-  height: var(--bande-hoehe);
-  margin: var(--bande-abstand) calc(-1 * var(--rand)) 0;
-  opacity: 0;
-  transition: opacity 360ms ease-out, height 240ms ease-out, margin-top 240ms ease-out;
-}
-
-.bande--bereit { opacity: 1; }
-
-.bande.bande--aus {
-  height: 0;
-  margin-top: 0;
-  overflow: hidden;
-  visibility: hidden;
+  height: calc(var(--blatt-radius) + var(--fuss-oben) + var(--bande-hoehe) + var(--fuss-unten) + env(safe-area-inset-bottom, 0px));
+  margin-top: calc(-1 * var(--blatt-radius));
+  padding: calc(var(--blatt-radius) + var(--fuss-oben)) 0 calc(var(--fuss-unten) + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, #0E0F5E 0%, #13137A 55%, var(--blau-800) 100%);
+  color: var(--weiss);
+  transition: height 240ms ease-out, padding 240ms ease-out, margin-top 240ms ease-out;
 }
 
 .bande__link {
   display: block;
   color: var(--weiss);
   text-decoration: none;
+  opacity: 0;
+  transition: opacity 360ms ease-out;
 }
 
-/* Solange die Bande unsichtbar ist, führt ein Tippen in die blaue Fläche
-   nirgendwohin. */
+.bande--bereit .bande__link { opacity: 1; }
+
+.bande.bande--aus {
+  height: 0;
+  margin-top: 0;
+  padding-block: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+/* Solange die Bande unsichtbar ist, führt ein Tippen in den blauen
+   Streifen nirgendwohin. */
 .bande:not(.bande--bereit) .bande__link { pointer-events: none; }
 
 .bande__link:focus-visible { outline-offset: -3px; }
@@ -499,46 +551,275 @@ svg { display: block; flex: 0 0 auto; }
 }
 
 /* Auf niedrigen Bildschirmen (kleine Telefone, Querformat) die Bühne
-   straffen, damit Parkplatzhinweis und Knöpfe näher an die Falz rücken
-   (Rückmeldung der Jury zu Entwurf A). Zwei Stufen: ab 900px Bauhöhe leicht
-   enger, ab 620px (z. B. 320×568) deutlich enger. Die Begrüßungszeile
-   bleibt bei 44px Mindesthöhe (Tippziel Profil-Knopf). */
+   straffen, damit Termine, Parkplatzhinweis und Knöpfe näher an die Falz
+   rücken (Rückmeldung der Jury zu Entwurf A). Zwei Stufen: ab 900px
+   Bauhöhe leicht enger, ab 620px (z. B. 320×568) deutlich enger. Die
+   Begrüßungszeile bleibt bei 44px Mindesthöhe (Tippziel Profil-Knopf). */
 @media (max-height: 900px) {
-  .buehne { --bande-abstand: clamp(22px, 3.6vh, 30px); --bande-saum: 22px; }
-  .buehne--ohne-bande { --bande-saum: 24px; }
+  .buehne { --buehne-saum: clamp(24px, 3.6vh, 30px); }
   .buehne__satz { margin-top: clamp(18px, 4.4vh, 36px); }
   .buehne__claim { font-size: clamp(34px, 11vw, 50px); }
 }
 
 @media (max-height: 620px) {
-  .buehne { --bande-abstand: 18px; --bande-saum: 16px; }
-  .buehne--ohne-bande { --bande-saum: 16px; }
+  :root { --ueberlappung: 24px; }
+  .buehne { --buehne-saum: 20px; }
   .buehne__satz { margin-top: 14px; }
   .buehne__claim { font-size: 30px; }
 }
 
 /* Querformat auf dem Telefon: der Satz in einer Zeile, sonst bestünde der
-   erste Bildschirm fast nur aus Bühne und Bande. */
+   erste Bildschirm fast nur aus der Bühne. */
 @media (max-height: 620px) and (min-width: 560px) {
   .buehne__claim span { display: inline; }
 }
 
 /* === 5. Heller Grund („Blatt“) === */
 
+/* Das Blatt schiebt sich oben mit gerundeten Ecken über die Bühne; sein
+   erster Baustein, die Termine-Karte, ragt noch --ueberlappung höher in
+   die Bühne. Unten liegt es genauso gerundet auf dem Fußstreifen. Ohne
+   Fußstreifen ist es das letzte Element: unten gerade, bis an den
+   Bildschirmrand, mit Safe-Area-Abstand. */
 .blatt {
   position: relative;
   z-index: 1;
   margin-top: calc(-1 * var(--blatt-radius));
-  border-radius: var(--blatt-radius) var(--blatt-radius) 0 0;
+  border-radius: var(--blatt-radius);
   background: var(--bg);
-  /* oben gleicher Luftraum wie seitlich: erster Baustein ist seit dem
-     Wegfall von „Aktuelles“ die Hinweis-Karte ohne eigenen Kopf */
-  padding: var(--sp-5) var(--rand) calc(24px + env(safe-area-inset-bottom));
+  padding: 0 var(--rand) var(--sp-5);
 }
 
+.inhalt--ohne-bande .blatt {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  padding-bottom: calc(var(--sp-5) + env(safe-area-inset-bottom, 0px));
+}
+
+.termine-karte + .hinweis-karte,
 .hinweis-karte + .aktionen {
   margin-top: var(--sp-5);
 }
+
+/* === 5a. Termine (Info-Panel über dem Bühnenrand) === */
+
+/* Wunsch der 1. Vorsitzenden (25.09.2026): Kalendertermine direkt unter
+   der Bühne, „zumindest kleiner als vorher“ (vorher: eine große Karte „Als
+   Nächstes“ mit einem Termin, gut 95px je Termin). Jetzt eine weiße Karte
+   mit bis zu drei kompakten Zeilen (Datumskachel, Titel ein-/zweizeilig,
+   Tag und Uhrzeit; 56–71px je Termin, Karte mit drei Terminen etwa
+   215–260px), die wie ein Info-Panel über die Oberkante des Blatts in die
+   Bühne ragt. Die ganze Karte ist Teil des Blatts (gleiche Breite wie
+   Hinweis und Knöpfe). Mehrere Termine am selben Tag: Kachel nur beim
+   ersten; ein Termin von heute hat eine gefüllte Kachel. Beim Laden drei
+   ruhige Platzhalter-Zeilen in genau der Höhe echter Zeilen; bei Fehler
+   oder ohne Termine schrumpft die Karte auf eine einzige Zeile „Alle
+   Termine im Kalender ›“ (.termine-karte--kurz, kein leerer Kasten). */
+.termine-karte {
+  position: relative;
+  margin-top: calc(-1 * var(--ueberlappung));
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-panel);
+  overflow: hidden;
+}
+
+/* Fokusrahmen innen, die Karte schneidet außen ab */
+.termine-karte a:focus-visible { outline-offset: -3px; border-radius: var(--r-lg); }
+
+.termine-kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  min-height: 44px;
+  padding: 0 6px 0 var(--sp-4);
+}
+
+.termine-kopf__titel {
+  margin: 0;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.1;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.termine-kopf__link {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  min-height: 44px;
+  padding: 0 var(--sp-2) 0 var(--sp-4);
+  color: var(--blau-700);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.termine-kopf__link svg { width: 16px; height: 16px; }
+
+.termine-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 var(--sp-1);
+}
+
+.termin { position: relative; }
+
+/* Trennlinie zwischen den Zeilen, eingerückt bis zur Textspalte.
+   Maße (25.09.2026 gestrafft, Jury: Block „kleiner als vorher“): Zeile mit
+   zweizeiligem Titel 71px, mit einzeiligem 56px (Tippziel ≥ 44px). */
+.termin + .termin::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: calc(var(--sp-4) + var(--kachel) + var(--sp-3));
+  right: 0;
+  border-top: 1px solid var(--line);
+}
+
+.termine-karte { --kachel: 40px; }
+
+.termin__link,
+.termin--platzhalter {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 56px;
+  padding: var(--sp-2) var(--sp-4);
+  color: var(--ink);
+  text-decoration: none;
+  transition: background-color 120ms ease-out;
+}
+
+.termin__link:active { background: var(--blau-50); }
+
+/* Datumskachel: Tag groß in der Überschriftenschrift, Monat klein */
+.termin__datum {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: var(--kachel);
+  height: 40px;
+  border-radius: 10px;
+  background: var(--blau-50);
+  color: var(--blau-950);
+}
+
+/* Termin von heute: Kachel gefüllt im Vereinsblau (ruhiger Hinweis, fällt
+   in der Liste sofort auf); „Morgen“ und spätere Tage bleiben hell. */
+.termin__datum--heute {
+  background: var(--blau-700);
+  color: var(--weiss);
+}
+
+.termin__datum--heute .termin__monat { color: rgba(255, 255, 255, .86); }
+
+.termin__tag {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 19px;
+  line-height: 1;
+}
+
+.termin__monat {
+  margin-top: 2px;
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: .07em;
+  color: var(--blau-700);
+}
+
+.termin__text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.termin__titel {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-weight: 600;
+  font-size: 14.5px;
+  line-height: 1.28;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.termin__zeit {
+  display: block;
+  margin-top: 1px;
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Weiterer Termin am selben Tag: Kachel ausgespart (Platz bleibt) */
+.termin--gleicher-tag .termin__datum { visibility: hidden; }
+
+/* Platzhalter beim Laden (ruhig, ohne Animation) */
+/* so hoch wie eine echte Zeile (zweizeiliger Titel + Zeitzeile), damit
+   beim Eintreffen der Daten nichts springt; die dritte Zeile mit
+   einzeiligem Titel wie echte kurze Zeilen */
+.termin--platzhalter { min-height: 71px; }
+.termin--platzhalter:nth-last-child(2) { min-height: 56px; }
+
+.platzhalter-balken {
+  display: block;
+  height: 11px;
+  border-radius: 6px;
+  background: var(--blau-50);
+}
+
+.platzhalter-balken + .platzhalter-balken { margin-top: 8px; }
+.platzhalter-balken--klein { height: 9px; }
+
+/* Rückfall: eine ruhige Zeile statt der Liste */
+.termine-karte--kurz .termine-kopf { display: none; }
+
+.termine-ersatz {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 52px;
+  padding: 8px 10px 8px var(--sp-4);
+  color: var(--blau-800);
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  transition: background-color 120ms ease-out;
+}
+
+.termine-ersatz:active { background: var(--blau-50); }
+
+.termine-ersatz__symbol {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--blau-50);
+  color: var(--blau-700);
+}
+
+.termine-ersatz__symbol svg { width: 18px; height: 18px; }
+
+.termine-ersatz__text { flex: 1 1 auto; }
+
+.termine-ersatz > svg { width: 18px; height: 18px; color: var(--ink-3); }
 
 /* === 6. Parkplatzhinweis === */
 
@@ -681,27 +962,382 @@ svg { display: block; flex: 0 0 auto; }
       <p class="buehne__claim"><span>Fußball</span> <span>im Gallus</span> <span>– seit 1904.</span></p>
     </div>
   </div>
-
-  <!-- BANDE: Logos aus dem Sponsoren-Worksheet (CMS, Häkchen „showSlider“,
-       Reihenfolge „sponSort“), pflegt die 1. Vorsitzende selbst. Tippen
-       öffnet „Sponsoren & Partner“. Ohne Treffer klappt die Bande weg. -->
-  <section id="bande" class="bande" aria-labelledby="bande-titel" aria-hidden="true">
-    <a id="bande-link" class="bande__link" href="nav://sportfreunde04_TextImage_1780401660337" tabindex="-1">
-      <div class="bande__kopf">
-        <h2 id="bande-titel" class="bande__titel">Sponsoren &amp; Partner</h2>
-        <span class="bande__alle">Alle<span class="vh"> ansehen</span><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></span>
-      </div>
-      <div class="bande__schiene">
-        <div class="bande__fenster">
-          <div id="bande-spur" class="bande__spur"></div>
-        </div>
-      </div>
-    </a>
-  </section>
 </section>
 
 <div class="blatt">
   <div class="rahmen">
+
+    <!-- TERMINE: die nächsten drei Spiele/Veranstaltungen aus dem
+         öffentlichen Kalender (ohne Trainings), siehe Skript „Termine“.
+         Tippen öffnet den Kalender. Bis die Daten da sind, stehen drei
+         ruhige Platzhalter-Zeilen; bei Fehler/ohne Termine eine Zeile
+         „Alle Termine im Kalender ›“. -->
+    <section id="termine" class="termine-karte" aria-labelledby="termine-titel">
+      <div class="termine-kopf">
+        <h2 id="termine-titel" class="termine-kopf__titel">Termine</h2>
+        <a class="termine-kopf__link" href="nav://sportfreunde04_Application_1780401660369">Alle<span class="vh"> Termine</span><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></a>
+      </div>
+      <ul id="termine-liste" class="termine-liste" aria-busy="true">
+        <li class="termin termin--platzhalter" aria-hidden="true"><span class="termin__datum"></span><span class="termin__text"><span class="platzhalter-balken" style="width:82%"></span><span class="platzhalter-balken" style="width:54%"></span><span class="platzhalter-balken platzhalter-balken--klein" style="width:34%"></span></span></li>
+        <li class="termin termin--platzhalter" aria-hidden="true"><span class="termin__datum"></span><span class="termin__text"><span class="platzhalter-balken" style="width:76%"></span><span class="platzhalter-balken" style="width:48%"></span><span class="platzhalter-balken platzhalter-balken--klein" style="width:34%"></span></span></li>
+        <li class="termin termin--platzhalter" aria-hidden="true"><span class="termin__datum"></span><span class="termin__text"><span class="platzhalter-balken" style="width:70%"></span><span class="platzhalter-balken platzhalter-balken--klein" style="width:34%"></span></span></li>
+        <li class="vh">Termine werden geladen</li>
+      </ul>
+    <script>
+    // ---------- Termine (öffentlicher Kalender) ----------
+    // Direkt hinter der Karte statt im Skript am Seitenende: die Abfrage
+    // startet so sofort und wartet nicht auf jQuery/Workbook vom cdn (kürzer
+    // sichtbare Platzhalter).
+    (function () {
+      "use strict";
+
+      // Quelle: appack-GraphQL, listUpcomingCalendarEvents für das
+      // Kalendermodul der App. Nicht über graphApi – das braucht eine
+      // Anmeldung (Gäste: HTTP 401) –, sondern mit dem ÖFFENTLICHEN
+      // Embedded-Token, den appack selbst beim Aufruf der öffentlichen
+      // Kalenderansicht https://shorturl.appack.de/sportfreunde04_Application_1780401660369
+      // in die Weiterleitungsadresse schreibt (Scope „embedded“, technischer
+      // Nutzer der App, keine Personendaten, geprüft 25.09.2026). Er liefert
+      // nur die öffentlichen Kalender (heute: „Spielplan Mannschaften“ und
+      // „Speuzer D3 – Spiele und Training (Pilot)“, künftig „Vereinstermine“
+      // für Veranstaltungen). CORS: der Server erlaubt die Herkunft
+      // https://appack.de (drender) samt Kopfzeile Authorization (Vorabfrage
+      // geprüft 25.09.2026). Der Token ist öffentlich (appack liefert ihn
+      // jedem Besucher der Kalenderansicht aus) und darf deshalb hier und im
+      // Repo stehen. GÜLTIG BIS 21.08.2027 (Feld „exp“ im Token).
+      // Erneuern: die Kurzadresse oben im Browser öffnen; die Adresse nach
+      // der Weiterleitung enthält „jwt=eyJ…“ – den Teil nach „jwt=“ (bis zum
+      // nächsten „&“) hier bei TERMINE_TOKEN einsetzen und das Ablaufdatum
+      // in diesem Kommentar und in assets/app/LIESMICH.md nachziehen.
+      // Abgelaufen oder gesperrt: die Karte zeigt nur „Alle Termine im
+      // Kalender ›“ (kein Fehlerbild).
+      var KALENDER_ID = "sportfreunde04_Application_1780401660369";
+      var TERMINE_API = "https://api.appack.de/graphql";
+      var TERMINE_TOKEN = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJZCI6InNwb3J0ZnJldW5kZTA0IiwidXNlcm5hbWUiOiJzcG9ydGZyZXVuZGUwNCIsImlzcyI6ImFwcGFjayIsImV4cCI6MTgxODgzNzY4NywiaWF0IjoxNzg3MzAxNjg3LCJzY29wZSI6WyJlbWJlZGRlZCJdfQ.yUyf5TWInpjnkzWrQdVE6UuWJUCVQNl6r2nQtMbF3_0s7GvD8nVko4_ozutbSeVYddTGCJAi0o0SVt94uKYZgQqEBYv8fA4f8Qkj6zv0GjM9dSJK36j4DF-O3yz_Dd_udk60pXRdu_f7JL_B6wEEcVktNhEzrABUR3Gi2PcvMzLedDHW-PQy76il_nb0n7koVk60_M3m60MbPfRRyNS08p5ddraf1CzLNG7CxtWJqMim0yzIr-wDlH9x6Gf1d_rrqRB7kVYzjpt_d8wKvBqRvMxfxUQCY9KlzZ4Pzi7x9tPfqhTTIHKJ3zh6JbuIG6gfm5MenI9sn1hQOf2_tu4Akw";
+      var TERMINE_ABFRAGE = 20;     // so viele kommende Termine holen (Trainings fallen danach heraus)
+      var TERMINE_ANZAHL = 3;       // so viele zeigt die Startseite
+      var TERMINE_WARTEZEIT = 6000; // ms; danach statt der Platzhalter die Zeile „Alle Termine im Kalender ›“
+
+      var MONATE = ["JAN", "FEB", "MÄR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEZ"];
+      var MONATE_LANG = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+      var WOCHENTAGE = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+      var WOCHENTAGE_LANG = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+      var PFEIL_SVG = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>';
+      var KALENDER_SVG = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>';
+
+      function element(tag, klasse, text) {
+        var el = document.createElement(tag);
+        if (klasse) el.className = klasse;
+        if (text !== undefined) el.textContent = text;
+        return el;
+      }
+
+      function zweistellig(zahl) {
+        return (zahl < 10 ? "0" : "") + zahl;
+      }
+
+      // Kalenderteile eines Zeitpunkts in deutscher Zeit (Europe/Berlin):
+      // die Termine finden in Frankfurt statt, auch wenn das Telefon gerade
+      // auf eine andere Zeitzone steht. Ohne Intl-Zeitzonen: Gerätezeit.
+      var berlinFormat = null;
+      try {
+        berlinFormat = new Intl.DateTimeFormat("de-DE", { timeZone: "Europe/Berlin", year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric", hour12: false });
+      } catch (e) {
+        berlinFormat = null;
+      }
+
+      function datumsTeile(datum) {
+        if (berlinFormat && berlinFormat.formatToParts) {
+          try {
+            var t = {};
+            berlinFormat.formatToParts(datum).forEach(function (teil) { t[teil.type] = parseInt(teil.value, 10); });
+            if (isFinite(t.year) && isFinite(t.month) && isFinite(t.day) && isFinite(t.hour) && isFinite(t.minute)) {
+              // manche Engines schreiben Mitternacht als „24“
+              return { jahr: t.year, monat: t.month - 1, tag: t.day, stunde: t.hour % 24, minute: t.minute };
+            }
+          } catch (e) { /* Rückfall: Gerätezeit */ }
+        }
+        return { jahr: datum.getFullYear(), monat: datum.getMonth(), tag: datum.getDate(), stunde: datum.getHours(), minute: datum.getMinutes() };
+      }
+
+      function tagesNummer(teile) {
+        return Math.round(Date.UTC(teile.jahr, teile.monat, teile.tag) / 86400000);
+      }
+
+      function wochentag(teile) {
+        return new Date(Date.UTC(teile.jahr, teile.monat, teile.tag)).getUTCDay();
+      }
+
+      function uhrzeit(teile) {
+        return zweistellig(teile.stunde) + ":" + zweistellig(teile.minute);
+      }
+
+      // Kalendertag aus einer Tagesnummer (Gegenstück zu tagesNummer)
+      function teileAusNummer(nummer) {
+        var d = new Date(nummer * 86400000);
+        return { jahr: d.getUTCFullYear(), monat: d.getUTCMonth(), tag: d.getUTCDate(), stunde: 0, minute: 0 };
+      }
+
+      function datumKurz(teile) {
+        return WOCHENTAGE[wochentag(teile)] + " " + zweistellig(teile.tag) + "." + zweistellig(teile.monat + 1) + ".";
+      }
+
+      function datumLang(teile) {
+        return WOCHENTAGE_LANG[wochentag(teile)] + ", " + teile.tag + ". " + MONATE_LANG[teile.monat];
+      }
+
+      function kategorien(termin) {
+        return (Array.isArray(termin.categories) ? termin.categories : []).map(function (k) {
+          return String((k && k.title) || "").trim().toLowerCase();
+        });
+      }
+
+      // Wörter eines Textes, klein, getrennt an allem, was kein Buchstabe
+      // ist: „Probetraining-Tag“ → probetraining, tag.
+      function woerterVon(text) {
+        var s = String(text || "");
+        if (s.normalize) s = s.normalize("NFC");
+        return s.toLowerCase().split(/[^a-zäöüß]+/).filter(Boolean);
+      }
+
+      // Ein Trainingswort: „Training(s)“ und Zusammensetzungen auf
+      // „…training“ (Torwarttraining, Hallentraining). Ausgenommen sind
+      // Angebote für Neue (Probetraining, Schnuppertraining) – die gehören
+      // gerade auf die Startseite – und Wörter, die nur mit „Training“
+      // beginnen (Trainingslager).
+      var KEIN_TRAINING = ["probetraining", "schnuppertraining"];
+      function istTrainingWort(wort) {
+        if (KEIN_TRAINING.indexOf(wort) !== -1) return false;
+        return wort === "trainings" || /training$/.test(wort);
+      }
+
+      // Trainings gehören nicht auf die Startseite (Entscheidung 25.09.2026):
+      // öffentlich gibt es nur die D3-Trainings („Freitag Training“) ohne
+      // Teamnamen; alle Trainings stehen je Team unter „Mannschaften“ und im
+      // Kalender. Erkannt an einem Trainingswort in Kategorie oder Titel –
+      // Kategorie „Veranstaltung“ hat immer Vorrang (bleibt stehen).
+      function istTraining(termin) {
+        var k = kategorien(termin);
+        if (k.some(function (titel) { return /veranstaltung/.test(titel); })) return false;
+        if (k.some(function (titel) { return woerterVon(titel).some(istTrainingWort); })) return true;
+        return woerterVon(termin.title).some(istTrainingWort);
+      }
+
+      // Titel behutsam aufräumen, nichts dazuerfinden: Leerraum glätten, die
+      // Anhängsel aus dem DFBnet-Spielplan am Ende weg („ (26/27)“,
+      // „ (D-Junioren)“, „ (Herren)“ …), Bindestrich zwischen zwei
+      // Mannschaften als Gedankenstrich.
+      function titelAufraeumen(titel) {
+        var text = String(titel || "");
+        if (text.normalize) text = text.normalize("NFC");
+        text = text.replace(/\s+/g, " ").trim();
+        var vorher;
+        do {
+          vorher = text;
+          text = text.replace(/\s*\((?:\d{2}\/\d{2}|\d{4}\/\d{2,4}|[A-G]-Junior(?:inn)?en|Herren|Frauen|Senioren|Alte Herren)\)$/i, "");
+        } while (text !== vorher);
+        return text.replace(/ - /g, " – ");
+      }
+
+      // Letzter Kalendertag eines Termins (Berlin). Endet er genau um
+      // Mitternacht, zählt der Vortag (übliche Schreibweise für ganztägige
+      // Termine und für „bis 24 Uhr“).
+      function letzterTag(e) {
+        if (e.ende.getTime() <= e.start.getTime()) return e.startNr;
+        var t = datumsTeile(e.ende);
+        var nummer = tagesNummer(t);
+        if (t.stunde === 0 && t.minute === 0) nummer -= 1;
+        return Math.max(nummer, e.startNr);
+      }
+
+      // Die nächsten TERMINE_ANZAHL Spiele/Veranstaltungen: gültiges Datum,
+      // Titel vorhanden, kein Training, noch nicht vorbei (mit Uhrzeit: bis
+      // zum Ende; ganztags: bis zum Ende des letzten Tages, auch wenn
+      // dateEnd = dateStart), jeder Termin nur einmal (Schlüssel id und
+      // Titel|Beginn – derselbe Termin kann in zwei öffentlichen Kalendern
+      // stehen); nach Beginn sortiert.
+      function termineFuerStart(liste) {
+        var jetzt = Date.now();
+        var heuteNr = tagesNummer(datumsTeile(new Date(jetzt)));
+        var gesehen = {};
+        return (Array.isArray(liste) ? liste : [])
+          .map(function (termin, i) {
+            termin = termin || {};
+            var start = new Date(termin.dateStart);
+            var ende = termin.dateEnd ? new Date(termin.dateEnd) : start;
+            if (isNaN(ende.getTime()) || ende.getTime() < start.getTime()) ende = start;
+            return { termin: termin, i: i, start: start, ende: ende, titel: titelAufraeumen(termin.title) };
+          })
+          .filter(function (e) {
+            if (isNaN(e.start.getTime()) || e.titel === "" || istTraining(e.termin)) return false;
+            e.startNr = tagesNummer(datumsTeile(e.start));
+            e.endNr = letzterTag(e);
+            var aktuell = e.termin.allDay === true ? e.endNr >= heuteNr : e.ende.getTime() >= jetzt;
+            if (!aktuell) return false;
+            var schluessel = [e.titel.toLowerCase() + "|" + e.start.getTime()];
+            if (e.termin.id) schluessel.push("id|" + e.termin.id);
+            if (schluessel.some(function (s) { return gesehen[s]; })) return false;
+            schluessel.forEach(function (s) { gesehen[s] = true; });
+            return true;
+          })
+          .sort(function (a, b) {
+            return (a.start.getTime() - b.start.getTime()) || (a.i - b.i);
+          })
+          .slice(0, TERMINE_ANZAHL);
+      }
+
+      // Eine Zeile: Datumskachel (Tag/Monat; heute gefüllt), Titel
+      // (höchstens zwei Zeilen), darunter „Morgen · 09:00 Uhr“ bzw.
+      // „Sa · 09:00 Uhr“, „Heute · ganztags“, mehrtägig „Fr bis So 25.10.“
+      // oder, wenn schon begonnen, „Noch bis morgen“ bzw. „Noch bis So
+      // 25.10.“ (Kachel = heute).
+      // Ganze Zeile = Link ins Kalendermodul (nav://, zuverlässig in der
+      // App; App.navigate öffnete im Test 21.09.2026 nichts).
+      function baueTerminZeile(e, heute) {
+        var start = datumsTeile(e.start);
+        var laeuft = e.startNr < heute.nr;
+        var mehrtaegig = e.endNr > e.startNr;
+        var anzeigeNr = laeuft ? heute.nr : e.startNr;
+        var anzeige = laeuft ? heute.teile : start;
+        var abstand = anzeigeNr - heute.nr;
+        var tagWort = abstand === 0 ? "Heute" : (abstand === 1 ? "Morgen" : WOCHENTAGE[wochentag(start)]);
+        var ganztags = e.termin.allDay === true;
+        var letzte = teileAusNummer(e.endNr);
+        var kurzText, vorlesen;
+
+        if (mehrtaegig && laeuft) {
+          var rest = e.endNr - heute.nr;
+          kurzText = rest === 0 ? "Heute letzter Tag" : (rest === 1 ? "Noch bis morgen" : "Noch bis " + datumKurz(letzte));
+          vorlesen = rest === 0 ? "heute letzter Tag" : "läuft noch bis " + (rest === 1 ? "morgen, " : "") + datumLang(letzte);
+        } else if (mehrtaegig) {
+          kurzText = tagWort + " bis " + datumKurz(letzte);
+          vorlesen = (abstand === 0 ? "ab heute, " : (abstand === 1 ? "ab morgen, " : "")) + datumLang(start) + " bis " + datumLang(letzte);
+        } else {
+          kurzText = tagWort + " · " + (ganztags ? "ganztags" : uhrzeit(start) + " Uhr");
+          var bis = "";
+          if (!ganztags && e.ende.getTime() > e.start.getTime()) {
+            bis = " bis " + (tagesNummer(datumsTeile(e.ende)) > e.startNr ? "24:00" : uhrzeit(datumsTeile(e.ende)));
+          }
+          vorlesen = (abstand === 0 ? "heute, " : (abstand === 1 ? "morgen, " : "")) + datumLang(start) + ", " +
+            (ganztags ? "ganztägig" : uhrzeit(start) + bis + " Uhr");
+        }
+
+        var zeile = element("li", "termin");
+        var link = element("a", "termin__link");
+        link.href = "nav://" + KALENDER_ID;
+        link.setAttribute("data-termin", String(e.termin.id || ""));
+
+        var kachel = element("span", abstand === 0 ? "termin__datum termin__datum--heute" : "termin__datum");
+        kachel.setAttribute("aria-hidden", "true");
+        kachel.appendChild(element("span", "termin__tag", zweistellig(anzeige.tag)));
+        kachel.appendChild(element("span", "termin__monat", MONATE[anzeige.monat]));
+
+        var text = element("span", "termin__text");
+        text.appendChild(element("span", "termin__titel", e.titel));
+        var kurz = element("span", "termin__zeit", kurzText);
+        kurz.setAttribute("aria-hidden", "true");
+        text.appendChild(kurz);
+        // vollständig für Bildschirmleser, mit Trenner nach dem Titel, z. B.
+        // „…, morgen, Samstag, 26. September, 09:00 bis 11:00 Uhr“
+        text.appendChild(element("span", "vh", ", " + vorlesen));
+
+        link.appendChild(kachel);
+        link.appendChild(text);
+        zeile.appendChild(link);
+        zeile.setAttribute("data-tag", String(anzeigeNr));
+        return zeile;
+      }
+
+      // Rückfall (Fehler, Zeitüberschreitung, keine passenden Termine): die
+      // Karte schrumpft auf eine ruhige Zeile „Alle Termine im Kalender ›“ –
+      // kein leerer Kasten, keine Fehlermeldung.
+      function zeigeTermineErsatz() {
+        var karte = document.getElementById("termine");
+        var liste = document.getElementById("termine-liste");
+        if (!karte || !liste || !liste.parentNode) return;
+        var link = element("a", "termine-ersatz");
+        link.href = "nav://" + KALENDER_ID;
+        var symbol = element("span", "termine-ersatz__symbol");
+        symbol.setAttribute("aria-hidden", "true");
+        symbol.innerHTML = KALENDER_SVG;
+        link.appendChild(symbol);
+        link.appendChild(element("span", "termine-ersatz__text", "Alle Termine im Kalender"));
+        link.insertAdjacentHTML("beforeend", PFEIL_SVG);
+        karte.classList.add("termine-karte--kurz");
+        liste.parentNode.replaceChild(link, liste);
+      }
+
+      function zeigeTermine(eintraege) {
+        var liste = document.getElementById("termine-liste");
+        if (!liste) return;
+        if (!eintraege || !eintraege.length) { zeigeTermineErsatz(); return; }
+        var heuteTeile = datumsTeile(new Date());
+        var heute = { nr: tagesNummer(heuteTeile), teile: heuteTeile };
+        var neu = document.createDocumentFragment();
+        var letzterAnzeigeTag = null;
+        eintraege.forEach(function (e) {
+          var zeile = baueTerminZeile(e, heute);
+          // Mehrere Termine am selben Tag (Spieltag-Samstag): die Kachel nur
+          // beim ersten, darunter bleibt ihr Platz leer – liest sich wie ein
+          // Kalender und wiederholt nicht dreimal „26 SEP“.
+          var tag = zeile.getAttribute("data-tag");
+          if (tag === letzterAnzeigeTag) zeile.classList.add("termin--gleicher-tag");
+          letzterAnzeigeTag = tag;
+          neu.appendChild(zeile);
+        });
+        liste.innerHTML = "";
+        liste.appendChild(neu);
+        liste.removeAttribute("aria-busy");
+      }
+
+      // Für alle, auch Gäste (öffentlicher Token). Antwort spätestens nach
+      // TERMINE_WARTEZEIT, sonst Rückfall-Zeile; eine spätere Antwort wird
+      // verworfen (kein nachträglicher Sprung).
+      function ladeTermine() {
+        if (!document.getElementById("termine-liste")) return;
+        if (!window.fetch || !window.Promise) { zeigeTermineErsatz(); return; }
+        var erledigt = false;
+        var abbruch = null;
+        try { abbruch = window.AbortController ? new AbortController() : null; } catch (e) { abbruch = null; }
+        function fertig(eintraege) {
+          if (erledigt) return;
+          erledigt = true;
+          clearTimeout(uhr);
+          try { zeigeTermine(eintraege); } catch (e) { zeigeTermineErsatz(); }
+        }
+        var uhr = setTimeout(function () {
+          if (abbruch) { try { abbruch.abort(); } catch (e) { /* egal */ } }
+          fertig(null);
+        }, TERMINE_WARTEZEIT);
+        var abfrage = 'query { listUpcomingCalendarEvents(componentId: "' + KALENDER_ID + '", amount: ' + TERMINE_ABFRAGE +
+          ') { id calendarId title subTitle dateStart dateEnd allDay categories { title color } } }';
+        var optionen = {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TERMINE_TOKEN },
+          body: JSON.stringify({ query: abfrage }),
+          // keine Cookies mitschicken: der Token reicht, und die Antwort
+          // braucht so keine Freigabe für Anmeldedaten
+          credentials: "omit"
+        };
+        if (abbruch) optionen.signal = abbruch.signal;
+        Promise.resolve()
+          .then(function () { return fetch(TERMINE_API, optionen); })
+          .then(function (antwort) {
+            if (!antwort.ok) throw new Error("HTTP " + antwort.status);
+            return antwort.json();
+          })
+          .then(function (json) {
+            var liste = json && json.data && json.data.listUpcomingCalendarEvents;
+            if (!Array.isArray(liste)) throw new Error("keine Termine");
+            fertig(termineFuerStart(liste));
+          })
+          .catch(function () { fertig(null); });
+      }
+
+      ladeTermine();
+    })();
+    </script>
+    </section>
 
     <!-- HINWEIS: im CMS-Quelltext pflegen oder samt <aside> entfernen -->
     <aside class="hinweis-karte" aria-label="Hinweis">
@@ -719,6 +1355,24 @@ svg { display: block; flex: 0 0 auto; }
 
   </div>
 </div>
+
+<!-- BANDE: Logos aus dem Sponsoren-Worksheet (CMS, Häkchen „showSlider“,
+     Reihenfolge „sponSort“), pflegt die 1. Vorsitzende selbst. Tippen
+     öffnet „Sponsoren & Partner“. Fußstreifen am Seitenende; ohne Treffer
+     klappt er ganz weg. -->
+<section id="bande" class="bande" aria-labelledby="bande-titel" aria-hidden="true">
+  <a id="bande-link" class="bande__link" href="nav://sportfreunde04_TextImage_1780401660337" tabindex="-1">
+    <div class="bande__kopf">
+      <h2 id="bande-titel" class="bande__titel">Sponsoren &amp; Partner</h2>
+      <span class="bande__alle">Alle<span class="vh"> ansehen</span><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></span>
+    </div>
+    <div class="bande__schiene">
+      <div class="bande__fenster">
+        <div id="bande-spur" class="bande__spur"></div>
+      </div>
+    </div>
+  </a>
+</section>
 </main>
 
 <script src="https://cdn.appack.de/modules/common/jquery-3.4.1.min.js"></script>
@@ -927,7 +1581,9 @@ svg { display: block; flex: 0 0 auto; }
     var bande = document.getElementById("bande");
     var link = document.getElementById("bande-link");
     if (!bande) return;
-    if (bande.parentNode && bande.parentNode.classList) bande.parentNode.classList.add("buehne--ohne-bande");
+    // Eltern = <main class="inhalt">: das Blatt wird zum letzten Element
+    // und bekommt unten den Safe-Area-Abstand (.inhalt--ohne-bande).
+    if (bande.parentNode && bande.parentNode.classList) bande.parentNode.classList.add("inhalt--ohne-bande");
     bande.classList.remove("bande--bereit");
     bande.classList.add("bande--aus");
     bande.setAttribute("aria-hidden", "true");
