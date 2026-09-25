@@ -115,13 +115,80 @@ Cache-Ordner und werden nie committet oder zitiert.
 
 **`Startseite_v3.tpl`** → wird als **dynamische Seite** im appack-CMS
 angelegt, nicht in den Workspace hochgeladen. Sie ergibt die neue
-Startseite der Vereins-App: blaue Bühne (Begrüßung, Profil-Knopf bzw. für
-Gäste die Pille „Anmelden“, Claim) mit der Sponsoren-„Bande“ am Fuß,
-darunter nur Parkplatzhinweis und zwei Knöpfe – ohne Foto, Kacheln und
-Meldungen („Aktuelles“ entfällt seit 24.09.2026 abends, die News stehen im
-Menüpunkt „News“). Kopf und Menü kommen von der App-Hülle (seit
-24.09.2026 auf iOS Seitenmenü statt Tab-Leiste); die Vorlage liefert nur
-den Inhalt.
+Startseite der Vereins-App, von oben nach unten: blaue Bühne (Begrüßung,
+Profil-Knopf bzw. für Gäste die Pille „Anmelden“, Claim), der Terminblock
+„Termine“ (nächste drei Spiele/Veranstaltungen), Parkplatzhinweis und
+zwei Knöpfe auf dem hellen Blatt, ganz unten die Sponsoren-„Bande“ auf
+einem blauen Fußstreifen – ohne Foto, Kacheln und Meldungen („Aktuelles“
+entfällt seit 24.09.2026 abends, die News stehen im Menüpunkt „News“).
+Kopf und Menü kommen von der App-Hülle (seit 24.09.2026 auf iOS
+Seitenmenü statt Tab-Leiste); die Vorlage liefert nur den Inhalt.
+
+### Stand 25.09.2026: Terminblock unter der Bühne, Sponsoren unten
+
+Wunsch der 1. Vorsitzenden (Reihenfolge verbindlich): Bühne › Termine
+(„zumindest kleiner als vorher“) › Probetraining/Mitglied werden ›
+Sponsoren „eher unten“. Umgesetzt ist Entwurf C („Info-Panel“) aus dem
+Entwurfsvergleich, mit den Nachbesserungen der Jury.
+
+- **Terminblock:** weiße Karte, die über die gerundete Oberkante des Blatts
+  in die Bühne ragt; Kopf „Termine“ mit „Alle ›“, darunter bis zu drei
+  kompakte Zeilen (Datumskachel, Titel höchstens zweizeilig, „Morgen ·
+  09:00 Uhr“; 56–71 px je Termin statt gut 95 px bei der alten Karte „Als
+  Nächstes“). Mehrere Termine am selben Tag: Kachel nur beim ersten.
+  Termin von heute: Kachel blau gefüllt. Mehrtägig: „Fr bis So 04.10.“
+  bzw. „Noch bis morgen“. Jede Zeile und „Alle“ öffnen den Kalender
+  (`nav://sportfreunde04_Application_1780401660369`, nur das Modul, nicht
+  den einzelnen Termin). Mit drei Terminen ist der Block als Ganzes höher
+  als die alte Karte mit einem Termin (etwa 215–260 px); weniger Zeilen
+  wären eine Zeile im Skript (`TERMINE_ANZAHL`).
+- **Auswahl:** die nächsten drei Spiele und Veranstaltungen, keine
+  Trainings (Kategorie oder Titelwort „Training“, „…training“ wie
+  Torwarttraining; Probetraining, Schnuppertraining und Trainingslager
+  bleiben stehen, Kategorie „Veranstaltung“ hat immer Vorrang), keine
+  vergangenen Termine (ganztägige zählen bis Tagesende), jeder Termin nur
+  einmal. Titel behutsam aufgeräumt: „ (26/27)“, „ (D-Junioren)“,
+  „ (Herren)“ u. ä. am Ende weg, „ - “ als „ – “; sonst nichts geändert.
+  Der Untertitel (`subTitle`) wird bewusst nicht gezeigt (keine
+  Personendaten). Datum und Uhrzeit immer in Frankfurter Zeit.
+- **Daten:** `POST https://api.appack.de/graphql`,
+  `listUpcomingCalendarEvents(componentId: "sportfreunde04_Application_1780401660369", amount: 20)`,
+  mit dem **öffentlichen Embedded-Token** als Konstante `TERMINE_TOKEN`.
+  Herkunft: appack schreibt ihn beim Aufruf der öffentlichen
+  Kalenderansicht `https://shorturl.appack.de/sportfreunde04_Application_1780401660369`
+  selbst in die Weiterleitungsadresse (`…&jwt=eyJ…`; Scope „embedded“,
+  technischer Nutzer, liefert nur öffentliche Kalender). Für alle, auch
+  Gäste. CORS am 25.09.2026 geprüft: Vorabfrage und Antwort erlauben die
+  Herkunft `https://appack.de` mit Kopfzeile `Authorization`.
+- **Token gültig bis 21.08.2027.** Erneuern: Kurzadresse im Browser
+  öffnen, aus der Adresse nach der Weiterleitung den Teil nach `jwt=`
+  (bis zum nächsten `&`) bei `TERMINE_TOKEN` einsetzen, Ablaufdatum im
+  Kommentar und hier nachziehen, Vorlage im CMS neu einspielen. Läuft er
+  ab oder sperrt appack ihn, zeigt die Karte still nur „Alle Termine im
+  Kalender ›“.
+- **Robust:** Beim Laden drei ruhige Platzhalter-Zeilen in Höhe echter
+  Zeilen (kein Sprung). Fehler, leere oder unpassende Liste, kein `fetch`
+  oder keine Antwort nach 6 s: statt der Liste nur die Zeile „Alle Termine
+  im Kalender ›“. Das Termine-Skript steht direkt im Abschnitt und wartet
+  nicht auf die cdn-Skripte.
+- **Sponsoren unten:** die Bande sitzt jetzt auf einem vollbreiten blauen
+  Fußstreifen am Seitenende (bis in den Safe-Area-Bereich); das helle
+  Blatt liegt oben auf der Bühne und unten auf dem Streifen gleich
+  gerundet. Logik der Bande unverändert, einzige Änderung:
+  `bandeAusblenden` setzt `inhalt--ohne-bande` statt `buehne--ohne-bande`.
+  Ohne Sponsoren klappt der Streifen weg, das Blatt schließt die Seite
+  unten gerade ab.
+- **Bildschirm füllen** gilt weiter (Bühne wächst, nie leere helle Fläche
+  unter dem letzten Element); der Zuwachs wird geteilt (zwei Teile über,
+  ein Teil unter dem Satz). Grund hinter der Seite (iOS-Überziehen) ist
+  Vereinsblau.
+- Maße (Chrome, Mobil-Emulation): bei 393×749 endet das Blatt genau am
+  Bildschirmrand, vom Fußstreifen ist nur der Anfang zu sehen; bei
+  390×844 und 430×932 sind Sponsoren-Kopf und Tafeln angeschnitten zu
+  sehen. Ohne Sponsoren passt die Seite bei 393×749 ohne Scrollen.
+- Entwürfe, Bilder und Prüfskripte liegen in
+  `tools/cache/app-optik/termine-entwurf-{A,B,C}/` und
+  `tools/cache/app-optik/termine-final/` (nicht im Repo).
 
 ### Stand 24.09.2026: „Als Nächstes“ entfällt, Sponsoren-Bande
 
@@ -188,6 +255,11 @@ npm run tpl-vorschau
 
 Mit `TPL_VORSCHAU_WORKSHEETS=<json>` lassen sich echte Worksheet-Zeilen
 (z. B. die Sponsoren für die Bande) über die Mocks legen.
+`TPL_VORSCHAU_TERMINE=<json>` beantwortet die Kalenderabfrage des
+Terminblocks mit einer gespeicherten Antwort (Form wie die echte),
+`TPL_VORSCHAU_TERMINE=fehler` simuliert einen Ausfall (HTTP 500; die
+Vorschau zählt die Browser-Meldung dazu als pageerror=1 je Seite), ohne
+Variable kommt eine leere Liste.
 
 Rendert `Startseite_v3.tpl` lokal ohne appack: ersetzt die appack-
 FreeMarker-Konstrukte der Vorlage gegen Mock-Daten aus
@@ -202,6 +274,11 @@ Viewport + fullPage), einen Kontaktbogen (`vergleich.png`, Vergleich mit
 
 ### Offene Punkte (nur in der echten App/CMS prüfbar)
 
+- **Terminblock in der echten App:** CORS ist am Server geprüft, der
+  Abruf aus der drender-Seite im iOS-/Android-WebView noch nicht; ebenso
+  `line-clamp`, `dvh` und `env(safe-area-inset-bottom)` dort. Schlägt der
+  Abruf fehl, steht dauerhaft nur „Alle Termine im Kalender ›“.
+- **Token-Ablauf 21.08.2027:** rechtzeitig vorher erneuern (siehe oben).
 - **Webfonts vom GitHub-Pages-Host** (`justolgay.github.io`) in der
   nativen WebView: die lokale Vorschau lief offline, Barlow
   Condensed/Inter luden dort nicht – ob appacks WebView (iOS/Android)
