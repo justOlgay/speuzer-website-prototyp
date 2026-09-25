@@ -379,7 +379,7 @@ button.knopf {
   <!-- Kein App-Modul (W8, Befund 6): normaler Link auf die Website-Seite,
        Verhalten innerhalb der App (appack öffnet externe Adressen ggf. im
        Systembrowser statt im Rahmen) noch nicht geprüft. -->
-  <a class="zeile" href="https://cdn.appack.de/sportfreunde04/workspace/web/verein-mach-mit.html">
+  <a class="zeile" href="https://cdn.appack.de/sportfreunde04/workspace/web/verein-mach-mit.html?app=1">
     <span class="zeile__text">
       <span class="zeile__titel">Mach mit &amp; Ehrenamt</span>
       <span class="zeile__untertitel">Trainer, Betreuer, Vorstand, Helfer</span>
@@ -390,7 +390,9 @@ button.knopf {
 
 <h2 class="abschnittstitel">Service</h2>
 <div class="liste">
-  <a class="zeile" href="nav://sportfreunde04_Application_1783064196311">
+  <!-- 25.09.2026: dieselbe Seite wie auf der Website (9 PDFs + Online-Antrag), im App-Modus;
+       vorher das native Downloads-Modul mit eigener Liste. -->
+  <a class="zeile" href="https://cdn.appack.de/sportfreunde04/workspace/web/verein-downloads.html?app=1">
     <span class="zeile__text">
       <span class="zeile__titel">Downloads &amp; Anträge</span>
       <span class="zeile__untertitel">Satzung, Beiträge, Anträge</span>
@@ -423,7 +425,7 @@ button.knopf {
   </a>
   <!-- Kein App-Modul (W8, Befund 6): normaler Link auf die Website-Seite,
        Verhalten innerhalb der App noch nicht geprüft. -->
-  <a class="zeile" href="https://cdn.appack.de/sportfreunde04/workspace/web/shop.html">
+  <a class="zeile" href="https://cdn.appack.de/sportfreunde04/workspace/web/shop.html?app=1">
     <span class="zeile__text">
       <span class="zeile__titel">Fanshop &amp; Teamshop</span>
       <span class="zeile__untertitel">Fanartikel und Teamausstattung</span>

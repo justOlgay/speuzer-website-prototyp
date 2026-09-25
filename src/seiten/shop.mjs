@@ -2,7 +2,7 @@
 // eigene Bestellstrecke. Ab P9-Korrektur A5 zusätzlich ein Hinweisabschnitt
 // zur Mannschafts-Vereinskleidung (Bestellung über das Trainerteam).
 
-import { ruecklink } from "../vorlagen/hilfen.mjs";
+import { ruecklink, APP_MODUS_SKRIPT } from "../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/shop/" (Tiefe 1), daher immer "../"
 // (siehe pfadZurWurzel() in tools/build.mjs).
@@ -88,6 +88,8 @@ export function seite(daten) {
 
   return {
     url: "/shop/",
+    // App-Modus (?app=1): Links führen in die App-Seiten, siehe hilfen.mjs
+    kopfZusatz: APP_MODUS_SKRIPT,
     // W8-Korrektur: H1/Title an den Verein-Verteiler angeglichen (dort schon
     // "Fanshop & Teamshop" verlinkt, siehe src/seiten/verein/index.mjs).
     title: "Fanshop & Teamshop",

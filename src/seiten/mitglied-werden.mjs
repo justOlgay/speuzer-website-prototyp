@@ -14,7 +14,7 @@
 // /mannschaften/ und /kontakt/) entfällt hier.
 
 import { downloadZeile } from "../vorlagen/bausteine.mjs";
-import { PROBETRAINING_MAILTO } from "../vorlagen/hilfen.mjs";
+import { PROBETRAINING_MAILTO, APP_MODUS_SKRIPT } from "../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/mitglied-werden/" (Tiefe 1), daher immer
 // "../" (siehe pfadZurWurzel() in tools/build.mjs).
@@ -360,6 +360,8 @@ export function seite(daten) {
 
   return {
     url: "/mitglied-werden/",
+    // App-Modus (?app=1): Links führen in die App-Seiten, siehe hilfen.mjs
+    kopfZusatz: APP_MODUS_SKRIPT,
     title: "Mitglied werden",
     description:
       "Mitglied beim FFV Sportfreunde 04 werden: Beiträge für Fußball und Karneval, Ablauf von Probetraining bis Spielerpass, Unterlagen zum Download und der Aufnahmeantrag.",

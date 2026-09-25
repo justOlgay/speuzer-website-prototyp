@@ -3,7 +3,7 @@
 // übernommen (siehe dort: Stand, Quelle und Hinweis auf die noch fehlende
 // juristische Prüfung).
 
-import { mailLink, telefonAnzeige } from "../vorlagen/hilfen.mjs";
+import { mailLink, telefonAnzeige, APP_MODUS_SKRIPT } from "../vorlagen/hilfen.mjs";
 
 function escapeHtml(text) {
   return String(text ?? "")
@@ -383,6 +383,8 @@ export function seite(daten) {
 
   return {
     url: "/datenschutz/",
+    // App-Modus (?app=1): Links führen in die App-Seiten, siehe hilfen.mjs
+    kopfZusatz: APP_MODUS_SKRIPT,
     title: "Datenschutz",
     description:
       "Datenschutzerklärung des FFV Sportfreunde 04 für Website und Vereins-App, Fassung vom 17. Juli 2026.",

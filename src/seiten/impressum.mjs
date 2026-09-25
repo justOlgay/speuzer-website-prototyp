@@ -1,7 +1,7 @@
 // Impressum /impressum/ (P8) – Angaben gemäß § 5 DDG. Kein appack/DOSB-
 // Werbeblock (das ist der Live-App-Fußtext, nicht Teil dieses Prototyps).
 
-import { mailLink, telefonAnzeige } from "../vorlagen/hilfen.mjs";
+import { mailLink, telefonAnzeige, APP_MODUS_SKRIPT } from "../vorlagen/hilfen.mjs";
 
 function escapeHtml(text) {
   return String(text ?? "")
@@ -133,6 +133,8 @@ export function seite(daten) {
 
   return {
     url: "/impressum/",
+    // App-Modus (?app=1): Links führen in die App-Seiten, siehe hilfen.mjs
+    kopfZusatz: APP_MODUS_SKRIPT,
     title: "Impressum",
     description:
       "Impressum des Frankfurter Fußballvereins Sportfreunde 1904 e. V.: Anschrift, Vertretung, Registergericht und Kontakt der Geschäftsstelle.",
