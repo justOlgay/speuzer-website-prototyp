@@ -1,6 +1,6 @@
 /* Speuzer: Sponsoren-„Bande“ auf der Website-Startseite (24.09.2026).
-   Skriptblock für Microwebsite.tpl (<script id="speuzer-bande-js"> vor
-   </head>, nach dem Stilblock speuzer-bande). Gleiche Daten und Regeln wie
+   Skriptblock „speuzer-bande-js“ für Microwebsite.tpl (am Ende des
+   head-Bereichs, nach dem Stilblock „speuzer-bande“). Gleiche Daten und Regeln wie
    die Bande der App-Startseite (assets/app/Startseite_v3.tpl): Sponsoren-
    Worksheet, Häkchen „showSlider“, Reihenfolge „sponSort“, saubere
    Website-Logos mit Rückfall sponImg. Tippen öffnet „Sponsoren & Partner“

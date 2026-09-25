@@ -1,5 +1,5 @@
 /* Speuzer: Sponsoren-„Bande“ auf der Website-Startseite (24.09.2026).
-   Stilblock für Microwebsite.tpl (<style id="speuzer-bande"> vor </head>),
+   Stilblock „speuzer-bande“ für Microwebsite.tpl (am Ende des head-Bereichs),
    Gegenstück zur Bande der App-Startseite (assets/app/Startseite_v3.tpl,
    Abschnitt 4a). Das Skript (bande-microwebsite.js) hängt die Bande an den
    unteren Rand des Startbilds (.wide); sie ist nur auf „Start“ zu sehen –

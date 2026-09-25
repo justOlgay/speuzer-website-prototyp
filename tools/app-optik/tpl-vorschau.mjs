@@ -397,6 +397,19 @@ async function screenshotTpl(browser, htmlPfad, namePräfix, mockWorksheets) {
       req.respond({ status: 200, contentType: "application/javascript; charset=utf-8", body: workbookStub(mockWorksheets) });
       return;
     }
+    // 25.09.2026: öffentliche Kalenderabfrage der Startseite (api.appack.de/graphql,
+    // listUpcomingCalendarEvents mit dem Embedded-Token). Antwort aus
+    // TPL_VORSCHAU_TERMINE=<json> (Form wie die echte Antwort), sonst leer.
+    // TPL_VORSCHAU_TERMINE=fehler simuliert einen Ausfall (HTTP 500).
+    if (url.startsWith("https://api.appack.de/graphql")) {
+      const kopf = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Methods": "POST, OPTIONS" };
+      if (req.method() === "OPTIONS") { req.respond({ status: 204, headers: kopf, body: "" }); return; }
+      const quelle = process.env.TPL_VORSCHAU_TERMINE;
+      if (quelle === "fehler") { req.respond({ status: 500, headers: kopf, contentType: "application/json", body: "{}" }); return; }
+      const body = quelle && existsSync(quelle) ? readFileSync(quelle, "utf8") : JSON.stringify({ data: { listUpcomingCalendarEvents: [] } });
+      req.respond({ status: 200, headers: kopf, contentType: "application/json; charset=utf-8", body });
+      return;
+    }
     if (url.includes("www.fussball.de/widgets.js")) {
       req.respond({ status: 200, contentType: "application/javascript; charset=utf-8", body: fussballWidgetsStub() });
       return;
