@@ -364,7 +364,6 @@ function quelleAbschnitt(datenschutz) {
   <div class="container fluss">
     <div class="inhalt fluss">
     <p class="meta">Quelle: ${escapeHtml(datenschutz.quelle ?? "")}</p>
-    <p><a href="https://cdn.appack.de/sportfreunde04/workspace/Datenschutzerklaerung.html" rel="noopener" target="_blank">Zur Live-Fassung auf cdn.appack.de</a></p>
     </div>
   </div>
 </section>`;

@@ -20,8 +20,14 @@
   "tel_geschaeftsstelle": "069 736868",
   "tel_platzwart": "069 732193",
   "register": "Amtsgericht Frankfurt am Main, VR 4727",
-  "vorsitz": ["Melanie Seipp (1. Vorsitzende)", "Uwe Korndörfer (2. Vorsitzender)"],
-  "vertretung": ["Melanie Seipp (1. Vorsitzende)", "Uwe Korndörfer (2. Vorsitzender)"],
+  "vorsitz": [
+    "Melanie Seipp (1. Vorsitzende)",
+    "Uwe Korndörfer (2. Vorsitzender)"
+  ],
+  "vertretung": [
+    "Melanie Seipp (1. Vorsitzende)",
+    "Uwe Korndörfer (2. Vorsitzender)"
+  ],
   "instagram": "https://www.instagram.com/speuzer_ffm/",
   "facebook": "https://www.facebook.com/groups/223133414377924/",
   "fanshop": "https://sportfreunde04.fan12.de/",
@@ -47,5 +53,6 @@
     "apple": "https://maps.apple.com/?q=Mainzer+Landstra%C3%9Fe+480,+60326+Frankfurt+am+Main",
     "google": "https://www.google.com/maps/search/?api=1&query=Mainzer+Landstra%C3%9Fe+480%2C+60326+Frankfurt+am+Main"
   },
-  "kalender_basis": "https://justolgay.github.io/speuzer-spielplan/"
+  "kalender_basis": "https://justolgay.github.io/speuzer-spielplan/",
+  "vereinsnummer": "24053"
 }
