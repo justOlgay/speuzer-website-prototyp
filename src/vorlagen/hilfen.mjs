@@ -40,6 +40,28 @@ export const AUFNAHMEANTRAG_MAILTO =
 export const AUFNAHMEANTRAG_ONLINE_MAILTO =
   "mailto:geschaeftsstelle@sportfreunde04.de?subject=Aufnahmeantrag&body=Hallo%2C%0A%0Aanbei%20der%20online%20ausgef%C3%BCllte%20und%20unterschriebene%20Aufnahmeantrag%20als%20PDF.%0A%0AViele%20Gr%C3%BC%C3%9Fe";
 
+// ---------- Versand des Online-Aufnahmeantrags ----------
+
+// Wie das fertige PDF des Online-Aufnahmeantrags (src/seiten/aufnahmeantrag.mjs)
+// zum Verein kommt:
+// "manuell" (seit 28.09.2026): Herunterladen bzw. Teilen und vorbereitete
+//   E-Mail – der Nutzer sendet selbst.
+// "endpunkt": „An die Geschäftsstelle senden“ schickt das PDF an die eigene
+//   Annahme auf dem Vereins-Webspace bei IONOS (server/aufnahmeantrag-annahme/,
+//   Einrichtung dort in ANLEITUNG.md), die es per E-Mail an die
+//   Geschäftsstelle weitergibt. Papier-Unterschrift und ein fehlgeschlagenes
+//   Senden fallen auf den Weg "manuell" zurück.
+// Umschalten erst, wenn <url>?pruefen "bereit": true meldet – Schritte in
+// server/aufnahmeantrag-annahme/LIESMICH.md („Umschalten“). Betroffen sind
+// Aufnahmeantrag, Mitglied werden, Downloads & Anträge und Datenschutz (§ 14).
+// Für den lokalen Test setzt ANTRAG_VERSAND_URL den Endpunkt nur für einen
+// Bau (tools/cache/…, nie für das Paket ins CMS).
+const ANNAHME_URL = "https://formular.sportfreunde04.de/annahme.php";
+const TEST_ANNAHME_URL = globalThis.process?.env?.ANTRAG_VERSAND_URL;
+export const AUFNAHMEANTRAG_VERSAND = TEST_ANNAHME_URL
+  ? { art: "endpunkt", url: TEST_ANNAHME_URL }
+  : { art: "manuell", url: ANNAHME_URL };
+
 export const BESCHEINIGUNG_MAILTO =
   "mailto:geschaeftsstelle@sportfreunde04.de?subject=Anforderung%20Mitgliedsbescheinigung&body=Hallo%2C%0A%0Abitte%20schicken%20Sie%20mir%20eine%20Mitgliedsbescheinigung.%0A%0AF%C3%BCr%20%28mich%20selbst%20/%20mein%20Kind%29%3A%20%0AName%20und%20Vorname%20des%20Mitglieds%3A%20%0AGeburtsdatum%20des%20Mitglieds%3A%20%0AAnschrift%3A%20%0AMitgliedsnummer%20%28falls%20bekannt%29%3A%20%0ATelefon%20f%C3%BCr%20R%C3%BCckfragen%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe";
 

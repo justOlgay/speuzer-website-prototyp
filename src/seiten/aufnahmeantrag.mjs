@@ -34,6 +34,7 @@ import {
   APP_MODUS_SKRIPT,
   AUFNAHMEANTRAG_MAILTO,
   AUFNAHMEANTRAG_ONLINE_MAILTO,
+  AUFNAHMEANTRAG_VERSAND,
 } from "../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/aufnahmeantrag/" (Tiefe 1), daher "../"
@@ -42,10 +43,17 @@ const PFAD = "../";
 
 // Versand des fertigen PDF (gekapselt, siehe assets/js/antrag/aufnahmeantrag.js,
 // Abschnitt "Versand"): "manuell" = Herunterladen/Teilen + vorbereitete
-// E-Mail, der Nutzer sendet selbst. Für einen späteren eigenen Endpunkt hier
-// { art: "endpunkt", url: "https://…" } eintragen – das Skript schickt das
-// PDF dann per POST (multipart/form-data, Feld "antrag") dorthin.
-const VERSAND = { art: "manuell" };
+// E-Mail, der Nutzer sendet selbst. "endpunkt" = „An die Geschäftsstelle
+// senden“: das Skript schickt das PDF per POST (multipart/form-data, Felder
+// "antrag", "email", "name") an die eigene Annahme auf dem Vereins-Webspace
+// (server/aufnahmeantrag-annahme/). Der Schalter steht in hilfen.mjs
+// (AUFNAHMEANTRAG_VERSAND), weil auch Mitglied werden, Downloads und
+// Datenschutz den Weg beschreiben. Im Weg "manuell" bleibt die Seite
+// Zeichen für Zeichen wie vor der Annahme (Konfiguration ohne Adresse).
+const VERSAND = AUFNAHMEANTRAG_VERSAND.art === "endpunkt"
+  ? { art: "endpunkt", url: AUFNAHMEANTRAG_VERSAND.url }
+  : { art: "manuell" };
+const ENDPUNKT = VERSAND.art === "endpunkt";
 
 // Gleiche Adresse wie in mitglied-werden.mjs/downloads.mjs: das App-Formular,
 // im App-Modus schreibt APP_MODUS_SKRIPT den Link auf nav:// um.
@@ -467,20 +475,14 @@ function schrittUnterschrift() {
   return schritt("unterschrift", "Unterschreiben", inhalt);
 }
 
-function schrittPruefen(daten) {
+// Ergebnis nach „PDF erstellen“. Weg "manuell": Herunterladen/Teilen und
+// die Anleitung für die E-Mail. Weg "endpunkt": zuerst „An die
+// Geschäftsstelle senden“ (data-weg-senden), Herunterladen nur noch als
+// Kopie; die E-Mail-Anleitung (data-weg-manuell) zeigt das Skript bei
+// Unterschrift auf Papier und wenn das Senden nicht geklappt hat.
+function schrittPruefen(daten, datenschutzHref) {
   const mail = daten.verein?.mail ?? "geschaeftsstelle@sportfreunde04.de";
-  const inhalt = `<p>Bitte prüfen Sie Ihre Angaben. Mit „Ändern“ kommen Sie zum jeweiligen Schritt – nichts geht dabei verloren.</p>
-        <div class="antrag__zusammenfassung" data-zusammenfassung></div>
-        <div class="antrag__ergebnis" data-ergebnis hidden tabindex="-1" aria-labelledby="antrag-ergebnis-titel">
-          <h3 id="antrag-ergebnis-titel">Ihr Antrag ist fertig</h3>
-          <p><span data-text="datei-name"></span> <span class="meta" data-text="datei-info"></span></p>
-          <p class="knopfzeile">
-            <button type="button" class="knopf" data-aktion="teilen" hidden>PDF teilen, z. B. per Mail</button>
-            <button type="button" class="knopf" data-aktion="herunterladen">PDF herunterladen</button>
-            <button type="button" class="knopf knopf--sekundaer" data-aktion="ansehen">PDF ansehen</button>
-          </p>
-          <p class="antrag__meldung" data-meldung aria-live="polite"></p>
-          <h3>So kommt der Antrag zum Verein</h3>
+  const anleitung = `<h3>So kommt der Antrag zum Verein</h3>
           <ol class="antrag__anleitung">
             <li>Sehen Sie sich das PDF einmal an und speichern Sie es – herunterladen oder am Handy teilen.</li>
             <li>Schreiben Sie eine E-Mail an ${mailLink(mail)} mit dem Betreff „Aufnahmeantrag“. Der Knopf unten bereitet sie vor.</li>
@@ -488,14 +490,45 @@ function schrittPruefen(daten) {
           </ol>
           <p class="knopfzeile">
             <a class="knopf knopf--sekundaer" href="${escapeHtml(AUFNAHMEANTRAG_ONLINE_MAILTO)}" data-aktion="mail">E-Mail an die Geschäftsstelle vorbereiten</a>
+          </p>`;
+  const senden = ENDPUNKT
+    ? `<div class="fluss" data-weg-senden>
+            <p>Sehen Sie sich das PDF einmal an. Dann schicken Sie es mit einem Klick an die Geschäftsstelle – eine Eingangsbestätigung kommt an <strong data-text="email-anzeige"></strong>.</p>
+            <p class="knopfzeile">
+              <button type="button" class="knopf" data-aktion="senden">An die Geschäftsstelle senden</button>
+            </p>
+            <p class="meta">Das PDF geht verschlüsselt an ${escapeHtml(mail)} und wird unterwegs nicht gespeichert (<a href="${datenschutzHref}">Datenschutz</a>). Für Ihre Unterlagen können Sie es auch herunterladen.</p>
+          </div>
+          <div class="hinweis hinweis--info antrag__gesendet" data-gesendet tabindex="-1" hidden>
+            <p><strong>Gesendet.</strong> Ihr Antrag ist an die Geschäftsstelle gegangen. <span data-text="gesendet-bestaetigung"></span></p>
+          </div>
+          `
+    : "";
+  const inhalt = `<p>Bitte prüfen Sie Ihre Angaben. Mit „Ändern“ kommen Sie zum jeweiligen Schritt – nichts geht dabei verloren.</p>
+        <div class="antrag__zusammenfassung" data-zusammenfassung></div>
+        <div class="antrag__ergebnis" data-ergebnis hidden tabindex="-1" aria-labelledby="antrag-ergebnis-titel">
+          <h3 id="antrag-ergebnis-titel">Ihr Antrag ist fertig</h3>
+          <p><span data-text="datei-name"></span> <span class="meta" data-text="datei-info"></span></p>
+          ${senden}<p class="knopfzeile">
+            <button type="button" class="knopf" data-aktion="teilen" hidden>PDF teilen, z. B. per Mail</button>
+            <button type="button" class="knopf" data-aktion="herunterladen">PDF herunterladen</button>
+            <button type="button" class="knopf knopf--sekundaer" data-aktion="ansehen">PDF ansehen</button>
           </p>
+          <p class="antrag__meldung" data-meldung aria-live="polite"></p>
+          ${ENDPUNKT ? `<div class="fluss" data-weg-manuell hidden>
+          ${anleitung}
+          </div>` : anleitung}
           <div class="hinweis hinweis--info" data-wenn="papier" hidden>
             <p>Sie unterschreiben von Hand: Bitte das PDF ausdrucken, auf Seite 2 und 3 <span data-wenn="sepa" hidden>sowie für das SEPA-Mandat auf Seite 4</span> Ort und Datum eintragen und unterschreiben, dann im Vereinsheim abgeben oder eingescannt per E-Mail schicken.</p>
           </div>
           <div class="hinweis hinweis--info" data-wenn="azubi" hidden>
-            <p>Bitte den Ausbildungs- oder Studiennachweis mitschicken.</p>
+            <p>${ENDPUNKT
+              ? "Bitte den Ausbildungs- oder Studiennachweis mitschicken – nach dem Senden über den Knopf oben am einfachsten als Antwort auf die Eingangsbestätigung."
+              : "Bitte den Ausbildungs- oder Studiennachweis mitschicken."}</p>
           </div>
-          <p class="antrag__hinweis">Das gespeicherte PDF enthält alle Angaben, auch IBAN und Unterschrift. Es bleibt auf Ihrem Gerät, bis Sie es löschen – nach dem Senden können Sie es löschen.</p>
+          <p class="antrag__hinweis">${ENDPUNKT
+            ? "Ein heruntergeladenes PDF enthält alle Angaben, auch IBAN und Unterschrift. Es bleibt auf Ihrem Gerät, bis Sie es löschen."
+            : "Das gespeicherte PDF enthält alle Angaben, auch IBAN und Unterschrift. Es bleibt auf Ihrem Gerät, bis Sie es löschen – nach dem Senden können Sie es löschen."}</p>
           <p><button type="button" class="knopf knopf--sekundaer" data-aktion="loeschen">Alle Angaben löschen</button></p>
         </div>`;
   return schritt("pruefen", "Prüfen und PDF erstellen", inhalt);
@@ -546,7 +579,9 @@ export function seite(daten) {
   <div class="container">
     ${ruecklink(`${PFAD}mitglied-werden/`, "Mitglied werden")}
     <h1>Aufnahmeantrag online</h1>
-    <p class="seitenkopf__lead">Ausfüllen, am Bildschirm unterschreiben – daraus entsteht der vollständige Aufnahmeantrag des Vereins als PDF. Den schicken Sie per E-Mail an die Geschäftsstelle.</p>
+    <p class="seitenkopf__lead">${ENDPUNKT
+      ? "Ausfüllen, am Bildschirm unterschreiben, absenden – daraus entsteht der vollständige Aufnahmeantrag des Vereins als PDF, und der geht direkt an die Geschäftsstelle."
+      : "Ausfüllen, am Bildschirm unterschreiben – daraus entsteht der vollständige Aufnahmeantrag des Vereins als PDF. Den schicken Sie per E-Mail an die Geschäftsstelle."}</p>
   </div>
 </section>
 <section class="abschnitt">
@@ -560,7 +595,9 @@ export function seite(daten) {
       data-fontkit="../assets/js/antrag/aufnahmeantrag-fontkit.js"
       data-schrift="../assets/fonts/liberation-sans-regular.ttf">
       <div class="hinweis hinweis--info antrag__einleitung">
-        <p><strong>Etwa 10 Minuten.</strong> Für die Lastschrift brauchen Sie die IBAN. Ihre Angaben bleiben auf diesem Gerät: Das PDF entsteht in Ihrem Browser, der Verein erhält den Antrag erst, wenn Sie ihn selbst senden (<a href="${datenschutzHref}">Datenschutz</a>).</p>
+        <p><strong>Etwa 10 Minuten.</strong> Für die Lastschrift brauchen Sie die IBAN. ${ENDPUNKT
+          ? "Das PDF entsteht in Ihrem Browser. An den Verein geht es erst, wenn Sie am Ende auf „An die Geschäftsstelle senden“ tippen"
+          : "Ihre Angaben bleiben auf diesem Gerät: Das PDF entsteht in Ihrem Browser, der Verein erhält den Antrag erst, wenn Sie ihn selbst senden"} (<a href="${datenschutzHref}">Datenschutz</a>).</p>
       </div>
       <div class="hinweis hinweis--offen antrag__stoerung" data-stoerung tabindex="-1" hidden>
         <p><strong data-text="stoerung-titel"></strong> <span data-text="stoerung"></span></p>
@@ -585,7 +622,7 @@ export function seite(daten) {
       ${schrittEinwilligungen(daten)}
       ${schrittZahlung(daten)}
       ${schrittUnterschrift()}
-      ${schrittPruefen(daten)}
+      ${schrittPruefen(daten, datenschutzHref)}
         <p class="antrag__arbeitet" data-arbeitet aria-live="polite" hidden></p>
         <div class="antrag__navigation">
           <button type="button" class="knopf knopf--sekundaer" data-zurueck hidden>Zurück</button>

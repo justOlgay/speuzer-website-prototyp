@@ -1,7 +1,7 @@
 // Downloads /verein/downloads/ (P5) – Gruppen aus data/downloads.json in
 // fester Reihenfolge (Anmeldung, Verein, Kinder- und Jugendschutz).
 
-import { ruecklink, APP_MODUS_SKRIPT, AUFNAHMEANTRAG_MAILTO } from "../../vorlagen/hilfen.mjs";
+import { ruecklink, APP_MODUS_SKRIPT, AUFNAHMEANTRAG_MAILTO, AUFNAHMEANTRAG_VERSAND } from "../../vorlagen/hilfen.mjs";
 import { downloadZeile } from "../../vorlagen/bausteine.mjs";
 
 // Diese Seite liegt immer unter "/verein/downloads/" (Tiefe 2), daher immer
@@ -58,7 +58,7 @@ function aufnahmeantragOnlineZeile() {
 // der E-Mail-Weg; in der App gilt weiter das App-Formular (Zeile oben).
 function aufnahmeantragOnlineKnopf() {
   return `<div class="inhalt fluss downloads-einstieg" data-nur-web>
-      <p>Den Aufnahmeantrag online ausfüllen und am Bildschirm unterschreiben – daraus entsteht das fertige PDF für die E-Mail an die Geschäftsstelle.</p>
+      <p>Den Aufnahmeantrag online ausfüllen und am Bildschirm unterschreiben – daraus entsteht das fertige PDF${AUFNAHMEANTRAG_VERSAND.art === "endpunkt" ? ", das Sie direkt an die Geschäftsstelle senden" : " für die E-Mail an die Geschäftsstelle"}.</p>
       <p class="knopfzeile"><a class="knopf" href="${PFAD}aufnahmeantrag/">Aufnahmeantrag online ausfüllen</a></p>
     </div>`;
 }

@@ -26,7 +26,9 @@
     "app-optik": "node tools/app-optik/vorschau.mjs",
     "tpl-vorschau": "node tools/app-optik/tpl-vorschau.mjs",
     "tpl-bauen": "node tools/app-optik/tpl-bauen.mjs",
-    "antrag-bibliotheken": "node tools/antrag-bibliotheken.mjs"
+    "antrag-bibliotheken": "node tools/antrag-bibliotheken.mjs",
+    "annahme-paket": "node tools/annahme-paket.mjs",
+    "annahme-test": "python3 server/aufnahmeantrag-annahme/test/annahme_test.py"
   },
   "keywords": [],
   "author": "",

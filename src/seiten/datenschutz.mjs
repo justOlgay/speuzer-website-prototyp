@@ -3,7 +3,17 @@
 // übernommen (siehe dort: Stand, Quelle und Hinweis auf die noch fehlende
 // juristische Prüfung).
 
-import { mailLink, telefonAnzeige, APP_MODUS_SKRIPT } from "../vorlagen/hilfen.mjs";
+import { mailLink, telefonAnzeige, APP_MODUS_SKRIPT, AUFNAHMEANTRAG_VERSAND } from "../vorlagen/hilfen.mjs";
+
+// Abschnitte mit zwei Fassungen je nach Versandweg des Online-Aufnahmeantrags
+// (hilfen.mjs, AUFNAHMEANTRAG_VERSAND): Im Weg "endpunkt" gilt
+// "absaetze_endpunkt" statt "absaetze"; {annahme_host} steht dort für die
+// Adresse der Annahme auf dem Vereins-Webspace.
+function mitVersandweg(abschnitt) {
+  if (AUFNAHMEANTRAG_VERSAND.art !== "endpunkt" || !abschnitt.absaetze_endpunkt) return abschnitt;
+  const host = new URL(AUFNAHMEANTRAG_VERSAND.url).host;
+  return { ...abschnitt, absaetze: abschnitt.absaetze_endpunkt.map((p) => p.replaceAll("{annahme_host}", host)) };
+}
 
 function escapeHtml(text) {
   return String(text ?? "")
@@ -371,7 +381,7 @@ function quelleAbschnitt(datenschutz) {
 
 export function seite(daten) {
   const datenschutz = daten.datenschutz ?? {};
-  const abschnitte = datenschutz.abschnitte ?? [];
+  const abschnitte = (datenschutz.abschnitte ?? []).map(mitVersandweg);
 
   const inhalt = [
     seitenkopfAbschnitt(datenschutz),
