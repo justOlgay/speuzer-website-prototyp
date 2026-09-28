@@ -1,0 +1,1092 @@
+{
+  "_beschreibung": "Feldpositionen für den Aufnahmeantrag (Vereinsanmeldung allgemein, Stand 9/2026). Koordinaten in PDF-Punkten, Ursprung unten links wie bei pdf-lib; 'seite' ist 1-basiert (pdf-lib: getPage(seite - 1)). Text: x/y = Anfang der Grundlinie (bei ausrichtung 'mitte': Mitte), breite = Platz auf der gedruckten Linie, breite_max = freier Platz bis zum nächsten gedruckten Element. kreuz/unterschrift: x/y = linke untere Ecke. zellen: je Zeichen eine Zellenmitte.",
+  "quelle": {
+    "url": "https://cdn.appack.de/sportfreunde04/pdf/Vereinsanmeldung%20allgemein_NEU_9-2026%20%20(1).pdf",
+    "sha256": "ce9c37c0f01b6cfffeb09f9c306d403e48ea2220b3f4178315a75ff245866edf",
+    "bytes": 217968,
+    "seiten": 4,
+    "seitenformat": {
+      "breite": 595.32,
+      "hoehe": 841.92,
+      "name": "A4"
+    },
+    "formularfelder": 0
+  },
+  "vorgaben": {
+    "schrift": "Helvetica",
+    "schriftgroesse": 11,
+    "min_schriftgroesse": 7,
+    "farbe_rgb": [
+      0,
+      0,
+      0
+    ],
+    "grundlinie_ueber_linie": 2.6,
+    "anpassung": "Erst auf 'breite' einpassen; würde die Schrift dabei kleiner als 9 pt, 'breite_max' (falls vorhanden) nutzen; sonst bis min_schriftgroesse verkleinern. Gemessen wird so, wie pdf-lib zeichnet: bei der Standardschrift Helvetica ohne Unterschneidung (Kerning), also als Summe der Einzelzeichenbreiten. Felder mit 'zeilen_max' werden umbrochen statt weiter verkleinert.",
+    "untergrenze_schriftgroesse": 6,
+    "untergrenze_hinweis": "Kleiner soll kein Eintrag werden; das Web-Formular weist zu lange Angaben vorher ab (Prüfung mit den Zeichenbreiten aus data/aufnahmeantrag-schriftbreiten.json).",
+    "kreuz": {
+      "strichstaerke": 1.1,
+      "einzug": 0.9,
+      "form": "zwei Diagonalen im Innenquadrat"
+    },
+    "zellen": {
+      "schrift": "Helvetica",
+      "schriftgroesse": 11,
+      "hinweis": "Zeichen einzeln auf die Zellenmitte zentrieren"
+    },
+    "unterschrift": {
+      "leinwand_seitenverhaeltnis": 4.0,
+      "hinweis": "PNG mit transparentem Hintergrund, vor dem Einsetzen auf die Tinte zuschneiden"
+    }
+  },
+  "felder": {
+    "s1.fussball.jugendlicher": {
+      "typ": "kreuz",
+      "seite": 1,
+      "beschriftung": "Fußball: Jugendlicher (inkl. A-Jugend)",
+      "x": 32.5,
+      "y": 556.42,
+      "breite": 6.5,
+      "hoehe": 6.25,
+      "mitte": [
+        35.75,
+        559.54
+      ],
+      "zeichen": "❑",
+      "aussen": {
+        "x0": 32.0,
+        "x1": 40.75,
+        "y0": 554.67,
+        "y1": 563.42
+      }
+    },
+    "s1.fussball.erwachsener": {
+      "typ": "kreuz",
+      "seite": 1,
+      "beschriftung": "Fußball: Erwachsener",
+      "x": 209.75,
+      "y": 556.42,
+      "breite": 6.5,
+      "hoehe": 6.25,
+      "mitte": [
+        213.0,
+        559.54
+      ],
+      "zeichen": "❑",
+      "aussen": {
+        "x0": 209.25,
+        "x1": 218.0,
+        "y0": 554.67,
+        "y1": 563.42
+      }
+    },
+    "s1.fussball.passiv": {
+      "typ": "kreuz",
+      "seite": 1,
+      "beschriftung": "Fußball: Passive/Frauen/Rentner (ab 65. Lebensj.)",
+      "x": 315.75,
+      "y": 556.42,
+      "breite": 6.5,
+      "hoehe": 6.25,
+      "mitte": [
+        319.0,
+        559.54
+      ],
+      "zeichen": "❑",
+      "aussen": {
+        "x0": 315.25,
+        "x1": 324.0,
+        "y0": 554.67,
+        "y1": 563.42
+      }
+    },
+    "s1.fussball.familie": {
+      "typ": "kreuz",
+      "seite": 1,
+      "beschriftung": "Fußball: Familienbeitrag",
+      "x": 32.5,
+      "y": 542.67,
+      "breite": 6.5,
+      "hoehe": 6.25,
+      "mitte": [
+        35.75,
+        545.79
+      ],
+      "zeichen": "❑",
+      "aussen": {
+        "x0": 32.0,
+        "x1": 40.75,
+        "y0": 540.92,
+        "y1": 549.67
+      }
+    },
+    "s1.karneval.kinder": {
+      "typ": "kreuz",
+      "seite": 1,
+      "beschriftung": "Karneval: Kinder- und Jugendlicher (bis 17. Lebensj.)",
+      "x": 32.5,
+      "y": 487.42,
+      "breite": 6.5,
+      "hoehe": 6.25,
+      "mitte": [
+        35.75,
+        490.55
+      ],
+      "zeichen": "❑",
+      "aussen": {
+        "x0": 32.0,
+        "x1": 40.75,
+        "y0": 485.67,
+        "y1": 494.42
+      }
+    },
+    "s1.karneval.erwachsener": {
+      "typ": "kreuz",
+      "seite": 1,
+      "beschriftung": "Karneval: Erwachsener",
+      "x": 315.75,
+      "y": 487.42,
+      "breite": 6.5,
+      "hoehe": 6.25,
+      "mitte": [
+        319.0,
+        490.55
+      ],
+      "zeichen": "❑",
+      "aussen": {
+        "x0": 315.25,
+        "x1": 324.0,
+        "y0": 485.67,
+        "y1": 494.42
+      }
+    },
+    "s1.karneval.rentner": {
+      "typ": "kreuz",
+      "seite": 1,
+      "beschriftung": "Karneval: Rentner (ab 65. Lebensj.)",
+      "x": 422.0,
+      "y": 487.42,
+      "breite": 6.5,
+      "hoehe": 6.25,
+      "mitte": [
+        425.25,
+        490.55
+      ],
+      "zeichen": "❑",
+      "aussen": {
+        "x0": 421.5,
+        "x1": 430.25,
+        "y0": 485.67,
+        "y1": 494.42
+      }
+    },
+    "s1.karneval.familie": {
+      "typ": "kreuz",
+      "seite": 1,
+      "beschriftung": "Karneval: Familienbeitrag",
+      "x": 32.5,
+      "y": 468.67,
+      "breite": 6.5,
+      "hoehe": 6.25,
+      "mitte": [
+        35.75,
+        471.8
+      ],
+      "zeichen": "❑",
+      "aussen": {
+        "x0": 32.0,
+        "x1": 40.75,
+        "y0": 466.92,
+        "y1": 475.67
+      }
+    },
+    "s1.karneval.azubi": {
+      "typ": "kreuz",
+      "seite": 1,
+      "beschriftung": "Karneval: Auszubildende/Studierende (mit Nachweis)",
+      "x": 174.25,
+      "y": 468.67,
+      "breite": 6.5,
+      "hoehe": 6.25,
+      "mitte": [
+        177.5,
+        471.8
+      ],
+      "zeichen": "❑",
+      "aussen": {
+        "x0": 173.75,
+        "x1": 182.5,
+        "y0": 466.92,
+        "y1": 475.67
+      }
+    },
+    "s1.karneval.senator": {
+      "typ": "kreuz",
+      "seite": 1,
+      "beschriftung": "Karneval: Senatorenmitgliedschaft",
+      "x": 422.0,
+      "y": 468.67,
+      "breite": 6.5,
+      "hoehe": 6.25,
+      "mitte": [
+        425.25,
+        471.8
+      ],
+      "zeichen": "❑",
+      "aussen": {
+        "x0": 421.5,
+        "x1": 430.25,
+        "y0": 466.92,
+        "y1": 475.67
+      }
+    },
+    "s1.nachname": {
+      "typ": "text",
+      "seite": 1,
+      "beschriftung": "Nachname",
+      "x": 147.1,
+      "y": 430.02,
+      "breite": 146.0,
+      "schriftgroesse": 11,
+      "min_schriftgroesse": 7,
+      "ausrichtung": "links",
+      "linie": {
+        "x0": 145.1,
+        "x1": 295.1,
+        "y": 427.42,
+        "staerke": 0.5
+      },
+      "richtwert_zeichen": {
+        "bei_schriftgroesse": 26,
+        "hoechstens": 41
+      }
+    },
+    "s1.vorname": {
+      "typ": "text",
+      "seite": 1,
+      "beschriftung": "Vorname",
+      "x": 309.21,
+      "y": 430.02,
+      "breite": 146.0,
+      "schriftgroesse": 11,
+      "min_schriftgroesse": 7,
+      "ausrichtung": "links",
+      "linie": {
+        "x0": 307.21,
+        "x1": 457.21,
+        "y": 427.42,
+        "staerke": 0.5
+      },
+      "breite_max": 255.79,
+      "richtwert_zeichen": {
+        "bei_schriftgroesse": 26,
+        "hoechstens": 73
+      }
+    },
+    "s1.strasse": {
+      "typ": "text",
+      "seite": 1,
+      "beschriftung": "Straße und Haus-Nr.",
+      "x": 145.42,
+      "y": 411.02,
+      "breite": 308.0,
+      "schriftgroesse": 11,
+      "min_schriftgroesse": 7,
+      "ausrichtung": "links",
+      "linie": {
+        "x0": 143.42,
+        "x1": 455.42,
+        "y": 408.42,
+        "staerke": 0.5
+      },
+      "breite_max": 419.58,
+      "richtwert_zeichen": {
+        "bei_schriftgroesse": 56,
+        "hoechstens": 119
+      }
+    },
+    "s1.plz_ort": {
+      "typ": "text",
+      "seite": 1,
+      "beschriftung": "PLZ und Wohnort",
+      "x": 145.42,
+      "y": 392.27,
+      "breite": 308.0,
+      "schriftgroesse": 11,
+      "min_schriftgroesse": 7,
+      "ausrichtung": "links",
+      "linie": {
+        "x0": 143.42,
+        "x1": 455.42,
+        "y": 389.67,
+        "staerke": 0.5
+      },
+      "breite_max": 419.58,
+      "richtwert_zeichen": {
+        "bei_schriftgroesse": 56,
+        "hoechstens": 119
+      }
+    },
+    "s1.geburtsdatum.tag": {
+      "typ": "text",
+      "seite": 1,
+      "beschriftung": "Geburtsdatum Tag (TT)",
+      "x": 152.42,
+      "y": 373.52,
+      "breite": 17.0,
+      "schriftgroesse": 11,
+      "min_schriftgroesse": 7,
+      "ausrichtung": "mitte",
+      "linie": {
+        "x0": 143.42,
+        "x1": 161.42,
+        "y": 370.92,
+        "staerke": 0.5
+      },
+      "richtwert_zeichen": {
+        "bei_schriftgroesse": 3,
+        "hoechstens": 4
+      }
+    },
+    "s1.geburtsdatum.monat": {
+      "typ": "text",
+      "seite": 1,
+      "beschriftung": "Geburtsdatum Monat (MM)",
+      "x": 173.42,
+      "y": 373.52,
+      "breite": 17.0,
+      "schriftgroesse": 11,
+      "min_schriftgroesse": 7,
+      "ausrichtung": "mitte",
+      "linie": {
+        "x0": 164.42,
+        "x1": 182.42,
+        "y": 370.92,
+        "staerke": 0.5
+      },
+      "richtwert_zeichen": {
+        "bei_schriftgroesse": 3,
+        "hoechstens": 4
+      }
+    },
+    "s1.geburtsdatum.jahr": {
+      "typ": "text",
+      "seite": 1,
+      "beschriftung": "Geburtsdatum Jahr (JJJJ)",
+      "x": 209.42,
+      "y": 373.52,
+      "breite": 47.0,
+      "schriftgroesse": 11,
+      "min_schriftgroesse": 7,
+      "ausrichtung": "mitte",
+      "linie": {
+        "x0": 185.42,
+        "x1": 233.42,
+        "y": 370.92,
+        "staerke": 0.5
+      },
+      "richtwert_zeichen": {
+        "bei_schriftgroesse": 8,
+        "hoechstens": 13
+      }
+    },
+    "s1.telefon": {
+      "typ": "text",
+      "seite": 1,
+      "beschriftung": "Telefon",
+      "x": 145.42,
+      "y": 354.77,
+      "breite": 122.0,
+      "schriftgroesse": 11,
+      "min_schriftgroesse": 7,
+      "ausrichtung": "links",
+      "linie": {
+        "x0": 143.42,
+        "x1": 269.42,
+        "y": 352.17,
+        "staerke": 0.5
+      },
+      "breite_max": 130.58,
+      "richtwert_zeichen": {
+        "bei_schriftgroesse": 22,
+        "hoechstens": 37
+      }
+    },
+    "s1.mobil": {
+      "typ": "text",
+      "seite": 1,
+      "beschriftung": "Tel. mobil",
+      "x": 393.27,
+      "y": 354.77,
+      "breite": 122.0,
+      "schriftgroesse": 11,
+      "min_schriftgroesse": 7,
+      "ausrichtung": "links",
+      "linie": {
+        "x0": 391.27,
+        "x1": 517.27,
+        "y": 352.17,
+        "staerke": 0.5
+      },
+      "breite_max": 171.73,
+      "richtwert_zeichen": {
+        "bei_schriftgroesse": 22,
+        "hoechstens": 49
+      }
+    },
+    "s1.email": {
+      "typ": "text",
+      "seite": 1,
+      "beschriftung": "E-Mail",
+      "x": 145.42,
+      "y": 335.77,
+      "breite": 254.0,
+      "schriftgroesse": 11,
+      "min_schriftgroesse": 7,
+      "ausrichtung": "links",
+      "linie": {
+        "x0": 143.42,
+        "x1": 401.42,
+        "y": 333.17,
+        "staerke": 0.5
+      },
+      "breite_max": 419.58,
+      "richtwert_zeichen": {
+        "bei_schriftgroesse": 46,
+        "hoechstens": 119
+      }
+    },
+    "s1.satzung": {
+      "typ": "kreuz",
+      "seite": 1,
+      "beschriftung": "Satzung zur Kenntnis genommen",
+      "x": 32.5,
+      "y": 311.17,
+      "breite": 6.5,
+      "hoehe": 6.25,
+      "mitte": [
+        35.75,
+        314.3
+      ],
+      "zeichen": "❑",
+      "aussen": {
+        "x0": 32.0,
+        "x1": 40.75,
+        "y0": 309.42,
+        "y1": 318.17
+      }
+    },
+    "s2.familie": {
+      "typ": "familie",
+      "seite": 2,
+      "beschriftung": "Familienmitglieder bei Familienbeitrag (je Spalte ein Mitglied: Name, Vorname / Geburtsdatum)",
+      "schriftgroesse": 10,
+      "min_schriftgroesse": 6.5,
+      "spalten": [
+        {
+          "x": 108.0,
+          "breite": 130.0
+        },
+        {
+          "x": 245.0,
+          "breite": 130.0
+        },
+        {
+          "x": 382.0,
+          "breite": 130.0
+        }
+      ],
+      "zeilen": {
+        "name": {
+          "y": 235.0
+        },
+        "geburtsdatum": {
+          "y": 206.9
+        }
+      },
+      "max_im_kasten": 3,
+      "kasten": {
+        "x0": 29.8,
+        "x1": 568.6,
+        "y0": 202.82,
+        "y1": 245.32,
+        "unterstrich_name_y": 232.72
+      },
+      "frei_name": {
+        "x0": 66.0,
+        "x1": 516.0,
+        "hinweis": "zwischen gedrucktem „Name,“ (bis 62,8) und „Vorname:“ (ab 519,1)"
+      },
+      "frei_geburtsdatum": {
+        "x0": 106.0,
+        "x1": 567.0
+      },
+      "erweiterung": {
+        "hinweis": "Mitglied 4–6 unter dem Kasten (freie Fläche bis „Ort, Datum“), gleiche Spalten, eigene kleine Beschriftung",
+        "beschriftung_x": 31.2,
+        "beschriftung_groesse": 8,
+        "beschriftung_name": "Name, Vorname:",
+        "beschriftung_geburtsdatum": "Geburtsdatum:",
+        "zeilen": {
+          "name": {
+            "y": 184.0
+          },
+          "geburtsdatum": {
+            "y": 170.0
+          }
+        },
+        "max": 3,
+        "frei": {
+          "y0": 142.0,
+          "y1": 200.0
+        }
+      }
+    },
+    "s2.ort_datum": {
+      "typ": "text",
+      "seite": 2,
+      "beschriftung": "Ort, Datum (Aufnahmeantrag)",
+      "x": 97.12,
+      "y": 131.02,
+      "breite": 122.0,
+      "schriftgroesse": 11,
+      "min_schriftgroesse": 7,
+      "ausrichtung": "links",
+      "linie": {
+        "x0": 95.12,
+        "x1": 221.12,
+        "y": 128.42,
+        "staerke": 0.5
+      },
+      "breite_max": 140.88,
+      "richtwert_zeichen": {
+        "bei_schriftgroesse": 22,
+        "hoechstens": 40
+      }
+    },
+    "s2.unterschrift": {
+      "typ": "unterschrift",
+      "seite": 2,
+      "beschriftung": "Unterschrift Aufnahmeantrag",
+      "x": 312.0,
+      "y": 126.42,
+      "breite": 232.0,
+      "hoehe": 40.0,
+      "seitenverhaeltnis": 5.8,
+      "linie": {
+        "x0": 310.87,
+        "x1": 545.12,
+        "y": 128.42
+      },
+      "einpassen": "Tinte zuschneiden, proportional einpassen (contain), links unten ausrichten",
+      "hinweis": "bei Minderjährigen Erziehungsberechtigte/r (auf dem Formular nicht ausdrücklich genannt)"
+    },
+    "s3.medien.intern": {
+      "typ": "kreuz",
+      "seite": 3,
+      "beschriftung": "Vereinsinterne Publikationen",
+      "x": 32.75,
+      "y": 598.17,
+      "breite": 7.0,
+      "hoehe": 7.0,
+      "mitte": [
+        36.25,
+        601.67
+      ],
+      "zeichen": "☐",
+      "aussen": {
+        "x0": 32.0,
+        "x1": 40.25,
+        "y0": 597.42,
+        "y1": 605.92
+      }
+    },
+    "s3.medien.web": {
+      "typ": "kreuz",
+      "seite": 3,
+      "beschriftung": "Vereinswebseite, Social-Media-Kanäle und Vereins-APP",
+      "x": 32.75,
+      "y": 562.17,
+      "breite": 7.0,
+      "hoehe": 7.0,
+      "mitte": [
+        36.25,
+        565.67
+      ],
+      "zeichen": "☐",
+      "aussen": {
+        "x0": 32.0,
+        "x1": 40.25,
+        "y0": 561.42,
+        "y1": 569.92
+      }
+    },
+    "s3.medien.presse": {
+      "typ": "kreuz",
+      "seite": 3,
+      "beschriftung": "Lokale Presseberichte",
+      "x": 32.75,
+      "y": 526.17,
+      "breite": 7.0,
+      "hoehe": 7.0,
+      "mitte": [
+        36.25,
+        529.67
+      ],
+      "zeichen": "☐",
+      "aussen": {
+        "x0": 32.0,
+        "x1": 40.25,
+        "y0": 525.42,
+        "y1": 533.92
+      }
+    },
+    "s3.medien.dokumentation": {
+      "typ": "kreuz",
+      "seite": 3,
+      "beschriftung": "Dokumentationen von Vereinsveranstaltungen",
+      "x": 32.75,
+      "y": 490.17,
+      "breite": 7.0,
+      "hoehe": 7.0,
+      "mitte": [
+        36.25,
+        493.67
+      ],
+      "zeichen": "☐",
+      "aussen": {
+        "x0": 32.0,
+        "x1": 40.25,
+        "y0": 489.42,
+        "y1": 497.92
+      }
+    },
+    "s3.einwilligung.ja": {
+      "typ": "kreuz",
+      "seite": 3,
+      "beschriftung": "Ja, ich willige in die Veröffentlichung ein",
+      "x": 32.75,
+      "y": 220.17,
+      "breite": 7.0,
+      "hoehe": 7.0,
+      "mitte": [
+        36.25,
+        223.67
+      ],
+      "zeichen": "☐",
+      "aussen": {
+        "x0": 32.0,
+        "x1": 40.25,
+        "y0": 219.42,
+        "y1": 227.92
+      }
+    },
+    "s3.einwilligung.nein": {
+      "typ": "kreuz",
+      "seite": 3,
+      "beschriftung": "Nein, ich willige nicht ein",
+      "x": 32.75,
+      "y": 184.17,
+      "breite": 7.0,
+      "hoehe": 7.0,
+      "mitte": [
+        36.25,
+        187.67
+      ],
+      "zeichen": "☐",
+      "aussen": {
+        "x0": 32.0,
+        "x1": 40.25,
+        "y0": 183.42,
+        "y1": 191.92
+      }
+    },
+    "s3.ort_datum": {
+      "typ": "text",
+      "seite": 3,
+      "beschriftung": "Ort, Datum (Einwilligung)",
+      "x": 94.12,
+      "y": 147.52,
+      "breite": 114.0,
+      "schriftgroesse": 11,
+      "min_schriftgroesse": 6,
+      "ausrichtung": "links",
+      "linie": {
+        "x0": 92.12,
+        "x1": 212.12,
+        "y": 144.92,
+        "staerke": 0.5
+      },
+      "richtwert_zeichen": {
+        "bei_schriftgroesse": 20,
+        "hoechstens": 38
+      }
+    },
+    "s3.unterschrift": {
+      "typ": "unterschrift",
+      "seite": 3,
+      "beschriftung": "Unterschrift Mitglied (bei Minderjährigen Erziehungsberechtigte/r)",
+      "x": 321.0,
+      "y": 142.92,
+      "breite": 180.0,
+      "hoehe": 30.0,
+      "seitenverhaeltnis": 6.0,
+      "linie": {
+        "x0": 320.81,
+        "x1": 416.56,
+        "y": 144.92
+      },
+      "einpassen": "Tinte zuschneiden, proportional einpassen (contain), links unten ausrichten",
+      "hinweis": "gedruckte Linie nur 320,8–416,6 (96 pt); Rahmen reicht bis 501 (Breite des Klammerhinweises darunter)"
+    },
+    "s3.zusatz_mitglied": {
+      "typ": "text",
+      "seite": 3,
+      "zusatz": true,
+      "beschriftung": "Zusatz (nicht im Formular): Name des Mitglieds, damit Seite 3 zuordenbar bleibt",
+      "x": 31.2,
+      "y": 127.92,
+      "breite": 270.0,
+      "schriftgroesse": 8,
+      "min_schriftgroesse": 6.5,
+      "ausrichtung": "links",
+      "zeilen_max": 3,
+      "zeilenabstand": 1.2,
+      "hinweis": "gleiche Grundlinie wie der Klammerhinweis rechts (ab x 313,5); optional; weitere Zeilen darunter (je schriftgroesse × zeilenabstand)",
+      "richtwert_zeichen": {
+        "bei_schriftgroesse": 67,
+        "hoechstens": 83
+      }
+    },
+    "s4.kontoinhaber.name": {
+      "typ": "text",
+      "seite": 4,
+      "beschriftung": "Kontoinhaber Name",
+      "x": 174.85,
+      "y": 656.77,
+      "breite": 134.0,
+      "schriftgroesse": 11,
+      "min_schriftgroesse": 7,
+      "ausrichtung": "links",
+      "linie": {
+        "x0": 172.85,
+        "x1": 310.85,
+        "y": 654.17,
+        "staerke": 0.5
+      },
+      "richtwert_zeichen": {
+        "bei_schriftgroesse": 24,
+        "hoechstens": 38
+      }
+    },
+    "s4.kontoinhaber.vorname": {
+      "typ": "text",
+      "seite": 4,
+      "beschriftung": "Kontoinhaber Vorname",
+      "x": 318.85,
+      "y": 656.77,
+      "breite": 110.0,
+      "schriftgroesse": 11,
+      "min_schriftgroesse": 7,
+      "ausrichtung": "links",
+      "linie": {
+        "x0": 316.85,
+        "x1": 430.85,
+        "y": 654.17,
+        "staerke": 0.5
+      },
+      "breite_max": 246.15,
+      "richtwert_zeichen": {
+        "bei_schriftgroesse": 20,
+        "hoechstens": 70
+      }
+    },
+    "s4.strasse": {
+      "typ": "text",
+      "seite": 4,
+      "beschriftung": "Kontoinhaber Straße und Haus-Nr.",
+      "x": 174.85,
+      "y": 637.02,
+      "breite": 248.0,
+      "schriftgroesse": 11,
+      "min_schriftgroesse": 7,
+      "ausrichtung": "links",
+      "linie": {
+        "x0": 172.85,
+        "x1": 424.85,
+        "y": 634.42,
+        "staerke": 0.5
+      },
+      "breite_max": 390.15,
+      "richtwert_zeichen": {
+        "bei_schriftgroesse": 45,
+        "hoechstens": 111
+      }
+    },
+    "s4.plz_ort": {
+      "typ": "text",
+      "seite": 4,
+      "beschriftung": "Kontoinhaber PLZ und Ort",
+      "x": 174.85,
+      "y": 617.27,
+      "breite": 248.0,
+      "schriftgroesse": 11,
+      "min_schriftgroesse": 7,
+      "ausrichtung": "links",
+      "linie": {
+        "x0": 172.85,
+        "x1": 424.85,
+        "y": 614.67,
+        "staerke": 0.5
+      },
+      "breite_max": 390.15,
+      "richtwert_zeichen": {
+        "bei_schriftgroesse": 45,
+        "hoechstens": 111
+      }
+    },
+    "s4.mitglied": {
+      "typ": "text",
+      "seite": 4,
+      "beschriftung": "Name des Mitglieds bei Nichtkontoinhaber bzw. Schüler und Jugendlicher",
+      "x": 299.06,
+      "y": 524.27,
+      "breite": 320.0,
+      "schriftgroesse": 11,
+      "min_schriftgroesse": 7,
+      "ausrichtung": "mitte",
+      "linie": {
+        "x0": 137.06,
+        "x1": 461.06,
+        "y": 521.67,
+        "staerke": 0.5
+      },
+      "richtwert_zeichen": {
+        "bei_schriftgroesse": 58,
+        "hoechstens": 91
+      }
+    },
+    "s4.kreditinstitut": {
+      "typ": "text",
+      "seite": 4,
+      "beschriftung": "Kreditinstitut",
+      "x": 33.2,
+      "y": 237.77,
+      "breite": 224.0,
+      "schriftgroesse": 11,
+      "min_schriftgroesse": 7,
+      "ausrichtung": "links",
+      "linie": {
+        "x0": 31.2,
+        "x1": 259.2,
+        "y": 235.17,
+        "staerke": 0.5
+      },
+      "breite_max": 531.8,
+      "richtwert_zeichen": {
+        "bei_schriftgroesse": 40,
+        "hoechstens": 151
+      }
+    },
+    "s4.bic": {
+      "typ": "zellen",
+      "seite": 4,
+      "beschriftung": "BIC (8 + 3 Stellen)",
+      "y": 186.77,
+      "schriftgroesse": 11,
+      "ausrichtung": "mitte",
+      "zellen": [
+        {
+          "x": 63.5,
+          "breite": 6.0
+        },
+        {
+          "x": 75.5,
+          "breite": 6.0
+        },
+        {
+          "x": 87.5,
+          "breite": 6.0
+        },
+        {
+          "x": 99.5,
+          "breite": 6.0
+        },
+        {
+          "x": 111.5,
+          "breite": 6.0
+        },
+        {
+          "x": 123.5,
+          "breite": 6.0
+        },
+        {
+          "x": 135.5,
+          "breite": 6.0
+        },
+        {
+          "x": 147.5,
+          "breite": 6.0
+        },
+        {
+          "x": 161.89,
+          "breite": 6.0
+        },
+        {
+          "x": 173.93,
+          "breite": 6.0
+        },
+        {
+          "x": 185.93,
+          "breite": 6.0
+        }
+      ],
+      "anzahl": 11,
+      "linie_y": 184.17,
+      "gruppen": [
+        8,
+        3
+      ]
+    },
+    "s4.iban": {
+      "typ": "zellen",
+      "seite": 4,
+      "beschriftung": "IBAN ohne „DE“ (2 Prüfziffern + 18 Stellen)",
+      "y": 153.27,
+      "schriftgroesse": 11,
+      "ausrichtung": "mitte",
+      "zellen": [
+        {
+          "x": 97.79,
+          "breite": 6.0
+        },
+        {
+          "x": 109.79,
+          "breite": 6.0
+        },
+        {
+          "x": 124.16,
+          "breite": 6.0
+        },
+        {
+          "x": 136.16,
+          "breite": 6.0
+        },
+        {
+          "x": 148.16,
+          "breite": 6.0
+        },
+        {
+          "x": 160.27,
+          "breite": 6.0
+        },
+        {
+          "x": 174.55,
+          "breite": 6.0
+        },
+        {
+          "x": 186.55,
+          "breite": 6.0
+        },
+        {
+          "x": 198.55,
+          "breite": 6.0
+        },
+        {
+          "x": 210.55,
+          "breite": 6.0
+        },
+        {
+          "x": 224.94,
+          "breite": 6.0
+        },
+        {
+          "x": 236.94,
+          "breite": 6.0
+        },
+        {
+          "x": 248.94,
+          "breite": 6.0
+        },
+        {
+          "x": 260.94,
+          "breite": 6.0
+        },
+        {
+          "x": 275.44,
+          "breite": 6.0
+        },
+        {
+          "x": 287.44,
+          "breite": 6.0
+        },
+        {
+          "x": 299.44,
+          "breite": 6.0
+        },
+        {
+          "x": 311.44,
+          "breite": 6.0
+        },
+        {
+          "x": 325.72,
+          "breite": 6.0
+        },
+        {
+          "x": 337.72,
+          "breite": 6.0
+        }
+      ],
+      "anzahl": 20,
+      "linie_y": 150.67,
+      "vorgedruckt": "DE",
+      "gruppen": [
+        2,
+        4,
+        4,
+        4,
+        4,
+        2
+      ]
+    },
+    "s4.ort_datum": {
+      "typ": "text",
+      "seite": 4,
+      "beschriftung": "Ort, Datum (SEPA-Mandat)",
+      "x": 33.2,
+      "y": 119.52,
+      "breite": 188.0,
+      "schriftgroesse": 11,
+      "min_schriftgroesse": 7,
+      "ausrichtung": "links",
+      "linie": {
+        "x0": 31.2,
+        "x1": 223.2,
+        "y": 116.92,
+        "staerke": 0.5
+      },
+      "breite_max": 311.8,
+      "richtwert_zeichen": {
+        "bei_schriftgroesse": 34,
+        "hoechstens": 89
+      }
+    },
+    "s4.unterschrift": {
+      "typ": "unterschrift",
+      "seite": 4,
+      "beschriftung": "Unterschrift des Kontoinhabers",
+      "x": 351.0,
+      "y": 114.92,
+      "breite": 190.0,
+      "hoehe": 38.0,
+      "seitenverhaeltnis": 5.0,
+      "linie": {
+        "x0": 349.87,
+        "x1": 541.87,
+        "y": 116.92
+      },
+      "einpassen": "Tinte zuschneiden, proportional einpassen (contain), links unten ausrichten"
+    }
+  }
+}

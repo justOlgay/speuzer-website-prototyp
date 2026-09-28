@@ -118,6 +118,17 @@ npm run lighthouse
                   data/lighthouse.json und tools/cache/lighthouse.md, bricht mit Exit 1
                   ab, wenn eine Kategorie im Minimum über alle Seiten unter 90 bleibt.
                   Dauer: 20–40 Minuten.
+npm run antrag-bibliotheken
+                  Kopiert pdf-lib und @pdf-lib/fontkit (devDependencies, MIT) mit
+                  vorangestelltem Lizenzhinweis nach assets/js/antrag/ und prüft die
+                  Schrift assets/fonts/liberation-sans-regular.ttf (SIL OFL 1.1) gegen
+                  ihre Prüfsumme; schreibt außerdem die Zeichenbreiten für die
+                  Längenprüfung im Formular (data/aufnahmeantrag-schriftbreiten.json).
+                  Nur nach einem Versionswechsel nötig; das Ergebnis wird committet. Gebraucht von der Seite „Aufnahmeantrag online“
+                  (src/seiten/aufnahmeantrag.mjs, Skript assets/js/antrag/
+                  aufnahmeantrag.js, Feldpositionen data/aufnahmeantrag-felder.json):
+                  Sie füllt das Vereins-PDF im Browser aus, ohne Daten zu übertragen;
+                  tools/appack-paket.mjs legt die Skripte mit in den Ordner web/.
 npm run vorstand-pdf
                   Baut das Vorstandsdokument „Website-Vergleich Live-Seite und
                   appack-Fassung“ als A4-PDF (tools/vorstand-pdf/bauen.mjs, Texte aus

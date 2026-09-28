@@ -51,6 +51,18 @@ function aufnahmeantragOnlineZeile() {
     </li>`;
 }
 
+// 28.09.2026: Hauptknopf „Aufnahmeantrag online ausfüllen“ über der Liste
+// „Anmeldung“ – nur auf der Website (data-nur-web), führt auf die eigene
+// Seite /aufnahmeantrag/ (src/seiten/aufnahmeantrag.mjs), aus der das
+// unterschriebene PDF entsteht. Darunter bleiben das PDF zum Ausdrucken und
+// der E-Mail-Weg; in der App gilt weiter das App-Formular (Zeile oben).
+function aufnahmeantragOnlineKnopf() {
+  return `<div class="inhalt fluss downloads-einstieg" data-nur-web>
+      <p>Den Aufnahmeantrag online ausfüllen und am Bildschirm unterschreiben – daraus entsteht das fertige PDF für die E-Mail an die Geschäftsstelle.</p>
+      <p class="knopfzeile"><a class="knopf" href="${PFAD}aufnahmeantrag/">Aufnahmeantrag online ausfüllen</a></p>
+    </div>`;
+}
+
 // W10-Nachprüfung (offen 12): die Liste lief bisher über die volle
 // .container-Breite (bis 1304px), während derselbe Baustein auf
 // /verein/ueber-uns/ auf die Lesebreite (.inhalt, 720px) begrenzt ist – ein
@@ -70,6 +82,7 @@ function gruppenAbschnitt(gruppe, downloads, index) {
   return `<section class="abschnitt${hellKlasse}">
   <div class="container fluss">
     <h2>${escapeHtml(gruppe)}</h2>
+    ${gruppe === "Anmeldung" ? aufnahmeantragOnlineKnopf() : ""}
     <ul class="downloads inhalt" role="list">
       ${zeilen}
     </ul>

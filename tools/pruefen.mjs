@@ -280,7 +280,9 @@ async function pruefeSeite(browser, seitenPfad, axeSkript, bericht) {
       // bewusst kein <label> verwendet wird). Ist diese Beschriftung
       // mindestens 44px hoch, gilt das Tippziel als erreicht, auch wenn das
       // <input> selbst kleiner ist.
-      if (el.tagName === "INPUT" && el.type === "checkbox") {
+      // 28.09.2026 (Aufnahmeantrag online): Knöpfe zur Auswahl (Radio) wie
+      // Kästchen – 24px Kreis, Tippziel ist die umschließende Beschriftung.
+      if (el.tagName === "INPUT" && (el.type === "checkbox" || el.type === "radio")) {
         let beschriftung = el.labels && el.labels.length ? el.labels[0] : null;
         if (!beschriftung) {
           const labelledby = el.getAttribute("aria-labelledby");
