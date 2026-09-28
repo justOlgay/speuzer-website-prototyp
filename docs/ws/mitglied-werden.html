@@ -66,8 +66,16 @@
       }
     });
   }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", umschreiben);
-  else umschreiben();
+  // Teile nur für Website bzw. nur für die App (Übergangslösung Anträge,
+  // 28.09.2026): in der App gibt es die Online-Formulare, auf der Website PDF
+  // und E-Mail.
+  function teileUmschalten() {
+    [].forEach.call(document.querySelectorAll("[data-nur-web]"), function (el) { el.parentNode.removeChild(el); });
+    [].forEach.call(document.querySelectorAll("[data-nur-app]"), function (el) { el.removeAttribute("hidden"); });
+  }
+  function start() { teileUmschalten(); umschreiben(); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
 })();
 </script>
 </head>
@@ -204,7 +212,15 @@
         </div>
       </li>
       <li>
-        <div class="schritt__inhalt">
+        <div class="schritt__inhalt" data-nur-web>
+          <p>Aufnahmeantrag als PDF herunterladen, ausfüllen und unterschreiben – dann per E-Mail an die Geschäftsstelle schicken oder im Vereinsheim abgeben.</p>
+          <p class="knopfzeile">
+            <a class="knopf knopf--sekundaer" href="https://cdn.appack.de/sportfreunde04/pdf/Vereinsanmeldung%20allgemein_NEU_9-2026%20%20(1).pdf" rel="noopener" target="_blank">Aufnahmeantrag (PDF)</a>
+            <a class="knopf knopf--sekundaer" href="mailto:geschaeftsstelle@sportfreunde04.de?subject=Aufnahmeantrag&amp;body=Hallo%2C%0A%0Aanbei%20der%20ausgef%C3%BCllte%20und%20unterschriebene%20Aufnahmeantrag%20%28PDF%29.%0A%0AName%20des%20neuen%20Mitglieds%3A%20%0AAbteilung%20%28Fu%C3%9Fball%20oder%20Karneval%29%3A%20%0AMannschaft%20bzw.%20Gruppe%20%28falls%20bekannt%29%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe">Per E-Mail senden</a>
+          </p>
+          <p class="meta">In der Vereins-App lässt sich der Antrag auch online ausfüllen (Menü › Mitglied werden).</p>
+        </div>
+        <div class="schritt__inhalt" data-nur-app hidden>
           <p>Aufnahmeantrag ausfüllen – online oder als PDF.</p>
           <p class="knopfzeile">
             <a class="knopf" href="https://appack.de/rest-api/drender/6a903758337cdc97f94f2655" target="_blank" rel="noopener">Aufnahmeantrag online ausfüllen</a>

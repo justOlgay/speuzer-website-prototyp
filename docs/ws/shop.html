@@ -66,8 +66,16 @@
       }
     });
   }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", umschreiben);
-  else umschreiben();
+  // Teile nur für Website bzw. nur für die App (Übergangslösung Anträge,
+  // 28.09.2026): in der App gibt es die Online-Formulare, auf der Website PDF
+  // und E-Mail.
+  function teileUmschalten() {
+    [].forEach.call(document.querySelectorAll("[data-nur-web]"), function (el) { el.parentNode.removeChild(el); });
+    [].forEach.call(document.querySelectorAll("[data-nur-app]"), function (el) { el.removeAttribute("hidden"); });
+  }
+  function start() { teileUmschalten(); umschreiben(); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
 })();
 </script>
 </head>

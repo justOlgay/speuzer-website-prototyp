@@ -7,18 +7,18 @@
   "dateien": [
     {
       "datei": "web/datenschutz.html",
-      "bytes": 61749,
-      "sha256": "74a91de4fea9351c083eb361d4f2ef094c5a99aca1a7e624f008e787e9019901"
+      "bytes": 62235,
+      "sha256": "aa2b8611fe050bce501df9a3545af74b83db643e0881b22a517455ee364cd7c9"
     },
     {
       "datei": "web/formular-gesendet.html",
-      "bytes": 4663,
-      "sha256": "d6cb19ccde219e0247484ccde75a53d8148b6eb4516ab9f269868186844b122e"
+      "bytes": 5149,
+      "sha256": "522f1f4f00495c95e9fd8a5c8f18e13e9556de283ea58d5ac642820f8ce580ab"
     },
     {
       "datei": "web/impressum.html",
-      "bytes": 6105,
-      "sha256": "a99ed2d9cacf84197bb9654f706e8ceff69370d1e1cad85316b614d8ecf4e72d"
+      "bytes": 6591,
+      "sha256": "31afba9c09e886f137a8fd6c6aa3000d2e9128b3d8423bb9596e806103524ae0"
     },
     {
       "datei": "web/kontakt.html",
@@ -87,13 +87,13 @@
     },
     {
       "datei": "web/mitglied-werden.html",
-      "bytes": 13654,
-      "sha256": "c6b45d69602b6ffe858a2cf04939bbcb715597aa28beaa93920bbc100ca42697"
+      "bytes": 15203,
+      "sha256": "347810ff52d34e8f5b7b82595c7b8b6ddfcfa612d197375dfb38e84d1cb7cab7"
     },
     {
       "datei": "web/shop.html",
-      "bytes": 6100,
-      "sha256": "f8bc4f8d47e86712daf30cf1e07c867da2173cdf09cd51a7ca93df5e2569e347"
+      "bytes": 6586,
+      "sha256": "8563992facbbf1f4b9bfc9a38d27c74c94f7959b40cabbb4b809e906620fbca0"
     },
     {
       "datei": "web/spielplan-a-jugend.html",
@@ -167,8 +167,8 @@
     },
     {
       "datei": "web/verein-downloads.html",
-      "bytes": 7792,
-      "sha256": "f43ffb233425be16f498799ed8abba7c0e7c3038551bffc635d7b1e0f55e32d8"
+      "bytes": 8850,
+      "sha256": "8e6b96f74e5f0792dbb64a45fcbfdc4889f22bc4075f4a6aa75248556c729b26"
     },
     {
       "datei": "web/verein-karneval.html",
@@ -177,8 +177,8 @@
     },
     {
       "datei": "web/verein-mach-mit.html",
-      "bytes": 6604,
-      "sha256": "0cedf3d5bd2ce3d77faeb78db465991ffaf10b66080787ea62f448d590fd4095"
+      "bytes": 7090,
+      "sha256": "9ee8a1281956e0137976b40156ec5ce36df0649b70b3604ce9cd392603f6611f"
     },
     {
       "datei": "web/verein-sponsoren.html",
@@ -197,13 +197,13 @@
     },
     {
       "datei": "web/verein.html",
-      "bytes": 8527,
-      "sha256": "51a233f16fed132a2fdcafd89086cf5e7efc5bba0b8cb5db25893e73d77b98d3"
+      "bytes": 8923,
+      "sha256": "77e12e41efbc1692f7f945de8619997ed24dfecbcbedecd021e2035b6f7b154e"
     },
     {
       "datei": "web/site.css",
-      "bytes": 35573,
-      "sha256": "bc50f715d538513b07edd646f9f3bd9a016a1929997897247b7b520a4d1345dc"
+      "bytes": 35621,
+      "sha256": "8e19ff3c1bf7a0a4db5a54f0c6635af338ec77882fca1378e659e98aa41f1150"
     }
   ]
 }

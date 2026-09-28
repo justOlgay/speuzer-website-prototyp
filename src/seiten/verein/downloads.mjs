@@ -1,7 +1,7 @@
 // Downloads /verein/downloads/ (P5) – Gruppen aus data/downloads.json in
 // fester Reihenfolge (Anmeldung, Verein, Kinder- und Jugendschutz).
 
-import { ruecklink, APP_MODUS_SKRIPT } from "../../vorlagen/hilfen.mjs";
+import { ruecklink, APP_MODUS_SKRIPT, AUFNAHMEANTRAG_MAILTO } from "../../vorlagen/hilfen.mjs";
 import { downloadZeile } from "../../vorlagen/bausteine.mjs";
 
 // Diese Seite liegt immer unter "/verein/downloads/" (Tiefe 2), daher immer
@@ -38,8 +38,14 @@ const APPACK_FORMULAR_URL = "https://appack.de/rest-api/drender/6a903758337cdc97
 // einzige in der Liste keine graue Metazeile ("PDF · Seiten · Größe") und
 // wirkte dadurch niedriger als ihre Nachbarn – jetzt mit "Online-Formular"
 // im selben Baustein, wie die übrigen Einträge.
+// 28.09.2026: auf der Website per E-Mail (appack nimmt Formulardaten nur aus
+// der App an, siehe AUFNAHMEANTRAG_MAILTO), in der App weiter online.
 function aufnahmeantragOnlineZeile() {
-  return `<li class="download">
+  return `<li class="download" data-nur-web>
+      <a href="${escapeHtml(AUFNAHMEANTRAG_MAILTO)}">Ausgefüllten Antrag per E-Mail senden ›</a>
+      <span class="meta">E-Mail an die Geschäftsstelle · PDF anhängen</span>
+    </li>
+    <li class="download" data-nur-app hidden>
       <a href="${escapeHtml(APPACK_FORMULAR_URL)}" target="_blank" rel="noopener">Aufnahmeantrag online ausfüllen ›</a>
       <span class="meta">Online-Formular</span>
     </li>`;

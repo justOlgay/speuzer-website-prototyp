@@ -3114,3 +3114,8 @@ body.datenschutz h3.gruppenueberschrift {
     display: inline;
   }
 }
+
+/* 28.09.2026: Teile nur für die App (Online-Formulare) bleiben auf der
+   Website verborgen, auch wenn der Baustein selbst ein display setzt; das
+   App-Modus-Skript entfernt hidden (siehe APP_MODUS_SKRIPT in hilfen.mjs). */
+[data-nur-app][hidden] { display: none !important; }
