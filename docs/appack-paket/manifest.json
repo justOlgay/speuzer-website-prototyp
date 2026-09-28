@@ -7,8 +7,8 @@
   "dateien": [
     {
       "datei": "web/aufnahmeantrag.html",
-      "bytes": 62580,
-      "sha256": "67a85a18dcfbd90e58c390077331d8ac56ad1143bfe290b51a5c1c4a9646a496"
+      "bytes": 62572,
+      "sha256": "5fddce478be9e385f2fa8ec96e44d06ec1d8058e1b2ffa8a5db8999e3d8c92d9"
     },
     {
       "datei": "web/datenschutz.html",
@@ -206,12 +206,12 @@
       "sha256": "77e12e41efbc1692f7f945de8619997ed24dfecbcbedecd021e2035b6f7b154e"
     },
     {
-      "datei": "web/aufnahmeantrag-fontkit.min.js",
+      "datei": "web/aufnahmeantrag-fontkit.js",
       "bytes": 760110,
       "sha256": "75dffb571d80687fc2a0bfa8be1a738b4590595d3907834ae75fd969eec8903c"
     },
     {
-      "datei": "web/aufnahmeantrag-pdf-lib.min.js",
+      "datei": "web/aufnahmeantrag-pdf-lib.js",
       "bytes": 526692,
       "sha256": "e0112b917b1f741a1b00e685a9a7980b4afd4de78893fffdfb4c5b61e775fd7e"
     },

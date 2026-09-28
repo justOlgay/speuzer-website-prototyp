@@ -20,7 +20,7 @@ ihren Lizenzhinweis voran und entfernt nur den Verweis auf die Source-Map
 (die .map-Dateien werden nicht mit ausgeliefert). Der Programmcode selbst
 bleibt Byte für Byte, wie er im npm-Paket liegt.
 
-- aufnahmeantrag-pdf-lib.min.js
+- aufnahmeantrag-pdf-lib.js
   pdf-lib 1.17.1 (https://github.com/Hopding/pdf-lib), Datei
   dist/pdf-lib.min.js. MIT-Lizenz, Copyright (c) 2019 Andrew Dillon.
   Enthält gebündelt: pako 1.0.11 (MIT, Copyright (C) 2014-2017 by Vitaly
@@ -29,7 +29,7 @@ bleibt Byte für Byte, wie er im npm-Paket liegt.
   (c) 2017 Photopea) und tslib 1.x (Apache License 2.0, Copyright (c)
   Microsoft Corporation – der Hinweis steht unverändert im Bündel).
 
-- aufnahmeantrag-fontkit.min.js
+- aufnahmeantrag-fontkit.js
   @pdf-lib/fontkit 1.1.1 (https://github.com/Hopding/fontkit, Ableger von
   fontkit, https://github.com/foliojs/fontkit), Datei
   dist/fontkit.umd.min.js. MIT-Lizenz, Copyright (c) 2014 Devon Govett,

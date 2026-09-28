@@ -556,8 +556,8 @@ export function seite(daten) {
       <p class="knopfzeile"><a class="knopf" href="${escapeHtml(APPACK_FORMULAR_URL)}" target="_blank" rel="noopener">Aufnahmeantrag in der App ausfüllen</a></p>
     </div>
     <div class="antrag fluss" id="antrag" data-nur-web
-      data-pdf-lib="../assets/js/antrag/aufnahmeantrag-pdf-lib.min.js"
-      data-fontkit="../assets/js/antrag/aufnahmeantrag-fontkit.min.js"
+      data-pdf-lib="../assets/js/antrag/aufnahmeantrag-pdf-lib.js"
+      data-fontkit="../assets/js/antrag/aufnahmeantrag-fontkit.js"
       data-schrift="../assets/fonts/liberation-sans-regular.ttf">
       <div class="hinweis hinweis--info antrag__einleitung">
         <p><strong>Etwa 10 Minuten.</strong> Für die Lastschrift brauchen Sie die IBAN. Ihre Angaben bleiben auf diesem Gerät: Das PDF entsteht in Ihrem Browser, der Verein erhält den Antrag erst, wenn Sie ihn selbst senden (<a href="${datenschutzHref}">Datenschutz</a>).</p>

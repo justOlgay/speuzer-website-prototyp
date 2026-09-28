@@ -78,7 +78,7 @@ VERBOTENE_DATEINAMEN_TEILE = ["WhatsApp", "IMG-2026", "IMG-2025", "IMG-2024"]
 # Zeichenfolgen wie "0123456789", die das Telefonmuster als Fehltreffer
 # meldet; Vereinsdaten stehen darin nicht. Nur diese Dateinamen, egal ob unter
 # assets/, docs/assets/ oder docs/appack-paket/web/.
-FREMDCODE_DATEIEN = {"aufnahmeantrag-pdf-lib.min.js", "aufnahmeantrag-fontkit.min.js"}
+FREMDCODE_DATEIEN = {"aufnahmeantrag-pdf-lib.js", "aufnahmeantrag-fontkit.js"}
 # "Mannheim" stand hier ursprünglich als generischer Demodaten-Marker; P5
 # bringt mit dem App-Projektpartner vmapit GmbH (data/sponsoren.json) eine
 # echte, öffentliche Firmenadresse in Mannheim ins Projekt – klarer
