@@ -4,3 +4,4 @@ tools/cache/
 scratch/
 *.log
 dist/
+__pycache__/
