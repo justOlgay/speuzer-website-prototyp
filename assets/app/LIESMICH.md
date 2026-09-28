@@ -935,3 +935,12 @@ API) liegen in `tools/cache/app-optik/termine-umsetzung/` (nicht im Repo).
   oder eine Zeile): beide Formen sind berücksichtigt, gegen den echten
   Kalender erst prüfbar, wenn er öffentlich ist.
 - Zeitraum, Halle und Zeiten der Winterhalle (G1, F1, F2) fehlen noch.
+
+
+### Termine – eingeführt am 28.09.2026
+
+- Seitenmodul **„Termine“** = `sportfreunde04_TextImage_1783345459688` (das seit W6 ungenutzte Modul „Spielplan & Tabellen“, umbenannt), Seitenlink `Termine-App.html`, im App-Menü hinter „News“, öffentlich, Symbol calendar-alt (Fontawesome – light).
+- Das Terminmodul heißt jetzt **„Terminkalender“** (`sportfreunde04_Application_1780401660369`), steht nicht mehr im Menü, bleibt aber bestehen: Eintragen im CMS (Vorschau › „+“), Verknüpfung der Kalender, Kalenderansicht-Link der Terminseite.
+- Website-Menü (Worksheet MENU, Eintrag #33 „Termine“): Link `https://cdn.appack.de/sportfreunde04/workspace/web/termine.html`, Vollbild im Rahmen.
+- `TERMINE_SEITE_MODUL` in Startseite_v3.tpl zeigt auf das Seitenmodul.
+- **Rückweg:** Im App-Menü „Termine“ entfernen, Terminmodul wieder aufnehmen und in „Termine“ umbenennen; MENU-Eintrag #33 zurück auf `https://shorturl.appack.de/sportfreunde04_Application_1780401660369`; `TERMINE_SEITE_MODUL` zurück; Seitenlink des Moduls 1783345459688 wieder `Spielplan-App.html`, Titel „Spielplan & Tabellen“.

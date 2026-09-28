@@ -1036,7 +1036,7 @@ svg { display: block; flex: 0 0 auto; }
     <section id="termine" class="termine-karte" aria-labelledby="termine-titel">
       <div class="termine-kopf">
         <h2 id="termine-titel" class="termine-kopf__titel">Termine</h2>
-        <a id="termine-alle" class="termine-kopf__link" href="nav://sportfreunde04_Application_1780401660369">Alle<span class="vh"> Termine</span><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></a>
+        <a id="termine-alle" class="termine-kopf__link" href="nav://sportfreunde04_TextImage_1783345459688">Alle<span class="vh"> Termine</span><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></a>
       </div>
       <ul id="termine-liste" class="termine-liste" aria-busy="true">
         <li class="termin termin--platzhalter" aria-hidden="true"><span class="termin__datum"></span><span class="termin__text"><span class="platzhalter-balken" style="width:82%"></span><span class="platzhalter-balken" style="width:54%"></span><span class="platzhalter-balken platzhalter-balken--klein" style="width:34%"></span></span></li>
@@ -1082,7 +1082,7 @@ svg { display: block; flex: 0 0 auto; }
 
       // Ziel beim Antippen: die Terminseite (Seitenmodul „Termine“ mit
       // Seitenlink Termine-App.html). Bis dahin das Terminmodul.
-      var TERMINE_SEITE_MODUL = "sportfreunde04_Application_1780401660369"; // nach Anlage des Seitenmoduls ersetzen
+      var TERMINE_SEITE_MODUL = "sportfreunde04_TextImage_1783345459688"; // Seitenmodul „Termine“ (Termine-App.html), seit 28.09.2026; vorher Terminmodul
 
       // ==== Beginn: aus data/termine.json und data/teams.json (npm run tpl-bauen), nicht von Hand ändern ====
       var KALENDER_ID = "sportfreunde04_Application_1780401660369";
