@@ -11,6 +11,11 @@
       "sha256": "74a91de4fea9351c083eb361d4f2ef094c5a99aca1a7e624f008e787e9019901"
     },
     {
+      "datei": "web/formular-gesendet.html",
+      "bytes": 4663,
+      "sha256": "d6cb19ccde219e0247484ccde75a53d8148b6eb4516ab9f269868186844b122e"
+    },
+    {
       "datei": "web/impressum.html",
       "bytes": 6105,
       "sha256": "a99ed2d9cacf84197bb9654f706e8ceff69370d1e1cad85316b614d8ecf4e72d"

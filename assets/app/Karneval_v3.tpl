@@ -496,6 +496,26 @@ button.knopf {
   }
 
   var gruppenListe = document.getElementById("gruppen-liste");
+  // Wie mitGeschuetzterUebungszeit() in src/seiten/verein/karneval.mjs
+  // (28.09.2026, Prüfbefund 320/390 px): Zeitspanne nicht trennen,
+  // Schulnamen mit geschütztem Bindestrich (U+2011), Straße und Hausnummer
+  // mit festem Leerzeichen.
+  function zeigeUebungszeit(el, text) {
+    var t = String(text)
+      .replace(/Fridtjof-Nansen-Schule/g, "Fridtjof\u2011Nansen\u2011Schule")
+      .replace(/Friedrich-List-Schule/g, "Friedrich\u2011List\u2011Schule")
+      .replace(/(\S+straße) (\d+)/, "$1\u00a0$2");
+    var m = t.match(/\d{1,2}:\d{2}–\d{1,2}:\d{2}\s*Uhr/);
+    el.appendChild(document.createTextNode("Übungszeit: " + (m ? t.slice(0, m.index) : t)));
+    if (m) {
+      var spanne = document.createElement("span");
+      spanne.style.whiteSpace = "nowrap";
+      spanne.textContent = m[0];
+      el.appendChild(spanne);
+      el.appendChild(document.createTextNode(t.slice(m.index + m[0].length)));
+    }
+  }
+
   (KARNEVAL.gruppen || []).forEach(function (g) {
     var karte = document.createElement("div");
     karte.className = "karte";
@@ -510,7 +530,7 @@ button.knopf {
     if (g.uebungszeit) {
       var zeit = document.createElement("p");
       zeit.className = "gruppe-karte__untertitel";
-      zeit.textContent = "Übungszeit: " + g.uebungszeit;
+      zeigeUebungszeit(zeit, g.uebungszeit);
       karte.appendChild(zeit);
     }
     gruppenListe.appendChild(karte);
