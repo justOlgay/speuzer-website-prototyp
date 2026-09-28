@@ -15,7 +15,7 @@
 
 // Diese Seite liegt immer unter "/verein/" (Tiefe 1), daher immer "../"
 // (siehe pfadZurWurzel() in tools/build.mjs).
-import { PROBETRAINING_MAILTO } from "../../vorlagen/hilfen.mjs";
+import { PROBETRAINING_MAILTO, BESCHEINIGUNG_MAILTO } from "../../vorlagen/hilfen.mjs";
 
 const PFAD = "../";
 
@@ -92,7 +92,9 @@ function derVereinAbschnitt() {
       zeile("Downloads & Anträge", "Satzung, Beiträge, Anträge", `${PFAD}verein/downloads/`),
       // 25.09.2026 (Wunsch der 1. Vorsitzenden, gleich in der App): das
       // appack-Formular und die öffentliche Ansicht des Schwarzen Bretts.
-      zeile("Mitgliedsbescheinigung", "Per Formular anfordern", "https://appack.de/rest-api/drender/6a9952db5d989f94800fc246"),
+      // 28.09.2026: per E-Mail (das appack-Formular nimmt von Website-
+      // Besuchern ohne App-Sitzung nichts an); in der App weiter per Formular.
+      zeile("Mitgliedsbescheinigung", "Per E-Mail anfordern", escapeHtml(BESCHEINIGUNG_MAILTO)),
       zeile("Schwarzes Brett", "Aushänge, Fundsachen, Gesuche", "https://shorturl.appack.de/sportfreunde04_Application_1780401660387"),
       zeile("Sponsoren & Partner", "Wer uns unterstützt", `${PFAD}verein/sponsoren/`),
       zeile("Fanshop & Teamshop", "Fanartikel und Teamausstattung", `${PFAD}shop/`),

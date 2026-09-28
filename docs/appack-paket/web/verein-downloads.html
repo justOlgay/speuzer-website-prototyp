@@ -66,8 +66,16 @@
       }
     });
   }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", umschreiben);
-  else umschreiben();
+  // Teile nur für Website bzw. nur für die App (Übergangslösung Anträge,
+  // 28.09.2026): in der App gibt es die Online-Formulare, auf der Website PDF
+  // und E-Mail.
+  function teileUmschalten() {
+    [].forEach.call(document.querySelectorAll("[data-nur-web]"), function (el) { el.parentNode.removeChild(el); });
+    [].forEach.call(document.querySelectorAll("[data-nur-app]"), function (el) { el.removeAttribute("hidden"); });
+  }
+  function start() { teileUmschalten(); umschreiben(); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
 })();
 </script>
 </head>
@@ -88,7 +96,11 @@
       <a href="https://cdn.appack.de/sportfreunde04/pdf/Vereinsanmeldung%20allgemein_NEU_9-2026%20%20(1).pdf" target="_blank" rel="noopener">Aufnahmeantrag / Vereinsanmeldung (Stand: September 2026)</a>
       <span class="meta">PDF · 4 Seiten · 213 KB</span>
     </li>
-      <li class="download">
+      <li class="download" data-nur-web>
+      <a href="mailto:geschaeftsstelle@sportfreunde04.de?subject=Aufnahmeantrag&amp;body=Hallo%2C%0A%0Aanbei%20der%20ausgef%C3%BCllte%20und%20unterschriebene%20Aufnahmeantrag%20%28PDF%29.%0A%0AName%20des%20neuen%20Mitglieds%3A%20%0AAbteilung%20%28Fu%C3%9Fball%20oder%20Karneval%29%3A%20%0AMannschaft%20bzw.%20Gruppe%20%28falls%20bekannt%29%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe">Ausgefüllten Antrag per E-Mail senden ›</a>
+      <span class="meta">E-Mail an die Geschäftsstelle · PDF anhängen</span>
+    </li>
+    <li class="download" data-nur-app hidden>
       <a href="https://appack.de/rest-api/drender/6a903758337cdc97f94f2655" target="_blank" rel="noopener">Aufnahmeantrag online ausfüllen ›</a>
       <span class="meta">Online-Formular</span>
     </li>

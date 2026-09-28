@@ -14,7 +14,7 @@
 // /mannschaften/ und /kontakt/) entfällt hier.
 
 import { downloadZeile } from "../vorlagen/bausteine.mjs";
-import { PROBETRAINING_MAILTO, APP_MODUS_SKRIPT } from "../vorlagen/hilfen.mjs";
+import { PROBETRAINING_MAILTO, APP_MODUS_SKRIPT, AUFNAHMEANTRAG_MAILTO } from "../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/mitglied-werden/" (Tiefe 1), daher immer
 // "../" (siehe pfadZurWurzel() in tools/build.mjs).
@@ -237,7 +237,15 @@ function ablaufAbschnitt(daten) {
         </div>
       </li>
       <li>
-        <div class="schritt__inhalt">
+        <div class="schritt__inhalt" data-nur-web>
+          <p>Aufnahmeantrag als PDF herunterladen, ausfüllen und unterschreiben – dann per E-Mail an die Geschäftsstelle schicken oder im Vereinsheim abgeben.</p>
+          <p class="knopfzeile">
+            ${downloadKnopf(aufnahmeantrag, "Aufnahmeantrag (PDF)")}
+            <a class="knopf knopf--sekundaer" href="${escapeHtml(AUFNAHMEANTRAG_MAILTO)}">Per E-Mail senden</a>
+          </p>
+          <p class="meta">In der Vereins-App lässt sich der Antrag auch online ausfüllen (Menü › Mitglied werden).</p>
+        </div>
+        <div class="schritt__inhalt" data-nur-app hidden>
           <p>Aufnahmeantrag ausfüllen – online oder als PDF.</p>
           <p class="knopfzeile">
             <a class="knopf" href="${escapeHtml(APPACK_FORMULAR_URL)}" target="_blank" rel="noopener">Aufnahmeantrag online ausfüllen</a>
@@ -265,7 +273,8 @@ function unterlagenKarte(titel, liste, extraHtml = "") {
     </div>`;
 }
 
-// W2: löst den früheren Formularentwurf (assets/js/formular.js) ab – der
+// Seit 28.09.2026 nur noch im App-Modus verlinkt (Website: PDF + E-Mail,
+// AUFNAHMEANTRAG_MAILTO in hilfen.mjs). W2: löst den früheren Formularentwurf (assets/js/formular.js) ab – der
 // Antrag läuft über das appack-Formular des Vereins (speichert in ein
 // Worksheet, Bestätigung per E-Mail an die Geschäftsstelle), verlinkt direkt
 // in Schritt 2 der Ablauf-Liste (siehe ablaufAbschnitt() oben).

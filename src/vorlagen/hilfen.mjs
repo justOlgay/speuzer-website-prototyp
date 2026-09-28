@@ -22,6 +22,20 @@ function escapeHtml(text) {
 export const PROBETRAINING_MAILTO =
   "mailto:jugendleitung@sportfreunde04.de?subject=Probetraining%20beim%20FFV%20Sportfreunde%2004&body=Hallo%2C%0A%0Awir%20interessieren%20uns%20f%C3%BCr%20ein%20Probetraining.%0AJahrgang%20des%20Kindes%3A%20%0AVorerfahrung%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe";
 
+// ---------- Anträge per E-Mail (Übergangslösung seit 28.09.2026) ----------
+
+// appack nimmt Formulardaten nur aus der App an (Website-Besucher ohne
+// App-Sitzung: 401 „Schreiboperation sind nur im Kontext einer App möglich“
+// bzw. 403 beim Formularversand). Bis zur eigenen Annahme über die
+// Vereinsdomain bietet die Website deshalb PDF + vorbereitete E-Mail an; in
+// der App (?app=1) bleiben die Online-Formulare (data-nur-app, siehe
+// APP_MODUS_SKRIPT).
+export const AUFNAHMEANTRAG_MAILTO =
+  "mailto:geschaeftsstelle@sportfreunde04.de?subject=Aufnahmeantrag&body=Hallo%2C%0A%0Aanbei%20der%20ausgef%C3%BCllte%20und%20unterschriebene%20Aufnahmeantrag%20%28PDF%29.%0A%0AName%20des%20neuen%20Mitglieds%3A%20%0AAbteilung%20%28Fu%C3%9Fball%20oder%20Karneval%29%3A%20%0AMannschaft%20bzw.%20Gruppe%20%28falls%20bekannt%29%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe";
+
+export const BESCHEINIGUNG_MAILTO =
+  "mailto:geschaeftsstelle@sportfreunde04.de?subject=Anforderung%20Mitgliedsbescheinigung&body=Hallo%2C%0A%0Abitte%20schicken%20Sie%20mir%20eine%20Mitgliedsbescheinigung.%0A%0AF%C3%BCr%20%28mich%20selbst%20/%20mein%20Kind%29%3A%20%0AName%20und%20Vorname%20des%20Mitglieds%3A%20%0AGeburtsdatum%20des%20Mitglieds%3A%20%0AAnschrift%3A%20%0AMitgliedsnummer%20%28falls%20bekannt%29%3A%20%0ATelefon%20f%C3%BCr%20R%C3%BCckfragen%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe";
+
 // ---------- Jahrgang-Anzeige ----------
 
 // Die Herren haben kein Jahrgang-Feld (kategorie "Senioren", jahrgang null) –
@@ -831,7 +845,15 @@ ${Object.entries(APP_MODULE).map(([name, modul]) => `    "${name}": "${modul}"`)
       }
     });
   }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", umschreiben);
-  else umschreiben();
+  // Teile nur für Website bzw. nur für die App (Übergangslösung Anträge,
+  // 28.09.2026): in der App gibt es die Online-Formulare, auf der Website PDF
+  // und E-Mail.
+  function teileUmschalten() {
+    [].forEach.call(document.querySelectorAll("[data-nur-web]"), function (el) { el.parentNode.removeChild(el); });
+    [].forEach.call(document.querySelectorAll("[data-nur-app]"), function (el) { el.removeAttribute("hidden"); });
+  }
+  function start() { teileUmschalten(); umschreiben(); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
 })();
 </script>`;
