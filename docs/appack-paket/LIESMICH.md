@@ -78,8 +78,8 @@ ist kein Seitenfehler (siehe `tools/appack-paket-pruefen.mjs`).
 
 `aufnahmeantrag.html` lädt ihre Skripte aus demselben Ordner `web`:
 `aufnahmeantrag.js` (Formular, Unterschriften, PDF-Erzeugung) sofort,
-`aufnahmeantrag-pdf-lib.min.js` (pdf-lib 1.17.1, MIT) nach dem ersten
-Schritt im Hintergrund und `aufnahmeantrag-fontkit.min.js` (@pdf-lib/fontkit
+`aufnahmeantrag-pdf-lib.js` (pdf-lib 1.17.1, MIT) nach dem ersten
+Schritt im Hintergrund und `aufnahmeantrag-fontkit.js` (@pdf-lib/fontkit
 1.1.1, MIT) nur beim Erstellen des PDF, wenn ein Name Zeichen außerhalb von
 Helvetica enthält. Lizenzhinweise stehen jeweils am Dateianfang, Herkunft in
 `assets/js/antrag/LIZENZ.txt`. Die Schrift für Namen mit Zeichen
@@ -177,7 +177,7 @@ hier nur dokumentiert (W3-Spezifikation Abschnitt 5), nicht umgesetzt:
 - web/verein-ueber-uns.html
 - web/verein-vorstand.html
 - web/verein.html
-- web/aufnahmeantrag-fontkit.min.js
-- web/aufnahmeantrag-pdf-lib.min.js
+- web/aufnahmeantrag-fontkit.js
+- web/aufnahmeantrag-pdf-lib.js
 - web/aufnahmeantrag.js
 - web/site.css

@@ -68,7 +68,7 @@ const BIBLIOTHEKEN = [
   {
     paket: "pdf-lib",
     quelle: "dist/pdf-lib.min.js",
-    ziel: "aufnahmeantrag-pdf-lib.min.js",
+    ziel: "aufnahmeantrag-pdf-lib.js",
     globalName: "PDFLib",
     kopf: [
       "Copyright (c) 2019 Andrew Dillon (pdf-lib, https://github.com/Hopding/pdf-lib)",
@@ -81,7 +81,7 @@ const BIBLIOTHEKEN = [
   {
     paket: "@pdf-lib/fontkit",
     quelle: "dist/fontkit.umd.min.js",
-    ziel: "aufnahmeantrag-fontkit.min.js",
+    ziel: "aufnahmeantrag-fontkit.js",
     globalName: "fontkit",
     kopf: [
       "Copyright (c) 2014 Devon Govett (fontkit, https://github.com/foliojs/fontkit)",
