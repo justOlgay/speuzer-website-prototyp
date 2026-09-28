@@ -187,8 +187,9 @@ async function main() {
     process.exit(1);
   }
   const seiten = readdirSync(WEB_DIR).filter((d) => d.endsWith(".html")).sort();
-  if (seiten.length !== 37) {
-    console.error(`Erwartet 37 Seiten in dist/appack-paket/web/, gefunden ${seiten.length}.`);
+  // 28.09.2026: 38 (+ formular-gesendet.html)
+  if (seiten.length !== 38) {
+    console.error(`Erwartet 38 Seiten in dist/appack-paket/web/, gefunden ${seiten.length}.`);
     process.exit(1);
   }
 

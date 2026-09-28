@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vielen Dank – FFV Sportfreunde 04</title>
+<meta name="description" content="Bestätigung: Ihre Anfrage an die Geschäftsstelle des FFV Sportfreunde 04 ist angekommen.">
+<link rel="canonical" href="https://cdn.appack.de/sportfreunde04/workspace/web/formular-gesendet.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FFV Sportfreunde 04">
+<meta property="og:title" content="Vielen Dank – FFV Sportfreunde 04">
+<meta property="og:description" content="Bestätigung: Ihre Anfrage an die Geschäftsstelle des FFV Sportfreunde 04 ist angekommen.">
+<meta property="og:url" content="https://cdn.appack.de/sportfreunde04/workspace/web/formular-gesendet.html">
+<meta property="og:image" content="https://justolgay.github.io/speuzer-website-prototyp/assets/og/standard.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#191793">
+<link rel="icon" href="https://justolgay.github.io/speuzer-website-prototyp/assets/logo/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="https://justolgay.github.io/speuzer-website-prototyp/assets/logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="https://justolgay.github.io/speuzer-website-prototyp/assets/logo/apple-touch-icon.png">
+<link rel="preload" href="https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="site.css">
+<script>
+(function () {
+  "use strict";
+  if (!/(^|[?&])app=1(&|$)/.test(location.search)) return;
+  var NAV = {
+    "mannschaften": "sportfreunde04_TextImage_1783343147611",
+    "verein": "sportfreunde04_TextImage_1783060935192",
+    "verein-karneval": "sportfreunde04_TextImage_1780401660343",
+    "verein-vorstand": "sportfreunde04_TextImage_1780401660340",
+    "verein-sponsoren": "sportfreunde04_TextImage_1780401660337",
+    "verein-ueber-uns": "sportfreunde04_TextImage_1784295208452",
+    "kontakt": "sportfreunde04_TextImage_1780401660324",
+    "mitglied-werden": "sportfreunde04_TextImage_1780401660329",
+    "chronik": "sportfreunde04_TextImage_1789020275334"
+  };
+  var FORMULAR_WEB = "6a903758337cdc97f94f2655";
+  function umschreiben() {
+    [].forEach.call(document.querySelectorAll("a[href]"), function (a) {
+      var href = a.getAttribute("href");
+      if (/^(mailto:|tel:|#|nav:|ext:|javascript:)/i.test(href)) return;
+      var url;
+      try { url = new URL(href, location.href); } catch (e) { return; }
+      if (url.pathname.indexOf(FORMULAR_WEB) !== -1) {
+        a.href = "nav://" + NAV["mitglied-werden"];
+        a.removeAttribute("target");
+        return;
+      }
+      if (url.hostname === location.hostname && /\/workspace\/web\//.test(url.pathname)) {
+        var name = url.pathname.split("/").pop().replace(/\.html$/, "");
+        var modul = NAV[name] || (/^mannschaften-/.test(name) ? NAV.mannschaften : null) || (/^chronik/.test(name) ? NAV.chronik : null);
+        if (modul && !url.hash) {
+          a.href = "nav://" + modul;
+        } else {
+          url.searchParams.set("app", "1");
+          a.href = url.toString();
+        }
+        a.removeAttribute("target");
+        return;
+      }
+      if (/^https?:$/.test(url.protocol)) {
+        a.href = "ext://" + url.toString();
+        a.removeAttribute("target");
+      }
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", umschreiben);
+  else umschreiben();
+})();
+</script>
+</head>
+<body class="ws formular-gesendet">
+<main id="inhalt">
+<section class="abschnitt seitenkopf">
+  <div class="container">
+    <h1>Vielen Dank!</h1>
+    <p class="seitenkopf__lead">Ihre Anfrage ist bei der Geschäftsstelle angekommen. Wir melden uns per E-Mail.</p>
+  </div>
+</section>
+<section class="abschnitt">
+  <div class="container fluss">
+    <p>Bei Fragen erreichen Sie die Geschäftsstelle unter <a href="mailto:geschaeftsstelle@sportfreunde04.de">geschaeftsstelle@sportfreunde04.de</a>.</p>
+    <p class="knopfzeile">
+      <a class="knopf knopf--sekundaer" href="verein.html">Zurück zum Verein</a>
+    </p>
+  </div>
+</section>
+</main>
+<footer class="ws-fuss">
+  
+</footer>
+</body>
+</html>
