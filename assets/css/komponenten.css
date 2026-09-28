@@ -3119,3 +3119,531 @@ body.datenschutz h3.gruppenueberschrift {
    Website verborgen, auch wenn der Baustein selbst ein display setzt; das
    App-Modus-Skript entfernt hidden (siehe APP_MODUS_SKRIPT in hilfen.mjs). */
 [data-nur-app][hidden] { display: none !important; }
+
+/* ==========================================================================
+   Aufnahmeantrag online (.antrag, 28.09.2026) – /aufnahmeantrag/
+   (src/seiten/aufnahmeantrag.mjs, Verhalten assets/js/antrag/
+   aufnahmeantrag.js). Baut auf .formular auf (Eingabefelder 48 px,
+   Kästchen 24 px mit Beschriftung als Tippziel ≥ 44 px), ergänzt Knöpfe
+   zur Auswahl (Radio), Schrittanzeige, Fehlerliste, Unterschriftsfelder,
+   Zusammenfassung und Ergebnis. Mobil zuerst, Lesebreite wie .inhalt.
+   ========================================================================== */
+
+/* „Downloads & Anträge“: Einstieg mit Knopf über der Liste „Anmeldung“ */
+.fluss > .downloads-einstieg + .downloads {
+  margin-top: var(--sp-6);
+}
+
+/* Viele Bausteine hier setzen selbst ein display (.formular fieldset,
+   .knopf …) – ausgeblendete Schritte und Bedingungsteile müssen trotzdem
+   verschwinden. */
+.antrag [hidden] {
+  display: none !important;
+}
+
+.antrag {
+  max-width: var(--inhalt);
+}
+
+.antrag p {
+  margin: 0;
+}
+
+.antrag.fluss > .antrag__formular {
+  margin-top: var(--sp-6);
+}
+
+.antrag__einleitung p + p {
+  margin-top: var(--sp-2);
+}
+
+.antrag__hinweis {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+
+.antrag__freiwillig {
+  font-weight: 400;
+  color: var(--ink-3);
+}
+
+/* Schrittanzeige: „Schritt 3 von 8“ und ein schmaler Balken */
+.antrag__stand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.antrag__stand-text {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.antrag__balken {
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--blau-100);
+  overflow: hidden;
+}
+
+.antrag__balken span {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: var(--blau-700);
+  transition: width var(--t-mittel);
+}
+
+.antrag__schritt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+.antrag__schritt > h2 {
+  margin: 0;
+}
+
+.antrag__schritt > h2:focus {
+  outline: none;
+}
+
+.antrag__schritt > h2:focus-visible {
+  outline: var(--fokus);
+  outline-offset: 4px;
+}
+
+/* Gruppen innerhalb eines Schritts: Legende in der Textschrift, nicht versal
+   (die große Versal-Legende von .formular passt nur als Abschnittstitel). */
+.formular .antrag__gruppe > legend {
+  font-family: var(--font-text);
+  font-size: var(--fs-md);
+  font-weight: 700;
+  text-transform: none;
+  color: var(--ink);
+  margin: 0 0 var(--sp-1);
+}
+
+.antrag__gruppe {
+  min-width: 0;
+}
+
+.antrag__block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+/* Auswahlzeilen als ruhige Kästen mit großem Tippziel */
+.formular .antrag__option {
+  align-items: flex-start;
+  font-weight: 400;
+  font-size: var(--fs-md);
+  padding: var(--sp-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color var(--t-kurz), background var(--t-kurz);
+}
+
+.formular .antrag__option:hover {
+  border-color: var(--blau-600);
+}
+
+.formular .antrag__option:has(input:checked) {
+  border-color: var(--blau-700);
+  background: var(--blau-50);
+}
+
+.antrag__option-text {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  column-gap: var(--sp-3);
+  row-gap: var(--sp-1);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.antrag__option-meta {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+/* Knöpfe zur Auswahl (Radio) im Stil der Kästchen: 24 px Kreis */
+.formular__checkzeile input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  flex: none;
+  border: 2px solid var(--blau-700);
+  border-radius: 50%;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.formular__checkzeile input[type="radio"]:checked {
+  background: var(--blau-700);
+  box-shadow: inset 0 0 0 5px var(--surface);
+}
+
+.formular input[type="text"],
+.formular input[type="email"],
+.formular input[type="tel"] {
+  font-size: var(--fs-md);
+}
+
+.formular input[aria-invalid="true"] {
+  border: 2px solid var(--warn);
+}
+
+.formular .antrag__option:has(input[aria-invalid="true"]) {
+  border-color: var(--warn);
+}
+
+.antrag .formular__fehler {
+  font-weight: 600;
+}
+
+.formular .antrag__feld--fehler {
+  padding-left: var(--sp-3);
+  border-left: 4px solid var(--warn);
+}
+
+/* Geburtsdatum: drei schmale Felder nebeneinander */
+.antrag__datum-felder {
+  display: flex;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+.formular .antrag__datum-teil input {
+  width: 4rem;
+}
+
+.formular .antrag__datum-teil--jahr input {
+  width: 5.5rem;
+}
+
+/* PLZ und Ort: ab 480 px nebeneinander */
+.antrag__zeile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.antrag__plz input {
+  max-width: 9rem;
+}
+
+@media (min-width: 480px) {
+  .antrag__zeile {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    column-gap: var(--sp-4);
+  }
+}
+
+/* Fehlerliste oben im Schritt */
+.antrag__fehlerliste {
+  border-left: 4px solid var(--warn);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  background: var(--warn-bg);
+  padding: var(--sp-4);
+}
+
+.antrag__fehlerliste:focus {
+  outline: none;
+}
+
+.antrag__fehlerliste:focus-visible {
+  outline: var(--fokus);
+  outline-offset: 2px;
+}
+
+.antrag__fehlerliste-titel {
+  font-weight: 700;
+}
+
+.antrag__fehlerliste ul {
+  margin: var(--sp-2) 0 0;
+  padding-left: 1.25rem;
+}
+
+.antrag__fehlerliste li + li {
+  margin-top: var(--sp-1);
+}
+
+.antrag__fehlerliste a {
+  color: var(--warn);
+  font-weight: 600;
+}
+
+/* Familienmitglieder */
+.antrag__familie-liste {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.formular .antrag__familie-eintrag {
+  padding: var(--sp-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+
+.formular .antrag__familie-eintrag > legend {
+  padding: 0 var(--sp-1);
+  margin-left: calc(var(--sp-1) * -1);
+}
+
+/* Unterschriftsfeld */
+.unterschrift {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  border-radius: var(--r-md);
+}
+
+.unterschrift:focus {
+  outline: none;
+}
+
+.unterschrift:focus-visible {
+  outline: var(--fokus);
+  outline-offset: 4px;
+}
+
+.unterschrift__titel {
+  font-weight: 700;
+}
+
+.unterschrift__flaeche {
+  position: relative;
+  border: 2px solid var(--blau-700);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.unterschrift__leinwand {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 1;
+  min-height: 7rem;
+  max-height: 11rem;
+  touch-action: none;
+  cursor: crosshair;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Schreiblinie mit Kreuz, wie auf Papier */
+.unterschrift__linie {
+  position: absolute;
+  left: var(--sp-4);
+  right: var(--sp-4);
+  bottom: 26%;
+  border-bottom: 1px solid var(--ink-3);
+  pointer-events: none;
+}
+
+.unterschrift__linie::before {
+  content: "\00D7";
+  position: absolute;
+  left: 0;
+  bottom: 2px;
+  font-size: var(--fs-lg);
+  line-height: 1;
+  color: var(--ink-3);
+}
+
+.unterschrift__leiste {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.unterschrift__stand {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+.unterschrift--fertig .unterschrift__stand {
+  color: var(--ok);
+  font-weight: 600;
+}
+
+.unterschrift.antrag__feld--fehler .unterschrift__flaeche {
+  border-color: var(--warn);
+}
+
+/* Zusammenfassung */
+.antrag__zusammenfassung {
+  display: flex;
+  flex-direction: column;
+}
+
+.antrag__zusammenfassung-bereich {
+  padding-block: var(--sp-4);
+  border-top: 1px solid var(--line);
+}
+
+.antrag__zusammenfassung-bereich:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.antrag__zusammenfassung-kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.antrag__zusammenfassung-kopf h3 {
+  margin: 0;
+  font-size: var(--fs-lg);
+}
+
+.antrag .angaben dt {
+  margin-top: var(--sp-3);
+}
+
+.antrag .angaben dt:first-child {
+  margin-top: 0;
+}
+
+.antrag .angaben dd {
+  overflow-wrap: anywhere;
+}
+
+.antrag__aendern {
+  flex: none;
+}
+
+.antrag__unterschrift-vorschau {
+  max-height: 56px;
+  max-width: 100%;
+  background: var(--surface);
+}
+
+/* Ergebnis nach „PDF erstellen“ */
+.antrag__ergebnis {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+  border-left: 4px solid var(--ok);
+  border-radius: 0 var(--r-lg) var(--r-lg) 0;
+  background: var(--surface);
+  box-shadow: var(--sh-1);
+}
+
+.antrag__ergebnis:focus {
+  outline: none;
+}
+
+.antrag__ergebnis:focus-visible {
+  outline: var(--fokus);
+  outline-offset: 2px;
+}
+
+@media (min-width: 480px) {
+  .antrag__ergebnis {
+    padding: var(--sp-5);
+  }
+}
+
+.antrag__ergebnis p,
+.antrag__ergebnis li {
+  overflow-wrap: anywhere;
+}
+
+.antrag__ergebnis h3 {
+  margin: 0;
+  font-size: var(--fs-xl);
+}
+
+.antrag__ergebnis h3 + * {
+  margin-top: calc(var(--sp-2) * -1);
+}
+
+.antrag__ergebnis .knopfzeile .knopf {
+  flex: 1 1 auto;
+}
+
+.antrag__anleitung {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.antrag__anleitung li + li {
+  margin-top: var(--sp-2);
+}
+
+.antrag__meldung {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.antrag__meldung:empty {
+  display: none;
+}
+
+.antrag__arbeitet {
+  font-weight: 600;
+}
+
+/* Zurück / Weiter */
+.antrag__navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  padding-top: var(--sp-5);
+  border-top: 1px solid var(--line);
+}
+
+.antrag__navigation [data-weiter] {
+  margin-left: auto;
+  min-width: 9rem;
+}
+
+.antrag__navigation .knopf:disabled {
+  opacity: .6;
+  cursor: progress;
+}
+
+/* Nachbesserung 28.09.2026: „Lieber auf Papier?“ mit Abstand unter
+   Zurück/Weiter (.antrag p setzt sonst den Fluss-Abstand auf 0), Sprungziel
+   beim Schrittwechsel mit etwas Luft, Hinweis bei Störungen. */
+.antrag.fluss > .antrag__alternative {
+  margin-top: var(--sp-6);
+}
+
+.antrag__stand {
+  scroll-margin-top: var(--sp-4);
+}
+
+.antrag__stoerung p + p {
+  margin-top: var(--sp-2);
+}
+
+.antrag__stoerung:focus {
+  outline: none;
+}
+
+.antrag__stoerung:focus-visible {
+  outline: var(--fokus);
+  outline-offset: 2px;
+}

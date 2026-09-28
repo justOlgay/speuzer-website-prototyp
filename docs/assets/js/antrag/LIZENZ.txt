@@ -1,0 +1,70 @@
+Fremdbibliotheken für den Aufnahmeantrag online (assets/js/antrag/)
+======================================================================
+
+Die Seite „Aufnahmeantrag online“ (src/seiten/aufnahmeantrag.mjs, im
+appack-Workspace web/aufnahmeantrag.html) erzeugt den unterschriebenen
+Aufnahmeantrag als PDF im Browser. Dafür liegen hier zwei fremde
+Bibliotheken, unverändert aus npm übernommen und selbst ausgeliefert (kein
+Aufruf eines fremden CDN zur Laufzeit). pdf-lib lädt die Seite nach dem
+ersten Schritt des Formulars im Hintergrund, fontkit nur beim Erstellen des
+PDF und nur, wenn ein Name Zeichen außerhalb von Helvetica enthält.
+
+Die Zeichenbreiten für die Längenprüfung im Formular
+(data/aufnahmeantrag-schriftbreiten.json) erzeugt dasselbe Werkzeug aus den
+Metriken von Liberation Sans (SIL OFL 1.1) und der PDF-Standardschrift
+Helvetica, wie sie pdf-lib mitbringt (@pdf-lib/standard-fonts, MIT).
+
+Erzeugt mit `npm run antrag-bibliotheken` (tools/antrag-bibliotheken.mjs)
+aus den devDependencies in package.json. Das Werkzeug stellt jeder Datei
+ihren Lizenzhinweis voran und entfernt nur den Verweis auf die Source-Map
+(die .map-Dateien werden nicht mit ausgeliefert). Der Programmcode selbst
+bleibt Byte für Byte, wie er im npm-Paket liegt.
+
+- aufnahmeantrag-pdf-lib.min.js
+  pdf-lib 1.17.1 (https://github.com/Hopding/pdf-lib), Datei
+  dist/pdf-lib.min.js. MIT-Lizenz, Copyright (c) 2019 Andrew Dillon.
+  Enthält gebündelt: pako 1.0.11 (MIT, Copyright (C) 2014-2017 by Vitaly
+  Puzrin and Andrei Tuputcyn), @pdf-lib/standard-fonts 1.0.0 (MIT,
+  Copyright (c) 2018 Andrew Dillon), @pdf-lib/upng 1.0.1 (MIT, Copyright
+  (c) 2017 Photopea) und tslib 1.x (Apache License 2.0, Copyright (c)
+  Microsoft Corporation – der Hinweis steht unverändert im Bündel).
+
+- aufnahmeantrag-fontkit.min.js
+  @pdf-lib/fontkit 1.1.1 (https://github.com/Hopding/fontkit, Ableger von
+  fontkit, https://github.com/foliojs/fontkit), Datei
+  dist/fontkit.umd.min.js. MIT-Lizenz, Copyright (c) 2014 Devon Govett,
+  Anpassungen Copyright (c) 2019 Andrew Dillon. Enthält gebündelt kleinere
+  Hilfsbibliotheken aus dem Bau des Pakets (u. a. restructure,
+  unicode-properties, unicode-trie, tiny-inflate, brotli, dfa, clone,
+  deep-equal, buffer, pako), jeweils unter MIT- bzw. BSD-Lizenz;
+  maßgeblich ist das Quellpaket @pdf-lib/fontkit 1.1.1 bei npm.
+  Wird nur gebraucht, wenn ein Name Zeichen enthält, die die
+  PDF-Standardschrift Helvetica nicht kennt (z. B. Ş, ğ, ı, Ł) – dann
+  bettet die Seite die Schrift Liberation Sans ein (siehe
+  assets/fonts/LIZENZ-liberation-sans.txt).
+
+Eigener Code: aufnahmeantrag.js (Formular, Unterschriftsfelder,
+PDF-Erzeugung) gehört zur Website des F.F.V. Sportfreunde 04.
+
+
+MIT License (Wortlaut, gilt für alle oben mit „MIT“ genannten Teile mit
+ihrem jeweiligen Copyright-Vermerk)
+----------------------------------------------------------------------
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aufnahmeantrag online – FFV Sportfreunde 04</title>
+<meta name="description" content="Aufnahmeantrag des FFV Sportfreunde 04 online ausfüllen und unterschreiben: Daraus entsteht das Vereins-PDF für die E-Mail an die Geschäftsstelle.">
+<link rel="canonical" href="https://justolgay.github.io/speuzer-website-prototyp/ws/aufnahmeantrag.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FFV Sportfreunde 04">
+<meta property="og:title" content="Aufnahmeantrag online – FFV Sportfreunde 04">
+<meta property="og:description" content="Aufnahmeantrag des FFV Sportfreunde 04 online ausfüllen und unterschreiben: Daraus entsteht das Vereins-PDF für die E-Mail an die Geschäftsstelle.">
+<meta property="og:url" content="https://justolgay.github.io/speuzer-website-prototyp/ws/aufnahmeantrag.html">
+<meta property="og:image" content="https://justolgay.github.io/speuzer-website-prototyp/assets/og/standard.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#191793">
+<link rel="icon" href="../assets/logo/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/logo/apple-touch-icon.png">
+<link rel="preload" href="../assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/css/site.css">
+<script>
+(function () {
+  "use strict";
+  if (!/(^|[?&])app=1(&|$)/.test(location.search)) return;
+  var NAV = {
+    "mannschaften": "sportfreunde04_TextImage_1783343147611",
+    "verein": "sportfreunde04_TextImage_1783060935192",
+    "verein-karneval": "sportfreunde04_TextImage_1780401660343",
+    "verein-vorstand": "sportfreunde04_TextImage_1780401660340",
+    "verein-sponsoren": "sportfreunde04_TextImage_1780401660337",
+    "verein-ueber-uns": "sportfreunde04_TextImage_1784295208452",
+    "kontakt": "sportfreunde04_TextImage_1780401660324",
+    "mitglied-werden": "sportfreunde04_TextImage_1780401660329",
+    "chronik": "sportfreunde04_TextImage_1789020275334"
+  };
+  var FORMULAR_WEB = "6a903758337cdc97f94f2655";
+  function umschreiben() {
+    [].forEach.call(document.querySelectorAll("a[href]"), function (a) {
+      var href = a.getAttribute("href");
+      if (/^(mailto:|tel:|#|nav:|ext:|javascript:)/i.test(href)) return;
+      var url;
+      try { url = new URL(href, location.href); } catch (e) { return; }
+      if (url.pathname.indexOf(FORMULAR_WEB) !== -1) {
+        a.href = "nav://" + NAV["mitglied-werden"];
+        a.removeAttribute("target");
+        return;
+      }
+      if (url.hostname === location.hostname && /\/workspace\/web\//.test(url.pathname)) {
+        var name = url.pathname.split("/").pop().replace(/\.html$/, "");
+        var modul = NAV[name] || (/^mannschaften-/.test(name) ? NAV.mannschaften : null) || (/^chronik/.test(name) ? NAV.chronik : null);
+        if (modul && !url.hash) {
+          a.href = "nav://" + modul;
+        } else {
+          url.searchParams.set("app", "1");
+          a.href = url.toString();
+        }
+        a.removeAttribute("target");
+        return;
+      }
+      if (/^https?:$/.test(url.protocol)) {
+        a.href = "ext://" + url.toString();
+        a.removeAttribute("target");
+      }
+    });
+  }
+  // Teile nur für Website bzw. nur für die App (Übergangslösung Anträge,
+  // 28.09.2026): in der App gibt es die Online-Formulare, auf der Website PDF
+  // und E-Mail.
+  function teileUmschalten() {
+    [].forEach.call(document.querySelectorAll("[data-nur-web]"), function (el) { el.parentNode.removeChild(el); });
+    [].forEach.call(document.querySelectorAll("[data-nur-app]"), function (el) { el.removeAttribute("hidden"); });
+  }
+  function start() { teileUmschalten(); umschreiben(); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
+})();
+</script>
+</head>
+<body class="ws aufnahmeantrag">
+<main id="inhalt">
+<section class="abschnitt seitenkopf">
+  <div class="container">
+    <a class="ruecklink" href="mitglied-werden.html">‹ Mitglied werden</a>
+    <h1>Aufnahmeantrag online</h1>
+    <p class="seitenkopf__lead">Ausfüllen, am Bildschirm unterschreiben – daraus entsteht der vollständige Aufnahmeantrag des Vereins als PDF. Den schicken Sie per E-Mail an die Geschäftsstelle.</p>
+  </div>
+</section>
+<section class="abschnitt">
+  <div class="container">
+    <div class="antrag" data-nur-app hidden>
+      <p>In der Vereins-App gibt es dafür das App-Formular.</p>
+      <p class="knopfzeile"><a class="knopf" href="https://appack.de/rest-api/drender/6a903758337cdc97f94f2655" target="_blank" rel="noopener">Aufnahmeantrag in der App ausfüllen</a></p>
+    </div>
+    <div class="antrag fluss" id="antrag" data-nur-web
+      data-pdf-lib="../assets/js/antrag/aufnahmeantrag-pdf-lib.min.js"
+      data-fontkit="../assets/js/antrag/aufnahmeantrag-fontkit.min.js"
+      data-schrift="../assets/fonts/liberation-sans-regular.ttf">
+      <div class="hinweis hinweis--info antrag__einleitung">
+        <p><strong>Etwa 10 Minuten.</strong> Für die Lastschrift brauchen Sie die IBAN. Ihre Angaben bleiben auf diesem Gerät: Das PDF entsteht in Ihrem Browser, der Verein erhält den Antrag erst, wenn Sie ihn selbst senden (<a href="datenschutz.html#abschnitt-16">Datenschutz</a>).</p>
+      </div>
+      <div class="hinweis hinweis--offen antrag__stoerung" data-stoerung tabindex="-1" hidden>
+        <p><strong data-text="stoerung-titel"></strong> <span data-text="stoerung"></span></p>
+        <p>Den <a href="https://cdn.appack.de/sportfreunde04/pdf/Vereinsanmeldung%20allgemein_NEU_9-2026%20%20(1).pdf" target="_blank" rel="noopener">Aufnahmeantrag als PDF</a> können Sie ausdrucken, ausfüllen und unterschreiben – und im Vereinsheim abgeben oder <a href="mailto:geschaeftsstelle@sportfreunde04.de?subject=Aufnahmeantrag&amp;body=Hallo%2C%0A%0Aanbei%20der%20ausgef%C3%BCllte%20und%20unterschriebene%20Aufnahmeantrag%20%28PDF%29.%0A%0AName%20des%20neuen%20Mitglieds%3A%20%0AAbteilung%20%28Fu%C3%9Fball%20oder%20Karneval%29%3A%20%0AMannschaft%20bzw.%20Gruppe%20%28falls%20bekannt%29%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe">per E-Mail senden</a>.</p>
+      </div>
+      <div class="antrag__ohne-skript" data-ohne-skript>
+        <p>Das Online-Formular braucht JavaScript. Alternativ können Sie den <a href="https://cdn.appack.de/sportfreunde04/pdf/Vereinsanmeldung%20allgemein_NEU_9-2026%20%20(1).pdf" target="_blank" rel="noopener">Aufnahmeantrag als PDF</a> herunterladen, ausdrucken, ausfüllen und unterschreiben – und ihn im Vereinsheim abgeben oder <a href="mailto:geschaeftsstelle@sportfreunde04.de?subject=Aufnahmeantrag&amp;body=Hallo%2C%0A%0Aanbei%20der%20ausgef%C3%BCllte%20und%20unterschriebene%20Aufnahmeantrag%20%28PDF%29.%0A%0AName%20des%20neuen%20Mitglieds%3A%20%0AAbteilung%20%28Fu%C3%9Fball%20oder%20Karneval%29%3A%20%0AMannschaft%20bzw.%20Gruppe%20%28falls%20bekannt%29%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe">per E-Mail senden</a>.</p>
+      </div>
+      <form class="formular antrag__formular" id="antrag-formular" novalidate hidden>
+        <div class="antrag__stand" aria-hidden="true">
+          <p class="antrag__stand-text"><span data-text="schritt-nummer">Schritt 1 von 8</span></p>
+          <div class="antrag__balken"><span data-balken></span></div>
+        </div>
+        <div class="antrag__fehlerliste" data-fehlerliste role="group" aria-labelledby="antrag-fehler-titel" tabindex="-1" hidden>
+          <p class="antrag__fehlerliste-titel" id="antrag-fehler-titel" data-text="fehler-titel">Bitte prüfen Sie diese Angaben:</p>
+          <ul data-fehler-eintraege></ul>
+        </div>
+      <section class="antrag__schritt" id="schritt-mitgliedschaft" data-schritt="mitgliedschaft" aria-labelledby="schritt-mitgliedschaft-titel" hidden>
+        <h2 id="schritt-mitgliedschaft-titel" tabindex="-1">Mitgliedschaft</h2>
+        <p class="antrag__hinweis">Alle Angaben sind Pflicht, außer sie sind als „freiwillig“ gekennzeichnet.</p>
+        <fieldset class="antrag__gruppe" data-feld="abteilung" aria-describedby="a-abteilung-hinweis">
+          <legend>In welche Abteilung?</legend>
+          <p class="antrag__hinweis" id="a-abteilung-hinweis">Beides ist möglich.</p>
+          <p class="formular__fehler" id="a-abteilung-fehler" hidden></p>
+          <div class="formular__checkgruppe">
+          <label class="formular__checkzeile antrag__option" for="a-abteilung_fussball">
+            <input id="a-abteilung_fussball" type="checkbox" name="abteilung_fussball">
+            <span class="antrag__option-text">Fußball</span>
+          </label>
+          <label class="formular__checkzeile antrag__option" for="a-abteilung_karneval">
+            <input id="a-abteilung_karneval" type="checkbox" name="abteilung_karneval">
+            <span class="antrag__option-text">Karneval – „Die&nbsp;Schnauzer“</span>
+          </label>
+          </div>
+        </fieldset>
+        <div data-wenn="fussball" hidden>
+        <fieldset class="antrag__gruppe" data-feld="beitrag_fussball" role="radiogroup" aria-required="true">
+          <legend>Beitrag Fußballabteilung</legend>
+          
+          <p class="formular__fehler" id="a-beitrag_fussball-fehler" hidden></p>
+          <div class="formular__checkgruppe">
+          <label class="formular__checkzeile antrag__option" for="a-beitrag_fussball-jugendlicher">
+            <input id="a-beitrag_fussball-jugendlicher" type="radio" name="beitrag_fussball" value="jugendlicher">
+            <span class="antrag__option-text">Kinder und Jugendliche (inkl. A-Jugend) <span class="antrag__option-meta">108&nbsp;€ im Jahr</span></span>
+          </label>
+          <label class="formular__checkzeile antrag__option" for="a-beitrag_fussball-erwachsener">
+            <input id="a-beitrag_fussball-erwachsener" type="radio" name="beitrag_fussball" value="erwachsener">
+            <span class="antrag__option-text">Erwachsene <span class="antrag__option-meta">120&nbsp;€ im Jahr</span></span>
+          </label>
+          <label class="formular__checkzeile antrag__option" for="a-beitrag_fussball-passiv">
+            <input id="a-beitrag_fussball-passiv" type="radio" name="beitrag_fussball" value="passiv">
+            <span class="antrag__option-text">Passive, Frauen, Rentner (ab 65) <span class="antrag__option-meta">84&nbsp;€ im Jahr</span></span>
+          </label>
+          <label class="formular__checkzeile antrag__option" for="a-beitrag_fussball-familie">
+            <input id="a-beitrag_fussball-familie" type="radio" name="beitrag_fussball" value="familie">
+            <span class="antrag__option-text">Familienbeitrag <span class="antrag__option-meta">180&nbsp;€ im Jahr</span></span>
+          </label>
+          </div>
+        </fieldset>
+        </div>
+        <div data-wenn="karneval" hidden>
+        <fieldset class="antrag__gruppe" data-feld="beitrag_karneval" role="radiogroup" aria-required="true">
+          <legend>Beitrag Karnevalabteilung</legend>
+          
+          <p class="formular__fehler" id="a-beitrag_karneval-fehler" hidden></p>
+          <div class="formular__checkgruppe">
+          <label class="formular__checkzeile antrag__option" for="a-beitrag_karneval-kinder">
+            <input id="a-beitrag_karneval-kinder" type="radio" name="beitrag_karneval" value="kinder">
+            <span class="antrag__option-text">Kinder und Jugendliche (bis 17) <span class="antrag__option-meta">108&nbsp;€ im Jahr</span></span>
+          </label>
+          <label class="formular__checkzeile antrag__option" for="a-beitrag_karneval-azubi">
+            <input id="a-beitrag_karneval-azubi" type="radio" name="beitrag_karneval" value="azubi">
+            <span class="antrag__option-text">Auszubildende und Studierende (mit Nachweis) <span class="antrag__option-meta">108&nbsp;€ im Jahr</span></span>
+          </label>
+          <label class="formular__checkzeile antrag__option" for="a-beitrag_karneval-erwachsener">
+            <input id="a-beitrag_karneval-erwachsener" type="radio" name="beitrag_karneval" value="erwachsener">
+            <span class="antrag__option-text">Erwachsene <span class="antrag__option-meta">120&nbsp;€ im Jahr</span></span>
+          </label>
+          <label class="formular__checkzeile antrag__option" for="a-beitrag_karneval-rentner">
+            <input id="a-beitrag_karneval-rentner" type="radio" name="beitrag_karneval" value="rentner">
+            <span class="antrag__option-text">Rentner (ab 65) <span class="antrag__option-meta">84&nbsp;€ im Jahr</span></span>
+          </label>
+          <label class="formular__checkzeile antrag__option" for="a-beitrag_karneval-familie">
+            <input id="a-beitrag_karneval-familie" type="radio" name="beitrag_karneval" value="familie">
+            <span class="antrag__option-text">Familienbeitrag <span class="antrag__option-meta">180&nbsp;€ im Jahr</span></span>
+          </label>
+          <label class="formular__checkzeile antrag__option" for="a-beitrag_karneval-senator">
+            <input id="a-beitrag_karneval-senator" type="radio" name="beitrag_karneval" value="senator">
+            <span class="antrag__option-text">Senatorenmitgliedschaft <span class="antrag__option-meta">144&nbsp;€ im Jahr</span></span>
+          </label>
+          </div>
+        </fieldset>
+        </div>
+        <div class="hinweis hinweis--info" data-wenn="azubi" hidden>
+          <p>Bitte den Ausbildungs- oder Studiennachweis mit dem Antrag an die Geschäftsstelle schicken.</p>
+        </div>
+        <div class="hinweis hinweis--info" data-wenn="doppel" hidden>
+          <p>Bei einer Doppelmitgliedschaft in der Fußball- und der Karnevalabteilung kann ein gesonderter Beitrag erfragt werden.</p>
+        </div>
+        <p class="antrag__hinweis">Dazu kommt einmalig die Aufnahmegebühr von 20&nbsp;€. Fälligkeit und Kündigung: <a href="mitglied-werden.html">Mitglied werden</a>.</p>
+      </section>
+      <section class="antrag__schritt" id="schritt-person" data-schritt="person" aria-labelledby="schritt-person-titel" hidden>
+        <h2 id="schritt-person-titel" tabindex="-1">Neues Mitglied</h2>
+        <div class="formular__feld" data-feld="vorname">
+          <label for="a-vorname">Vorname</label>
+          
+          <p class="formular__fehler" id="a-vorname-fehler" hidden></p>
+          <input id="a-vorname" name="vorname" type="text" autocomplete="given-name" maxlength="40" aria-required="true">
+        </div>
+        <div class="formular__feld" data-feld="nachname">
+          <label for="a-nachname">Nachname</label>
+          
+          <p class="formular__fehler" id="a-nachname-fehler" hidden></p>
+          <input id="a-nachname" name="nachname" type="text" autocomplete="family-name" maxlength="40" aria-required="true">
+        </div>
+        <fieldset class="antrag__gruppe antrag__datum" data-feld="geb" aria-describedby="a-geb-hinweis">
+          <legend>Geburtsdatum</legend>
+          <p class="antrag__hinweis" id="a-geb-hinweis">Tag, Monat und Jahr, zum Beispiel 27 3 2015</p>
+          <p class="formular__fehler" id="a-geb-fehler" hidden></p>
+          <div class="antrag__datum-felder">
+            <div class="formular__feld antrag__datum-teil">
+              <label for="a-geb_tag">Tag</label>
+              <input id="a-geb_tag" name="geb_tag" type="text" inputmode="numeric" aria-required="true" maxlength="2" autocomplete="bday-day">
+            </div>
+            <div class="formular__feld antrag__datum-teil">
+              <label for="a-geb_monat">Monat</label>
+              <input id="a-geb_monat" name="geb_monat" type="text" inputmode="numeric" aria-required="true" maxlength="2" autocomplete="bday-month">
+            </div>
+            <div class="formular__feld antrag__datum-teil antrag__datum-teil--jahr">
+              <label for="a-geb_jahr">Jahr</label>
+              <input id="a-geb_jahr" name="geb_jahr" type="text" inputmode="numeric" aria-required="true" maxlength="4" autocomplete="bday-year">
+            </div>
+          </div>
+        </fieldset>
+        <div class="hinweis hinweis--offen" data-wenn="beitrag-alter" hidden>
+          <p><span data-text="beitrag-hinweis"></span> Den Beitrag können Sie im ersten Schritt ändern (mit „Zurück“).</p>
+        </div>
+        <div class="hinweis hinweis--info" data-wenn="minderjaehrig" hidden>
+          <p>Das neue Mitglied ist unter 18. Den Antrag unterschreibt deshalb eine erziehungsberechtigte Person – ihren Namen tragen Sie im nächsten Schritt ein.</p>
+        </div>
+        <div class="formular__feld" data-feld="strasse">
+          <label for="a-strasse">Straße und Hausnummer</label>
+          
+          <p class="formular__fehler" id="a-strasse-fehler" hidden></p>
+          <input id="a-strasse" name="strasse" type="text" autocomplete="address-line1" maxlength="60" aria-required="true">
+        </div>
+        <div class="antrag__zeile">
+          <div class="formular__feld antrag__plz" data-feld="plz">
+          <label for="a-plz">Postleitzahl</label>
+          
+          <p class="formular__fehler" id="a-plz-fehler" hidden></p>
+          <input id="a-plz" name="plz" type="text" autocomplete="postal-code" inputmode="numeric" maxlength="5" aria-required="true">
+        </div>
+          <div class="formular__feld" data-feld="ort">
+          <label for="a-ort">Wohnort</label>
+          
+          <p class="formular__fehler" id="a-ort-fehler" hidden></p>
+          <input id="a-ort" name="ort" type="text" autocomplete="address-level2" maxlength="50" aria-required="true">
+        </div>
+        </div>
+      </section>
+      <section class="antrag__schritt" id="schritt-kontakt" data-schritt="kontakt" aria-labelledby="schritt-kontakt-titel" hidden>
+        <h2 id="schritt-kontakt-titel" tabindex="-1">Kontakt</h2>
+        <fieldset class="antrag__gruppe" data-wenn="minderjaehrig" hidden aria-describedby="a-eb-hinweis">
+          <legend>Erziehungsberechtigte Person</legend>
+          <p class="antrag__hinweis" id="a-eb-hinweis">Sie unterschreibt den Antrag und die Einwilligung zu Fotos.</p>
+          <div class="formular__feld" data-feld="eb_vorname">
+          <label for="a-eb_vorname">Vorname</label>
+          
+          <p class="formular__fehler" id="a-eb_vorname-fehler" hidden></p>
+          <input id="a-eb_vorname" name="eb_vorname" type="text" autocomplete="given-name" maxlength="40" aria-required="true">
+        </div>
+          <div class="formular__feld" data-feld="eb_nachname">
+          <label for="a-eb_nachname">Nachname</label>
+          
+          <p class="formular__fehler" id="a-eb_nachname-fehler" hidden></p>
+          <input id="a-eb_nachname" name="eb_nachname" type="text" autocomplete="family-name" maxlength="40" aria-required="true">
+        </div>
+        </fieldset>
+        <p class="antrag__hinweis" data-wenn="minderjaehrig" hidden>Bei Kindern und Jugendlichen bitte die Kontaktdaten der Eltern eintragen.</p>
+        <div class="formular__feld" data-feld="email">
+          <label for="a-email">E-Mail</label>
+          
+          <p class="formular__fehler" id="a-email-fehler" hidden></p>
+          <input id="a-email" name="email" type="email" autocomplete="email" maxlength="80" aria-required="true" spellcheck="false" autocapitalize="off">
+        </div>
+        <fieldset class="antrag__gruppe" data-feld="telefon_gruppe" aria-describedby="a-telefon_gruppe-hinweis">
+          <legend>Telefon</legend>
+          <p class="antrag__hinweis" id="a-telefon_gruppe-hinweis">Mindestens eine Nummer – für Rückfragen der Geschäftsstelle und des Trainerteams.</p>
+          <p class="formular__fehler" id="a-telefon_gruppe-fehler" hidden></p>
+          <div class="formular__feld" data-feld="mobil">
+          <label for="a-mobil">Mobil</label>
+          
+          <p class="formular__fehler" id="a-mobil-fehler" hidden></p>
+          <input id="a-mobil" name="mobil" type="tel" autocomplete="tel" maxlength="30">
+        </div>
+          <div class="formular__feld" data-feld="telefon">
+          <label for="a-telefon">Festnetz</label>
+          
+          <p class="formular__fehler" id="a-telefon-fehler" hidden></p>
+          <input id="a-telefon" name="telefon" type="tel" autocomplete="off" maxlength="30">
+        </div>
+        </fieldset>
+      </section>
+      <section class="antrag__schritt" id="schritt-familie" data-schritt="familie" aria-labelledby="schritt-familie-titel" hidden>
+        <h2 id="schritt-familie-titel" tabindex="-1">Familienmitglieder</h2>
+        <p>Der Familienbeitrag gilt für die ganze Familie. Bitte tragen Sie die weiteren Familienmitglieder ein, die darüber Mitglied werden – bis zu sechs.</p>
+        <div data-feld="familie">
+          <p class="formular__fehler" id="a-familie-fehler" hidden></p>
+          <div class="antrag__familie-liste" data-familie-liste></div>
+        </div>
+        <p><button type="button" class="knopf knopf--sekundaer" data-familie-hinzu>Weiteres Familienmitglied hinzufügen</button></p>
+        <p class="antrag__hinweis" data-familie-voll hidden>Mehr als sechs Familienmitglieder passen nicht auf das Formular – bitte melden Sie sich dafür bei der Geschäftsstelle.</p>
+      </section>
+      <section class="antrag__schritt" id="schritt-einwilligungen" data-schritt="einwilligungen" aria-labelledby="schritt-einwilligungen-titel" hidden>
+        <h2 id="schritt-einwilligungen-titel" tabindex="-1">Satzung und Fotos</h2>
+        <fieldset class="antrag__gruppe" data-feld="satzung_gruppe">
+          <legend>Satzung</legend>
+          
+          <p class="formular__fehler" id="a-satzung_gruppe-fehler" hidden></p>
+          <div class="formular__checkgruppe">
+          <label class="formular__checkzeile antrag__option" for="a-satzung">
+            <input id="a-satzung" type="checkbox" name="satzung" aria-required="true">
+            <span class="antrag__option-text">Ich habe die Satzung des Vereins zur Kenntnis genommen, insbesondere, dass die Abmeldung nur mit Wirkung zum Ende eines Kalenderjahres per Einschreiben an die Postanschrift des Vereins möglich ist.</span>
+          </label>
+          </div>
+        </fieldset>
+        <p class="antrag__hinweis"><a href="https://cdn.appack.de/sportfreunde04/pdf/Satzung_Aktuell_2025%20(1).pdf" target="_blank" rel="noopener">Satzung lesen (PDF, öffnet in neuem Fenster)</a></p>
+        <fieldset class="antrag__gruppe" data-feld="fotos" role="radiogroup" aria-required="true" aria-describedby="a-fotos-hinweis">
+          <legend>Fotos und Namen veröffentlichen?</legend>
+          <p class="antrag__hinweis" id="a-fotos-hinweis">Darf der Verein im Rahmen seiner satzungsgemäßen Aufgaben Fotos, Videoaufnahmen und den Namen <span data-text="mitglied-dativ">des neuen Mitglieds</span> veröffentlichen? Die Einwilligung ist freiwillig und kann jederzeit mit Wirkung für die Zukunft widerrufen werden, schriftlich oder per E-Mail.</p>
+          <p class="formular__fehler" id="a-fotos-fehler" hidden></p>
+          <div class="formular__checkgruppe">
+          <label class="formular__checkzeile antrag__option" for="a-fotos-ja">
+            <input id="a-fotos-ja" type="radio" name="fotos" value="ja">
+            <span class="antrag__option-text">Ja, ich willige in die Veröffentlichung ein.</span>
+          </label>
+          <label class="formular__checkzeile antrag__option" for="a-fotos-nein">
+            <input id="a-fotos-nein" type="radio" name="fotos" value="nein">
+            <span class="antrag__option-text">Nein, ich willige nicht ein.</span>
+          </label>
+          </div>
+        </fieldset>
+        <div data-wenn="fotos-ja" hidden>
+        <fieldset class="antrag__gruppe" data-feld="medien" aria-describedby="a-medien-hinweis">
+          <legend>In welchen Medien?</legend>
+          <p class="antrag__hinweis" id="a-medien-hinweis">Bitte mindestens eines auswählen.</p>
+          <p class="formular__fehler" id="a-medien-fehler" hidden></p>
+          <div class="formular__checkgruppe">
+          <label class="formular__checkzeile antrag__option" for="a-medien_intern">
+            <input id="a-medien_intern" type="checkbox" name="medien_intern">
+            <span class="antrag__option-text">Vereinsinterne Publikationen (z. B. Rundbriefe, Aushänge, Mitgliederzeitungen)</span>
+          </label>
+          <label class="formular__checkzeile antrag__option" for="a-medien_web">
+            <input id="a-medien_web" type="checkbox" name="medien_web">
+            <span class="antrag__option-text">Vereinswebsite, Social-Media-Kanäle und Vereins-App</span>
+          </label>
+          <label class="formular__checkzeile antrag__option" for="a-medien_presse">
+            <input id="a-medien_presse" type="checkbox" name="medien_presse">
+            <span class="antrag__option-text">Lokale Presseberichte über Vereinsaktivitäten</span>
+          </label>
+          <label class="formular__checkzeile antrag__option" for="a-medien_dokumentation">
+            <input id="a-medien_dokumentation" type="checkbox" name="medien_dokumentation">
+            <span class="antrag__option-text">Dokumentationen von Vereinsveranstaltungen (z. B. Chroniken, Jubiläumshefte)</span>
+          </label>
+          </div>
+        </fieldset>
+        </div>
+        <p class="antrag__hinweis">Nach einem Widerruf werden keine weiteren Veröffentlichungen vorgenommen; bereits veröffentlichte Inhalte bleiben bestehen, soweit eine Löschung nicht möglich oder unzumutbar ist. Grundlage ist Art. 6 Abs. 1 lit. a DSGVO.</p>
+      </section>
+      <section class="antrag__schritt" id="schritt-zahlung" data-schritt="zahlung" aria-labelledby="schritt-zahlung-titel" hidden>
+        <h2 id="schritt-zahlung-titel" tabindex="-1">Beitragszahlung</h2>
+        <fieldset class="antrag__gruppe" data-feld="zahlung" role="radiogroup" aria-required="true">
+          <legend>Wie soll der Beitrag bezahlt werden?</legend>
+          
+          <p class="formular__fehler" id="a-zahlung-fehler" hidden></p>
+          <div class="formular__checkgruppe">
+          <label class="formular__checkzeile antrag__option" for="a-zahlung-sepa">
+            <input id="a-zahlung-sepa" type="radio" name="zahlung" value="sepa">
+            <span class="antrag__option-text">Per SEPA-Lastschrift (empfohlen) <span class="antrag__option-meta">Einzug einmal im Jahr</span></span>
+          </label>
+          <label class="formular__checkzeile antrag__option" for="a-zahlung-rechnung">
+            <input id="a-zahlung-rechnung" type="radio" name="zahlung" value="rechnung">
+            <span class="antrag__option-text">Per Rechnung <span class="antrag__option-meta">3&nbsp;€ Zuschlag im Jahr</span></span>
+          </label>
+          </div>
+        </fieldset>
+        <div class="hinweis hinweis--info" data-wenn="rechnung" hidden>
+          <p>Seite 4 des Formulars (SEPA-Lastschriftmandat) bleibt dann leer. Die Geschäftsstelle schickt eine Rechnung.</p>
+        </div>
+        <div class="antrag__block" data-wenn="sepa" hidden>
+        <fieldset class="antrag__gruppe" data-feld="kontoinhaber" role="radiogroup" aria-required="true">
+          <legend>Wer ist Kontoinhaber?</legend>
+          
+          <p class="formular__fehler" id="a-kontoinhaber-fehler" hidden></p>
+          <div class="formular__checkgruppe">
+          <div data-wenn="volljaehrig" hidden><label class="formular__checkzeile antrag__option" for="a-kontoinhaber-mitglied">
+            <input id="a-kontoinhaber-mitglied" type="radio" name="kontoinhaber" value="mitglied">
+            <span class="antrag__option-text">Das neue Mitglied</span>
+          </label></div>
+          <div data-wenn="minderjaehrig" hidden><label class="formular__checkzeile antrag__option" for="a-kontoinhaber-erziehungsberechtigt">
+            <input id="a-kontoinhaber-erziehungsberechtigt" type="radio" name="kontoinhaber" value="erziehungsberechtigt">
+            <span class="antrag__option-text"><span data-text="eb-name">Die erziehungsberechtigte Person</span> (erziehungsberechtigt)</span>
+          </label></div>
+          <label class="formular__checkzeile antrag__option" for="a-kontoinhaber-andere">
+            <input id="a-kontoinhaber-andere" type="radio" name="kontoinhaber" value="andere">
+            <span class="antrag__option-text">Eine andere Person</span>
+          </label>
+          </div>
+        </fieldset>
+        <fieldset class="antrag__gruppe" data-wenn="konto-andere" hidden>
+          <legend>Kontoinhaberin oder Kontoinhaber</legend>
+          <div class="formular__feld" data-feld="ki_vorname">
+          <label for="a-ki_vorname">Vorname</label>
+          
+          <p class="formular__fehler" id="a-ki_vorname-fehler" hidden></p>
+          <input id="a-ki_vorname" name="ki_vorname" type="text" autocomplete="off" maxlength="40" aria-required="true">
+        </div>
+          <div class="formular__feld" data-feld="ki_nachname">
+          <label for="a-ki_nachname">Nachname</label>
+          
+          <p class="formular__fehler" id="a-ki_nachname-fehler" hidden></p>
+          <input id="a-ki_nachname" name="ki_nachname" type="text" autocomplete="off" maxlength="38" aria-required="true">
+        </div>
+        </fieldset>
+        <div class="antrag__block" data-wenn="konto-fremd" hidden>
+          <fieldset class="antrag__gruppe" data-feld="ki_anschrift">
+          <legend>Anschrift der Kontoinhaberin oder des Kontoinhabers</legend>
+          
+          <p class="formular__fehler" id="a-ki_anschrift-fehler" hidden></p>
+          <div class="formular__checkgruppe">
+          <label class="formular__checkzeile antrag__option" for="a-ki_anschrift_gleich">
+            <input id="a-ki_anschrift_gleich" type="checkbox" name="ki_anschrift_gleich">
+            <span class="antrag__option-text">Wie beim neuen Mitglied</span>
+          </label>
+          </div>
+        </fieldset>
+          <div class="antrag__block" data-wenn="ki-anschrift-eigene" hidden>
+            <div class="formular__feld" data-feld="ki_strasse">
+          <label for="a-ki_strasse">Straße und Hausnummer</label>
+          
+          <p class="formular__fehler" id="a-ki_strasse-fehler" hidden></p>
+          <input id="a-ki_strasse" name="ki_strasse" type="text" autocomplete="off" maxlength="60" aria-required="true">
+        </div>
+            <div class="antrag__zeile">
+              <div class="formular__feld antrag__plz" data-feld="ki_plz">
+          <label for="a-ki_plz">Postleitzahl</label>
+          
+          <p class="formular__fehler" id="a-ki_plz-fehler" hidden></p>
+          <input id="a-ki_plz" name="ki_plz" type="text" autocomplete="off" inputmode="numeric" maxlength="5" aria-required="true">
+        </div>
+              <div class="formular__feld" data-feld="ki_ort">
+          <label for="a-ki_ort">Ort</label>
+          
+          <p class="formular__fehler" id="a-ki_ort-fehler" hidden></p>
+          <input id="a-ki_ort" name="ki_ort" type="text" autocomplete="off" maxlength="50" aria-required="true">
+        </div>
+            </div>
+          </div>
+        </div>
+        <div class="formular__feld" data-feld="iban">
+          <label for="a-iban">IBAN</label>
+          <p class="antrag__hinweis" id="a-iban-hinweis">Deutsche IBAN: DE und 20 Ziffern. Leerzeichen sind egal.</p>
+          <p class="formular__fehler" id="a-iban-fehler" hidden></p>
+          <input id="a-iban" name="iban" type="text" autocomplete="off" maxlength="48" aria-describedby="a-iban-hinweis" aria-required="true" spellcheck="false" autocapitalize="characters" autocorrect="off">
+        </div>
+        <div class="formular__feld" data-feld="bic">
+          <label for="a-bic">BIC <span class="antrag__freiwillig">(freiwillig)</span></label>
+          
+          <p class="formular__fehler" id="a-bic-fehler" hidden></p>
+          <input id="a-bic" name="bic" type="text" autocomplete="off" maxlength="24" spellcheck="false" autocapitalize="characters" autocorrect="off">
+        </div>
+        <div class="formular__feld" data-feld="kreditinstitut">
+          <label for="a-kreditinstitut">Kreditinstitut <span class="antrag__freiwillig">(freiwillig)</span></label>
+          
+          <p class="formular__fehler" id="a-kreditinstitut-fehler" hidden></p>
+          <input id="a-kreditinstitut" name="kreditinstitut" type="text" autocomplete="off" maxlength="60">
+        </div>
+        <p class="antrag__hinweis">Gläubiger: FFV Sportfreunde 04, Gläubiger-ID DE51FFV00000338939, Mandatsreferenz „Beitrag Sportfreunde 04“. Der Jahresbeitrag wird im Februar abgebucht, bei Eintritt im laufenden Jahr im Monat nach dem Beitritt. Innerhalb von acht Wochen ab der Belastung können Sie die Erstattung verlangen.</p>
+        </div>
+      </section>
+      <section class="antrag__schritt" id="schritt-unterschrift" data-schritt="unterschrift" aria-labelledby="schritt-unterschrift-titel" hidden>
+        <h2 id="schritt-unterschrift-titel" tabindex="-1">Unterschreiben</h2>
+        <div class="antrag__block" data-wenn="digital">
+        <div class="formular__feld" data-feld="unterschrift_ort">
+          <label for="a-unterschrift_ort">Ort</label>
+          <p class="antrag__hinweis" id="a-unterschrift_ort-hinweis">Steht mit dem heutigen Datum (<span data-text="heute">heute</span>) neben jeder Unterschrift. Auf Seite 3 ist dafür wenig Platz – bitte ohne Zusätze, z. B. „Kelkheim“ statt „Kelkheim (Taunus)“.</p>
+          <p class="formular__fehler" id="a-unterschrift_ort-fehler" hidden></p>
+          <input id="a-unterschrift_ort" name="unterschrift_ort" type="text" autocomplete="off" maxlength="26" aria-describedby="a-unterschrift_ort-hinweis" aria-required="true">
+        </div>
+        <div class="unterschrift" data-unterschrift="antrag" data-feld="unterschrift_antrag" role="group" aria-labelledby="a-unterschrift_antrag-titel" aria-describedby="a-unterschrift_antrag-hinweis a-unterschrift_antrag-stand">
+          <p class="unterschrift__titel" id="a-unterschrift_antrag-titel"><span data-text="unterschrift-antrag-titel">Unterschrift des neuen Mitglieds</span></p>
+          <p class="antrag__hinweis" id="a-unterschrift_antrag-hinweis"><span data-text="unterschrift-antrag-hinweis">Gilt für den Aufnahmeantrag (Seite 2) und die Einwilligung zu Fotos (Seite 3).</span></p>
+          <p class="formular__fehler" id="a-unterschrift_antrag-fehler" hidden></p>
+          <div class="unterschrift__flaeche">
+            <canvas class="unterschrift__leinwand" role="img" aria-label="Unterschriftsfeld – mit dem Finger, einem Stift oder der Maus unterschreiben"></canvas>
+            <span class="unterschrift__linie" aria-hidden="true"></span>
+          </div>
+          <div class="unterschrift__leiste">
+            <p class="unterschrift__stand" id="a-unterschrift_antrag-stand" aria-live="polite">Noch nicht unterschrieben</p>
+            <button type="button" class="knopf knopf--sekundaer unterschrift__neu">Neu<span class="sr-only"> – Unterschrift für Antrag und Fotos löschen</span></button>
+          </div>
+        </div>
+        </div>
+        <div data-wenn="unterschrift-konto" hidden>
+        <div class="unterschrift" data-unterschrift="konto" data-feld="unterschrift_konto" role="group" aria-labelledby="a-unterschrift_konto-titel" aria-describedby="a-unterschrift_konto-hinweis a-unterschrift_konto-stand">
+          <p class="unterschrift__titel" id="a-unterschrift_konto-titel"><span data-text="unterschrift-konto-titel">Unterschrift der Kontoinhaberin oder des Kontoinhabers</span></p>
+          <p class="antrag__hinweis" id="a-unterschrift_konto-hinweis">Gilt für das SEPA-Lastschriftmandat (Seite 4).</p>
+          <p class="formular__fehler" id="a-unterschrift_konto-fehler" hidden></p>
+          <div class="unterschrift__flaeche">
+            <canvas class="unterschrift__leinwand" role="img" aria-label="Unterschriftsfeld – mit dem Finger, einem Stift oder der Maus unterschreiben"></canvas>
+            <span class="unterschrift__linie" aria-hidden="true"></span>
+          </div>
+          <div class="unterschrift__leiste">
+            <p class="unterschrift__stand" id="a-unterschrift_konto-stand" aria-live="polite">Noch nicht unterschrieben</p>
+            <button type="button" class="knopf knopf--sekundaer unterschrift__neu">Neu<span class="sr-only"> – Unterschrift für das SEPA-Mandat löschen</span></button>
+          </div>
+        </div>
+        </div>
+        <fieldset class="antrag__gruppe" data-feld="papier" aria-describedby="a-papier-hinweis">
+          <legend>Lieber von Hand unterschreiben?</legend>
+          <p class="antrag__hinweis" id="a-papier-hinweis">Dann entsteht das PDF ohne Unterschrift, Ort und Datum. Sie drucken es aus, tragen Ort und Datum ein, unterschreiben auf Papier und geben es ab oder schicken es eingescannt.</p>
+          <p class="formular__fehler" id="a-papier-fehler" hidden></p>
+          <div class="formular__checkgruppe">
+          <label class="formular__checkzeile antrag__option" for="a-unterschrift_papier">
+            <input id="a-unterschrift_papier" type="checkbox" name="unterschrift_papier">
+            <span class="antrag__option-text">Ich unterschreibe den Ausdruck von Hand.</span>
+          </label>
+          </div>
+        </fieldset>
+      </section>
+      <section class="antrag__schritt" id="schritt-pruefen" data-schritt="pruefen" aria-labelledby="schritt-pruefen-titel" hidden>
+        <h2 id="schritt-pruefen-titel" tabindex="-1">Prüfen und PDF erstellen</h2>
+        <p>Bitte prüfen Sie Ihre Angaben. Mit „Ändern“ kommen Sie zum jeweiligen Schritt – nichts geht dabei verloren.</p>
+        <div class="antrag__zusammenfassung" data-zusammenfassung></div>
+        <div class="antrag__ergebnis" data-ergebnis hidden tabindex="-1" aria-labelledby="antrag-ergebnis-titel">
+          <h3 id="antrag-ergebnis-titel">Ihr Antrag ist fertig</h3>
+          <p><span data-text="datei-name"></span> <span class="meta" data-text="datei-info"></span></p>
+          <p class="knopfzeile">
+            <button type="button" class="knopf" data-aktion="teilen" hidden>PDF teilen, z. B. per Mail</button>
+            <button type="button" class="knopf" data-aktion="herunterladen">PDF herunterladen</button>
+            <button type="button" class="knopf knopf--sekundaer" data-aktion="ansehen">PDF ansehen</button>
+          </p>
+          <p class="antrag__meldung" data-meldung aria-live="polite"></p>
+          <h3>So kommt der Antrag zum Verein</h3>
+          <ol class="antrag__anleitung">
+            <li>Sehen Sie sich das PDF einmal an und speichern Sie es – herunterladen oder am Handy teilen.</li>
+            <li>Schreiben Sie eine E-Mail an <a class="mail" href="mailto:geschaeftsstelle@sportfreunde04.de">geschaeftsstelle<wbr>@sportfreunde04.de</a> mit dem Betreff „Aufnahmeantrag“. Der Knopf unten bereitet sie vor.</li>
+            <li>Hängen Sie das PDF an und senden Sie die E-Mail ab. Die vorbereitete E-Mail enthält den Anhang noch nicht.</li>
+          </ol>
+          <p class="knopfzeile">
+            <a class="knopf knopf--sekundaer" href="mailto:geschaeftsstelle@sportfreunde04.de?subject=Aufnahmeantrag&amp;body=Hallo%2C%0A%0Aanbei%20der%20online%20ausgef%C3%BCllte%20und%20unterschriebene%20Aufnahmeantrag%20als%20PDF.%0A%0AViele%20Gr%C3%BC%C3%9Fe" data-aktion="mail">E-Mail an die Geschäftsstelle vorbereiten</a>
+          </p>
+          <div class="hinweis hinweis--info" data-wenn="papier" hidden>
+            <p>Sie unterschreiben von Hand: Bitte das PDF ausdrucken, auf Seite 2 und 3 <span data-wenn="sepa" hidden>sowie für das SEPA-Mandat auf Seite 4</span> Ort und Datum eintragen und unterschreiben, dann im Vereinsheim abgeben oder eingescannt per E-Mail schicken.</p>
+          </div>
+          <div class="hinweis hinweis--info" data-wenn="azubi" hidden>
+            <p>Bitte den Ausbildungs- oder Studiennachweis mitschicken.</p>
+          </div>
+          <p class="antrag__hinweis">Das gespeicherte PDF enthält alle Angaben, auch IBAN und Unterschrift. Es bleibt auf Ihrem Gerät, bis Sie es löschen – nach dem Senden können Sie es löschen.</p>
+          <p><button type="button" class="knopf knopf--sekundaer" data-aktion="loeschen">Alle Angaben löschen</button></p>
+        </div>
+      </section>
+        <p class="antrag__arbeitet" data-arbeitet aria-live="polite" hidden></p>
+        <div class="antrag__navigation">
+          <button type="button" class="knopf knopf--sekundaer" data-zurueck hidden>Zurück</button>
+          <button type="submit" class="knopf" data-weiter>Weiter</button>
+        </div>
+      </form>
+      <template id="antrag-familie-vorlage">
+        <fieldset class="antrag__gruppe antrag__familie-eintrag" data-familie-eintrag>
+          <legend>Familienmitglied <span data-familie-nummer>1</span></legend>
+          <div class="formular__feld" data-feld="fam_vorname___N__">
+          <label for="a-fam_vorname___N__">Vorname</label>
+          
+          <p class="formular__fehler" id="a-fam_vorname___N__-fehler" hidden></p>
+          <input id="a-fam_vorname___N__" name="fam_vorname___N__" type="text" autocomplete="off" maxlength="40" aria-required="true">
+        </div>
+          <div class="formular__feld" data-feld="fam_nachname___N__">
+          <label for="a-fam_nachname___N__">Nachname</label>
+          
+          <p class="formular__fehler" id="a-fam_nachname___N__-fehler" hidden></p>
+          <input id="a-fam_nachname___N__" name="fam_nachname___N__" type="text" autocomplete="off" maxlength="40" aria-required="true">
+        </div>
+          <fieldset class="antrag__gruppe antrag__datum" data-feld="fam_geb___N__" aria-describedby="a-fam_geb___N__-hinweis">
+          <legend>Geburtsdatum</legend>
+          <p class="antrag__hinweis" id="a-fam_geb___N__-hinweis">Tag, Monat und Jahr, zum Beispiel 27 3 2015</p>
+          <p class="formular__fehler" id="a-fam_geb___N__-fehler" hidden></p>
+          <div class="antrag__datum-felder">
+            <div class="formular__feld antrag__datum-teil">
+              <label for="a-fam_geb___N___tag">Tag</label>
+              <input id="a-fam_geb___N___tag" name="fam_geb___N___tag" type="text" inputmode="numeric" aria-required="true" maxlength="2" autocomplete="off">
+            </div>
+            <div class="formular__feld antrag__datum-teil">
+              <label for="a-fam_geb___N___monat">Monat</label>
+              <input id="a-fam_geb___N___monat" name="fam_geb___N___monat" type="text" inputmode="numeric" aria-required="true" maxlength="2" autocomplete="off">
+            </div>
+            <div class="formular__feld antrag__datum-teil antrag__datum-teil--jahr">
+              <label for="a-fam_geb___N___jahr">Jahr</label>
+              <input id="a-fam_geb___N___jahr" name="fam_geb___N___jahr" type="text" inputmode="numeric" aria-required="true" maxlength="4" autocomplete="off">
+            </div>
+          </div>
+        </fieldset>
+          <p><button type="button" class="knopf knopf--sekundaer antrag__entfernen" data-familie-entfernen><span>Familienmitglied <span data-familie-nummer>1</span> entfernen</span></button></p>
+        </fieldset>
+      </template>
+      <p class="antrag__hinweis antrag__alternative">Lieber auf Papier? <a href="https://cdn.appack.de/sportfreunde04/pdf/Vereinsanmeldung%20allgemein_NEU_9-2026%20%20(1).pdf" target="_blank" rel="noopener">Aufnahmeantrag als PDF</a> (zum Ausdrucken).</p>
+    </div>
+  </div>
+</section>
+<script type="application/json" id="antrag-konfiguration">{"vorlage":{"url":"https://cdn.appack.de/sportfreunde04/pdf/Vereinsanmeldung%20allgemein_NEU_9-2026%20%20(1).pdf","sha256":"ce9c37c0f01b6cfffeb09f9c306d403e48ea2220b3f4178315a75ff245866edf","bytes":217968,"seiten":4,"seitenformat":{"breite":595.32,"hoehe":841.92,"name":"A4"},"formularfelder":0},"vorgaben":{"schrift":"Helvetica","schriftgroesse":11,"min_schriftgroesse":7,"farbe_rgb":[0,0,0],"grundlinie_ueber_linie":2.6,"anpassung":"Erst auf 'breite' einpassen; würde die Schrift dabei kleiner als 9 pt, 'breite_max' (falls vorhanden) nutzen; sonst bis min_schriftgroesse verkleinern. Gemessen wird so, wie pdf-lib zeichnet: bei der Standardschrift Helvetica ohne Unterschneidung (Kerning), also als Summe der Einzelzeichenbreiten. Felder mit 'zeilen_max' werden umbrochen statt weiter verkleinert.","untergrenze_schriftgroesse":6,"untergrenze_hinweis":"Kleiner soll kein Eintrag werden; das Web-Formular weist zu lange Angaben vorher ab (Prüfung mit den Zeichenbreiten aus data/aufnahmeantrag-schriftbreiten.json).","kreuz":{"strichstaerke":1.1,"einzug":0.9,"form":"zwei Diagonalen im Innenquadrat"},"zellen":{"schrift":"Helvetica","schriftgroesse":11,"hinweis":"Zeichen einzeln auf die Zellenmitte zentrieren"},"unterschrift":{"leinwand_seitenverhaeltnis":4,"hinweis":"PNG mit transparentem Hintergrund, vor dem Einsetzen auf die Tinte zuschneiden"}},"felder":{"s1.fussball.jugendlicher":{"typ":"kreuz","seite":1,"beschriftung":"Fußball: Jugendlicher (inkl. A-Jugend)","x":32.5,"y":556.42,"breite":6.5,"hoehe":6.25,"mitte":[35.75,559.54],"zeichen":"❑","aussen":{"x0":32,"x1":40.75,"y0":554.67,"y1":563.42}},"s1.fussball.erwachsener":{"typ":"kreuz","seite":1,"beschriftung":"Fußball: Erwachsener","x":209.75,"y":556.42,"breite":6.5,"hoehe":6.25,"mitte":[213,559.54],"zeichen":"❑","aussen":{"x0":209.25,"x1":218,"y0":554.67,"y1":563.42}},"s1.fussball.passiv":{"typ":"kreuz","seite":1,"beschriftung":"Fußball: Passive/Frauen/Rentner (ab 65. Lebensj.)","x":315.75,"y":556.42,"breite":6.5,"hoehe":6.25,"mitte":[319,559.54],"zeichen":"❑","aussen":{"x0":315.25,"x1":324,"y0":554.67,"y1":563.42}},"s1.fussball.familie":{"typ":"kreuz","seite":1,"beschriftung":"Fußball: Familienbeitrag","x":32.5,"y":542.67,"breite":6.5,"hoehe":6.25,"mitte":[35.75,545.79],"zeichen":"❑","aussen":{"x0":32,"x1":40.75,"y0":540.92,"y1":549.67}},"s1.karneval.kinder":{"typ":"kreuz","seite":1,"beschriftung":"Karneval: Kinder- und Jugendlicher (bis 17. Lebensj.)","x":32.5,"y":487.42,"breite":6.5,"hoehe":6.25,"mitte":[35.75,490.55],"zeichen":"❑","aussen":{"x0":32,"x1":40.75,"y0":485.67,"y1":494.42}},"s1.karneval.erwachsener":{"typ":"kreuz","seite":1,"beschriftung":"Karneval: Erwachsener","x":315.75,"y":487.42,"breite":6.5,"hoehe":6.25,"mitte":[319,490.55],"zeichen":"❑","aussen":{"x0":315.25,"x1":324,"y0":485.67,"y1":494.42}},"s1.karneval.rentner":{"typ":"kreuz","seite":1,"beschriftung":"Karneval: Rentner (ab 65. Lebensj.)","x":422,"y":487.42,"breite":6.5,"hoehe":6.25,"mitte":[425.25,490.55],"zeichen":"❑","aussen":{"x0":421.5,"x1":430.25,"y0":485.67,"y1":494.42}},"s1.karneval.familie":{"typ":"kreuz","seite":1,"beschriftung":"Karneval: Familienbeitrag","x":32.5,"y":468.67,"breite":6.5,"hoehe":6.25,"mitte":[35.75,471.8],"zeichen":"❑","aussen":{"x0":32,"x1":40.75,"y0":466.92,"y1":475.67}},"s1.karneval.azubi":{"typ":"kreuz","seite":1,"beschriftung":"Karneval: Auszubildende/Studierende (mit Nachweis)","x":174.25,"y":468.67,"breite":6.5,"hoehe":6.25,"mitte":[177.5,471.8],"zeichen":"❑","aussen":{"x0":173.75,"x1":182.5,"y0":466.92,"y1":475.67}},"s1.karneval.senator":{"typ":"kreuz","seite":1,"beschriftung":"Karneval: Senatorenmitgliedschaft","x":422,"y":468.67,"breite":6.5,"hoehe":6.25,"mitte":[425.25,471.8],"zeichen":"❑","aussen":{"x0":421.5,"x1":430.25,"y0":466.92,"y1":475.67}},"s1.nachname":{"typ":"text","seite":1,"beschriftung":"Nachname","x":147.1,"y":430.02,"breite":146,"schriftgroesse":11,"min_schriftgroesse":7,"ausrichtung":"links","linie":{"x0":145.1,"x1":295.1,"y":427.42,"staerke":0.5},"richtwert_zeichen":{"bei_schriftgroesse":26,"hoechstens":41}},"s1.vorname":{"typ":"text","seite":1,"beschriftung":"Vorname","x":309.21,"y":430.02,"breite":146,"schriftgroesse":11,"min_schriftgroesse":7,"ausrichtung":"links","linie":{"x0":307.21,"x1":457.21,"y":427.42,"staerke":0.5},"breite_max":255.79,"richtwert_zeichen":{"bei_schriftgroesse":26,"hoechstens":73}},"s1.strasse":{"typ":"text","seite":1,"beschriftung":"Straße und Haus-Nr.","x":145.42,"y":411.02,"breite":308,"schriftgroesse":11,"min_schriftgroesse":7,"ausrichtung":"links","linie":{"x0":143.42,"x1":455.42,"y":408.42,"staerke":0.5},"breite_max":419.58,"richtwert_zeichen":{"bei_schriftgroesse":56,"hoechstens":119}},"s1.plz_ort":{"typ":"text","seite":1,"beschriftung":"PLZ und Wohnort","x":145.42,"y":392.27,"breite":308,"schriftgroesse":11,"min_schriftgroesse":7,"ausrichtung":"links","linie":{"x0":143.42,"x1":455.42,"y":389.67,"staerke":0.5},"breite_max":419.58,"richtwert_zeichen":{"bei_schriftgroesse":56,"hoechstens":119}},"s1.geburtsdatum.tag":{"typ":"text","seite":1,"beschriftung":"Geburtsdatum Tag (TT)","x":152.42,"y":373.52,"breite":17,"schriftgroesse":11,"min_schriftgroesse":7,"ausrichtung":"mitte","linie":{"x0":143.42,"x1":161.42,"y":370.92,"staerke":0.5},"richtwert_zeichen":{"bei_schriftgroesse":3,"hoechstens":4}},"s1.geburtsdatum.monat":{"typ":"text","seite":1,"beschriftung":"Geburtsdatum Monat (MM)","x":173.42,"y":373.52,"breite":17,"schriftgroesse":11,"min_schriftgroesse":7,"ausrichtung":"mitte","linie":{"x0":164.42,"x1":182.42,"y":370.92,"staerke":0.5},"richtwert_zeichen":{"bei_schriftgroesse":3,"hoechstens":4}},"s1.geburtsdatum.jahr":{"typ":"text","seite":1,"beschriftung":"Geburtsdatum Jahr (JJJJ)","x":209.42,"y":373.52,"breite":47,"schriftgroesse":11,"min_schriftgroesse":7,"ausrichtung":"mitte","linie":{"x0":185.42,"x1":233.42,"y":370.92,"staerke":0.5},"richtwert_zeichen":{"bei_schriftgroesse":8,"hoechstens":13}},"s1.telefon":{"typ":"text","seite":1,"beschriftung":"Telefon","x":145.42,"y":354.77,"breite":122,"schriftgroesse":11,"min_schriftgroesse":7,"ausrichtung":"links","linie":{"x0":143.42,"x1":269.42,"y":352.17,"staerke":0.5},"breite_max":130.58,"richtwert_zeichen":{"bei_schriftgroesse":22,"hoechstens":37}},"s1.mobil":{"typ":"text","seite":1,"beschriftung":"Tel. mobil","x":393.27,"y":354.77,"breite":122,"schriftgroesse":11,"min_schriftgroesse":7,"ausrichtung":"links","linie":{"x0":391.27,"x1":517.27,"y":352.17,"staerke":0.5},"breite_max":171.73,"richtwert_zeichen":{"bei_schriftgroesse":22,"hoechstens":49}},"s1.email":{"typ":"text","seite":1,"beschriftung":"E-Mail","x":145.42,"y":335.77,"breite":254,"schriftgroesse":11,"min_schriftgroesse":7,"ausrichtung":"links","linie":{"x0":143.42,"x1":401.42,"y":333.17,"staerke":0.5},"breite_max":419.58,"richtwert_zeichen":{"bei_schriftgroesse":46,"hoechstens":119}},"s1.satzung":{"typ":"kreuz","seite":1,"beschriftung":"Satzung zur Kenntnis genommen","x":32.5,"y":311.17,"breite":6.5,"hoehe":6.25,"mitte":[35.75,314.3],"zeichen":"❑","aussen":{"x0":32,"x1":40.75,"y0":309.42,"y1":318.17}},"s2.familie":{"typ":"familie","seite":2,"beschriftung":"Familienmitglieder bei Familienbeitrag (je Spalte ein Mitglied: Name, Vorname / Geburtsdatum)","schriftgroesse":10,"min_schriftgroesse":6.5,"spalten":[{"x":108,"breite":130},{"x":245,"breite":130},{"x":382,"breite":130}],"zeilen":{"name":{"y":235},"geburtsdatum":{"y":206.9}},"max_im_kasten":3,"kasten":{"x0":29.8,"x1":568.6,"y0":202.82,"y1":245.32,"unterstrich_name_y":232.72},"frei_name":{"x0":66,"x1":516,"hinweis":"zwischen gedrucktem „Name,“ (bis 62,8) und „Vorname:“ (ab 519,1)"},"frei_geburtsdatum":{"x0":106,"x1":567},"erweiterung":{"hinweis":"Mitglied 4–6 unter dem Kasten (freie Fläche bis „Ort, Datum“), gleiche Spalten, eigene kleine Beschriftung","beschriftung_x":31.2,"beschriftung_groesse":8,"beschriftung_name":"Name, Vorname:","beschriftung_geburtsdatum":"Geburtsdatum:","zeilen":{"name":{"y":184},"geburtsdatum":{"y":170}},"max":3,"frei":{"y0":142,"y1":200}}},"s2.ort_datum":{"typ":"text","seite":2,"beschriftung":"Ort, Datum (Aufnahmeantrag)","x":97.12,"y":131.02,"breite":122,"schriftgroesse":11,"min_schriftgroesse":7,"ausrichtung":"links","linie":{"x0":95.12,"x1":221.12,"y":128.42,"staerke":0.5},"breite_max":140.88,"richtwert_zeichen":{"bei_schriftgroesse":22,"hoechstens":40}},"s2.unterschrift":{"typ":"unterschrift","seite":2,"beschriftung":"Unterschrift Aufnahmeantrag","x":312,"y":126.42,"breite":232,"hoehe":40,"seitenverhaeltnis":5.8,"linie":{"x0":310.87,"x1":545.12,"y":128.42},"einpassen":"Tinte zuschneiden, proportional einpassen (contain), links unten ausrichten","hinweis":"bei Minderjährigen Erziehungsberechtigte/r (auf dem Formular nicht ausdrücklich genannt)"},"s3.medien.intern":{"typ":"kreuz","seite":3,"beschriftung":"Vereinsinterne Publikationen","x":32.75,"y":598.17,"breite":7,"hoehe":7,"mitte":[36.25,601.67],"zeichen":"☐","aussen":{"x0":32,"x1":40.25,"y0":597.42,"y1":605.92}},"s3.medien.web":{"typ":"kreuz","seite":3,"beschriftung":"Vereinswebseite, Social-Media-Kanäle und Vereins-APP","x":32.75,"y":562.17,"breite":7,"hoehe":7,"mitte":[36.25,565.67],"zeichen":"☐","aussen":{"x0":32,"x1":40.25,"y0":561.42,"y1":569.92}},"s3.medien.presse":{"typ":"kreuz","seite":3,"beschriftung":"Lokale Presseberichte","x":32.75,"y":526.17,"breite":7,"hoehe":7,"mitte":[36.25,529.67],"zeichen":"☐","aussen":{"x0":32,"x1":40.25,"y0":525.42,"y1":533.92}},"s3.medien.dokumentation":{"typ":"kreuz","seite":3,"beschriftung":"Dokumentationen von Vereinsveranstaltungen","x":32.75,"y":490.17,"breite":7,"hoehe":7,"mitte":[36.25,493.67],"zeichen":"☐","aussen":{"x0":32,"x1":40.25,"y0":489.42,"y1":497.92}},"s3.einwilligung.ja":{"typ":"kreuz","seite":3,"beschriftung":"Ja, ich willige in die Veröffentlichung ein","x":32.75,"y":220.17,"breite":7,"hoehe":7,"mitte":[36.25,223.67],"zeichen":"☐","aussen":{"x0":32,"x1":40.25,"y0":219.42,"y1":227.92}},"s3.einwilligung.nein":{"typ":"kreuz","seite":3,"beschriftung":"Nein, ich willige nicht ein","x":32.75,"y":184.17,"breite":7,"hoehe":7,"mitte":[36.25,187.67],"zeichen":"☐","aussen":{"x0":32,"x1":40.25,"y0":183.42,"y1":191.92}},"s3.ort_datum":{"typ":"text","seite":3,"beschriftung":"Ort, Datum (Einwilligung)","x":94.12,"y":147.52,"breite":114,"schriftgroesse":11,"min_schriftgroesse":6,"ausrichtung":"links","linie":{"x0":92.12,"x1":212.12,"y":144.92,"staerke":0.5},"richtwert_zeichen":{"bei_schriftgroesse":20,"hoechstens":38}},"s3.unterschrift":{"typ":"unterschrift","seite":3,"beschriftung":"Unterschrift Mitglied (bei Minderjährigen Erziehungsberechtigte/r)","x":321,"y":142.92,"breite":180,"hoehe":30,"seitenverhaeltnis":6,"linie":{"x0":320.81,"x1":416.56,"y":144.92},"einpassen":"Tinte zuschneiden, proportional einpassen (contain), links unten ausrichten","hinweis":"gedruckte Linie nur 320,8–416,6 (96 pt); Rahmen reicht bis 501 (Breite des Klammerhinweises darunter)"},"s3.zusatz_mitglied":{"typ":"text","seite":3,"zusatz":true,"beschriftung":"Zusatz (nicht im Formular): Name des Mitglieds, damit Seite 3 zuordenbar bleibt","x":31.2,"y":127.92,"breite":270,"schriftgroesse":8,"min_schriftgroesse":6.5,"ausrichtung":"links","zeilen_max":3,"zeilenabstand":1.2,"hinweis":"gleiche Grundlinie wie der Klammerhinweis rechts (ab x 313,5); optional; weitere Zeilen darunter (je schriftgroesse × zeilenabstand)","richtwert_zeichen":{"bei_schriftgroesse":67,"hoechstens":83}},"s4.kontoinhaber.name":{"typ":"text","seite":4,"beschriftung":"Kontoinhaber Name","x":174.85,"y":656.77,"breite":134,"schriftgroesse":11,"min_schriftgroesse":7,"ausrichtung":"links","linie":{"x0":172.85,"x1":310.85,"y":654.17,"staerke":0.5},"richtwert_zeichen":{"bei_schriftgroesse":24,"hoechstens":38}},"s4.kontoinhaber.vorname":{"typ":"text","seite":4,"beschriftung":"Kontoinhaber Vorname","x":318.85,"y":656.77,"breite":110,"schriftgroesse":11,"min_schriftgroesse":7,"ausrichtung":"links","linie":{"x0":316.85,"x1":430.85,"y":654.17,"staerke":0.5},"breite_max":246.15,"richtwert_zeichen":{"bei_schriftgroesse":20,"hoechstens":70}},"s4.strasse":{"typ":"text","seite":4,"beschriftung":"Kontoinhaber Straße und Haus-Nr.","x":174.85,"y":637.02,"breite":248,"schriftgroesse":11,"min_schriftgroesse":7,"ausrichtung":"links","linie":{"x0":172.85,"x1":424.85,"y":634.42,"staerke":0.5},"breite_max":390.15,"richtwert_zeichen":{"bei_schriftgroesse":45,"hoechstens":111}},"s4.plz_ort":{"typ":"text","seite":4,"beschriftung":"Kontoinhaber PLZ und Ort","x":174.85,"y":617.27,"breite":248,"schriftgroesse":11,"min_schriftgroesse":7,"ausrichtung":"links","linie":{"x0":172.85,"x1":424.85,"y":614.67,"staerke":0.5},"breite_max":390.15,"richtwert_zeichen":{"bei_schriftgroesse":45,"hoechstens":111}},"s4.mitglied":{"typ":"text","seite":4,"beschriftung":"Name des Mitglieds bei Nichtkontoinhaber bzw. Schüler und Jugendlicher","x":299.06,"y":524.27,"breite":320,"schriftgroesse":11,"min_schriftgroesse":7,"ausrichtung":"mitte","linie":{"x0":137.06,"x1":461.06,"y":521.67,"staerke":0.5},"richtwert_zeichen":{"bei_schriftgroesse":58,"hoechstens":91}},"s4.kreditinstitut":{"typ":"text","seite":4,"beschriftung":"Kreditinstitut","x":33.2,"y":237.77,"breite":224,"schriftgroesse":11,"min_schriftgroesse":7,"ausrichtung":"links","linie":{"x0":31.2,"x1":259.2,"y":235.17,"staerke":0.5},"breite_max":531.8,"richtwert_zeichen":{"bei_schriftgroesse":40,"hoechstens":151}},"s4.bic":{"typ":"zellen","seite":4,"beschriftung":"BIC (8 + 3 Stellen)","y":186.77,"schriftgroesse":11,"ausrichtung":"mitte","zellen":[{"x":63.5,"breite":6},{"x":75.5,"breite":6},{"x":87.5,"breite":6},{"x":99.5,"breite":6},{"x":111.5,"breite":6},{"x":123.5,"breite":6},{"x":135.5,"breite":6},{"x":147.5,"breite":6},{"x":161.89,"breite":6},{"x":173.93,"breite":6},{"x":185.93,"breite":6}],"anzahl":11,"linie_y":184.17,"gruppen":[8,3]},"s4.iban":{"typ":"zellen","seite":4,"beschriftung":"IBAN ohne „DE“ (2 Prüfziffern + 18 Stellen)","y":153.27,"schriftgroesse":11,"ausrichtung":"mitte","zellen":[{"x":97.79,"breite":6},{"x":109.79,"breite":6},{"x":124.16,"breite":6},{"x":136.16,"breite":6},{"x":148.16,"breite":6},{"x":160.27,"breite":6},{"x":174.55,"breite":6},{"x":186.55,"breite":6},{"x":198.55,"breite":6},{"x":210.55,"breite":6},{"x":224.94,"breite":6},{"x":236.94,"breite":6},{"x":248.94,"breite":6},{"x":260.94,"breite":6},{"x":275.44,"breite":6},{"x":287.44,"breite":6},{"x":299.44,"breite":6},{"x":311.44,"breite":6},{"x":325.72,"breite":6},{"x":337.72,"breite":6}],"anzahl":20,"linie_y":150.67,"vorgedruckt":"DE","gruppen":[2,4,4,4,4,2]},"s4.ort_datum":{"typ":"text","seite":4,"beschriftung":"Ort, Datum (SEPA-Mandat)","x":33.2,"y":119.52,"breite":188,"schriftgroesse":11,"min_schriftgroesse":7,"ausrichtung":"links","linie":{"x0":31.2,"x1":223.2,"y":116.92,"staerke":0.5},"breite_max":311.8,"richtwert_zeichen":{"bei_schriftgroesse":34,"hoechstens":89}},"s4.unterschrift":{"typ":"unterschrift","seite":4,"beschriftung":"Unterschrift des Kontoinhabers","x":351,"y":114.92,"breite":190,"hoehe":38,"seitenverhaeltnis":5,"linie":{"x0":349.87,"x1":541.87,"y":116.92},"einpassen":"Tinte zuschneiden, proportional einpassen (contain), links unten ausrichten"},"s2.zusatz_unterzeichner":{"typ":"text","seite":2,"zusatz":true,"beschriftung":"Zusatz: unterschreibende erziehungsberechtigte Person (Seite 2)","x":312,"y":115.2,"breite":232,"schriftgroesse":8,"min_schriftgroesse":6,"ausrichtung":"links"},"s3.zusatz_unterzeichner":{"typ":"text","seite":3,"zusatz":true,"beschriftung":"Zusatz: unterschreibende erziehungsberechtigte Person (Seite 3)","x":313.5,"y":117,"breite":188,"schriftgroesse":8,"min_schriftgroesse":6,"ausrichtung":"links","zeilen_max":2,"zeilenabstand":1.2}},"schriftbreiten":{"breiten":{"191":"'","223":"ijlįĵĺļłſƖƚǐǰȷɉḭḷḹḻḽẛỉị‘’‚‛","260":"|¦ǀ","278":" !,./:;I[\\]ft ÌÍÎÏìíîïĨĩĪīĬĭĮİıţŧƗƫƭǃǏȈȉȊȋțḟḬḮḯṫṭṯṱẗỈỊ","292":"ľ","334":"()-`r{}¡¨­²³´·¸¹ŀŕŗřȑȓɍṙṛṝṟ‐“”„‹›","350":"ȴ","351":"•","355":"\"","366":"º","368":"ȶ","371":"ª","375":"ť","381":"ƪ","390":"*","400":"°","414":"ǁ","437":"ȝ","444":"ĳ","452":"ǉ","454":"ɂ","459":"ƽ","470":"^","487":"ƾ","500":"JcksvxyzçýÿćĉċčĴķĸśŝşšŷźżžƈƙƛƨƴƶǩșȥȳȼȿɀɈɏḉḱḳḵṡṣṥṧṩṽṿẋẍẏẑẓẕẙỳỵỷỹ","538":"¶","545":"ƹƺǯȜ","553":"¯","557":"#$0123456789?L_abdeghnopqu¢£¤¥§«»àáâãäåèéêëðñòóôõöùúûüþāăąđēĕėęěĝğġģĥħĹĻĽĿŁńņňŋōŏőũūŭůűųƀƃƅƌƍƒƞƥƻƼƿǎǒǔǖǘǚǜǝǟǡǥǧǫǭǵǹǻȁȃȅȇȍȏȕȗȟȧȩȫȭȯȱȽɇɋḁḃḅḇḋḍḏḑḓḕḗḙḛḝḡḣḥḧḩḫḶḸḺḼṅṇṉṋṍṏṑṓṕṗṳṵṷṹṻẖẚạảấầẩẫậắằẳẵặẹẻẽếềểễệọỏốồổỗộụủ‒–†‡€","566":"ȣ","577":"µ","581":"Ɂ","584":"+\u003c=>~¬±×÷ǂ","605":"ŉƐȢ","611":"FTZ¿ßøŢŤŦŹŻŽƑƬƮƵƷƸǮǿȚȤȾḞṪṬṮṰẐẒẔ","615":"ď","619":"ƩǷ","625":"Ɣ","656":"ơớờởỡợ","657":"ƂƄƋ","667":"&ABEKPSVXYÀÁÂÃÄÅÈÉÊËÝÞĀĂĄĒĔĖĘĚĶŚŜŞŠŶŸƎƘƦƧǍǞǠǨǺȀȂȄȆȘȦȨȲȺɃɆɎḀḂḄḆḔḖḘḚḜḰḲḴṔṖṠṢṤṦṨṼṾẊẌẎẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼẾỀỂỄỆỲỴỶỸ","668":"ƣɅ","670":"ưứừửữự","682":"ȡ","685":"ȵ","703":"ẞ","707":"Ƞ","723":"CDHNRUwÇÐÑÙÚÛÜĆĈĊČĎĐĤĦŃŅŇŔŖŘŨŪŬŮŰŲŵƆƇƉƝƲǓǕǗǙǛǸȐȒȔȖȞȻɄɌḈḊḌḎḐḒḢḤḦḨḪṄṆṈṊṘṚṜṞṲṴṶṸṺẁẃẅẇẉẘỤỦ","724":"Ŋ","735":"Ĳ","737":"©®","738":"Ɋ","748":"Ʊ","753":"Ə","755":"Ƥ","759":"Ɓ","771":"ǌ","773":"Ƴ","778":"GOQÒÓÔÕÖØĜĞĠĢŌŎŐƓƟǑǤǦǪǬǴǾȌȎȪȬȮȰḠṌṎṐṒỌỎỐỒỔỖỘ","810":"Ɗ","834":"Mm¼½¾ǈḾḿṀṁṂṃ","855":"ƯỨỪỬỮỰ","858":"ƠỚỜỞỠỢ","869":"Ƣ","881":"ƕ","887":"ȸȹ","890":"%æǣǽ","891":"Ɯ","944":"WœŴẀẂẄẆẈ","945":"ǋ","1000":"ÆŒǢǼ—―…‰™","1016":"@","1035":"Ƕ","1049":"ǆǳ","1063":"Ǉ","1223":"ǅǊǲ","1334":"ǄǱ"},"ersatz":1000},"versand":{"art":"manuell"},"verein":"FFV Sportfreunde 04","mail":"geschaeftsstelle@sportfreunde04.de"}</script>
+<script src="../assets/js/antrag/aufnahmeantrag.js" defer></script>
+</main>
+<footer class="ws-fuss">
+  <div data-nur-prototyp>
+  <p>Prototyp · Testumgebung, keine Live-Seite · Inhalte Stand Montag, 28. September 2026</p>
+  </div>
+</footer>
+</body>
+</html>

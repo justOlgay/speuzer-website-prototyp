@@ -25,14 +25,17 @@
     "vorstand-pdf": "node tools/vorstand-pdf/bauen.mjs",
     "app-optik": "node tools/app-optik/vorschau.mjs",
     "tpl-vorschau": "node tools/app-optik/tpl-vorschau.mjs",
-    "tpl-bauen": "node tools/app-optik/tpl-bauen.mjs"
+    "tpl-bauen": "node tools/app-optik/tpl-bauen.mjs",
+    "antrag-bibliotheken": "node tools/antrag-bibliotheken.mjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@pdf-lib/fontkit": "1.1.1",
     "axe-core": "^4.13.0",
     "lighthouse": "^13.4.1",
+    "pdf-lib": "1.17.1",
     "puppeteer-core": "^25.10.0",
     "qrcode": "^1.5.4"
   }

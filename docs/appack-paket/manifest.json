@@ -6,9 +6,14 @@
   },
   "dateien": [
     {
+      "datei": "web/aufnahmeantrag.html",
+      "bytes": 62580,
+      "sha256": "67a85a18dcfbd90e58c390077331d8ac56ad1143bfe290b51a5c1c4a9646a496"
+    },
+    {
       "datei": "web/datenschutz.html",
-      "bytes": 62235,
-      "sha256": "aa2b8611fe050bce501df9a3545af74b83db643e0881b22a517455ee364cd7c9"
+      "bytes": 63893,
+      "sha256": "b21baa96efb52e3449d5633a8bf86fdff338d3a0bc284ac4bbadcdac07125fd7"
     },
     {
       "datei": "web/formular-gesendet.html",
@@ -87,8 +92,8 @@
     },
     {
       "datei": "web/mitglied-werden.html",
-      "bytes": 15203,
-      "sha256": "347810ff52d34e8f5b7b82595c7b8b6ddfcfa612d197375dfb38e84d1cb7cab7"
+      "bytes": 15254,
+      "sha256": "00fd90bcc05448bbee6f382a44360f82102d8ac45a9265222d9cde9ec19ba652"
     },
     {
       "datei": "web/shop.html",
@@ -167,8 +172,8 @@
     },
     {
       "datei": "web/verein-downloads.html",
-      "bytes": 8850,
-      "sha256": "8e6b96f74e5f0792dbb64a45fcbfdc4889f22bc4075f4a6aa75248556c729b26"
+      "bytes": 9207,
+      "sha256": "970eb5db3f0c646e0fd6689efcdac1455939798f57a2d922943bcea198c53c67"
     },
     {
       "datei": "web/verein-karneval.html",
@@ -201,9 +206,24 @@
       "sha256": "77e12e41efbc1692f7f945de8619997ed24dfecbcbedecd021e2035b6f7b154e"
     },
     {
+      "datei": "web/aufnahmeantrag-fontkit.min.js",
+      "bytes": 760110,
+      "sha256": "75dffb571d80687fc2a0bfa8be1a738b4590595d3907834ae75fd969eec8903c"
+    },
+    {
+      "datei": "web/aufnahmeantrag-pdf-lib.min.js",
+      "bytes": 526692,
+      "sha256": "e0112b917b1f741a1b00e685a9a7980b4afd4de78893fffdfb4c5b61e775fd7e"
+    },
+    {
+      "datei": "web/aufnahmeantrag.js",
+      "bytes": 82435,
+      "sha256": "e29dc436ed1d6aa0a19742af403bd437555fc30fb1af1e2bdb42b67e594665e0"
+    },
+    {
       "datei": "web/site.css",
-      "bytes": 35621,
-      "sha256": "8e19ff3c1bf7a0a4db5a54f0c6635af338ec77882fca1378e659e98aa41f1150"
+      "bytes": 42711,
+      "sha256": "66ac46e5638b55f2dd3f43c5ee370954fbb6d48ddcfe8895b3bd3940c65e4503"
     }
   ]
 }

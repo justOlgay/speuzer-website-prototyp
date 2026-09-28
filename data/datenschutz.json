@@ -1,6 +1,6 @@
 {
-  "stand": "24.09.2026",
-  "quelle": "Datenschutzerklärung der Vereins-App (cdn.appack.de), Fassung vom 17.07.2026, für Website und App ergänzt am 24.09.2026 (Hosting, GitHub Pages, Online-Aufnahmeantrag, Links, Fotos, Aufsichtsbehörde)",
+  "stand": "28.09.2026",
+  "quelle": "Datenschutzerklärung der Vereins-App (cdn.appack.de), Fassung vom 17.07.2026, für Website und App ergänzt am 24.09.2026 (Hosting, GitHub Pages, Online-Aufnahmeantrag, Links, Fotos, Aufsichtsbehörde) und am 28.09.2026 (Aufnahmeantrag online auf der Website)",
   "hinweis": "Fragen beantwortet die Geschäftsstelle.",
   "abschnitte": [
     {
@@ -227,7 +227,9 @@
     {
       "titel": "14. Online-Aufnahmeantrag",
       "absaetze": [
-        "Den Aufnahmeantrag können Sie online über ein Formular der Plattform appack stellen. Dabei verarbeiten wir die Angaben aus dem Formular: Vor- und Nachname, Geburtsdatum, Anschrift, Telefonnummer, E-Mail-Adresse, gewählte Sparte (Fußball, Karneval), gegebenenfalls weitere Familienmitglieder sowie für das SEPA-Lastschriftmandat Kontoinhaber, IBAN, Kreditinstitut und Unterschrift.",
+        "In der Vereins-App können Sie den Aufnahmeantrag über ein Formular der Plattform appack stellen. Dabei verarbeiten wir die Angaben aus dem Formular: Vor- und Nachname, Geburtsdatum, Anschrift, Telefonnummer, E-Mail-Adresse, gewählte Sparte (Fußball, Karneval), gegebenenfalls weitere Familienmitglieder sowie für das SEPA-Lastschriftmandat Kontoinhaber, IBAN, Kreditinstitut und Unterschrift.",
+        "Auf der Website füllen Sie den Aufnahmeantrag auf der Seite „Aufnahmeantrag online“ aus. Aus Ihren Angaben und Ihrer Unterschrift erzeugt Ihr Browser das Antragsformular des Vereins als PDF, und zwar auf Ihrem Gerät. Das PDF enthält dieselben Angaben wie das Papierformular, dazu Ihre Entscheidung zur Veröffentlichung von Fotos und Namen. Die Angaben werden dabei weder an den Verein noch an appack oder andere Dritte übertragen. Die Seite speichert keine Angaben, auch nicht im Browser; beim Schließen oder Neuladen der Seite sind sie gelöscht. Unabhängig davon kann Ihr Browser über seine eigene Funktion zum automatischen Ausfüllen anbieten, Angaben wie Anschrift oder Bankverbindung zu speichern – ob Sie das zulassen, entscheiden Sie in Ihrem Browser. Für das Erzeugen lädt Ihr Browser nur die leere Antragsvorlage und die nötigen Programmdateien von cdn.appack.de (siehe „12. Hosting von Website und App“), bei Namen mit besonderen Schriftzeichen außerdem eine Schriftdatei über GitHub Pages (siehe „13. Schriften, Bilder, Spielpläne und Kalender über GitHub Pages“).",
+        "Der Verein erhält den Antrag erst, wenn Sie das PDF selbst senden, zum Beispiel als Anhang einer E-Mail an die Geschäftsstelle, oder ausgedruckt abgeben. Die vorbereitete E-Mail enthält keine Angaben aus dem Formular. Für die E-Mail gilt „4. Kontaktmöglichkeiten“. Das gespeicherte PDF enthält alle Angaben einschließlich Bankverbindung und Unterschrift und bleibt auf Ihrem Gerät, bis Sie es löschen; nach dem Senden können Sie es löschen.",
         "Wir verwenden diese Daten ausschließlich zur Bearbeitung des Antrags, zur Mitgliederverwaltung und zum Einzug der Beiträge (Art. 6 Abs. 1 lit. b DSGVO). Nach dem Ende der Mitgliedschaft löschen wir die Daten, soweit keine gesetzlichen Aufbewahrungsfristen (z. B. für Buchungsbelege) entgegenstehen."
       ]
     },

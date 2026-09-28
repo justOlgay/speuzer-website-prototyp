@@ -48,3 +48,11 @@ wie bei Inter, siehe Hinweis oben); anders als bei Inter liegen hier trotzdem
 zwei gleichnamige Dateien und zwei @font-face-Regeln (font-weight 400 bzw.
 700) in huelle.css, weil die Hülle die Vorlage 1:1 nachbildet, nicht das
 Gestaltungssystem des übrigen Prototyps.
+
+Liberation Sans Regular (28.09.2026): liberation-sans-regular.ttf, nur für
+den Aufnahmeantrag online (PDF-Erzeugung im Browser, eingebettet nur bei
+Namen mit Zeichen außerhalb der PDF-Standardschrift Helvetica, z. B. Ş, ğ,
+ı, Ł). Liberation Fonts 2.1.5, unverändert; SIL Open Font License,
+Version 1.1, mit den Reserved Font Names „Liberation“, „Arimo“, „Tinos“ und
+„Cousine“. Copyright-Vermerke, Lizenztext, Herkunft und Prüfsumme:
+LIZENZ-liberation-sans.txt in diesem Ordner.

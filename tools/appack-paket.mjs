@@ -49,8 +49,20 @@ const ZIEL_WORKSPACE_ORDNER = "https://cdn.appack.de/sportfreunde04/workspace/we
 const AUSGESCHLOSSENE_DATEIEN = new Set(["styleguide.html"]);
 // 28.09.2026: 39 (+ formular-gesendet.html, Bestätigung nach dem Absenden
 // der Mitgliedsbescheinigung), das Paket entsprechend 38. Am selben Tag 40
-// (+ termine.html, Menüpunkt „Termine“), das Paket entsprechend 39.
-const ERWARTETE_WS_DATEIEN = 40;
+// (+ termine.html, Menüpunkt „Termine“), das Paket entsprechend 39, dann 41
+// (+ aufnahmeantrag.html, Aufnahmeantrag online), das Paket entsprechend 40.
+const ERWARTETE_WS_DATEIEN = 41;
+
+// Skripte im Workspace-Ordner (28.09.2026, Aufnahmeantrag online): Anders
+// als Schriften und Bilder (GitHub Pages) liegen die Skripte der Seite
+// aufnahmeantrag.html selbst im Ordner web/ – eigener Code und pdf-lib/
+// fontkit, keine Laufzeit-Abhängigkeit von einem fremden CDN. Quelle ist
+// docs/assets/js/antrag/*.js (aus assets/js/antrag/, siehe LIZENZ.txt dort);
+// Verweise "../assets/js/antrag/<datei>.js" in src/data-* werden auf
+// "<datei>.js" umgeschrieben (gleicher Ordner wie die Seite), bevor das
+// allgemeine Muster unten sie auf GitHub Pages umlenken würde.
+const WEB_SKRIPTE_DIR = path.join(DOCS, "assets", "js", "antrag");
+const WEB_SKRIPT_MUSTER = /(?<=[\s<])(src|data-[a-zA-Z-]+)="\.\.\/assets\/js\/antrag\/([a-z0-9][a-z0-9.-]*\.js)"/g;
 
 // canonical/og:url: statt der GitHub-Pages-Prototyp-Adresse zeigt das Paket
 // auf die künftige Live-Adresse im appack-Workspace (W3, Abschnitt 7,
@@ -154,6 +166,14 @@ function schreibeSeiteUm(html, dateiname, zaehler) {
   // data-nur-prototyp-Blöcke entfernen (W2, siehe oben).
   let ergebnis = wandleAusgabemodusUm(html, zaehler);
 
+  // 0b) Skripte des Aufnahmeantrags: gleicher Ordner wie die Seite (siehe
+  // WEB_SKRIPT_MUSTER oben).
+  ergebnis = ergebnis.replace(WEB_SKRIPT_MUSTER, (_treffer, attribut, datei) => {
+    zaehler.webSkripte.add(datei);
+    zaehler.webSkriptVerweise += 1;
+    return `${attribut}="${datei}"`;
+  });
+
   // 1) site.css: gleicher Ordner wie die Seite selbst, kein "../assets/" mehr.
   const cssTreffer = ergebnis.match(SITE_CSS_LINK_MUSTER) ?? [];
   if (cssTreffer.length !== 1) {
@@ -219,6 +239,12 @@ function pruefeAusgabe(dateiname, html, paketDateien) {
   for (const ziel of seitenLinks) {
     if (!paketDateien.has(ziel)) {
       throw new Error(`${dateiname}: relativer Seitenlink 'href=\"${ziel}\"' zeigt auf keine Datei im Paket`);
+    }
+  }
+  const skriptVerweise = [...html.matchAll(/(?<=[\s<])(?:src|data-[a-zA-Z-]+)="([a-z0-9][a-z0-9.-]*\.js)"/g)].map((m) => m[1]);
+  for (const ziel of skriptVerweise) {
+    if (!paketDateien.has(ziel)) {
+      throw new Error(`${dateiname}: relativer Skriptverweis '${ziel}' zeigt auf keine Datei im Paket`);
     }
   }
 }
@@ -312,6 +338,25 @@ Widgets sind bei FUSSBALL.DE nur für die Domain \`cdn.appack.de\` freigegeben �
 lokal oder auf GitHub Pages zeigen sie eine Fehlermeldung von FUSSBALL.DE, das
 ist kein Seitenfehler (siehe \`tools/appack-paket-pruefen.mjs\`).
 
+## Skripte für den Aufnahmeantrag online (28.09.2026)
+
+\`aufnahmeantrag.html\` lädt ihre Skripte aus demselben Ordner \`web\`:
+\`aufnahmeantrag.js\` (Formular, Unterschriften, PDF-Erzeugung) sofort,
+\`aufnahmeantrag-pdf-lib.min.js\` (pdf-lib 1.17.1, MIT) nach dem ersten
+Schritt im Hintergrund und \`aufnahmeantrag-fontkit.min.js\` (@pdf-lib/fontkit
+1.1.1, MIT) nur beim Erstellen des PDF, wenn ein Name Zeichen außerhalb von
+Helvetica enthält. Lizenzhinweise stehen jeweils am Dateianfang, Herkunft in
+\`assets/js/antrag/LIZENZ.txt\`. Die Schrift für Namen mit Zeichen
+außerhalb von Helvetica (\`liberation-sans-regular.ttf\`, SIL OFL 1.1) kommt
+wie alle Schriften von GitHub Pages. Die Vorlage selbst ist das
+Vereins-PDF in der Mediathek
+(\`cdn.appack.de/sportfreunde04/pdf/Vereinsanmeldung…\`); die Seite prüft
+Größe und SHA-256 gegen \`data/aufnahmeantrag-felder.json\` gleich beim
+Aufruf; wurde die Datei im CMS ersetzt, blendet sie das Formular aus und
+bietet den Papierweg an (dann Vermessung erneuern). Beim Anlegen
+der Skripte im Workspace darauf achten, dass cdn.appack.de sie als
+JavaScript ausliefert (\`curl -I …/web/aufnahmeantrag.js\`, Content-Type).
+
 ## Datenschutz
 
 \`datenschutz.html\` nennt seit W3b die FUSSBALL.DE-Widgets als Drittanbieter
@@ -385,10 +430,14 @@ function main() {
   rmSync(PAKET_DIR, { recursive: true, force: true });
   mkdirSync(WEB_DIR, { recursive: true });
 
-  const paketDateien = new Set([...htmlDateien, "site.css"]);
+  const webSkripte = existsSync(WEB_SKRIPTE_DIR)
+    ? readdirSync(WEB_SKRIPTE_DIR).filter((d) => d.endsWith(".js")).sort()
+    : [];
+  const paketDateien = new Set([...htmlDateien, "site.css", ...webSkripte]);
   const zaehler = {
     cssLink: 0, href: 0, src: 0, srcset: 0, content: 0, poster: 0, dataStern: 0, cssUrl: 0,
     nurAppackHidden: 0, nurPrototyp: 0, canonical: 0, ogUrl: 0,
+    webSkripte: new Set(), webSkriptVerweise: 0,
   };
   const manifestEintraege = [];
   let gesamtBytes = 0;
@@ -405,6 +454,18 @@ function main() {
     const bytes = Buffer.byteLength(umgeschrieben, "utf8");
     gesamtBytes += bytes;
     manifestEintraege.push({ datei: `web/${dateiname}`, bytes, sha256: sha256(umgeschrieben) });
+  }
+
+  // Skripte des Aufnahmeantrags unverändert in den Ordner web/ (siehe
+  // WEB_SKRIPTE_DIR oben); jede Datei muss von einer Seite verwendet werden.
+  for (const datei of webSkripte) {
+    if (!zaehler.webSkripte.has(datei)) {
+      throw new Error(`docs/assets/js/antrag/${datei}: von keiner Seite verwendet – nicht ins Paket`);
+    }
+    const inhalt = readFileSync(path.join(WEB_SKRIPTE_DIR, datei));
+    writeFileSync(path.join(WEB_DIR, datei), inhalt);
+    gesamtBytes += inhalt.length;
+    manifestEintraege.push({ datei: `web/${datei}`, bytes: inhalt.length, sha256: sha256(inhalt) });
   }
 
   const css = readFileSync(SITE_CSS_QUELLE, "utf8");
@@ -432,7 +493,7 @@ function main() {
   writeFileSync(LIESMICH_PFAD, liesmich, "utf8");
 
   console.log("=== appack-paket.mjs: Zusammenfassung ===");
-  console.log(`Dateien: ${manifestEintraege.length} (${htmlDateien.length} HTML + 1 site.css)`);
+  console.log(`Dateien: ${manifestEintraege.length} (${htmlDateien.length} HTML + 1 site.css + ${webSkripte.length} Skripte)`);
   console.log(`Bytes gesamt: ${gesamtBytes}`);
   console.log("Ausgabemodus (W2):");
   console.log(`  data-nur-appack: "hidden" entfernt (jetzt sichtbar): ${zaehler.nurAppackHidden}×`);
@@ -446,6 +507,7 @@ function main() {
   console.log(`  poster="../assets/…" -> absolute Adresse: ${zaehler.poster}`);
   console.log(`  data-*="../assets/…" -> absolute Adresse: ${zaehler.dataStern}`);
   console.log(`  site.css: url("../fonts/…") -> absolute Adresse: ${zaehler.cssUrl}`);
+  console.log(`  Skripte "../assets/js/antrag/…" -> gleicher Ordner: ${zaehler.webSkriptVerweise} (${[...zaehler.webSkripte].join(", ")})`);
   console.log(`  canonical -> ${ZIEL_WORKSPACE_ORDNER}<datei>: ${zaehler.canonical}`);
   console.log(`  og:url -> ${ZIEL_WORKSPACE_ORDNER}<datei>: ${zaehler.ogUrl}`);
   console.log(`Ausgeschlossen: ${[...AUSGESCHLOSSENE_DATEIEN].join(", ")} (${AUSGESCHLOSSENE_DATEIEN.size} Datei(en), nicht im Paket)`);

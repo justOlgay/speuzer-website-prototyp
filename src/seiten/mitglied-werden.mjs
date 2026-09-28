@@ -238,12 +238,12 @@ function ablaufAbschnitt(daten) {
       </li>
       <li>
         <div class="schritt__inhalt" data-nur-web>
-          <p>Aufnahmeantrag als PDF herunterladen, ausfüllen und unterschreiben – dann per E-Mail an die Geschäftsstelle schicken oder im Vereinsheim abgeben.</p>
+          <p>Aufnahmeantrag online ausfüllen und am Bildschirm unterschreiben – daraus entsteht das fertige PDF für die E-Mail an die Geschäftsstelle.</p>
           <p class="knopfzeile">
-            ${downloadKnopf(aufnahmeantrag, "Aufnahmeantrag (PDF)")}
-            <a class="knopf knopf--sekundaer" href="${escapeHtml(AUFNAHMEANTRAG_MAILTO)}">Per E-Mail senden</a>
+            <a class="knopf" href="${PFAD}aufnahmeantrag/">Online ausfüllen</a>
+            ${downloadKnopf(aufnahmeantrag, "PDF zum Ausdrucken")}
           </p>
-          <p class="meta">In der Vereins-App lässt sich der Antrag auch online ausfüllen (Menü › Mitglied werden).</p>
+          <p class="meta">Lieber auf Papier? PDF ausdrucken, ausfüllen, unterschreiben und im Vereinsheim abgeben oder <a href="${escapeHtml(AUFNAHMEANTRAG_MAILTO)}">per E-Mail an die Geschäftsstelle senden</a>.</p>
         </div>
         <div class="schritt__inhalt" data-nur-app hidden>
           <p>Aufnahmeantrag ausfüllen – online oder als PDF.</p>
@@ -273,8 +273,11 @@ function unterlagenKarte(titel, liste, extraHtml = "") {
     </div>`;
 }
 
-// Seit 28.09.2026 nur noch im App-Modus verlinkt (Website: PDF + E-Mail,
-// AUFNAHMEANTRAG_MAILTO in hilfen.mjs). W2: löst den früheren Formularentwurf (assets/js/formular.js) ab – der
+// Seit 28.09.2026 nur noch im App-Modus verlinkt. Auf der Website führt
+// „Online ausfüllen“ auf die eigene Seite /aufnahmeantrag/
+// (src/seiten/aufnahmeantrag.mjs: Formular, Unterschrift, fertiges PDF),
+// daneben stehen das PDF zum Ausdrucken und der E-Mail-Weg
+// (AUFNAHMEANTRAG_MAILTO in hilfen.mjs). W2: löst den früheren Formularentwurf (assets/js/formular.js) ab – der
 // Antrag läuft über das appack-Formular des Vereins (speichert in ein
 // Worksheet, Bestätigung per E-Mail an die Geschäftsstelle), verlinkt direkt
 // in Schritt 2 der Ablauf-Liste (siehe ablaufAbschnitt() oben).

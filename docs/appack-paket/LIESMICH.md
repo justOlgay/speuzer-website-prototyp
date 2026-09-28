@@ -74,6 +74,25 @@ Widgets sind bei FUSSBALL.DE nur für die Domain `cdn.appack.de` freigegeben –
 lokal oder auf GitHub Pages zeigen sie eine Fehlermeldung von FUSSBALL.DE, das
 ist kein Seitenfehler (siehe `tools/appack-paket-pruefen.mjs`).
 
+## Skripte für den Aufnahmeantrag online (28.09.2026)
+
+`aufnahmeantrag.html` lädt ihre Skripte aus demselben Ordner `web`:
+`aufnahmeantrag.js` (Formular, Unterschriften, PDF-Erzeugung) sofort,
+`aufnahmeantrag-pdf-lib.min.js` (pdf-lib 1.17.1, MIT) nach dem ersten
+Schritt im Hintergrund und `aufnahmeantrag-fontkit.min.js` (@pdf-lib/fontkit
+1.1.1, MIT) nur beim Erstellen des PDF, wenn ein Name Zeichen außerhalb von
+Helvetica enthält. Lizenzhinweise stehen jeweils am Dateianfang, Herkunft in
+`assets/js/antrag/LIZENZ.txt`. Die Schrift für Namen mit Zeichen
+außerhalb von Helvetica (`liberation-sans-regular.ttf`, SIL OFL 1.1) kommt
+wie alle Schriften von GitHub Pages. Die Vorlage selbst ist das
+Vereins-PDF in der Mediathek
+(`cdn.appack.de/sportfreunde04/pdf/Vereinsanmeldung…`); die Seite prüft
+Größe und SHA-256 gegen `data/aufnahmeantrag-felder.json` gleich beim
+Aufruf; wurde die Datei im CMS ersetzt, blendet sie das Formular aus und
+bietet den Papierweg an (dann Vermessung erneuern). Beim Anlegen
+der Skripte im Workspace darauf achten, dass cdn.appack.de sie als
+JavaScript ausliefert (`curl -I …/web/aufnahmeantrag.js`, Content-Type).
+
 ## Datenschutz
 
 `datenschutz.html` nennt seit W3b die FUSSBALL.DE-Widgets als Drittanbieter
@@ -116,8 +135,9 @@ hier nur dokumentiert (W3-Spezifikation Abschnitt 5), nicht umgesetzt:
 - Facebook-Link der Fußzeile zeigt auf eine andere Adresse als
   `kontakt.html` (Worksheet-Pflege, macht der Auftraggeber im CMS).
 
-## Dateien (40)
+## Dateien (44)
 
+- web/aufnahmeantrag.html
 - web/datenschutz.html
 - web/formular-gesendet.html
 - web/impressum.html
@@ -157,4 +177,7 @@ hier nur dokumentiert (W3-Spezifikation Abschnitt 5), nicht umgesetzt:
 - web/verein-ueber-uns.html
 - web/verein-vorstand.html
 - web/verein.html
+- web/aufnahmeantrag-fontkit.min.js
+- web/aufnahmeantrag-pdf-lib.min.js
+- web/aufnahmeantrag.js
 - web/site.css

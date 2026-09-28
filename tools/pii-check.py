@@ -22,6 +22,10 @@ TEXT_ENDUNGEN = {
 # Whitelist: die beiden Vereins-Festnetznummern (Geschäftsstelle, Platzwart) in allen Schreibweisen,
 # inklusive der kompakten Schreibweise ohne Leerzeichen, wie sie in tel:-Links (href) steht (P1: Fußbereich)
 WHITELIST_TELEFON = {
+    # Nachbesserung 28.09.2026: die Ziffernfolge 0–9 ist keine Telefonnummer – sie steht in
+    # der Zeichenbreiten-Tabelle des Aufnahmeantrags (data/aufnahmeantrag-schriftbreiten.json,
+    # alle Ziffern sind gleich breit) und damit auch in der Seite aufnahmeantrag.html.
+    "0123456789",
     "+49 69 736868",
     "+49 69 732193",
     "069 736868",
@@ -67,6 +71,14 @@ ERLAUBTE_EMAIL_DOMAINS = ("sportfreunde04.de",)
 ERLAUBTE_EMAIL_ADRESSEN = {"info@vmapit.de", "ffvsportfreunde04@t-online.de"}
 
 VERBOTENE_DATEINAMEN_TEILE = ["WhatsApp", "IMG-2026", "IMG-2025", "IMG-2024"]
+
+# Aufnahmeantrag online (28.09.2026): unveränderter Fremdcode (pdf-lib,
+# @pdf-lib/fontkit, siehe assets/js/antrag/LIZENZ.txt und
+# tools/antrag-bibliotheken.mjs). Die minifizierten Bündel enthalten
+# Zeichenfolgen wie "0123456789", die das Telefonmuster als Fehltreffer
+# meldet; Vereinsdaten stehen darin nicht. Nur diese Dateinamen, egal ob unter
+# assets/, docs/assets/ oder docs/appack-paket/web/.
+FREMDCODE_DATEIEN = {"aufnahmeantrag-pdf-lib.min.js", "aufnahmeantrag-fontkit.min.js"}
 # "Mannheim" stand hier ursprünglich als generischer Demodaten-Marker; P5
 # bringt mit dem App-Projektpartner vmapit GmbH (data/sponsoren.json) eine
 # echte, öffentliche Firmenadresse in Mannheim ins Projekt – klarer
@@ -141,7 +153,7 @@ def main():
             if not pfad.is_file():
                 continue
             pruefe_dateinamen(pfad, treffer)
-            if not ist_text_datei(pfad):
+            if not ist_text_datei(pfad) or pfad.name in FREMDCODE_DATEIEN:
                 continue
             pfad_rel = str(pfad.relative_to(ROOT))
             try:
