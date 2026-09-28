@@ -994,6 +994,22 @@
   text-wrap: wrap;
 }
 
+/* Winterhalle (28.09.2026, data/teams.json trainingHinweis): leise Zeile
+   unter den Trainingszeiten, Haus-Symbol in Vereinsblau – sichtbar, aber kein
+   weiterer Hinweiskasten. Gleiche Zeile in der App (Mannschaften-App.html). */
+.trainings-hinweis {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  max-width: 62ch;
+}
+
+.trainings-hinweis svg {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  color: var(--blau-700);
+}
+
 /* ==========================================================================
    Personen-Karte
    ========================================================================== */

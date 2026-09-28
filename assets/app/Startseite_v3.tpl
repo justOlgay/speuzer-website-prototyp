@@ -20,12 +20,14 @@
    1. ruhige Bühne in Vereinsblau wie die Website-Startseite (Wappen als
       Wasserzeichen, Satz „Fußball im Gallus – seit 1904.“), darin klein die
       Begrüßung (Gäste: Pille „Anmelden“);
-   2. „Termine“: weiße Karte mit den nächsten drei Spielen/Veranstaltungen
-      (ohne Trainings) in kompakten Zeilen, die über die gerundete
+   2. „Termine“: weiße Karte mit den nächsten zwei Spielen/Veranstaltungen
+      und EINER Zeile für alle Trainings („Heute Training · A-Jugend · E1 …“,
+      in den Ferien „Herbstferien · Training wieder ab …“; ohne lesbaren
+      Trainingskalender drei Spiele/Veranstaltungen), die über die gerundete
       Oberkante des hellen Blatts in die Bühne ragt (Info-Panel). Daten aus
-      dem öffentlichen appack-Kalender mit dem Embedded-Token (gültig bis
-      21.08.2027, Erneuern siehe Skript „Termine“); bei Ausfall nur die
-      Zeile „Alle Termine im Kalender ›“;
+      den öffentlichen appack-Kalendern mit dem Embedded-Token (gültig bis
+      21.08.2027, Erneuern siehe assets/app/LIESMICH.md, Abschnitt
+      „Termine“); bei Ausfall nur die Zeile „Alle Termine im Kalender ›“;
    3. auf dem hellen Blatt der leise Parkplatzhinweis und zwei Handlungen;
    4. ganz unten die „Bande“ auf einem Fußstreifen im Blau der Bühne (das
       Blatt liegt unten genauso gerundet darauf): weiße Logo-Tafeln der
@@ -606,15 +608,18 @@ svg { display: block; flex: 0 0 auto; }
 /* Wunsch der 1. Vorsitzenden (25.09.2026): Kalendertermine direkt unter
    der Bühne, „zumindest kleiner als vorher“ (vorher: eine große Karte „Als
    Nächstes“ mit einem Termin, gut 95px je Termin). Jetzt eine weiße Karte
-   mit bis zu drei kompakten Zeilen (Datumskachel, Titel ein-/zweizeilig,
-   Tag und Uhrzeit; 56–71px je Termin, Karte mit drei Terminen etwa
-   215–260px), die wie ein Info-Panel über die Oberkante des Blatts in die
-   Bühne ragt. Die ganze Karte ist Teil des Blatts (gleiche Breite wie
-   Hinweis und Knöpfe). Mehrere Termine am selben Tag: Kachel nur beim
-   ersten; ein Termin von heute hat eine gefüllte Kachel. Beim Laden drei
-   ruhige Platzhalter-Zeilen in genau der Höhe echter Zeilen; bei Fehler
-   oder ohne Termine schrumpft die Karte auf eine einzige Zeile „Alle
-   Termine im Kalender ›“ (.termine-karte--kurz, kein leerer Kasten). */
+   mit zwei kompakten Zeilen (Datumskachel, Titel ein-/zweizeilig, Tag und
+   Uhrzeit; 56–71px je Termin) und der einzeiligen Trainingszeile (44px) –
+   höchstens etwa 234px (ohne lesbaren Trainingskalender drei Zeilen wie
+   bisher, höchstens etwa 261px) –, die wie ein Info-Panel über die
+   Oberkante des Blatts in die Bühne ragt. Die ganze Karte ist Teil des
+   Blatts (gleiche Breite wie Hinweis und Knöpfe). Mehrere Termine am
+   selben Tag: Kachel nur beim ersten; ein Termin von heute hat eine
+   gefüllte Kachel, eine Veranstaltung eine blau umrandete. Beim Laden zwei
+   ruhige Platzhalter-Zeilen und die Trainingszeile in der Höhe echter
+   Zeilen; bei Fehler oder ohne Termine schrumpft die Karte auf eine
+   einzige Zeile „Alle Termine im Kalender ›“ (.termine-karte--kurz, kein
+   leerer Kasten). */
 .termine-karte {
   position: relative;
   margin-top: calc(-1 * var(--ueberlappung));
@@ -773,7 +778,11 @@ svg { display: block; flex: 0 0 auto; }
    beim Eintreffen der Daten nichts springt; die dritte Zeile mit
    einzeiligem Titel wie echte kurze Zeilen */
 .termin--platzhalter { min-height: 71px; }
-.termin--platzhalter:nth-last-child(2) { min-height: 56px; }
+/* dritte Platzhalter-Zeile in Form und Höhe der Trainingszeile */
+.termin--platzhalter.termin--platzhalter-training { min-height: 44px; margin-top: var(--sp-1); padding-block: 0; background: var(--blau-50); }
+.termin--platzhalter-training .termin__datum { visibility: hidden; height: 20px; }
+.termin--platzhalter-training .platzhalter-balken { background: var(--blau-100); }
+.termine-liste:has(.termin--platzhalter-training) { padding-bottom: 0; }
 
 .platzhalter-balken {
   display: block;
@@ -784,6 +793,56 @@ svg { display: block; flex: 0 0 auto; }
 
 .platzhalter-balken + .platzhalter-balken { margin-top: 8px; }
 .platzhalter-balken--klein { height: 9px; }
+
+/* Veranstaltung (Fest, Stand, Versammlung, Karneval): Kachel blau umrandet
+   und „Veranstaltung“ vor dem Tag – fällt zwischen den Spielen auf, ohne
+   laut zu sein. */
+.termin__art { font-weight: 600; color: var(--blau-700); }
+.termin--veranstaltung .termin__datum:not(.termin__datum--heute) {
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--blau-700);
+}
+
+/* Trainingszeile (28.09.2026): alle Trainings in EINER leisen Zeile am Fuß
+   der Karte, hellblau unterlegt, 44px hoch – „Heute Training · A-Jugend ·
+   E1 …“ bzw. der nächste Trainingstag, in den Ferien „Herbstferien ·
+   Training wieder ab …“. Die Spiele und Veranstaltungen darüber bleiben die
+   Hauptsache. Passt die Zeile nicht, kürzt das Skript gemessen („+3“,
+   „· 6 Teams“); Bildschirmleser hören den ganzen Satz. */
+.termine-liste--mit-training { padding-bottom: 0; }
+.termin-training { margin-top: var(--sp-1); }
+.termin-training__link {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+  padding: 6px 10px 6px var(--sp-4);
+  background: var(--blau-50);
+  color: var(--ink-2);
+  font-size: 13.5px;
+  line-height: 1.3;
+  text-decoration: none;
+  transition: background-color 120ms ease-out;
+}
+.termin-training__link:active { background: var(--blau-100); }
+.termin-training__symbol {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--kachel);
+  color: var(--blau-700);
+}
+.termin-training__symbol svg { width: 18px; height: 18px; }
+.termin-training__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.termin-training__lead { font-weight: 600; color: var(--blau-950); }
+.termin-training__link > svg { width: 16px; height: 16px; color: var(--ink-3); }
 
 /* Rückfall: eine ruhige Zeile statt der Liste */
 .termine-karte--kurz .termine-kopf { display: none; }
@@ -967,56 +1026,79 @@ svg { display: block; flex: 0 0 auto; }
 <div class="blatt">
   <div class="rahmen">
 
-    <!-- TERMINE: die nächsten drei Spiele/Veranstaltungen aus dem
-         öffentlichen Kalender (ohne Trainings), siehe Skript „Termine“.
-         Tippen öffnet den Kalender. Bis die Daten da sind, stehen drei
-         ruhige Platzhalter-Zeilen; bei Fehler/ohne Termine eine Zeile
-         „Alle Termine im Kalender ›“. -->
+    <!-- TERMINE: die nächsten zwei Spiele/Veranstaltungen (eine anstehende
+         Veranstaltung hat immer einen Platz) und darunter EINE leise Zeile
+         für alle Trainings; ist der Trainingskalender nicht lesbar, drei
+         Spiele/Veranstaltungen. Siehe Skript „Termine“. Tippen öffnet die
+         Terminseite. Bis die Daten da sind, stehen ruhige Platzhalter in
+         Höhe echter Zeilen; bei Fehler/ohne Termine eine Zeile „Alle Termine
+         im Kalender ›“. -->
     <section id="termine" class="termine-karte" aria-labelledby="termine-titel">
       <div class="termine-kopf">
         <h2 id="termine-titel" class="termine-kopf__titel">Termine</h2>
-        <a class="termine-kopf__link" href="nav://sportfreunde04_Application_1780401660369">Alle<span class="vh"> Termine</span><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></a>
+        <a id="termine-alle" class="termine-kopf__link" href="nav://sportfreunde04_Application_1780401660369">Alle<span class="vh"> Termine</span><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></a>
       </div>
       <ul id="termine-liste" class="termine-liste" aria-busy="true">
         <li class="termin termin--platzhalter" aria-hidden="true"><span class="termin__datum"></span><span class="termin__text"><span class="platzhalter-balken" style="width:82%"></span><span class="platzhalter-balken" style="width:54%"></span><span class="platzhalter-balken platzhalter-balken--klein" style="width:34%"></span></span></li>
-        <li class="termin termin--platzhalter" aria-hidden="true"><span class="termin__datum"></span><span class="termin__text"><span class="platzhalter-balken" style="width:76%"></span><span class="platzhalter-balken" style="width:48%"></span><span class="platzhalter-balken platzhalter-balken--klein" style="width:34%"></span></span></li>
         <li class="termin termin--platzhalter" aria-hidden="true"><span class="termin__datum"></span><span class="termin__text"><span class="platzhalter-balken" style="width:70%"></span><span class="platzhalter-balken platzhalter-balken--klein" style="width:34%"></span></span></li>
+        <li class="termin termin--platzhalter termin--platzhalter-training" aria-hidden="true"><span class="termin__datum"></span><span class="termin__text"><span class="platzhalter-balken platzhalter-balken--klein" style="width:62%"></span></span></li>
         <li class="vh">Termine werden geladen</li>
       </ul>
     <script>
-    // ---------- Termine (öffentlicher Kalender) ----------
+    // ---------- Termine (öffentliche Kalender) ----------
     // Direkt hinter der Karte statt im Skript am Seitenende: die Abfrage
     // startet so sofort und wartet nicht auf jQuery/Workbook vom cdn (kürzer
     // sichtbare Platzhalter).
     (function () {
       "use strict";
 
-      // Quelle: appack-GraphQL, listUpcomingCalendarEvents für das
-      // Kalendermodul der App. Nicht über graphApi – das braucht eine
-      // Anmeldung (Gäste: HTTP 401) –, sondern mit dem ÖFFENTLICHEN
-      // Embedded-Token, den appack selbst beim Aufruf der öffentlichen
-      // Kalenderansicht https://shorturl.appack.de/sportfreunde04_Application_1780401660369
+      // Quelle: appack-GraphQL mit dem ÖFFENTLICHEN Embedded-Token, den
+      // appack selbst beim Aufruf der öffentlichen Kalenderansicht
+      // https://shorturl.appack.de/sportfreunde04_Application_1780401660369
       // in die Weiterleitungsadresse schreibt (Scope „embedded“, technischer
-      // Nutzer der App, keine Personendaten, geprüft 25.09.2026). Er liefert
-      // nur die öffentlichen Kalender (heute: „Spielplan Mannschaften“ und
-      // „Speuzer D3 – Spiele und Training (Pilot)“, künftig „Vereinstermine“
-      // für Veranstaltungen). CORS: der Server erlaubt die Herkunft
-      // https://appack.de (drender) samt Kopfzeile Authorization (Vorabfrage
-      // geprüft 25.09.2026). Der Token ist öffentlich (appack liefert ihn
-      // jedem Besucher der Kalenderansicht aus) und darf deshalb hier und im
-      // Repo stehen. GÜLTIG BIS 21.08.2027 (Feld „exp“ im Token).
-      // Erneuern: die Kurzadresse oben im Browser öffnen; die Adresse nach
-      // der Weiterleitung enthält „jwt=eyJ…“ – den Teil nach „jwt=“ (bis zum
-      // nächsten „&“) hier bei TERMINE_TOKEN einsetzen und das Ablaufdatum
-      // in diesem Kommentar und in assets/app/LIESMICH.md nachziehen.
-      // Abgelaufen oder gesperrt: die Karte zeigt nur „Alle Termine im
-      // Kalender ›“ (kein Fehlerbild).
+      // Nutzer der App, keine Personendaten). Nicht über graphApi – das
+      // braucht eine Anmeldung (Gäste: HTTP 401). CORS: der Server erlaubt
+      // die Herkunft https://appack.de (drender) samt Kopfzeile
+      // Authorization (geprüft 25.09. und 28.09.2026). Der Token ist
+      // öffentlich und darf hier und im Repo stehen; GÜLTIG BIS 21.08.2027.
+      // Token, Kalender-Ids, trainingsfreie Zeiten und Mannschaften stehen im
+      // Block unten und kommen aus data/termine.json bzw. data/teams.json
+      // (npm run tpl-bauen) – dort pflegen, nicht hier. Abgelaufen oder
+      // gesperrt: die Karte zeigt still nur „Alle Termine im Kalender ›“.
+      //
+      // Seit 28.09.2026 nicht mehr listUpcomingCalendarEvents: sobald die
+      // Trainings (25–35 je Woche) öffentlich sind, lieferte das fast nur
+      // Trainings. Stattdessen:
+      //  1. listCalendarByComponentId: die Kalender des Terminmoduls, nur die
+      //     mit canRead=true (ein nicht lesbarer Kalender in der Abfrage ließe
+      //     sie ganz scheitern; „Vorstand (intern)“ fällt so weg). Fällt die
+      //     Liste aus, gelten BEKANNTE_KALENDER.
+      //  2. findCalendarEvents je Kalender als eigenes Feld in EINER Anfrage:
+      //     Spiele/Veranstaltungen für HIGHLIGHT_TAGE, Trainings nur für die
+      //     nächsten TRAINING_TAGE (nur Titel und Zeiten). Ein nicht lesbarer
+      //     Kalender liefert still null, die anderen Felder bleiben.
+      // Anzeige: Trainingskalender lesbar -> zwei Spiele/Veranstaltungen und
+      // die Trainingszeile; nicht lesbar -> drei Spiele/Veranstaltungen.
+
+      // Ziel beim Antippen: die Terminseite (Seitenmodul „Termine“ mit
+      // Seitenlink Termine-App.html). Bis dahin das Terminmodul.
+      var TERMINE_SEITE_MODUL = "sportfreunde04_Application_1780401660369"; // nach Anlage des Seitenmoduls ersetzen
+
+      // ==== Beginn: aus data/termine.json und data/teams.json (npm run tpl-bauen), nicht von Hand ändern ====
       var KALENDER_ID = "sportfreunde04_Application_1780401660369";
       var TERMINE_API = "https://api.appack.de/graphql";
-      var TERMINE_TOKEN = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJZCI6InNwb3J0ZnJldW5kZTA0IiwidXNlcm5hbWUiOiJzcG9ydGZyZXVuZGUwNCIsImlzcyI6ImFwcGFjayIsImV4cCI6MTgxODgzNzY4NywiaWF0IjoxNzg3MzAxNjg3LCJzY29wZSI6WyJlbWJlZGRlZCJdfQ.yUyf5TWInpjnkzWrQdVE6UuWJUCVQNl6r2nQtMbF3_0s7GvD8nVko4_ozutbSeVYddTGCJAi0o0SVt94uKYZgQqEBYv8fA4f8Qkj6zv0GjM9dSJK36j4DF-O3yz_Dd_udk60pXRdu_f7JL_B6wEEcVktNhEzrABUR3Gi2PcvMzLedDHW-PQy76il_nb0n7koVk60_M3m60MbPfRRyNS08p5ddraf1CzLNG7CxtWJqMim0yzIr-wDlH9x6Gf1d_rrqRB7kVYzjpt_d8wKvBqRvMxfxUQCY9KlzZ4Pzi7x9tPfqhTTIHKJ3zh6JbuIG6gfm5MenI9sn1hQOf2_tu4Akw";
-      var TERMINE_ABFRAGE = 20;     // so viele kommende Termine holen (Trainings fallen danach heraus)
-      var TERMINE_ANZAHL = 3;       // so viele zeigt die Startseite
-      var TERMINE_WARTEZEIT = 6000; // ms; danach statt der Platzhalter die Zeile „Alle Termine im Kalender ›“
+      var TERMINE_TOKEN = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJZCI6InNwb3J0ZnJldW5kZTA0IiwidXNlcm5hbWUiOiJzcG9ydGZyZXVuZGUwNCIsImlzcyI6ImFwcGFjayIsImV4cCI6MTgxODgzNzY4NywiaWF0IjoxNzg3MzAxNjg3LCJzY29wZSI6WyJlbWJlZGRlZCJdfQ.yUyf5TWInpjnkzWrQdVE6UuWJUCVQNl6r2nQtMbF3_0s7GvD8nVko4_ozutbSeVYddTGCJAi0o0SVt94uKYZgQqEBYv8fA4f8Qkj6zv0GjM9dSJK36j4DF-O3yz_Dd_udk60pXRdu_f7JL_B6wEEcVktNhEzrABUR3Gi2PcvMzLedDHW-PQy76il_nb0n7koVk60_M3m60MbPfRRyNS08p5ddraf1CzLNG7CxtWJqMim0yzIr-wDlH9x6Gf1d_rrqRB7kVYzjpt_d8wKvBqRvMxfxUQCY9KlzZ4Pzi7x9tPfqhTTIHKJ3zh6JbuIG6gfm5MenI9sn1hQOf2_tu4Akw"; // gültig bis 2027-08-21
+      var BEKANNTE_KALENDER = [{"id":"6a86e0994c9e78e40353f3f4","rolle":"spiel"},{"id":"6a8ea6f2b34f1ebb47097a67","rolle":"training"},{"id":"6ab6365a66ca4a55867520de","rolle":"verein"}];
+      var TRAININGSFREI = [{"von":"2026-10-05","bis":"2026-10-17","name":"Herbstferien","ferien":true},{"von":"2026-12-23","bis":"2027-01-12","name":"Weihnachtsferien","ferien":true},{"von":"2027-03-22","bis":"2027-04-02","name":"Osterferien","ferien":true},{"von":"2027-05-06","bis":"2027-05-06","name":"Christi Himmelfahrt","ferien":false},{"von":"2027-05-17","bis":"2027-05-17","name":"Pfingstmontag","ferien":false},{"von":"2027-05-27","bis":"2027-05-27","name":"Fronleichnam","ferien":false},{"von":"2027-06-28","bis":"2027-08-06","name":"Sommerferien","ferien":true}];
+      var MANNSCHAFTEN = [{"kurz":"Herren","namen":["herren","1herrenmannschaft","1herren"]},{"kurz":"A-Jugend","namen":["ajugend","a"]},{"kurz":"D1","namen":["d1","d1jugend"]},{"kurz":"D2","namen":["d2","d2jugend"]},{"kurz":"D3","namen":["d3","d3jugend"]},{"kurz":"E1","namen":["e1","e1jugend"]},{"kurz":"E2","namen":["e2","e2jugend"]},{"kurz":"E3","namen":["e3","e3jugend"]},{"kurz":"F1","namen":["f1","f1jugend"]},{"kurz":"F2","namen":["f2","f2jugend"]},{"kurz":"G-Jugend","namen":["gjugend","g1","gjugendbambinis","bambinis"]}];
+      // ==== Ende: aus data/termine.json und data/teams.json ====
+
+      var HIGHLIGHT_TAGE = 120;      // Spiele/Veranstaltungen: so viele Tage voraus
+      var TRAINING_TAGE = 21;        // Trainings: so viele Tage voraus (überbrückt zwei Ferienwochen)
+      var VORRANG_TAGE = 28;         // eine Veranstaltung in dieser Frist bekommt immer einen Platz
+      var ANZAHL_MIT_TRAINING = 2;   // Spiele/Veranstaltungen, wenn die Trainingszeile steht
+      var ANZAHL_OHNE_TRAINING = 3;  // … sonst (wie bisher)
+      var TERMINE_WARTEZEIT = 8000;  // ms für beide Anfragen; danach statt der Platzhalter die Zeile „Alle Termine im Kalender ›“
 
       var MONATE = ["JAN", "FEB", "MÄR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEZ"];
       var MONATE_LANG = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
@@ -1024,6 +1106,10 @@ svg { display: block; flex: 0 0 auto; }
       var WOCHENTAGE_LANG = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
       var PFEIL_SVG = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>';
       var KALENDER_SVG = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>';
+      var UHR_SVG = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>';
+
+      var alleLink = document.getElementById("termine-alle");
+      if (alleLink) alleLink.href = "nav://" + TERMINE_SEITE_MODUL;
 
       function element(tag, klasse, text) {
         var el = document.createElement(tag);
@@ -1078,12 +1164,28 @@ svg { display: block; flex: 0 0 auto; }
         return { jahr: d.getUTCFullYear(), monat: d.getUTCMonth(), tag: d.getUTCDate(), stunde: 0, minute: 0 };
       }
 
+      function nummerAusIso(iso) {
+        var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ""));
+        return m ? Math.round(Date.UTC(+m[1], +m[2] - 1, +m[3]) / 86400000) : NaN;
+      }
+
       function datumKurz(teile) {
         return WOCHENTAGE[wochentag(teile)] + " " + zweistellig(teile.tag) + "." + zweistellig(teile.monat + 1) + ".";
       }
 
+      function datumOhneTag(teile) {
+        return zweistellig(teile.tag) + "." + zweistellig(teile.monat + 1) + ".";
+      }
+
       function datumLang(teile) {
         return WOCHENTAGE_LANG[wochentag(teile)] + ", " + teile.tag + ". " + MONATE_LANG[teile.monat];
+      }
+
+      // „05.–17.10.“ bzw. „23.12.–12.01.“
+      function spanne(von, bis) {
+        var a = teileAusNummer(von), b = teileAusNummer(bis);
+        if (a.monat === b.monat) return zweistellig(a.tag) + ".–" + datumOhneTag(b);
+        return datumOhneTag(a) + "–" + datumOhneTag(b);
       }
 
       function kategorien(termin) {
@@ -1111,11 +1213,8 @@ svg { display: block; flex: 0 0 auto; }
         return wort === "trainings" || /training$/.test(wort);
       }
 
-      // Trainings gehören nicht auf die Startseite (Entscheidung 25.09.2026):
-      // öffentlich gibt es nur die D3-Trainings („Freitag Training“) ohne
-      // Teamnamen; alle Trainings stehen je Team unter „Mannschaften“ und im
-      // Kalender. Erkannt an einem Trainingswort in Kategorie oder Titel –
-      // Kategorie „Veranstaltung“ hat immer Vorrang (bleibt stehen).
+      // Training: aus dem Trainingskalender, sonst an einem Trainingswort in
+      // Kategorie oder Titel. Kategorie „Veranstaltung“ hat immer Vorrang.
       function istTraining(termin) {
         var k = kategorien(termin);
         if (k.some(function (titel) { return /veranstaltung/.test(titel); })) return false;
@@ -1123,10 +1222,34 @@ svg { display: block; flex: 0 0 auto; }
         return woerterVon(termin.title).some(istTrainingWort);
       }
 
+      // Rolle eines Kalenders am Terminmodul: bekannte Ids zuerst, sonst an
+      // Titel und Kategorien; interne Kalender nie.
+      function kalenderRolle(kalender) {
+        for (var i = 0; i < BEKANNTE_KALENDER.length; i++) if (BEKANNTE_KALENDER[i].id === kalender.id) return BEKANNTE_KALENDER[i].rolle;
+        var titel = String(kalender.title || "");
+        var kats = kategorien(kalender).join(" ");
+        if (/\bintern\b/i.test(titel)) return "";
+        if (/training/i.test(titel) || /training/.test(kats)) return "training";
+        if (/spielplan|spiele\b/i.test(titel) || /fu(ss|ß)ball|spiel/.test(kats)) return "spiel";
+        return "verein";
+      }
+
+      function normName(text) {
+        return String(text || "").toLowerCase().replace(/[^a-z0-9äöüß]+/g, "");
+      }
+
+      function mannschaftVon(name) {
+        var n = normName(name);
+        for (var i = 0; i < MANNSCHAFTEN.length; i++) if (MANNSCHAFTEN[i].namen.indexOf(n) !== -1) return { kurz: MANNSCHAFTEN[i].kurz, rang: i };
+        return null;
+      }
+
       // Titel behutsam aufräumen, nichts dazuerfinden: Leerraum glätten, die
       // Anhängsel aus dem DFBnet-Spielplan am Ende weg („ (26/27)“,
-      // „ (D-Junioren)“, „ (Herren)“ …), Bindestrich zwischen zwei
-      // Mannschaften als Gedankenstrich.
+      // „ (D-Junioren)“, „ (Herren)“ …), „Speuzer “ vorne weg (in der
+      // Vereins-App klar) mit dem Kurznamen der Mannschaft („Speuzer G1 ·
+      // Kinderfestival …“ → „G-Jugend · Kinderfestival …“), Bindestrich
+      // zwischen zwei Mannschaften als Gedankenstrich.
       function titelAufraeumen(titel) {
         var text = String(titel || "");
         if (text.normalize) text = text.normalize("NFC");
@@ -1136,62 +1259,98 @@ svg { display: block; flex: 0 0 auto; }
           vorher = text;
           text = text.replace(/\s*\((?:\d{2}\/\d{2}|\d{4}\/\d{2,4}|[A-G]-Junior(?:inn)?en|Herren|Frauen|Senioren|Alte Herren)\)$/i, "");
         } while (text !== vorher);
-        return text.replace(/ - /g, " – ");
+        var m = /^Speuzer\s+(.+?)\s+[·•|–-]\s+(.+)$/.exec(text);
+        if (m) {
+          var team = mannschaftVon(m[1]);
+          text = (team ? team.kurz : m[1]) + " · " + m[2];
+        }
+        // kurzes Titelende nicht allein umbrechen („Neu-Isenburg 2“)
+        return text.replace(/ - /g, " – ").replace(/ (\S{1,3})$/, "\u00a0$1");
       }
 
       // Letzter Kalendertag eines Termins (Berlin). Endet er genau um
-      // Mitternacht, zählt der Vortag (übliche Schreibweise für ganztägige
-      // Termine und für „bis 24 Uhr“).
+      // Mitternacht, zählt der Vortag („bis 24 Uhr“). Ganztägig: das Ende
+      // steht je nach Eingabe auf 23:59 UTC, 23:59 Ortszeit oder Mitternacht
+      // – drei Stunden zurück ergibt in allen Fällen den letzten Tag (vorher
+      // stand ein ganztägiger Termin mit Ende 23:59 UTC als „Sa bis So“ da).
       function letzterTag(e) {
         if (e.ende.getTime() <= e.start.getTime()) return e.startNr;
+        if (e.termin.allDay === true) return Math.max(tagesNummer(datumsTeile(new Date(e.ende.getTime() - 3 * 3600000))), e.startNr);
         var t = datumsTeile(e.ende);
         var nummer = tagesNummer(t);
         if (t.stunde === 0 && t.minute === 0) nummer -= 1;
         return Math.max(nummer, e.startNr);
       }
 
-      // Die nächsten TERMINE_ANZAHL Spiele/Veranstaltungen: gültiges Datum,
-      // Titel vorhanden, kein Training, noch nicht vorbei (mit Uhrzeit: bis
-      // zum Ende; ganztags: bis zum Ende des letzten Tages, auch wenn
-      // dateEnd = dateStart), jeder Termin nur einmal (Schlüssel id und
-      // Titel|Beginn – derselbe Termin kann in zwei öffentlichen Kalendern
-      // stehen); nach Beginn sortiert.
-      function termineFuerStart(liste) {
+      // Termine eines Kalenders aufbereiten: gültiges Datum, Titel
+      // vorhanden, noch nicht vorbei (mit Uhrzeit: bis zum Ende; ganztags:
+      // bis zum Ende des letzten Tages).
+      function aufbereiten(liste, rolle) {
         var jetzt = Date.now();
         var heuteNr = tagesNummer(datumsTeile(new Date(jetzt)));
-        var gesehen = {};
         return (Array.isArray(liste) ? liste : [])
           .map(function (termin, i) {
             termin = termin || {};
             var start = new Date(termin.dateStart);
             var ende = termin.dateEnd ? new Date(termin.dateEnd) : start;
             if (isNaN(ende.getTime()) || ende.getTime() < start.getTime()) ende = start;
-            return { termin: termin, i: i, start: start, ende: ende, titel: titelAufraeumen(termin.title) };
+            var m = /^Speuzer\s+(.+?)\s+[·•|–-]\s/.exec(String(termin.title || "").trim());
+            return { termin: termin, i: i, rolle: rolle, start: start, ende: ende, titel: titelAufraeumen(termin.title), team: m ? mannschaftVon(m[1]) || { kurz: m[1], rang: 99 } : null };
           })
           .filter(function (e) {
-            if (isNaN(e.start.getTime()) || e.titel === "" || istTraining(e.termin)) return false;
+            if (isNaN(e.start.getTime()) || e.titel === "") return false;
             e.startNr = tagesNummer(datumsTeile(e.start));
             e.endNr = letzterTag(e);
-            var aktuell = e.termin.allDay === true ? e.endNr >= heuteNr : e.ende.getTime() >= jetzt;
-            if (!aktuell) return false;
+            return e.termin.allDay === true ? e.endNr >= heuteNr : e.ende.getTime() >= jetzt;
+          });
+      }
+
+      // Veranstaltung des Vereins: aus dem Kalender „Veranstaltungen“, mit
+      // Kategorie „Veranstaltung“ oder ohne „Speuzer <Mannschaft> · …“.
+      function istVeranstaltung(e) {
+        if (e.rolle === "verein") return true;
+        if (e.rolle === "spiel") return false;
+        if (kategorien(e.termin).some(function (t) { return /veranstaltung/.test(t); })) return true;
+        return !e.team;
+      }
+
+      // Die nächsten `anzahl` Spiele/Veranstaltungen: kein Training, jeder
+      // Termin nur einmal (Schlüssel id und Titel|Beginn – derselbe Termin
+      // kann in zwei Kalendern stehen), nach Beginn sortiert. Steht unter den
+      // gewählten keine Veranstaltung, rückt die nächste Veranstaltung der
+      // kommenden VORRANG_TAGE auf den letzten Platz – Feste und
+      // Vereinstermine gehen zwischen den Spielen von elf Mannschaften nicht
+      // unter.
+      function termineFuerStart(liste, anzahl) {
+        var heuteNr = tagesNummer(datumsTeile(new Date()));
+        var gesehen = {};
+        var alle = liste
+          .filter(function (e) {
+            if (e.rolle !== "verein" && istTraining(e.termin)) return false;
             var schluessel = [e.titel.toLowerCase() + "|" + e.start.getTime()];
             if (e.termin.id) schluessel.push("id|" + e.termin.id);
             if (schluessel.some(function (s) { return gesehen[s]; })) return false;
             schluessel.forEach(function (s) { gesehen[s] = true; });
+            e.veranstaltung = istVeranstaltung(e);
             return true;
           })
           .sort(function (a, b) {
             return (a.start.getTime() - b.start.getTime()) || (a.i - b.i);
-          })
-          .slice(0, TERMINE_ANZAHL);
+          });
+        var auswahl = alle.slice(0, anzahl);
+        if (auswahl.length === anzahl && anzahl > 1 && !auswahl.some(function (e) { return e.veranstaltung; })) {
+          var fest = alle.slice(anzahl).filter(function (e) { return e.veranstaltung && e.startNr <= heuteNr + VORRANG_TAGE; })[0];
+          if (fest) auswahl[anzahl - 1] = fest;
+        }
+        return auswahl;
       }
 
-      // Eine Zeile: Datumskachel (Tag/Monat; heute gefüllt), Titel
-      // (höchstens zwei Zeilen), darunter „Morgen · 09:00 Uhr“ bzw.
-      // „Sa · 09:00 Uhr“, „Heute · ganztags“, mehrtägig „Fr bis So 25.10.“
-      // oder, wenn schon begonnen, „Noch bis morgen“ bzw. „Noch bis So
-      // 25.10.“ (Kachel = heute).
-      // Ganze Zeile = Link ins Kalendermodul (nav://, zuverlässig in der
+      // Eine Zeile: Datumskachel (Tag/Monat; heute gefüllt, Veranstaltung
+      // blau umrandet), Titel (höchstens zwei Zeilen), darunter „Morgen ·
+      // 09:00 Uhr“ bzw. „Veranstaltung · So · 10:00 Uhr“, „Heute ·
+      // ganztags“, mehrtägig „Fr bis So 25.10.“ oder, wenn schon begonnen,
+      // „Noch bis morgen“ bzw. „Noch bis So 25.10.“ (Kachel = heute).
+      // Ganze Zeile = Link auf die Terminseite (nav://, zuverlässig in der
       // App; App.navigate öffnete im Test 21.09.2026 nichts).
       function baueTerminZeile(e, heute) {
         var start = datumsTeile(e.start);
@@ -1222,24 +1381,29 @@ svg { display: block; flex: 0 0 auto; }
             (ganztags ? "ganztägig" : uhrzeit(start) + bis + " Uhr");
         }
 
-        var zeile = element("li", "termin");
+        var zeile = element("li", "termin" + (e.veranstaltung ? " termin--veranstaltung" : ""));
         var link = element("a", "termin__link");
-        link.href = "nav://" + KALENDER_ID;
+        link.href = "nav://" + TERMINE_SEITE_MODUL;
         link.setAttribute("data-termin", String(e.termin.id || ""));
 
-        var kachel = element("span", abstand === 0 ? "termin__datum termin__datum--heute" : "termin__datum");
+        var kachel = element("span", "termin__datum" + (abstand === 0 ? " termin__datum--heute" : ""));
         kachel.setAttribute("aria-hidden", "true");
         kachel.appendChild(element("span", "termin__tag", zweistellig(anzeige.tag)));
         kachel.appendChild(element("span", "termin__monat", MONATE[anzeige.monat]));
 
         var text = element("span", "termin__text");
         text.appendChild(element("span", "termin__titel", e.titel));
-        var kurz = element("span", "termin__zeit", kurzText);
+        var kurz = element("span", "termin__zeit");
+        if (e.veranstaltung) {
+          kurz.appendChild(element("span", "termin__art", "Veranstaltung"));
+          kurz.appendChild(document.createTextNode(" · "));
+        }
+        kurz.appendChild(document.createTextNode(kurzText));
         kurz.setAttribute("aria-hidden", "true");
         text.appendChild(kurz);
         // vollständig für Bildschirmleser, mit Trenner nach dem Titel, z. B.
-        // „…, morgen, Samstag, 26. September, 09:00 bis 11:00 Uhr“
-        text.appendChild(element("span", "vh", ", " + vorlesen));
+        // „…, Veranstaltung, morgen, Samstag, 26. September, 09:00 bis 11:00 Uhr“
+        text.appendChild(element("span", "vh", ", " + (e.veranstaltung ? "Veranstaltung, " : "") + vorlesen));
 
         link.appendChild(kachel);
         link.appendChild(text);
@@ -1248,9 +1412,127 @@ svg { display: block; flex: 0 0 auto; }
         return zeile;
       }
 
+      // Die Trainingszeile: EIN Eintrag für alle Trainings. Heute noch
+      // Training: „Heute Training · A-Jugend · E1 …“ (Mannschaften in
+      // Vereinsreihenfolge), sonst „Morgen Training …“ bzw. „Training Mi
+      // 30.09. …“. Liegen Ferien (TRAININGSFREI) zwischen heute und dem
+      // nächsten Training: „Herbstferien ab Mo 05.10. · Training wieder ab Mo
+      // 19.10.“ bzw. während der Ferien „Herbstferien · Training wieder ab …“;
+      // eine längere Pause ohne Ferieneintrag heißt „Trainingspause“. null =
+      // keine Zeile (nichts Passendes in TRAINING_TAGE).
+      function trainingZeile(liste) {
+        var jetzt = Date.now();
+        var heuteNr = tagesNummer(datumsTeile(new Date(jetzt)));
+        var kommende = liste
+          .filter(function (e) { return e.ende.getTime() >= jetzt && e.startNr >= heuteNr; })
+          .sort(function (a, b) { return a.start.getTime() - b.start.getTime(); });
+        var naechster = kommende.length ? kommende[0].startNr : null;
+        var ferien = TRAININGSFREI
+          .filter(function (f) { return f.ferien; })
+          .map(function (f) { return { von: nummerAusIso(f.von), bis: nummerAusIso(f.bis), name: f.name }; })
+          .filter(function (f) {
+            return f.bis >= heuteNr && f.von <= (naechster === null ? heuteNr + TRAINING_TAGE : naechster) && (naechster === null || naechster > f.bis);
+          })[0];
+        var ab = naechster !== null ? teileAusNummer(naechster) : null;
+        if (ferien) {
+          var abText = ab ? datumKurz(ab) : "";
+          var abKurz = ab ? datumOhneTag(ab) : "";
+          if (ferien.von > heuteNr) {
+            var beginn = teileAusNummer(ferien.von);
+            return {
+              lead: ferien.name,
+              varianten: ab
+                ? [" ab " + datumKurz(beginn) + " · Training wieder ab " + abText, " " + spanne(ferien.von, ferien.bis) + " · Training wieder ab " + abKurz,
+                  " " + spanne(ferien.von, ferien.bis) + " · wieder ab " + abKurz, " " + spanne(ferien.von, ferien.bis)]
+                : [" ab " + datumKurz(beginn), " " + spanne(ferien.von, ferien.bis)],
+              vorlesen: ferien.name + " ab " + datumLang(beginn) + (ab ? ", Training wieder ab " + datumLang(ab) : "") + ". Zu den Terminen"
+            };
+          }
+          return {
+            lead: ferien.name,
+            varianten: ab
+              ? [" · Training wieder ab " + abText, " · wieder ab " + abText, " · wieder ab " + abKurz, " bis " + datumOhneTag(teileAusNummer(ferien.bis))]
+              : [" bis " + datumKurz(teileAusNummer(ferien.bis)), " bis " + datumOhneTag(teileAusNummer(ferien.bis))],
+            vorlesen: ferien.name + " bis " + datumLang(teileAusNummer(ferien.bis)) + (ab ? ", Training wieder ab " + datumLang(ab) : "") + ". Zu den Terminen"
+          };
+        }
+        if (naechster === null) return null;
+        var abstand = naechster - heuteNr;
+        if (abstand > 7) {
+          return {
+            lead: "Trainingspause",
+            varianten: [" · Training wieder ab " + datumKurz(ab), " · wieder ab " + datumKurz(ab), " · ab " + datumOhneTag(ab)],
+            vorlesen: "Trainingspause, Training wieder ab " + datumLang(ab) + ". Zu den Terminen"
+          };
+        }
+        var teams = [];
+        kommende.forEach(function (e) {
+          if (e.startNr !== naechster || !e.team) return;
+          if (!teams.some(function (t) { return t.kurz === e.team.kurz; })) teams.push(e.team);
+        });
+        teams.sort(function (a, b) { return a.rang - b.rang; });
+        var namen = teams.map(function (t) { return t.kurz; });
+        var lead = abstand === 0 ? "Heute Training" : (abstand === 1 ? "Morgen Training" : "Training " + datumKurz(ab));
+        var varianten = [];
+        for (var n = namen.length; n >= 1; n--) varianten.push(" " + namen.slice(0, n).join(" · ") + (n < namen.length ? " +" + (namen.length - n) : ""));
+        if (namen.length > 1) varianten.push(" · " + namen.length + " Teams");
+        return {
+          lead: lead,
+          varianten: varianten,
+          vorlesen: (abstand === 0 ? "Heute Training" : (abstand === 1 ? "Morgen Training" : "Training am " + datumLang(ab))) +
+            (namen.length ? ": " + namen.length + (namen.length === 1 ? " Mannschaft, " : " Mannschaften, ") + namen.join(", ") : "") + ". Zu den Terminen"
+        };
+      }
+
+      // Die leise Trainingszeile (44px): Uhr-Symbol, fetter Anfang, Rest in
+      // der ersten Fassung, die in die Zeile passt (siehe trainingKuerzen).
+      function baueTrainingZeile(t) {
+        var zeile = element("li", "termin-training");
+        var link = element("a", "termin-training__link");
+        link.href = "nav://" + TERMINE_SEITE_MODUL;
+        var symbol = element("span", "termin-training__symbol");
+        symbol.setAttribute("aria-hidden", "true");
+        symbol.innerHTML = UHR_SVG;
+        link.appendChild(symbol);
+        var text = element("span", "termin-training__text");
+        var sichtbar = element("span");
+        sichtbar.setAttribute("aria-hidden", "true");
+        sichtbar.appendChild(element("strong", "termin-training__lead", t.lead));
+        var rest = element("span", "termin-training__rest", t.varianten[0] || "");
+        rest.setAttribute("data-varianten", JSON.stringify(t.varianten));
+        sichtbar.appendChild(rest);
+        text.appendChild(sichtbar);
+        text.appendChild(element("span", "vh", t.vorlesen));
+        link.appendChild(text);
+        link.insertAdjacentHTML("beforeend", PFEIL_SVG);
+        zeile.appendChild(link);
+        return zeile;
+      }
+
+      // Die erste Fassung wählen, die ganz in die Zeile passt (gemessen, die
+      // Namen sind verschieden lang); passt keine, bleibt die kürzeste mit „…“.
+      function trainingKuerzen() {
+        var rest = document.querySelector(".termin-training__rest");
+        var box = document.querySelector(".termin-training__text");
+        if (!rest || !box) return;
+        var varianten = [];
+        try { varianten = JSON.parse(rest.getAttribute("data-varianten") || "[]"); } catch (e) { return; }
+        var innen = rest.parentNode;
+        for (var i = 0; i < varianten.length; i++) {
+          rest.textContent = varianten[i];
+          if (innen.getBoundingClientRect().right <= box.getBoundingClientRect().right - 1) return;
+        }
+      }
+      var kuerzenUhr = null;
+      window.addEventListener("resize", function () {
+        clearTimeout(kuerzenUhr);
+        kuerzenUhr = setTimeout(trainingKuerzen, 150);
+      });
+
       // Rückfall (Fehler, Zeitüberschreitung, keine passenden Termine): die
       // Karte schrumpft auf eine ruhige Zeile „Alle Termine im Kalender ›“ –
-      // kein leerer Kasten, keine Fehlermeldung.
+      // kein leerer Kasten, keine Fehlermeldung. Ziel ist das Terminmodul (es
+      // arbeitet mit der Anmeldung der App, nicht mit unserem Token).
       function zeigeTermineErsatz() {
         var karte = document.getElementById("termine");
         var liste = document.getElementById("termine-liste");
@@ -1267,10 +1549,11 @@ svg { display: block; flex: 0 0 auto; }
         liste.parentNode.replaceChild(link, liste);
       }
 
-      function zeigeTermine(eintraege) {
+      function zeigeTermine(highlights, training) {
         var liste = document.getElementById("termine-liste");
         if (!liste) return;
-        if (!eintraege || !eintraege.length) { zeigeTermineErsatz(); return; }
+        var eintraege = termineFuerStart(highlights, training ? ANZAHL_MIT_TRAINING : ANZAHL_OHNE_TRAINING);
+        if (!eintraege.length && !training) { zeigeTermineErsatz(); return; }
         var heuteTeile = datumsTeile(new Date());
         var heute = { nr: tagesNummer(heuteTeile), teile: heuteTeile };
         var neu = document.createDocumentFragment();
@@ -1279,15 +1562,41 @@ svg { display: block; flex: 0 0 auto; }
           var zeile = baueTerminZeile(e, heute);
           // Mehrere Termine am selben Tag (Spieltag-Samstag): die Kachel nur
           // beim ersten, darunter bleibt ihr Platz leer – liest sich wie ein
-          // Kalender und wiederholt nicht dreimal „26 SEP“.
+          // Kalender und wiederholt nicht „26 SEP“.
           var tag = zeile.getAttribute("data-tag");
           if (tag === letzterAnzeigeTag) zeile.classList.add("termin--gleicher-tag");
           letzterAnzeigeTag = tag;
           neu.appendChild(zeile);
         });
+        if (training) neu.appendChild(baueTrainingZeile(training));
         liste.innerHTML = "";
         liste.appendChild(neu);
+        liste.classList.toggle("termine-liste--mit-training", !!training);
         liste.removeAttribute("aria-busy");
+        trainingKuerzen();
+        // Webfont kommt oft erst danach: noch einmal messen
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(trainingKuerzen, function () {});
+      }
+
+      function abfrage(text, signal) {
+        var optionen = {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TERMINE_TOKEN },
+          body: JSON.stringify({ query: text }),
+          // keine Cookies mitschicken: der Token reicht, und die Antwort
+          // braucht so keine Freigabe für Anmeldedaten
+          credentials: "omit"
+        };
+        if (signal) optionen.signal = signal;
+        return fetch(TERMINE_API, optionen).then(function (antwort) {
+          if (!antwort.ok) throw new Error("HTTP " + antwort.status);
+          return antwort.json();
+        });
+      }
+
+      function feld(alias, id, von, bis) {
+        return alias + ": findCalendarEvents(calendarIds: " + JSON.stringify([id]) +
+          ", range: {from: \"" + von.toISOString() + "\", to: \"" + bis.toISOString() + "\"}) { id calendarId title dateStart dateEnd allDay categories { title } }";
       }
 
       // Für alle, auch Gäste (öffentlicher Token). Antwort spätestens nach
@@ -1299,37 +1608,66 @@ svg { display: block; flex: 0 0 auto; }
         var erledigt = false;
         var abbruch = null;
         try { abbruch = window.AbortController ? new AbortController() : null; } catch (e) { abbruch = null; }
-        function fertig(eintraege) {
+        var signal = abbruch ? abbruch.signal : null;
+        function fertig(ergebnis) {
           if (erledigt) return;
           erledigt = true;
           clearTimeout(uhr);
-          try { zeigeTermine(eintraege); } catch (e) { zeigeTermineErsatz(); }
+          if (!ergebnis) { zeigeTermineErsatz(); return; }
+          try { zeigeTermine(ergebnis.highlights, ergebnis.training); } catch (e) { zeigeTermineErsatz(); }
         }
         var uhr = setTimeout(function () {
           if (abbruch) { try { abbruch.abort(); } catch (e) { /* egal */ } }
           fertig(null);
         }, TERMINE_WARTEZEIT);
-        var abfrage = 'query { listUpcomingCalendarEvents(componentId: "' + KALENDER_ID + '", amount: ' + TERMINE_ABFRAGE +
-          ') { id calendarId title subTitle dateStart dateEnd allDay categories { title color } } }';
-        var optionen = {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TERMINE_TOKEN },
-          body: JSON.stringify({ query: abfrage }),
-          // keine Cookies mitschicken: der Token reicht, und die Antwort
-          // braucht so keine Freigabe für Anmeldedaten
-          credentials: "omit"
-        };
-        if (abbruch) optionen.signal = abbruch.signal;
+
         Promise.resolve()
-          .then(function () { return fetch(TERMINE_API, optionen); })
-          .then(function (antwort) {
-            if (!antwort.ok) throw new Error("HTTP " + antwort.status);
-            return antwort.json();
+          .then(function () {
+            return abfrage('query { listCalendarByComponentId(componentId: "' + KALENDER_ID + '") { id title canRead categories { title } } }', signal)
+              .then(function (json) {
+                var liste = json && json.data && json.data.listCalendarByComponentId;
+                if (!Array.isArray(liste)) throw new Error("keine Kalenderliste");
+                return liste
+                  .filter(function (k) { return k && k.id && k.canRead === true; })
+                  .map(function (k) { return { id: String(k.id), rolle: kalenderRolle(k) }; });
+              })
+              .catch(function () { return BEKANNTE_KALENDER; });
           })
-          .then(function (json) {
-            var liste = json && json.data && json.data.listUpcomingCalendarEvents;
-            if (!Array.isArray(liste)) throw new Error("keine Termine");
-            fertig(termineFuerStart(liste));
+          .then(function (kalender) {
+            kalender = kalender.filter(function (k) { return k.rolle; });
+            if (!kalender.length) throw new Error("keine Kalender");
+            var jetzt = Date.now();
+            var heuteNr = tagesNummer(datumsTeile(new Date(jetzt)));
+            var felder = [];
+            var rollen = {};
+            kalender.forEach(function (k, i) {
+              var alias = "k" + i;
+              rollen[alias] = k.rolle;
+              if (k.rolle === "training") {
+                felder.push(feld(alias, k.id, new Date((heuteNr - 1) * 86400000), new Date((heuteNr + TRAINING_TAGE + 1) * 86400000)));
+              } else {
+                felder.push(feld(alias, k.id, new Date(jetzt - 7 * 86400000), new Date(jetzt + HIGHLIGHT_TAGE * 86400000)));
+              }
+            });
+            return abfrage("query { " + felder.join(" ") + " }", signal).then(function (antwort) {
+              var daten = (antwort && antwort.data) || {};
+              var highlights = [];
+              var trainings = [];
+              var hlGelesen = false;
+              var trGelesen = false;
+              Object.keys(rollen).forEach(function (alias) {
+                if (!Array.isArray(daten[alias])) return; // dieser Kalender gerade nicht lesbar
+                if (rollen[alias] === "training") {
+                  trGelesen = true;
+                  trainings = trainings.concat(aufbereiten(daten[alias], "training"));
+                } else {
+                  hlGelesen = true;
+                  highlights = highlights.concat(aufbereiten(daten[alias], rollen[alias]));
+                }
+              });
+              if (!hlGelesen && !trGelesen) throw new Error("keine Termine");
+              fertig({ highlights: highlights, training: trGelesen ? trainingZeile(trainings) : null });
+            });
           })
           .catch(function () { fertig(null); });
       }

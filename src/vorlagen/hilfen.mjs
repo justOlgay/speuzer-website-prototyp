@@ -770,6 +770,20 @@ export function trainerFotosSkript(team) {
 
 // ---------- App-Modus (25.09.2026) ----------
 
+// Seitenmodule der App je Website-Seite (Dateiname ohne .html). Auch die
+// Terminseite (src/vorlagen/termine.mjs) liest ihre App-Ziele von hier.
+export const APP_MODULE = {
+  "mannschaften": "sportfreunde04_TextImage_1783343147611",
+  "verein": "sportfreunde04_TextImage_1783060935192",
+  "verein-karneval": "sportfreunde04_TextImage_1780401660343",
+  "verein-vorstand": "sportfreunde04_TextImage_1780401660340",
+  "verein-sponsoren": "sportfreunde04_TextImage_1780401660337",
+  "verein-ueber-uns": "sportfreunde04_TextImage_1784295208452",
+  "kontakt": "sportfreunde04_TextImage_1780401660324",
+  "mitglied-werden": "sportfreunde04_TextImage_1780401660329",
+  "chronik": "sportfreunde04_TextImage_1789020275334",
+};
+
 // Öffnet die Vereins-App eine Website-Seite mit ?app=1 (z. B. „Beiträge,
 // Ablauf & Unterlagen“ aus dem App-Aufnahmeantrag, „Mach mit“ und „Shop“ aus
 // der App-Seite Verein), führen die Links zurück in die App-Seiten (nav://)
@@ -785,15 +799,7 @@ export const APP_MODUS_SKRIPT = `
   "use strict";
   if (!/(^|[?&])app=1(&|$)/.test(location.search)) return;
   var NAV = {
-    "mannschaften": "sportfreunde04_TextImage_1783343147611",
-    "verein": "sportfreunde04_TextImage_1783060935192",
-    "verein-karneval": "sportfreunde04_TextImage_1780401660343",
-    "verein-vorstand": "sportfreunde04_TextImage_1780401660340",
-    "verein-sponsoren": "sportfreunde04_TextImage_1780401660337",
-    "verein-ueber-uns": "sportfreunde04_TextImage_1784295208452",
-    "kontakt": "sportfreunde04_TextImage_1780401660324",
-    "mitglied-werden": "sportfreunde04_TextImage_1780401660329",
-    "chronik": "sportfreunde04_TextImage_1789020275334"
+${Object.entries(APP_MODULE).map(([name, modul]) => `    "${name}": "${modul}"`).join(",\n")}
   };
   var FORMULAR_WEB = "6a903758337cdc97f94f2655";
   function umschreiben() {

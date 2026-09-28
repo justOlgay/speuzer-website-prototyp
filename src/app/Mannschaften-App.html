@@ -83,6 +83,8 @@
        einzige der drei Bausteine, die auf beiden Kanälen unterschiedlich
        aufgebaut war (quervergleich Nr. 13). -->
   <ul id="detail-training-liste" class="team-karte__zeiten team-karte__zeiten--liste"></ul>
+  <!-- Winterhalle (data/teams.json trainingHinweis), wie auf der Website -->
+  <p id="detail-trainingshinweis" class="trainings-hinweis" hidden><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 10.5L12 4l9 6.5V20H3z"/><path d="M9.5 20v-5h5v5"/></svg><span id="detail-trainingshinweis-text"></span></p>
   <div class="hinweis"><p id="detail-ferienhinweis"></p></div>
 
   <div id="team-inhalt"></div>
@@ -391,6 +393,26 @@ a.team-karte--link {
 .trainingszeile__platz {
   font-size: 12px;
   color: var(--ink-3);
+}
+
+/* Winterhalle (28.09.2026, data/teams.json trainingHinweis): leise Zeile
+   unter den Trainingszeiten, wie .trainings-hinweis auf der Website. */
+.trainings-hinweis {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  margin: var(--sp-3) 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-3);
+}
+
+.trainings-hinweis[hidden] { display: none; }
+
+.trainings-hinweis svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: var(--blau-700);
 }
 
 .person-mini-liste {
@@ -1409,6 +1431,10 @@ a.team-karte--link {
       // Platzaufteilung 26/27), sonst der gemeinsame Teil (Herren: "Rebstock").
       liste.appendChild(baueTrainingszeile(t, t.platz || stelle.teil));
     });
+
+    var trainingsHinweis = document.getElementById("detail-trainingshinweis");
+    document.getElementById("detail-trainingshinweis-text").textContent = team.trainingHinweis || "";
+    trainingsHinweis.hidden = !team.trainingHinweis;
 
     document.getElementById("detail-ferienhinweis").textContent = (VEREIN && VEREIN.hinweise && VEREIN.hinweise.ferien) || "";
   }

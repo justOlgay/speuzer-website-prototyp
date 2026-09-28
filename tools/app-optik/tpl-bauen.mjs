@@ -9,14 +9,20 @@
 // <head> wie Startseite_v3.tpl (meta viewport, format-detection-Metas,
 // <title>${userTitle}</title>).
 //
-// Startseite_v3.tpl (B1) bleibt unverändert und wird NICHT von diesem
-// Skript gebaut/berührt – sie ist produktiv (siehe assets/app/LIESMICH.md).
+// Startseite_v3.tpl (B1) wird von Hand gepflegt und NICHT von diesem
+// Skript gebaut – nur der markierte Datenblock im Terminblock (Token,
+// Kalender, trainingsfreie Zeiten, Mannschaften) kommt aus data/termine.json
+// und data/teams.json (siehe startseiteTermineBlock unten).
+//
+// Termine-App.html (28.09.2026) entsteht aus derselben Quelle wie die
+// Website-Seite web/termine.html (src/vorlagen/termine.mjs).
 //
 // Aufruf: npm run tpl-bauen
 
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { termineAppSeite, termineDaten } from "../../src/vorlagen/termine.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const SRC_APP = path.join(ROOT, "src", "app");
@@ -254,6 +260,51 @@ function baueStatischeVorlage(name, titel, teile, braucheWorkbook) {
   return teileHtml.join("\n");
 }
 
+// ---------- Termine (28.09.2026): App-Kopie und Datenblock der Startseite ----------
+
+function termineQuelldaten() {
+  const laden = (datei) => JSON.parse(readFileSync(path.join(DATA_DIR, datei), "utf8"));
+  return { termine: laden("termine.json"), teams: laden("teams.json"), verein: laden("verein.json") };
+}
+
+const BLOCK_ANFANG = "// ==== Beginn: aus data/termine.json und data/teams.json (npm run tpl-bauen), nicht von Hand ändern ====";
+const BLOCK_ENDE = "// ==== Ende: aus data/termine.json und data/teams.json ====";
+
+// Eine Quelle für Seite und Startseite: dieselben Werte wie der Datenblock
+// der Terminseite (termineDaten), hier nur, was der Terminblock braucht.
+function startseiteTermineBlock(daten, einzug) {
+  const t = termineDaten(daten);
+  const zeilen = [
+    `var KALENDER_ID = ${JSON.stringify(t.komponente)};`,
+    `var TERMINE_API = ${JSON.stringify(t.api)};`,
+    `var TERMINE_TOKEN = ${JSON.stringify(t.token)}; // gültig bis ${daten.termine.tokenGueltigBis}`,
+    `var BEKANNTE_KALENDER = ${JSON.stringify(t.kalender.map(({ id, rolle }) => ({ id, rolle })))};`,
+    `var TRAININGSFREI = ${JSON.stringify(t.frei)};`,
+    `var MANNSCHAFTEN = ${JSON.stringify(t.mannschaften.map(({ kurz, namen }) => ({ kurz, namen })))};`,
+  ];
+  const text = zeilen.map((z) => einzug + z).join("\n");
+  if (text.includes("$" + "{") || text.includes("[" + "#")) throw new Error("Datenblock enthält FreeMarker-Zeichen");
+  return text;
+}
+
+function aktualisiereStartseite(daten) {
+  const datei = path.join(ZIEL_APP, "Startseite_v3.tpl");
+  const alt = readFileSync(datei, "utf8");
+  const anfang = alt.indexOf(BLOCK_ANFANG);
+  const ende = alt.indexOf(BLOCK_ENDE);
+  if (anfang === -1 || ende === -1 || ende < anfang) throw new Error("Startseite_v3.tpl: Datenblock der Termine nicht gefunden");
+  const zeilenAnfang = alt.lastIndexOf("\n", anfang) + 1;
+  const einzug = alt.slice(zeilenAnfang, anfang);
+  const nachAnfang = alt.indexOf("\n", anfang) + 1;
+  const neu = alt.slice(0, nachAnfang) + startseiteTermineBlock(daten, einzug) + "\n" + einzug + alt.slice(ende);
+  if (neu === alt) {
+    console.log("  assets/app/Startseite_v3.tpl: Datenblock der Termine unverändert");
+  } else {
+    writeFileSync(datei, neu, "utf8");
+    console.log("  assets/app/Startseite_v3.tpl: Datenblock der Termine aktualisiert");
+  }
+}
+
 function main() {
   const werte = bauzeitWerte();
   const datenWerte = datenPlatzhalter();
@@ -282,6 +333,12 @@ function main() {
     writeFileSync(zielDatei, vorlage, "utf8");
     console.log(`  assets/app/${name}.html geschrieben (${vorlage.length} Zeichen)`);
   }
+
+  const termineDatenQuelle = termineQuelldaten();
+  const termineApp = termineAppSeite(termineDatenQuelle);
+  writeFileSync(path.join(ZIEL_APP, "Termine-App.html"), termineApp, "utf8");
+  console.log(`  assets/app/Termine-App.html geschrieben (${termineApp.length} Zeichen)`);
+  aktualisiereStartseite(termineDatenQuelle);
 
   console.log("Fertig.");
 }

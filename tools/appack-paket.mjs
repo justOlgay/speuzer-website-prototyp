@@ -48,8 +48,9 @@ const ZIEL_WORKSPACE_ORDNER = "https://cdn.appack.de/sportfreunde04/workspace/we
 // styleguide.html) statt 38.
 const AUSGESCHLOSSENE_DATEIEN = new Set(["styleguide.html"]);
 // 28.09.2026: 39 (+ formular-gesendet.html, Bestätigung nach dem Absenden
-// der Mitgliedsbescheinigung), das Paket entsprechend 38.
-const ERWARTETE_WS_DATEIEN = 39;
+// der Mitgliedsbescheinigung), das Paket entsprechend 38. Am selben Tag 40
+// (+ termine.html, Menüpunkt „Termine“), das Paket entsprechend 39.
+const ERWARTETE_WS_DATEIEN = 40;
 
 // canonical/og:url: statt der GitHub-Pages-Prototyp-Adresse zeigt das Paket
 // auf die künftige Live-Adresse im appack-Workspace (W3, Abschnitt 7,
