@@ -1,0 +1,18 @@
+# Aufnahmeantrag-Annahme (FFV Sportfreunde 04) – Zugriffsschutz
+# Aus dem Internet erreichbar sind nur annahme.php und index.html.
+# Gesperrt sind auch Kopien der Einstellungen (einstellungen.php.bak, …~)
+# und abgeschaltete Dateien (….aus).
+# Bewusst nur Zugriffsregeln (keine Options/DirectoryIndex), damit die Datei
+# auf jedem Webspace ohne Fehler 500 läuft.
+
+<IfModule mod_authz_core.c>
+  <FilesMatch "^(einstellungen.*|.*\.(md|txt|json|bak|old|orig|save|swp|tmp|aus|zip)|.*~)$">
+    Require all denied
+  </FilesMatch>
+</IfModule>
+<IfModule !mod_authz_core.c>
+  <FilesMatch "^(einstellungen.*|.*\.(md|txt|json|bak|old|orig|save|swp|tmp|aus|zip)|.*~)$">
+    Order allow,deny
+    Deny from all
+  </FilesMatch>
+</IfModule>

@@ -12,11 +12,11 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DURCHSUCHTE_ORDNER = ["data", "src", "docs"]
+DURCHSUCHTE_ORDNER = ["data", "src", "docs", "server"]
 
 TEXT_ENDUNGEN = {
     ".html", ".htm", ".mjs", ".js", ".json", ".css", ".txt",
-    ".xml", ".csv", ".md", ".svg", ".ics",
+    ".xml", ".csv", ".md", ".svg", ".ics", ".php", ".py",
 }
 
 # Whitelist: die beiden Vereins-Festnetznummern (Geschäftsstelle, Platzwart) in allen Schreibweisen,
@@ -78,7 +78,9 @@ VERBOTENE_DATEINAMEN_TEILE = ["WhatsApp", "IMG-2026", "IMG-2025", "IMG-2024"]
 # Zeichenfolgen wie "0123456789", die das Telefonmuster als Fehltreffer
 # meldet; Vereinsdaten stehen darin nicht. Nur diese Dateinamen, egal ob unter
 # assets/, docs/assets/ oder docs/appack-paket/web/.
-FREMDCODE_DATEIEN = {"aufnahmeantrag-pdf-lib.js", "aufnahmeantrag-fontkit.js"}
+FREMDCODE_DATEIEN = {"aufnahmeantrag-pdf-lib.js", "aufnahmeantrag-fontkit.js",
+                     # PHPMailer 7.1.1 (server/aufnahmeantrag-annahme/lib/PHPMailer): Autoren-Adressen im Quelltext
+                     "PHPMailer.php", "SMTP.php", "Exception.php"}
 # "Mannheim" stand hier ursprünglich als generischer Demodaten-Marker; P5
 # bringt mit dem App-Projektpartner vmapit GmbH (data/sponsoren.json) eine
 # echte, öffentliche Firmenadresse in Mannheim ins Projekt – klarer
@@ -154,6 +156,10 @@ def main():
                 continue
             pruefe_dateinamen(pfad, treffer)
             if not ist_text_datei(pfad) or pfad.name in FREMDCODE_DATEIEN:
+                continue
+            # Lokale Tests der Annahme (server/…/test/) arbeiten absichtlich mit
+            # Beispieldaten (example.org, .test-Domains, „Max Mustermann“).
+            if ordnername == "server" and "test" in pfad.relative_to(ordner).parts:
                 continue
             pfad_rel = str(pfad.relative_to(ROOT))
             try:

@@ -14,7 +14,7 @@
 // /mannschaften/ und /kontakt/) entfällt hier.
 
 import { downloadZeile } from "../vorlagen/bausteine.mjs";
-import { PROBETRAINING_MAILTO, APP_MODUS_SKRIPT, AUFNAHMEANTRAG_MAILTO } from "../vorlagen/hilfen.mjs";
+import { PROBETRAINING_MAILTO, APP_MODUS_SKRIPT, AUFNAHMEANTRAG_MAILTO, AUFNAHMEANTRAG_VERSAND } from "../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/mitglied-werden/" (Tiefe 1), daher immer
 // "../" (siehe pfadZurWurzel() in tools/build.mjs).
@@ -238,7 +238,7 @@ function ablaufAbschnitt(daten) {
       </li>
       <li>
         <div class="schritt__inhalt" data-nur-web>
-          <p>Aufnahmeantrag online ausfüllen und am Bildschirm unterschreiben – daraus entsteht das fertige PDF für die E-Mail an die Geschäftsstelle.</p>
+          <p>Aufnahmeantrag online ausfüllen und am Bildschirm unterschreiben – daraus entsteht das fertige PDF${AUFNAHMEANTRAG_VERSAND.art === "endpunkt" ? ", das Sie direkt an die Geschäftsstelle senden" : " für die E-Mail an die Geschäftsstelle"}.</p>
           <p class="knopfzeile">
             <a class="knopf" href="${PFAD}aufnahmeantrag/">Online ausfüllen</a>
             ${downloadKnopf(aufnahmeantrag, "PDF zum Ausdrucken")}

@@ -25,9 +25,12 @@
   data/aufnahmeantrag-schriftbreiten.json, dass jede Angabe in mindestens
   UNTERGRENZE pt ins Feld passt; lange Zusatzzeilen werden umbrochen.
 
-  Versand: gekapselt in VERSAND (Abschnitt „Versand“ unten), heute
-  "manuell"; mit { art: "endpunkt", url } in src/seiten/aufnahmeantrag.mjs
-  schickt das Skript das PDF später an einen eigenen Endpunkt.
+  Versand: gekapselt in VERSAND (Abschnitt „Versand“ unten). "manuell":
+  Herunterladen/Teilen und vorbereitete E-Mail. "endpunkt" (Schalter
+  AUFNAHMEANTRAG_VERSAND in src/vorlagen/hilfen.mjs): „An die
+  Geschäftsstelle senden“ schickt das PDF an die eigene Annahme auf dem
+  Vereins-Webspace (server/aufnahmeantrag-annahme/); bei Unterschrift auf
+  Papier und wenn das Senden nicht klappt, gilt wieder der Weg "manuell".
 */
 (function () {
   "use strict";
@@ -45,6 +48,7 @@
   const F = K.felder;
   const V = K.vorgaben;
   const VERSAND = K.versand || { art: "manuell" };
+  const ENDPUNKT = VERSAND.art === "endpunkt" && !!VERSAND.url;
 
   // Tinte der Unterschrift (Kugelschreiber-Blau), Strichstärke am Bildschirm
   // in CSS-Pixeln und größter Maßstab beim Einsetzen ins PDF (Punkt je
@@ -1477,6 +1481,8 @@
     URL.revokeObjectURL(ergebnis.url);
     ergebnis = null;
     ergebnisBereich.hidden = true;
+    const gesendetEl = $("[data-gesendet]", ergebnisBereich);
+    if (gesendetEl) gesendetEl.hidden = true;
     meldung("");
     if (aktuell === "pruefen") knopfWeiter.hidden = false;
   }
@@ -1518,20 +1524,8 @@
     ergebnis = { blob: blob, datei: datei, name: name, url: URL.createObjectURL(blob) };
     setzeText("datei-name", name);
     setzeText("datei-info", "(" + seitenAnzahl + " Seiten, " + kbText(blob.size) + ")");
-    const teilen = $('[data-aktion="teilen"]', ergebnisBereich);
-    const laden = $('[data-aktion="herunterladen"]', ergebnisBereich);
-    const handy = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
-    const kann = kannTeilen(datei);
-    // Am Handy ist Teilen der Hauptweg (direkt in die Mail-App), am Rechner
-    // das Herunterladen – im fremden Rahmen nur, wenn sich die Regel prüfen
-    // ließ (siehe imFremdenRahmen()).
-    const teilenZuerst = handy && kann && (!imFremdenRahmen() || !!teilenRegel());
-    teilen.hidden = !kann;
-    teilen.classList.toggle("knopf--sekundaer", !teilenZuerst);
-    laden.classList.toggle("knopf--sekundaer", teilenZuerst);
-    if (teilenZuerst) laden.parentNode.insertBefore(teilen, laden);
-    else laden.parentNode.insertBefore(laden, teilen);
-    versandEinrichten();
+    setzeText("email-anzeige", sauber(wert("email")));
+    versandWeg(ENDPUNKT && !zustand().papier ? "senden" : "manuell");
     ergebnisBereich.hidden = false;
     knopfWeiter.hidden = true;
     meldung("");
@@ -1580,39 +1574,103 @@
     });
   }
 
-  // Versand (gekapselt): "manuell" – der Nutzer speichert oder teilt das PDF
-  // und sendet es selbst (vorbereitete E-Mail). "endpunkt" – später: POST
-  // an eine eigene Annahme (multipart/form-data, Feld "antrag"); dann
-  // erscheint zusätzlich „An die Geschäftsstelle senden“. Nur hier wird das
-  // PDF je übertragen, und nur auf ausdrücklichen Klick.
-  function versandEinrichten() {
-    if (VERSAND.art !== "endpunkt" || !VERSAND.url) return;
-    let knopf = $('[data-aktion="senden"]', ergebnisBereich);
-    if (!knopf) {
-      knopf = document.createElement("button");
-      knopf.type = "button";
-      knopf.className = "knopf";
-      knopf.setAttribute("data-aktion", "senden");
-      knopf.textContent = "An die Geschäftsstelle senden";
-      const zeile = $(".knopfzeile", ergebnisBereich);
-      zeile.insertBefore(knopf, zeile.firstChild);
-      knopf.addEventListener("click", sendeAnEndpunkt);
-    }
+  // ---------- Versand (gekapselt) ----------
+  // "manuell": Der Nutzer speichert oder teilt das PDF und sendet es selbst
+  // (vorbereitete E-Mail). "endpunkt": „An die Geschäftsstelle senden“
+  // schickt es per POST an die eigene Annahme (multipart/form-data: Datei
+  // "antrag", dazu "email" für Eingangsbestätigung und Antwort-Adresse und
+  // "name" für den Betreff). Nur hier verlässt das PDF je das Gerät, und nur
+  // auf ausdrücklichen Klick.
+
+  // Welcher Weg im Ergebnis gilt: "senden" (nur Senden-Knopf, Herunterladen
+  // als Kopie), "manuell" (Herunterladen/Teilen und E-Mail-Anleitung – immer
+  // im Weg "manuell" und bei Unterschrift auf Papier) oder "beide" (Senden
+  // hat nicht geklappt: noch einmal senden oder selbst per E-Mail).
+  function versandWeg(weg) {
+    const teilen = $('[data-aktion="teilen"]', ergebnisBereich);
+    const laden = $('[data-aktion="herunterladen"]', ergebnisBereich);
+    const handy = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+    const kann = weg !== "senden" && kannTeilen(ergebnis && ergebnis.datei);
+    // Am Handy ist Teilen der Hauptweg (direkt in die Mail-App), am Rechner
+    // das Herunterladen – im fremden Rahmen nur, wenn sich die Regel prüfen
+    // ließ (siehe imFremdenRahmen()). Ist Senden möglich, ist das der
+    // Hauptknopf und beide anderen treten zurück.
+    const teilenZuerst = handy && kann && (!imFremdenRahmen() || !!teilenRegel());
+    teilen.hidden = !kann;
+    teilen.classList.toggle("knopf--sekundaer", !teilenZuerst || weg === "beide");
+    laden.classList.toggle("knopf--sekundaer", teilenZuerst || weg !== "manuell");
+    if (teilenZuerst) laden.parentNode.insertBefore(teilen, laden);
+    else laden.parentNode.insertBefore(laden, teilen);
+    $$("[data-weg-senden]", ergebnisBereich).forEach((el) => { el.hidden = weg === "manuell"; });
+    $$("[data-weg-manuell]", ergebnisBereich).forEach((el) => { el.hidden = weg === "senden"; });
+    const senden = $('[data-aktion="senden"]', ergebnisBereich);
+    if (senden && weg === "senden") senden.textContent = "An die Geschäftsstelle senden";
   }
 
-  async function sendeAnEndpunkt() {
-    if (!ergebnis) return;
+  let sendetGerade = false;
+  async function sendeAnEndpunkt(knopf) {
+    if (!ENDPUNKT || !ergebnis || sendetGerade) return;
+    sendetGerade = true;
+    // Ändert jemand während des Sendens etwas, entsteht ein neues PDF – die
+    // Antwort gilt dann nur für das alte (siehe unten).
+    const sendung = ergebnis;
+    const email = sauber(wert("email"));
     const daten = new FormData();
     daten.append("antrag", ergebnis.datei || ergebnis.blob, ergebnis.name);
+    daten.append("email", email);
+    daten.append("name", zustand().name);
+    knopf.disabled = true;
+    knopf.textContent = "Wird gesendet …";
     meldung("Wird gesendet …");
+    // Die Annahme verschickt zwei E-Mails nacheinander (je bis zu 20 s
+    // Wartezeit am Postfach) – daher großzügig warten.
+    const abbruch = typeof AbortController === "function" ? new AbortController() : null;
+    let abgebrochen = false;
+    const uhr = abbruch ? window.setTimeout(() => { abgebrochen = true; abbruch.abort(); }, 120000) : 0;
+    let status = 0, antwort = null;
     try {
-      const antwort = await fetch(VERSAND.url, { method: "POST", body: daten, credentials: "omit" });
-      if (!antwort.ok) throw new Error("HTTP " + antwort.status);
-      gesichert = true;
-      meldung("Gesendet. Die Geschäftsstelle meldet sich per E-Mail.");
+      const r = await fetch(VERSAND.url, { method: "POST", body: daten, credentials: "omit", signal: abbruch ? abbruch.signal : undefined });
+      status = r.status;
+      try { antwort = await r.json(); } catch (e) { antwort = null; }
     } catch (e) {
-      meldung("Senden hat nicht geklappt. Bitte laden Sie das PDF herunter und schicken Sie es per E-Mail an " + K.mail + ".");
+      status = 0;
     }
+    window.clearTimeout(uhr);
+    sendetGerade = false;
+    knopf.disabled = false;
+    if (ergebnis !== sendung) return; // inzwischen neues PDF – dessen Knöpfe gelten
+    if (status === 200 && antwort && antwort.ok === true) {
+      knopf.textContent = "An die Geschäftsstelle senden";
+      gesendet(antwort.bestaetigung, email);
+      return;
+    }
+    knopf.textContent = "Noch einmal senden";
+    versandWeg("beide");
+    const fehler = antwort && antwort.fehler;
+    const selbst = "Oder senden Sie das PDF selbst per E-Mail an " + K.mail + " – so geht’s unten.";
+    if (fehler === "zu-viele-heute") meldung("Heute sind schon sehr viele Anträge eingegangen, deshalb nimmt die Website bis morgen keine weiteren an. Bitte senden Sie das PDF selbst per E-Mail an " + K.mail + " – so geht’s unten.");
+    else if (status === 429) meldung("Von diesem Anschluss kamen gerade mehrere Anträge. Bitte versuchen Sie es in einer Stunde noch einmal. " + selbst);
+    else if (status === 400 || status === 413) meldung("Der Antrag ließ sich nicht übertragen. Bitte senden Sie das PDF selbst per E-Mail an " + K.mail + " – so geht’s unten.");
+    else if (abgebrochen) meldung("Die Website hat keine Antwort bekommen. Vielleicht ist der Antrag trotzdem angekommen – dann kommt gleich die Eingangsbestätigung. Kommt in den nächsten Minuten keine, senden Sie ihn bitte noch einmal. " + selbst);
+    else meldung("Senden hat nicht geklappt. Bitte prüfen Sie die Internetverbindung und versuchen Sie es noch einmal. " + selbst);
+  }
+
+  // bestaetigt: true = Eingangsbestätigung verschickt, false = ging nicht,
+  // null = in der Annahme abgeschaltet (dann kein Satz dazu).
+  function gesendet(bestaetigt, email) {
+    gesichert = true;
+    $$("[data-weg-senden]", ergebnisBereich).forEach((el) => { el.hidden = true; });
+    $$("[data-weg-manuell]", ergebnisBereich).forEach((el) => { el.hidden = true; });
+    const teilen = $('[data-aktion="teilen"]', ergebnisBereich);
+    if (teilen) teilen.hidden = true;
+    setzeText("gesendet-bestaetigung", bestaetigt === true
+      ? "Eine Eingangsbestätigung ist unterwegs an " + email + "."
+      : bestaetigt === false
+        ? "Die Eingangsbestätigung per E-Mail hat nicht geklappt – die Geschäftsstelle meldet sich bei Ihnen."
+        : "Die Geschäftsstelle meldet sich bei Ihnen.");
+    meldung("");
+    const box = $("[data-gesendet]", ergebnisBereich);
+    if (box) { box.hidden = false; box.focus(); }
   }
 
   const FEHLERTEXTE = {
@@ -1733,6 +1791,7 @@
     if (aktion === "herunterladen") herunterladen();
     else if (aktion === "ansehen") ansehen();
     else if (aktion === "teilen") teilen();
+    else if (aktion === "senden") sendeAnEndpunkt(knopf);
     else if (aktion === "loeschen") alleLoeschen(knopf);
   });
 
