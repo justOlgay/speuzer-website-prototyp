@@ -116,7 +116,7 @@ hier nur dokumentiert (W3-Spezifikation Abschnitt 5), nicht umgesetzt:
 - Facebook-Link der Fußzeile zeigt auf eine andere Adresse als
   `kontakt.html` (Worksheet-Pflege, macht der Auftraggeber im CMS).
 
-## Dateien (39)
+## Dateien (40)
 
 - web/datenschutz.html
 - web/formular-gesendet.html
@@ -149,6 +149,7 @@ hier nur dokumentiert (W3-Spezifikation Abschnitt 5), nicht umgesetzt:
 - web/spielplan-herren.html
 - web/spielplan.html
 - web/tabellen.html
+- web/termine.html
 - web/verein-downloads.html
 - web/verein-karneval.html
 - web/verein-mach-mit.html

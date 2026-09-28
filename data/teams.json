@@ -217,6 +217,7 @@
     "tabelle": false,
     "kalender": "f1.ics",
     "trainingsKalender": "training-f1.ics",
+    "trainingHinweis": "Über den Winter trainiert die Mannschaft in der Halle. Zeitraum, Halle und Zeiten folgen, bis dahin gelten die Zeiten auf dem Platz.",
     "beschreibung": "Das ist unsere F1-Jugend, der ältere F-Jahrgang: Hier spielen die Kinder schon mit Torwart und wachsen Schritt für Schritt ins Mannschaftsspiel hinein."
   },
   {
@@ -241,6 +242,7 @@
     "tabelle": false,
     "kalender": "f2.ics",
     "trainingsKalender": "training-f2.ics",
+    "trainingHinweis": "Über den Winter trainiert die Mannschaft in der Halle. Zeitraum, Halle und Zeiten folgen, bis dahin gelten die Zeiten auf dem Platz.",
     "beschreibung": "Das ist unsere F2-Jugend, der jüngere F-Jahrgang: viele Ballkontakte, die ersten Kinderfestivals und vor allem Spaß am Fußball."
   },
   {
@@ -264,6 +266,7 @@
     "tabelle": false,
     "kalender": "g1.ics",
     "trainingsKalender": "training-g1.ics",
+    "trainingHinweis": "Über den Winter trainiert die Mannschaft in der Halle. Zeitraum, Halle und Zeiten folgen, bis dahin gelten die Zeiten auf dem Platz.",
     "beschreibung": "Das ist unsere Bambini-Mannschaft, der Einstieg in den Vereinsfußball für unsere Jüngsten."
   }
 ]

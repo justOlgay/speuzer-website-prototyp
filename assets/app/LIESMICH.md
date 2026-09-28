@@ -117,7 +117,8 @@ Cache-Ordner und werden nie committet oder zitiert.
 angelegt, nicht in den Workspace hochgeladen. Sie ergibt die neue
 Startseite der Vereins-App, von oben nach unten: blaue Bühne (Begrüßung,
 Profil-Knopf bzw. für Gäste die Pille „Anmelden“, Claim), der Terminblock
-„Termine“ (nächste drei Spiele/Veranstaltungen), Parkplatzhinweis und
+„Termine“ (seit 28.09.2026: zwei Spiele/Veranstaltungen und eine
+Trainingszeile, siehe Abschnitt „Termine“ unten), Parkplatzhinweis und
 zwei Knöpfe auf dem hellen Blatt, ganz unten die Sponsoren-„Bande“ auf
 einem blauen Fußstreifen – ohne Foto, Kacheln und Meldungen („Aktuelles“
 entfällt seit 24.09.2026 abends, die News stehen im Menüpunkt „News“).
@@ -141,9 +142,9 @@ Entwurfsvergleich, mit den Nachbesserungen der Jury.
   (`nav://sportfreunde04_Application_1780401660369`, nur das Modul, nicht
   den einzelnen Termin). Mit drei Terminen ist der Block als Ganzes höher
   als die alte Karte mit einem Termin (etwa 215–260 px); weniger Zeilen
-  wären eine Zeile im Skript (`TERMINE_ANZAHL`).
-- **Auswahl:** die nächsten drei Spiele und Veranstaltungen, keine
-  Trainings (Kategorie oder Titelwort „Training“, „…training“ wie
+  wären eine Zeile im Skript (seit 28.09.2026 `ANZAHL_MIT_TRAINING`/`ANZAHL_OHNE_TRAINING`, siehe Abschnitt „Termine“).
+- **Auswahl (bis 28.09.2026, seitdem siehe Abschnitt „Termine“):** die
+  nächsten drei Spiele und Veranstaltungen, keine Trainings (Kategorie oder Titelwort „Training“, „…training“ wie
   Torwarttraining; Probetraining, Schnuppertraining und Trainingslager
   bleiben stehen, Kategorie „Veranstaltung“ hat immer Vorrang), keine
   vergangenen Termine (ganztägige zählen bis Tagesende), jeder Termin nur
@@ -151,7 +152,8 @@ Entwurfsvergleich, mit den Nachbesserungen der Jury.
   „ (Herren)“ u. ä. am Ende weg, „ - “ als „ – “; sonst nichts geändert.
   Der Untertitel (`subTitle`) wird bewusst nicht gezeigt (keine
   Personendaten). Datum und Uhrzeit immer in Frankfurter Zeit.
-- **Daten:** `POST https://api.appack.de/graphql`,
+- **Daten (bis 28.09.2026, seitdem `listCalendarByComponentId` +
+  `findCalendarEvents`, siehe Abschnitt „Termine“):** `POST https://api.appack.de/graphql`,
   `listUpcomingCalendarEvents(componentId: "sportfreunde04_Application_1780401660369", amount: 20)`,
   mit dem **öffentlichen Embedded-Token** als Konstante `TERMINE_TOKEN`.
   Herkunft: appack schreibt ihn beim Aufruf der öffentlichen
@@ -160,16 +162,14 @@ Entwurfsvergleich, mit den Nachbesserungen der Jury.
   technischer Nutzer, liefert nur öffentliche Kalender). Für alle, auch
   Gäste. CORS am 25.09.2026 geprüft: Vorabfrage und Antwort erlauben die
   Herkunft `https://appack.de` mit Kopfzeile `Authorization`.
-- **Token gültig bis 21.08.2027.** Erneuern: Kurzadresse im Browser
-  öffnen, aus der Adresse nach der Weiterleitung den Teil nach `jwt=`
-  (bis zum nächsten `&`) bei `TERMINE_TOKEN` einsetzen, Ablaufdatum im
-  Kommentar und hier nachziehen, Vorlage im CMS neu einspielen. Läuft er
-  ab oder sperrt appack ihn, zeigt die Karte still nur „Alle Termine im
-  Kalender ›“.
-- **Robust:** Beim Laden drei ruhige Platzhalter-Zeilen in Höhe echter
+- **Token gültig bis 21.08.2027.** Erneuern seit 28.09.2026 an EINER
+  Stelle: `data/termine.json` (siehe Abschnitt „Termine“, „Token
+  erneuern“). Läuft er ab oder sperrt appack ihn, zeigt die Karte still nur
+  „Alle Termine im Kalender ›“.
+- **Robust:** Beim Laden ruhige Platzhalter-Zeilen in Höhe echter
   Zeilen (kein Sprung). Fehler, leere oder unpassende Liste, kein `fetch`
-  oder keine Antwort nach 6 s: statt der Liste nur die Zeile „Alle Termine
-  im Kalender ›“. Das Termine-Skript steht direkt im Abschnitt und wartet
+  oder keine Antwort nach 8 s (seit 28.09.2026 zwei Anfragen): statt der
+  Liste nur die Zeile „Alle Termine im Kalender ›“. Das Termine-Skript steht direkt im Abschnitt und wartet
   nicht auf die cdn-Skripte.
 - **Sponsoren unten:** die Bande sitzt jetzt auf einem vollbreiten blauen
   Fußstreifen am Seitenende (bis in den Safe-Area-Bereich); das helle
@@ -255,11 +255,19 @@ npm run tpl-vorschau
 
 Mit `TPL_VORSCHAU_WORKSHEETS=<json>` lassen sich echte Worksheet-Zeilen
 (z. B. die Sponsoren für die Bande) über die Mocks legen.
-`TPL_VORSCHAU_TERMINE=<json>` beantwortet die Kalenderabfrage des
-Terminblocks mit einer gespeicherten Antwort (Form wie die echte),
-`TPL_VORSCHAU_TERMINE=fehler` simuliert einen Ausfall (HTTP 500; die
-Vorschau zählt die Browser-Meldung dazu als pageerror=1 je Seite), ohne
-Variable kommt eine leere Liste.
+`TPL_VORSCHAU_TERMINE=<json>` beantwortet die Kalenderabfragen (Terminblock
+der Startseite und `Termine-App.html`): enthält die Datei `{ kalender,
+termine }` (Form wie `tools/cache/app-optik/termine-daten/termine-fixture.json`),
+beantwortet die Vorschau `listCalendarByComponentId`, `findCalendarEvents`
+(auch mehrere Felder mit Alias in einer Anfrage; ein Kalender mit
+`canRead: false` liefert wie beim echten Server `null` plus `errors`) und
+`listUpcomingCalendarEvents` daraus; jede andere Datei geht wie bisher als
+gespeicherte Antwort zurück. `TPL_VORSCHAU_TERMINE=fehler` simuliert einen
+Ausfall (HTTP 500; die Vorschau zählt die Browser-Meldung je Anfrage als
+pageerror, seit 28.09.2026 also 2 je Startseite: Kalenderliste und
+Rückfall), ohne Variable kommen leere Listen.
+`npm run tpl-vorschau Termine-App` rendert nur die Terminseite der App
+(site.css dann aus `docs/appack-paket/web/`, also vorher `npm run build`).
 
 Rendert `Startseite_v3.tpl` lokal ohne appack: ersetzt die appack-
 FreeMarker-Konstrukte der Vorlage gegen Mock-Daten aus
@@ -512,7 +520,8 @@ extrahiert) plus je Seite `src/app/<Name>_v3.html` (Body-Markup,
 seitenspezifisches `<style>`, `<script>`). `tools/app-optik/tpl-bauen.mjs`
 (`npm run tpl-bauen`) setzt daraus die fünf `assets/app/<Name>_v3.tpl`
 zusammen (derselbe `<head>` wie `Startseite_v3.tpl`). **`Startseite_v3.tpl`
-bleibt unverändert** und wird von diesem Bauskript nicht angefasst. Die
+wird von Hand gepflegt**; seit 28.09.2026 ersetzt das Bauskript darin nur
+den markierten Datenblock des Terminblocks (siehe Abschnitt „Termine“). Die
 gebauten `.tpl`-Dateien werden committet – sie sind das, was ins CMS
 kopiert wird, nicht die `src/app/`-Quellen. `npm run build` kopiert
 `assets/` unverändert nach `docs/assets/`, die fünf `.tpl` kommen dabei
@@ -724,3 +733,205 @@ jeweilige Mannschaftsseite (`src/vorlagen/weiterleitung.mjs`) – sie bleiben
 unter demselben Workspace-Namen bestehen (keine toten Links für alte
 Verweise), tragen aber keine Widgets mehr und stehen nicht in
 `docs/sitemap.xml`.
+
+## Termine (28.09.2026): Terminseite für Website und App, neuer Terminblock
+
+Olgays Wunsch: die Trainings aller Mannschaften im Kalender, ohne dass Spiele,
+Kinderfestivals und Vereinsveranstaltungen darin untergehen; die D3 genauso
+wie alle anderen (seit 28.09.2026 alle elf Mannschaften aus demselben
+Trainingsgenerator). Umgesetzt ist Entwurf B „Zwei Ebenen“ aus dem
+Entwurfsvergleich (`tools/cache/app-optik/termine-seite-{A,B,C}/`, nicht im
+Repo) mit den Nachbesserungen der Jury.
+
+### Aufbau der Terminseite
+
+- **Mannschaftswahl** (Pillen „Alle“ + elf Mannschaften aus
+  `data/teams.json`; am Handy „A“/„G“, ab 720px „A-Jugend“/„G-Jugend“, immer
+  voller Name als `aria-label`). Die Wahl merkt sich das Gerät und steht in
+  der Adresse (`#d3`); Links können auch `?team=d3` und `?ansicht=training`
+  setzen.
+- **Als Nächstes** (nur mit gewählter Mannschaft): nächstes Spiel bzw.
+  Kinderfestival, nächstes Training, nächste Veranstaltung; Tippen springt
+  zum Eintrag, klappt ihn auf und setzt den Fokus.
+- **Spiele & Veranstaltungen**: nach Tagen, die nächsten 14 Tage (mindestens
+  vier Einträge), „Weitere Termine anzeigen“, Ferien als Zwischenzeile,
+  Veranstaltungen hellblau mit Stern-Marke „Verein“, darunter „Später im
+  Verein“ (die nächsten Veranstaltungen jenseits der sichtbaren Tage).
+  Jeder Eintrag klappt auf: Wettbewerb (lesbar, ohne DFBnet-Kürzel),
+  Adresse, Route planen, Spiel auf FUSSBALL.DE, Zur Mannschaft.
+- **Trainingswoche**: Wochenplan Mannschaften × Tage mit Blättern (bis 30
+  Wochen voraus); mit gewählter Mannschaft deren Einheiten als Liste
+  (aufklappbar: Wann, Platz, Wo, Hinweis, Route) und der Plan aller
+  Mannschaften zum Aufklappen. Ferienwochen als eine Karte über den ganzen
+  Zeitraum („Herbstferien – kein Training · 5.–17. Oktober · 2 Wochen“) mit
+  Sprung zur nächsten Trainingswoche.
+- **Kalender abonnieren** (mit Mannschaft deren Spielplan/Trainingszeiten,
+  sonst `alle.ics`/`training-alle.ics`) und „Kalenderansicht“ (appack-
+  Terminmodul).
+
+### Dateien und Quelle
+
+| Datei | Wofür | Entsteht aus |
+|---|---|---|
+| `web/termine.html` (Paket `dist/appack-paket/web/`) | Menüpunkt „Termine“ der Website | `src/seiten/termine.mjs` (`npm run build`) |
+| `assets/app/Termine-App.html` | Seitenmodul „Termine“ der App (Workspace-Wurzel) | `npm run tpl-bauen` |
+| `assets/app/Startseite_v3.tpl` | Terminblock der App-Startseite | von Hand; Datenblock per `npm run tpl-bauen` |
+
+Website- und App-Seite haben **dieselbe Quelle** `src/vorlagen/termine.mjs`
+(Markup, Daten) mit `src/vorlagen/termine/termine.css` (auf `site.css`) und
+`src/vorlagen/termine/termine.js` (Skript, ES5, ohne FreeMarker-Zeichen).
+`Termine-App.html` ist dieselbe Seite mit fest eingeschaltetem App-Modus
+(`<html class="app-modus" data-app-seite>`: Titel in der App-Kopfleiste,
+Mannschaftsseiten und Kalender als `nav://`, alles andere `ext://`) und lädt
+`site.css` absolut aus dem Ordner `web` – sie braucht also das hochgeladene
+Website-Paket. `web/termine.html?app=1` ergibt dieselbe App-Ansicht.
+
+### Datenquelle
+
+`POST https://api.appack.de/graphql` mit dem öffentlichen Embedded-Token,
+`credentials: "omit"`. CORS erlaubt die Herkünfte `https://appack.de`
+(drender, Startseite) und `https://cdn.appack.de` (Website-Seiten und
+statische App-Seiten), nicht `file://`, `localhost` oder GitHub Pages – dort
+zeigen die Seiten den ruhigen Fehlerfall (Terminseite: Hinweis mit „Erneut
+versuchen“ und die regelmäßigen Trainingszeiten; Startseite: „Alle Termine im
+Kalender ›“). Geprüft am 28.09.2026 gegen den echten Server.
+
+1. `listCalendarByComponentId(componentId: "sportfreunde04_Application_1780401660369")`
+   – nur Kalender mit `canRead: true` werden abgefragt (ein nicht lesbarer
+   Kalender in einer Abfrage ließe sie ganz scheitern). Fällt die Liste aus,
+   gelten die bekannten Kalender aus `data/termine.json`; ein nicht lesbarer
+   liefert dann je Feld still `null`.
+2. `findCalendarEvents(calendarIds: [<id>], range: {from, to})` je Kalender
+   als eigenes Feld (Alias) in EINER Anfrage. Terminseite: Spiele/
+   Veranstaltungen 16 Wochen, Trainings nur die gezeigte Woche (die folgende
+   wird vorgeladen; in Ferien sucht die Seite das nächste Training bis 6
+   Wochen voraus). Startseite: Spiele/Veranstaltungen 120 Tage, Trainings 21
+   Tage (nur Titel und Zeiten).
+
+| Kalender | Id | Rolle | Stand 28.09.2026 |
+|---|---|---|---|
+| Spielplan Mannschaften | `6a86e0994c9e78e40353f3f4` | Spiele und Kinderfestivals aller elf Mannschaften (Titel „Speuzer D2 · Heim gegen …“) | öffentlich |
+| Trainingszeiten Mannschaften | `6a8ea6f2b34f1ebb47097a67` | Trainings aller elf Mannschaften (Titel „Speuzer D3 · Training“, Beschreibung mit „Platz: …“) | **nur App-Admins** |
+| Veranstaltungen | `6ab6365a66ca4a55867520de` | Feste, Stände, Versammlungen, Karneval (pflegt die 1. Vorsitzende) | öffentlich, noch leer |
+| Vorstand (intern) | `6a8ea6a66fca3ace0c245975` | intern | nicht lesbar, wird übersprungen |
+
+Trainings erkennt die Seite am Trainingskalender (bekannte Id, sonst Titel/
+Kategorie „Training“), in anderen Kalendern am Wort „Training“ (nicht
+Probe-/Schnuppertraining, Kategorie „Veranstaltung“ hat Vorrang). Die
+Mannschaft steht im Titel („Speuzer A-Jugend · …“, „Speuzer G1 · …“) und wird
+über `data/teams.json` (`kurz`, `csv`, `name`, `slug`) zugeordnet.
+
+**Solange der Trainingskalender nicht öffentlich ist** (heute): Die
+Terminseite zeigt statt der Trainingswoche „Trainingszeiten“ mit den
+regelmäßigen Zeiten aus `data/teams.json` (wie die Mannschaftsseiten), die
+Karte „Als Nächstes“ die regelmäßigen Tage; die Startseite zeigt drei
+Spiele/Veranstaltungen ohne Trainingszeile. Sobald der Kalender öffentlich
+ist, schalten beide ohne Änderung um.
+
+### Trainingsfreie Zeiten
+
+`data/termine.json` → `trainingsfrei` (gleiche Zeiträume wie `FREI` im
+Trainingsgenerator `speuzer-spielplan/build_ics.py`, dazu die Sommerferien
+28.06.–06.08.2027): nur zur Beschriftung („Herbstferien 05.–17.10. · kein
+Training“, Ferienkarte, Trainingszeile der Startseite). Was im Kalender
+steht, gilt immer: ein Tag mit Trainings wird nie als Ferien markiert, eine
+Woche ohne Training ohne Ferieneintrag heißt „Kein Training eingetragen“
+(die Seite sucht dann das nächste Training), auf der Startseite
+„Trainingspause · wieder ab …“. **Jährlich mit dem Generator nachziehen.**
+
+### Winterhalle G1, F1, F2
+
+Der Generator schreibt bis zur Eintragung der Hallenzeiten (`HALLE` in
+`build_ics.py`) den Satz „Über den Winter trainiert die Mannschaft in der
+Halle. Zeitraum, Halle und Zeiten folgen, bis dahin gelten die Zeiten auf
+dem Platz.“ in jede Trainingsbeschreibung. Die Terminseite liest den Satz aus
+dem Kalender (Haus-Symbol an der Mannschaft, Fußnote unter dem Plan, Zeile in
+der Mannschaftswoche); stehen später „Halle: …“ und andere Sätze drin,
+erscheinen sie ohne Änderung an der Seite. Die Mannschaftsseiten (Website
+`team.mjs`, App `Mannschaften-App.html`) zeigen denselben Satz aus
+`data/teams.json` (`trainingHinweis`) als leise Zeile unter den
+Trainingszeiten – beim Eintragen der Hallenzeiten dort mit anpassen.
+
+### Terminblock der App-Startseite (Stand 28.09.2026)
+
+- Zwei Spiele/Veranstaltungen und darunter EINE leise Trainingszeile
+  (44px): „Heute Training A-Jugend · E1 · E2 +3“ (gemessen gekürzt, bei 320px
+  „Heute Training · 6 Teams“), sonst „Morgen Training …“ bzw. „Training Mi
+  30.09. …“; vor und in den Ferien „Herbstferien ab Mo 05.10. · Training
+  wieder ab Mo 19.10.“ bzw. „Herbstferien · wieder ab Mo 19.10.“ (kürzere
+  Fassungen, wenn es nicht passt). Bildschirmleser hören den ganzen Satz.
+  Ohne lesbaren Trainingskalender drei Spiele/Veranstaltungen wie bisher.
+- Titel ohne „Speuzer “ („A-Jugend · Heim gegen …“, „G-Jugend ·
+  Kinderfestival …“). Veranstaltungen: Kachel blau umrandet und
+  „Veranstaltung · So · 10:00 Uhr“; steht unter den nächsten Terminen keine,
+  rückt die nächste Veranstaltung der kommenden 28 Tage auf den letzten Platz.
+- Ganztägige Termine mit Ende 23:59 UTC stehen jetzt als ein Tag da
+  (vorher „Sa bis So“).
+- Höhe: mit Trainingszeile höchstens 234px, ohne lesbaren Trainingskalender
+  wie bisher 215–261px (gemessen bei 393×749 und 320×568: 234px bzw. 246px
+  mit den heutigen Titeln).
+- Tippen (Zeilen, „Alle“, Trainingszeile) öffnet `nav://` +
+  `TERMINE_SEITE_MODUL`. **Heute steht dort noch das Terminmodul
+  `sportfreunde04_Application_1780401660369`; nach Anlage des Seitenmoduls
+  „Termine“ dessen Ref eintragen** (Konstante im Skript „Termine“ der
+  Vorlage) und die Vorlage neu einspielen. Die Ersatzzeile „Alle Termine im
+  Kalender ›“ öffnet weiter das Terminmodul (arbeitet mit der App-Anmeldung).
+- Token, Kalender-Ids, trainingsfreie Zeiten und Mannschaften stehen im
+  markierten Block „aus data/termine.json und data/teams.json“ – nicht von
+  Hand ändern, `npm run tpl-bauen` setzt ihn.
+
+### Token erneuern (gültig bis 21.08.2027)
+
+1. `https://shorturl.appack.de/sportfreunde04_Application_1780401660369` im
+   Browser öffnen; die Adresse nach der Weiterleitung enthält `jwt=eyJ…`.
+2. Den Teil nach `jwt=` (bis zum nächsten `&`) in `data/termine.json` bei
+   `token` einsetzen, `tokenGueltigBis` nachziehen (Feld `exp` im Token).
+3. `npm run tpl-bauen` und `npm run build`, dann neu einspielen:
+   `Startseite_v3.tpl` (CMS, dynamische Seite), `web/termine.html` und
+   `Termine-App.html` (Workspace).
+
+### Einführung im CMS (Reihenfolge verbindlich)
+
+1. Website-Paket hochladen (`dist/appack-paket/web/`, u. a. neu
+   `termine.html`, geändert `site.css` und `mannschaften-f1/-f2/-g-jugend.html`).
+2. `assets/app/Termine-App.html` an die Workspace-Wurzel hochladen
+   (`https://cdn.appack.de/sportfreunde04/workspace/Termine-App.html`) und
+   `assets/app/Mannschaften-App.html` ersetzen (Winterhallen-Zeile).
+3. Seitenmodul „Termine“ anlegen, Seitenlink `Termine-App.html`. Lässt sich
+   kein neues Modul anlegen (siehe Chronik): das seit W6 unverlinkte Modul
+   „Spielplan & Tabellen“ (`sportfreunde04_TextImage_1783345459688`,
+   Seitenlink bisher `Spielplan-App.html`) umbenennen in „Termine“ und den
+   Seitenlink auf `Termine-App.html` setzen.
+4. Menüs: App-Menü „Termine“ auf das neue Modul (statt Terminmodul);
+   Website-Hülle, Worksheet MENU: „Termine“ → `https://cdn.appack.de/sportfreunde04/workspace/web/termine.html`.
+5. `TERMINE_SEITE_MODUL` in `Startseite_v3.tpl` auf die Ref des Moduls aus
+   Schritt 3 setzen, Vorlage im CMS neu einspielen.
+6. Erst danach den Kalender „Trainingszeiten Mannschaften“ öffentlich
+   schalten (sonst liefe das alte Terminmodul, auf das die Startseite bis
+   Schritt 5 zeigt, mit Trainings über).
+
+**Rückweg:** Menüpunkte wieder auf das Terminmodul
+`sportfreunde04_Application_1780401660369` (App) bzw. die Kurzadresse
+(Website), `TERMINE_SEITE_MODUL` zurück auf das Terminmodul; Seitenmodul und
+Dateien können stehen bleiben. Im Notfall den Trainingskalender wieder auf
+„nur App-Admins“ stellen – beide Seiten fallen dann auf die regelmäßigen
+Zeiten bzw. drei Spiele zurück.
+
+### Prüfen
+
+`npm run tpl-bauen`, `npm run build`, `npm run pruefen`, `npm run pii`,
+`npm run appack-paket-pruefen`. Sichtprüfung mit Testdaten:
+`TPL_VORSCHAU_TERMINE=<{kalender, termine}.json> npm run tpl-vorschau
+Startseite_v3` bzw. `… Termine-App`. Prüfskripte und Bilder der Umsetzung
+(Handy 320/390, Desktop im Rahmen der Website-Hülle, Startseite angemeldet/
+Gast, Trainingskalender lesbar/nicht lesbar, Fehlerfall, Ferienwoche, echte
+API) liegen in `tools/cache/app-optik/termine-umsetzung/` (nicht im Repo).
+
+### Offene Punkte (nur in der echten App/CMS prüfbar)
+
+- Terminseite im WebView der App (iOS/Android): `nav://`-Sprünge, `ext://`
+  für Kalender-Abos (öffnet der Browser die `.ics` als Abo?), `<details>`.
+- Genaue Form der Trainingsbeschreibungen im appack-Kalender (Zeilenumbrüche
+  oder eine Zeile): beide Formen sind berücksichtigt, gegen den echten
+  Kalender erst prüfbar, wenn er öffentlich ist.
+- Zeitraum, Halle und Zeiten der Winterhalle (G1, F1, F2) fehlen noch.

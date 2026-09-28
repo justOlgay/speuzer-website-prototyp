@@ -518,12 +518,19 @@ function hauptspalte(team, daten) {
       ${spieleHtml}
     </div>`;
 
+  // Winterhalle (G1, F1, F2; data/teams.json trainingHinweis): leise Zeile
+  // unter den Zeiten, wortgleich in der App (Mannschaften-App.html) und auf
+  // der Terminseite.
+  const trainingHinweis = team.trainingHinweis
+    ? `<p class="meta trainings-hinweis"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 10.5L12 4l9 6.5V20H3z"/><path d="M9.5 20v-5h5v5"/></svg><span>${escapeHtml(team.trainingHinweis)}</span></p>`
+    : "";
+
   return `<div class="fluss">
     <h2>Training</h2>
     ${ortHinweis}
     <ul class="trainings" role="list">
     ${trainingsZeilen(team, trainingsPlatzteil)}
-    </ul>
+    </ul>${trainingHinweis ? `\n    ${trainingHinweis}` : ""}
     <div class="hinweis hinweis--info">
       <p style="margin:0;">${escapeHtml(verein.hinweise?.ferien ?? "")}</p>
     </div>

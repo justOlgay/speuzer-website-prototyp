@@ -20,8 +20,19 @@
 //     `{ sponActive: true }` ab, wie es Sponsoren_v3.tpl sendet). `App`
 //     bleibt bewusst undefiniert (Browser-Fallback, siehe Vorlagen).
 //
-// Aufruf ohne Argument: alle assets/app/*_v3.tpl. Mit Argument (z. B.
-// "Verein_v3"): nur diese eine Vorlage.
+// Aufruf ohne Argument: alle assets/app/*_v3.tpl, Spielplan-App.html und
+// Termine-App.html. Mit Argument (z. B. "Verein_v3", "Termine-App"): nur
+// diese eine Seite.
+//
+// Kalender (Terminblock der Startseite, Termine-App.html): die Abfragen an
+// https://api.appack.de/graphql beantwortet TPL_VORSCHAU_TERMINE=<json>.
+// Enthält die Datei { kalender, termine } (Form wie
+// tools/cache/app-optik/termine-daten/termine-fixture.json), werden
+// listCalendarByComponentId, findCalendarEvents (auch mehrere Felder mit
+// Alias in einer Anfrage, nicht lesbarer Kalender -> Feld null + errors wie
+// beim echten Server) und listUpcomingCalendarEvents daraus beantwortet;
+// jede andere Datei wird wie bisher unverändert als Antwort geschickt.
+// TPL_VORSCHAU_TERMINE=fehler -> HTTP 500, ohne Variable leere Listen.
 //
 // Screenshots (390×760, Viewport + fullPage, zusätzlich 320×760 für die
 // Sichtprüfung "kein horizontales Scrollen") und ein Kontaktbogen landen in
@@ -42,6 +53,7 @@ const MOCK_WORKSHEETS_PFAD = path.join(ROOT, "tools", "app-optik", "mock-workshe
 const VERGLEICH_PFAD = path.join(ROOT, "docs", "app-konzept", "start.html");
 const ZIEL = process.env.TPL_VORSCHAU_ZIEL ? path.resolve(process.env.TPL_VORSCHAU_ZIEL) : path.join(ROOT, "tools", "cache", "app-optik", "tpl-vorschau");
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+const SITE_CSS_LOKAL = path.join(ROOT, "docs", "appack-paket", "web", "site.css");
 
 const BREITE = 390;
 const HOEHE = 760;
@@ -327,6 +339,62 @@ function fussballWidgetsStub() {
   })();`;
 }
 
+// ---------- Kalenderabfragen (api.appack.de/graphql) ----------
+
+// Beantwortet eine GraphQL-Abfrage aus Testdaten { kalender, termine } so,
+// wie der echte Server es tut (geprüft 28.09.2026): Kalenderliste mit
+// canRead, findCalendarEvents je Feld (Zeitraum = Überschneidung; nicht
+// lesbarer Kalender -> Feld null + errors[], HTTP 200, die übrigen Felder
+// bleiben), listUpcomingCalendarEvents aus den lesbaren Kalendern.
+function beantworteKalenderAbfrage(abfrage, testdaten, jetztMs) {
+  const kalender = Array.isArray(testdaten.kalender) ? testdaten.kalender : [];
+  const termine = Array.isArray(testdaten.termine) ? testdaten.termine : [];
+  const lesbar = new Set(kalender.filter((k) => k.canRead).map((k) => k.id));
+  const data = {};
+  const errors = [];
+  if (/listCalendarByComponentId/.test(abfrage)) data.listCalendarByComponentId = kalender;
+  const feldMuster = /(?:(\w+)\s*:\s*)?findCalendarEvents\(\s*calendarIds:\s*(\[[^\]]*\])\s*,\s*range:\s*\{\s*from:\s*"([^"]+)"\s*,\s*to:\s*"([^"]+)"\s*\}\s*\)/g;
+  let m;
+  while ((m = feldMuster.exec(abfrage))) {
+    const schluessel = m[1] || "findCalendarEvents";
+    const ids = JSON.parse(m[2]);
+    const gesperrt = ids.find((id) => !lesbar.has(id));
+    if (gesperrt) {
+      const titel = (kalender.find((k) => k.id === gesperrt) || {}).title || gesperrt;
+      data[schluessel] = null;
+      errors.push({ message: `Sie haben nicht die erforderlichen Lese-Rechte, um auf den Kalender ${titel} zuzugreifen!`, path: [schluessel], extensions: { classification: "INTERNAL_ERROR" } });
+      continue;
+    }
+    const von = Date.parse(m[3]);
+    const bis = Date.parse(m[4]);
+    data[schluessel] = termine.filter((t) => ids.includes(t.calendarId) && Date.parse(t.dateEnd || t.dateStart) >= von && Date.parse(t.dateStart) < bis);
+  }
+  const kommende = /listUpcomingCalendarEvents\(\s*componentId:\s*"[^"]*"\s*,\s*amount:\s*(\d+)/.exec(abfrage);
+  if (kommende) {
+    data.listUpcomingCalendarEvents = termine
+      .filter((t) => lesbar.has(t.calendarId) && Date.parse(t.dateEnd || t.dateStart) >= jetztMs)
+      .sort((a, b) => a.dateStart.localeCompare(b.dateStart))
+      .slice(0, Number(kommende[1]));
+  }
+  return errors.length ? { errors, data } : { data };
+}
+
+function kalenderAntwort(postDaten) {
+  const quelle = process.env.TPL_VORSCHAU_TERMINE;
+  let abfrage = "";
+  try { abfrage = JSON.parse(postDaten || "{}").query || ""; } catch { abfrage = ""; }
+  if (!quelle || !existsSync(quelle)) {
+    return JSON.stringify(beantworteKalenderAbfrage(abfrage, { kalender: [], termine: [] }, Date.now()));
+  }
+  const text = readFileSync(quelle, "utf8");
+  let testdaten = null;
+  try { testdaten = JSON.parse(text); } catch { testdaten = null; }
+  if (testdaten && Array.isArray(testdaten.kalender) && Array.isArray(testdaten.termine)) {
+    return JSON.stringify(beantworteKalenderAbfrage(abfrage, testdaten, Date.now()));
+  }
+  return text; // gespeicherte Antwort wie bisher
+}
+
 // ---------- Rendern + Screenshot ----------
 
 function warte(ms) {
@@ -397,17 +465,20 @@ async function screenshotTpl(browser, htmlPfad, namePräfix, mockWorksheets) {
       req.respond({ status: 200, contentType: "application/javascript; charset=utf-8", body: workbookStub(mockWorksheets) });
       return;
     }
-    // 25.09.2026: öffentliche Kalenderabfrage der Startseite (api.appack.de/graphql,
-    // listUpcomingCalendarEvents mit dem Embedded-Token). Antwort aus
-    // TPL_VORSCHAU_TERMINE=<json> (Form wie die echte Antwort), sonst leer.
-    // TPL_VORSCHAU_TERMINE=fehler simuliert einen Ausfall (HTTP 500).
+    // Öffentliche Kalenderabfragen (api.appack.de/graphql mit dem
+    // Embedded-Token): Startseite und Termine-App.html. Antwort aus
+    // TPL_VORSCHAU_TERMINE (siehe Kopf), =fehler -> HTTP 500.
     if (url.startsWith("https://api.appack.de/graphql")) {
       const kopf = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Methods": "POST, OPTIONS" };
       if (req.method() === "OPTIONS") { req.respond({ status: 204, headers: kopf, body: "" }); return; }
-      const quelle = process.env.TPL_VORSCHAU_TERMINE;
-      if (quelle === "fehler") { req.respond({ status: 500, headers: kopf, contentType: "application/json", body: "{}" }); return; }
-      const body = quelle && existsSync(quelle) ? readFileSync(quelle, "utf8") : JSON.stringify({ data: { listUpcomingCalendarEvents: [] } });
-      req.respond({ status: 200, headers: kopf, contentType: "application/json; charset=utf-8", body });
+      if (process.env.TPL_VORSCHAU_TERMINE === "fehler") { req.respond({ status: 500, headers: kopf, contentType: "application/json", body: "{}" }); return; }
+      req.respond({ status: 200, headers: kopf, contentType: "application/json; charset=utf-8", body: kalenderAntwort(req.postData()) });
+      return;
+    }
+    // Termine-App.html lädt site.css aus dem Ordner web – lokal der gebaute
+    // Stand (npm run build), sonst die Live-Datei.
+    if (url === "https://cdn.appack.de/sportfreunde04/workspace/web/site.css" && existsSync(SITE_CSS_LOKAL)) {
+      req.respond({ status: 200, contentType: "text/css; charset=utf-8", body: readFileSync(SITE_CSS_LOKAL, "utf8") });
       return;
     }
     if (url.includes("www.fussball.de/widgets.js")) {
@@ -610,6 +681,23 @@ async function renderSpielplanApp(browser, ergebnisse, bilderFuerKontaktbogen) {
   bilderFuerKontaktbogen.push({ beschriftung: "Spielplan-App.html (Herren)", pfad: ergebnis.zielViewport });
 }
 
+// ---------- Termine-App.html (statisch, kein FreeMarker) ----------
+
+async function renderTermineApp(browser, ergebnisse, bilderFuerKontaktbogen) {
+  const quellPfad = path.join(APP_DIR, "Termine-App.html");
+  if (!existsSync(quellPfad)) {
+    console.warn("  Termine-App.html fehlt, übersprungen.");
+    return;
+  }
+  mkdirSync(ZIEL, { recursive: true });
+  const htmlPfad = path.join(ZIEL, "_termine-app.html");
+  writeFileSync(htmlPfad, readFileSync(quellPfad, "utf8"), "utf8");
+  console.log("Rendere Termine-App.html …");
+  const ergebnis = await screenshotTpl(browser, htmlPfad, "termine-app", {});
+  ergebnisse.push(ergebnis);
+  bilderFuerKontaktbogen.push({ beschriftung: "Termine-App.html", pfad: ergebnis.zielViewport });
+}
+
 // ---------- Hauptablauf ----------
 
 async function main() {
@@ -627,7 +715,8 @@ async function main() {
   const alleTplDateien = readdirSync(APP_DIR).filter((d) => d.endsWith("_v3.tpl")).sort();
   const tplDateien = arg ? alleTplDateien.filter((d) => d === `${arg}.tpl`) : alleTplDateien;
   const spielplanAppMitrendern = !arg || arg === "Spielplan-App";
-  if (!tplDateien.length && !spielplanAppMitrendern) {
+  const termineAppMitrendern = !arg || arg === "Termine-App";
+  if (!tplDateien.length && !spielplanAppMitrendern && !termineAppMitrendern) {
     throw new Error(`Keine Vorlage gefunden für Argument "${arg}" (erwartet z. B. "Verein_v3")`);
   }
 
@@ -645,6 +734,9 @@ async function main() {
     }
     if (spielplanAppMitrendern) {
       await renderSpielplanApp(browser, ergebnisse, bilderFuerKontaktbogen);
+    }
+    if (termineAppMitrendern) {
+      await renderTermineApp(browser, ergebnisse, bilderFuerKontaktbogen);
     }
     await baueKontaktbogen(browser, bilderFuerKontaktbogen);
   } finally {

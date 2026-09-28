@@ -1,0 +1,21 @@
+{
+  "_hinweis": "Eine Quelle für die Terminseite (src/seiten/termine.mjs, web/termine.html und assets/app/Termine-App.html) und den Terminblock der App-Startseite (npm run tpl-bauen setzt Token, Kalender, trainingsfreie Zeiten und Mannschaften in den markierten Block von assets/app/Startseite_v3.tpl ein). token = öffentlicher Embedded-Token aus der Weiterleitungsadresse der Kurzadresse https://shorturl.appack.de/sportfreunde04_Application_1780401660369 (Teil nach jwt= bis zum nächsten &), Scope embedded, liest nur öffentliche Kalender, gültig bis tokenGueltigBis. Erneuern siehe assets/app/LIESMICH.md, Abschnitt Termine. kalender = die Kalender am Terminmodul, nur als Rückfall, falls listCalendarByComponentId ausfällt (Vorstand (intern) fehlt bewusst). trainingsfrei = Schulferien Hessen und Feiertage an Trainingstagen, gleiche Zeiträume wie FREI im Trainingsgenerator (speuzer-spielplan/build_ics.py), dazu die Sommerferien nach Saisonende; nur zur Beschriftung, was im Kalender steht, gilt immer. Jährlich mit dem Generator nachziehen.",
+  "api": "https://api.appack.de/graphql",
+  "komponente": "sportfreunde04_Application_1780401660369",
+  "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJZCI6InNwb3J0ZnJldW5kZTA0IiwidXNlcm5hbWUiOiJzcG9ydGZyZXVuZGUwNCIsImlzcyI6ImFwcGFjayIsImV4cCI6MTgxODgzNzY4NywiaWF0IjoxNzg3MzAxNjg3LCJzY29wZSI6WyJlbWJlZGRlZCJdfQ.yUyf5TWInpjnkzWrQdVE6UuWJUCVQNl6r2nQtMbF3_0s7GvD8nVko4_ozutbSeVYddTGCJAi0o0SVt94uKYZgQqEBYv8fA4f8Qkj6zv0GjM9dSJK36j4DF-O3yz_Dd_udk60pXRdu_f7JL_B6wEEcVktNhEzrABUR3Gi2PcvMzLedDHW-PQy76il_nb0n7koVk60_M3m60MbPfRRyNS08p5ddraf1CzLNG7CxtWJqMim0yzIr-wDlH9x6Gf1d_rrqRB7kVYzjpt_d8wKvBqRvMxfxUQCY9KlzZ4Pzi7x9tPfqhTTIHKJ3zh6JbuIG6gfm5MenI9sn1hQOf2_tu4Akw",
+  "tokenGueltigBis": "2027-08-21",
+  "kalender": [
+    { "id": "6a86e0994c9e78e40353f3f4", "titel": "Spielplan Mannschaften", "rolle": "spiel" },
+    { "id": "6a8ea6f2b34f1ebb47097a67", "titel": "Trainingszeiten Mannschaften", "rolle": "training" },
+    { "id": "6ab6365a66ca4a55867520de", "titel": "Veranstaltungen", "rolle": "verein" }
+  ],
+  "trainingsfrei": [
+    { "von": "2026-10-05", "bis": "2026-10-17", "name": "Herbstferien", "ferien": true },
+    { "von": "2026-12-23", "bis": "2027-01-12", "name": "Weihnachtsferien", "ferien": true },
+    { "von": "2027-03-22", "bis": "2027-04-02", "name": "Osterferien", "ferien": true },
+    { "von": "2027-05-06", "bis": "2027-05-06", "name": "Christi Himmelfahrt", "ferien": false },
+    { "von": "2027-05-17", "bis": "2027-05-17", "name": "Pfingstmontag", "ferien": false },
+    { "von": "2027-05-27", "bis": "2027-05-27", "name": "Fronleichnam", "ferien": false },
+    { "von": "2027-06-28", "bis": "2027-08-06", "name": "Sommerferien", "ferien": true }
+  ]
+}

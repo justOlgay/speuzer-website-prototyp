@@ -1,0 +1,552 @@
+/* Terminseite (src/vorlagen/termine.mjs): web/termine.html und die App-Kopie
+   Termine-App.html. Baut auf site.css auf (Tokens, Grundregeln, .seitenkopf,
+   .abschnitt, .zeile, .hinweis, .knopf) und ergänzt nur die eigenen
+   Bausteine (Präfix ts-). Zwei Ebenen: oben Spiele, Kinderfestivals und
+   Vereinsveranstaltungen, darunter die Trainingswoche als Wochenplan – die
+   vielen Trainings verdrängen so nie ein Spiel oder Fest. */
+
+/* hidden gilt auch gegen display-Regeln (.knopf, Wochenleiste) – site.css
+   hat dafür keine allgemeine Regel */
+.ts-abschnitt [hidden] { display: none !important; }
+
+/* === Mannschaftswahl: Pillen „Alle“ + jede Mannschaft === */
+.ts-wahl { margin-bottom: var(--sp-6); }
+.ts-wahl__titel {
+  margin: 0 0 var(--sp-2);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.ts-wahl__knoepfe { display: flex; flex-wrap: wrap; gap: 6px; }
+.ts-pille {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--blau-100);
+  color: var(--blau-800);
+  font-size: .8125rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--t-kurz);
+}
+.ts-pille:hover { background: #D6DAF6; }
+.ts-pille[aria-pressed="true"] { background: var(--blau-700); color: var(--weiss); }
+@media (max-width: 479.98px) {
+  .ts-pille { padding: 0 10px; letter-spacing: .02em; }
+}
+
+/* === Karte „Als Nächstes“ (nur mit gewählter Mannschaft) === */
+.ts-naechstes {
+  margin-bottom: var(--sp-7);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--sh-1);
+  overflow: hidden;
+}
+.ts-naechstes__kopf {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: 14px var(--sp-4) 6px;
+}
+.ts-naechstes__kopf h2 { font-size: 1.25rem; color: var(--blau-950); }
+.ts-naechstes__team { font-size: var(--fs-sm); font-weight: 600; color: var(--ink-3); white-space: nowrap; }
+.ts-naechstes__liste { list-style: none; margin: 0; padding: 0 0 var(--sp-1); }
+.ts-naechstes__eintrag + .ts-naechstes__eintrag { border-top: 1px solid var(--line); }
+/* Art klein über dem Titel (auch „Veranstaltung“ passt so auf 320px),
+   Pfeil rechts */
+.ts-naechstes__zeile {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20px;
+  gap: 2px var(--sp-3);
+  align-items: center;
+  min-height: 56px;
+  padding: 10px var(--sp-3) 12px var(--sp-4);
+  color: inherit;
+  text-decoration: none;
+  transition: background-color var(--t-kurz);
+}
+a.ts-naechstes__zeile:hover { background: var(--blau-50); color: inherit; text-decoration: none; }
+.ts-naechstes__zeile:focus-visible { outline-offset: -3px; }
+.ts-naechstes__art {
+  grid-column: 1 / -1;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--blau-700);
+}
+.ts-naechstes__text { min-width: 0; }
+.ts-naechstes__titel { display: block; font-weight: 600; line-height: 1.3; overflow-wrap: break-word; }
+.ts-naechstes__meta { display: block; margin-top: 2px; font-size: .84rem; line-height: 1.35; color: var(--ink-3); }
+.ts-naechstes__zeile--leer .ts-naechstes__titel { font-weight: 500; color: var(--ink-2); }
+@media (min-width: 720px) {
+  /* nebeneinander: Spiel | Training | Veranstaltung */
+  .ts-naechstes__liste { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); padding: 0; }
+  .ts-naechstes__eintrag + .ts-naechstes__eintrag { border-top: 0; border-left: 1px solid var(--line); }
+  .ts-naechstes__zeile { height: 100%; align-content: start; padding-block: 12px 14px; }
+}
+
+/* === Zwei Ebenen === */
+.ts-ebenen { display: grid; gap: var(--sp-7); }
+@media (min-width: 1024px) {
+  /* Highlights links (zuerst gelesen), Trainingswoche rechts */
+  .ts-ebenen { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; }
+  .ts-sprung { display: none !important; }
+}
+.ts-ebene__kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.ts-ebene__lead { margin-top: var(--sp-2); font-size: var(--fs-sm); color: var(--ink-3); }
+.ts-sprung {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 44px;
+  padding: 0 var(--sp-2) 0 var(--sp-3);
+  margin-right: calc(-1 * var(--sp-2));
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.ts-sprung svg { width: 16px; height: 16px; }
+.ts-pfeil { width: 20px; height: 20px; color: var(--ink-3); transition: transform var(--t-kurz); }
+
+/* === Spiele & Veranstaltungen === */
+.ts-tage { list-style: none; margin: var(--sp-4) 0 0; padding: 0; }
+.ts-tage > li + li { margin-top: var(--sp-4); }
+.ts-tag__kopf {
+  margin: 0 0 6px;
+  font-family: var(--font-text);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: .06em;
+  color: var(--ink-2);
+  text-transform: uppercase;
+}
+.ts-tag__rel { color: var(--blau-700); }
+.ts-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--surface);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-1);
+  overflow: hidden;
+}
+.ts-hl { position: relative; }
+.ts-hl + .ts-hl { border-top: 1px solid var(--line); }
+.ts-hl summary { list-style: none; cursor: pointer; }
+.ts-hl summary::-webkit-details-marker { display: none; }
+.ts-hl summary::marker { content: ""; }
+/* Zeile = <summary>: Uhrzeit, Mannschaft + Gegner/Titel, Art · Ort;
+   Aufklappen zeigt Wettbewerb, Adresse, Route und FUSSBALL.DE. */
+.ts-hl__zeile {
+  display: grid;
+  grid-template-columns: 3.4rem minmax(0, 1fr) 20px;
+  gap: var(--sp-3);
+  align-items: start;
+  min-height: 56px;
+  padding: 11px var(--sp-3) 11px var(--sp-4);
+  transition: background-color var(--t-kurz);
+}
+.ts-hl__zeile:hover { background: var(--blau-50); }
+.ts-hl summary:focus-visible { outline-offset: -3px; border-radius: var(--r-md); }
+.ts-hl details[open] .ts-pfeil { transform: rotate(90deg); }
+.ts-hl__zeit {
+  padding-top: 1px;
+  font-weight: 600;
+  font-size: .9375rem;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+  color: var(--blau-950);
+}
+.ts-hl__zeit--klein { font-size: .8125rem; }
+.ts-hl__text { min-width: 0; }
+/* Titel nicht automatisch trennen, nur ein zu langes Einzelwort darf brechen */
+.ts-hl__titel { display: block; font-weight: 600; line-height: 1.3; overflow-wrap: break-word; hyphens: manual; }
+.ts-hl__art { display: block; margin-top: 2px; font-size: .84rem; line-height: 1.35; color: var(--ink-3); }
+.ts-marke {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-right: 6px;
+  padding: 1px 7px;
+  border-radius: var(--r-sm);
+  background: var(--blau-100);
+  color: var(--blau-900);
+  font-size: .72rem;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  vertical-align: 1px;
+  white-space: nowrap;
+}
+.ts-marke svg { width: 11px; height: 11px; }
+/* Veranstaltungen des Vereins: hellblau unterlegt, Kante und Marke mit Stern
+   in Vereinsblau – sie gehen zwischen den vielen Spielen nicht unter. */
+.ts-hl--verein { background: var(--blau-50); }
+.ts-hl--verein::before {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 4px;
+  background: var(--blau-700);
+}
+.ts-hl--verein .ts-hl__zeile:hover { background: var(--blau-100); }
+.ts-marke--verein { background: var(--blau-700); color: var(--weiss); }
+.ts-hl--aus .ts-hl__titel { text-decoration: line-through; color: var(--ink-3); }
+.ts-hl__mehr {
+  padding: 0 var(--sp-4) var(--sp-4) calc(var(--sp-4) + 3.4rem + var(--sp-3));
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+.ts-hl__mehr p + p { margin-top: 6px; }
+.ts-hl__beschreibung { white-space: pre-line; }
+.ts-links { display: flex; flex-wrap: wrap; gap: 0 var(--sp-4); margin-top: var(--sp-1) !important; }
+.ts-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.ts-links a:hover { text-decoration: underline; }
+/* Sehr schmal (320px): Zeitspalte und Abstände knapper, damit lange
+   Einzelwörter („Kampagneneröffnung“) ungetrennt in die Titelspalte passen */
+@media (max-width: 359.98px) {
+  .ts-hl__zeile { grid-template-columns: 2.9rem minmax(0, 1fr) 18px; gap: 10px; padding-left: 12px; padding-right: 10px; }
+  .ts-hl__mehr { padding-left: calc(12px + 2.9rem + 10px); }
+  .ts-hl__kachel { width: 40px; }
+}
+
+/* Ziel eines Sprungs aus „Als Nächstes“ kurz markieren */
+.ts-ziel { box-shadow: inset 0 0 0 2px var(--blau-500); }
+
+/* Ferien zwischen den Spieltagen: ruhige Zwischenzeile, kein Highlight */
+.ts-frei {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 9px var(--sp-4);
+  border-radius: var(--r-md);
+  background: var(--blau-50);
+  border: 1px solid var(--blau-100);
+  font-size: .84rem;
+  color: var(--ink-2);
+}
+.ts-frei svg { width: 18px; height: 18px; color: var(--blau-700); }
+.ts-frei strong { color: var(--blau-950); }
+
+.ts-leer {
+  margin-top: var(--sp-4);
+  padding: var(--sp-4);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--sh-1);
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+
+/* „Später im Verein“: die nächsten Veranstaltungen jenseits der sichtbaren
+   Tage, mit Datumskachel wie im Terminblock der App-Startseite */
+.ts-spaeter { margin-top: var(--sp-5); }
+.ts-hl__kachel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--blau-700);
+  color: var(--blau-950);
+  line-height: 1;
+}
+.ts-hl__kachel-tag { font-family: var(--font-head); font-weight: 700; font-size: 1.25rem; }
+.ts-hl__kachel-monat { margin-top: 2px; font-size: .62rem; font-weight: 700; letter-spacing: .07em; color: var(--blau-700); }
+
+.ts-mehr { width: 100%; margin-top: var(--sp-3); }
+
+/* === Trainingswoche === */
+.ts-woche-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-top: var(--sp-4);
+  padding: 4px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  box-shadow: var(--sh-1);
+}
+.ts-woche-nav__knopf {
+  flex: 0 0 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--blau-100);
+  color: var(--blau-800);
+  cursor: pointer;
+}
+.ts-woche-nav__knopf:hover { background: #D6DAF6; }
+.ts-woche-nav__knopf:disabled { background: transparent; color: var(--line); cursor: default; }
+.ts-woche-nav__knopf svg { width: 20px; height: 20px; }
+.ts-woche-nav__titel { flex: 1 1 auto; min-width: 0; text-align: center; line-height: 1.25; }
+.ts-woche-nav__titel strong {
+  display: block;
+  font-family: var(--font-head);
+  font-size: 1.125rem;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  color: var(--blau-950);
+}
+.ts-woche-nav__titel span { display: block; font-size: .8125rem; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.ts-tr-inhalt { margin-top: var(--sp-3); }
+
+/* Wochenplan: Zeilen = Mannschaften, Spalten = Tage. Schmal (Handy):
+   Beginn fett, Ende klein darunter; ab 720px zusätzlich der Platz. */
+.ts-plan-rahmen {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-1);
+  overflow: hidden;
+}
+.ts-plan {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: .8125rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.ts-plan th,
+.ts-plan td {
+  padding: 7px 2px;
+  border-bottom: 1px solid var(--line);
+  text-align: center;
+  vertical-align: middle;
+}
+.ts-plan tbody tr:last-child > * { border-bottom: 0; }
+.ts-plan__ecke,
+.ts-plan__team { width: 3.9rem; padding-left: 10px !important; text-align: left !important; }
+.ts-plan thead th { padding-block: 8px; font-weight: 600; }
+.ts-plan__wt {
+  display: block;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: .95rem;
+  text-transform: uppercase;
+  color: var(--blau-950);
+}
+.ts-plan__dt { display: block; font-size: .7rem; font-weight: 600; color: var(--ink-3); }
+.ts-plan__frei-marke {
+  display: block;
+  margin-top: 2px;
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--blau-700);
+}
+.ts-plan th.ts-plan__heute { background: var(--blau-700); }
+.ts-plan th.ts-plan__heute .ts-plan__wt,
+.ts-plan th.ts-plan__heute .ts-plan__dt,
+.ts-plan th.ts-plan__heute .ts-plan__frei-marke { color: var(--weiss); }
+.ts-plan td.ts-plan__heute { background: var(--blau-50); }
+.ts-plan td.ts-plan__frei,
+.ts-plan th.ts-plan__frei:not(.ts-plan__heute) {
+  background: repeating-linear-gradient(135deg, var(--blau-50) 0 6px, var(--surface) 6px 12px);
+}
+.ts-plan__team { font-weight: 700; color: var(--blau-900); white-space: nowrap; }
+.ts-plan__team-inhalt { display: inline-flex; align-items: center; gap: 3px; }
+.ts-halle { width: 13px; height: 13px; flex: 0 0 auto; color: var(--blau-700); }
+.ts-plan__zeile--gewaehlt > * { background: var(--blau-100) !important; }
+.ts-einheit { display: block; }
+.ts-einheit + .ts-einheit { margin-top: 4px; }
+.ts-einheit__von { display: block; font-weight: 700; color: var(--blau-950); }
+.ts-einheit__bis { display: block; font-size: .7rem; color: var(--ink-3); }
+.ts-einheit__platz { display: none; }
+.ts-einheit--vorbei .ts-einheit__von { font-weight: 500; color: var(--ink-3); }
+.ts-einheit--aus .ts-einheit__von { text-decoration: line-through; color: var(--ink-3); }
+.ts-plan__leer { color: var(--ink-3); }
+/* nur die Pillen-Langform (A-Jugend, G-Jugend) ab 720px */
+.ts-lang { display: none; }
+@media (min-width: 720px) {
+  .ts-lang { display: inline; }
+  .ts-plan { font-size: .875rem; }
+  .ts-plan th, .ts-plan td { padding: 8px 4px; }
+  .ts-plan__ecke, .ts-plan__team { width: 6.4rem; }
+  .ts-einheit__von, .ts-einheit__bis { display: inline; }
+  .ts-einheit__bis::before { content: "–"; }
+  .ts-einheit__bis { font-size: inherit; color: inherit; font-weight: 700; }
+  .ts-einheit__platz {
+    display: block;
+    margin-top: 2px;
+    font-size: .72rem;
+    color: var(--ink-3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.ts-plan-fuss {
+  display: flex;
+  gap: var(--sp-2);
+  align-items: flex-start;
+  margin-top: var(--sp-3);
+  font-size: .84rem;
+  color: var(--ink-2);
+}
+.ts-plan-fuss .ts-halle { margin-top: 3px; }
+.ts-tr-hinweis { margin-top: var(--sp-3); font-size: .84rem; color: var(--ink-3); }
+
+/* Eine Mannschaft gewählt: ihre Woche als Liste, jede Einheit aufklappbar */
+.ts-team-woche {
+  padding: 0 var(--sp-4);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--sh-1);
+}
+.ts-team-woche__kopf {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: 14px 0 10px;
+  border-bottom: 1px solid var(--line);
+}
+.ts-team-woche__titel { font-size: 1.25rem; color: var(--blau-950); }
+.ts-team-woche__zahl { font-size: .84rem; color: var(--ink-3); white-space: nowrap; }
+.ts-team-woche__liste { list-style: none; margin: 0; padding: 0; }
+.ts-tw { border-bottom: 1px solid var(--line); }
+.ts-tw summary { list-style: none; cursor: pointer; }
+.ts-tw summary::-webkit-details-marker { display: none; }
+.ts-tw summary::marker { content: ""; }
+.ts-tw summary:focus-visible { outline-offset: -3px; }
+.ts-tw details[open] .ts-pfeil { transform: rotate(90deg); }
+.ts-tw__zeile {
+  display: grid;
+  grid-template-columns: 5.6rem minmax(0, 1fr) 20px;
+  gap: 1px var(--sp-3);
+  align-items: start;
+  min-height: 44px;
+  padding: 10px 0;
+}
+.ts-tw__tag { font-weight: 700; color: var(--blau-950); font-variant-numeric: tabular-nums; }
+.ts-tw__zeit { font-weight: 600; font-variant-numeric: tabular-nums; }
+.ts-tw__platz { display: block; font-size: .84rem; font-weight: 400; color: var(--ink-3); }
+.ts-tw--heute .ts-tw__tag { color: var(--blau-700); }
+.ts-tw--vorbei .ts-tw__tag,
+.ts-tw--vorbei .ts-tw__zeit { color: var(--ink-3); font-weight: 500; }
+.ts-tw--aus .ts-tw__zeit { text-decoration: line-through; }
+@media (max-width: 359.98px) {
+  .ts-tw__zeile { grid-template-columns: 4.9rem minmax(0, 1fr) 18px; gap: 1px 10px; }
+  .ts-tw__tag, .ts-tw__zeit { font-size: .9375rem; }
+  .ts-tw__tag { white-space: nowrap; }
+}
+.ts-tw__mehr {
+  padding: 0 0 12px calc(5.6rem + var(--sp-3));
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+.ts-tw__mehr p + p { margin-top: 4px; }
+@media (max-width: 359.98px) {
+  .ts-tw__mehr { padding-left: calc(4.9rem + 10px); }
+}
+.ts-tw-leer { padding: 12px 0; font-size: var(--fs-sm); color: var(--ink-2); border-bottom: 1px solid var(--line); }
+.ts-hinweiszeile {
+  display: flex;
+  gap: var(--sp-2);
+  align-items: flex-start;
+  padding: 10px 0 12px;
+  border-bottom: 1px solid var(--line);
+  font-size: .84rem;
+  color: var(--ink-2);
+}
+.ts-hinweiszeile .ts-halle { margin-top: 3px; }
+.ts-team-woche > .zeile:last-child { border-bottom: 0; }
+
+.ts-alle-teams { margin-top: var(--sp-4); }
+.ts-alle-teams > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  list-style: none;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--blau-700);
+}
+.ts-alle-teams > summary::-webkit-details-marker { display: none; }
+.ts-alle-teams > summary::marker { content: ""; }
+.ts-alle-teams > summary svg { width: 18px; height: 18px; transition: transform var(--t-kurz); }
+.ts-alle-teams[open] > summary svg { transform: rotate(90deg); }
+.ts-alle-teams > summary + * { margin-top: var(--sp-2); }
+
+/* Hinweiskasten mit Knopf (Fehler, freie Woche) */
+.ts-kasten .hinweis__titel,
+.ts-kasten__titel { display: block; margin-bottom: 4px; font-weight: 700; color: var(--blau-950); }
+.ts-kasten p + p,
+.ts-kasten p + .knopf { margin-top: var(--sp-2); }
+.ts-kasten .knopf { margin-top: var(--sp-3); }
+
+/* Ruhige Platzhalter beim Laden (ohne Animation) */
+.ts-platzhalter { display: block; border-radius: 6px; background: var(--blau-100); }
+.ts-platzhalter-zeile {
+  display: grid;
+  grid-template-columns: 3.4rem minmax(0, 1fr);
+  gap: var(--sp-3);
+  padding: 14px var(--sp-4);
+}
+.ts-platzhalter-zeile + .ts-platzhalter-zeile { border-top: 1px solid var(--line); }
+
+/* Fuß: Kalender abonnieren, Kalenderansicht */
+.ts-fuss { margin-top: var(--sp-8); }
+.ts-fuss h2 { font-size: 1.25rem; color: var(--blau-950); }
+.ts-fuss .zeilen-liste { margin-top: var(--sp-2); }
+.ts-fuss .meta { margin-top: var(--sp-2); }
+.ts-fuss__ansicht { margin-top: var(--sp-5); border-top: 1px solid var(--line); }
+
+/* === App-Modus === */
+/* Die App-Kopfleiste zeigt „Termine“ – h1 nur für Bildschirmleser, Einleitung
+   kurz, Überschriften in App-Größe. */
+.app-modus .seitenkopf { padding-block: var(--sp-4) 0; }
+.app-modus .seitenkopf h1 {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+.app-modus .seitenkopf__lead { margin-top: 0; font-size: .9375rem; }
+.app-modus .ts-abschnitt { padding-top: var(--sp-4); padding-bottom: calc(var(--sp-7) + env(safe-area-inset-bottom, 0px)); }
+.app-modus .ts-abschnitt h2 { font-size: 1.25rem; color: var(--blau-950); }
+.app-modus .ts-wahl { margin-bottom: var(--sp-5); }
+.app-modus .ts-naechstes { margin-bottom: var(--sp-6); }
+.app-modus .ts-ebenen { gap: var(--sp-6); }
+.app-modus .ts-fuss { margin-top: var(--sp-7); }
+.app-modus .ws-fuss { display: none; }

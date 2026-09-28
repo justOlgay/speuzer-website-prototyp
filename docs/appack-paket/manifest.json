@@ -27,63 +27,63 @@
     },
     {
       "datei": "web/mannschaften-a-jugend.html",
-      "bytes": 14851,
-      "sha256": "a4f072910e6ecb8c6bf13770c1c61c2ec3375f19ff631b08011b1d83b1303a45"
+      "bytes": 14900,
+      "sha256": "4e994be8b29a99fd034463f27f6c493459482990409d1e384982423d8f54bfe8"
     },
     {
       "datei": "web/mannschaften-d1.html",
-      "bytes": 15927,
-      "sha256": "3a37da750e513121b5e6475c33a52c09e17e53d9a2a58c892dda7192b0c3ba0e"
+      "bytes": 15976,
+      "sha256": "a3806b17c076d8189521f86c23106070f8e24a8b1d5f91412314b34e46266791"
     },
     {
       "datei": "web/mannschaften-d2.html",
-      "bytes": 14884,
-      "sha256": "95f9ff0cc942c1427194dcab2ab90b6954f4557e70af2d03731c62009573c7e5"
+      "bytes": 14933,
+      "sha256": "1494124dddfec3350f4a19a224f6764584fd2b252d8d5b5b6a4f02ee06abd4b4"
     },
     {
       "datei": "web/mannschaften-d3.html",
-      "bytes": 17246,
-      "sha256": "ee7682024130cc06070953117ba866f7a4a1f44ade53365d8f8836c77c642298"
+      "bytes": 17295,
+      "sha256": "9397f958ecf600e09da611801af81562300b4b0e9b90c47e6f55b9613fd378e5"
     },
     {
       "datei": "web/mannschaften-e1.html",
-      "bytes": 16557,
-      "sha256": "4bfb73b9be982a276c09c4bc4518f941ad6dd20edf1e37fcbfef035bf6b0760b"
+      "bytes": 16606,
+      "sha256": "f0efbbd5990bb7560cc7825434927a7266d8117b675ef33112fbe14842609611"
     },
     {
       "datei": "web/mannschaften-e2.html",
-      "bytes": 14911,
-      "sha256": "b5ec1ec673dca80fd552e359a07683f021c475e8c3e60c972fba5d600440c5b5"
+      "bytes": 14960,
+      "sha256": "c794febb00556977933e2304a2742c9d0cd38f9ab319396f1fbd156fedfef091"
     },
     {
       "datei": "web/mannschaften-e3.html",
-      "bytes": 14490,
-      "sha256": "13074d9494840fcb0beed0248b9b6e2a2576b034538e2de43cbcffb4d0a33fae"
+      "bytes": 14539,
+      "sha256": "5b74b8d97fa449c1fe5781b1206bbeb04815715ba36aba24e67d51ff94249c72"
     },
     {
       "datei": "web/mannschaften-f1.html",
-      "bytes": 12260,
-      "sha256": "3ed971e5ab4e328095edba3acc5160efb82497ffb3cd659a2d19ace191d0f114"
+      "bytes": 12749,
+      "sha256": "6bc5c20c9177b3d80b35aea92ea608189addab902dff748fdaec5ba4dea0a8ae"
     },
     {
       "datei": "web/mannschaften-f2.html",
-      "bytes": 11189,
-      "sha256": "8d77c282ad471920584ecf144fa21133296fb870a8492ff7746b00338a523396"
+      "bytes": 11678,
+      "sha256": "d028a07b59440a34ace53424d5fcab7cb7870a52951f76ff58162e0c2deda554"
     },
     {
       "datei": "web/mannschaften-g-jugend.html",
-      "bytes": 10727,
-      "sha256": "d7219f3b2347a0f4b51a8eaaa91a7b092da37ac4d51bdb321b6a50a269c0f62a"
+      "bytes": 11216,
+      "sha256": "eb0eaaa0198010a17d8535e673f231a9da2ae7e0f70f0fd3ff84521fa6157057"
     },
     {
       "datei": "web/mannschaften-herren.html",
-      "bytes": 14831,
-      "sha256": "da409d7ff460fbae6b46d484671fd46726b6488d181eef5bcdfb00439ac47651"
+      "bytes": 14880,
+      "sha256": "2202071f44b43feb152413f454bc98c5e781d517c65ca1a03b7588f3b761b4e5"
     },
     {
       "datei": "web/mannschaften.html",
-      "bytes": 21131,
-      "sha256": "462b481052331fd2aad9c078af9a293441bddde86be83e0d5f06521161bbe87f"
+      "bytes": 21180,
+      "sha256": "15afb91b7f83cc3ddf595105166f6efd56edf90b314d1b3fd9a5a6b6503ede19"
     },
     {
       "datei": "web/mitglied-werden.html",
@@ -161,6 +161,11 @@
       "sha256": "52ef6b0d9594f331cdc5038464876b60b59f091c3503ac8f1adb3599a7f05a16"
     },
     {
+      "datei": "web/termine.html",
+      "bytes": 107183,
+      "sha256": "9128c1696678e871ce2507789720f2c8ccd923a04d64d8144ad7aeaaebf96746"
+    },
+    {
       "datei": "web/verein-downloads.html",
       "bytes": 7792,
       "sha256": "f43ffb233425be16f498799ed8abba7c0e7c3038551bffc635d7b1e0f55e32d8"
@@ -197,8 +202,8 @@
     },
     {
       "datei": "web/site.css",
-      "bytes": 35411,
-      "sha256": "04e8711d4e0c79eb4ea21ef08912d980b5dc892e3da22a9a96aa18a5eb1357e4"
+      "bytes": 35573,
+      "sha256": "bc50f715d538513b07edd646f9f3bd9a016a1929997897247b7b520a4d1345dc"
     }
   ]
 }
