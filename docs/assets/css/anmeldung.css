@@ -1,0 +1,1195 @@
+/*
+  Anmelde-Assistent (Entwurf, 29.09.2026) – eigene Stile, Präfix .anm-.
+
+  Nur Vereinsblau und die Tokens aus tokens.css; die Komponenten der Website
+  (.knopf, .hinweis, .container, .abschnitt …) kommen aus site.css. Mobil
+  zuerst. Alle Abstände und Ränder nutzen logische Eigenschaften
+  (margin-inline, padding-inline, inset-inline …), damit die Oberfläche in
+  Arabisch (dir="rtl") ohne eigene Regeln spiegelt. Kein Buchstabenabstand,
+  keine Versalien in den Fragen: Sie stören Türkisch (Punkt-i) und Arabisch
+  (verbundene Schrift) und sind schwerer zu lesen.
+*/
+
+/* ---------- Seite ---------- */
+
+.anm-band p {
+  margin: 0;
+}
+
+/* ---------- Kompakter Seitenkopf ----------
+   assistent.js setzt die Klasse anm-kompakt an <main>, sobald die Fragen
+   beginnen (nicht auf "start" und "fertig"). Dann rückt die Frage nach oben:
+   die h1 bleibt im Dokument, wird aber klein und einzeilig; Lead,
+   Werkzeugkasten und Konzept-Link fallen weg; das Entwurfs-Band ist eine
+   schmale Zeile mit dem kurzen Satz. */
+
+.anm-band__kurz {
+  display: none;
+}
+
+.anm-kompakt .seitenkopf {
+  padding-block: var(--sp-3) 0;
+}
+
+.anm-kompakt .seitenkopf h1 {
+  font-size: var(--fs-md);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.anm-kompakt .seitenkopf__lead,
+.anm-kompakt .anm-werkzeugkasten,
+.anm-kompakt .anm-vorfuehren .meta {
+  display: none;
+}
+
+.anm-kompakt .anm-vorfuehren {
+  padding-block: var(--sp-2) var(--sp-4);
+}
+
+.anm-kompakt .anm-band {
+  padding: var(--sp-1) var(--sp-3);
+  font-size: var(--fs-sm);
+}
+
+.anm-kompakt .anm-band__lang {
+  display: none;
+}
+
+.anm-kompakt .anm-band__kurz {
+  display: inline;
+}
+
+/* Knopf "Vorführung" neben der h1: nur im kompakten Kopf. Er holt den Werkzeugkasten (Vereinssicht,
+   Beispiele) zurück, der dort sonst fehlt; auf "start" und "fertig" steht der Werkzeugkasten selbst da.
+   assistent.js setzt die Klasse anm-vorfuehrung-offen am <main>, solange er offen ist. */
+.anm-titelzeile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.anm-titelzeile h1 {
+  min-width: 0;
+}
+
+/* Ist neben dem Knopf nicht genug Platz (schmaler Bildschirm, lange Überschrift in einer anderen Sprache),
+   bricht die h1 in zwei Zeilen um, statt mit "…" abzubrechen. Zwei Zeilen sind nicht höher als der Knopf daneben.
+   Passt sie in eine Zeile, bleibt sie einzeilig. */
+.anm-kompakt .anm-titelzeile h1 {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  text-wrap: balance;
+}
+
+.anm-vorfuehrknopf {
+  display: none;
+  flex: none;
+  padding-inline: var(--sp-3);
+  font-size: var(--fs-sm);
+}
+
+.anm-kompakt .anm-vorfuehrknopf {
+  display: inline-flex;
+}
+
+.anm-vorfuehrknopf[aria-expanded="true"] {
+  background: var(--blau-100);
+}
+
+/* Offen im kompakten Kopf: der Werkzeugkasten ohne eigene Titelzeile (der Knopf ist sein Schalter). */
+.anm-kompakt.anm-vorfuehrung-offen .anm-werkzeugkasten {
+  display: block;
+}
+
+.anm-kompakt.anm-vorfuehrung-offen .anm-werkzeugkasten__titel {
+  display: none;
+}
+
+/* Auch eine kurze Seite muss so weit scrollen können, dass die Leiste mit
+   Zurück, Sprache und Hilfe oben im Bild steht (assistent.js scrollt bei jedem
+   Seitenwechsel dorthin): Unter dem Assistenten bleibt mindestens eine
+   Bildschirmhöhe Platz. */
+@media (max-width: 719.98px) {
+  .anm-assistent-abschnitt {
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+}
+
+/* Aufklappbare Bereiche: eigener Pfeil (der Standard-Pfeil fällt bei display:flex weg). */
+.anm-werkzeugkasten__titel,
+.anm-einzelheiten summary {
+  list-style: none;
+}
+
+.anm-werkzeugkasten__titel::-webkit-details-marker,
+.anm-einzelheiten summary::-webkit-details-marker {
+  display: none;
+}
+
+.anm-werkzeugkasten__titel::before,
+.anm-einzelheiten summary::before {
+  content: "\203A";
+  display: inline-block;
+  margin-inline-end: var(--sp-2);
+  font-size: 1.4em;
+  line-height: 1;
+  transition: transform var(--t-kurz);
+}
+
+.anm[dir="rtl"] .anm-einzelheiten summary::before {
+  content: "\2039";
+}
+
+.anm-werkzeugkasten[open] > .anm-werkzeugkasten__titel::before,
+.anm-einzelheiten[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.anm[dir="rtl"] .anm-einzelheiten[open] > summary::before {
+  transform: rotate(-90deg);
+}
+
+.anm-werkzeugkasten__titel {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding-block: var(--sp-2);
+  font-weight: 700;
+  color: var(--blau-900);
+  cursor: pointer;
+}
+
+.anm-werkzeugkasten[open] > .anm-werkzeugkasten__titel {
+  margin-block-end: var(--sp-3);
+}
+
+.anm-werkzeuge {
+  display: grid;
+  align-items: start;
+  gap: var(--sp-5);
+}
+
+@media (min-width: 720px) {
+  .anm-werkzeuge {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.anm-werkzeug {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border: 1px dashed var(--ink-3);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+
+.anm-werkzeug > * {
+  margin: 0;
+}
+
+.anm-werkzeug__titel {
+  font-size: var(--fs-lg);
+}
+
+.anm-beispiele {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.anm-beispiele .knopf,
+.anm-schalter {
+  width: 100%;
+  justify-content: flex-start;
+  text-align: start;
+}
+
+.anm-laden {
+  margin: 0;
+  color: var(--ink-2);
+}
+
+/* ---------- Rahmen des Assistenten ---------- */
+
+.anm {
+  max-width: var(--inhalt);
+  scroll-margin-top: var(--sp-3);
+}
+
+.anm [hidden] {
+  display: none !important;
+}
+
+.anm p {
+  margin: 0;
+}
+
+.anm-kopf {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-3);
+  padding-block-end: var(--sp-2);
+  border-block-end: 1px solid var(--line);
+  /* Bei jedem Seitenwechsel rückt diese Leiste oben ins Bild (assistent.js). */
+  scroll-margin-top: var(--sp-2);
+}
+
+.anm-kopf__werkzeuge {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-inline-start: auto;
+}
+
+.anm-zurueck {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  min-height: 44px;
+  padding: var(--sp-2) var(--sp-3);
+  margin-inline-start: calc(var(--sp-3) * -1);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--blau-700);
+  font-size: var(--fs-md);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.anm-zurueck::before {
+  content: "\2039";
+  font-size: 1.4em;
+  line-height: 1;
+}
+
+.anm[dir="rtl"] .anm-zurueck::before {
+  content: "\203A";
+}
+
+.anm-zurueck:hover {
+  background: var(--blau-50);
+  text-decoration: underline;
+}
+
+.anm-sprache {
+  display: flex;
+}
+
+.anm-sprache__auswahl,
+.anm-hilfe {
+  min-height: 44px;
+  border: 2px solid var(--blau-700);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--blau-700);
+  font-size: var(--fs-md);
+  font-weight: 600;
+}
+
+.anm-sprache__auswahl {
+  padding-inline: var(--sp-3);
+  max-width: 11rem;
+}
+
+.anm-hilfe {
+  min-width: 44px;
+  padding-inline: var(--sp-4);
+  cursor: pointer;
+}
+
+.anm-hilfe:hover {
+  background: var(--blau-50);
+}
+
+/* Abschnittsnamen statt einer Fortschrittszahl: Die Weiche verzweigt, deshalb
+   steht keine Gesamtzahl der Seiten fest. Der aktuelle Abschnitt ist fett und
+   unterstrichen – nicht nur eine Farbe. */
+.anm-abschnitte {
+  margin-block-start: var(--sp-3);
+}
+
+.anm-abschnitte__liste {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+.anm-abschnitte__punkt[aria-current] {
+  color: var(--blau-900);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.anm-uebersetzung {
+  margin-block-start: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border-inline-start: 4px solid var(--blau-700);
+  background: var(--blau-100);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+
+.anm-meldung {
+  margin-block-start: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border-inline-start: 4px solid var(--blau-700);
+  background: var(--blau-100);
+  font-weight: 600;
+}
+
+.anm-meldung:empty {
+  display: none;
+}
+
+/* ---------- Seite mit einer Frage ---------- */
+
+.anm-seite {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  margin-block-start: var(--sp-5);
+}
+
+.anm-titel {
+  margin: 0;
+  font-family: var(--font-text);
+  font-size: clamp(1.45rem, 1.2rem + 1.2vw, 1.85rem);
+  font-weight: 700;
+  line-height: 1.25;
+  text-transform: none;
+  color: var(--blau-900);
+}
+
+.anm-titel:focus {
+  outline: none;
+}
+
+.anm-titel:focus-visible {
+  outline: var(--fokus);
+  outline-offset: 4px;
+}
+
+.anm-text {
+  font-size: var(--fs-md);
+}
+
+.anm-text--gross {
+  font-size: var(--fs-lg);
+}
+
+.anm-zwischentitel {
+  margin: 0;
+  font-family: var(--font-text);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  text-transform: none;
+  color: var(--blau-900);
+}
+
+.anm-hinweis {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+
+.anm-hinweis--achtung {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.anm-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.anm-absaetze {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.anm-liste-punkte {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+  list-style: disc;
+}
+
+.anm-liste-punkte li + li {
+  margin-block-start: var(--sp-1);
+}
+
+/* ---------- Felder ---------- */
+
+.anm-feld {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+
+.anm-label {
+  font-size: var(--fs-md);
+  font-weight: 600;
+}
+
+.anm-freiwillig {
+  font-weight: 400;
+  color: var(--ink-3);
+}
+
+.anm-eingabe {
+  width: 100%;
+  max-width: 100%;
+  min-height: 48px;
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--fs-md);
+}
+
+.anm-eingabe--mehrzeilig {
+  padding-block: var(--sp-2);
+  line-height: var(--lh-text);
+  resize: vertical;
+}
+
+.anm-eingabe--auswahl {
+  padding-inline-end: var(--sp-2);
+}
+
+.anm-eingabe--datum {
+  text-align: center;
+}
+
+.anm-eingabe--schmal {
+  width: 4.5rem;
+}
+
+.anm-eingabe--breit {
+  width: 6.5rem;
+}
+
+.anm-eingabe[aria-invalid="true"] {
+  border: 2px solid var(--warn);
+}
+
+.anm-fehler {
+  color: var(--warn);
+  font-size: var(--fs-md);
+  font-weight: 600;
+}
+
+.anm-feld--fehler {
+  padding-inline-start: var(--sp-3);
+  border-inline-start: 4px solid var(--warn);
+}
+
+.anm-gruppe {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.anm-legende {
+  padding: 0;
+  margin-block-end: var(--sp-1);
+  font-size: var(--fs-md);
+  font-weight: 700;
+}
+
+.anm-datum__felder {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+
+.anm-datum__teil {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.anm-zeile {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-3);
+}
+
+.anm-zeile > .anm-feld {
+  flex: 1 1 auto;
+}
+
+.anm-zeile--plz {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.anm-feld--plz .anm-eingabe {
+  max-width: 9rem;
+}
+
+@media (min-width: 480px) {
+  .anm-zeile--plz {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.anm-liste {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.anm-liste--karten {
+  gap: var(--sp-4);
+}
+
+/* Die Legende einer Personengruppe steht in der Gruppe, nicht auf dem Rand. */
+.anm-person > .anm-legende {
+  float: inline-start;
+  width: 100%;
+}
+
+.anm-person {
+  padding: var(--sp-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+
+/* ---------- Auswahlkarten ---------- */
+
+.anm-karten {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.anm-karte {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  min-height: 56px;
+  padding: var(--sp-3) var(--sp-4);
+  border: 2px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color var(--t-kurz), background var(--t-kurz);
+}
+
+.anm-karte:hover {
+  border-color: var(--blau-600);
+}
+
+.anm-karte:has(:checked) {
+  border-color: var(--blau-700);
+  background: var(--blau-50);
+}
+
+.anm-karte:focus-within {
+  outline: var(--fokus);
+  outline-offset: 2px;
+}
+
+.anm-karte__eingabe {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  margin: 1px 0 0;
+  border: 2px solid var(--blau-700);
+  border-radius: 50%;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.anm-karte__eingabe:checked {
+  background: var(--blau-700);
+  box-shadow: inset 0 0 0 5px var(--surface);
+}
+
+.anm-karte__eingabe--kasten {
+  border-radius: var(--r-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.anm-karte__eingabe--kasten:checked {
+  background: var(--blau-700);
+  box-shadow: none;
+}
+
+.anm-karte__eingabe--kasten:checked::after {
+  content: "\2713";
+  color: var(--weiss);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.anm-karte__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.anm-karte__titel {
+  font-size: var(--fs-md);
+  font-weight: 600;
+}
+
+.anm-karte:has(:checked) .anm-karte__titel {
+  font-weight: 700;
+}
+
+.anm-karte__meta {
+  font-weight: 400;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.anm-karte__hinweis {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+
+@media (min-width: 640px) {
+  .anm-sprachwahl .anm-karten {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---------- Fehlerliste ---------- */
+
+.anm-fehlerbox {
+  padding: var(--sp-4);
+  border-inline-start: 4px solid var(--warn);
+  border-radius: var(--r-md);
+  background: var(--warn-bg);
+}
+
+.anm-fehlerbox:focus {
+  outline: none;
+}
+
+.anm-fehlerbox:focus-visible {
+  outline: var(--fokus);
+  outline-offset: 2px;
+}
+
+.anm-fehlerbox__titel {
+  font-weight: 700;
+}
+
+.anm-fehlerbox__liste {
+  margin: var(--sp-2) 0 0;
+  padding-inline-start: 1.25rem;
+}
+
+.anm-fehlerbox__liste li + li {
+  margin-block-start: var(--sp-1);
+}
+
+.anm-fehlerbox__liste a {
+  color: var(--warn);
+  font-weight: 600;
+}
+
+/* ---------- Navigation, Knöpfe ---------- */
+
+.anm-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  padding-block-start: var(--sp-5);
+  border-block-start: 1px solid var(--line);
+}
+
+.anm-weiter {
+  min-width: 9rem;
+  margin-inline-start: auto;
+}
+
+.anm-knoepfe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+
+.anm-datei {
+  position: relative;
+}
+
+.anm-datei__eingabe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.anm-datei:focus-within {
+  outline: var(--fokus);
+  outline-offset: 2px;
+}
+
+/* ---------- Bilder und Dateien ---------- */
+
+.anm-vorschau-foto {
+  width: 100%;
+  max-width: 15rem;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+
+.anm-vorschau-foto--klein {
+  max-width: 4.5rem;
+}
+
+.anm-vorschau-unterschrift {
+  max-width: 100%;
+  max-height: 56px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+}
+
+.anm-nachweise {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+.anm-nachweis {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+
+.anm-einzelheiten {
+  font-size: var(--fs-sm);
+}
+
+.anm-einzelheiten summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.anm-einzelheiten p + p {
+  margin-block-start: var(--sp-2);
+}
+
+/* "Weitere Hinweise (n)": Sichtbar stehen nur Warnungen und Fristen; alles
+   andere (Infos, Dinge, die der Verein klärt) klappt hier auf. */
+.anm-weitere {
+  font-size: var(--fs-md);
+}
+
+.anm-weitere summary {
+  color: var(--blau-900);
+  font-weight: 700;
+}
+
+.anm-weitere__inhalt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding-block: var(--sp-2) var(--sp-1);
+}
+
+.anm-weitere__gruppe {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-block-start: var(--sp-3);
+}
+
+.anm-dateien {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.anm-dateien__eintrag {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.anm-dateien__bild,
+.anm-dateien__pdf {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  object-fit: cover;
+  background: var(--surface);
+}
+
+.anm-dateien__pdf {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--blau-800);
+}
+
+.anm-dateien__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: var(--fs-sm);
+}
+
+/* ---------- Unterschrift ---------- */
+
+.anm-unterschriften {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+.anm-unterschrift {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  border-radius: var(--r-md);
+}
+
+.anm-unterschrift:focus {
+  outline: none;
+}
+
+.anm-unterschrift:focus-visible {
+  outline: var(--fokus);
+  outline-offset: 4px;
+}
+
+.anm-unterschrift__titel {
+  font-weight: 700;
+}
+
+.anm-unterschrift__flaeche {
+  position: relative;
+  max-width: 34rem;
+  border: 2px solid var(--blau-700);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.anm-unterschrift__leinwand {
+  display: block;
+  width: 100%;
+  aspect-ratio: 5 / 2;
+  touch-action: none;
+  cursor: crosshair;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.anm-unterschrift__linie {
+  position: absolute;
+  inset-inline: var(--sp-4);
+  bottom: 24%;
+  border-bottom: 1px solid var(--ink-3);
+  pointer-events: none;
+}
+
+.anm-unterschrift__linie::before {
+  content: "\00D7";
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: 2px;
+  font-size: var(--fs-lg);
+  line-height: 1;
+  color: var(--ink-3);
+}
+
+.anm-unterschrift__leiste {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  max-width: 34rem;
+}
+
+.anm-unterschrift__stand {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+.anm-unterschrift--fertig .anm-unterschrift__stand {
+  color: var(--ok);
+  font-weight: 700;
+}
+
+.anm-unterschrift.anm-feld--fehler .anm-unterschrift__flaeche {
+  border-color: var(--warn);
+}
+
+/* ---------- Prüfseite ---------- */
+
+.anm-bereich {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.anm-pruefliste {
+  margin: 0;
+}
+
+.anm-pruefzeile {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "label aktion"
+    "wert wert";
+  align-items: center;
+  gap: 0 var(--sp-3);
+  padding-block: var(--sp-2) var(--sp-3);
+  border-block-start: 1px solid var(--line);
+}
+
+.anm-pruefzeile:last-child {
+  border-block-end: 1px solid var(--line);
+}
+
+.anm-pruefzeile dt {
+  grid-area: label;
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+.anm-pruefzeile__wert {
+  grid-area: wert;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-weight: 600;
+}
+
+.anm-pruefzeile__aktion {
+  grid-area: aktion;
+  margin: 0;
+}
+
+/* ---------- Hinweise, Ergebnis ---------- */
+
+.anm-hinweiskasten__label {
+  margin-block-end: var(--sp-1);
+  font-weight: 700;
+}
+
+.anm-hinweiskasten p + p {
+  margin-block-start: var(--sp-2);
+}
+
+.anm-vereinshinweis {
+  display: none;
+}
+
+.anm--verein .anm-vereinshinweis {
+  display: block;
+  padding: var(--sp-3);
+  border: 1px dashed var(--blau-700);
+  border-radius: var(--r-sm);
+  background: var(--blau-50);
+  font-size: var(--fs-sm);
+}
+
+.anm-vereinshinweis__titel {
+  font-weight: 700;
+}
+
+.anm-vereinshinweis ul {
+  margin: var(--sp-1) 0 0;
+  padding-inline-start: 1.25rem;
+}
+
+.anm-ergebnis {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+  border-inline-start: 4px solid var(--ok);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--sh-1);
+}
+
+.anm-ergebnis--fehler {
+  border-inline-start-color: var(--warn);
+}
+
+.anm-datei-zeile {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.anm-status {
+  font-weight: 600;
+}
+
+.anm-status:empty {
+  display: none;
+}
+
+.anm-naechste {
+  margin: 0;
+  padding-inline-start: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.anm-naechste ul {
+  margin: var(--sp-1) 0;
+  padding-inline-start: 1.25rem;
+}
+
+/* ---------- Fuß und Dialoge ---------- */
+
+.anm-fuss {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-block-start: var(--sp-7);
+  padding-block-start: var(--sp-4);
+  border-block-start: 1px solid var(--line);
+}
+
+.anm-fuss__text {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+
+.anm-dialog {
+  width: min(32rem, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: var(--sp-5);
+  border: 0;
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--sh-2);
+  overflow: auto;
+}
+
+.anm-dialog::backdrop {
+  background: rgba(11, 14, 74, 0.55);
+}
+
+.anm-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.anm-dialog__titel {
+  margin: 0;
+  font-family: var(--font-text);
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  text-transform: none;
+}
+
+.anm-kontakte {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.anm-kontakt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.anm-kontakt .knopf {
+  overflow-wrap: anywhere;
+}
+
+/* E-Mail-Knopf: Aufgabe oben, Adresse klein darunter – ohne Umbruch mitten im Wort. */
+.anm-kontakt .knopf--mail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  text-align: center;
+}
+
+.anm-knopf-name,
+.anm-knopf-adresse {
+  display: block;
+}
+
+.anm-knopf-adresse {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  overflow-wrap: normal;
+  word-break: keep-all;
+  unicode-bidi: isolate;
+}
+
+/* Arabisch: Systemschrift, keine Rücksicht auf die schmale Kopfschrift. */
+.anm[lang="ar"] {
+  font-family: system-ui, "Segoe UI", Tahoma, "Noto Naskh Arabic", sans-serif;
+}

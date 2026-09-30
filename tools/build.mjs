@@ -124,6 +124,18 @@ function fuelleVorlage(basis, werte) {
   return html;
 }
 
+// Platzhalter der Begleit-Vorlage (src/vorlagen/begleit.html), die nur einzelne
+// Seiten füllen: zusätzliche <head>-Tags und die aria-current-Markierung der
+// beiden Anmelde-Seiten. Seiten, die sie nicht setzen (404, Rahmenseite des
+// App-Konzepts), bekommen leere Werte – sonst bliebe "{{…}}" im HTML stehen.
+const BEGLEIT_PLATZHALTER_LEER = {
+  kopfZusatz: "",
+  navAktuellVorherNachher: "",
+  navAktuellApp: "",
+  navAktuellAnmeldung: "",
+  navAktuellAnmeldungKonzept: "",
+};
+
 // ---------- Link- und Pfad-Umschreibung für Workspace-Seiten (P15) ----------
 // Die Seitenmodule bauen ihre Verweise weiterhin relativ zur alten,
 // verschachtelten URL (pfad = pfadZurWurzel(url), z. B. "../../assets/…" oder
@@ -390,8 +402,10 @@ async function main() {
   // ihre Module schreiben Verweise auf Workspace-Seiten bereits direkt als
   // "${pfad}ws/<name>.html" (siehe dort). aria-current="page" am jeweils
   // passenden Kopfleisten-Link (begleit.html: {{navAktuellVorherNachher}} /
-  // {{navAktuellApp}}) – die Hülle selbst nutzt diese Vorlage nicht, deshalb
-  // gibt es dafür keinen dritten Platzhalter.
+  // {{navAktuellApp}} / {{navAktuellAnmeldung}} / {{navAktuellAnmeldungKonzept}})
+  // – die Hülle selbst nutzt diese Vorlage nicht, deshalb gibt es dafür keinen
+  // weiteren Platzhalter. {{kopfZusatz}} nimmt zusätzliche <head>-Tags einer
+  // Begleitseite auf (Anmelde-Assistent: Stylesheet, Skript, robots).
   const begleitModule = existsSync(path.join(SRC, "begleit")) ? findeSeitenModule(path.join(SRC, "begleit")) : [];
   const begleitGeschrieben = []; // { url, title } je Begleitseite
 
@@ -420,8 +434,13 @@ async function main() {
       pfad,
       inhalt: seite.inhalt,
       stand: standLang,
+      // Anmelde-Assistent (29.09.2026): zusätzliche Tags im <head> (Stylesheet,
+      // Skript, robots), Standard leer – wie kopfZusatz der Workspace-Seiten.
+      kopfZusatz: seite.kopfZusatz ?? "",
       navAktuellVorherNachher: url === "/vorher-nachher/" ? ' aria-current="page"' : "",
       navAktuellApp: url === "/app/" ? ' aria-current="page"' : "",
+      navAktuellAnmeldung: url === "/anmeldung/" ? ' aria-current="page"' : "",
+      navAktuellAnmeldungKonzept: url === "/anmeldung-konzept/" ? ' aria-current="page"' : "",
     });
 
     mkdirSync(path.join(DOCS, url), { recursive: true });
@@ -436,7 +455,14 @@ async function main() {
   // bekommt einen Sitemap-Eintrag (unten) – die neun Bildschirme sind kein
   // eigenständiges Prüfziel der allgemeinen Begleitseiten-Prüfung, siehe
   // tools/pruefen.mjs (eigene, schlankere Prüfschleife für docs/app-konzept/).
-  const appKonzeptDateien = bildschirme(daten);
+  // Die Rahmenseite (index.html) füllt die Begleit-Vorlage in
+  // src/appkonzept/bildschirme.mjs selbst und kennt die Platzhalter der
+  // Anmelde-Seiten nicht – hier leer nachfüllen (die übrigen Dateien enthalten
+  // keinen dieser Platzhalter, das Ersetzen ändert sie nicht).
+  const appKonzeptDateien = bildschirme(daten).map(({ datei, html }) => ({
+    datei,
+    html: fuelleVorlage(html, BEGLEIT_PLATZHALTER_LEER),
+  }));
   mkdirSync(path.join(DOCS, "app-konzept"), { recursive: true });
   for (const { datei, html } of appKonzeptDateien) {
     writeFileSync(path.join(DOCS, "app-konzept", datei), html, "utf8");
@@ -483,8 +509,7 @@ async function main() {
       pfad,
       inhalt,
       stand: standLang,
-      navAktuellVorherNachher: "",
-      navAktuellApp: "",
+      ...BEGLEIT_PLATZHALTER_LEER,
     });
 
     // Befund 1 (P13, Sichtprüfung): GitHub Pages liefert docs/404.html für

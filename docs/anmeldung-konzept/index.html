@@ -1,0 +1,891 @@
+<!doctype html>
+<!--
+  Speuzer Website Prototyp – Vorlage für Begleitseiten (P17)
+  Wie src/vorlagen/workspace.html (lang="de", Meta, OG, site.css), aber mit
+  einer eigenen schmalen Kopfleiste vor <main> und Pfaden über ../ statt
+  fest "../" – Begleitseiten liegen zwar wie Workspace-Seiten in Tiefe 1
+  (/vorher-nachher/, /app/), 404.html aber in Tiefe 0 (docs/404.html), siehe
+  tools/build.mjs. Begleitseiten sind NICHT Teil der nachgebildeten
+  appack-Website (docs/index.html): eigene Kopfleiste statt Hülle, eigene
+  Fußzeile (ws-fuss, wie Workspace-Seiten) mit dem Hinweis, dass es sich um
+  Begleitmaterial für den Vorstand handelt.
+-->
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anmeldung neu gedacht – FFV Sportfreunde 04</title>
+<meta name="description" content="Entwurf für den Vorstand: Ein Anmelde-Assistent statt Formular. Ablauf, PDF, Fälle, Entscheidungen, Fragen an den HFV, Karneval und Einführungsplan.">
+<link rel="canonical" href="https://justolgay.github.io/speuzer-website-prototyp/anmeldung-konzept/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FFV Sportfreunde 04">
+<meta property="og:title" content="Anmeldung neu gedacht – FFV Sportfreunde 04">
+<meta property="og:description" content="Entwurf für den Vorstand: Ein Anmelde-Assistent statt Formular. Ablauf, PDF, Fälle, Entscheidungen, Fragen an den HFV, Karneval und Einführungsplan.">
+<meta property="og:url" content="https://justolgay.github.io/speuzer-website-prototyp/anmeldung-konzept/">
+<meta property="og:image" content="https://justolgay.github.io/speuzer-website-prototyp/assets/og/standard.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#191793">
+<link rel="icon" href="../assets/logo/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/logo/apple-touch-icon.png">
+<link rel="preload" href="../assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/css/site.css">
+<meta name="robots" content="noindex">
+</head>
+<body class="ws">
+<header class="begleit-kopf">
+  <div class="container begleit-kopf__zeile">
+    <p class="begleit-kopf__marke">Begleitseite zum Prototyp · FFV Sportfreunde 04</p>
+    <nav aria-label="Begleitseiten"><ul>
+      <li><a href="../">appack-Fassung</a></li>
+      <li><a href="../vorher-nachher/">Vorher / Nachher</a></li>
+      <li><a href="../app/">In der App</a></li>
+      <li><a href="../app-konzept/">App-Konzept</a></li>
+      <li><a href="../anmeldung/">Anmeldung (Entwurf)</a></li>
+      <li><a href="../anmeldung-konzept/" aria-current="page">Anmeldung: Konzept</a></li>
+    </ul></nav>
+  </div>
+</header>
+<main id="inhalt">
+<style>
+.konzept-liste { padding-left: 1.4rem; }
+.konzept-liste > li { padding-left: var(--sp-1); }
+.konzept-liste > li + li { margin-top: var(--sp-2); }
+.konzept-quellen { font-size: var(--fs-sm); color: var(--ink-2); }
+.konzept-quellen > li + li { margin-top: var(--sp-1); }
+.konzept-box { --fluss: var(--sp-3); }
+/* Tabellen: weißer Grund und Schatten am Rand zeigen, dass man seitlich wischen kann */
+.konzept-tabelle {
+  background:
+    linear-gradient(to right, var(--surface) 30%, rgba(255, 255, 255, 0)) left center / 40px 100% no-repeat local,
+    linear-gradient(to left, var(--surface) 30%, rgba(255, 255, 255, 0)) right center / 40px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgba(11, 14, 74, .22), rgba(11, 14, 74, 0)) left center / 14px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgba(11, 14, 74, .22), rgba(11, 14, 74, 0)) right center / 14px 100% no-repeat scroll,
+    var(--surface);
+}
+.konzept-tabelle table { min-width: 34rem; }
+.konzept-tabelle--breit table { min-width: 46rem; }
+.konzept-tabelle td { vertical-align: top; font-size: var(--fs-sm); line-height: 1.5; }
+.konzept-tabelle--label td:first-child { min-width: 9rem; }
+.konzept-tabelle--prio { max-width: 60rem; }
+.konzept-tabelle--prio table { min-width: 0; }
+.konzept-tabelle--prio td:first-child { width: 4.75rem; }
+.konzept-frage { margin: 0; font-weight: 600; }
+.konzept-warum { margin: var(--sp-1) 0 0; color: var(--ink-2); }
+.konzept-tabelle--datum td:first-child { width: 7rem; white-space: nowrap; }
+.konzept-toc { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: 0 var(--sp-5); }
+.konzept-toc a { display: inline-block; padding-block: var(--sp-1); }
+.konzept .tag { vertical-align: 1px; }
+.konzept-tabelle .tag { white-space: nowrap; }
+/* Kleine Nummer eines offenen Punkts (O26 …): als Marke, als Link nur bei sichtbaren Zeilen */
+.konzept .konzept-onr {
+  display: inline-block;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: .04em;
+  line-height: 1.5;
+  padding: 0 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--blau-50);
+  color: var(--blau-900);
+  white-space: nowrap;
+  vertical-align: 1px;
+}
+.konzept a.konzept-onr { text-decoration: none; }
+.konzept a.konzept-onr:hover { background: var(--blau-100); }
+.konzept-tabelle td:first-child .konzept-onr { margin-top: var(--sp-1); }
+/* Listen mit Nummer vor jedem Text (Fragen an den HFV, offene Punkte im Karneval) */
+.konzept .konzept-oliste { list-style: none; margin: 0; padding: 0; max-width: calc(var(--measure) + 5rem); }
+.konzept .konzept-oliste > li {
+  display: grid;
+  grid-template-columns: 3.4rem minmax(0, 1fr);
+  gap: var(--sp-2);
+  align-items: start;
+  padding-block: var(--sp-2);
+  border-top: 1px solid var(--line);
+  max-width: none;
+}
+.konzept .konzept-oliste > li:first-child { border-top: 0; }
+.konzept .konzept-oliste__nr { display: flex; flex-wrap: wrap; gap: var(--sp-1); align-content: flex-start; padding-top: 2px; }
+.konzept .konzept-oliste__text { max-width: var(--measure); }
+/* Aufklapper für P2 und P3 */
+.konzept-mehr > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  padding: var(--sp-2) var(--sp-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  font-weight: 700;
+  color: var(--blau-900);
+  cursor: pointer;
+  list-style: none;
+}
+.konzept-mehr > summary::-webkit-details-marker { display: none; }
+.konzept-mehr > summary::before {
+  content: "\203A";
+  font-size: 1.4em;
+  line-height: 1;
+  transition: transform var(--t-kurz);
+}
+.konzept-mehr[open] > summary::before { transform: rotate(90deg); }
+.konzept-mehr[open] > summary { margin-bottom: var(--sp-3); }
+@media print {
+  .konzept-mehr > summary::before { content: ""; }
+}
+@media print {
+  .konzept-mehr::details-content { content-visibility: visible; display: block; }
+}
+</style>
+<section class="abschnitt seitenkopf konzept">
+  <div class="container fluss">
+    <p class="seitenkopf__kicker"><span class="tag tag--warn">Entwurf zur Abstimmung im Vorstand</span></p>
+    <h1>Anmeldung neu gedacht – ein Assistent statt eines Formulars</h1>
+    <p class="seitenkopf__lead">Heute meldet eine Familie ihr Kind mit dem Aufnahmeantrag an. Der Antrag fragt nur einen Teil dessen ab, was Verband und Verein wissen müssen. Ein Anmelde-Assistent stellt Schritt für Schritt nur die Fragen, die im jeweiligen Fall nötig sind. Am Ende steht ein vollständiges PDF für die Familie und den Verein.</p>
+    <p class="knopfzeile"><a class="knopf" href="../anmeldung/">Prototyp ansehen</a></p>
+    <p class="meta">Stand der Recherche: 29.09.2026. Abgeglichen mit dem Prototyp am 30.09.2026 (Regelwerk Version 2026-09-29.2 mit 71 offenen Punkten). Grundlage sind die Ordnungen des Hessischen Fußball-Verbands (HFV) für die Saison 2026/27, die Vereinsunterlagen und weitere Quellen (<a href="#quellen">Abschnitt 14</a>). Der Prototyp ist ein Entwurf zum Anschauen. Er sendet und speichert nichts. Die Seite ersetzt keine Rechtsberatung.</p>
+    <div class="hinweis inhalt fluss konzept-box">
+    <p><strong>So lesen Sie die Kennzeichen</strong></p>
+    <p><span class="tag tag--heim">Pflicht</span> Verband, FIFA oder Gesetz schreiben es vor.</p>
+    <p><span class="tag">Verein</span> Regel oder Praxis des Vereins.</p>
+    <p><span class="tag tag--warn">offen</span> Nicht belegt oder unsicher. Wir müssen nachfragen.</p>
+    <p><span class="tag tag--heim">P1</span> <span class="tag">P2</span> <span class="tag tag--auswaerts">P3</span> Dringlichkeit eines offenen Punkts. P1 muss vor dem Livegang geklärt sein.</p>
+    <p><span class="konzept-onr">O26</span> Nummer des offenen Punkts im Regelwerk des Prototyps. Damit können wir im Gespräch auf eine Zeile verweisen.</p>
+    <p class="meta">Kürzel: JO = Jugendordnung des HFV. SpO = Spielordnung des HFV. DFB = Deutscher Fußball-Bund. DFBnet = Online-System des DFB, in dem Vereine Anträge einreichen. LSB = Landessportbund Hessen.</p>
+  </div>
+  </div>
+</section>
+<section class="abschnitt abschnitt--kompakt" id="kurz" aria-labelledby="kurz-titel">
+  <div class="container fluss prosa konzept">
+    <h2 id="kurz-titel">1. Kurz gesagt</h2>
+    <ul class="konzept-liste">
+    <li><strong>Das Problem.</strong> Der Aufnahmeantrag fragt vieles nicht ab, was der HFV für das Spielrecht braucht. Fehlende Angaben und Unterlagen müssen einzeln nachgefordert werden. Dazu sind Vereinsunterlagen von 2014 und 2021 veraltet. <a href="#warum">Abschnitt 2</a></li>
+    <li><strong>Die Lösung.</strong> Ein Assistent im Browser fragt Schritt für Schritt in Einfacher Sprache. Er bietet Übersetzungshilfe auf Englisch, Türkisch und Arabisch. Am Ende erzeugt er ein PDF mit allen Unterlagen. Ein Prototyp zum Ausprobieren liegt vor. <a href="#assistent">Abschnitt 3</a>, <a href="#pdf">Abschnitt 4</a></li>
+    <li><strong>Die Unterschrift.</strong> Vereinsunterlagen unterschreibt die Familie am Bildschirm, nachdem sie die Satzung gelesen hat. Die Vordrucke des HFV unterschreibt sie mit Stift, denn der Verband verlangt die eigenhändige Unterschrift. <a href="#unterschrift">Abschnitt 5</a></li>
+    <li><strong>Der Vorstand entscheidet zuerst:</strong> Wie sichern wir den Unfallschutz beim Probetraining (<a class="konzept-onr" href="#o27">O27</a>)? Wann beginnt die Mitgliedschaft (<a class="konzept-onr" href="#o30">O30</a>)? Was gilt für die Unterschrift der Eltern (<a class="konzept-onr" href="#o26">O26</a>)? Wo liegen die Originale (<a class="konzept-onr" href="#o24">O24</a>)? Dazu kommen die Bildschirm-Unterschrift der Vereinsunterlagen (<a class="konzept-onr" href="#o68">O68</a>) und die Rechtsgrundlage für die Notfallkontakte (<a class="konzept-onr" href="#o67">O67</a>). <a href="#entscheiden">Abschnitt 10</a></li>
+    <li><strong>Beim HFV zu klären:</strong> 26 Fragen an die Passstelle, 19 davon mit P1. Die P1-Fragen sollten vor dem Livegang beantwortet sein. <a href="#hfv-fragen">Abschnitt 11</a></li>
+    <li><strong>Beim Karneval eilt es.</strong> Der Meldeschluss für den Fastnachtszug 2027 ist der 30.09.2026 (<a class="konzept-onr" href="#o29">O29</a>). Dazu laufen zwei Anmeldewege parallel (<a class="konzept-onr" href="#o28">O28</a>). <a href="#karneval">Abschnitt 12</a></li>
+  </ul>
+    <div class="hinweis hinweis--info inhalt fluss konzept-box">
+    <p><strong>Wenig Zeit?</strong> In 10 Minuten lesen Sie die Abschnitte 1, 3, 5, 10 und 13.</p>
+    <p>Die Abschnitte 6 bis 8 und 14 sind Tabellen zum Nachschlagen.</p>
+  </div>
+    <nav id="verzeichnis" aria-label="Inhalt dieser Seite">
+      <p class="meta"><strong>Springen zu</strong></p>
+      <ol class="inhaltsverzeichnis konzept-toc">
+      <li><a href="#kurz">1. Kurz gesagt</a></li>
+      <li><a href="#warum">2. Warum der Aufnahmeantrag nicht reicht</a></li>
+      <li><a href="#assistent">3. So funktioniert der Assistent</a></li>
+      <li><a href="#pdf">4. Was im PDF steht</a></li>
+      <li><a href="#unterschrift">5. Die Unterschrift</a></li>
+      <li><a href="#faelle">6. Welche Fälle es gibt</a></li>
+      <li><a href="#gelernt">7. Was wir an unserer bisherigen Liste gelernt haben</a></li>
+      <li><a href="#wartefristen">8. Wartefristen in Kürze</a></li>
+      <li><a href="#datenschutz">9. Datenschutz und Aufbewahrung</a></li>
+      <li><a href="#entscheiden">10. Was der Verein entscheiden muss</a></li>
+      <li><a href="#hfv-fragen">11. Was wir beim HFV (Passstelle) fragen sollten</a></li>
+      <li><a href="#karneval">12. Karneval – KA Schnauzer</a></li>
+      <li><a href="#einfuehrung">13. Einführung in Schritten</a></li>
+      <li><a href="#quellen">14. Quellen mit Stand</a></li>
+      </ol>
+    </nav>
+  </div>
+</section>
+<section class="abschnitt abschnitt--kompakt abschnitt--hell" id="warum" aria-labelledby="warum-titel">
+  <div class="container fluss prosa konzept">
+    <h2 id="warum-titel">2. Warum der Aufnahmeantrag nicht reicht</h2>
+    <p>Der Aufnahmeantrag ist richtig und nötig. Ohne Mitgliedschaft gibt es kein Spielrecht (JO § 9 Nr. 1). Für aktive Fußballer braucht es aber ein zweites Formular: den „Antrag auf Spielerlaubnis“ des Verbands. Der Vordruck heißt „Antrag auf Spielerlaubnis / Vereinswechsel“. Er gilt für Erstanmeldung und Wechsel. Den Antrag stellt immer der Verein. Die Familie liefert Unterschriften und Nachweise.</p>
+    <p>Der Aufnahmeantrag fragt nicht ab, was der Antrag auf Spielerlaubnis und DFBnet brauchen:</p>
+    <ul class="konzept-liste">
+    <li>Staatsangehörigkeit und Geschlecht</li>
+    <li>Geburtsort (in DFBnet ein Pflichtfeld)</li>
+    <li>bisheriger Verein und Verband</li>
+    <li>Abmeldetag, letztes Spiel und laufende Sperre</li>
+    <li>die Sorgeberechtigten. Auf Seite 2 gibt es nur ein Unterschriftsfeld ohne Hinweis auf sie. Satzung § 6 und JO § 3 Nr. 1 verlangen die Zustimmung der Sorgeberechtigten.</li>
+  </ul>
+    <p>So entsteht Nacharbeit. Dazu sind die Vereinsunterlagen veraltet: Das Info-Blatt und die Zusatzerklärung stammen von 2014, die Unterlagenliste von 2021. Sie widersprechen sich teils. Ein Beispiel ist die Aufnahmegebühr: Der Antrag 2026 zieht sie mit dem ersten Beitrag ein, die Liste von 2021 nennt Barzahlung. Auch die Satzungsadresse im Aufnahmeantrag führt ins Leere (<a class="konzept-onr" href="#o66">O66</a>).</p>
+    <div class="hinweis hinweis--info inhalt fluss konzept-box">
+    <p><strong>Sprache.</strong> Im Stadtteil Gallus hatten Ende 2025 rund 44 Prozent der Einwohner eine ausländische Staatsangehörigkeit (43,8 %). In ganz Frankfurt sind es 32,1 %. Weitere 28,0 % im Gallus sind Deutsche mit Migrationshintergrund.</p>
+    <p>Wir haben keine übersetzten HFV-Formulare gefunden. Die Zahl sagt aber nicht, welche Sprache zu Hause gesprochen wird. Deshalb legt der Verein die Sprachen selbst fest (<a href="#assistent">Abschnitt 3</a>).</p>
+    <p class="meta">Quelle: Statistikportal Frankfurt, Tabelle „Migrationshintergrund (Stadtteile)“, Stadtteil Gallus, Stichtag 31.12.2025 (eigene Summe). Frankfurt insgesamt: Statistik aktuell 05/2026.</p>
+  </div>
+    <p class="meta"><a href="#verzeichnis">Zum Inhaltsverzeichnis</a></p>
+  </div>
+</section>
+<section class="abschnitt abschnitt--kompakt" id="assistent" aria-labelledby="assistent-titel">
+  <div class="container fluss prosa konzept">
+    <h2 id="assistent-titel">3. So funktioniert der Assistent</h2>
+    <p>Der Assistent stellt eine Frage pro Seite. Er zeigt nur die Fragen, die im jeweiligen Fall nötig sind. Oben auf jeder Seite stehen sieben Abschnitte. Den Ablauf können Sie im <a href="../anmeldung/">Prototyp</a> mit Beispielfällen durchklicken.</p>
+    <ol class="schritte">
+      <li>
+        <div class="schritt__inhalt">
+          <p><strong>Person</strong></p>
+          <p>Wer wird angemeldet: das Kind oder Sie selbst? Der Assistent fragt nach Name und Geburtsdatum. Daraus berechnet er Alter und Altersklasse. Gibt es für den Jahrgang keine Mannschaft, verweist er an die Jugendleitung (<span class="konzept-onr">O54</span>).</p>
+        </div>
+      </li>
+      <li>
+        <div class="schritt__inhalt">
+          <p><strong>Fußball oder Karneval</strong></p>
+          <p>Fußball, Karneval, beides oder nur Förderer. Bei Fußball fragt er nach Mannschaft, Spielen, Spielerpass und Wechsel, Pass und Wohnort, Sorgerecht und Besonderem. Die Antworten entscheiden, welche Unterlagen der Verband verlangt. Bei Karneval fragt er nach Gruppe, Turnieren und Abendauftritten.</p>
+        </div>
+      </li>
+      <li>
+        <div class="schritt__inhalt">
+          <p><strong>Kontakt</strong></p>
+          <p>Anschrift, E-Mail und Telefon. Bei Kindern tragen die Eltern ihre eigenen Daten ein.</p>
+        </div>
+      </li>
+      <li>
+        <div class="schritt__inhalt">
+          <p><strong>Beitrag</strong></p>
+          <p>Der Assistent schlägt die Beitragsgruppe vor und nennt den Beitrag. Er fragt nach Familienmitgliedern, nach Leistungen vom Amt (Bildung und Teilhabe) und nach der Zahlung: Lastschrift oder Rechnung.</p>
+        </div>
+      </li>
+      <li>
+        <div class="schritt__inhalt">
+          <p><strong>Unterlagen</strong></p>
+          <p>Die Familie entscheidet über die Erlaubnis für Fotos, die Erlaubnis für Name und Foto im Internet, Fahrten und Messenger-Gruppe. Bei Kindern nennt sie einen Notfallkontakt und wählt, ob sie einen Gesundheitsbogen ausfüllt. Eine Liste zeigt „Habe ich“ und „Fehlt noch“. Die Familie fotografiert jeden Nachweis mit dem Handy oder wählt eine Datei. Auch das Spielerfoto entsteht hier.</p>
+        </div>
+      </li>
+      <li>
+        <div class="schritt__inhalt">
+          <p><strong>Unterschrift</strong></p>
+          <p>Die Familie wählt: am Bildschirm oder auf Papier. Vor der Bildschirm-Unterschrift setzt sie den Haken bei der Satzung. Vereinsunterlagen unterschreibt sie am Bildschirm, die Vordrucke des HFV mit Stift (<a href="#unterschrift">Abschnitt 5</a>).</p>
+        </div>
+      </li>
+      <li>
+        <div class="schritt__inhalt">
+          <p><strong>Fertig</strong></p>
+          <p>Die Familie prüft alle Angaben und ändert, was nicht stimmt. Dann baut der Assistent das PDF (<a href="#pdf">Abschnitt 4</a>). Es zeigt auch, was noch fehlt und wie es weitergeht.</p>
+        </div>
+      </li>
+    </ol>
+    <h3>Was der Assistent außerdem bietet</h3>
+    <ul class="konzept-liste">
+    <li><strong>Einfache Sprache.</strong> Kurze Sätze mit höchstens 12 Wörtern, Sie-Form, Fachwörter einmal erklärt. Der Text orientiert sich an DIN 8581-1 (Niveau A2 bis B1). „Leichte Sprache“ nennen wir ihn erst, wenn eine Prüfgruppe ihn getestet hat.</li>
+    <li><strong>Sprachwahl.</strong> Der deutsche Text ist verbindlich. Englisch, Türkisch und Arabisch sind eine Übersetzungshilfe. Arabisch läuft von rechts nach links. Das PDF bleibt deutsch. Muttersprachler sollen die Übersetzungen vor dem Livegang prüfen.</li>
+    <li><strong>Nur lateinische Schrift.</strong> Namen und alle Felder, die ins PDF gehen, schreibt die Familie mit lateinischen Buchstaben, so wie im Pass. Nummern schreibt sie mit den Ziffern 0 bis 9. Die Schrift im PDF kennt keine anderen Zeichen. Bei anderen Zeichen bittet der Assistent, die Angabe zu ändern.</li>
+    <li><strong>Sprachen des Vereins.</strong> Der Verein wählt die Sprachen aus. Als erste Stufe schlagen wir vor: Deutsch, Englisch, Türkisch, Arabisch, Ukrainisch, Rumänisch, Bulgarisch, Dari/Farsi und Kroatisch/Serbisch/Bosnisch. Zu prüfen sind Albanisch, Spanisch, Italienisch und Tigrinya. Die Rangfolge legen wir nach einer kurzen Abfrage bei den Trainern oder im Mitgliederbestand fest.</li>
+    <li><strong>Hilfe-Knopf.</strong> Auf jeder Seite steht an derselben Stelle ein Hilfe-Knopf mit den Kontaktdaten des Vereins. Ansprechpersonen, Sprachen und Sprechzeiten im Vereinsheim müssen wir noch festlegen, und die Ansprechpersonen müssen zustimmen. <span class="konzept-onr">O52</span> <span class="tag tag--warn">offen</span></li>
+    <li><strong>Ehrliche Grenzen.</strong> Wo eine Regel nicht sicher ist, sagt der Assistent das: „Vielleicht nötig – der Verein sagt Ihnen Bescheid.“ Auf dem Laufzettel steht der Punkt dann als „klären“. Fristen schätzt der Assistent nur (<a href="#wartefristen">Abschnitt 8</a>).</li>
+    <li><strong>Nichts wird gesendet oder gespeichert.</strong> Alle Angaben und Fotos bleiben im Browser. Fotos werden dort neu kodiert, das entfernt Standort- und Kameradaten. Ein Knopf löscht alle Angaben. Ob ein Zwischenstand gespeichert werden soll, entscheidet der Verein später. Die Beispiele im Prototyp nutzen nur erfundene Daten. Ihre Telefonnummern stammen aus der Liste der Bundesnetzagentur für Medien.</li>
+    <li><strong>Vorführung.</strong> Der Knopf „Vorführung“ öffnet auf jeder Frageseite fünf Beispiele und die Sicht des Vereins. Ein Beispiel füllt alle Angaben aus. Die Sicht des Vereins zeigt bei Unterlagen und Fristen die Quelle. Der Knopf ist für die Vorführung gedacht, nicht für Familien.</li>
+  </ul>
+    <p class="meta"><a href="#verzeichnis">Zum Inhaltsverzeichnis</a></p>
+  </div>
+</section>
+<section class="abschnitt abschnitt--kompakt abschnitt--hell" id="pdf" aria-labelledby="pdf-titel">
+  <div class="container fluss prosa konzept">
+    <h2 id="pdf-titel">4. Was im PDF steht</h2>
+    <p>Der Assistent erzeugt ein einziges PDF mit drei Teilen. Jeder Teil hat einen anderen Empfänger.</p>
+    <div class="tabelle-wrap konzept-tabelle konzept-tabelle--breit konzept-tabelle--label" role="region" aria-label="Die drei Teile des PDF" tabindex="0">
+      <table>
+        <caption class="sr-only">Die drei Teile des PDF</caption>
+        <thead><tr><th scope="col">Teil</th><th scope="col">Für wen</th><th scope="col">Was drinsteht</th></tr></thead>
+        <tbody>
+        <tr><td><strong>Teil A – Für Sie</strong></td><td>Bleibt bei der Familie.</td><td>Anleitung in Einfacher Sprache. Übersicht „Wo unterschreiben Sie?“. Liste „Das fehlt noch“. Wartezeit, Hinweise und Kontakte. „So geht es weiter“.</td></tr>
+        <tr><td><strong>Teil B – Für den Verein</strong></td><td>Wird im Verein abgegeben.</td><td>Laufzettel als Deckblatt. Aufnahmeantrag mit Erlaubnis für Fotos und Erlaubnis für die Lastschrift. Liste der Familienmitglieder. Information zum Datenschutz. Antrag auf Spielerlaubnis, ausgefüllt. Vollmacht für die Abmeldung oder Abmeldung beim alten Verein. Weitere Einverständnisse und Erlaubnisse: Einverständnis für Spiele bei den Herren, Einverständnis für Mädchen bei den Jungen, Einverständnis für Fahrten und Messenger-Gruppe, Erlaubnis für Auftritte am Abend. Seite mit dem Spielerfoto. Kopien der Nachweise mit Wasserzeichen.</td></tr>
+        <tr><td><strong>Teil C – Vertraulich, getrennt abgeben</strong></td><td>Attest nur für das Passwesen. Notfall- und Gesundheitsbogen nur für Trainer und Betreuer.</td><td>Trennblatt mit der Anleitung für den Umschlag. Attest vom Arzt: die Vorlage „Ärztliche Bescheinigung (Attest)“ oder die Kopie des Attests. Erlaubnis für das Attest. Notfall- und Gesundheitsbogen, freiwillig.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="konzept-liste">
+    <li><strong>Laufzettel.</strong> Das Deckblatt für den Verein fasst den Fall zusammen. Es nennt Alter, Altersklasse, vorhandene und fehlende Unterlagen und die geschätzte Wartefrist. Dazu stehen dort alle Punkte, die der Verein klären muss. Auch das, was der Vorstand noch bestätigen muss: zum Beispiel die Bildschirm-Unterschrift und die Freigabe der Entwurfsblätter. Teil A für die Familie enthält keine Paragrafen. Die Quellen zeigt der Prototyp in der Sicht des Vereins.</li>
+    <li><strong>Antrag auf Spielerlaubnis.</strong> Das ist das offizielle, ausfüllbare PDF des Verbands. Der Assistent befüllt es. Die Felder des Vereins und die Bearbeitungsvermerke bleiben leer. Die Stellen für die Unterschrift sind blau markiert. Auf Seite 3 steht die freiwillige Erlaubnis für Name und Foto im Internet.</li>
+    <li><strong>Attest vom Arzt.</strong> Bei der Erstanmeldung Minderjähriger verlangt der Verband ein Attest (JO § 9 Nr. 1). Beim Vereinswechsel ist offen, ob er es verlangt (<a class="konzept-onr" href="#o04">O04</a>, <a class="konzept-onr" href="#o05">O05</a>). Hat die Familie ein Attest, kommt die Erlaubnis für das Attest mit ins PDF. Ist das Attest Pflicht und fehlt es, liegt die Vorlage für die Ärztin oder den Arzt bei. Auf dem Attest steht nur „keine Bedenken“. Diagnosen gehören nicht ins PDF.</li>
+    <li><strong>Notfall- und Gesundheitsbogen.</strong> Er ist freiwillig und nur für Kinder. Die Familie nennt zuerst einen Notfallkontakt und wählt dann, ob sie einen Gesundheitsbogen ausfüllt. Mit Angaben zur Gesundheit gilt die ausdrückliche Einwilligung nach Art. 9 DSGVO. Ohne Angaben zeigt der Bogen nur die Notfallkontakte. Die Rechtsgrundlage dafür klärt der Vorstand (<a class="konzept-onr" href="#o67">O67</a>). Die Absprache zur Medikamentengabe unterschreiben eine Person mit Sorgerecht und der Trainer immer getrennt mit Stift.</li>
+    <li><strong>Erlaubnis für Auftritte am Abend.</strong> Sie gehört zum Karneval. Die Eltern erlauben Auftritte am Abend. Sie geben an, wer das Kind abholt und ab wann es allein nach Hause darf („allein nach Hause ab … Uhr“). Beide Fragen sind freiwillig. Wer beim Heimweg „Ja“ wählt, nennt auch die Uhrzeit. Wer nicht antwortet, sieht auf dem Blatt „–“. So ergänzt später niemand etwas von Hand.</li>
+    <li><strong>Wasserzeichen.</strong> Jede Kopie eines Nachweises trägt den Vermerk „KOPIE“ mit dem Zweck, dem Namen des Vereins und dem Datum. So lässt sich die Kopie nicht anders verwenden.</li>
+    <li><strong>Spielerfoto.</strong> Es steht auf einer eigenen Seite. Zusätzlich gibt es das Foto als JPG-Datei für den Upload in DFBnet.</li>
+  </ul>
+    <p>Was aus Datenschutzgründen nicht ins PDF gehört, steht in <a href="#datenschutz">Abschnitt 9</a>.</p>
+    <p class="meta"><a href="#verzeichnis">Zum Inhaltsverzeichnis</a></p>
+  </div>
+</section>
+<section class="abschnitt abschnitt--kompakt" id="unterschrift" aria-labelledby="unterschrift-titel">
+  <div class="container fluss prosa konzept">
+    <h2 id="unterschrift-titel">5. Die Unterschrift</h2>
+    <p>Nicht jede Unterschrift darf am Bildschirm stehen. Deshalb gibt es zwei Wege und einen Sonderfall.</p>
+    <div class="tabelle-wrap konzept-tabelle konzept-tabelle--breit konzept-tabelle--label" role="region" aria-label="Wege für die Unterschrift" tabindex="0">
+      <table>
+        <caption class="sr-only">Wege für die Unterschrift</caption>
+        <thead><tr><th scope="col">Unterlagen</th><th scope="col">So wird unterschrieben</th><th scope="col">Grund</th></tr></thead>
+        <tbody>
+        <tr><td><strong>Vereinsunterlagen:</strong> Aufnahmeantrag mit Erlaubnis für Fotos und Erlaubnis für die Lastschrift, Information zum Datenschutz (Kenntnisnahme), Einverständnisse und Erlaubnisse des Vereins</td><td>Am Bildschirm, mit Finger oder Maus.</td><td>Die Form bestimmt der Verein selbst. Die Satzung verlangt Schriftform. Nach § 127 BGB kann dafür auch eine elektronische Übermittlung reichen. Der Online-Aufnahmeantrag arbeitet schon so. Der Vorstand muss es noch bestätigen (<span class="konzept-onr">O68</span>). <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td><strong>Vordrucke des HFV:</strong> Antrag auf Spielerlaubnis, Vollmacht für die Abmeldung, Abmeldung beim alten Verein, Einverständnis für Spiele bei den Herren</td><td>Mit Stift auf Papier.</td><td>Beim Wechsel Minderjähriger verlangt JO § 37 Nr. 2 die „eigenhändige Unterschrift auf dem Antragsformular“. SpO § 92 verlangt den „unterzeichneten Original-Antrag“ und 2 Jahre Aufbewahrung. Laut Passstelle 2026 (Folie 6) muss das Papier bei der Antragstellung vorliegen.</td></tr>
+        <tr><td><strong>Immer mit Stift:</strong> Attest der Ärztin oder des Arztes, Stempel des Vereins, Absprache zur Medikamentengabe</td><td>Mit Stift, durch die jeweilige Person.</td><td>Die Ärztin oder der Arzt unterschreibt und stempelt das Attest. Der Verein unterschreibt und stempelt den Antrag auf Spielerlaubnis. Die Absprache zur Medikamentengabe unterschreiben Eltern und Trainer getrennt.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Eine am Bildschirm gezeichnete Unterschrift ist rechtlich eine einfache elektronische Signatur. Gleichgestellt ist nur die qualifizierte elektronische Signatur (eIDAS Art. 25). Für den HFV-Teil reicht die gezeichnete Unterschrift deshalb nicht sicher.</p>
+    <h3>So läuft die Unterschrift im Assistenten</h3>
+    <ul class="konzept-liste">
+    <li><strong>Wahl.</strong> Die Familie wählt „Am Bildschirm, wo es erlaubt ist“ oder „Ich unterschreibe alles auf Papier“.</li>
+    <li><strong>Satzung zuerst.</strong> Vor der Bildschirm-Unterschrift liest die Familie die Satzung und setzt den Haken „Ich habe die Satzung gelesen.“ Der Haken ist Pflicht. Der Link führt auf die Satzung der Website, nicht auf die Adresse im Vordruck. Die Adresse im Vordruck ist defekt (<a class="konzept-onr" href="#o66">O66</a>). Auf dem Papierweg ist der Haken freiwillig. Dann kreuzt die Familie das Kästchen im Ausdruck von Hand an.</li>
+    <li><strong>Zweiter Elternteil.</strong> Seine Unterschrift ist freiwillig. Dem Verband reicht eine Unterschrift. Wir empfehlen beide. Leben die Eltern getrennt und der andere Elternteil ist nicht einverstanden, ist seine Unterschrift nötig. Sie geht nur mit Stift, und die Stelle im PDF ist markiert.</li>
+    <li><strong>Keine leeren Erklärungsfelder.</strong> Eine Bildschirm-Unterschrift steht nur unter Angaben, die schon dastehen. Auf den eigenen Blättern des Vereins steht „–“ oder ein Satz statt eines leeren Feldes. Fehlt auf dem Aufnahmeantrag eine Erklärung, zum Beispiel zu den Fotos, zur IBAN oder zur Liste der Familienmitglieder, wird die Stelle zur Stift-Stelle. So ergänzt nach der Unterschrift niemand etwas von Hand.</li>
+    <li><strong>Stift-Blätter.</strong> Die Vordrucke des HFV kommen vorausgefüllt ins PDF, die Stellen sind blau markiert. Die Familie wählt: Sie unterschreibt beim ersten Training und der Verein bringt die Blätter ausgedruckt mit, oder sie druckt selbst aus.</li>
+    <li><strong>Umstellbar.</strong> Jedes Formular hat einen Schalter. Erlaubt die Passstelle Bildschirm-Unterschriften, ändern wir nur den Schalter (<a class="konzept-onr" href="#o01">O01</a>).</li>
+  </ul>
+    <h3>Wer unterschreibt?</h3>
+    <ul class="konzept-liste">
+    <li>Für den Antrag auf Spielerlaubnis genügt ein gesetzlicher Vertreter (SpO § 92 Nr. 1). Ob auch ein kleines Kind selbst auf der Zeile „Spieler“ unterschreiben muss, ist offen (<a class="konzept-onr" href="#o11">O11</a>).</li>
+    <li>Nach Zivilrecht vertreten Eltern ihr Kind gemeinsam (§ 1629 BGB).</li>
+    <li><strong>Empfehlung:</strong> Beide Eltern unterschreiben. Oder ein Elternteil bestätigt, dass der andere einverstanden ist. Bei „alleiniges Sorgerecht“ unterschreibt eine Person.</li>
+    <li>Bei getrennt lebenden Eltern entscheidet der Elternteil, bei dem das Kind lebt, Alltagsfragen allein (§ 1687 BGB). Ob der Vereinsbeitritt dazu zählt, sagt das Gesetz nicht. <span class="tag tag--warn">offen</span> Der Assistent fragt deshalb, ob der andere Elternteil einverstanden ist.</li>
+    <li>Bei Vormund, Pflegefamilie oder Heim klärt die Jugendleitung persönlich (<a href="#faelle">Abschnitt 6</a>).</li>
+    <li>Die Regel für den Verein legt der Vorstand fest (<a class="konzept-onr" href="#o26">O26</a>, <a href="#entscheiden">Abschnitt 10</a>).</li>
+    <li>Die Erlaubnis für Fotos unterschreiben bisher nur die Eltern. Ob Jugendliche ab 14 oder ab 16 Jahren zusätzlich selbst unterschreiben, entscheidet der Vorstand (<span class="konzept-onr">O65</span>).</li>
+  </ul>
+    <p class="meta"><a href="#verzeichnis">Zum Inhaltsverzeichnis</a></p>
+  </div>
+</section>
+<section class="abschnitt abschnitt--kompakt abschnitt--hell" id="faelle" aria-labelledby="faelle-titel">
+  <div class="container fluss prosa konzept">
+    <h2 id="faelle-titel">6. Welche Fälle es gibt</h2>
+    <p>Der Assistent kennt 18 Fälle. Der Fall bestimmt, welche Unterlagen nötig sind. Zu jedem Fall gehören Aufnahmeantrag und Erlaubnis für die Lastschrift oder Rechnung. Bei Fußball kommt die freiwillige Erlaubnis für Name und Foto im Internet dazu. Für Kinder gibt es den freiwilligen Notfall- und Gesundheitsbogen. Die Tabelle nennt, was zusätzlich nötig ist.</p>
+    <div class="tabelle-wrap konzept-tabelle konzept-tabelle--breit konzept-tabelle--label" role="region" aria-label="Die 18 Fälle des Assistenten" tabindex="0">
+      <table>
+        <caption class="sr-only">Die 18 Fälle des Assistenten</caption>
+        <thead><tr><th scope="col">Fall</th><th scope="col">Was zusätzlich nötig ist</th><th scope="col">Hinweis</th></tr></thead>
+        <tbody>
+        <tr><td><strong>F01</strong> Nur Karneval</td><td>Aufnahmeantrag mit Erlaubnis für die Lastschrift und Erlaubnis für Fotos. Je nach Fall: Liste der Familienmitglieder, Nachweis für Azubis oder Studierende, Erlaubnis für Auftritte am Abend (die Eltern übertragen die Aufsicht an eine erwachsene Person), Leihvereinbarung für das Kostüm.</td><td>Kein Antrag auf Spielerlaubnis und kein Attest. Nimmt eine Gruppe an Turnieren teil, kommen Tanzausweis und Zustimmung zu Aufnahmen dazu (<span class="konzept-onr">O56</span>). <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td><strong>F02</strong> Passive Mitgliedschaft, Förderer oder Senator</td><td>Aufnahmeantrag mit Erlaubnis für die Lastschrift. Senator nur als Antrag.</td><td>Der Vorstand entscheidet über Senatoren. Die Satzung kennt sie nicht (<span class="konzept-onr">O34</span>). <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td><strong>F03</strong> Kind neu im Fußball, deutsch</td><td>Antrag auf Spielerlaubnis, Geburtsurkunde, Attest vom Arzt, digitales Spielerfoto.</td><td>Keine Wartefrist. Im Kreis Frankfurt brauchen auch G- und F-Kinder ein Spielrecht, wenn sie an Spielen, Turnieren oder Festivals teilnehmen. Auch Doppelstaatler mit deutschem Pass gehören hierher. Welche Staatsangehörigkeit im Verbandssystem steht, ist zu klären (<span class="konzept-onr">O09</span>). <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td><strong>F04</strong> Kind neu im Fußball, nichtdeutsch, unter 10 Jahren</td><td>Wie F03. Ob Ausweis und Meldebescheinigung (Bescheinigung des Bürgeramts über den Wohnsitz) nötig sind, ist unklar (<span class="konzept-onr">O03</span>). <span class="tag tag--warn">offen</span></td><td>Ein Freigabeschein ist nicht nötig. Der Verband prüft vor der Registrierung, ob eine FIFA-Ausnahme oder die 5-Jahres-Regel greift (Art. 19 Abs. 6). Welche Nachweise er dafür will, ist noch zu klären (<span class="konzept-onr">O17</span>). <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td><strong>F05</strong> Kind neu im Fußball, nichtdeutsch (oder Rückkehrer) ab 10 Jahren</td><td>Wie F03. Dazu Ausweiskopie und Meldebescheinigung (gemeinsamer Wohnsitz mit den Eltern in Deutschland).</td><td>Der DFB gibt frei. Das Spielrecht kommt erst danach, das dauert länger. Ob ein Elternteil für die Meldebescheinigung reicht, ist noch zu klären (<span class="konzept-onr">O14</span>). <span class="tag tag--warn">offen</span> Das Verfahren gilt ab 10 Jahren auch für Kinder mit deutschem Pass, die zuletzt im Ausland wohnten. Ob das auch gilt, wenn sie seit vielen Jahren wieder in Deutschland leben, ist offen (<span class="konzept-onr">O62</span>). <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td><strong>F06</strong> Wechsel innerhalb des HFV, Kind deutsch</td><td>Antrag auf Spielerlaubnis, Abmeldung beim alten Verein (Einschreiben) oder Vollmacht für die Abmeldung, Foto. Dazu die Kündigung beim alten Verein.</td><td>Freigabe (Zustimmung des alten Vereins) und Wartefrist nach JO §§ 35 und 38 (Abschnitt 8). Ob Geburtsurkunde und Attest nötig sind, ist noch zu klären (<span class="konzept-onr">O05</span>). <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td><strong>F07</strong> Wechsel innerhalb des HFV, Kind nichtdeutsch</td><td>Wie F06. Dazu Ausweiskopie. Bei 10 bis 17 Jahren auch Meldebescheinigung und Attest.</td><td>Beim Wechsel innerhalb Hessens sind Meldebescheinigung und Attest unklar: Das Formular sagt ja, die Präsentation 2026 nennt sie nicht (<span class="konzept-onr">O04</span>). <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td><strong>F08</strong> Wechsel aus einem anderen Landesverband</td><td>Wie F06. Standard ist das Einschreiben.</td><td>Der HFV fragt beim Verband des alten Vereins an. Nach 20 Tagen ohne Antwort gilt die Abmeldung als ordnungsgemäß (JO § 43, Jugend). Bei den Herren nennt der HFV 30 Tage, der DFB 20 Tage (<span class="konzept-onr">O22</span>). <span class="tag tag--warn">offen</span> Ob die Vollmacht für die Abmeldung hier geht, ist nicht belegt (<span class="konzept-onr">O18</span>). <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td><strong>F09</strong> Wechsel aus dem Ausland, Verein bekannt</td><td>Ausweis und Angaben zum Auslandsverein (Name, Ort, Land, Status, letztes Spiel). Bei Junioren auch Geburtsurkunde, Attest und Meldebescheinigung.</td><td>Im Ausland ist keine Abmeldung nötig (SpO § 99 Nr. 1). Ab 10 Jahren gibt der DFB frei (Freigabeschein, international „ITC“). Unter 10 ist kein Freigabeschein nötig. Ob der Verein die Kopie eines deutschen Ausweises hochladen darf, ist zu klären (<span class="konzept-onr">O10</span>). <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td><strong>F10</strong> Herren neu, deutsch</td><td>Antrag auf Spielerlaubnis und Foto.</td><td>Keine Wartefrist. Ein Attest ist nur eine Vereinsregel (Info-Blatt), keine Pflicht des Verbands (<span class="konzept-onr">O42</span>).</td></tr>
+        <tr><td><strong>F11</strong> Herren neu, nichtdeutsch oder aus dem Ausland</td><td>Wie F10. Dazu Ausweiskopie. Bei einem Auslandsverein ein internationaler Wechsel.</td><td>Die Aufenthaltserlaubnis ist erst ab der Regionalliga Pflicht (SpO § 91 Nr. 6).</td></tr>
+        <tr><td><strong>F12</strong> Herren, Wechsel</td><td>Wie F06, nach den Regeln der Wechselperioden.</td><td>Nächste Möglichkeit ist Wechselperiode II: Abmeldung bis 31.12.2026, Unterlagen bis 31.01.2027.</td></tr>
+        <tr><td><strong>F13</strong> A-Jugend unter 18 hilft bei den Herren aus</td><td>Einverständnis für Spiele bei den Herren (HFV-Vordruck vom 10.06.2025) und Attest.</td><td>Grundsätzlich nur der ältere A-Jahrgang (2008), der Jahrgang 2009 nur in Ausnahmefällen. Ein Arzt ist Pflicht. Ob ein Sportarzt nötig ist, ist noch zu klären (<span class="konzept-onr">O20</span>). <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td><strong>F14</strong> Sonderfall bei Sorgerecht oder Aufenthalt</td><td>Nachweis der Vormundschaft (Bestellungsurkunde oder schriftliche Übertragung). Bei Geflüchteten Nachweis des Schutzstatus.</td><td>Die Jugendleitung klärt persönlich. Die Anmeldung wird nicht blockiert. Die genaue HFV-Liste ist noch zu klären (<span class="konzept-onr">O12</span>). <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td><strong>F15</strong> Geflüchtetes Kind ohne Eltern in Deutschland</td><td>Nachweis von Schutzstatus oder Aufenthalt, Bestellung des Vormunds, Einwilligung des Vormunds.</td><td>FIFA-Ausnahme d (Art. 19 Abs. 2 d). Welche Nachweise der HFV genau will, ist noch zu klären (<span class="konzept-onr">O12</span>, <span class="konzept-onr">O15</span>). <span class="tag tag--warn">offen</span> Der Assistent macht keine Zusage zu Spielen.</td></tr>
+        <tr><td><strong>F16</strong> Austauschschüler ohne Eltern</td><td>Unterlagen zum Austauschprogramm mit Dauer, Einwilligung der Gasteltern und der Eltern, Bestätigung der Rückkehr.</td><td>FIFA-Ausnahme e. Das Spielrecht gilt höchstens 1 Jahr, ein weiterer Wechsel ist nicht erlaubt. Nur bei einem reinen Amateurverein. Die genaue HFV-Liste ist noch zu klären (<span class="konzept-onr">O12</span>, <span class="konzept-onr">O15</span>). <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td><strong>F17</strong> Kind bei Verwandten oder in Pflegefamilie ohne Schutzstatus</td><td>Nachweis, dass das Kind seit 5 Jahren ununterbrochen in Deutschland wohnt (Wohnsitznachweis, nicht älter als 3 Monate) und noch nie registriert war.</td><td>Nur unter dieser Bedingung möglich. Sonst gilt: Training ja, Spiele wahrscheinlich erst mit 18. Auch Freundschaftsspiele gehen nicht. Der Umzug der Eltern (Ausnahme a) zählt nicht für Verwandte. Die genaue HFV-Liste ist noch zu klären (<span class="konzept-onr">O12</span>, <span class="konzept-onr">O15</span>). <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td><strong>F18</strong> EU-Jugendliche mit 16 oder 17 Jahren ohne Eltern</td><td>Wie F17.</td><td>Die FIFA-Ausnahme für 16- bis 18-Jährige in der EU kann der FFV nicht erfüllen: Der Verein müsste Ausbildung, Schule, Unterkunft und Betreuer stellen und einer der obersten FIFA-Ausbildungskategorien angehören.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="hinweis hinweis--offen inhalt fluss konzept-box">
+    <p><strong>Kinder ohne Eltern in Deutschland (F15 bis F18).</strong> Hier sagt der Assistent ehrlich, was möglich ist und was nicht.</p>
+    <p>Die FIFA kennt für Minderjährige fünf Ausnahmen. Verwandte zählen nicht dazu. Möglich ist es sonst nur mit der 5-Jahres-Regel: Das Kind lebt seit 5 Jahren ununterbrochen in Deutschland und war noch nie registriert.</p>
+    <p>Ist das nicht der Fall, sagt der Assistent klar: Training ja, Spiele vielleicht nicht. Im Kreis Frankfurt dürfen Spieler ohne Spielrecht auch keine Freundschaftsspiele bestreiten. Der Assistent macht keine Zusage. Die Jugendleitung spricht persönlich mit der Familie, und die Anmeldung läuft weiter.</p>
+  </div>
+    <h3>Weitere Sonderfälle</h3>
+    <ul class="konzept-liste">
+    <li><strong>Mädchen im Jungenteam der B- oder C-Jugend:</strong> Die Eltern geben das Einverständnis für Mädchen bei den Jungen (JO § 14 Nr. 6).</li>
+    <li><strong>Juniorinnen unter 18:</strong> Für jedes Spielrecht braucht es ein ärztliches Attest (SpO § 110).</li>
+    <li><strong>Frauen ab 18 bei den Herren:</strong> Sonderspielrecht auf Antrag (SpO § 109a, Pilotprojekt bis 30.06.2028). Der FFV hat keine Frauenmannschaft. Der Ablauf ist zu klären (<span class="konzept-onr">O21</span>).</li>
+    <li><strong>Geschlecht „divers“ oder „ohne Angabe“:</strong> Die Person wählt Frauen- oder Herrenteam (SpO § 91 Nr. 8 und 9). Die Jugendleitung und die Vertrauensperson des HFV begleiten den Antrag.</li>
+    <li><strong>Behinderung:</strong> Sonderspielrecht in einer jüngeren Altersklasse mit fachärztlichem Gutachten (JO § 11 Nr. 5). Die HFV-Gebühr beträgt 25 €.</li>
+    <li><strong>Wechsel in den letzten 6 Monaten oder laufende Sperre:</strong> Die Wartefrist verschiebt sich (<a href="#wartefristen">Abschnitt 8</a>).</li>
+  </ul>
+    <h3>Altersklassen 2026/27</h3>
+    <p>Der Assistent rechnet den Jahrgang in die Altersklasse um (Kreisjugendausschuss Frankfurt). Für Altersgrenzen wie „unter 18“ oder „ab 10 Jahren“ zählt der Tag der Anmeldung. Ob der Verband denselben Tag nimmt, ist offen (<span class="konzept-onr">O23</span>). <span class="tag tag--warn">offen</span></p>
+    <div class="tabelle-wrap konzept-tabelle" role="region" aria-label="Altersklassen und Jahrgänge 2026/27" tabindex="0">
+      <table>
+        <caption class="sr-only">Altersklassen und Jahrgänge 2026/27</caption>
+        <thead><tr><th scope="col">Altersklasse</th><th scope="col">G</th><th scope="col">F</th><th scope="col">E</th><th scope="col">D</th><th scope="col">C</th><th scope="col">B</th><th scope="col">A</th></tr></thead>
+        <tbody>
+        <tr><td><strong>Jahrgänge</strong></td><td>2020 und jünger</td><td>2018, 2019</td><td>2016, 2017</td><td>2014, 2015</td><td>2012, 2013</td><td>2010, 2011</td><td>2008, 2009</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Für die Jahrgänge 2010 bis 2013 hat der Verein 2026/27 keine Mannschaft. Der Assistent verweist diese Familien an die Jugendleitung. Was er ihnen genau sagt, ist noch zu klären (<span class="konzept-onr">O54</span>). <span class="tag tag--warn">offen</span></p>
+    <p class="meta"><a href="#verzeichnis">Zum Inhaltsverzeichnis</a></p>
+  </div>
+</section>
+<section class="abschnitt abschnitt--kompakt" id="gelernt" aria-labelledby="gelernt-titel">
+  <div class="container fluss prosa konzept">
+    <h2 id="gelernt-titel">7. Was wir an unserer bisherigen Liste gelernt haben</h2>
+    <p>Wir haben unsere bisherige Liste gegen die Ordnungen des HFV geprüft. Vieles stimmt. Manches ist falsch oder überholt.</p>
+    <div class="tabelle-wrap konzept-tabelle konzept-tabelle--breit konzept-tabelle--label" role="region" aria-label="Bisher gedacht und tatsächlich" tabindex="0">
+      <table>
+        <caption class="sr-only">Bisher gedacht und tatsächlich</caption>
+        <thead><tr><th scope="col">Bisher gedacht</th><th scope="col">Tatsächlich</th></tr></thead>
+        <tbody>
+        <tr><td>Geburtsurkunde brauchen nur ausländische Kinder.</td><td><strong>Falsch.</strong> Bei der Erstanmeldung ist sie Pflicht für alle Minderjährigen (JO § 9 Nr. 1). Sie belegt aber nicht die Staatsangehörigkeit. Beim Wechsel deutscher Kinder ist es noch zu klären (<span class="konzept-onr">O05</span>). <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td>Das Attest verlangen wir als Verein.</td><td><strong>Falsch.</strong> Der HFV verlangt es bei Minderjährigen (JO § 9 Nr. 1). Jeder Arzt genügt. Es gilt außerdem für Juniorinnen unter 18 (SpO § 110) und für A-Junioren unter 18, die bei den Herren spielen (JO § 29). Bei Erwachsenen ist es nur eine Vereinsregel.</td></tr>
+        <tr><td>Meldebescheinigung und Pass für Nichtdeutsche jeden Alters bei der Erstanmeldung.</td><td><strong>Der HFV verlangt sie nur von 10 bis 17 Jahren.</strong> Die Meldebescheinigung muss den gemeinsamen Wohnsitz von Kind und Eltern zeigen. Für Kinder unter 10 ist beides noch zu klären (<span class="konzept-onr">O03</span>, <span class="konzept-onr">O17</span>). Beim Wechsel braucht der HFV den Ausweis von allen Nichtdeutschen, egal wie alt. <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td>Eine Ausweiskopie gehört zur Anmeldung.</td><td><strong>Nicht von deutschen Kindern.</strong> Kopien deutscher Ausweise dürfen nicht weitergegeben werden (§ 20 PAuswG, § 18 PassG). Bei internationalen Wechseln ist die Frage noch zu klären (<span class="konzept-onr">O10</span>). <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td>Ein Passbild auf Papier für den Spielerpass.</td><td><strong>Überholt.</strong> Den Spielerpass gibt es nur digital. Das Spielerfoto ist ein JPG oder PNG im Format 3:4, mindestens 375 Pixel breit. Es muss vor dem ersten Spiel in DFBnet liegen und kommt bei jedem Wechsel neu. Im Kreis Frankfurt gilt es 2 Jahre. Ein Papierfoto braucht der HFV nicht.</td></tr>
+        <tr><td>Zum Wechsel gehört die Vollmacht für die Abmeldung.</td><td><strong>Eine von mehreren Varianten.</strong> Die Vollmacht für die Abmeldung ist ein HFV-Vordruck für DFBnet Pass Online. Die andere Variante ist die Abmeldung beim alten Verein per Einschreiben: Der Einlieferungsbeleg genügt, ein Einwurf-Einschreiben zählt nicht. Der alte Verein kann auch selbst in DFBnet abmelden. Nach SpO § 92 Nr. 2 ist die Vollmacht das ganze Jahr nutzbar. Außerhalb des Junis gelten die normalen Wartefristen. Die Passstelle schreibt: Nutzung „nur bis zum 30. Juni mit verkürzter Wartefrist“. Das ist mehrdeutig, wir lassen es bestätigen (<span class="konzept-onr">O07</span>). Der Abmeldetag ist der Tag der Eingabe im System. Jeder Tag Verzögerung verlängert die Wartefrist.</td></tr>
+        <tr><td>Nicht auf der Liste: die Kündigung beim alten Verein.</td><td><strong>Sie kommt extra.</strong> Die Mitgliedschaft im alten Verein muss gesondert gekündigt werden. Der Vordruck „Abmeldung beim alten Verein“ hat dafür ein eigenes Kästchen. Der Austritt eines Minderjährigen gilt nur mit der Unterschrift des gesetzlichen Vertreters (JO § 3 Nr. 2). Der alte Verein darf bis zum Ende seiner Kündigungsfrist Beitrag verlangen.</td></tr>
+        <tr><td>Die Zusatzerklärung für Spieler von 12 bis 18 Jahren.</td><td><strong>Überholt.</strong> Der HFV nennt sie nicht mehr, und die Altersgrenze liegt heute bei 10. Sie ist ein Vordruck von 2014. Auf dem Antrag auf Spielerlaubnis steht: „weitere Dokumente sind ab sofort nicht einzureichen“. Ob die Passstelle sie doch anfordert, ist noch zu klären (<span class="konzept-onr">O02</span>). <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td>Zusatzformulare für Spieler aus USA, Mexiko, Argentinien und Brasilien.</td><td><strong>Unklar.</strong> Sie stehen nicht auf der HFV-Formularseite. Wenn überhaupt, betreffen sie internationale Wechsel. Wir verlangen sie nur, wenn die Passstelle sie anfordert (<span class="konzept-onr">O02</span>). Die Anmeldung wird nicht blockiert. <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td>Der Pass mit Freigabe und Stempel.</td><td><strong>Überholt.</strong> Den Spielerpass gibt es nur noch digital.</td></tr>
+        <tr><td>Die 20 € gehen an den HFV.</td><td><strong>Falsch.</strong> Die Erstausstellung beim HFV ist gebührenfrei. Die 20 € sind das Eintrittsgeld des Vereins (<span class="konzept-onr">O43</span>). Der HFV verlangt beim Wechsel Gebühren: 10 € für Junioren, 25 € für Herren. Die zahlt der Verein.</td></tr>
+        <tr><td>Der Aufnahmeantrag reicht für die Mitgliedschaft.</td><td><strong>Richtig, mit einer Lücke.</strong> Ohne Mitgliedschaft gibt es kein Spielrecht. Auf Seite 2 fehlt aber der Hinweis auf die Sorgeberechtigten (Satzung § 6, JO § 3 Nr. 1).</td></tr>
+        <tr><td>Die Erlaubnis für die Lastschrift (SEPA) gehört immer dazu.</td><td><strong>Vereinssache, keine Pflicht des Verbands.</strong> Ohne Erlaubnis für die Lastschrift bekommt die Familie eine Rechnung. Der Zuschlag von 3 € ohne Lastschrift steht im Info-Blatt von 2014, nicht im Aufnahmeantrag 9/2026. Der Verein muss ihn bestätigen (<span class="konzept-onr">O38</span>). <span class="tag tag--warn">offen</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Was auf der Liste ganz fehlte</h3>
+    <ul class="konzept-liste">
+    <li>Die Erlaubnis für Name und Foto im Internet, Seite 3 des Antrags auf Spielerlaubnis. Sie betrifft den Namen auf FUSSBALL.DE bei Kindern unter 16 und das Foto. Beides ist freiwillig.</li>
+    <li>Angaben zum Vereinswechsel: alter Verein, Abmeldetag, letztes Spiel, laufende Sperre.</li>
+    <li>Der Weg bei Auslandsbezug: Ist ein Verein im Ausland bekannt, läuft ein internationaler Wechsel. Bei Nichtdeutschen ab 10 Jahren holt der HFV über den DFB eine Freigabe ein. Das Spielrecht kommt erst danach.</li>
+    <li>Das Einverständnis für Spiele bei den Herren, mit Attest, für A-Jugendliche unter 18, die bei den Herren aushelfen.</li>
+    <li>Die Information zum Datenschutz nach Art. 13 DSGVO, die Erlaubnis für das Attest und ein freiwilliger Notfall- und Gesundheitsbogen.</li>
+    <li>Die Versicherungslücke beim Probetraining (<a href="#entscheiden">Abschnitt 10</a>).</li>
+    <li>Sonderfälle: Vormund, Pflegefamilie, Geflüchtete ohne Eltern, Mädchen im Jungenteam der B- oder C-Jugend, Sonderspielrecht bei Behinderung.</li>
+    <li>Beitragsfälle: Liste der Familienmitglieder, Nachweis für Azubis und Studierende (nur Karneval), Beleg für Bildung und Teilhabe, Beitragserlass nach Satzung § 16.</li>
+    <li>Ein eigener Zweig für die Karnevalabteilung (<a href="#karneval">Abschnitt 12</a>).</li>
+  </ul>
+    <p class="meta"><a href="#verzeichnis">Zum Inhaltsverzeichnis</a></p>
+  </div>
+</section>
+<section class="abschnitt abschnitt--kompakt abschnitt--hell" id="wartefristen" aria-labelledby="wartefristen-titel">
+  <div class="container fluss prosa konzept">
+    <h2 id="wartefristen-titel">8. Wartefristen in Kürze</h2>
+    <p>Eine Wartefrist gibt es nur bei einem Vereinswechsel. „Pflichtspiel ab“ bedeutet: frühestens ab dem Tag, an dem der Antrag beim Verband eingeht.</p>
+    <div class="hinweis hinweis--info inhalt fluss konzept-box">
+    <p><strong>Der Assistent schätzt, der Verein prüft.</strong> Die Schätzung ersetzt keine Auskunft des HFV.</p>
+    <p>Sie rechnet ab dem Tag nach der Abmeldung. Bei unklaren Regeln kennzeichnet der Assistent die Schätzung als unsicher.</p>
+    <p>Am Monatsende weicht die Passstelle um einen Tag ab: Sie rechnet Abmeldedatum plus Monate plus 1 Tag. Der Assistent nimmt den späteren Tag (<span class="konzept-onr">O60</span>).</p>
+    <p>Die Wartefrist entfällt nach mehr als 6 Monaten ohne Pflichtspiel. Der Assistent rechnet damit nur, wenn dieser Zeitraum am Tag des Antrags schon vorbei ist. Ob der Verein den Antrag später stellen darf, um die Wartefrist zu vermeiden, ist offen (<span class="konzept-onr">O61</span>).</p>
+  </div>
+    <div class="tabelle-wrap konzept-tabelle konzept-tabelle--breit konzept-tabelle--label" role="region" aria-label="Wartefristen nach Altersgruppe" tabindex="0">
+      <table>
+        <caption class="sr-only">Wartefristen nach Altersgruppe</caption>
+        <thead><tr><th scope="col">Wer</th><th scope="col">Wartefrist</th><th scope="col">Anmerkung</th></tr></thead>
+        <tbody>
+        <tr><td><strong>Neu im Fußball</strong> (noch nie ein Spielerpass)</td><td>Keine Wartefrist. Jederzeit möglich.</td><td>Pflichtspiele frühestens ab dem Tag, an dem der Antrag beim Verband eingeht (SpO § 91 Nr. 1). In internationalen Fällen erst nach der Rückmeldung über den DFB.</td></tr>
+        <tr><td><strong>G- und F-Jugend</strong>, Wechsel</td><td>Keine Freigabe und keine Wartefrist (JO §§ 35 und 38 Nr. 4).</td><td>Im Kreis Frankfurt brauchen auch G- und F-Kinder ein Spielrecht, wenn sie an Spielen, Turnieren oder Festivals teilnehmen.</td></tr>
+        <tr><td><strong>E-Jugend</strong>, Wechsel</td><td>Abmeldung vom 1. bis 30. Juni: Pflichtspiele ab 1. Juli. Sonst 3 Monate ab dem Tag nach der Abmeldung.</td><td>Freundschaftsspiele ab Eingang der vollständigen Unterlagen. Die E-Jugend spielt 2026/27 in der Kreisliga, also sind es Pflichtspiele. Ältere E-Jahrgänge müssen bei Abmeldung bis 30. Juni freigegeben werden. Ab 2027/28 spielt die E-Jugend nur noch 6 gegen 6 in Meldeligen. Die Regeln sind dann neu zu prüfen (<span class="konzept-onr">O59</span>).</td></tr>
+        <tr><td><strong>D- bis A-Jugend</strong> (jüngerer A-Jahrgang), Wechsel</td><td>Im Juni: mit Freigabe (Zustimmung des alten Vereins) oder Entschädigung ab 1. Juli, ohne beides ab 1. November. Außerhalb des Junis: mit Freigabe 3 Monate, ohne Freigabe 6 Monate ab dem Tag nach der Abmeldung.</td><td>Liegt das letzte Pflichtspiel mehr als 6 Monate zurück, entfällt die Wartefrist (JO § 47 Nr. 1). Außerhalb des Junis ersetzt eine Entschädigung die Freigabe nicht. Die Entschädigung zahlt der neue Verein. Für uns (Herren in der Kreisliga A) sind es 200 € für A und B, 100 € für C und D, dazu 25 € je angefangenem Spieljahr, höchstens 6. Für den jüngeren D-Jahrgang erlaubt der DFB höchstens 3 Monate, der HFV sieht 6 vor (<span class="konzept-onr">O08</span>). <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td><strong>Freundschaftsspiele</strong> in der Jugend</td><td>Keine Wartefrist.</td><td>Ausnahme: der ältere A-Jahrgang (2008) und die älteren B-Juniorinnen (2010). Im Kreis Frankfurt dürfen Spieler ohne Spielrecht auch dort nicht eingesetzt werden.</td></tr>
+        <tr><td><strong>Herren</strong>, älterer A-Jahrgang (2008), ältere B-Juniorinnen (2010)</td><td>Wechselperiode I: Abmeldung bis 30.06., Unterlagen bis 31.08., 23:59 Uhr. Ohne Zustimmung Pflichtspiele erst ab 1. November. Wechselperiode II: Abmeldung vom 01.07. bis 31.12., Unterlagen bis 31.01. Nur mit Zustimmung, sonst Pflichtspiele erst ab 1. November des folgenden Spieljahres.</td><td>Ab 1. Juni gelten für die älteren Jahrgänge die Regeln der Senioren. Liegt das letzte Pflichtspiel mehr als 6 Monate zurück, gibt es keine Wartefrist, auch außerhalb der Wechselperioden.</td></tr>
+        <tr><td><strong>Sonderwege in der Jugend</strong></td><td>Rückkehr zum alten Verein bis 31.10. Fehlende Spielmöglichkeit: vom 01.07. bis 30.09. ohne Freigabe, vom 01.10. bis 31.03. nur mit Freigabe. Jugendspielgemeinschaft bis 14 Tage nach dem ersten Pflichtspiel. Härtefall (JO § 41).</td><td>Diese Fälle gehen an die Jugendleitung.</td></tr>
+        <tr><td><strong>Internationale Fälle</strong> (Nichtdeutsche ab 10, Rückkehrer ab 10, Auslandsverein bekannt)</td><td>Spielrecht erst nach der Rückmeldung über den DFB. Der ausländische Verband hat 72 Stunden Zeit für den Freigabeschein. Dazu kommt die Bearbeitung bei HFV und DFB.</td><td>Der HFV nennt keine Bearbeitungsdauer (<span class="konzept-onr">O13</span>). Ältere Angaben von 30 oder 7 Tagen sind überholt. Ab 01.01.2027 gilt ein neues FIFA-Transferreglement. Die Fristen müssen wir dann neu prüfen (<span class="konzept-onr">O58</span>). <span class="tag tag--warn">offen</span></td></tr>
+        <tr><td><strong>Mehrfach-Wechsel und Sperre</strong></td><td>Ein neuer Wechsel während einer laufenden Wartefrist startet die neue Frist erst danach (SpO § 94 Nr. 1 b). Ein zweiter Wechsel im Juni zählt wie ein Wechsel außerhalb des Junis (JO § 39).</td><td>Eine Wartefrist unterbricht eine Sperre. Der Rest der Sperre folgt danach.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="hinweis hinweis--info inhalt fluss konzept-box">
+    <p><strong>Rechenbeispiel</strong> (unsere eigene Rechnung, keine Auskunft des HFV): Ein Kind meldet sich am 29.09.2026 ab. In der D-Jugend darf es mit Freigabe ab etwa 30.12.2026 Pflichtspiele bestreiten, ohne Freigabe ab etwa 30.03.2027. In der E-Jugend ist es ebenfalls etwa der 30.12.2026.</p>
+  </div>
+    <h3>Drei Warnungen, die der Assistent zeigt</h3>
+    <ul class="konzept-liste">
+    <li>Eine Abmeldung per Mail, WhatsApp oder einfachem Brief zählt nicht.</li>
+    <li>Erst nach dem wirklich letzten Spiel abmelden.</li>
+    <li>Nie für zwei Vereine gleichzeitig unterschreiben (SpO § 91 Nr. 3, § 93 Nr. 6).</li>
+  </ul>
+    <p>Bei der Vollmacht für die Abmeldung zählt der Tag der Eingabe im System als Abmeldetag. Der Assistent bietet sie nur an, wenn der Verein sie am selben oder nächsten Tag eingibt. Sonst empfiehlt er ein Einschreiben. Beim Einschreiben zählt der Poststempel.</p>
+    <p class="meta"><a href="#verzeichnis">Zum Inhaltsverzeichnis</a></p>
+  </div>
+</section>
+<section class="abschnitt abschnitt--kompakt" id="datenschutz" aria-labelledby="datenschutz-titel">
+  <div class="container fluss prosa konzept">
+    <h2 id="datenschutz-titel">9. Datenschutz und Aufbewahrung</h2>
+    <p>Ausweise, Atteste und Angaben zur Gesundheit sind sensible Daten. Der Assistent soll davon so wenig wie möglich sammeln, weitergeben und aufbewahren.</p>
+    <h3>So gehen wir mit den Daten um</h3>
+    <ul class="konzept-liste">
+    <li><strong>Originale bleiben 2 Jahre.</strong> Der Verein bewahrt das Original des Antrags auf Spielerlaubnis und alle Unterlagen mindestens 2 Jahre ab Antrag auf (SpO § 92). Der HFV kann sie verlangen. Dann müssen sie binnen 14 Tagen im Original vorliegen. In einem Pilotprojekt prüft der HFV vom 01.07. bis Ende 2026 Online-Vereinswechsel stichprobenartig.</li>
+    <li><strong>Danach löschen.</strong> Nach der Frist werden Unterlagen vernichtet, auch Ausweiskopien (Art. 5 Abs. 1 lit. e DSGVO). Ob ein rein digitales Archiv reicht, ist noch zu klären (<a class="konzept-onr" href="#o01">O01</a>). Hamburg erlaubt es. <span class="tag tag--warn">offen</span></li>
+    <li><strong>Keine Ausweiskopien deutscher Kinder.</strong> Wo eine Kopie nötig ist, schwärzen wir Zugangsnummer (CAN) und Seriennummer und weisen darauf hin. Es gibt keine automatische Texterkennung und keine strukturierte Speicherung von Ausweisdaten. Was man auf ausländischen Pässen schwärzen darf, ist noch zu klären (<a class="konzept-onr" href="#o10">O10</a>). <span class="tag tag--warn">offen</span></li>
+    <li><strong>Wasserzeichen.</strong> Kopien tragen den Vermerk „KOPIE“ mit dem Zweck, dem Namen des Vereins und dem Datum.</li>
+    <li><strong>Attest getrennt.</strong> Im Attest steht nur „keine Bedenken“. Es ist ein Gesundheitsdatum (Art. 9 DSGVO). Welche Rechtsgrundlage der HFV annimmt, ist noch zu klären (<a class="konzept-onr" href="#o06">O06</a>). Deshalb holen wir mit der Erlaubnis für das Attest eine ausdrückliche Einwilligung ein. Verlangt der Verband das Attest nicht, vernichtet der Verein es sofort. <span class="tag tag--warn">offen</span></li>
+    <li><strong>Notfall- und Gesundheitsbogen freiwillig.</strong> Er liegt in Teil C, getrennt von den übrigen Unterlagen, und nur Trainer und Betreuer der Mannschaft sehen ihn. Mit Angaben zur Gesundheit gilt die ausdrückliche Einwilligung (Art. 9 Abs. 2 lit. a DSGVO). Ohne Angaben stehen nur die Notfallkontakte darauf. Die Rechtsgrundlage dafür klärt der Vorstand (<a class="konzept-onr" href="#o67">O67</a>). Die Absprache zur Medikamentengabe unterschreiben Eltern und Trainer getrennt mit Stift. Beim Austritt oder auf Widerruf wird alles gelöscht.</li>
+    <li><strong>Information zum Datenschutz.</strong> Eine eigene Seite im PDF informiert nach Art. 13 DSGVO. Sie verweist auf die Information zum Datenschutz des HFV (Stand 20.01.2026). Ob die Unterschrift zur Kenntnisnahme nötig ist, ist offen (<span class="konzept-onr">O63</span>). <span class="tag tag--warn">offen</span></li>
+    <li><strong>Rechtsgrundlagen.</strong> Stammdaten und Foto für den Spielerpass sind ohne Einwilligung zulässig (Art. 6 Abs. 1 lit. b DSGVO). Eine Veröffentlichung braucht die Einwilligung. Ab 16 Jahren darf der Verband Name und Spielberichtsdaten aus berechtigtem Interesse veröffentlichen. Darauf und auf das Widerspruchsrecht weisen wir hin.</li>
+    <li><strong>DFBnet.</strong> Das Häkchen „Adressweitergabe“ setzen wir nicht. Es ist eine Einwilligung zu Werbung.</li>
+  </ul>
+    <h3>Versand und Übergabe</h3>
+    <ul class="konzept-liste">
+    <li>Die Familie gibt die Originale im Verein ab, im Vereinsheim oder beim Trainer.</li>
+    <li>Ausweiskopien und Atteste von Kindern gehen nicht per normaler Mail oder WhatsApp. Die Datenschutzkonferenz verlangt bei hohem Risiko Ende-zu-Ende-Verschlüsselung oder ein Webportal (Orientierungshilfe vom 16. Juni 2021).</li>
+    <li>Die Familie schickt nichts an den HFV. Das E-Postfach der Passstelle ist nur aus DFBnet erreichbar.</li>
+  </ul>
+    <div class="hinweis hinweis--offen inhalt fluss konzept-box">
+    <p><strong>Offen: automatischer Versand.</strong> Der geplante Versand läuft über die IONOS-Annahme des Vereins, die das PDF per E-Mail an die Geschäftsstelle weitergibt. Sie ist bisher für den Online-Aufnahmeantrag gebaut. Bevor Ausweiskopien und Atteste so übertragen werden, muss der Verein klären, ob das nach der Orientierungshilfe zulässig ist. Dann muss auch die Information zum Datenschutz angepasst werden: Sie sagt heute, die Angaben würden nicht an einen Server übertragen. <span class="tag tag--warn">offen</span></p>
+  </div>
+    <h3>Was der Verein festlegen muss</h3>
+    <ul class="konzept-liste">
+    <li>Ein Löschkonzept für die Mitgliederdaten. Als Beispiel nennt der Landesdatenschutzbeauftragte Baden-Württemberg: 2 Jahre nach Ende der Mitgliedschaft, Beitragsdaten 10 Jahre. DFBnet löscht die Daten beim Verband frühestens 5 Jahre nach der letzten Saison.</li>
+    <li>Ein Verarbeitungsverzeichnis. Wegen der Gesundheitsdaten greift die Ausnahme für kleine Stellen nicht (<span class="konzept-onr">O46</span>).</li>
+    <li>Die Prüfung, ob ein Datenschutzbeauftragter nötig ist: ab 20 Personen, die in der Regel ständig automatisiert mit Daten umgehen (§ 38 BDSG). Trainer mit Listen oder Messenger-Gruppen zählen mit.</li>
+    <li>Satzung § 23 überarbeiten. Sie verweist noch auf das BDSG.</li>
+    <li>Die Information zum Datenschutz in Einfacher Sprache schreiben und übersetzen (<span class="konzept-onr">O45</span>).</li>
+  </ul>
+    <p class="meta"><a href="#verzeichnis">Zum Inhaltsverzeichnis</a></p>
+  </div>
+</section>
+<section class="abschnitt abschnitt--kompakt abschnitt--hell" id="entscheiden" aria-labelledby="entscheiden-titel">
+  <div class="container fluss prosa konzept">
+    <h2 id="entscheiden-titel">10. Was der Verein entscheiden muss</h2>
+    <p>Die Listen sind nach Dringlichkeit geordnet. P1 muss vor dem Livegang geklärt sein und steht immer sichtbar. P2 und P3 eilen weniger und stehen unter jeder Liste in einem Aufklapper. Jede Zeile trägt ihre Nummer aus dem Regelwerk des Prototyps, zum Beispiel O26.</p>
+    <div class="hinweis hinweis--offen inhalt fluss konzept-box">
+    <p><strong>Versicherung beim Probetraining – der Befund in Kürze.</strong></p>
+    <p>Wer nur zum Probetraining kommt und kein Mitglied ist, hat über die Sportversicherung des LSB keinen persönlichen Unfall- und Haftpflichtschutz (ARAG-Merkblatt, Stand 01.01.2026). Die Haftpflicht des Vereins greift dagegen: Angebote für Nichtmitglieder gehören zur Mitgliederwerbung.</p>
+    <p>Es gibt zwei Fallen. Erstens: Eine beitragsfreie oder befristete Probemitgliedschaft schließt die Lücke nicht. Zweitens: Beginnt die Mitgliedschaft erst am 1. des Folgemonats, ist ein angemeldetes Kind bis dahin nicht versichert.</p>
+    <p>Zwei Wege sind möglich: Der Verein schließt über das Versicherungsbüro des LSB eine Zusatzversicherung für Nichtmitglieder ab. Oder er legt die Anmeldung vor das erste Training.</p>
+    <p>Dazu gehören die Punkte <a class="konzept-onr" href="#o27">O27</a>, <a class="konzept-onr" href="#o30">O30</a>, <a class="konzept-onr" href="#o31">O31</a> und <span class="konzept-onr">O49</span>.</p>
+  </div>
+    <h3>Vorstand</h3>
+    <div class="tabelle-wrap konzept-tabelle konzept-tabelle--prio" role="region" aria-label="Entscheidungen: Vorstand, mit P1" tabindex="0">
+      <table>
+        <caption class="sr-only">Entscheidungen: Vorstand, mit P1</caption>
+        <thead><tr><th scope="col">Prio · Nr.</th><th scope="col">Entscheidung</th></tr></thead>
+        <tbody>
+        <tr id="o26" data-prio="P1"><td><span class="tag tag--heim">P1</span><br><span class="konzept-onr">O26</span></td><td><p class="konzept-frage">Unterschreibt ein Elternteil, oder müssen beide Eltern unterschreiben?</p><p class="konzept-warum">Für den HFV genügt ein Elternteil, nach Zivilrecht vertreten beide gemeinsam. Der Assistent empfiehlt beide beim Aufnahmeantrag und bei der Erlaubnis für Fotos (Abschnitt 5).</p></td></tr>
+        <tr id="o27" data-prio="P1"><td><span class="tag tag--heim">P1</span><br><span class="konzept-onr">O27</span></td><td><p class="konzept-frage">Wie sichern wir den Unfallschutz beim Probetraining? Schließen wir eine Nichtmitgliederversicherung ab, oder legen wir die Anmeldung vor das erste Training?</p><p class="konzept-warum">Nichtmitglieder haben keinen persönlichen Unfallschutz. Die Website erlaubt heute ein- bis zweimal Probetraining ohne Anmeldung (siehe Kasten).</p></td></tr>
+        <tr id="o28" data-prio="P1"><td><span class="tag tag--heim">P1</span><br><span class="konzept-onr">O28</span></td><td><p class="konzept-frage">Schalten wir das Online-Formular des FCV ab oder leiten wir es um? Wie kommt Karneval in die Satzung?</p><p class="konzept-warum">Zwei Anmeldewege mit unterschiedlichen Regeln laufen parallel, und die Satzung nennt Karneval nicht (Abschnitt 12).</p></td></tr>
+        <tr id="o29" data-prio="P1"><td><span class="tag tag--heim">P1</span><br><span class="konzept-onr">O29</span></td><td><p class="konzept-frage">Melden wir uns zum Fastnachtszug 2027 an?</p><p class="konzept-warum">Meldeschluss beim Großen Rat ist der 30.09.2026. Teilnehmen dürfen nur Mitgliedsvereine.</p></td></tr>
+        <tr id="o30" data-prio="P1"><td><span class="tag tag--heim">P1</span><br><span class="konzept-onr">O30</span></td><td><p class="konzept-frage">Beginnt die Mitgliedschaft am Tag der Anmeldung? Wie berechnen wir den Beitrag im ersten Jahr?</p><p class="konzept-warum">Die Satzung (§ 6) sagt ja. App und Website sagen „zum 1. des nächsten Monats“. Bis dahin ist das Kind kein Mitglied und nicht versichert. Der Aufnahmeantrag nennt bei Eintritt im Jahr nur „das restliche Kalenderjahr“, aber keinen Rechenweg.</p></td></tr>
+        <tr id="o31" data-prio="P1"><td><span class="tag tag--heim">P1</span><br><span class="konzept-onr">O31</span></td><td><p class="konzept-frage">Verzichten wir auf beitragsfreie oder befristete Probemitgliedschaften?</p><p class="konzept-warum">Mitgliedschaften, die schon beim Eintritt auf weniger als 12 Monate angelegt sind, sind nicht versichert. Das gilt auch für eine Mitgliedschaft nur für die Karnevalskampagne.</p></td></tr>
+        <tr id="o66" data-prio="P1"><td><span class="tag tag--heim">P1</span><br><span class="konzept-onr">O66</span></td><td><p class="konzept-frage">Reparieren wir die Weiterleitung der Satzungsadresse im Aufnahmeantrag, oder ändern wir die Adresse im Vordruck?</p><p class="konzept-warum">Die Adresse im Aufnahmeantrag führt ins Leere (Fehler 401, geprüft am 29.09.2026). Die Satzung liegt unter der Download-Adresse der Website. Der Assistent verlinkt dorthin (Abschnitt 5).</p></td></tr>
+        <tr id="o68" data-prio="P1"><td><span class="tag tag--heim">P1</span><br><span class="konzept-onr">O68</span></td><td><p class="konzept-frage">Dürfen Vereinsunterlagen am Bildschirm unterschrieben werden?</p><p class="konzept-warum">Das wäre eine einfache elektronische Unterschrift. Die Form bestimmt der Verein selbst: Die Satzung verlangt Schriftform, nach § 127 BGB kann eine elektronische Übermittlung reichen. HFV-Vordrucke bleiben Stift. Der Laufzettel im PDF bittet den Vorstand, das zu bestätigen (Abschnitt 5).</p></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <details class="konzept-mehr">
+    <summary>Weitere Punkte des Vorstands: 9 (P2 und P3)</summary>
+    <div class="tabelle-wrap konzept-tabelle konzept-tabelle--prio" role="region" aria-label="Entscheidungen: Vorstand, weitere Punkte" tabindex="0">
+      <table>
+        <caption class="sr-only">Entscheidungen: Vorstand, weitere Punkte</caption>
+        <thead><tr><th scope="col">Prio · Nr.</th><th scope="col">Entscheidung</th></tr></thead>
+        <tbody>
+        <tr id="o32" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O32</span></td><td><p class="konzept-frage">Geben wir die HFV-Gebühr an die Familien weiter?</p><p class="konzept-warum">Die Erstausstellung ist gebührenfrei. Ein Wechsel kostet 10 € für Junioren und 25 € für Herren. Die Gebühr zahlt der Verein.</p></td></tr>
+        <tr id="o33" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O33</span></td><td><p class="konzept-frage">Geben wir die Bescheinigung für Bildung und Teilhabe standardmäßig mit?</p><p class="konzept-warum">Bei Grundsicherungsgeld gibt es für Kinder unter 18 pauschal 15 € im Monat für Sport und Verein (§ 28 Abs. 7 SGB II). Bei Wohngeld und Kinderzuschlag gilt dasselbe mit eigenem Antrag (§ 6b BKGG). Das deckt den Kinderbeitrag von 9 € voll. Wie der im Voraus fällige Jahresbeitrag bezahlt wird, ist noch zu klären. <span class="tag tag--warn">offen</span></p></td></tr>
+        <tr id="o34" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O34</span></td><td><p class="konzept-frage">Senatorenmitgliedschaft: Welchen Status und welches Stimmrecht haben Senatoren?</p><p class="konzept-warum">Der Vorstand entscheidet über die Aufnahme als Senator. Die Satzung kennt keine Senatoren. Der Beitrag beträgt 144 € im Jahr.</p></td></tr>
+        <tr id="o35" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O35</span></td><td><p class="konzept-frage">Kostüme im Karneval: Wem gehören sie, was kosten sie, gibt es eine Kaution? Was zahlen Familien noch dazu?</p><p class="konzept-warum">Nebenkosten und Pflichtteile der Garde-Uniform sind offen. Eine Leihvereinbarung ist sinnvoll.</p></td></tr>
+        <tr id="o36" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O36</span></td><td><p class="konzept-frage">Aufsicht bei Abendauftritten, Umkleide und Kostümwechsel: Ergänzen wir das Schutzkonzept für den Karneval? Gilt die Erlaubnis für Auftritte am Abend je Kampagne oder einmalig?</p><p class="konzept-warum">Das Schutzkonzept hat für den Karneval noch keine Regeln. Der Assistent formuliert die Erlaubnis bisher für eine Kampagne.</p></td></tr>
+        <tr id="o52" data-prio="P3"><td><span class="tag tag--auswaerts">P3</span><br><span class="konzept-onr">O52</span></td><td><p class="konzept-frage">Legen wir Ansprechpersonen, Sprachen und Sprechzeiten im Vereinsheim für den Hilfe-Knopf fest?</p><p class="konzept-warum">Die Ansprechpersonen müssen zustimmen. Sprachmittlung über das AmkA ist gegen Entgelt möglich.</p></td></tr>
+        <tr id="o53" data-prio="P3"><td><span class="tag tag--auswaerts">P3</span><br><span class="konzept-onr">O53</span></td><td><p class="konzept-frage">Testen wir den Assistenten mit 3 bis 5 Eltern, die wenig Deutsch sprechen?</p><p class="konzept-warum">Ergebnis: verbesserte Texte und die Sprachauswahl (Abschnitt 13).</p></td></tr>
+        <tr id="o65" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O65</span></td><td><p class="konzept-frage">Erlaubnis für Fotos bei Jugendlichen: Unterschreiben ab 14 oder ab 16 Jahren auch die Jugendlichen selbst?</p><p class="konzept-warum">Es geht um die Einsichtsfähigkeit. Der Assistent lässt bisher nur die Eltern unterschreiben. Der Hinweis dazu ist bis zur Entscheidung entfernt.</p></td></tr>
+        <tr id="o71" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O71</span></td><td><p class="konzept-frage">Wer pflegt Fristen, Beträge und Gebühren im Regelwerk des Assistenten, wenn sich Beitragsordnung oder Verbandsordnungen ändern?</p><p class="konzept-warum">Sie ändern sich: Ab 01.01.2027 gilt ein neues FIFA-Transferreglement (<span class="konzept-onr">O58</span>). Ab 2027/28 spielt die E-Jugend nur noch 6 gegen 6 in Meldeligen (<span class="konzept-onr">O59</span>).</p></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+    <h3>Passwesen (DFBnet und Pass Online)</h3>
+    <div class="tabelle-wrap konzept-tabelle konzept-tabelle--prio" role="region" aria-label="Entscheidungen: Passwesen, mit P1" tabindex="0">
+      <table>
+        <caption class="sr-only">Entscheidungen: Passwesen, mit P1</caption>
+        <thead><tr><th scope="col">Prio · Nr.</th><th scope="col">Entscheidung</th></tr></thead>
+        <tbody>
+        <tr id="o24" data-prio="P1"><td><span class="tag tag--heim">P1</span><br><span class="konzept-onr">O24</span></td><td><p class="konzept-frage">Wer hat die DFBnet-Kennung für Pass Online? Wo liegen die Originale 2 Jahre lang, und wer löscht sie danach?</p><p class="konzept-warum">Über DFBnet reicht der Verein den Antrag auf Spielerlaubnis online ein und lädt das Spielerfoto hoch. Der HFV kann Unterlagen stichprobenartig verlangen. Sie müssen dann binnen 14 Tagen im Original vorliegen.</p></td></tr>
+        <tr id="o25" data-prio="P1"><td><span class="tag tag--heim">P1</span><br><span class="konzept-onr">O25</span></td><td><p class="konzept-frage">Wie kommen die Unterlagen zum Verein, und wer prüft sie auf Vollständigkeit?</p><p class="konzept-warum">Vorschlag: Die Familie gibt die Originale im Verein ab, nicht per WhatsApp. Der Antrag kann erst mit vollständigem, von Hand unterschriebenem Original an den HFV gehen.</p></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <details class="konzept-mehr">
+    <summary>Weitere Punkte des Passwesens: 2 (P2)</summary>
+    <div class="tabelle-wrap konzept-tabelle konzept-tabelle--prio" role="region" aria-label="Entscheidungen: Passwesen, weitere Punkte" tabindex="0">
+      <table>
+        <caption class="sr-only">Entscheidungen: Passwesen, weitere Punkte</caption>
+        <thead><tr><th scope="col">Prio · Nr.</th><th scope="col">Entscheidung</th></tr></thead>
+        <tbody>
+        <tr id="o69" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O69</span></td><td><p class="konzept-frage">Wer im Verein gibt eine Vollmacht für die Abmeldung am selben oder nächsten Tag in DFBnet ein?</p><p class="konzept-warum">Bei der Vollmacht zählt der Tag der Eingabe als Abmeldetag. Jeder Tag Verzögerung verlängert die Wartefrist. Der Assistent bietet sie nur an, wenn die Eingabe am selben oder nächsten Tag klappt.</p></td></tr>
+        <tr id="o70" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O70</span></td><td><p class="konzept-frage">Wer meldet die Jugendspieler namentlich beim Kreisjugendwart, und bis wann?</p><p class="konzept-warum">Das schreibt JO § 7 Nr. 2 vor, und zwar vor dem ersten Pflichtspieltag.</p></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+    <h3>Geschäftsstelle und Kasse</h3>
+    <p>Kein Punkt dieser Liste hat P1.</p>
+    <details class="konzept-mehr">
+    <summary>Punkte für Geschäftsstelle und Kasse: 8 (P2)</summary>
+    <div class="tabelle-wrap konzept-tabelle konzept-tabelle--prio" role="region" aria-label="Entscheidungen: Geschäftsstelle und Kasse, weitere Punkte" tabindex="0">
+      <table>
+        <caption class="sr-only">Entscheidungen: Geschäftsstelle und Kasse, weitere Punkte</caption>
+        <thead><tr><th scope="col">Prio · Nr.</th><th scope="col">Entscheidung</th></tr></thead>
+        <tbody>
+        <tr id="o37" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O37</span></td><td><p class="konzept-frage">Wird die Aufnahmegebühr von 20 € bar oder per Einzug bezahlt? Gilt sie auch im Karneval und für passive Mitglieder?</p><p class="konzept-warum">Der Antrag 2026 zieht sie mit dem ersten Beitrag ein, die Liste von 2021 nennt bar. Die Satzung (§ 16) nennt sie auch für Karneval.</p></td></tr>
+        <tr id="o38" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O38</span></td><td><p class="konzept-frage">Gilt der Zuschlag von 3 € ohne Lastschrift noch?</p><p class="konzept-warum">Er steht im Info-Blatt von 2014, nicht im Aufnahmeantrag 9/2026.</p></td></tr>
+        <tr id="o39" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O39</span></td><td><p class="konzept-frage">Bekommt jede Erlaubnis für die Lastschrift eine eigene Mandatsreferenz? Nehmen wir IBANs aus allen SEPA-Ländern an?</p><p class="konzept-warum">Heute haben alle Mitglieder dieselbe Referenz „Beitrag Sportfreunde 04“, und „DE“ ist im IBAN-Feld vorgedruckt. Ob zum Beispiel türkische IBANs SEPA-fähig sind, ist unbelegt. Die Länderliste des European Payments Council ist zu prüfen. Ausweg: Rechnung oder Überweisung. <span class="tag tag--warn">offen</span></p></td></tr>
+        <tr id="o40" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O40</span></td><td><p class="konzept-frage">Wer gehört zur Familie? Welcher Beitrag gilt bei Doppelmitgliedschaft in Fußball und Karneval? Wie lange gilt der Nachweis für Azubis und Studierende?</p><p class="konzept-warum">Der Antrag sagt nur, ein „gesonderter Beitrag“ sei zu erfragen.</p></td></tr>
+        <tr id="o41" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O41</span></td><td><p class="konzept-frage">Zählt bei der Kündigung bis 31.12. die Absendung oder der Eingang?</p><p class="konzept-warum">Der Austritt geht nur zum Jahresende per Einschreiben. Beim Wechsel darf der alte Verein bis zum Ende seiner Kündigungsfrist Beitrag verlangen, also kann doppelt Beitrag anfallen.</p></td></tr>
+        <tr id="o42" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O42</span></td><td><p class="konzept-frage">Behalten wir das Attest bei Erwachsenen als Vereinsregel? Schaffen wir das Papier-Passbild ab? Wer macht das Spielerfoto, und wer lädt es hoch?</p><p class="konzept-warum">Der HFV verlangt das Attest nur bei Minderjährigen. Er braucht ein digitales Spielerfoto, kein Papierbild. Das Foto muss vor dem Anstoß des ersten Spiels in DFBnet liegen. Im Kreis Frankfurt gilt es 2 Jahre.</p></td></tr>
+        <tr id="o43" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O43</span></td><td><p class="konzept-frage">Formulieren wir den Hinweis zu den 20 € neu?</p><p class="konzept-warum">Die 20 € sind keine HFV-Gebühr, sondern die Aufnahmegebühr des Vereins. Der bisherige Hinweis „20 € für den HFV“ stimmt nicht.</p></td></tr>
+        <tr id="o44" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O44</span></td><td><p class="konzept-frage">Welche Altersgrenzen gelten für die Jugendbeiträge?</p><p class="konzept-warum">Die Satzung nennt das vollendete 18. Lebensjahr. Im Fußball zählt die A-Jugend einschließlich 18-Jähriger, im Karneval gilt „bis 17“.</p></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+    <h3>Datenschutz und Vereinsunterlagen</h3>
+    <div class="tabelle-wrap konzept-tabelle konzept-tabelle--prio" role="region" aria-label="Entscheidungen: Datenschutz und Vereinsunterlagen, mit P1" tabindex="0">
+      <table>
+        <caption class="sr-only">Entscheidungen: Datenschutz und Vereinsunterlagen, mit P1</caption>
+        <thead><tr><th scope="col">Prio · Nr.</th><th scope="col">Entscheidung</th></tr></thead>
+        <tbody>
+        <tr id="o67" data-prio="P1"><td><span class="tag tag--heim">P1</span><br><span class="konzept-onr">O67</span></td><td><p class="konzept-frage">Welche Rechtsgrundlage gilt für die Notfallkontakte ohne Angaben zur Gesundheit: Art. 6 Abs. 1 lit. b oder lit. f DSGVO?</p><p class="konzept-warum">Art. 9 DSGVO (ausdrückliche Einwilligung) passt nur zur Fassung mit Angaben zur Gesundheit. Für die Fassung „nur Notfallkontakte“ braucht die Information zum Datenschutz eine eigene Rechtsgrundlage. Der Entwurf im PDF nennt beide: lit. b für Mitgliedschaft und Fürsorge im Training, lit. f (berechtigtes Interesse) für weitere Kontaktpersonen. Der Vorstand bestätigt die Wahl.</p></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <details class="konzept-mehr">
+    <summary>Punkte zu Datenschutz und Vereinsunterlagen: 5 (P2 und P3)</summary>
+    <div class="tabelle-wrap konzept-tabelle konzept-tabelle--prio" role="region" aria-label="Entscheidungen: Datenschutz und Vereinsunterlagen, weitere Punkte" tabindex="0">
+      <table>
+        <caption class="sr-only">Entscheidungen: Datenschutz und Vereinsunterlagen, weitere Punkte</caption>
+        <thead><tr><th scope="col">Prio · Nr.</th><th scope="col">Entscheidung</th></tr></thead>
+        <tbody>
+        <tr id="o45" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O45</span></td><td><p class="konzept-frage">Schreiben wir die Information zum Datenschutz in Einfacher Sprache, lassen sie übersetzen und vom Vorstand freigeben?</p><p class="konzept-warum">Im PDF tragen die Information zum Datenschutz, alle Einverständnisse und Erlaubnisse die Fußzeile „Entwurf – vom Vorstand zu prüfen“.</p></td></tr>
+        <tr id="o46" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O46</span></td><td><p class="konzept-frage">Legen wir ein Verarbeitungsverzeichnis an, prüfen den Datenschutzbeauftragten und passen Satzung § 23 an?</p><p class="konzept-warum">Wegen der Gesundheitsdaten ist ein Verzeichnis nötig. Satzung § 23 verweist noch auf das BDSG (Abschnitt 9).</p></td></tr>
+        <tr id="o47" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O47</span></td><td><p class="konzept-frage">Stellen wir das Schutzkonzept fertig?</p><p class="konzept-warum">Es hat noch Platzhalter „XXX“, fehlende Anlagen und private Kontaktadressen. Für den Karneval fehlen Regeln.</p></td></tr>
+        <tr id="o48" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O48</span></td><td><p class="konzept-frage">Ersetzen wir Info-Blatt, Unterlagenliste, Zusatzerklärung und den toten Satzungslink?</p><p class="konzept-warum">Sie stammen von 2014 und 2021. Im Info-Blatt muss „ALG II“ ersetzt werden: Laut Bundesagentur für Arbeit heißt das Bürgergeld seit 01.07.2026 Grundsicherungsgeld.</p></td></tr>
+        <tr id="o63" data-prio="P3"><td><span class="tag tag--auswaerts">P3</span><br><span class="konzept-onr">O63</span></td><td><p class="konzept-frage">Ist die Unterschrift zur Kenntnisnahme der Information zum Datenschutz nötig?</p><p class="konzept-warum">Nach Art. 13 DSGVO genügt die Information. Der Assistent sieht eine Unterschrift zur Kenntnisnahme vor.</p></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+    <h3>Weitere Stellen</h3>
+    <p>Kein Punkt dieser Liste hat P1.</p>
+    <details class="konzept-mehr">
+    <summary>Punkte für weitere Stellen: 7 (P2 und P3)</summary>
+    <div class="tabelle-wrap konzept-tabelle konzept-tabelle--prio" role="region" aria-label="Entscheidungen: Weitere Stellen, weitere Punkte" tabindex="0">
+      <table>
+        <caption class="sr-only">Entscheidungen: Weitere Stellen, weitere Punkte</caption>
+        <thead><tr><th scope="col">Prio · Nr.</th><th scope="col">Entscheidung</th></tr></thead>
+        <tbody>
+        <tr id="o49" data-prio="P3"><td><span class="tag tag--auswaerts">P3</span><br><span class="konzept-onr">O49</span></td><td><p class="konzept-frage"><strong>ARAG-Versicherungsbüro und LSB:</strong> Sind Karneval, Nichtmitglieder und neue Mitglieder vom ersten Tag an versichert? Ist die Karnevalabteilung beim LSB angemeldet?</p><p class="konzept-warum">Der Schutz gilt nur, wenn die Abteilung beim LSB angemeldet ist und die Karnevalsmitglieder in der Bestandsmeldung stehen (Abschnitt 12).</p></td></tr>
+        <tr id="o50" data-prio="P3"><td><span class="tag tag--auswaerts">P3</span><br><span class="konzept-onr">O50</span></td><td><p class="konzept-frage"><strong>Kreis Frankfurt:</strong> Wie wird der Jahrgang 2020 zugeordnet, und wie wirkt die Funino-Regel in der F-Jugend?</p><p class="konzept-warum">Der Verein führt den Jahrgang 2020 in der F2, der Kreis in der G-Jugend.</p></td></tr>
+        <tr id="o51" data-prio="P3"><td><span class="tag tag--auswaerts">P3</span><br><span class="konzept-onr">O51</span></td><td><p class="konzept-frage"><strong>Großer Rat und BDK:</strong> Mitgliedschaft der Abteilung und Turnierfragen.</p><p class="konzept-warum">Davon hängen Tanzausweis und Zustimmung zu Aufnahmen bei Turnieren ab (Abschnitt 12).</p></td></tr>
+        <tr id="o54" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O54</span></td><td><p class="konzept-frage"><strong>Jugendleitung:</strong> Was sagt der Assistent Familien mit Kindern der Jahrgänge 2010 bis 2013?</p><p class="konzept-warum">Für sie gibt es 2026/27 keine B- oder C-Jugend. Mädchen können bis zur C-Jugend ein Jahr älter sein und in Jungenteams spielen.</p></td></tr>
+        <tr id="o58" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O58</span></td><td><p class="konzept-frage"><strong>Regelwerk:</strong> Neues FIFA-Transferreglement ab 01.01.2027: Regeln für internationale Wechsel neu prüfen.</p><p class="konzept-warum">Eine Kanzleimeldung nennt einen Freigabeschein in 5 Tagen. Das ist nicht an der FIFA-Quelle geprüft.</p></td></tr>
+        <tr id="o59" data-prio="P2"><td><span class="tag">P2</span><br><span class="konzept-onr">O59</span></td><td><p class="konzept-frage"><strong>Regelwerk:</strong> Ab 2027/28 spielt die E-Jugend nur noch 6 gegen 6 in Meldeligen: Wartefrist-Regeln für die E-Jugend neu prüfen.</p><p class="konzept-warum">Die heutigen Regeln gelten für 2026/27, wenn die E-Jugend Punktspiele spielt.</p></td></tr>
+        <tr id="o64" data-prio="P3"><td><span class="tag tag--auswaerts">P3</span><br><span class="konzept-onr">O64</span></td><td><p class="konzept-frage"><strong>Gesundheitsamt Frankfurt:</strong> Gibt es ein kostenloses Attest für Kinder mit Frankfurt-Pass oder Grundsicherungsgeld?</p><p class="konzept-warum">Die Seite war nicht prüfbar. Der Assistent nennt das deshalb nicht.</p></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+    <p class="meta">Die Punkte der Karnevalabteilung (O55 bis O57) stehen in <a href="#karneval">Abschnitt 12</a>, die Fragen an den HFV in <a href="#hfv-fragen">Abschnitt 11</a>.</p>
+    <p class="meta"><a href="#verzeichnis">Zum Inhaltsverzeichnis</a></p>
+  </div>
+</section>
+<section class="abschnitt abschnitt--kompakt" id="hfv-fragen" aria-labelledby="hfv-fragen-titel">
+  <div class="container fluss prosa konzept">
+    <h2 id="hfv-fragen-titel">11. Was wir beim HFV (Passstelle) fragen sollten</h2>
+    <p>Die Fragen gehen schriftlich über das E-Postfach des Vereins in DFBnet an die Passstelle. Die Familie schreibt nie selbst an den HFV. Die Status-Hotline der Passstelle endet am 30.09.2026.</p>
+    <p>Bis die Antworten da sind, zeigt der Assistent die betroffenen Punkte als offen. Die P1-Fragen sollten vor dem Livegang beantwortet sein. Jede Frage trägt ihre Nummer aus dem Regelwerk.</p>
+    <h3>P1: vor dem Livegang klären (19)</h3>
+    <ul class="konzept-oliste">
+    <li id="o01" data-prio="P1"><span class="konzept-oliste__nr"><span class="konzept-onr">O01</span></span> <span class="konzept-oliste__text">Reicht ein Scan oder eine digitale Unterschrift, oder muss das Papier-Original mit Stift vorliegen? Darf der Verein rein digital archivieren?</span></li>
+    <li id="o02" data-prio="P1"><span class="konzept-oliste__nr"><span class="konzept-onr">O02</span></span> <span class="konzept-oliste__text">Sind die Zusatzerklärung „To Player's Parents“ und die Länderformulare (USA, Mexiko, Argentinien, Brasilien, Balkan) noch nötig?</span></li>
+    <li id="o03" data-prio="P1"><span class="konzept-oliste__nr"><span class="konzept-onr">O03</span></span> <span class="konzept-oliste__text">Brauchen Nichtdeutsche unter 10 Jahren Ausweis und Meldebescheinigung? Zählt für die Grenze von 10 Jahren das Alter am Tag des Antrags?</span></li>
+    <li id="o04" data-prio="P1"><span class="konzept-oliste__nr"><span class="konzept-onr">O04</span></span> <span class="konzept-oliste__text">Sind beim Wechsel innerhalb Hessens Meldebescheinigung und Attest für Nichtdeutsche von 10 bis 17 Jahren wirklich nötig? Das Formular sagt ja, die Präsentation 2026 nennt sie nicht.</span></li>
+    <li id="o05" data-prio="P1"><span class="konzept-oliste__nr"><span class="konzept-onr">O05</span></span> <span class="konzept-oliste__text">Braucht es beim Wechsel deutscher Minderjähriger Geburtsurkunde und Attest? Der Wortlaut von JO § 9 Nr. 1 und das Formular widersprechen sich.</span></li>
+    <li id="o06" data-prio="P1"><span class="konzept-oliste__nr"><span class="konzept-onr">O06</span></span> <span class="konzept-oliste__text">Attest: Wie alt darf es höchstens sein? Welchen Inhalt muss es haben? Welche Rechtsgrundlage gilt für die Verarbeitung (Art. 9 DSGVO)? Werden Atteste aus dem Ausland angenommen?</span></li>
+    <li id="o08" data-prio="P1"><span class="konzept-oliste__nr"><span class="konzept-onr">O08</span></span> <span class="konzept-oliste__text">Welche Wartefrist gilt für den jüngeren D-Jahrgang: 6 Monate (HFV-JO) oder höchstens 3 Monate (DFB-JO § 3 Nr. 3 b)?</span></li>
+    <li id="o09" data-prio="P1"><span class="konzept-oliste__nr"><span class="konzept-onr">O09</span></span> <span class="konzept-oliste__text">Doppelstaatler mit deutschem Pass: Welche Staatsangehörigkeit wird im Verbandssystem eingetragen? Müssen ausländische Urkunden übersetzt werden?</span></li>
+    <li id="o10" data-prio="P1"><span class="konzept-oliste__nr"><span class="konzept-onr">O10</span></span> <span class="konzept-oliste__text">Deutscher Ausweis bei einem internationalen Wechsel oder bei Rückkehrern: Darf der Verein die Kopie hochladen, obwohl § 20 PAuswG die Weitergabe verbietet? Reicht die Bestätigung, dass der Verein das Original gesehen hat?</span></li>
+    <li id="o11" data-prio="P1"><span class="konzept-oliste__nr"><span class="konzept-onr">O11</span></span> <span class="konzept-oliste__text">Genügt ein Elternteil als Unterschrift, oder müssen beide unterschreiben? Muss ein kleines Kind selbst auf der Zeile „Spieler“ unterschreiben?</span></li>
+    <li id="o12" data-prio="P1"><span class="konzept-oliste__nr"><span class="konzept-onr">O12</span></span> <span class="konzept-oliste__text">Welche Nachweise braucht es bei Vormund, Pflegefamilie, Verwandten und unbegleiteten Geflüchteten?</span></li>
+    <li id="o13" data-prio="P1"><span class="konzept-oliste__nr"><span class="konzept-onr">O13</span></span> <span class="konzept-oliste__text">Wie lange dauert die Bearbeitung, national und international? Gibt es ein Mindestalter für die G-Jugend?</span></li>
+    <li id="o14" data-prio="P1"><span class="konzept-oliste__nr"><span class="konzept-onr">O14</span></span> <span class="konzept-oliste__text">Reicht eine Meldebescheinigung mit nur einem Elternteil, zum Beispiel bei Alleinerziehenden oder wenn ein Elternteil im Ausland lebt? Wie alt darf die Bescheinigung sein?</span></li>
+    <li id="o15" data-prio="P1"><span class="konzept-oliste__nr"><span class="konzept-onr">O15</span></span> <span class="konzept-oliste__text">Welche Nachweise braucht es genau bei geflüchteten Kindern ohne Eltern, Austauschschülern und Kindern bei Verwandten?</span></li>
+    <li id="o16" data-prio="P1"><span class="konzept-oliste__nr"><span class="konzept-onr">O16</span></span> <span class="konzept-oliste__text">Gilt die Grenze „10. Lebensjahr“ ab dem 9. oder ab dem 10. Geburtstag?</span></li>
+    <li id="o17" data-prio="P1"><span class="konzept-oliste__nr"><span class="konzept-onr">O17</span></span> <span class="konzept-oliste__text">Welche Nachweise braucht es bei Nichtdeutschen unter 10 Jahren für die Prüfung nach FIFA Art. 19 Abs. 6?</span></li>
+    <li id="o18" data-prio="P1"><span class="konzept-oliste__nr"><span class="konzept-onr">O18</span></span> <span class="konzept-oliste__text">Geht die Vollmacht für die Abmeldung auch beim Wechsel aus einem anderen Landesverband?</span></li>
+    <li id="o20" data-prio="P1"><span class="konzept-oliste__nr"><span class="konzept-onr">O20</span></span> <span class="konzept-oliste__text">A-Junioren unter 18 bei den Herren: Genügt ein Arzt, oder braucht es einen vom Verband anerkannten Sportarzt (DFB-JO § 6 Nr. 2)?</span></li>
+    <li id="o62" data-prio="P1"><span class="konzept-oliste__nr"><span class="konzept-onr">O62</span></span> <span class="konzept-oliste__text">Deutsche Rückkehrer ab 10 Jahren: Gilt „zuletzt Wohnsitz im Ausland“ auch, wenn das Kind seit vielen Jahren wieder in Deutschland lebt? Der Assistent löst das internationale Verfahren aus, sobald „im Ausland gewohnt“ mit Ja beantwortet wird.</span></li>
+  </ul>
+    <details class="konzept-mehr">
+    <summary>Weitere Fragen: 7 (P2)</summary>
+    <ul class="konzept-oliste">
+    <li id="o07" data-prio="P2"><span class="konzept-oliste__nr"><span class="konzept-onr">O07</span></span> <span class="konzept-oliste__text"><strong>Weitgehend geklärt.</strong> Die Vollmacht für die Abmeldung ist außerhalb des Junis nutzbar, mit den normalen Wartefristen. Folie 4 der Präsentation 2026 ist mehrdeutig. Bitte kurz bestätigen lassen.</span></li>
+    <li id="o19" data-prio="P2"><span class="konzept-oliste__nr"><span class="konzept-onr">O19</span></span> <span class="konzept-oliste__text">Ist ein Spielerfoto mit religiöser Kopfbedeckung zulässig, wenn das Gesicht frei ist?</span></li>
+    <li id="o21" data-prio="P2"><span class="konzept-oliste__nr"><span class="konzept-onr">O21</span></span> <span class="konzept-oliste__text">Wie läuft das Sonderspielrecht für Frauen bei den Herren nach SpO § 109a ab, mit welchem Formular? Wird das Pilotprojekt verlängert?</span></li>
+    <li id="o22" data-prio="P2"><span class="konzept-oliste__nr"><span class="konzept-onr">O22</span></span> <span class="konzept-oliste__text">Wechsel von Herren aus einem anderen Landesverband: 20 Tage (DFB) oder 30 Tage (HFV), bis die Abmeldung als ordnungsgemäß gilt?</span></li>
+    <li id="o23" data-prio="P2"><span class="konzept-oliste__nr"><span class="konzept-onr">O23</span></span> <span class="konzept-oliste__text">Gilt für Altersgrenzen der Tag der Anmeldung oder der Tag des Antragseingangs beim Verband?</span></li>
+    <li id="o60" data-prio="P2"><span class="konzept-oliste__nr"><span class="konzept-onr">O60</span></span> <span class="konzept-oliste__text">Wartefrist nach Monaten: Die Passstelle rechnet „Abmeldedatum plus Monate plus 1 Tag“ (Folie 16). Die JO rechnet nach den Regeln des BGB (Beginn am Tag nach der Abmeldung). Beide Wege unterscheiden sich am Monatsende um einen Tag. Der Assistent nimmt den späteren Tag.</span></li>
+    <li id="o61" data-prio="P2"><span class="konzept-oliste__nr"><span class="konzept-onr">O61</span></span> <span class="konzept-oliste__text">Wegfall der Wartefrist nach mehr als 6 Monaten ohne Pflichtspiel: Der Assistent rechnet nur, wenn der Zeitraum am Tag des Antrags schon vorbei ist. Darf der Verein den Antrag später stellen, um die Wartefrist zu vermeiden?</span></li>
+  </ul>
+  </details>
+    <p class="meta"><a href="#verzeichnis">Zum Inhaltsverzeichnis</a></p>
+  </div>
+</section>
+<section class="abschnitt abschnitt--kompakt abschnitt--hell" id="karneval" aria-labelledby="karneval-titel">
+  <div class="container fluss prosa konzept">
+    <h2 id="karneval-titel">12. Karneval – KA Schnauzer</h2>
+    <p>KA Schnauzer steht für die Karnevalabteilung „Die Schnauzer“ des Vereins. Für sie gibt es keine HFV-Unterlagen. Dafür sind mehrere Punkte offen.</p>
+    <h3>Eilige Termine</h3>
+    <div class="tabelle-wrap konzept-tabelle konzept-tabelle--datum" role="region" aria-label="Eilige Termine im Karneval" tabindex="0">
+      <table>
+        <caption class="sr-only">Eilige Termine im Karneval</caption>
+        <thead><tr><th scope="col">Datum</th><th scope="col">Was</th></tr></thead>
+        <tbody>
+        <tr><td><strong>30.09.2026</strong></td><td>Meldeschluss für den Großen Frankfurter Fastnachtszug 2027 beim Großen Rat. Teilnehmen dürfen nur Mitgliedsvereine (<span class="konzept-onr">O29</span>).</td></tr>
+        <tr><td><strong>31.10.2026</strong></td><td>Meldeschluss beim Großen Rat für das Kindertanzfest (20.02.2027, nur bis 12 Jahre) und das Tanzfestival (21.02.2027).</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Was belegt ist</h3>
+    <div class="tabelle-wrap konzept-tabelle konzept-tabelle--breit konzept-tabelle--label" role="region" aria-label="Karneval: was belegt ist" tabindex="0">
+      <table>
+        <caption class="sr-only">Karneval: was belegt ist</caption>
+        <thead><tr><th scope="col">Thema</th><th scope="col">Stand</th></tr></thead>
+        <tbody>
+        <tr><td><strong>Anmeldung</strong></td><td>Derselbe Aufnahmeantrag, Kreuz bei „Karnevalabteilung“.</td></tr>
+        <tr><td><strong>Beiträge pro Jahr</strong></td><td>Kinder und Jugendliche bis 17: 108 €. Azubis und Studierende mit Nachweis: 108 €. Erwachsene: 120 €. Rentner ab 65: 84 €. Familie: 180 €. Senatoren: 144 €. Eine Gruppe „Passive/Frauen“ gibt es im Karneval nicht.</td></tr>
+        <tr><td><strong>HFV-Unterlagen und Attest</strong></td><td>Nicht nötig. Weder BDK (Bund Deutscher Karneval) noch RKK noch der Große Rat verlangen ein Attest. Bei Turnieren gibt es einen Turnierarzt. Ein freiwilliger Notfall- und Gesundheitsbogen ist trotzdem sinnvoll.</td></tr>
+        <tr><td><strong>Versicherung</strong></td><td>Mitglieder sind beim satzungsgemäßen Vereinsbetrieb versichert. Voraussetzung: Die Abteilung ist beim LSB angemeldet, und die Karnevalsmitglieder stehen in der Bestandsmeldung. Wer nur schnuppert, ist nicht versichert. Eine Mitgliedschaft „nur für die Kampagne“ wäre es auch nicht.</td></tr>
+        <tr><td><strong>Jugendschutz</strong></td><td>Bei Brauchtumsveranstaltungen dürfen Kinder bis 22 Uhr, Jugendliche unter 16 bis 24 Uhr auch ohne Begleitung bleiben (§ 5 JuSchG). Sinnvoll: die Erlaubnis für Auftritte am Abend. Darin übertragen die Eltern die Aufsicht an eine erwachsene Person (Erziehungsbeauftragung). Jugendliche sollten einen Ausweis dabeihaben (§ 2 JuSchG). Das Jugendarbeitsschutzgesetz greift nur bei Auftritten gegen Gage. Dann braucht es eine Bewilligung beim Regierungspräsidium Darmstadt.</td></tr>
+        <tr><td><strong>Turniere</strong></td><td>Großer Rat (Turnierordnung 06/2026): nur Mitgliedsvereine. Junioren 12 bis 15 Jahre, Hauptklasse ab 16, es zählt das Alter am Turniertag. Mindestens 4 Tänzer. Jede Tänzerin startet nur für einen Verein. Bei der Passkontrolle braucht jedes Kind einen Personal-, Kinder-, Schüler- oder Tanzausweis. BDK: nur mit Mitgliedschaft über die IGMK, mit Tanzturnierausweis und schriftlicher Zustimmung zu Aufnahmen. RKK: Tanzausweis für 5 € plus Versand, mit Passfoto.</td></tr>
+        <tr><td><strong>Fastnachtszug</strong></td><td>Nur Mitgliedsvereine des Großen Rats dürfen teilnehmen. Mit der Teilnahme willigt man in Bild- und Tonaufnahmen ein (Zugordnung Nr. 9.3). Das gehört in die Elterninformation. Bei Kindergruppen müssen genug erwachsene Aufsichtspersonen mitgehen.</td></tr>
+        <tr><td><strong>Schutzkonzept</strong></td><td>Es gilt für alle Trainer und Betreuer (erweitertes Führungszeugnis).</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Zwei Anmeldewege stehen parallel online</h3>
+    <div class="hinweis hinweis--offen inhalt fluss konzept-box">
+    <p>Neben der FFV-Abteilung gibt es den Verein „Frankfurter Carneval Verein ‚Die Schnauzer‘ e.V.“ (FCV). Er ist nach eigener Angabe im Vereinsregister eingetragen (Amtsgericht Frankfurt, VR 8286). Den Registerstand haben wir nicht geprüft. Der FCV hat eine eigene Satzung (21. Oktober 2018) und ein aktives Online-Formular mit anderen Regeln.</p>
+    <p>Die Regeln des FCV-Formulars: Beiträge von 0 bis 111 €, Aufnahmegebühr 5 € oder 50 €, Probezeit 3 Monate, Geschäftsjahr vom 1. April bis 31. März.</p>
+    <p>Der Große Rat führt in seiner aktuellen Vereinsliste unter Nr. 52 die FFV-Abteilung. 2025 stand diese Nummer noch beim FCV. Das spricht für einen Übergang. Belegt ist er nicht. Der Große Rat nennt außerdem die FCV-Website als Adresse der Abteilung.</p>
+    <p><strong>Folge:</strong> Das FCV-Formular abschalten oder auf den Assistenten umleiten (<a class="konzept-onr" href="#o28">O28</a>). Eigene Ableitung, nicht belegt: Bisherige FCV-Mitglieder brauchen einen Aufnahmeantrag des FFV und eine neue Erlaubnis für die Lastschrift, weil ein anderer Gläubiger abbucht. <span class="tag tag--warn">offen</span></p>
+  </div>
+    <h3>Karneval steht nicht ausdrücklich in der Satzung</h3>
+    <div class="hinweis hinweis--offen inhalt fluss konzept-box">
+    <p>Die FFV-Satzung (15. März 2024) nennt Sport sowie Kunst und Kultur. Karneval ist ein eigener gemeinnütziger Zweck (§ 52 Abs. 2 Nr. 23 AO). Die Satzung des Großen Rats (§ 3 Nr. 2a, 8. Oktober 2018) verlangt, dass der Mitgliedsverein das Brauchtum in seiner Satzung verankert.</p>
+    <p>Das berührt die Mitgliedschaft im Großen Rat, den Versicherungsschutz und die Gemeinnützigkeit. Ob es eine neuere Satzung gibt, ist zu klären (<a class="konzept-onr" href="#o28">O28</a>). <span class="tag tag--warn">offen</span></p>
+  </div>
+    <h3>Was offen ist</h3>
+    <ul class="konzept-oliste">
+    <li><span class="konzept-oliste__nr"><a class="konzept-onr" href="#o28">O28</a></span> <span class="konzept-oliste__text">Wie hängen der FCV und die FFV-Abteilung rechtlich zusammen? Was passiert mit den FCV-Mitgliedern? Kommt Karneval in die Satzung?</span></li>
+    <li><span class="konzept-oliste__nr"><span class="konzept-onr">O49</span></span> <span class="konzept-oliste__text">Ist die Abteilung beim LSB gemeldet? Den Versicherungsschutz für Sitzungen, Auswärtsauftritte und den Zug beim ARAG-Versicherungsbüro bestätigen lassen.</span></li>
+    <li id="o57" data-prio="P3"><span class="konzept-oliste__nr"><span class="konzept-onr">O57</span></span> <span class="konzept-oliste__text">Probetraining und Schnuppern regeln. Die Website widerspricht sich hier: Eine Seite sagt „Probetraining (nur Fußball)“, eine andere verweist zum Schnuppern an die Abteilung.</span></li>
+    <li id="o55" data-prio="P2"><span class="konzept-oliste__nr"><span class="konzept-onr">O55</span></span> <span class="konzept-oliste__text">Gruppen und Altersgrenzen: Laut FCV-Seite (Stand 2024) sind Little Fruities ab 4, Freaky Fruities 8 bis 16, Flying Fruities ab 16, Dreamboys und Pfläumchen ab 18. Aktuell gibt es fünf Gruppen. Der Verein muss die Grenzen bestätigen.</span></li>
+    <li><span class="konzept-oliste__nr"><span class="konzept-onr">O35</span></span> <span class="konzept-oliste__text">Kostüme: Wem gehören sie, was kosten sie, gibt es eine Kaution? Dazu Nebenkosten und Pflichtteile der Garde-Uniform. Eine Leihvereinbarung ist sinnvoll.</span></li>
+    <li id="o56" data-prio="P3"><span class="konzept-oliste__nr"><span class="konzept-onr">O56</span> <span class="konzept-onr">O51</span></span> <span class="konzept-oliste__text">Welche Turniere und Mitgliedschaften (BDK, IGMK)? Davon hängen Tanzausweis, Passfoto und Turnier-Einwilligung ab. Ist die Gruppe „Freaky Fruities“ bis 16 oder bis 15 Jahre?</span></li>
+    <li><span class="konzept-oliste__nr"><span class="konzept-onr">O36</span></span> <span class="konzept-oliste__text">Aufsicht bei Abendauftritten, Umkleide und Kostümwechsel: Das Schutzkonzept braucht dafür Regeln für den Karneval.</span></li>
+    <li><span class="konzept-oliste__nr"><span class="konzept-onr">O34</span></span> <span class="konzept-oliste__text">Senatorenmitgliedschaft: Status und Stimmrecht. Die FFV-Satzung kennt keine Senatoren.</span></li>
+    <li><span class="konzept-oliste__nr"><span class="konzept-onr">O37</span> <span class="konzept-onr">O40</span></span> <span class="konzept-oliste__text">Gilt die Aufnahmegebühr von 20 € auch für Karneval? Und wie gelten der Beitrag bei Doppelmitgliedschaft, der Familienbeitrag über beide Abteilungen und der Nachweis für Azubis und Studierende?</span></li>
+  </ul>
+    <p class="meta"><a href="#verzeichnis">Zum Inhaltsverzeichnis</a></p>
+  </div>
+</section>
+<section class="abschnitt abschnitt--kompakt" id="einfuehrung" aria-labelledby="einfuehrung-titel">
+  <div class="container fluss prosa konzept">
+    <h2 id="einfuehrung-titel">13. Einführung in Schritten</h2>
+    <p>Die Einführung geht in fünf Schritten. Jeder Schritt baut auf dem vorigen auf.</p>
+    <ol class="schritte">
+      <li>
+        <div class="schritt__inhalt">
+          <p><strong>Prototyp durchgehen</strong></p>
+          <p>Die 1. Vorsitzende und die Jugendleitung gehen den <a href="../anmeldung/">Prototyp</a> mit den Beispielfällen durch. Der Knopf „Vorführung“ öffnet die Beispiele. Ergebnis: Rückmeldungen zu Ablauf und Ton.</p>
+        </div>
+      </li>
+      <li>
+        <div class="schritt__inhalt">
+          <p><strong>Fragen und Entscheidungen klären</strong></p>
+          <p>Die Fragen an die Passstelle (<a href="#hfv-fragen">Abschnitt 11</a>) gehen über das E-Postfach des Vereins raus. Der Vorstand entscheidet die P1-Punkte (<a href="#entscheiden">Abschnitt 10</a>).</p>
+        </div>
+      </li>
+      <li>
+        <div class="schritt__inhalt">
+          <p><strong>Texte prüfen und testen</strong></p>
+          <p>Muttersprachler lesen Texte und Übersetzungen gegen. 3 bis 5 Eltern, die wenig Deutsch sprechen, testen den Assistenten (<span class="konzept-onr">O53</span>). Ergebnis: verbesserte Texte und die Sprachauswahl.</p>
+        </div>
+      </li>
+      <li>
+        <div class="schritt__inhalt">
+          <p><strong>Einbau auf Website und in der App</strong></p>
+          <p>Der Assistent kommt auf die Website und in die App, in beiden gleich. Der automatische Versand läuft über die IONOS-Annahme des Vereins. Sie ist gebaut und geprüft und wartet auf den IONOS-Zugang. Für das größere PDF des Assistenten muss sie noch angepasst werden. Der Versand von Ausweisen und Attesten ist zu klären (<a href="#datenschutz">Abschnitt 9</a>).</p>
+        </div>
+      </li>
+      <li>
+        <div class="schritt__inhalt">
+          <p><strong>Vereinsunterlagen aktualisieren</strong></p>
+          <p>Info-Blatt, Unterlagenliste und Zusatzerklärung werden ersetzt (<span class="konzept-onr">O48</span>). Die Satzungsadresse im Aufnahmeantrag wird repariert oder geändert (<a class="konzept-onr" href="#o66">O66</a>). Im Info-Blatt steht statt „ALG II“ das Grundsicherungsgeld.</p>
+        </div>
+      </li>
+    </ol>
+    <p>Die Website und die App in der aktuellen Fassung bleiben bis zum Livegang unverändert. Der Prototyp liegt nur auf dieser Testseite.</p>
+    <p class="meta"><a href="#verzeichnis">Zum Inhaltsverzeichnis</a></p>
+  </div>
+</section>
+<section class="abschnitt abschnitt--kompakt abschnitt--hell" id="quellen" aria-labelledby="quellen-titel">
+  <div class="container fluss prosa konzept">
+    <h2 id="quellen-titel">14. Quellen mit Stand</h2>
+    <p>Alle Quellen sind mit ihrem Stand genannt. Quellen anderer Landesverbände gelten in Hessen nicht. Sie zeigen nur, wie andere es machen.</p>
+    <h3>HFV und Kreis Frankfurt</h3>
+    <ul class="konzept-liste konzept-quellen">
+    <li>Jugendordnung (JO), letzte Änderung 1. Juli 2026</li>
+    <li>Spielordnung (SpO), 6. Juli 2026</li>
+    <li>Strafordnung, 1. Juli 2026</li>
+    <li>Antrag auf Spielerlaubnis / Vereinswechsel, PDF vom 12./16. Juni 2026</li>
+    <li>Vordrucke: Vollmacht stellvertretende Abmeldung (16. Mai 2024), Abmeldung bei Verein per Einschreiben (18. April 2024), nachträgliche Freigabe (04/2024), Einverständnis gesetzlicher Vertreter (10. Juni 2025)</li>
+    <li>Passstelle: Infoveranstaltung Wechselperiode I am 27./28. Mai 2026, Präsentation vom 12. Juni 2026</li>
+    <li>Finanz-, Beitrags- und Gebührenordnung § 7, 13. September 2025</li>
+    <li>Durchführungsbestimmungen G/F/E 2026/27, 10. Juli 2026, und Stichtage Junioren und Juniorinnen 2026/27, 12. Juni 2026</li>
+    <li>Kreisjugendausschuss Frankfurt 2026/27, 9. August 2026</li>
+    <li>Nutzungsbedingungen Pass Online; Information zum Datenschutz des HFV, 20. Januar 2026</li>
+    <li>Seiten „Passstelle“ und „Antragstellung“, abgerufen 29. September 2026</li>
+    <li>Ältere Hilfen (Fristen darin überholt): Tipps zur Antragstellung 5. Mai 2019, internationale Anträge 23. Januar 2019, Fußball mit Flüchtlingen 17. März 2022</li>
+  </ul>
+    <h3>DFB, DFBnet und FIFA</h3>
+    <ul class="konzept-liste konzept-quellen">
+    <li>DFB-Jugendordnung, 21. August 2026; DFB-Spielordnung, 1. Juli 2026</li>
+    <li>DFB-Übersichten zu Art. 19 (19a, 19e, 19.3), 8. Dezember 2025 und 15. Juli 2026</li>
+    <li>DFB-Seiten „Transfers von Minderjährigen“ und „Internationale Transfers“, abgerufen 29. September 2026</li>
+    <li>DFB: Information zum Datenschutz, 15. April 2024</li>
+    <li>DFBnet: Leitfaden Spielerfotos (5. Juli 2020), Online-Hilfe Pass Online (ohne Datum), Handbuch 2009</li>
+    <li>FIFA-Reglement zum Status und Transfer von Spielern (RSTP), Ausgabe Juli 2025 (Art. 1, 9, 19, Anhänge 3 und 7). Das neue RSTP gilt ab 1. Januar 2027 (beschlossen am 10. Juni 2026)</li>
+    <li>DFB-Broschüren „Willkommen im Verein!“ (2015) und „Im Fußball zu Hause!“ (2016)</li>
+  </ul>
+    <h3>Gesetze (gesetze-im-internet.de, abgerufen 29. September 2026)</h3>
+    <ul class="konzept-liste konzept-quellen">
+    <li>BGB §§ 107, 126, 127, 832, 1629, 1687, 1688, 1797</li>
+    <li>PAuswG § 20; PassG § 18; StAG § 4; BMG § 18</li>
+    <li>JuSchG §§ 1, 2, 4, 5; JArbSchG §§ 1, 6; KUG §§ 22, 23</li>
+    <li>DSGVO Art. 5, 6, 7, 9, 12, 13, 30; BDSG § 38; eIDAS Art. 25</li>
+    <li>SGB II §§ 19, 28, 37; BKGG §§ 6b, 9; AO § 52</li>
+  </ul>
+    <h3>Datenschutz und Versicherung</h3>
+    <ul class="konzept-liste konzept-quellen">
+    <li>HBDI (Hessischer Beauftragter für Datenschutz und Informationsfreiheit): Handreichung „Datenschutz im Verein“, 21. November 2024</li>
+    <li>Datenschutzkonferenz: Orientierungshilfe E-Mail, 16. Juni 2021</li>
+    <li>BfDI: Datenschutz beim Personalausweis, abgerufen 29. September 2026</li>
+    <li>Stiftung Datenschutz: Praxisratgeber Gesundheitsdaten (ohne Datum)</li>
+    <li>LSB Hessen: Muster-Datenschutzordnung, 09/2019</li>
+    <li>ARAG-Merkblatt Sportversicherung LSB Hessen, Stand 1. Januar 2026</li>
+    <li>Bundesärztekammer: GOÄ-Ratgeber (2010); Bundestag, hib-Meldung vom 24. September 2025</li>
+    <li>Stadt Frankfurt, Gesundheitsamt: Attest für Sportverein (abgerufen 29. September 2026). Die Seite war nicht prüfbar, die Angaben sind nicht bestätigt.</li>
+  </ul>
+    <h3>Karneval</h3>
+    <ul class="konzept-liste konzept-quellen">
+    <li>Großer Rat: Vereinsliste, Zugordnung (6. Dezember 2017), Satzung (8. Oktober 2018), Tanzturnierordnung (06/2026), Ausschreibungen 2027 (08/2026)</li>
+    <li>BDK-Tanzturnierordnung vom 21. September 2019; RKK-Richtlinien 01-2023; IGMK-Satzung vom 23. September 2018</li>
+    <li>FCV-Satzung vom 21. Oktober 2018 und FCV-Formular „Mitglied werden“ (Seite 2024)</li>
+  </ul>
+    <h3>Verein</h3>
+    <ul class="konzept-liste konzept-quellen">
+    <li>Aufnahmeantrag 9/2026 (PDF vom 31. August 2026); Beitragsübersicht, 4. September 2026</li>
+    <li>Satzung, ausgestellt 15. März 2024 (PDF vom 4. Februar 2025)</li>
+    <li>Info-Blatt, 8. Januar 2014; Unterlagenliste, 14. Juni 2021; Zusatzerklärung, 8. Januar 2014</li>
+    <li>Schutzkonzept, Stand Mai 2025</li>
+    <li>Vereinsdaten (Mannschaften, Unterlagen, Karneval), Stand 22. bis 28. September 2026</li>
+    <li>Regelwerk des Anmelde-Assistenten (Prototyp), Version 2026-09-29.2, mit den offenen Punkten O01 bis O71</li>
+  </ul>
+    <h3>Einfache Sprache und Statistik</h3>
+    <ul class="konzept-liste konzept-quellen">
+    <li>DIN SPEC 33429:2025-03; Servicestandard des Bundes, 2. September 2025</li>
+    <li>BITV 2.0, Anlage 2; BFIT-Handreichung vom 22. September 2026</li>
+    <li>GOV.UK Design System; WCAG 2.2 vom 12. Dezember 2024; W3C Internationalization</li>
+    <li>Stadt Frankfurt, Statistik aktuell 05/2026 (Stichtag 31. Dezember 2025); Statistikportal Frankfurt, Tabelle „Migrationshintergrund (Stadtteile)“ (Stichtag 31. Dezember 2025, abgerufen 29. September 2026)</li>
+    <li>BAMF, Integrationskursgeschäftsstatistik 2025; LEO-Studie 2018; DOSB-Meldung zur Sportwörterbuch-App, 1. März 2026</li>
+  </ul>
+    <h3>Sekundärquellen und andere Landesverbände (nur ergänzend, für Hessen nicht maßgeblich)</h3>
+    <ul class="konzept-liste konzept-quellen">
+    <li>Hamburger FV: Leitfaden 7. Oktober 2025, Hinweis zum internationalen Vereinswechsel 27. April 2022</li>
+    <li>SWFV-Handbuch, 7. Juli 2026; NFV-Antrag 06/2024; Bremer FV, Beschlüsse des Verbandstags vom 20. Juni 2026</li>
+    <li>FV Rheinland; SFV-Formular 01/2026; Rhein Main Verlag, 3. April 2024; Kanzlei Withers, 29. Juni 2026</li>
+    <li>Beispiel-Aufnahmeantrag eines anderen Vereins (ab 2024)</li>
+  </ul>
+    <p class="meta"><a href="#verzeichnis">Zum Inhaltsverzeichnis</a></p>
+  </div>
+</section>
+</main>
+<footer class="ws-fuss"><p>Begleitmaterial für den Vorstand, nicht Teil der Website · Stand Mittwoch, 30. September 2026</p></footer>
+</body>
+</html>

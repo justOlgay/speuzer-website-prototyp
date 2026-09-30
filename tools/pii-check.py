@@ -55,20 +55,46 @@ WHITELIST_TELEFON = {
     "069732193",
 }
 
+# Anmelde-Assistent (29.09.2026): Die Bundesnetzagentur hält diese Rufnummern für Medien dauerhaft frei
+# („Drama Numbers“, Mitteilung 148/2021, Amtsblatt 07/2021). Beispiele und Testdaten dürfen sie
+# verwenden, weil sie nie einer Person zugeteilt werden.
+DRAMA_BEREICHE = (
+    ("03023125", 3), ("06990009", 3), ("04066969", 3), ("02214710", 3), ("08999998", 3),  # Ortsnetze, je 000–999
+    ("0176040690", 2), ("017139200", 2),                                               # Mobilfunk, je 00–99
+)
+DRAMA_EINZELN = {"015228817386", "015228895456", "015254599371", "01729925904", "01729968532",
+                 "01729973185", "01729973186", "01729980752", "01749091317", "01749464308"}
+
+
+def ist_drama_nummer(text):
+    ziffern = re.sub(r"\D", "", text)
+    if text.strip().startswith("+49") or ziffern.startswith("0049"):
+        # internationale Schreibweise, auch „+49 (0) 176 …“
+        ziffern = "0" + ziffern[4 if ziffern.startswith("0049") else 2:].lstrip("0")
+    if ziffern in DRAMA_EINZELN:
+        return True
+    return any(ziffern.startswith(p) and len(ziffern) == len(p) + n for p, n in DRAMA_BEREICHE)
+
+
 MUSTER_TELEFON_1 = re.compile(r"\+49[\d /()\-]{6,}")
 MUSTER_TELEFON_2 = re.compile(r"\b0\d{2,5}[ /\-]?\d{3,}\b")
 MUSTER_IBAN = re.compile(r"\bDE\d{2}\s?\d{4}")
 MUSTER_GEBURTSDATUM = re.compile(r"\b\d{2}\.\d{2}\.(19\d{2}|20[01]\d|202[0-4])\b")
 MUSTER_EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
 
-ERLAUBTE_EMAIL_DOMAINS = ("sportfreunde04.de",)
+# example.org/.com/.net sind für Beispiele reserviert (RFC 2606, RFC 6761) und gehören niemandem;
+# die Beispiele des Anmelde-Assistenten (assets/js/anmeldung/beispiele.js) verwenden sie (29.09.2026).
+ERLAUBTE_EMAIL_DOMAINS = ("sportfreunde04.de", "example.org", "example.com", "example.net")
 # "ffvsportfreunde04@t-online.de" (P8): die eigene, alte Kontaktadresse des
 # Vereins aus der App-Datenschutzerklärung (data/datenschutz.json, Abschnitt
 # "1. Begrifflichkeiten" – "Für die Verarbeitung Verantwortliche Stelle").
 # Wörtlich übernommen wie im Original, siehe Plan-Abschnitt B2: keine private
 # Adresse, sondern die Vereinsadresse (nur auf einer anderen Domain als
 # @sportfreunde04.de).
-ERLAUBTE_EMAIL_ADRESSEN = {"info@vmapit.de", "ffvsportfreunde04@t-online.de"}
+# "datenschutz@hfv-online.de": öffentliche Datenschutz-Adresse des Hessischen
+# Fußball-Verbands, genannt in der Datenschutzinformation des
+# Anmelde-Assistenten (assets/js/anmeldung/pdf.js). Keine Privatperson.
+ERLAUBTE_EMAIL_ADRESSEN = {"info@vmapit.de", "ffvsportfreunde04@t-online.de", "datenschutz@hfv-online.de"}
 
 VERBOTENE_DATEINAMEN_TEILE = ["WhatsApp", "IMG-2026", "IMG-2025", "IMG-2024"]
 
@@ -108,7 +134,7 @@ def pruefe_zeile(pfad_rel, zeilennr, zeile, treffer):
 
     for m in MUSTER_TELEFON_1.finditer(zeile):
         text = m.group().strip()
-        if text not in WHITELIST_TELEFON:
+        if text not in WHITELIST_TELEFON and not ist_drama_nummer(text):
             treffer.append((pfad_rel, zeilennr, f"Telefonmuster (+49): '{text}'"))
 
     for m in MUSTER_TELEFON_2.finditer(zeile):
@@ -121,7 +147,7 @@ def pruefe_zeile(pfad_rel, zeilennr, zeile, treffer):
         vorheriges_zeichen = zeile[m.start() - 1] if m.start() > 0 else ""
         if vorheriges_zeichen == "#":
             continue
-        if text not in WHITELIST_TELEFON:
+        if text not in WHITELIST_TELEFON and not ist_drama_nummer(text):
             treffer.append((pfad_rel, zeilennr, f"Telefonmuster (0…): '{text}'"))
 
     for m in MUSTER_IBAN.finditer(zeile):
@@ -131,7 +157,8 @@ def pruefe_zeile(pfad_rel, zeilennr, zeile, treffer):
         treffer.append((pfad_rel, zeilennr, f"geburtsdatumsähnliche Angabe: '{m.group()}'"))
 
     for m in MUSTER_EMAIL.finditer(zeile):
-        adresse = m.group()
+        # Satzzeichen am Ende gehören nicht zur Adresse („… an info@x.de.“).
+        adresse = m.group().rstrip(".-")
         domain = adresse.split("@", 1)[1].lower() if "@" in adresse else ""
         erlaubt = adresse.lower() in ERLAUBTE_EMAIL_ADRESSEN or any(
             domain == d or domain.endswith("." + d) for d in ERLAUBTE_EMAIL_DOMAINS

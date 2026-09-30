@@ -1,0 +1,2301 @@
+{
+  "stand": "2026-09-29",
+  "version": "2026-09-29.2",
+  "hinweis": "Regelwerk des Anmelde-Assistenten. Alle Zahlen und Fristen stehen hier; regeln.js enthält die Logik. Nichts hier enthält Personendaten.",
+  "saison": "2026/27",
+  "quellenStand": [
+    {
+      "quelle": "HFV-Jugendordnung (JO)",
+      "stand": "2026-07-01",
+      "art": "primaer"
+    },
+    {
+      "quelle": "HFV-Spielordnung (SpO)",
+      "stand": "2026-07-06",
+      "art": "primaer"
+    },
+    {
+      "quelle": "HFV-Formular Antrag auf Spielerlaubnis / Vereinswechsel (PDF)",
+      "stand": "2026-06-16",
+      "art": "primaer"
+    },
+    {
+      "quelle": "HFV-Vordruck Vollmacht zur stellvertretenden Abmeldung",
+      "stand": "2024-05-16",
+      "art": "primaer"
+    },
+    {
+      "quelle": "HFV-Vordruck Abmeldung bei Verein per Einschreiben",
+      "stand": "2024-04-18",
+      "art": "primaer"
+    },
+    {
+      "quelle": "HFV-Vordruck Nachträgliche Freigabe",
+      "stand": "2024-04",
+      "art": "primaer"
+    },
+    {
+      "quelle": "HFV-Vordruck Einverständnis des gesetzlichen Vertreters (Seniorenspielrecht)",
+      "stand": "2025-06-10",
+      "art": "primaer"
+    },
+    {
+      "quelle": "HFV-Passstelle, Infoveranstaltung Wechselperiode I 2026/27 (Folien)",
+      "stand": "2026-06-12",
+      "art": "primaer"
+    },
+    {
+      "quelle": "HFV-Finanz-, Beitrags- und Gebührenordnung § 7",
+      "stand": "2025-09-13",
+      "art": "primaer"
+    },
+    {
+      "quelle": "HFV-Datenschutzinformation zum Spielrechtsantrag",
+      "stand": "2026-01-20",
+      "art": "primaer"
+    },
+    {
+      "quelle": "Kreisjugendausschuss Frankfurt, Durchführungsbestimmungen 2026/27",
+      "stand": "2026-08-09",
+      "art": "primaer"
+    },
+    {
+      "quelle": "HFV-Durchführungsbestimmungen G-, F- und E-Junioren 2026/27",
+      "stand": "2026-07-10",
+      "art": "primaer"
+    },
+    {
+      "quelle": "HFV-Stichtage Junioren und Juniorinnen 2026/27",
+      "stand": "2026-06-12",
+      "art": "primaer"
+    },
+    {
+      "quelle": "DFB-Jugendordnung",
+      "stand": "2026-08-21",
+      "art": "primaer"
+    },
+    {
+      "quelle": "DFB-Spielordnung",
+      "stand": "2026-07-01",
+      "art": "primaer"
+    },
+    {
+      "quelle": "DFB-Übersichten zu FIFA RSTP Art. 19 (Nr. 2 a bis 3)",
+      "stand": "2026-07-15",
+      "art": "primaer"
+    },
+    {
+      "quelle": "DFB-Seite Internationale Transfers und Transfers von Minderjährigen",
+      "stand": "2026-09-29 (abgerufen)",
+      "art": "primaer"
+    },
+    {
+      "quelle": "FIFA-Reglement bezüglich Status und Transfer von Spielern (RSTP)",
+      "stand": "2025-07",
+      "art": "primaer"
+    },
+    {
+      "quelle": "DFBnet-Leitfaden Spielerfotos",
+      "stand": "2020-07-05",
+      "art": "primaer"
+    },
+    {
+      "quelle": "Aufnahmeantrag FFV Sportfreunde 04",
+      "stand": "2026-09",
+      "art": "primaer"
+    },
+    {
+      "quelle": "Beitragsübersicht FFV Sportfreunde 04",
+      "stand": "2026-09-04",
+      "art": "primaer"
+    },
+    {
+      "quelle": "Satzung FFV Sportfreunde 04 (ausgestellt)",
+      "stand": "2024-03-15",
+      "art": "primaer"
+    },
+    {
+      "quelle": "Schutzkonzept FFV Sportfreunde 04",
+      "stand": "2025-05",
+      "art": "primaer"
+    },
+    {
+      "quelle": "Info-Blatt zur Anmeldung FFV Sportfreunde 04",
+      "stand": "2014-01-08",
+      "art": "veraltet"
+    },
+    {
+      "quelle": "Unterlagenliste FFV Sportfreunde 04",
+      "stand": "2021-06-14",
+      "art": "veraltet"
+    },
+    {
+      "quelle": "Zusatzerklärung für Spieler zwischen 12 und 18 Jahren FFV Sportfreunde 04",
+      "stand": "2014-01-08",
+      "art": "veraltet"
+    },
+    {
+      "quelle": "ARAG-Merkblatt Sportversicherung LSB Hessen",
+      "stand": "2026-01-01",
+      "art": "primaer"
+    },
+    {
+      "quelle": "Gesetze: BGB §§ 187, 188, 1629, 1687, 1688, 1797; SGB II §§ 19, 28, 37; PAuswG § 20; PassG § 18; JuSchG §§ 1, 2, 4, 5; DSGVO Art. 6, 7, 9, 12, 13; BDSG § 38; eIDAS Art. 25",
+      "stand": "2026-09-29 (abgerufen)",
+      "art": "primaer"
+    },
+    {
+      "quelle": "Großer Rat Frankfurt, Tanzturnierordnung",
+      "stand": "2026-06",
+      "art": "primaer"
+    },
+    {
+      "quelle": "BDK-Tanzturnierordnung",
+      "stand": "2019-09-21",
+      "art": "primaer"
+    },
+    {
+      "quelle": "RKK-Richtlinien",
+      "stand": "2023-01",
+      "art": "primaer"
+    },
+    {
+      "quelle": "Internetseite Frankfurter Carneval Verein Die Schnauzer (Gruppen und Altersangaben)",
+      "stand": "2024-10-20",
+      "art": "sekundaer"
+    },
+    {
+      "quelle": "Karnevalabteilung FFV, Übungszeiten laut Abteilung",
+      "stand": "2026-09-25",
+      "art": "primaer"
+    },
+    {
+      "quelle": "Recherche Anmelde-Assistent: Synthese und Vollständigkeitsprüfung",
+      "stand": "2026-09-29",
+      "art": "intern"
+    }
+  ],
+  "altersklassen": {
+    "spieljahr": "2026/27",
+    "stichtag": "Die Altersklasse richtet sich nach dem Geburtsjahr. Ein Jahrgang bleibt im ganzen Spieljahr (1. Juli 2026 bis 30. Juni 2027) in derselben Altersklasse.",
+    "alterStichtag": "Für das Alter (zum Beispiel unter 18, ab 10 Jahren) zählt der Tag der Anmeldung. Ob der Verband denselben Tag nimmt, ist offen (Frage an die Passstelle).",
+    "quelle": "HFV-Jugendordnung §§ 11 und 14, Stand 2026-07-01; Kreisjugendausschuss Frankfurt, Durchführungsbestimmungen 2026/27 (Altersklasseneinteilung), Stand 2026-08-09",
+    "klassen": [
+      {
+        "klasse": "G",
+        "name": "G-Jugend (Bambini)",
+        "von": 2020,
+        "bis": null,
+        "aeltererJahrgang": null
+      },
+      {
+        "klasse": "F",
+        "name": "F-Jugend",
+        "von": 2018,
+        "bis": 2019,
+        "aeltererJahrgang": 2018
+      },
+      {
+        "klasse": "E",
+        "name": "E-Jugend",
+        "von": 2016,
+        "bis": 2017,
+        "aeltererJahrgang": 2016
+      },
+      {
+        "klasse": "D",
+        "name": "D-Jugend",
+        "von": 2014,
+        "bis": 2015,
+        "aeltererJahrgang": 2014
+      },
+      {
+        "klasse": "C",
+        "name": "C-Jugend",
+        "von": 2012,
+        "bis": 2013,
+        "aeltererJahrgang": 2012
+      },
+      {
+        "klasse": "B",
+        "name": "B-Jugend",
+        "von": 2010,
+        "bis": 2011,
+        "aeltererJahrgang": 2010
+      },
+      {
+        "klasse": "A",
+        "name": "A-Jugend",
+        "von": 2008,
+        "bis": 2009,
+        "aeltererJahrgang": 2008
+      },
+      {
+        "klasse": "Herren",
+        "name": "Herren",
+        "von": null,
+        "bis": 2007,
+        "aeltererJahrgang": null
+      }
+    ],
+    "maedchenImJungenteam": {
+      "hoechsteKlasse": "B",
+      "einJahrAelterBisKlasse": "C",
+      "einverstaendnisKlassen": [
+        "B",
+        "C"
+      ],
+      "quelle": "HFV-Jugendordnung § 14 Nr. 6, Stand 2026-07-01"
+    }
+  },
+  "mannschaften": [
+    {
+      "slug": "herren",
+      "name": "1. Herrenmannschaft",
+      "kurz": "Herren",
+      "klasse": "Herren",
+      "jahrgaenge": [],
+      "jahrgangAb": null,
+      "jahrgangBis": 2007
+    },
+    {
+      "slug": "a-jugend",
+      "name": "A-Jugend",
+      "kurz": "A-Jugend",
+      "klasse": "A",
+      "jahrgaenge": [
+        2008,
+        2009
+      ],
+      "jahrgangAb": null,
+      "jahrgangBis": null
+    },
+    {
+      "slug": "d1",
+      "name": "D1-Jugend",
+      "kurz": "D1",
+      "klasse": "D",
+      "jahrgaenge": [
+        2014
+      ],
+      "jahrgangAb": null,
+      "jahrgangBis": null
+    },
+    {
+      "slug": "d2",
+      "name": "D2-Jugend",
+      "kurz": "D2",
+      "klasse": "D",
+      "jahrgaenge": [
+        2015
+      ],
+      "jahrgangAb": null,
+      "jahrgangBis": null
+    },
+    {
+      "slug": "d3",
+      "name": "D3-Jugend",
+      "kurz": "D3",
+      "klasse": "D",
+      "jahrgaenge": [
+        2014,
+        2015
+      ],
+      "jahrgangAb": null,
+      "jahrgangBis": null
+    },
+    {
+      "slug": "e1",
+      "name": "E1-Jugend",
+      "kurz": "E1",
+      "klasse": "E",
+      "jahrgaenge": [
+        2016
+      ],
+      "jahrgangAb": null,
+      "jahrgangBis": null
+    },
+    {
+      "slug": "e2",
+      "name": "E2-Jugend",
+      "kurz": "E2",
+      "klasse": "E",
+      "jahrgaenge": [
+        2017
+      ],
+      "jahrgangAb": null,
+      "jahrgangBis": null
+    },
+    {
+      "slug": "e3",
+      "name": "E3-Jugend",
+      "kurz": "E3",
+      "klasse": "E",
+      "jahrgaenge": [
+        2016,
+        2017
+      ],
+      "jahrgangAb": null,
+      "jahrgangBis": null
+    },
+    {
+      "slug": "f1",
+      "name": "F1-Jugend",
+      "kurz": "F1",
+      "klasse": "F",
+      "jahrgaenge": [
+        2018
+      ],
+      "jahrgangAb": null,
+      "jahrgangBis": null
+    },
+    {
+      "slug": "f2",
+      "name": "F2-Jugend",
+      "kurz": "F2",
+      "klasse": "F",
+      "jahrgaenge": [
+        2019,
+        2020
+      ],
+      "jahrgangAb": null,
+      "jahrgangBis": null
+    },
+    {
+      "slug": "g-jugend",
+      "name": "G-Jugend (Bambinis)",
+      "kurz": "G-Jugend",
+      "klasse": "G",
+      "jahrgaenge": [],
+      "jahrgangAb": 2021,
+      "jahrgangBis": null
+    }
+  ],
+  "karnevalGruppen": [
+    {
+      "name": "Little Fruities",
+      "altersVon": 4,
+      "altersBis": 7,
+      "quelle": "Internetseite FCV Die Schnauzer, Stand 2024-10-20 (Sekundärquelle, nicht durch die Abteilung bestätigt); Obergrenze abgeleitet, weil die Freaky Fruities ab 8 beginnen",
+      "bestaetigt": false
+    },
+    {
+      "name": "Freaky Fruities",
+      "altersVon": 8,
+      "altersBis": 16,
+      "quelle": "Internetseite FCV Die Schnauzer, Stand 2024-10-20 (Sekundärquelle, nicht durch die Abteilung bestätigt)",
+      "bestaetigt": false
+    },
+    {
+      "name": "Flying Fruities",
+      "altersVon": 16,
+      "altersBis": null,
+      "quelle": "Internetseite FCV Die Schnauzer, Stand 2024-10-20 (Sekundärquelle, nicht durch die Abteilung bestätigt)",
+      "bestaetigt": false
+    },
+    {
+      "name": "Pfläumchen",
+      "altersVon": 18,
+      "altersBis": null,
+      "quelle": "Internetseite FCV Die Schnauzer, Stand 2024-10-20 (Sekundärquelle, nicht durch die Abteilung bestätigt)",
+      "bestaetigt": false
+    },
+    {
+      "name": "Dreamboys",
+      "altersVon": 18,
+      "altersBis": null,
+      "quelle": "Internetseite FCV Die Schnauzer, Stand 2024-10-20 (Sekundärquelle, nicht durch die Abteilung bestätigt)",
+      "bestaetigt": false
+    }
+  ],
+  "beitragsgruppen": {
+    "fussball_jugend": {
+      "abteilung": "fussball",
+      "bezeichnung": "Kinder und Jugendliche (Fußball, mit A-Jugend)",
+      "jahr": 108,
+      "monat": 9,
+      "aufnahmeantragFeld": "s1.fussball.jugendlicher",
+      "quelle": "Aufnahmeantrag FFV und Beitragsübersicht, Stand 2026-09"
+    },
+    "fussball_erwachsene": {
+      "abteilung": "fussball",
+      "bezeichnung": "Erwachsene (Fußball)",
+      "jahr": 120,
+      "monat": 10,
+      "aufnahmeantragFeld": "s1.fussball.erwachsener",
+      "quelle": "Aufnahmeantrag FFV und Beitragsübersicht, Stand 2026-09"
+    },
+    "fussball_passiv": {
+      "abteilung": "fussball",
+      "bezeichnung": "Passive, Frauen und Rentner ab 65 (Fußball)",
+      "jahr": 84,
+      "monat": 7,
+      "aufnahmeantragFeld": "s1.fussball.passiv",
+      "quelle": "Aufnahmeantrag FFV und Beitragsübersicht, Stand 2026-09"
+    },
+    "fussball_familie": {
+      "abteilung": "fussball",
+      "bezeichnung": "Familienbeitrag (Fußball)",
+      "jahr": 180,
+      "monat": 15,
+      "aufnahmeantragFeld": "s1.fussball.familie",
+      "quelle": "Aufnahmeantrag FFV und Beitragsübersicht, Stand 2026-09"
+    },
+    "karneval_kinder": {
+      "abteilung": "karneval",
+      "bezeichnung": "Kinder und Jugendliche (Karneval)",
+      "jahr": 108,
+      "monat": 9,
+      "aufnahmeantragFeld": "s1.karneval.kinder",
+      "quelle": "Aufnahmeantrag FFV und Beitragsübersicht, Stand 2026-09"
+    },
+    "karneval_azubi": {
+      "abteilung": "karneval",
+      "bezeichnung": "Auszubildende und Studierende mit Nachweis (Karneval)",
+      "jahr": 108,
+      "monat": 9,
+      "aufnahmeantragFeld": "s1.karneval.azubi",
+      "quelle": "Aufnahmeantrag FFV und Beitragsübersicht, Stand 2026-09"
+    },
+    "karneval_erwachsene": {
+      "abteilung": "karneval",
+      "bezeichnung": "Erwachsene (Karneval)",
+      "jahr": 120,
+      "monat": 10,
+      "aufnahmeantragFeld": "s1.karneval.erwachsener",
+      "quelle": "Aufnahmeantrag FFV und Beitragsübersicht, Stand 2026-09"
+    },
+    "karneval_rentner": {
+      "abteilung": "karneval",
+      "bezeichnung": "Rentner ab 65 (Karneval)",
+      "jahr": 84,
+      "monat": 7,
+      "aufnahmeantragFeld": "s1.karneval.rentner",
+      "quelle": "Aufnahmeantrag FFV und Beitragsübersicht, Stand 2026-09"
+    },
+    "karneval_familie": {
+      "abteilung": "karneval",
+      "bezeichnung": "Familienbeitrag (Karneval)",
+      "jahr": 180,
+      "monat": 15,
+      "aufnahmeantragFeld": "s1.karneval.familie",
+      "quelle": "Aufnahmeantrag FFV und Beitragsübersicht, Stand 2026-09"
+    },
+    "karneval_senator": {
+      "abteilung": "karneval",
+      "bezeichnung": "Senatorenmitgliedschaft (Karneval)",
+      "jahr": 144,
+      "monat": null,
+      "aufnahmeantragFeld": "s1.karneval.senator",
+      "quelle": "Aufnahmeantrag FFV und Beitragsübersicht, Stand 2026-09",
+      "hinweis": "Der Vorstand entscheidet über die Aufnahme als Senator. Die Satzung kennt Senatoren nicht."
+    }
+  },
+  "beitragInfo": {
+    "aufnahmegebuehr": 20,
+    "zuschlagOhneSepa": 3,
+    "zuschlagOhneSepaBemerkung": "Der Zuschlag steht nur im Info-Blatt von 2014. Der Vorstand muss ihn bestätigen.",
+    "teilhabePauschaleMonat": 15,
+    "faelligkeit": "jährlich zum 1. Januar im Voraus, Abbuchung im ersten Quartal; bei Eintritt im Jahr anteilig mit der Aufnahme",
+    "kuendigung": "nur zum Ende eines Kalenderjahres, per Einschreiben an die Postanschrift",
+    "mitgliedschaftBeginn": "offen",
+    "quelle": "Aufnahmeantrag FFV und Beitragsübersicht, Stand 2026-09; SGB II § 28 Abs. 7 (15 Euro im Monat bis 18 Jahre); Info-Blatt FFV, Stand 2014-01-08"
+  },
+  "unterlagen": {
+    "U01": {
+      "titel": "Aufnahmeantrag des Vereins (Seiten 1 und 2)",
+      "art": "pflicht",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "formular_im_pdf",
+      "formular": "aufnahmeantrag",
+      "nachweis": false,
+      "bedingung": "Immer. Ohne Mitgliedschaft gibt es keine Spielberechtigung. Bei Minderjährigen unterschreiben die Sorgeberechtigten.",
+      "quelle": "Aufnahmeantrag FFV, Stand 2026-09; Satzung FFV § 6; HFV-Jugendordnung §§ 3 und 9 Nr. 1, Stand 2026-07-01"
+    },
+    "U02": {
+      "titel": "Liste der Familienmitglieder",
+      "art": "verein",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "formular_im_pdf",
+      "formular": "familienliste",
+      "nachweis": false,
+      "bedingung": "Wenn der Familienbeitrag gewählt ist oder Familienmitglieder angegeben sind.",
+      "quelle": "Aufnahmeantrag FFV Seite 2, Stand 2026-09"
+    },
+    "U03": {
+      "titel": "Nachweis über Ausbildung oder Studium",
+      "art": "verein",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "foto_oder_datei",
+      "formular": null,
+      "nachweis": true,
+      "bedingung": "Karneval mit Beitragsgruppe Auszubildende und Studierende. Wie lange der Nachweis gilt, ist offen.",
+      "quelle": "Aufnahmeantrag FFV Seite 1, Stand 2026-09"
+    },
+    "U04": {
+      "titel": "Foto-Einwilligung des Vereins",
+      "art": "freiwillig",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "formular_im_pdf",
+      "formular": "aufnahmeantrag",
+      "nachweis": false,
+      "bedingung": "Immer angeboten. Die Einwilligung ist freiwillig und jederzeit widerrufbar.",
+      "quelle": "Aufnahmeantrag FFV Seite 3, Stand 2026-09; DSGVO Art. 6 Abs. 1 lit. a und Art. 7"
+    },
+    "U05": {
+      "titel": "SEPA-Lastschriftmandat",
+      "art": "verein",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "formular_im_pdf",
+      "formular": "aufnahmeantrag",
+      "nachweis": false,
+      "bedingung": "Wenn der Beitrag per Lastschrift gezahlt wird. Das Konto gehört oft einer anderen Person als dem Mitglied.",
+      "quelle": "Aufnahmeantrag FFV Seite 4, Stand 2026-09"
+    },
+    "U06": {
+      "titel": "Datenschutzinformation nach Artikel 13",
+      "art": "pflicht",
+      "wer": "verein",
+      "wann": "anmeldung",
+      "form": "formular_im_pdf",
+      "formular": "datenschutz",
+      "nachweis": false,
+      "bedingung": "Immer. Der Verein muss bei der Datenerhebung informieren.",
+      "quelle": "DSGVO Art. 12 und 13; HFV-Datenschutzinformation zum Spielrechtsantrag, Stand 2026-01-20"
+    },
+    "U07": {
+      "titel": "HFV-Antrag auf Spielerlaubnis (Seiten 1 und 2)",
+      "art": "pflicht",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "formular_im_pdf",
+      "formular": "hfv_antrag",
+      "nachweis": false,
+      "bedingung": "Fußball mit Teilnahme an Spielen, Turnieren oder Festivals. Bei Kindern nur Training: erst später.",
+      "quelle": "HFV-Formular Antrag auf Spielerlaubnis, PDF Stand 2026-06-16; HFV-Spielordnung § 92, Stand 2026-07-06; HFV-Jugendordnung § 37 Nr. 2, Stand 2026-07-01; Kreis Frankfurt: Spieler ohne Spielrecht dürfen auch nicht in Freundschaftsspielen spielen (Durchführungsbestimmungen 2026/27)"
+    },
+    "U08": {
+      "titel": "HFV-Einwilligungen a und b (Name und Foto im Internet)",
+      "art": "freiwillig",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "formular_im_pdf",
+      "formular": "hfv_antrag",
+      "nachweis": false,
+      "bedingung": "Fußball mit Spielrecht. Einwilligung a (Name) nur unter 16 Jahren nötig, Einwilligung b (Foto) für alle.",
+      "quelle": "HFV-Formular Antrag auf Spielerlaubnis Seite 3, PDF Stand 2026-06-16"
+    },
+    "U09": {
+      "titel": "Kopie der Geburtsurkunde",
+      "art": "pflicht",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "foto_oder_datei",
+      "formular": null,
+      "nachweis": true,
+      "bedingung": "Erstanmeldung Minderjähriger und internationale Fälle Minderjähriger. Beim Wechsel Minderjähriger offen (Wortlaut JO § 9 und Formular widersprechen sich).",
+      "quelle": "HFV-Jugendordnung § 9 Nr. 1, Stand 2026-07-01; HFV-Antrag Seite 2, PDF Stand 2026-06-16; HFV-Passstelle Folien 41 und 44, Stand 2026-06-12"
+    },
+    "U10": {
+      "titel": "Ärztliche Unbedenklichkeitsbescheinigung (Attest)",
+      "art": "pflicht",
+      "wer": "arzt",
+      "wann": "anmeldung",
+      "form": "formular_im_pdf",
+      "formular": "attest",
+      "nachweis": true,
+      "bedingung": "Erstanmeldung Minderjähriger; internationale Fälle Minderjähriger; Wechsel von Nichtdeutschen von 10 bis 17 (beim Inlandswechsel offen); Juniorinnen unter 18; A-Jugend unter 18 bei den Herren. Erwachsene nur als Vereinsregel. Höchstalter des Attests offen.",
+      "quelle": "HFV-Jugendordnung §§ 9 Nr. 1 und 29 Nr. 5, Stand 2026-07-01; HFV-Spielordnung § 110, Stand 2026-07-06; HFV-Antrag Seite 2, PDF Stand 2026-06-16"
+    },
+    "U11": {
+      "titel": "Einwilligung zur Verarbeitung des Attests",
+      "art": "verein",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "formular_im_pdf",
+      "formular": "attest",
+      "nachweis": false,
+      "bedingung": "Überall dort, wo ein Attest verlangt wird. Auch beim Wechsel Minderjähriger, wo das Attest selbst noch offen ist (U10), sobald die Familie ein Attest hat und abgibt (Nachweis U10 auf \"habe\"). Das Attest ist ein Gesundheitsdatum (Art. 9 DSGVO). Die Rechtsgrundlage des Verbands ist offen.",
+      "quelle": "DSGVO Art. 9; Stiftung Datenschutz, Praxisratgeber Gesundheitsdaten (ohne Datum)"
+    },
+    "U12": {
+      "titel": "Kopie eines Lichtbildausweises",
+      "art": "pflicht",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "foto_oder_datei",
+      "formular": null,
+      "nachweis": true,
+      "bedingung": "Nichtdeutsche: neu von 10 bis 17, beim Wechsel jedes Alters, Erwachsene international; unter 10 offen. Nach Wechsel aus dem Ausland auch für Deutsche (dann offen, weil deutsche Ausweise nicht kopiert werden sollen). Nicht von deutschen Kindern verlangen.",
+      "quelle": "HFV-Antrag Seite 2, PDF Stand 2026-06-16; HFV-Passstelle Folien 38 bis 44, Stand 2026-06-12; PAuswG § 20 Abs. 2 und PassG § 18 Abs. 3"
+    },
+    "U13": {
+      "titel": "Meldebescheinigung (gemeinsamer Wohnsitz mit den Eltern)",
+      "art": "pflicht",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "foto_oder_datei",
+      "formular": null,
+      "nachweis": true,
+      "bedingung": "Minderjährige in internationalen Fällen; Nichtdeutsche von 10 bis 17 (beim Inlandswechsel offen); Nichtdeutsche unter 10 offen. Ob ein Elternteil reicht, ist offen.",
+      "quelle": "HFV-Antrag Seite 2, PDF Stand 2026-06-16; HFV-Passstelle Folien 41 und 44, Stand 2026-06-12"
+    },
+    "U14": {
+      "titel": "Angaben zum Verein im Ausland",
+      "art": "pflicht",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "formular_im_pdf",
+      "formular": "hfv_antrag",
+      "nachweis": false,
+      "bedingung": "Wechsel aus dem Ausland mit bekanntem Verein: Name, Ort, Land, Verband, letztes Spiel.",
+      "quelle": "HFV-Spielordnung §§ 99 und 106, Stand 2026-07-06; HFV-Antrag Seite 1, PDF Stand 2026-06-16"
+    },
+    "U15": {
+      "titel": "Zusatzangaben für das Verbandssystem (Geburtsort, letzter Wohnort)",
+      "art": "pflicht",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "nichts",
+      "formular": null,
+      "nachweis": false,
+      "bedingung": "Fußball mit Spielrecht: Geburtsort ist Pflichtfeld. Bei Nichtdeutschen und Rückkehrern auch Land und Stadt des letzten Wohnorts.",
+      "quelle": "DFBnet-Online-Hilfe Pass Online (ohne Datum); HFV-Passstelle Folie 42, Stand 2026-06-12"
+    },
+    "U16": {
+      "titel": "Digitales Spielerfoto",
+      "art": "pflicht",
+      "wer": "familie",
+      "wann": "vor_erstem_spiel",
+      "form": "foto_oder_datei",
+      "formular": null,
+      "nachweis": false,
+      "bedingung": "Fußball mit Spielrecht. Spätestens bis zum Anstoß des ersten Spiels. Bei jedem Wechsel neu, im Kreis Frankfurt nach 2 Jahren erneuern.",
+      "quelle": "HFV-Jugendordnung § 9 Nr. 2, Stand 2026-07-01; Kreisjugendausschuss Frankfurt, Durchführungsbestimmungen 2026/27, Stand 2026-08-09; DFBnet-Leitfaden Spielerfotos, Stand 2020-07-05"
+    },
+    "U17": {
+      "titel": "Abmeldung beim alten Verein per Einschreiben (mit Einlieferungsbeleg)",
+      "art": "pflicht",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "formular_im_pdf",
+      "formular": "abmeldung",
+      "nachweis": true,
+      "bedingung": "Wechsel innerhalb Deutschlands, wenn nicht mit Vollmacht abgemeldet wird: HFV-Vordruck Abmeldung bei Verein (Kästchen Spielberechtigung; dazu Mitgliedschaft oder passiv je nach Antwort). Nach dem letzten Spiel. Einschreiben national oder mit Rückschein, kein Einwurf-Einschreiben. Ist die Abmeldung schon erledigt, zählt der Einlieferungsbeleg als Nachweis.",
+      "quelle": "HFV-Spielordnung § 94 Nr. 1 b, Stand 2026-07-06; HFV-Vordruck Abmeldung bei Verein per Einschreiben, Stand 2024-04-18; HFV-Passstelle Folie 5, Stand 2026-06-12"
+    },
+    "U18": {
+      "titel": "Vollmacht zur stellvertretenden Abmeldung",
+      "art": "nur_wenn",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "formular_im_pdf",
+      "formular": "vollmacht",
+      "nachweis": false,
+      "bedingung": "Wechsel innerhalb des HFV, wenn die Familie die Vollmacht statt des Einschreibens wählt. Ganzjährig nutzbar; die kurze Wartefrist gibt es nur im Juni. Der Verein muss am selben oder nächsten Tag eingeben. Beim Wechsel aus einem anderen Landesverband nur nach Rückfrage (dann offen). Die Mitgliedschaft im alten Verein endet damit nicht (siehe U19).",
+      "quelle": "HFV-Spielordnung § 92 Nr. 2, Stand 2026-07-06; HFV-Vordruck Vollmacht, Stand 2024-05-16; HFV-Passstelle Folien 4 bis 6, Stand 2026-06-12"
+    },
+    "U19": {
+      "titel": "Kündigung der Mitgliedschaft im alten Verein (oder passiv bleiben)",
+      "art": "nur_wenn",
+      "wer": "familie",
+      "wann": "spaeter",
+      "form": "formular_im_pdf",
+      "formular": "abmeldung",
+      "nachweis": false,
+      "bedingung": "Wechsel innerhalb Deutschlands, wenn die Mitgliedschaft im alten Verein gekündigt werden soll oder die Person dort passives Mitglied bleibt (Kästchen im HFV-Vordruck Abmeldung bei Verein). Die Abmeldung vom Spielen beendet die Mitgliedschaft nicht. Bei Minderjährigen unterschreibt der gesetzliche Vertreter. Weiß die Familie das nicht, ist die Unterlage offen und ohne Formular.",
+      "quelle": "HFV-Jugendordnung § 3 Nr. 2, Stand 2026-07-01; HFV-Vordruck Abmeldung bei Verein per Einschreiben, Stand 2024-04-18; HFV-Vordruck Vollmacht, Stand 2024-05-16; HFV-Spielordnung § 93; Satzung FFV § 8"
+    },
+    "U20": {
+      "titel": "Nachträgliche Freigabe des alten Vereins",
+      "art": "nur_wenn",
+      "wer": "alter_verein",
+      "wann": "spaeter",
+      "form": "nichts",
+      "formular": null,
+      "nachweis": false,
+      "bedingung": "Wechsel, wenn der alte Verein nicht zustimmt (A-Jugend jüngerer Jahrgang bis D-Jugend, Herren und älterer A-Jahrgang). Nur der neue Verein lädt sie hoch. Bedingungslos, auf Vereinsbriefpapier, Fax genügt.",
+      "quelle": "HFV-Spielordnung § 94 Nr. 1 d und e, Stand 2026-07-06; HFV-Vordruck Nachträgliche Freigabe, Stand 2024-04"
+    },
+    "U21": {
+      "titel": "Nachweis der Ausbildungs- oder Spielerentschädigung",
+      "art": "nur_wenn",
+      "wer": "verein",
+      "wann": "spaeter",
+      "form": "nichts",
+      "formular": null,
+      "nachweis": false,
+      "bedingung": "Wechsel im Juni ohne Freigabe (A-Jugend jüngerer Jahrgang bis D-Jugend) und Herren in Wechselperiode I. Zahlt der neue Verein. Außerhalb des Junis ersetzt eine Entschädigung die Freigabe nicht.",
+      "quelle": "HFV-Jugendordnung §§ 36 und 44, Stand 2026-07-01; HFV-Spielordnung § 94 Nr. 3 b bis d, Stand 2026-07-06"
+    },
+    "U22": {
+      "titel": "Bestätigung des alten Vereins über das letzte Pflichtspiel",
+      "art": "nur_wenn",
+      "wer": "alter_verein",
+      "wann": "anmeldung",
+      "form": "nichts",
+      "formular": null,
+      "nachweis": false,
+      "bedingung": "Wenn das letzte Pflichtspiel mehr als 6 Monate zurückliegt (Wartefrist entfällt). Sonderwege bei fehlender Spielmöglichkeit bestätigt der Kreisjugendwart.",
+      "quelle": "HFV-Jugendordnung § 47, Stand 2026-07-01; HFV-Spielordnung § 95 Nr. 2 f, Stand 2026-07-06"
+    },
+    "U23": {
+      "titel": "Einverständnis für das Seniorenspielrecht (A-Jugend bei den Herren)",
+      "art": "pflicht",
+      "wer": "familie",
+      "wann": "vor_erstem_spiel",
+      "form": "formular_im_pdf",
+      "formular": "einverstaendnis_senioren",
+      "nachweis": false,
+      "bedingung": "A-Jugend unter 18, älterer Jahrgang (2008), wenn er bei den Herren aushelfen soll. Dazu Attest und Antrag des Vereins. Volljährige brauchen das nicht.",
+      "quelle": "HFV-Jugendordnung § 29, Stand 2026-07-01; HFV-Vordruck Einverständnis des gesetzlichen Vertreters, Stand 2025-06-10; HFV-Passstelle Folie 48, Stand 2026-06-12"
+    },
+    "U24": {
+      "titel": "Einverständnis für ein Mädchen im Jungenteam (B- oder C-Jugend)",
+      "art": "pflicht",
+      "wer": "familie",
+      "wann": "vor_erstem_spiel",
+      "form": "formular_im_pdf",
+      "formular": "einverstaendnis_maedchen",
+      "nachweis": false,
+      "bedingung": "Wenn ein Mädchen in einer B- oder C-Jugend-Mannschaft der Jungen spielen soll.",
+      "quelle": "HFV-Jugendordnung § 14 Nr. 6, Stand 2026-07-01"
+    },
+    "U25": {
+      "titel": "Nachweis über den Vormund oder die Übertragung der Sorge",
+      "art": "pflicht",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "foto_oder_datei",
+      "formular": null,
+      "nachweis": true,
+      "bedingung": "Kind mit Vormund oder Pflegeperson; geflüchtetes Kind ohne Eltern. Welche Papiere der HFV genau will, ist offen.",
+      "quelle": "FIFA-Reglement RSTP Art. 19 Abs. 2 d, Ausgabe 2025-07; DFB-Übersicht Art. 19 Nr. 2 d, Stand 2025-12-08; HFV-Liste offen"
+    },
+    "U26": {
+      "titel": "Zusatzerklärung der Eltern (To Player's Parents)",
+      "art": "offen",
+      "wer": "familie",
+      "wann": "spaeter",
+      "form": "nichts",
+      "formular": null,
+      "nachweis": false,
+      "bedingung": "Nur wenn die Passstelle sie anfordert. Der HFV nennt sie nicht mehr; das Vereinsformular von 2014 hat eine falsche Altersgrenze.",
+      "quelle": "Zusatzerklärung FFV, Stand 2014-01-08 (veraltet); HFV-Antrag Seite 2: weitere Dokumente sind ab sofort nicht einzureichen, PDF Stand 2026-06-16"
+    },
+    "U27": {
+      "titel": "Länderformulare oder Abmeldebestätigungen (USA, Mexiko, Argentinien, Brasilien, Balkan)",
+      "art": "offen",
+      "wer": "familie",
+      "wann": "spaeter",
+      "form": "nichts",
+      "formular": null,
+      "nachweis": false,
+      "bedingung": "Wechsel aus diesen Ländern: nur auf Anforderung der Passstelle. Die Anmeldung wird nicht blockiert.",
+      "quelle": "Hamburger FV, Hinweis zum internationalen Vereinswechsel, Stand 2022-04-27 (Sekundärquelle); DFBnet-Online-Hilfe (ohne Datum)"
+    },
+    "U28": {
+      "titel": "Freiwilliger Notfall- und Gesundheitsbogen",
+      "art": "freiwillig",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "formular_im_pdf",
+      "formular": "notfall",
+      "nachweis": false,
+      "bedingung": "Minderjährige in Fußball oder Karneval. Getrennt ablegen, nur mit Einwilligung, jährlich erneuern, beim Austritt löschen.",
+      "quelle": "DSGVO Art. 9; Stiftung Datenschutz, Praxisratgeber Gesundheitsdaten (ohne Datum); Schutzkonzept FFV, Stand 2025-05"
+    },
+    "U29": {
+      "titel": "Einverständnis zu Fahrten und Messenger-Gruppe",
+      "art": "verein",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "formular_im_pdf",
+      "formular": "einverstaendnis_fahrten",
+      "nachweis": false,
+      "bedingung": "Minderjährige in Fußball oder Karneval, wenn Fahrten oder die Messenger-Gruppe gewünscht sind.",
+      "quelle": "Schutzkonzept FFV Nr. 6.4 und 6.11, Stand 2025-05"
+    },
+    "U30": {
+      "titel": "Erziehungsbeauftragung für Abendauftritte",
+      "art": "verein",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "formular_im_pdf",
+      "formular": "karneval_auftritte",
+      "nachweis": false,
+      "bedingung": "Karneval, Minderjährige, wenn das Kind abends ohne Eltern auftritt. Kinder bis 22 Uhr, unter 16 bis 24 Uhr bei Brauchtumsveranstaltungen.",
+      "quelle": "Jugendschutzgesetz §§ 1, 2 und 5, Stand 2026-09-29 (abgerufen)"
+    },
+    "U31": {
+      "titel": "Kostüm- und Leihvereinbarung",
+      "art": "offen",
+      "wer": "familie",
+      "wann": "spaeter",
+      "form": "nichts",
+      "formular": null,
+      "nachweis": false,
+      "bedingung": "Karneval: Wem die Kostüme gehören, was sie kosten und ob es eine Kaution gibt, ist nicht geregelt (Frage an den Vorstand).",
+      "quelle": "Satzung FFV §§ 8a und 21; Regelung offen"
+    },
+    "U32": {
+      "titel": "Turnier: Zustimmung zu Aufnahmen, Tanzausweis, Ausweis des Kindes",
+      "art": "offen",
+      "wer": "familie",
+      "wann": "spaeter",
+      "form": "nichts",
+      "formular": null,
+      "nachweis": false,
+      "bedingung": "Karneval, wenn die Gruppe an Turnieren teilnimmt. Beim Großen Rat zählt ein Personal-, Kinder-, Schüler- oder Tanzausweis. Ob die Abteilung Turniere tanzt, ist offen.",
+      "quelle": "Großer Rat Frankfurt, Tanzturnierordnung, Stand 2026-06; BDK-Tanzturnierordnung § 8, Stand 2019-09-21; RKK-Richtlinien, Stand 2023-01"
+    },
+    "U33": {
+      "titel": "Beitragsbescheinigung für Bildung und Teilhabe",
+      "art": "nur_wenn",
+      "wer": "verein",
+      "wann": "spaeter",
+      "form": "nichts",
+      "formular": null,
+      "nachweis": false,
+      "bedingung": "Minderjährige, deren Familie Leistungen bezieht (Grundsicherungsgeld, Sozialhilfe, Asylbewerberleistungen, Wohngeld, Kinderzuschlag). Der Verein stellt die Bescheinigung aus.",
+      "quelle": "SGB II § 28 Abs. 7, Stand 2026-09-29 (abgerufen); Info-Blatt FFV, Stand 2014-01-08"
+    },
+    "U34": {
+      "titel": "Antrag auf Senatorenmitgliedschaft",
+      "art": "verein",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "formular_im_pdf",
+      "formular": "aufnahmeantrag",
+      "nachweis": false,
+      "bedingung": "Wenn die Senatorenmitgliedschaft gewünscht ist. Der Vorstand entscheidet. Die Satzung kennt keine Senatoren.",
+      "quelle": "Aufnahmeantrag FFV, Stand 2026-09; Satzung FFV § 5"
+    },
+    "U35": {
+      "titel": "Aufnahmegebühr",
+      "art": "verein",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "nichts",
+      "formular": null,
+      "nachweis": false,
+      "bedingung": "Neumitglieder. Beim Fußball wie im Aufnahmeantrag; für Karneval und Passive offen (laut Satzung § 16 für alle).",
+      "quelle": "Aufnahmeantrag FFV Seite 2, Stand 2026-09; Satzung FFV § 16"
+    },
+    "U36": {
+      "titel": "Nachweis über Schutzstatus oder Aufenthalt",
+      "art": "pflicht",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "foto_oder_datei",
+      "formular": null,
+      "nachweis": true,
+      "bedingung": "Geflüchtetes Kind ohne Eltern in Deutschland: Aufenthaltsrecht oder anerkannter Schutzstatus. Welche Papiere der HFV genau will, ist offen.",
+      "quelle": "FIFA-Reglement RSTP Art. 19 Abs. 2 d, Ausgabe 2025-07; DFB-Übersicht Art. 19 Nr. 2 d, Stand 2025-12-08"
+    },
+    "U37": {
+      "titel": "Unterlagen zum Austauschprogramm",
+      "art": "pflicht",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "foto_oder_datei",
+      "formular": null,
+      "nachweis": true,
+      "bedingung": "Austauschschüler ohne Eltern: Programm mit Dauer, Einwilligung der Gasteltern und der Eltern, Bestätigung der Rückkehr. Spielrecht höchstens 1 Jahr.",
+      "quelle": "FIFA-Reglement RSTP Art. 19 Abs. 2 e, Ausgabe 2025-07; DFB-Übersicht Art. 19 Nr. 2 e, Stand 2025-12-08"
+    },
+    "U38": {
+      "titel": "Nachweis über 5 Jahre Wohnsitz in Deutschland",
+      "art": "offen",
+      "wer": "familie",
+      "wann": "anmeldung",
+      "form": "foto_oder_datei",
+      "formular": null,
+      "nachweis": true,
+      "bedingung": "Kind bei Verwandten, in einer Pflegefamilie oder allein (EU, 16 und 17) ohne Schutzstatus: nur möglich bei 5 Jahren ununterbrochenem Aufenthalt. Nachweis nicht älter als 3 Monate.",
+      "quelle": "FIFA-Reglement RSTP Art. 19 Abs. 3, Ausgabe 2025-07; DFB-Übersicht Art. 19 Nr. 3, Stand 2026-07-15"
+    },
+    "U39": {
+      "titel": "Sonderspielrecht für Frauen bei den Herren",
+      "art": "pflicht",
+      "wer": "verein",
+      "wann": "vor_erstem_spiel",
+      "form": "nichts",
+      "formular": null,
+      "nachweis": false,
+      "bedingung": "Frau ab 18 im Fußball. Der Verein beantragt das Sonderspielrecht beim Verband. Es gilt als Pilotprojekt bis 2028-06-30. Ab 18 kein Attest nötig.",
+      "quelle": "HFV-Spielordnung § 109a, Stand 2026-07-06; HFV-Passstelle Folie 34, Stand 2026-06-12"
+    },
+    "U40": {
+      "titel": "Spielrecht bei Eintrag divers, ohne Angabe oder in der Transitionsphase",
+      "art": "pflicht",
+      "wer": "verein",
+      "wann": "anmeldung",
+      "form": "formular_im_pdf",
+      "formular": "hfv_antrag",
+      "nachweis": false,
+      "bedingung": "Geschlecht divers oder ohne Angabe. Die Person wählt Frauen- oder Herrenteam. Der Antrag läuft mit der Vertrauensperson des HFV; bei Minderjährigen stimmen die Eltern zu.",
+      "quelle": "HFV-Spielordnung § 91 Nr. 8 bis 10, Stand 2026-07-06; HFV-Jugendordnung § 37 Nr. 3, Stand 2026-07-01; HFV-Antrag Seite 1, PDF Stand 2026-06-16"
+    }
+  },
+  "faelle": {
+    "F01": {
+      "name": "Nur Karneval",
+      "bedingung": "Abteilung Karneval.",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 2.3 und 6; Aufnahmeantrag FFV, Stand 2026-09"
+    },
+    "F02": {
+      "name": "Passive Mitgliedschaft, Förderer oder Senator",
+      "bedingung": "Abteilung passiv.",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 2.3; Aufnahmeantrag FFV, Stand 2026-09"
+    },
+    "F03": {
+      "name": "Kind neu im Fußball, deutsch",
+      "bedingung": "Fußball mit Spielrecht, minderjährig, noch nie ein Spielerpass, deutscher Pass (auch Doppelstaatler mit deutschem Pass).",
+      "quelle": "HFV-Antrag Seite 2, PDF Stand 2026-06-16; HFV-Jugendordnung § 9, Stand 2026-07-01"
+    },
+    "F04": {
+      "name": "Kind neu im Fußball, nichtdeutsch, unter 10 Jahren",
+      "bedingung": "Wie F03, aber ohne deutschen Pass und unter 10 Jahren. Ausweis und Meldebescheinigung offen.",
+      "quelle": "FIFA-Reglement RSTP Art. 9 Abs. 4 und Art. 19 Abs. 6, Ausgabe 2025-07"
+    },
+    "F05": {
+      "name": "Kind neu im Fußball, nichtdeutsch (oder Rückkehrer) ab 10 Jahren",
+      "bedingung": "Minderjährig, ab 10, noch nie ein Spielerpass in Deutschland, ohne deutschen Pass oder zuletzt im Ausland gewohnt. Internationale Erstausstellung.",
+      "quelle": "HFV-Antrag Seite 2; HFV-Passstelle Folien 41 und 42; DFB Internationale Transfers"
+    },
+    "F06": {
+      "name": "Wechsel innerhalb des HFV, Kind deutsch",
+      "bedingung": "Minderjährig, deutsch, Spielerpass bei einem hessischen Verein.",
+      "quelle": "HFV-Jugendordnung §§ 35 bis 47, Stand 2026-07-01; HFV-Spielordnung §§ 92 bis 94"
+    },
+    "F07": {
+      "name": "Wechsel innerhalb des HFV, Kind nichtdeutsch",
+      "bedingung": "Wie F06, aber ohne deutschen Pass. Ausweiskopie; bei 10 bis 17 auch Meldebescheinigung und Attest (beim Inlandswechsel offen).",
+      "quelle": "HFV-Antrag Seite 2, PDF Stand 2026-06-16"
+    },
+    "F08": {
+      "name": "Wechsel aus einem anderen Landesverband",
+      "bedingung": "Spielerpass bei einem Verein in einem anderen Bundesland. Der HFV fragt beim anderen Verband an.",
+      "quelle": "HFV-Jugendordnung § 43, Stand 2026-07-01; HFV-Spielordnung §§ 96 und 107"
+    },
+    "F09": {
+      "name": "Wechsel aus dem Ausland, Verein bekannt",
+      "bedingung": "Spielerpass bei einem Verein im Ausland, Verein bekannt. Keine Abmeldung im Ausland nötig; Freigabe über den DFB ab 10 Jahren.",
+      "quelle": "HFV-Spielordnung §§ 99 und 106, Stand 2026-07-06; HFV-Passstelle Folien 38 und 41 bis 46"
+    },
+    "F10": {
+      "name": "Herren neu, deutsch",
+      "bedingung": "Erwachsen, noch nie ein Spielerpass, deutscher Pass. Attest nur als Vereinsregel.",
+      "quelle": "HFV-Antrag Seite 2, PDF Stand 2026-06-16; Info-Blatt FFV, Stand 2014-01-08"
+    },
+    "F11": {
+      "name": "Herren neu, nichtdeutsch oder aus dem Ausland",
+      "bedingung": "Erwachsen, ohne deutschen Pass oder zuletzt im Ausland gespielt, Verein unbekannt. Ausweiskopie; internationale Erstausstellung.",
+      "quelle": "HFV-Passstelle Folien 38 und 39, Stand 2026-06-12; HFV-Spielordnung § 91 Nr. 6"
+    },
+    "F12": {
+      "name": "Herren, Wechsel",
+      "bedingung": "Erwachsen, mit Spielerpass bei einem anderen Verein. Wechselperioden I und II.",
+      "quelle": "HFV-Spielordnung § 94, Stand 2026-07-06"
+    },
+    "F13": {
+      "name": "A-Jugend unter 18 hilft bei den Herren aus",
+      "bedingung": "Jahrgang 2008, unter 18, möchte bei den Herren spielen. Antrag, Einverständnis der Sorgeberechtigten und Attest.",
+      "quelle": "HFV-Jugendordnung § 29, Stand 2026-07-01; HFV-Passstelle Folie 48"
+    },
+    "F14": {
+      "name": "Sonderfall bei Sorgerecht oder Aufenthalt",
+      "bedingung": "Vormund, Pflegeperson, Kind wohnt nicht mit den Eltern zusammen oder ohne Eltern hier. Die Jugendleitung klärt persönlich; die Anmeldung wird nicht blockiert.",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 2.3; Vollständigkeitsprüfung L1"
+    },
+    "F15": {
+      "name": "Geflüchtetes Kind ohne Eltern in Deutschland",
+      "bedingung": "Kind lebt ohne Eltern hier und ist aus humanitären Gründen geflüchtet (FIFA Art. 19 Abs. 2 d). Nachweis von Schutzstatus, Vormund, Einwilligung des Vormunds.",
+      "quelle": "FIFA-Reglement RSTP Art. 19 Abs. 2 d, Ausgabe 2025-07; DFB-Übersicht Art. 19 Nr. 2 d"
+    },
+    "F16": {
+      "name": "Austauschschüler ohne Eltern",
+      "bedingung": "Schulaustausch (FIFA Art. 19 Abs. 2 e). Spielrecht höchstens 1 Jahr, nur bei reinem Amateurverein.",
+      "quelle": "FIFA-Reglement RSTP Art. 19 Abs. 2 e, Ausgabe 2025-07; DFB-Übersicht Art. 19 Nr. 2 e"
+    },
+    "F17": {
+      "name": "Kind bei Verwandten oder in Pflegefamilie ohne Schutzstatus",
+      "bedingung": "Nur möglich nach 5 Jahren ununterbrochenem Aufenthalt und ohne frühere Registrierung. Sonst: Training ja, Spiele wahrscheinlich erst mit 18.",
+      "quelle": "FIFA-Reglement RSTP Art. 19 Abs. 2 a und 3, Ausgabe 2025-07; DFB Transfers von Minderjährigen"
+    },
+    "F18": {
+      "name": "EU-Jugendliche mit 16 oder 17 Jahren ohne Eltern",
+      "bedingung": "Die Ausnahme Art. 19 Abs. 2 b kann der FFV nicht erfüllen. Weiter wie F17.",
+      "quelle": "FIFA-Reglement RSTP Art. 19 Abs. 2 b, Ausgabe 2025-07; DFB Transfers von Minderjährigen"
+    }
+  },
+  "fristen": {
+    "quelle": "HFV-Jugendordnung (Stand 2026-07-01) und HFV-Spielordnung (Stand 2026-07-06); Stellen je Regel unten",
+    "spieljahr": {
+      "gilt": "2026/27",
+      "von": "2026-07-01",
+      "bis": "2027-06-30",
+      "quelle": "HFV-Jugendordnung § 22 Nr. 1, Stand 2026-07-01"
+    },
+    "alter": {
+      "international": 10,
+      "volljaehrig": 18,
+      "hfvNameEinwilligungUnter": 16,
+      "rentner": 65,
+      "fuenfJahre": 5,
+      "bemerkung": "Die Grenze 10 gilt hier ab dem 10. Geburtstag (Umsetzung). Das Formular schreibt zwischen dem 10. und 18. Lebensjahr, die Folien ab dem 10. Lebensjahr. Wörtlich beginnt das 10. Lebensjahr mit dem 9. Geburtstag. Der Stichtag ist bei der Passstelle zu bestätigen.",
+      "quelle": "HFV-Antrag Seite 2, PDF Stand 2026-06-16; HFV-Passstelle Folien 41 und 42, Stand 2026-06-12; FIFA-Reglement RSTP Art. 19 Abs. 4, Ausgabe 2025-07"
+    },
+    "jugend": {
+      "wechselzeitJuni": {
+        "von": "06-01",
+        "bis": "06-30",
+        "quelle": "HFV-Jugendordnung §§ 36 und 38, Stand 2026-07-01"
+      },
+      "juniMitFreigabe": {
+        "pflichtspieleAb": "07-01",
+        "quelle": "HFV-Jugendordnung § 38 Nr. 2 a: Die Wartefrist endet mit Ablauf des 30. Juni."
+      },
+      "juniOhneFreigabe": {
+        "pflichtspieleAb": "11-01",
+        "quelle": "HFV-Jugendordnung § 38 Nr. 2 b: Die Wartefrist endet mit Ablauf des 31. Oktober. Nachträgliche Freigabe wirkt ab Eingang, nicht vor dem 1. Juli."
+      },
+      "ausserhalbJuni": {
+        "mitFreigabeMonate": 3,
+        "ohneFreigabeMonate": 6,
+        "quelle": "HFV-Jugendordnung § 38 Nr. 2 c und d: Beginn am Tag nach der Abmeldung."
+      },
+      "eJugend": {
+        "juniPflichtspieleAb": "07-01",
+        "ausserhalbJuniMonate": 3,
+        "quelle": "HFV-Jugendordnung § 38 Nr. 3 und § 35 Nr. 4 (keine Freigabe für E, F, G); Passstelle Folie 15 und 16; Kreis Frankfurt: E-Jugend spielt 2026/27 Punktspiele"
+      },
+      "fgJugend": {
+        "klassen": [
+          "F",
+          "G"
+        ],
+        "quelle": "HFV-Jugendordnung § 35 Nr. 4 und § 38 Nr. 4: keine Freigabe, keine Wartefrist; Spielfeste zählen als Freundschaftsspiele"
+      },
+      "mitFreigabeRegel": {
+        "klassen": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "bemerkung": "A nur der jüngere Jahrgang; der ältere Jahrgang folgt den Regeln der Senioren.",
+        "quelle": "HFV-Jugendordnung § 35 Nr. 2 und § 40, Stand 2026-07-01"
+      },
+      "wegfallMonateOhnePflichtspiel": {
+        "wert": 6,
+        "quelle": "HFV-Jugendordnung § 47 Nr. 1 (Jugend); HFV-Spielordnung § 95 Nr. 2 f (Herren), Stand 2026-07-06"
+      },
+      "rueckkehrZumAltenVereinBis": {
+        "wert": "10-31",
+        "quelle": "HFV-Jugendordnung § 47 Nr. 2, Stand 2026-07-01"
+      },
+      "fehlendeSpielmoeglichkeit": {
+        "ohneFreigabe": {
+          "von": "07-01",
+          "bis": "09-30"
+        },
+        "mitFreigabe": {
+          "von": "10-01",
+          "bis": "03-31"
+        },
+        "quelle": "HFV-Jugendordnung § 47 Nr. 5 und 6, Stand 2026-07-01; bestätigt der Kreisjugendwart"
+      },
+      "uebergebietlichAntwortTage": {
+        "wert": 20,
+        "quelle": "HFV-Jugendordnung § 43 Nr. 2, Stand 2026-07-01"
+      },
+      "reaktionAbgebenderVereinTage": {
+        "wert": 14,
+        "quelle": "HFV-Spielordnung § 92 Nr. 2 und § 94 Nr. 1 d, Stand 2026-07-06"
+      },
+      "aeltererJahrgangAb": {
+        "wert": "06-01",
+        "quelle": "HFV-Jugendordnung § 40: Ab 1. Juni gelten für den älteren A-Jahrgang und die älteren B-Juniorinnen die Regeln der Senioren."
+      },
+      "jungerDJahrgang": {
+        "offen": true,
+        "bemerkung": "Für den jüngeren D-Jahrgang erlaubt die DFB-Jugendordnung höchstens 3 Monate Wartefrist ohne Freigabepflicht; die HFV-Jugendordnung verlangt die Freigabe und nennt bis zu 6 Monate.",
+        "quelle": "DFB-Jugendordnung § 3 Nr. 3 b, Stand 2026-08-21, gegen HFV-Jugendordnung §§ 35 und 38, Stand 2026-07-01"
+      }
+    },
+    "senioren": {
+      "wechselperiodeI": {
+        "abmeldungBis": "06-30",
+        "antragBis": "08-31",
+        "pflichtspieleFruehestens": "07-01",
+        "ohneZustimmungAb": "11-01",
+        "quelle": "HFV-Spielordnung § 94 Nr. 2 a und Nr. 3 a, Stand 2026-07-06"
+      },
+      "wechselperiodeII": {
+        "abmeldungVon": "07-01",
+        "abmeldungBis": "12-31",
+        "antragBis": "01-31",
+        "pflichtspieleFruehestens": "01-01",
+        "ohneZustimmungAb": "11-01",
+        "ohneZustimmungImFolgejahr": true,
+        "nurMitZustimmung": true,
+        "quelle": "HFV-Spielordnung § 94 Nr. 2 b und Nr. 3 h, Stand 2026-07-06"
+      },
+      "entschaedigungErsetztZustimmungNur": "wechselperiodeI",
+      "uebergebietlichAntwortTage": {
+        "wert": 30,
+        "bemerkung": "Der DFB nennt 20 Tage. Offen.",
+        "quelle": "HFV-Spielordnung §§ 96 und 107, Stand 2026-07-06; DFB-Jugendordnung § 3a, Stand 2026-08-21"
+      }
+    },
+    "wechselperioden2026_27": {
+      "I": {
+        "abmeldungBis": "2026-06-30",
+        "antragBis": "2026-08-31",
+        "pflichtspieleFruehestens": "2026-07-01",
+        "ohneZustimmungAb": "2026-11-01"
+      },
+      "II": {
+        "abmeldungVon": "2026-07-01",
+        "abmeldungBis": "2026-12-31",
+        "antragBis": "2027-01-31",
+        "pflichtspieleFruehestens": "2027-01-01",
+        "ohneZustimmungAb": "2027-11-01"
+      },
+      "I_naechste": {
+        "abmeldungBis": "2027-06-30",
+        "antragBis": "2027-08-31",
+        "pflichtspieleFruehestens": "2027-07-01",
+        "ohneZustimmungAb": "2027-11-01"
+      },
+      "bemerkung": "Konkrete Daten der Saison 2026/27 zur Kontrolle; die Berechnung nutzt die Monats- und Tagangaben oben.",
+      "quelle": "HFV-Spielordnung § 94, Stand 2026-07-06; HFV-Passstelle Folien 4, 6 und 9, Stand 2026-06-12"
+    },
+    "vollmacht": {
+      "eingabeSpaetestensTage": 1,
+      "kurzeWartefristNurBis": "06-30",
+      "ganzjaehrigNutzbar": true,
+      "quelle": "HFV-Spielordnung § 92 Nr. 2 (Abmeldetag ist der Tag der Eingabe); HFV-Vordruck Vollmacht, Stand 2024-05-16; HFV-Passstelle Folien 4 bis 6 (Folie 4 mehrdeutig, kurz bestätigen lassen)"
+    },
+    "wiederholterWechsel": {
+      "quelle": "HFV-Spielordnung § 94 Nr. 1 b (weiterer Wechsel während laufender Wartefrist); HFV-Jugendordnung § 39, Stand 2026-07-01"
+    },
+    "entschaedigung": {
+      "jugendBeiKreisligaA": {
+        "aBJugend": 200,
+        "cDJugend": 100,
+        "jeAngefangenemSpieljahr": 25,
+        "hoechstensSpieljahre": 6,
+        "quelle": "HFV-Jugendordnung § 44 Nr. 3 (Tabelle), Stand 2026-07-01; die erste Herrenmannschaft des FFV spielt in der Kreisliga A"
+      },
+      "herrenWechselperiodeI": {
+        "abKreisliga": 250,
+        "kreisoberliga": 500,
+        "gruppenliga": 750,
+        "verbandsliga": 1500,
+        "mittelwertAusKreisoberliga": 375,
+        "mittelwertAusGruppenliga": 500,
+        "mittelwertAusVerbandsliga": 875,
+        "quelle": "HFV-Spielordnung § 94 Nr. 3 c und d, Stand 2026-07-06 (Nettobeträge)"
+      }
+    },
+    "gebuehren": {
+      "erstausstellung": 0,
+      "wechselJunioren": 10,
+      "wechselHerren": 25,
+      "nachtraeglicheFreigabe": 15,
+      "sonderspielrechtJuengereAltersklasse": 25,
+      "zweitUndGastspielrecht": 0,
+      "wemBelastet": "Der Verein zahlt. Ob er sie weitergibt, entscheidet der Verein (offen).",
+      "quelle": "HFV-Finanz-, Beitrags- und Gebührenordnung § 7 a, Stand 2025-09-13"
+    },
+    "aufbewahrungJahre": {
+      "wert": 2,
+      "quelle": "HFV-Spielordnung § 92, Stand 2026-07-06"
+    },
+    "spielerfotoErneuernJahre": {
+      "kreisFrankfurt": 2,
+      "hfv": 3,
+      "quelle": "Kreisjugendausschuss Frankfurt, Durchführungsbestimmungen 2026/27; HFV-Jugendordnung § 9 Nr. 2"
+    },
+    "stichprobenOnlineWechsel": {
+      "von": "2026-07-01",
+      "bis": "2026-12-31",
+      "quelle": "HFV-Passstelle Folie 62, Stand 2026-06-12"
+    },
+    "regeln": {
+      "R1": {
+        "titel": "Erstanmeldung",
+        "text": "Keine Wartefrist und keine Wechselperiode. Spielrecht frühestens am Tag, an dem der Antrag beim Verband eingeht.",
+        "quelle": "HFV-Spielordnung § 91 Nr. 1, Stand 2026-07-06; HFV-Passstelle Folie 9"
+      },
+      "R2": {
+        "titel": "Internationale Fälle",
+        "text": "Ab 10 Jahren (Nichtdeutsche, Rückkehrer, bekannter Auslandsverein): Spielrecht erst nach der Rückmeldung über den DFB, Dauer offen. Unter 10 Jahren kein Freigabeschein; bei Nichtdeutschen prüft der Verband vor der Registrierung.",
+        "offen": true,
+        "quelle": "FIFA-Reglement RSTP Art. 9 Abs. 4 und Art. 19 Abs. 3 bis 7, Ausgabe 2025-07; DFB-Seite Internationale Transfers (abgerufen 2026-09-29); HFV-Passstelle Folien 41 bis 44"
+      },
+      "R3": {
+        "titel": "Wechsel in der F- und G-Jugend",
+        "text": "Keine Freigabe und keine Wartefrist. Spielfeste gelten als Freundschaftsspiele.",
+        "quelle": "HFV-Jugendordnung § 35 Nr. 4 und § 38 Nr. 4, Stand 2026-07-01"
+      },
+      "R4": {
+        "titel": "Wechsel in der E-Jugend",
+        "text": "Abmeldung im Juni: Pflichtspiele ab 1. Juli. Sonst 3 Monate ab dem Tag nach der Abmeldung. Keine Freigabe nötig. Im Kreis Frankfurt sind die Spiele 2026/27 Pflichtspiele.",
+        "quelle": "HFV-Jugendordnung § 38 Nr. 3, Stand 2026-07-01; Kreisjugendausschuss Frankfurt 2026/27"
+      },
+      "R5": {
+        "titel": "Wechsel A-Jugend (jüngerer Jahrgang) bis D-Jugend",
+        "text": "Juni: mit Freigabe ab 1. Juli, ohne ab 1. November. Sonst mit Freigabe 3 Monate, ohne 6 Monate ab dem Tag nach der Abmeldung. Entfällt, wenn das letzte Pflichtspiel mehr als 6 Monate zurückliegt. Offen: jüngerer D-Jahrgang.",
+        "offen": true,
+        "quelle": "HFV-Jugendordnung §§ 35, 36, 38 und 47 Nr. 1, Stand 2026-07-01; DFB-Jugendordnung § 3 Nr. 3, Stand 2026-08-21; HFV-Passstelle Folien 15 und 16"
+      },
+      "R6": {
+        "titel": "Freundschaftsspiele in der Jugend",
+        "text": "Keine Wartefrist. Spielrecht ab Eingang der vollständigen Unterlagen beim Verband. Ohne Spielrecht darf im Kreis Frankfurt auch nicht in Freundschaftsspielen gespielt werden.",
+        "quelle": "HFV-Jugendordnung § 38 Nr. 1; HFV-Spielordnung § 94 Nr. 5; Kreisjugendausschuss Frankfurt 2026/27"
+      },
+      "R7": {
+        "titel": "Älterer A-Jahrgang, ältere B-Juniorinnen und Herren",
+        "text": "Wechselperiode I: Abmeldung bis 30. Juni, Antrag bis 31. August. Wechselperiode II: Abmeldung 1. Juli bis 31. Dezember, Antrag bis 31. Januar, nur mit Zustimmung sonst erst 1. November des folgenden Spieljahres. Entfällt, wenn das letzte Pflichtspiel mehr als 6 Monate zurückliegt.",
+        "quelle": "HFV-Spielordnung § 94 Nr. 2 und 3 sowie § 95 Nr. 2 f, Stand 2026-07-06; HFV-Jugendordnung § 40"
+      },
+      "R8": {
+        "titel": "Sonderwege in der Jugend",
+        "text": "Rückkehr zum alten Verein bis 31. Oktober, fehlende Spielmöglichkeit, Jugendspielgemeinschaft, Härtefall: Die Jugendleitung prüft.",
+        "quelle": "HFV-Jugendordnung §§ 41 und 47, Stand 2026-07-01"
+      },
+      "R9": {
+        "titel": "Warnungen zur Abmeldung",
+        "text": "Mail, WhatsApp oder einfacher Brief zählen nicht als Abmeldung. Erst nach dem letzten Spiel abmelden. Nie für zwei Vereine unterschreiben.",
+        "quelle": "HFV-Passstelle Folien 4 und 5, Stand 2026-06-12; HFV-Spielordnung § 94 Nr. 1 f und § 93 Nr. 6"
+      },
+      "R10": {
+        "titel": "Reihenfolge und Fristen der Unterlagen",
+        "text": "Erst Mitgliedschaft, dann HFV-Antrag. Spielerfoto spätestens vor dem ersten Spiel. Das Attest muss aktuell sein, das Höchstalter ist offen.",
+        "offen": true,
+        "quelle": "HFV-Jugendordnung § 9 Nr. 1 und 2, Stand 2026-07-01"
+      },
+      "R11": {
+        "titel": "Rechenweg der Wartefrist",
+        "text": "Die Wartefrist beginnt am Tag nach der Abmeldung. Eine Frist nach Monaten endet nach den Regeln des BGB mit Ablauf des vorherigen Tages; Pflichtspiele am Tag danach. Beispiel: Abmeldung 2026-09-29, D-Jugend, mit Freigabe ab 2026-12-30, ohne Freigabe ab 2027-03-30.",
+        "quelle": "HFV-Jugendordnung § 38 Nr. 2; BGB §§ 187 und 188; HFV-Passstelle Folie 16"
+      },
+      "R12": {
+        "titel": "Fristen zentral pflegen",
+        "text": "Alle Zahlen stehen in diesen Daten. Änderungen: neues FIFA-Transferreglement ab 2027-01-01, E-Jugend ab 2027/28 nur noch 6 gegen 6.",
+        "quelle": "FIFA-Beschluss 2026-06-10 (laut Kanzleimeldung, Sekundärquelle); HFV-Durchführungsbestimmungen G/F/E 2026/27, Stand 2026-07-10"
+      },
+      "R13": {
+        "titel": "Vollmacht zur stellvertretenden Abmeldung",
+        "text": "Abmeldetag ist der Tag der Eingabe im System. Nur anbieten, wenn der Verein am selben oder nächsten Tag eingibt. Ganzjährig nutzbar, die kurze Wartefrist gibt es nur im Juni. Beim Wechsel aus einem anderen Landesverband ist das Einschreiben der Standard.",
+        "quelle": "HFV-Spielordnung § 92 Nr. 2 und § 93 Nr. 2; HFV-Vordruck Vollmacht, Stand 2024-05-16; HFV-Passstelle Folien 4 bis 6; HFV-Jugendordnung § 43 Nr. 1"
+      },
+      "R14": {
+        "titel": "Kinder ohne Eltern in Deutschland",
+        "text": "Keine Zusage zu Spielen machen. Training ist möglich. Der Verband prüft die Ausnahme nach FIFA Art. 19.",
+        "offen": true,
+        "quelle": "FIFA-Reglement RSTP Art. 19, Ausgabe 2025-07; DFB-Übersichten Art. 19 (Stand 2025-12-08, Nr. 3 geändert 2026-07-15); HFV-Liste offen"
+      },
+      "R15": {
+        "titel": "Beginn der Mitgliedschaft",
+        "text": "Laut Satzung beginnt die Mitgliedschaft am Tag der Anmeldung; Website und App nennen den 1. des Folgemonats. Der Vorstand entscheidet (offen). Keine befristete Probemitgliedschaft anbieten, sie ist nicht versichert.",
+        "offen": true,
+        "quelle": "Satzung FFV § 6; Beitragsübersicht FFV, Stand 2026-09-04; ARAG-Merkblatt A.II.2.2, Stand 2026-01-01"
+      }
+    },
+    "aenderungen": [
+      {
+        "ab": "2027-01-01",
+        "key": "regelwerk_fifa_2027",
+        "betrifft": [
+          "R2"
+        ],
+        "quelle": "FIFA-Beschluss 2026-06-10 (laut Kanzleimeldung 2026-06-29, Sekundärquelle, nicht an der FIFA-Quelle geprüft)"
+      },
+      {
+        "ab": "2027-07-01",
+        "key": "regelwerk_saison_2027",
+        "betrifft": [
+          "R3",
+          "R4",
+          "R5",
+          "R7"
+        ],
+        "quelle": "HFV-Durchführungsbestimmungen G/F/E 2026/27, Stand 2026-07-10: Ab 2027/28 spielt die E-Jugend nur noch 6 gegen 6 in Meldeligen"
+      }
+    ]
+  },
+  "unterschriftStellen": {
+    "aufnahmeantrag": [
+      {
+        "stelleKey": "s2.unterschrift",
+        "bedeutung": "Aufnahmeantrag (Seite 2): Mitglied, bei Minderjährigen eine sorgeberechtigte Person"
+      },
+      {
+        "stelleKey": "s2.unterschrift_sorgeberechtigte",
+        "bedeutung": "Aufnahmeantrag (Seite 2), zusätzliche Zeile: beide sorgeberechtigten Personen (nur bei Minderjährigen und Empfehlung beide)"
+      },
+      {
+        "stelleKey": "s3.unterschrift",
+        "bedeutung": "Foto-Einwilligung des Vereins (Seite 3)"
+      },
+      {
+        "stelleKey": "s4.unterschrift",
+        "bedeutung": "SEPA-Lastschriftmandat (Seite 4)"
+      }
+    ],
+    "datenschutz": [
+      {
+        "stelleKey": "kenntnisnahme",
+        "bedeutung": "Kenntnisnahme der Datenschutzinformation"
+      }
+    ],
+    "hfv_antrag": [
+      {
+        "stelleKey": "spieler",
+        "bedeutung": "Unterschrift der Spielerin oder des Spielers (nur mit Stift)"
+      },
+      {
+        "stelleKey": "erziehungsberechtigte",
+        "bedeutung": "Unterschrift der Erziehungsberechtigten (nur mit Stift)"
+      },
+      {
+        "stelleKey": "verein",
+        "bedeutung": "Unterschrift und Stempel des Vereins"
+      },
+      {
+        "stelleKey": "einwilligung_a",
+        "bedeutung": "Einwilligung a: Name im Internet (unter 16 Jahren)"
+      },
+      {
+        "stelleKey": "einwilligung_b",
+        "bedeutung": "Einwilligung b: Spielerfoto im Internet"
+      }
+    ],
+    "vollmacht": [
+      {
+        "stelleKey": "unterschrift",
+        "bedeutung": "Zustimmung zur stellvertretenden Abmeldung"
+      }
+    ],
+    "abmeldung": [
+      {
+        "stelleKey": "unterschrift",
+        "bedeutung": "Abmeldung beim alten Verein: Spielerin oder Spieler"
+      },
+      {
+        "stelleKey": "unterschrift_vertreter",
+        "bedeutung": "Abmeldung beim alten Verein: gesetzlicher Vertreter (nur bei Minderjährigen)"
+      }
+    ],
+    "einverstaendnis_senioren": [
+      {
+        "stelleKey": "unterschrift",
+        "bedeutung": "Einverständnis des gesetzlichen Vertreters"
+      }
+    ],
+    "einverstaendnis_maedchen": [
+      {
+        "stelleKey": "unterschrift",
+        "bedeutung": "Einverständnis der Eltern"
+      }
+    ],
+    "einverstaendnis_fahrten": [
+      {
+        "stelleKey": "unterschrift",
+        "bedeutung": "Einverständnis zu Fahrten und Messenger-Gruppe"
+      }
+    ],
+    "karneval_auftritte": [
+      {
+        "stelleKey": "unterschrift",
+        "bedeutung": "Erziehungsbeauftragung für Abendauftritte"
+      }
+    ],
+    "attest": [
+      {
+        "stelleKey": "arzt",
+        "bedeutung": "Unterschrift und Stempel der Ärztin oder des Arztes"
+      },
+      {
+        "stelleKey": "einwilligung",
+        "bedeutung": "Einwilligung zur Verarbeitung des Attests"
+      }
+    ],
+    "notfall": [
+      {
+        "stelleKey": "unterschrift",
+        "bedeutung": "Einwilligung zum Notfall- und Gesundheitsbogen"
+      }
+    ]
+  },
+  "kontakte": {
+    "telefon": "069 736868",
+    "geschaeftsstelle": {
+      "mail": "geschaeftsstelle@sportfreunde04.de",
+      "telefon": "069 736868"
+    },
+    "jugendleitung": {
+      "mail": "jugendleitung@sportfreunde04.de"
+    },
+    "karneval": {
+      "mail": "karnevalabteilung@sportfreunde04.de"
+    },
+    "spielausschuss": {
+      "mail": "spielausschuss_senioren@sportfreunde04.de"
+    },
+    "passwesen": {
+      "mail": "geschaeftsstelle@sportfreunde04.de",
+      "telefon": "069 736868",
+      "hinweis": "Wer im Verein das Passwesen bearbeitet, ist noch offen. Bis dahin ist die Geschäftsstelle die Anlaufstelle."
+    },
+    "quelle": "data/verein.json, Stand 2026-09"
+  },
+  "offenePunkte": [
+    {
+      "id": "O01",
+      "an": "hfv_passstelle",
+      "prioritaet": "P1",
+      "frage": "Reicht ein Scan oder eine digitale Unterschrift, oder muss das Papier-Original mit Stift vorliegen? Darf der Verein rein digital archivieren?",
+      "betrifft": [
+        "U07",
+        "U17",
+        "U18",
+        "R13"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O02",
+      "an": "hfv_passstelle",
+      "prioritaet": "P1",
+      "frage": "Sind die Zusatzerklärung 'To Player's Parents' und die Länderformulare (USA, Mexiko, Argentinien, Brasilien, Balkan) noch nötig?",
+      "betrifft": [
+        "U26",
+        "U27"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O03",
+      "an": "hfv_passstelle",
+      "prioritaet": "P1",
+      "frage": "Brauchen Nichtdeutsche unter 10 Jahren Ausweis und Meldebescheinigung? Zählt für die Grenze von 10 Jahren das Alter am Tag des Antrags?",
+      "betrifft": [
+        "U12",
+        "U13",
+        "F04",
+        "R2"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O04",
+      "an": "hfv_passstelle",
+      "prioritaet": "P1",
+      "frage": "Beim Inlandswechsel Nichtdeutscher von 10 bis 17 Jahren: Sind Meldebescheinigung und Attest wirklich nötig? Das Formular sagt ja, die Präsentation 2026 nennt sie nicht.",
+      "betrifft": [
+        "U10",
+        "U13",
+        "F07"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O05",
+      "an": "hfv_passstelle",
+      "prioritaet": "P1",
+      "frage": "Beim Wechsel deutscher Minderjähriger: Braucht es Geburtsurkunde und Attest? Der Wortlaut von JO § 9 Nr. 1 und das Formular widersprechen sich.",
+      "betrifft": [
+        "U09",
+        "U10",
+        "F06",
+        "F08"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O06",
+      "an": "hfv_passstelle",
+      "prioritaet": "P1",
+      "frage": "Attest: Wie alt darf es höchstens sein? Welcher Inhalt? Welche Rechtsgrundlage für die Verarbeitung (Art. 9 DSGVO)? Werden Atteste aus dem Ausland angenommen?",
+      "betrifft": [
+        "U10",
+        "U11",
+        "R10"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O07",
+      "an": "hfv_passstelle",
+      "prioritaet": "P2",
+      "frage": "Vollmacht außerhalb des Junis: nutzbar mit normalen Wartefristen. Folie 4 der Präsentation 2026 ist mehrdeutig; kurz bestätigen lassen.",
+      "betrifft": [
+        "U18",
+        "R13"
+      ],
+      "status": "weitgehend_geklaert",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O08",
+      "an": "hfv_passstelle",
+      "prioritaet": "P1",
+      "frage": "Welche Wartefrist gilt für den jüngeren D-Jahrgang: 6 Monate (HFV-JO) oder höchstens 3 Monate (DFB-JO § 3 Nr. 3 b)?",
+      "betrifft": [
+        "R5"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O09",
+      "an": "hfv_passstelle",
+      "prioritaet": "P1",
+      "frage": "Doppelstaatler mit deutschem Pass: Welche Nationalität wird im Verbandssystem eingetragen? Müssen ausländische Urkunden übersetzt werden?",
+      "betrifft": [
+        "F03",
+        "F05",
+        "U12"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O10",
+      "an": "hfv_passstelle",
+      "prioritaet": "P1",
+      "frage": "Deutscher Ausweis bei einem internationalen Wechsel oder bei Rückkehrern: Darf der Verein die Kopie hochladen, obwohl PAuswG § 20 die Weitergabe verbietet? Reicht die Bestätigung, dass der Verein das Original gesehen hat?",
+      "betrifft": [
+        "U12"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O11",
+      "an": "hfv_passstelle",
+      "prioritaet": "P1",
+      "frage": "Einer oder beide Elternteile unterschreiben? Muss ein kleines Kind selbst auf der Zeile 'Spieler' unterschreiben?",
+      "betrifft": [
+        "U07",
+        "R13"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O12",
+      "an": "hfv_passstelle",
+      "prioritaet": "P1",
+      "frage": "Welche Nachweise braucht es bei Vormund, Pflegefamilie, Verwandten und unbegleiteten Geflüchteten?",
+      "betrifft": [
+        "U25",
+        "U36",
+        "U37",
+        "U38",
+        "F14",
+        "F15",
+        "F16",
+        "F17",
+        "F18"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O13",
+      "an": "hfv_passstelle",
+      "prioritaet": "P1",
+      "frage": "Wie lange dauert die Bearbeitung, national und international? Gibt es ein Mindestalter für die G-Jugend?",
+      "betrifft": [
+        "R2",
+        "R1"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O14",
+      "an": "hfv_passstelle",
+      "prioritaet": "P1",
+      "frage": "Reicht eine Meldebescheinigung mit nur einem Elternteil (Alleinerziehende, ein Elternteil im Ausland)? Wie alt darf die Bescheinigung sein?",
+      "betrifft": [
+        "U13"
+      ],
+      "status": "offen",
+      "quelle": "Vollständigkeitsprüfung, Korrektur K2 und Abschnitt 4"
+    },
+    {
+      "id": "O15",
+      "an": "hfv_passstelle",
+      "prioritaet": "P1",
+      "frage": "Welche Nachweise braucht es genau bei geflüchteten Kindern ohne Eltern, Austauschschülern und Kindern bei Verwandten?",
+      "betrifft": [
+        "U25",
+        "U36",
+        "U37",
+        "U38",
+        "F15",
+        "F16",
+        "F17"
+      ],
+      "status": "offen",
+      "quelle": "Vollständigkeitsprüfung, Abschnitt 4"
+    },
+    {
+      "id": "O16",
+      "an": "hfv_passstelle",
+      "prioritaet": "P1",
+      "frage": "Gilt die Grenze '10. Lebensjahr' ab dem 9. oder ab dem 10. Geburtstag?",
+      "betrifft": [
+        "R2"
+      ],
+      "status": "offen",
+      "quelle": "Vollständigkeitsprüfung, Korrektur K9"
+    },
+    {
+      "id": "O17",
+      "an": "hfv_passstelle",
+      "prioritaet": "P1",
+      "frage": "Welche Nachweise braucht es bei Nichtdeutschen unter 10 Jahren für die Prüfung nach FIFA Art. 19 Abs. 6?",
+      "betrifft": [
+        "U12",
+        "U13",
+        "F04"
+      ],
+      "status": "offen",
+      "quelle": "Vollständigkeitsprüfung, Abschnitt 4"
+    },
+    {
+      "id": "O18",
+      "an": "hfv_passstelle",
+      "prioritaet": "P1",
+      "frage": "Geht die Vollmacht auch beim Wechsel aus einem anderen Landesverband?",
+      "betrifft": [
+        "U18",
+        "F08",
+        "R13"
+      ],
+      "status": "offen",
+      "quelle": "Vollständigkeitsprüfung, Korrektur K6"
+    },
+    {
+      "id": "O19",
+      "an": "hfv_passstelle",
+      "prioritaet": "P2",
+      "frage": "Ist ein Spielerfoto mit religiöser Kopfbedeckung bei freiem Gesicht zulässig?",
+      "betrifft": [
+        "U16"
+      ],
+      "status": "offen",
+      "quelle": "Vollständigkeitsprüfung, Korrektur K10"
+    },
+    {
+      "id": "O20",
+      "an": "hfv_passstelle",
+      "prioritaet": "P1",
+      "frage": "A-Junioren unter 18 bei den Herren: Genügt ein Arzt, oder braucht es einen vom Verband anerkannten Sportarzt (DFB-JO § 6 Nr. 2)?",
+      "betrifft": [
+        "U23",
+        "U10",
+        "F13"
+      ],
+      "status": "offen",
+      "quelle": "Vollständigkeitsprüfung, Korrektur K3"
+    },
+    {
+      "id": "O21",
+      "an": "hfv_passstelle",
+      "prioritaet": "P2",
+      "frage": "Wie läuft das Sonderspielrecht für Frauen bei den Herren nach SpO § 109a ab, mit welchem Formular, und wird das Pilotprojekt verlängert?",
+      "betrifft": [
+        "U39"
+      ],
+      "status": "offen",
+      "quelle": "Vollständigkeitsprüfung, Abschnitt 1 L4 und Abschnitt 4"
+    },
+    {
+      "id": "O22",
+      "an": "hfv_passstelle",
+      "prioritaet": "P2",
+      "frage": "Wechsel von Herren aus einem anderen Landesverband: 20 Tage (DFB) oder 30 Tage (HFV) bis die Abmeldung als ordnungsgemäß gilt?",
+      "betrifft": [
+        "F08"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O23",
+      "an": "hfv_passstelle",
+      "prioritaet": "P2",
+      "frage": "Gilt für Altersgrenzen der Tag der Anmeldung oder der Tag des Antragseingangs beim Verband?",
+      "betrifft": [
+        "R2",
+        "R1"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 2.1"
+    },
+    {
+      "id": "O24",
+      "an": "vorstand",
+      "prioritaet": "P1",
+      "frage": "Wer hat die DFBnet-Kennung für Pass Online? Wo liegen die Originale 2 Jahre lang? Wer löscht danach?",
+      "betrifft": [
+        "U07",
+        "R13"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O25",
+      "an": "vorstand",
+      "prioritaet": "P1",
+      "frage": "Wie kommen die Unterlagen zum Verein (Übergabe der Originale, kein WhatsApp)? Wer prüft sie auf Vollständigkeit?",
+      "betrifft": [
+        "U01",
+        "U07"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O26",
+      "an": "vorstand",
+      "prioritaet": "P1",
+      "frage": "Vereinsregel für die Unterschrift der Eltern: Einer oder beide? Der Assistent empfiehlt beide beim Aufnahmeantrag und der Foto-Einwilligung.",
+      "betrifft": [
+        "U01",
+        "U04"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O27",
+      "an": "vorstand",
+      "prioritaet": "P1",
+      "frage": "Versicherung beim Probetraining: Nichtmitgliederversicherung abschließen oder die Anmeldung vor das erste Training legen?",
+      "betrifft": [
+        "U01"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O28",
+      "an": "vorstand",
+      "prioritaet": "P1",
+      "frage": "Das Online-Formular des Frankfurter Carneval Vereins abschalten oder umleiten. Wie hängen FCV und die FFV-Abteilung zusammen? Karneval in die Satzung aufnehmen?",
+      "betrifft": [
+        "F01"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O29",
+      "an": "vorstand",
+      "prioritaet": "P1",
+      "frage": "Fastnachtszug 2027: Meldeschluss beim Großen Rat ist der 30. September 2026.",
+      "betrifft": [
+        "F01"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O30",
+      "an": "vorstand",
+      "prioritaet": "P1",
+      "frage": "Beginn der Mitgliedschaft: Tag der Anmeldung (Satzung § 6) oder 1. des Folgemonats (Website, App)? Wie wird der Beitrag im ersten Jahr berechnet?",
+      "betrifft": [
+        "R15",
+        "U35"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O31",
+      "an": "vorstand",
+      "prioritaet": "P1",
+      "frage": "Keine beitragsfreie oder befristete Probemitgliedschaft anbieten (nicht versichert).",
+      "betrifft": [
+        "R15"
+      ],
+      "status": "offen",
+      "quelle": "Vollständigkeitsprüfung, Abschnitt 4"
+    },
+    {
+      "id": "O32",
+      "an": "vorstand",
+      "prioritaet": "P2",
+      "frage": "Gibt der Verein die HFV-Gebühr von 10 Euro (Junioren) und 25 Euro (Herren) an die Familien weiter?",
+      "betrifft": [
+        "F06",
+        "F12"
+      ],
+      "status": "offen",
+      "quelle": "Vollständigkeitsprüfung, Abschnitt 1 L5"
+    },
+    {
+      "id": "O33",
+      "an": "vorstand",
+      "prioritaet": "P2",
+      "frage": "Die Bescheinigung für Bildung und Teilhabe als Standardanlage mitgeben?",
+      "betrifft": [
+        "U33"
+      ],
+      "status": "offen",
+      "quelle": "Vollständigkeitsprüfung, Abschnitt 4"
+    },
+    {
+      "id": "O34",
+      "an": "vorstand",
+      "prioritaet": "P2",
+      "frage": "Senatorenmitgliedschaft: Status und Stimmrecht. Die Satzung kennt keine Senatoren.",
+      "betrifft": [
+        "U34"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O35",
+      "an": "vorstand",
+      "prioritaet": "P2",
+      "frage": "Kostüme im Karneval: Wem gehören sie, was kosten sie, gibt es eine Kaution? Was zahlen Familien noch dazu?",
+      "betrifft": [
+        "U31"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O36",
+      "an": "vorstand",
+      "prioritaet": "P2",
+      "frage": "Aufsicht bei Abendauftritten, Umkleide und Kostümwechsel: Schutzkonzept für den Karneval ergänzen. Erziehungsbeauftragung je Kampagne oder einmalig?",
+      "betrifft": [
+        "U30"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O37",
+      "an": "kassierer",
+      "prioritaet": "P2",
+      "frage": "Aufnahmegebühr 20 Euro: bar oder mit dem ersten Beitrag eingezogen? Gilt sie auch für Karneval und für passive Mitglieder?",
+      "betrifft": [
+        "U35"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O38",
+      "an": "kassierer",
+      "prioritaet": "P2",
+      "frage": "Gilt der Zuschlag von 3 Euro ohne Lastschrift noch (steht nur im Info-Blatt von 2014)?",
+      "betrifft": [
+        "U05"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O39",
+      "an": "kassierer",
+      "prioritaet": "P2",
+      "frage": "Jedes SEPA-Mandat braucht eine eigene Mandatsreferenz. IBANs aus allen SEPA-Ländern annehmen? Welche Ausweichmöglichkeit gilt bei Konten außerhalb von SEPA?",
+      "betrifft": [
+        "U05"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O40",
+      "an": "kassierer",
+      "prioritaet": "P2",
+      "frage": "Wer zählt zur Familie? Welcher Beitrag gilt bei Doppelmitgliedschaft in Fußball und Karneval? Wie lange gilt der Nachweis für Auszubildende und Studierende?",
+      "betrifft": [
+        "U02",
+        "U03"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O41",
+      "an": "kassierer",
+      "prioritaet": "P2",
+      "frage": "Kündigung bis 31. Dezember: Zählt die Absendung oder der Eingang?",
+      "betrifft": [
+        "U19"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O42",
+      "an": "kassierer",
+      "prioritaet": "P2",
+      "frage": "Attest bei Erwachsenen als Vereinsregel behalten? Papier-Passbild abschaffen? Wer macht das Spielerfoto?",
+      "betrifft": [
+        "U10",
+        "U16"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O43",
+      "an": "kassierer",
+      "prioritaet": "P2",
+      "frage": "Den Hinweis zu den 20 Euro neu formulieren (keine HFV-Gebühr, sondern Aufnahmegebühr des Vereins).",
+      "betrifft": [
+        "U35"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O44",
+      "an": "kassierer",
+      "prioritaet": "P2",
+      "frage": "Altersgrenzen der Jugendbeiträge: vollendetes 18. Lebensjahr (Satzung), A-Jugend einschließlich 18-Jähriger (Fußball) oder bis 17 (Karneval)?",
+      "betrifft": [
+        "U01"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O45",
+      "an": "datenschutz",
+      "prioritaet": "P2",
+      "frage": "Den Text nach Art. 13 DSGVO in Einfacher Sprache schreiben, übersetzen und vom Vorstand freigeben lassen.",
+      "betrifft": [
+        "U06"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O46",
+      "an": "datenschutz",
+      "prioritaet": "P2",
+      "frage": "Verarbeitungsverzeichnis anlegen, Datenschutzbeauftragten prüfen (ab 20 Personen mit automatisierter Verarbeitung), Satzung § 23 aktualisieren.",
+      "betrifft": [
+        "U06",
+        "U11",
+        "U28"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O47",
+      "an": "datenschutz",
+      "prioritaet": "P2",
+      "frage": "Schutzkonzept fertigstellen: Platzhalter 'XXX', fehlende Anlagen, private Kontaktadressen ersetzen.",
+      "betrifft": [
+        "U29"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O48",
+      "an": "datenschutz",
+      "prioritaet": "P2",
+      "frage": "Info-Blatt (2014), Unterlagenliste (2021), Zusatzerklärung (2014) und den toten Satzungslink ersetzen. Im Info-Blatt 'ALG II' durch 'Grundsicherungsgeld' ersetzen.",
+      "betrifft": [
+        "U26",
+        "U33"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O49",
+      "an": "versicherung",
+      "prioritaet": "P3",
+      "frage": "ARAG und LSB: Sind Karneval, Nichtmitglieder und neue Mitglieder vom ersten Tag an versichert? Ist die Karnevalabteilung beim LSB angemeldet?",
+      "betrifft": [
+        "R15",
+        "F01"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O50",
+      "an": "kreis_frankfurt",
+      "prioritaet": "P3",
+      "frage": "Funino in der F-Jugend: Wie wird der Jahrgang 2020 zugeordnet (Verein: F2, Kreis: G-Jugend)?",
+      "betrifft": [
+        "F03"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O51",
+      "an": "grosser_rat_bdk",
+      "prioritaet": "P3",
+      "frage": "Großer Rat und BDK: Mitgliedschaft der Abteilung und Turnierfragen (Tanzausweis, Zustimmung zu Aufnahmen).",
+      "betrifft": [
+        "U32"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O52",
+      "an": "vorstand",
+      "prioritaet": "P3",
+      "frage": "Ansprechpersonen und Sprachen für den Hilfe-Knopf festlegen, Sprechzeiten im Vereinsheim, Sprachmittlung.",
+      "betrifft": [],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O53",
+      "an": "vorstand",
+      "prioritaet": "P3",
+      "frage": "Den Assistenten mit 3 bis 5 Eltern testen, die wenig Deutsch sprechen.",
+      "betrifft": [],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O54",
+      "an": "jugendleitung",
+      "prioritaet": "P2",
+      "frage": "Was sagt der Verein Familien mit Kindern der Jahrgänge 2010 bis 2013? Für sie gibt es 2026/27 keine B- oder C-Jugend. Mädchen dürfen bis zur C-Jugend ein Jahr älter sein und in Jungenteams spielen.",
+      "betrifft": [
+        "R8"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O55",
+      "an": "karnevalabteilung",
+      "prioritaet": "P2",
+      "frage": "Gruppen und Altersgrenzen der Karnevalabteilung bestätigen (die Angaben stammen von der Internetseite des FCV, Stand 2024).",
+      "betrifft": [
+        "F01"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O56",
+      "an": "karnevalabteilung",
+      "prioritaet": "P3",
+      "frage": "Welche Turniere tanzen die Gruppen, und in welchen Verbänden (BDK, IGMK)? Ist die Gruppe 'Freaky Fruities' bis 16 oder bis 15 Jahre?",
+      "betrifft": [
+        "U32"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O57",
+      "an": "karnevalabteilung",
+      "prioritaet": "P3",
+      "frage": "Probetraining (Schnuppern) im Karneval regeln. Die Website widerspricht sich.",
+      "betrifft": [
+        "F01"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
+    },
+    {
+      "id": "O58",
+      "an": "regelwerk",
+      "prioritaet": "P2",
+      "frage": "Neues FIFA-Transferreglement ab 2027-01-01 (laut Kanzleimeldung Freigabeschein in 5 Tagen, nicht an der FIFA-Quelle geprüft): Regel R2 dann neu prüfen.",
+      "betrifft": [
+        "R2"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 4 (R12)"
+    },
+    {
+      "id": "O59",
+      "an": "regelwerk",
+      "prioritaet": "P2",
+      "frage": "Ab Saison 2027/28 spielt die E-Jugend nur noch 6 gegen 6 in Meldeligen: Die Wartefrist-Regeln für die E-Jugend (R4) neu prüfen.",
+      "betrifft": [
+        "R4"
+      ],
+      "status": "offen",
+      "quelle": "Recherche Anmelde-Assistent, Abschnitt 4 (R12)"
+    },
+    {
+      "id": "O60",
+      "an": "hfv_passstelle",
+      "prioritaet": "P2",
+      "frage": "Wartefrist nach Monaten: Die Passstelle rechnet 'Abmeldedatum plus Monate plus 1 Tag' (Folie 16), die JO rechnet nach den Regeln des BGB (Beginn am Tag nach der Abmeldung). Beide Wege unterscheiden sich am Monatsende um einen Tag. Der Assistent nimmt den späteren Tag.",
+      "betrifft": [
+        "R5",
+        "R4"
+      ],
+      "status": "offen",
+      "quelle": "Eigene Rechnung des Regelwerks, Stand 2026-09-29"
+    },
+    {
+      "id": "O61",
+      "an": "hfv_passstelle",
+      "prioritaet": "P2",
+      "frage": "Wegfall der Wartefrist nach mehr als 6 Monaten ohne Pflichtspiel: Der Assistent rechnet nur, wenn der Zeitraum am Tag des Antrags schon vorbei ist. Darf der Verein den Antrag später stellen, um die Wartefrist zu vermeiden?",
+      "betrifft": [
+        "R5",
+        "R7",
+        "U22"
+      ],
+      "status": "offen",
+      "quelle": "Eigene Annahme des Regelwerks, Stand 2026-09-29"
+    },
+    {
+      "id": "O62",
+      "an": "hfv_passstelle",
+      "prioritaet": "P1",
+      "frage": "Deutsche Rückkehrer ab 10 Jahren: Gilt 'zuletzt Wohnsitz im Ausland' auch, wenn das Kind seit vielen Jahren wieder in Deutschland lebt? Der Assistent löst das internationale Verfahren aus, sobald 'im Ausland gewohnt' mit ja beantwortet wird.",
+      "betrifft": [
+        "R2",
+        "F05",
+        "U12"
+      ],
+      "status": "offen",
+      "quelle": "DFB-Seite Internationale Transfers (abgerufen 2026-09-29)"
+    },
+    {
+      "id": "O63",
+      "an": "datenschutz",
+      "prioritaet": "P3",
+      "frage": "Ist die Unterschrift zur Kenntnisnahme der Datenschutzinformation nötig? Nach Art. 13 DSGVO genügt die Information; der Assistent sieht eine Unterschrift zur Kenntnisnahme vor.",
+      "betrifft": [
+        "U06"
+      ],
+      "status": "offen",
+      "quelle": "DSGVO Art. 12 und 13"
+    },
+    {
+      "id": "O64",
+      "an": "regelwerk",
+      "prioritaet": "P3",
+      "frage": "Gesundheitsamt Frankfurt: kostenloses Attest für Kinder mit Frankfurt-Pass oder Grundsicherungsgeld? Die Seite war nicht prüfbar, der Assistent nennt das deshalb nicht.",
+      "betrifft": [
+        "U10"
+      ],
+      "status": "offen",
+      "quelle": "Vollständigkeitsprüfung, Korrektur K8"
+    },
+    {
+      "id": "O65",
+      "an": "vorstand",
+      "prioritaet": "P2",
+      "frage": "Foto-Einwilligung bei Jugendlichen: Soll ab 14 oder ab 16 Jahren die oder der Jugendliche zusätzlich selbst unterschreiben (Einsichtsfähigkeit)? Der Assistent lässt bisher nur die Eltern unterschreiben. Der Hinweis dazu ist bis zur Entscheidung entfernt.",
+      "betrifft": [
+        "U04"
+      ],
+      "status": "offen",
+      "quelle": "Prüfung Orchestrator, 29.09.2026"
+    },
+    {
+      "id": "O66",
+      "an": "vorstand",
+      "prioritaet": "P1",
+      "frage": "Die Adresse im Aufnahmeantrag (www.sportfreunde04.de/satzung.pdf) führt ins Leere: Weiterleitung auf appack, Fehler 401, geprüft am 29.09.2026. Die Satzung liegt unter der Download-Adresse der Website. Weiterleitung reparieren oder Adresse im Vordruck ändern.",
+      "betrifft": [
+        "U01"
+      ],
+      "status": "offen",
+      "quelle": "Prüfung Orchestrator, 29.09.2026; Aufnahmeantrag FFV, Stand 2026-09"
+    },
+    {
+      "id": "O67",
+      "an": "datenschutz",
+      "prioritaet": "P1",
+      "frage": "Rechtsgrundlage für die Notfallkontakte ohne Angaben zur Gesundheit: Art. 6 Abs. 1 lit. b DSGVO (Mitgliedschaft, Fürsorge im Training) oder lit. f (berechtigtes Interesse, weitere Kontaktpersonen)? Der Entwurf der Information zum Datenschutz nennt beide.",
+      "betrifft": [
+        "U28",
+        "U06"
+      ],
+      "status": "offen",
+      "quelle": "Prüfung Orchestrator, 30.09.2026"
+    },
+    {
+      "id": "O68",
+      "an": "vorstand",
+      "prioritaet": "P1",
+      "frage": "Dürfen Vereinsunterlagen am Bildschirm unterschrieben werden? Das wäre eine einfache elektronische Unterschrift. Die Form bestimmt der Verein selbst (Satzung, § 127 BGB). HFV-Vordrucke bleiben Stift.",
+      "betrifft": [
+        "U01",
+        "U04",
+        "U05",
+        "U06",
+        "U29"
+      ],
+      "status": "offen",
+      "quelle": "Prüfung Orchestrator, 30.09.2026; data/anmeldung-formulare.json (digitaleUnterschrift)"
+    },
+    {
+      "id": "O69",
+      "an": "jugendleitung",
+      "prioritaet": "P2",
+      "frage": "Wer im Verein gibt eine Vollmacht für die Abmeldung am selben oder nächsten Tag in DFBnet ein? Sonst verlängert sich die Wartezeit.",
+      "betrifft": [
+        "U18"
+      ],
+      "status": "offen",
+      "quelle": "Prüfung Orchestrator, 30.09.2026"
+    },
+    {
+      "id": "O70",
+      "an": "jugendleitung",
+      "prioritaet": "P2",
+      "frage": "Namentliche Meldung der Jugendspieler beim Kreisjugendwart (HFV-Jugendordnung § 7 Nr. 2): Wer meldet, bis wann?",
+      "betrifft": [
+        "U07"
+      ],
+      "status": "offen",
+      "quelle": "Prüfung Orchestrator, 30.09.2026; HFV-Jugendordnung § 7 Nr. 2, Stand 2026-07-01"
+    },
+    {
+      "id": "O71",
+      "an": "vorstand",
+      "prioritaet": "P2",
+      "frage": "Wer pflegt Fristen, Beträge und Gebühren im Regelwerk des Assistenten, wenn sich Beitragsordnung oder Verbandsordnungen ändern?",
+      "betrifft": [],
+      "status": "offen",
+      "quelle": "Prüfung Orchestrator, 30.09.2026"
+    }
+  ]
+}

@@ -1,0 +1,1309 @@
+{
+  "_beschreibung": {
+    "zweck": "Amtliche Vordrucke und Schreibstellen für den Anmelde-Assistenten. Die Datei wird von tools/anmeldung-test/formulare-erzeugen.mjs aus den PDFs unter assets/pdf/anmeldung/ und den Zuordnungen in diesem Skript erzeugt; tools/anmeldung-test/formulare-pruefen.mjs prüft sie gegen die PDFs. Wird ein Vordruck ersetzt: Original mit --bereinigen umwandeln und als Kopie ablegen, quelle_sha256, quelle_bytes und quelle_stand in META anpassen, JSON neu erzeugen, Prüfskript ausführen und alle gemeldeten Abweichungen (Felder, Beschriftungen, Linien) nachziehen.",
+    "kopien": "Die PDFs unter assets/pdf/anmeldung/ sind Kopien der amtlichen Vordrucke ohne Datei-Metadaten (metadaten_entfernt: true): Die Info-Felder Author, Creator, Producer, Title, Subject und Keywords sowie der XMP-Metadatenstrom sind entfernt (CreationDate und ModDate bleiben), ebenso nicht mehr erreichbare Objekte älterer Fassungen. Seiteninhalt, Formularfelder und Trailer-ID sind unverändert, das Rendering ist pixelgleich. sha256 und bytes gelten für die Kopie im Repo, quelle_sha256 und quelle_bytes für die Originaldatei wie geliefert (sie liegt nicht im Repo).",
+    "koordinaten": "PDF-Punkte (1 pt = 1/72 Zoll), Ursprung unten links wie bei pdf-lib, Seiten 1-basiert (pdf-lib: getPage(seite - 1)). rect eines Formularfelds = [x, y, Breite, Höhe] mit x/y an der linken unteren Ecke. Kästen der Stellen (unterschriften, handfelder) = x, y (Unterkante), breite, hoehe; bei art „grundlinie“ (nur Aufnahmeantrag, Werte wörtlich aus data/aufnahmeantrag-felder.json) ist y die Textgrundlinie und der Kasten reicht von y - 3 um hoehe nach oben.",
+    "felder": "Schlüssel = exakter Feldname im PDF (pdf-lib: form.getField(name)); Sonderzeichen und irreführende Namen sind wörtlich übernommen (z. B. „undefined“, „Straße und Hausnummer 2“, „Staatsangeh#C3#B6rigkeit“). typ: text | checkbox. maxLaenge: höchstens erlaubte Zeichen (pdf-lib wirft sonst einen Fehler). bedeutung: gedruckter Wortlaut in „…“ plus Erläuterung. hinweis: Besonderheiten. beleg: gedruckte Beschriftung mit Lage zum Feld und Kasten [x0, y0, x1, y1] aus den Textkoordinaten der PDF (pdftotext -bbox-layout); das Prüfskript liest an derselben Stelle denselben Text wieder aus.",
+    "lagen": "rechts = Beschriftung rechts neben dem Feld; links = links, höchstens 60 pt entfernt; zeile = links in derselben Zeile (weiter entfernt); oben = direkt über dem Feld; unten = direkt darunter (z. B. unter der Schreiblinie); bereich = Abschnittsüberschrift weiter oben.",
+    "fuellt": "assistent = der Assistent füllt das Feld aus den Antworten; verein = Feld des Vereins oder des HFV, leer lassen; familie_hand = die Familie schreibt es von Hand, leer lassen.",
+    "quelle": "Wert bzw. Bedingung als kleiner Ausdruck. Pfade: a.… = Antworten (Schnittstellen Abschnitt 3), e.… = Ergebnis der Regeln (Abschnitt 5), konfig.… = Konfiguration (Abschnitt 2). Textfelder: Pfad, optional mit |Format (TT.MM.JJJJ = ISO-Datum in deutscher Schreibweise, z. B. 2026-12-31 als 31.12.2026; STAATEN = ISO-Länderkürzel als deutsche Bezeichnungen, mit Komma getrennt); Teile mit + verbinden (feste Texte in Anführungszeichen). Kästchen: Bedingung mit =, !=, <, in [x,y], enthält, und, oder, nicht; ein Pfad allein gilt bei Wahrheitswerten. bedingung (bei Textfeldern und Unterschriften): nur füllen bzw. nur nötig, wenn die Bedingung gilt. leerWennFehlt: true (nur bei fuellt=assistent) = fehlt der Wert (nicht beantwortet oder leer), bleibt das Feld bzw. Kästchen leer und wird von Hand ausgefüllt; ohne diese Angabe braucht der Assistent den Wert. Ist der Wert leer, bleibt das Feld leer. null = keine Quelle (Feld bleibt leer).",
+    "stellen": "unterschriften: Stellen für Unterschriften; stelleKey ist der Schlüssel, den e.unterschriften[].stelleKey verwendet. wer = wer laut Vordruck unterschreibt (mitglied, spieler, sorgeberechtigte, kontoinhaber, verein); wennMinderjaehrig = wer bei Minderjährigen stattdessen unterschreibt; bedingung = nur dann nötig. Kasten = Fläche über der gedruckten Linie für das Unterschriftsbild oder die Markierung; linie = gedruckte Schreiblinie (x0, x1, Höhe y); gedruckt: false = Linie und Beschriftung fehlen im Vordruck, der PDF-Baukasten zeichnet sie mit. handfelder: Stellen, die die Familie von Hand ausfüllt (typ text oder kreuz); feld = zugehöriges Formularfeld im PDF; hat es fuellt=assistent mit leerWennFehlt, schreibt die Familie nur dann von Hand, wenn der Assistent es leer lässt.",
+    "digitaleUnterschrift": "erlaubt = Vereinsformular, die Unterschrift darf am Bildschirm gezeichnet und als Bild eingesetzt werden; nicht_erlaubt = HFV-Vordruck, die Stellen bleiben leer und werden für die Unterschrift mit Stift markiert (digitaleUnterschriftGrund nennt die Regel; umstellbar, falls die HFV-Passstelle zustimmt)."
+  },
+  "stand": "2026-09-29",
+  "formulare": {
+    "aufnahmeantrag": {
+      "titel": "Aufnahmeantrag – Vereinsanmeldung für neue Mitglieder (mit Einwilligung zu Fotos und SEPA-Lastschriftmandat), F.F.V. Sportfreunde 1904 e.V.",
+      "datei": "assets/pdf/anmeldung/vereinsanmeldung-9-2026.pdf",
+      "quelle_url": "https://cdn.appack.de/sportfreunde04/pdf/Vereinsanmeldung%20allgemein_NEU_9-2026%20%20(1).pdf",
+      "quelle_stand": "Vereinsformular 9/2026, PDF vom 2026-08-31; Kopie ins Repo am 2026-09-29",
+      "sha256": "cbfef6eee35beb669f4e0ff96e50885cce649d9d1d0849660154b17a9958faed",
+      "bytes": 202874,
+      "quelle_sha256": "ce9c37c0f01b6cfffeb09f9c306d403e48ea2220b3f4178315a75ff245866edf",
+      "quelle_bytes": 217968,
+      "metadaten_entfernt": true,
+      "seiten": 4,
+      "seitenformat": { "breite": 595.32, "hoehe": 841.92, "name": "A4" },
+      "formularfelder": 0,
+      "vermessung": "data/aufnahmeantrag-felder.json",
+      "unterschriften": [
+        {
+          "stelleKey": "s2.unterschrift",
+          "seite": 2,
+          "x": 312,
+          "y": 126.42,
+          "breite": 232,
+          "hoehe": 40,
+          "wer": "mitglied",
+          "wennMinderjaehrig": "sorgeberechtigte",
+          "beschriftung": "Unterschrift:",
+          "bezug": "aufnahmeantrag-felder.json#s2.unterschrift",
+          "linie": { "x0": 310.87, "x1": 545.12, "y": 128.42 },
+          "hinweis": "Das Formular nennt hier niemanden; bei Minderjährigen unterschreibt ein Sorgeberechtigter (das Online-Formular druckt den Namen als Zusatz darunter, ZUSAETZE s2.zusatz_unterzeichner).",
+          "beleg": [
+            { "lage": "links", "text": "Unterschrift:", "box": [243.65, 127.73, 304.86, 141.01] }
+          ]
+        },
+        {
+          "stelleKey": "s2.unterschrift_sorgeberechtigte",
+          "seite": 2,
+          "x": 312,
+          "y": 72,
+          "breite": 232,
+          "hoehe": 30,
+          "wer": "sorgeberechtigte",
+          "bedingung": "e.minderjaehrig",
+          "beschriftung": "Unterschrift Erziehungsberechtigte/r (bei Minderjährigen)",
+          "linie": { "x0": 310.87, "x1": 545.12, "y": 74 },
+          "gedruckt": false,
+          "hinweis": "Zusätzliche Stelle, im Vordruck nicht vorhanden: freie Fläche unter der Rahmenlinie (gemessen 2026-09-29: Seite 2 zwischen y 61 und 107 ist leer, Fußzeile beginnt bei y 58,9 rechts). Linie und Beschriftung muss der PDF-Baukasten mit zeichnen. Reicht für zwei Unterschriften nebeneinander (je etwa 112 pt)."
+        },
+        {
+          "stelleKey": "s3.unterschrift",
+          "seite": 3,
+          "x": 321,
+          "y": 142.92,
+          "breite": 180,
+          "hoehe": 30,
+          "wer": "mitglied",
+          "wennMinderjaehrig": "sorgeberechtigte",
+          "beschriftung": "Unterschrift Mitglied (Unterschrift Erziehungsberechtigte/r bei Minderjährigen)",
+          "bezug": "aufnahmeantrag-felder.json#s3.unterschrift",
+          "linie": { "x0": 320.81, "x1": 416.56, "y": 144.92 },
+          "hinweis": "Gedruckte Linie nur 96 pt lang (x 320,8 bis 416,6); der Kasten reicht bis zum Klammerhinweis darunter (x 501).",
+          "beleg": [
+            { "lage": "unten", "text": "(Unterschrift Erziehungsberechtigte/r bei Minderjährigen)", "box": [313.51, 126.18, 501.29, 135.08] }
+          ]
+        },
+        {
+          "stelleKey": "s4.unterschrift",
+          "seite": 4,
+          "x": 351,
+          "y": 114.92,
+          "breite": 190,
+          "hoehe": 38,
+          "wer": "kontoinhaber",
+          "beschriftung": "Unterschrift des Kontoinhabers",
+          "bezug": "aufnahmeantrag-felder.json#s4.unterschrift",
+          "linie": { "x0": 349.87, "x1": 541.87, "y": 116.92 },
+          "beleg": [
+            { "lage": "unten", "text": "Unterschrift des Kontoinhabers", "box": [387.55, 105.94, 500.6, 115.9] }
+          ]
+        }
+      ],
+      "handfelder": [
+        {
+          "key": "s2.ort_datum",
+          "seite": 2,
+          "typ": "text",
+          "x": 97.12,
+          "y": 131.02,
+          "breite": 122,
+          "hoehe": 13,
+          "art": "grundlinie",
+          "bedeutung": "„Ort, Datum:“ unter dem Aufnahmeantrag (Seite 2)",
+          "bezug": "aufnahmeantrag-felder.json#s2.ort_datum",
+          "linie": { "x0": 95.12, "x1": 221.12, "y": 128.42 },
+          "beleg": [
+            { "lage": "links", "text": "Ort, Datum:", "box": [31.2, 127.73, 89.12, 141.01] }
+          ]
+        },
+        {
+          "key": "s3.ort_datum",
+          "seite": 3,
+          "typ": "text",
+          "x": 94.12,
+          "y": 147.52,
+          "breite": 114,
+          "hoehe": 13,
+          "art": "grundlinie",
+          "bedeutung": "„Ort, Datum:“ unter der Einwilligung zu Fotos (Seite 3)",
+          "bezug": "aufnahmeantrag-felder.json#s3.ort_datum",
+          "linie": { "x0": 92.12, "x1": 212.12, "y": 144.92 },
+          "beleg": [
+            { "lage": "links", "text": "Ort, Datum:", "box": [31.2, 144.31, 89.12, 157.59] }
+          ]
+        },
+        {
+          "key": "s4.ort_datum",
+          "seite": 4,
+          "typ": "text",
+          "x": 33.2,
+          "y": 119.52,
+          "breite": 188,
+          "hoehe": 13,
+          "art": "grundlinie",
+          "bedeutung": "„Ort, Datum“ unter dem SEPA-Lastschriftmandat (Seite 4)",
+          "bezug": "aufnahmeantrag-felder.json#s4.ort_datum",
+          "linie": { "x0": 31.2, "x1": 223.2, "y": 116.92 },
+          "beleg": [
+            { "lage": "unten", "text": "Ort, Datum", "box": [31.2, 105.94, 72.26, 115.9] }
+          ]
+        }
+      ],
+      "digitaleUnterschrift": "erlaubt",
+      "digitaleUnterschriftGrund": "Vereinsformular: Die Form der Erklärung bestimmt der Verein (Satzung verlangt Schriftform; § 127 BGB); Vorstand bestätigt. Der Online-Aufnahmeantrag der Vereinswebsite unterschreibt schon am Bildschirm."
+    },
+    "hfv_antrag": {
+      "titel": "Antrag auf Spielerlaubnis / Vereinswechsel (Hessischer Fußball-Verband, Pass-Stelle), mit Datenschutz und Einwilligungen auf Seite 3",
+      "datei": "assets/pdf/anmeldung/hfv-antrag-spielerlaubnis.pdf",
+      "quelle_url": "https://hfv-online.de/wp-content/uploads/2026/01/Vereinswechsel.pdf",
+      "quelle_stand": "Antrag Stand 06/2026: PDF erstellt 2026-06-12, zuletzt geändert 2026-06-16 (auf hfv-online.de/formulare-2/ verlinkt mit ?ver=1781606961); Kopie ins Repo am 2026-09-29",
+      "sha256": "1f5f257dc5b17d2c42ca6a6760396af01f62c5a7975b491b3f15c64db975a1b3",
+      "bytes": 231139,
+      "quelle_sha256": "141193a74971f987d8f26bc0f33ac82c7c1283bfef70577d16b0001c3f9a3af8",
+      "quelle_bytes": 278105,
+      "metadaten_entfernt": true,
+      "seiten": 3,
+      "seitenformat": { "breite": 595, "hoehe": 842, "name": "A4" },
+      "formularfelder": 38,
+      "felder": {
+        "AntragVerein": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [158, 705.4, 287.7, 18.3],
+          "maxLaenge": 70,
+          "bedeutung": "„Antrag stellender Verein:“ – Name des Vereins, der den Antrag stellt (Kopfbereich, breites Feld)",
+          "fuellt": "assistent",
+          "quelle": "konfig.verein.name_register",
+          "hinweis": "Vereinsname wie im DFBnet geführt; Schreibweise (eingetragener Name oder Kurzform konfig.verein.name) vor dem Livegang mit der Geschäftsstelle abstimmen.",
+          "beleg": [
+            { "lage": "links", "text": "Antrag stellender Verein:", "box": [59.1, 710.61, 146.65, 719.54] }
+          ]
+        },
+        "AntragNr": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [462.7, 705.4, 86.2, 18.3],
+          "maxLaenge": 8,
+          "bedeutung": "„Vereinsnummer“ (Spaltenüberschrift rechts) – Nummer des antragstellenden Vereins, Zeile „Antrag stellender Verein:“",
+          "fuellt": "assistent",
+          "quelle": "konfig.verein.vereinsnummer",
+          "beleg": [
+            { "lage": "oben", "text": "Vereinsnummer", "box": [462.9, 727.81, 522.88, 736.74] },
+            { "lage": "zeile", "text": "Antrag stellender Verein:", "box": [59.1, 710.61, 146.65, 719.54] }
+          ]
+        },
+        "StammVerein": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [158, 679.9, 287.7, 18.3],
+          "maxLaenge": 70,
+          "bedeutung": "„Stammverein (bei JFV):“ – nur für Spieler*innen eines Jugendfördervereins (JFV); der FFV ist kein JFV, daher leer",
+          "fuellt": "verein",
+          "quelle": null,
+          "beleg": [
+            { "lage": "links", "text": "Stammverein (bei JFV):", "box": [59.1, 685.11, 143.05, 694.04] }
+          ]
+        },
+        "StammNr": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [462.7, 679.9, 86.2, 18.3],
+          "maxLaenge": 8,
+          "bedeutung": "„Vereinsnummer“ (Spaltenüberschrift rechts) des Stammvereins, Zeile „Stammverein (bei JFV):“ – nur bei JFV, sonst leer",
+          "fuellt": "verein",
+          "quelle": null,
+          "beleg": [
+            { "lage": "oben", "text": "Vereinsnummer", "box": [462.9, 727.81, 522.88, 736.74] },
+            { "lage": "zeile", "text": "Stammverein (bei JFV):", "box": [59.1, 685.11, 143.05, 694.04] }
+          ]
+        },
+        "Familienname": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [158, 654.3, 392, 18.3],
+          "maxLaenge": 70,
+          "bedeutung": "„Familienname:“",
+          "fuellt": "assistent",
+          "quelle": "a.nachname",
+          "beleg": [
+            { "lage": "links", "text": "Familienname:", "box": [59.1, 659.51, 111.48, 668.44] }
+          ]
+        },
+        "Vorname": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [158, 628.8, 392, 18.3],
+          "maxLaenge": 70,
+          "bedeutung": "„Vorname:“",
+          "fuellt": "assistent",
+          "quelle": "a.vorname",
+          "beleg": [
+            { "lage": "zeile", "text": "Vorname:", "box": [59.1, 634.01, 93.3, 642.94] }
+          ]
+        },
+        "Strasse": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [158, 603.2, 392, 18.3],
+          "maxLaenge": 70,
+          "bedeutung": "„Straße, Hausnr.:“ – Straße und Hausnummer der Wohnanschrift",
+          "fuellt": "assistent",
+          "quelle": "a.anschrift.strasse",
+          "beleg": [
+            { "lage": "links", "text": "Straße, Hausnr.:", "box": [59.1, 608.41, 117.28, 617.34] }
+          ]
+        },
+        "PLZ": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [158, 577.7, 51.3, 18.3],
+          "maxLaenge": 5,
+          "bedeutung": "„PLZ, Ort:“ – linkes, kurzes Feld: Postleitzahl",
+          "fuellt": "assistent",
+          "quelle": "a.anschrift.plz",
+          "beleg": [
+            { "lage": "zeile", "text": "PLZ, Ort:", "box": [59.1, 582.91, 91.5, 591.84] }
+          ]
+        },
+        "Ort": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [226, 577.7, 324.1, 18.3],
+          "maxLaenge": 50,
+          "bedeutung": "„PLZ, Ort:“ – rechtes, langes Feld: Wohnort",
+          "fuellt": "assistent",
+          "quelle": "a.anschrift.ort",
+          "beleg": [
+            { "lage": "zeile", "text": "PLZ, Ort:", "box": [59.1, 582.91, 91.5, 591.84] }
+          ]
+        },
+        "Geburtsdatum": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [158, 552.1, 108, 18.3],
+          "maxLaenge": 10,
+          "bedeutung": "„Geburtsdatum:“ – Schreibweise TT.MM.JJJJ (höchstens 10 Zeichen)",
+          "fuellt": "assistent",
+          "quelle": "a.geburtsdatum|TT.MM.JJJJ",
+          "beleg": [
+            { "lage": "links", "text": "Geburtsdatum:", "box": [59.1, 557.31, 112, 566.24] }
+          ]
+        },
+        "Staatsangeh#C3#B6rigkeit": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [378.1, 552.1, 171.6, 18.3],
+          "maxLaenge": 30,
+          "bedeutung": "„Staatsangehörigkeit:“ (der Feldname im PDF lautet wörtlich „Staatsangeh#C3#B6rigkeit“ – Kodierungsfehler des Erstellers, nicht ändern)",
+          "fuellt": "assistent",
+          "quelle": "a.staaten|STAATEN",
+          "hinweis": "Bezeichnungen der Staatsangehörigkeiten auf Deutsch (Länderkürzel aus a.staaten umsetzen), mehrere durch Komma getrennt; höchstens 30 Zeichen, sonst kürzen.",
+          "beleg": [
+            { "lage": "links", "text": "Staatsangehörigkeit:", "box": [299.9, 557.31, 372.77, 566.24] }
+          ]
+        },
+        "K1": {
+          "typ": "checkbox",
+          "seite": 1,
+          "rect": [159.2, 531.2, 12.3, 11.9],
+          "bedeutung": "„Geschlecht:“ – Kästchen vor „männlich“",
+          "fuellt": "assistent",
+          "quelle": "a.geschlecht=m",
+          "beleg": [
+            { "lage": "rechts", "text": "männlich", "box": [175.39, 530.59, 215.33, 541.75] },
+            { "lage": "zeile", "text": "Geschlecht:", "box": [59.1, 531.81, 101.3, 540.74] }
+          ]
+        },
+        "K2": {
+          "typ": "checkbox",
+          "seite": 1,
+          "rect": [228.8, 531.2, 12.3, 11.9],
+          "bedeutung": "„Geschlecht:“ – Kästchen vor „weiblich“",
+          "fuellt": "assistent",
+          "quelle": "a.geschlecht=w",
+          "beleg": [
+            { "lage": "rechts", "text": "weiblich", "box": [243.4, 530.59, 278.84, 541.75] },
+            { "lage": "zeile", "text": "Geschlecht:", "box": [59.1, 531.81, 101.3, 540.74] }
+          ]
+        },
+        "K3": {
+          "typ": "checkbox",
+          "seite": 1,
+          "rect": [294.2, 531.2, 12.3, 11.9],
+          "bedeutung": "„Geschlecht:“ – Kästchen vor „divers“",
+          "fuellt": "assistent",
+          "quelle": "a.geschlecht=d",
+          "hinweis": "Bei a.geschlecht=ohne_angabe bleiben K1 bis K3 leer (das Formular kennt „ohne Angabe“ nicht); dann gelten K7 bis K9, der Verein klärt das mit der Vertrauensperson des HFV (SpO § 91 Nr. 9).",
+          "beleg": [
+            { "lage": "rechts", "text": "divers", "box": [308.7, 530.59, 335.37, 541.75] },
+            { "lage": "zeile", "text": "Geschlecht:", "box": [59.1, 531.81, 101.3, 540.74] }
+          ]
+        },
+        "Antragsdatum": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [475.6, 526.6, 73.8, 18.3],
+          "maxLaenge": 10,
+          "bedeutung": "„Tag der Antragstellung:“ – Tag, an dem der Verein den Antrag stellt (frühester Tag der Spielberechtigung ist der Tag des Antragseingangs beim Verband, SpO § 91 Nr. 1)",
+          "fuellt": "verein",
+          "quelle": null,
+          "hinweis": "Trägt der Verein am Tag der Antragstellung (Eingabe im DFBnet) ein. Bewusst nicht vorausgefüllt: zwischen PDF-Erstellung, Unterschrift und Antrag können Tage liegen.",
+          "beleg": [
+            { "lage": "links", "text": "Tag der Antragstellung:", "box": [388.5, 531.81, 470.27, 540.74] }
+          ]
+        },
+        "K4": {
+          "typ": "checkbox",
+          "seite": 1,
+          "rect": [60.1, 503.2, 12.3, 11.9],
+          "bedeutung": "Kästchen vor „Erstmalige Spielerlaubnis“ („O.g. Spieler/in bestätigt, dass noch keine Spielberechtigung für einen anderen Verein besteht oder bestanden hat, auch nicht im Ausland.“)",
+          "fuellt": "assistent",
+          "quelle": "e.status=neu",
+          "hinweis": "Bei e.status=ausland_unbekannt bleiben K4 und K5 leer: die Erklärung „auch nicht im Ausland“ wäre nicht sicher; der Verein klärt das. Unterlagen nennt Seite 2 des Vordrucks.",
+          "beleg": [
+            { "lage": "rechts", "text": "Erstmalige Spielerlaubnis", "box": [77.8, 505.29, 199.82, 516.45] }
+          ]
+        },
+        "K5": {
+          "typ": "checkbox",
+          "seite": 1,
+          "rect": [60.1, 457.8, 12.3, 11.9],
+          "bedeutung": "Kästchen vor „Vereinswechsel (Spieler*innen, die zuletzt einem Verein im Ausland angehört haben, bitte Seite 2 beachten)“",
+          "fuellt": "assistent",
+          "quelle": "e.status in [wechsel_hfv,wechsel_lv,wechsel_ausland]",
+          "beleg": [
+            { "lage": "rechts", "text": "Vereinswechsel (Spieler*innen, die zuletzt einem Verein im Ausland angehört haben, bitte Seite 2 beachten)", "box": [77.8, 459.89, 524.05, 471.05] }
+          ]
+        },
+        "Pass-Wechsel": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [247.4, 438.7, 106.8, 15.5],
+          "maxLaenge": 9,
+          "bedeutung": "„Pass-Nummer (soweit bekannt):“ – Spielerpass-Nummer beim bisherigen Verein (Block „Vereinswechsel“)",
+          "fuellt": "familie_hand",
+          "quelle": null,
+          "hinweis": "Nur wenn bekannt; die Antworten enthalten keine Pass-Nummer. Höchstens 9 Zeichen.",
+          "beleg": [
+            { "lage": "links", "text": "Pass-Nummer (soweit bekannt):", "box": [77.8, 442.51, 192.06, 451.44] }
+          ]
+        },
+        "letzterVerein": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [191.7, 416, 358.3, 15.5],
+          "maxLaenge": 60,
+          "bedeutung": "„Letzte Vereinszugehörigkeit:“ – Name des bisherigen Vereins (Block „Vereinswechsel“)",
+          "fuellt": "assistent",
+          "quelle": "a.alterVerein.name",
+          "bedingung": "e.status in [wechsel_hfv,wechsel_lv,wechsel_ausland]",
+          "beleg": [
+            { "lage": "links", "text": "Letzte Vereinszugehörigkeit:", "box": [77.8, 417.21, 178.25, 426.14] }
+          ]
+        },
+        "letzterVerband": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [247.4, 393.3, 301.6, 15.5],
+          "maxLaenge": 60,
+          "bedeutung": "„Bisheriger Landesverband / Nationalverband:“ (Block „Vereinswechsel“)",
+          "fuellt": "assistent",
+          "quelle": "a.alterVerein.verband",
+          "bedingung": "e.status in [wechsel_hfv,wechsel_lv,wechsel_ausland]",
+          "hinweis": "Bei a.alterVerein.region=hessen und leerem Verband „Hessischer Fußball-Verband“ eintragen; bei region=ausland der Nationalverband bzw. das Land (a.alterVerein.land).",
+          "beleg": [
+            { "lage": "links", "text": "Bisheriger Landesverband / Nationalverband:", "box": [77.8, 391.61, 238.3, 400.54] }
+          ]
+        },
+        "Abmeldung": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [154.2, 367.7, 65.8, 15.5],
+          "maxLaenge": 10,
+          "bedeutung": "„Tag der Abmeldung“ – Tag der Abmeldung beim bisherigen Verein (Block „Vereinswechsel“)",
+          "fuellt": "assistent",
+          "quelle": "a.abmeldung.datum|TT.MM.JJJJ",
+          "bedingung": "a.abmeldung.status=einschreiben",
+          "hinweis": "Tag der Abmeldung ist das Datum des Poststempels des Einschreibens (SpO § 93 Nr. 2). Bei Vollmacht oder wenn noch nicht abgemeldet leer: der Verein trägt den Tag der Eingabe im DFBnet ein (SpO § 92 Nr. 2).",
+          "beleg": [
+            { "lage": "links", "text": "Tag der Abmeldung", "box": [77.8, 363.31, 146.71, 372.24] }
+          ]
+        },
+        "LetztesSpiel": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [312.9, 367.7, 65.8, 15.5],
+          "maxLaenge": 10,
+          "bedeutung": "„Tag des letzten Spiels:“ – letztes Spiel im bisherigen Verein; daneben gedruckt: „Der/die Spieler*in erklärt nach der Abmeldung nicht mehr gespielt zu haben“",
+          "fuellt": "assistent",
+          "quelle": "a.letztesSpiel|TT.MM.JJJJ",
+          "bedingung": "e.status in [wechsel_hfv,wechsel_lv,wechsel_ausland]",
+          "beleg": [
+            { "lage": "links", "text": "Tag des letzten Spiels:", "box": [226.2, 363.31, 306.16, 372.24] }
+          ]
+        },
+        "SperrVon": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [103.3, 322.4, 79.9, 15.5],
+          "maxLaenge": 10,
+          "bedeutung": "„von:“ – Beginn einer laufenden Sperre („Läuft gegen den/die Spieler*in eine Sperre ? Wenn ja bitte angeben“)",
+          "fuellt": "familie_hand",
+          "quelle": null,
+          "hinweis": "Nur bei a.sperre=ja; die Antworten enthalten nur das Ende der Sperre (SperreBis).",
+          "beleg": [
+            { "lage": "links", "text": "von:", "box": [77.8, 323.61, 92.91, 332.54] },
+            { "lage": "bereich", "text": "Läuft gegen den/die Spieler*in eine Sperre ? Wenn ja bitte angeben", "box": [77.8, 343.41, 332.22, 352.34] }
+          ]
+        },
+        "SperreBis": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [214.2, 322.4, 85.6, 15.5],
+          "maxLaenge": 10,
+          "bedeutung": "„bis:“ – Ende einer laufenden Sperre",
+          "fuellt": "assistent",
+          "quelle": "a.sperreBis|TT.MM.JJJJ",
+          "bedingung": "a.sperre=ja",
+          "beleg": [
+            { "lage": "links", "text": "bis:", "box": [188.1, 323.61, 200.51, 332.54] },
+            { "lage": "bereich", "text": "Läuft gegen den/die Spieler*in eine Sperre ? Wenn ja bitte angeben", "box": [77.8, 343.41, 332.22, 352.34] }
+          ]
+        },
+        "Sperre-Spiel": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [411.9, 322.4, 28.7, 15.5],
+          "maxLaenge": 2,
+          "bedeutung": "„oder Pflichtspiele:“ – Sperre nach Anzahl Pflichtspiele (höchstens 2 Ziffern)",
+          "fuellt": "familie_hand",
+          "quelle": null,
+          "hinweis": "Nur bei a.sperre=ja und Sperre nach Spielen.",
+          "beleg": [
+            { "lage": "links", "text": "oder Pflichtspiele:", "box": [343.5, 323.61, 406.57, 332.54] },
+            { "lage": "bereich", "text": "Läuft gegen den/die Spieler*in eine Sperre ? Wenn ja bitte angeben", "box": [77.8, 343.41, 332.22, 352.34] }
+          ]
+        },
+        "K6": {
+          "typ": "checkbox",
+          "seite": 1,
+          "rect": [60.1, 299, 12.3, 11.9],
+          "bedeutung": "Kästchen vor „Zusätzliche Spielberechtigung für A-Junioren und B-Juniorinnen in Seniorenmannschaften“",
+          "fuellt": "assistent",
+          "quelle": "a.besonderes.herrenAushilfe",
+          "hinweis": "Nur zusammen mit dem Vordruck „Einverständnis gesetzlicher Vertreter“ (einverstaendnis_senioren) und dem Attest (Seite 2 des Antrags).",
+          "beleg": [
+            { "lage": "rechts", "text": "Zusätzliche Spielberechtigung für A-Junioren und B-Juniorinnen in Seniorenmannschaften", "box": [77.8, 301.19, 461.27, 312.45] }
+          ]
+        },
+        "Pass-Zusatz": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [151.6, 265.7, 86.4, 15.5],
+          "maxLaenge": 9,
+          "bedeutung": "„Pass-Nummer :“ (Block „Zusätzliche Spielberechtigung“) – „(Bitte aus Spielberechtigungsliste heraussuchen)“",
+          "fuellt": "verein",
+          "quelle": null,
+          "hinweis": "Der Verein sucht die Nummer in seiner Spielberechtigungsliste heraus (Hinweis im Formular).",
+          "beleg": [
+            { "lage": "links", "text": "Pass-Nummer :", "box": [77.8, 266.91, 133.38, 275.84] },
+            { "lage": "rechts", "text": "(Bitte aus Spielberechtigungsliste heraussuchen)", "box": [245, 266.91, 418.27, 275.84] }
+          ]
+        },
+        "K7": {
+          "typ": "checkbox",
+          "seite": 1,
+          "rect": [60.1, 242.3, 12.3, 11.9],
+          "bedeutung": "Kästchen vor „Spielrecht für trans/intergeschlechtliche Menschen und divers für“ (Spielrecht nach SpO § 91 Nr. 8 und 9)",
+          "fuellt": "assistent",
+          "quelle": "a.spielrechtFuer in [m,w]",
+          "hinweis": "Der Antrag wird gemeinsam mit der Vertrauensperson des HFV gestellt (SpO § 91 Nr. 9 und 10); bei Minderjährigen mit Zustimmung der Eltern (JO § 37 Nr. 3).",
+          "beleg": [
+            { "lage": "rechts", "text": "Spielrecht für trans/intergeschlechtliche Menschen und divers für", "box": [77.8, 241.29, 387.19, 252.45] }
+          ]
+        },
+        "K8": {
+          "typ": "checkbox",
+          "seite": 1,
+          "rect": [399.7, 242.3, 12.3, 11.9],
+          "bedeutung": "„…und divers für“ – Kästchen vor „männlich“ (Spielrecht für eine Herren-Mannschaft, SpO § 91 Nr. 9.1)",
+          "fuellt": "assistent",
+          "quelle": "a.spielrechtFuer=m",
+          "beleg": [
+            { "lage": "rechts", "text": "männlich", "box": [417.4, 241.29, 457.34, 252.45] },
+            { "lage": "zeile", "text": "Spielrecht für trans/intergeschlechtliche Menschen und divers für", "box": [77.8, 241.29, 387.19, 252.45] }
+          ]
+        },
+        "K9": {
+          "typ": "checkbox",
+          "seite": 1,
+          "rect": [475.2, 242.3, 12.3, 11.9],
+          "bedeutung": "„…und divers für“ – Kästchen vor „weiblich“ (Spielrecht für eine Frauen-Mannschaft, SpO § 91 Nr. 9.1)",
+          "fuellt": "assistent",
+          "quelle": "a.spielrechtFuer=w",
+          "beleg": [
+            { "lage": "rechts", "text": "weiblich", "box": [492.9, 241.29, 528.34, 252.45] },
+            { "lage": "zeile", "text": "Spielrecht für trans/intergeschlechtliche Menschen und divers für", "box": [77.8, 241.29, 387.19, 252.45] }
+          ]
+        },
+        "Text1": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [128.42, 199.89, 112.35, 18.11],
+          "bedeutung": "„Bearbeitungsvermerke der Geschäftsstelle“ – Zeile „Abmeldung“ (Vermerk des HFV, nicht auszufüllen)",
+          "fuellt": "verein",
+          "quelle": null,
+          "beleg": [
+            { "lage": "links", "text": "Abmeldung", "box": [59.1, 201.6, 104.61, 211.65] },
+            { "lage": "bereich", "text": "Bearbeitungsvermerke der Geschäftsstelle", "box": [59.1, 218.59, 262.23, 229.75] }
+          ]
+        },
+        "Text3": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [128.42, 180.1, 112.35, 16.85],
+          "bedeutung": "„Bearbeitungsvermerke der Geschäftsstelle“ – Zeile „Letztes Spiel:“ (Vermerk des HFV, nicht auszufüllen)",
+          "fuellt": "verein",
+          "quelle": null,
+          "beleg": [
+            { "lage": "links", "text": "Letztes Spiel:", "box": [59.1, 181.8, 113.17, 191.85] },
+            { "lage": "bereich", "text": "Bearbeitungsvermerke der Geschäftsstelle", "box": [59.1, 218.59, 262.23, 229.75] }
+          ]
+        },
+        "Text4": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [309.05, 199.89, 114.45, 18.11],
+          "bedeutung": "„Bearbeitungsvermerke der Geschäftsstelle“ – „Freigabe:“ (Vermerk des HFV, nicht auszufüllen)",
+          "fuellt": "verein",
+          "quelle": null,
+          "beleg": [
+            { "lage": "links", "text": "Freigabe:", "box": [254.1, 201.6, 292.1, 211.65] },
+            { "lage": "bereich", "text": "Bearbeitungsvermerke der Geschäftsstelle", "box": [59.1, 218.59, 262.23, 229.75] }
+          ]
+        },
+        "Text5": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [309.9, 180.52, 114.03, 16],
+          "bedeutung": "„Bearbeitungsvermerke der Geschäftsstelle“ – „Gemäß §“ (dahinter gedruckt „JO / SpO“; Vermerk des HFV, nicht auszufüllen)",
+          "fuellt": "verein",
+          "quelle": null,
+          "beleg": [
+            { "lage": "links", "text": "Gemäß §", "box": [254.1, 181.8, 291.57, 191.85] },
+            { "lage": "bereich", "text": "Bearbeitungsvermerke der Geschäftsstelle", "box": [59.1, 218.59, 262.23, 229.75] }
+          ]
+        },
+        "AntragVerein_2": {
+          "typ": "text",
+          "seite": 3,
+          "rect": [68.96, 181.7, 208.5, 18.3],
+          "maxLaenge": 70,
+          "bedeutung": "„Antragstellender Verein“ – Beschriftung unter der Linie (Seite 3, unten links), zweite Nennung des Vereins zu den Einwilligungen",
+          "fuellt": "assistent",
+          "quelle": "konfig.verein.name_register",
+          "beleg": [
+            { "lage": "unten", "text": "Antragstellender Verein", "box": [68.6, 168.2, 162.1, 178.25] }
+          ]
+        },
+        "Spielername": {
+          "typ": "text",
+          "seite": 3,
+          "rect": [299.86, 181.14, 252.5, 18.3],
+          "maxLaenge": 70,
+          "bedeutung": "„Name, Vorname Spieler“ – Beschriftung unter der Linie (Seite 3, unten rechts), Name zu den Einwilligungen a) und b)",
+          "fuellt": "assistent",
+          "quelle": "a.nachname + \", \" + a.vorname",
+          "beleg": [
+            { "lage": "unten", "text": "Name, Vorname Spieler", "box": [299.5, 168.2, 394.95, 178.25] }
+          ]
+        },
+        "Text2": {
+          "typ": "text",
+          "seite": 3,
+          "rect": [67.37, 364.52, 126.24, 16],
+          "bedeutung": "Datumsfeld der Einwilligung a) (Spieler*innendaten im Internet, für unter 16-Jährige) – links auf der Zeile „Datum, Unterschrift des/der gesetzlichen Vertreter/s“",
+          "fuellt": "familie_hand",
+          "quelle": null,
+          "hinweis": "Datum und Unterschrift nur, wenn eingewilligt wird (a.einwilligungen.hfvName); kein vorausgefülltes Datum.",
+          "beleg": [
+            { "lage": "unten", "text": "Datum, Unterschrift des/der gesetzlichen Vertreter/s", "box": [68.2, 352.9, 274.71, 362.95] },
+            { "lage": "bereich", "text": "a) Spieler*innendaten im Internet - z.B. auf FUSSBALL.DE für unter 16-Jährige (empfohlen)", "box": [56.8, 466.79, 461.92, 477.95] }
+          ]
+        },
+        "Text6": {
+          "typ": "text",
+          "seite": 3,
+          "rect": [67.93, 219.68, 126.24, 16],
+          "bedeutung": "Datumsfeld der Einwilligung b) (Spieler*innenfotos im Internet) – links auf der Zeile „Datum, Unterschrift der Spielerin/des Spielers (bei Minderjährigen des/der gesetzlichen Vertreter/s)“",
+          "fuellt": "familie_hand",
+          "quelle": null,
+          "hinweis": "Datum und Unterschrift nur, wenn eingewilligt wird (a.einwilligungen.hfvFoto); kein vorausgefülltes Datum.",
+          "beleg": [
+            { "lage": "unten", "text": "Datum, Unterschrift der Spielerin/des Spielers (bei Minderjährigen des/der gesetzlichen Vertreter/s)", "box": [68.2, 207.4, 462.38, 217.45] },
+            { "lage": "bereich", "text": "b) Spieler*innenfotos im Internet - z.B. auf FUSSBALL.DE (empfohlen)", "box": [56.8, 335.79, 368.75, 346.95] }
+          ]
+        }
+      },
+      "unterschriften": [
+        {
+          "stelleKey": "spieler",
+          "seite": 1,
+          "x": 56.3,
+          "y": 74.2,
+          "breite": 155.2,
+          "hoehe": 34,
+          "wer": "spieler",
+          "beschriftung": "Unterschrift des Spielers/der Spielerin",
+          "linie": { "x0": 56.3, "x1": 211.5, "y": 74.2 },
+          "hinweis": "Die Spielerin bzw. der Spieler unterschreibt hier; bei Minderjährigen zusätzlich der gesetzliche Vertreter in der Mitte (Stelle „erziehungsberechtigte“).",
+          "beleg": [
+            { "lage": "unten", "text": "Unterschrift des Spielers/der Spielerin", "box": [66.9, 64.01, 201.04, 72.94] }
+          ]
+        },
+        {
+          "stelleKey": "erziehungsberechtigte",
+          "seite": 1,
+          "x": 226,
+          "y": 74.2,
+          "breite": 154.8,
+          "hoehe": 34,
+          "wer": "sorgeberechtigte",
+          "bedingung": "e.minderjaehrig",
+          "beschriftung": "Unterschrift der Erziehungsberechtigten (nur bei Minderjährigen)",
+          "linie": { "x0": 226, "x1": 380.8, "y": 74.2 },
+          "hinweis": "JO § 37 Nr. 2: Beim Wechsel Minderjähriger ist die Zustimmung des gesetzlichen Vertreters durch eigenhändige Unterschrift auf dem Antragsformular zu bestätigen.",
+          "beleg": [
+            { "lage": "unten", "text": "Unterschrift der Erziehungsberechtigten", "box": [233, 64.01, 373.95, 72.94] },
+            { "lage": "unten", "text": "(nur bei Minderjährigen)", "box": [261.1, 54.81, 345.9, 63.74] }
+          ]
+        },
+        {
+          "stelleKey": "verein",
+          "seite": 1,
+          "x": 395.8,
+          "y": 74.2,
+          "breite": 157,
+          "hoehe": 34,
+          "wer": "verein",
+          "beschriftung": "Unterschrift des Vereins mit Stempel",
+          "linie": { "x0": 395.8, "x1": 552.8, "y": 74.2 },
+          "hinweis": "Unterschreibt und stempelt der Verein, nicht die Familie.",
+          "beleg": [
+            { "lage": "unten", "text": "Unterschrift des Vereins mit Stempel", "box": [409.7, 64.01, 539, 72.94] }
+          ]
+        },
+        {
+          "stelleKey": "einwilligung_a",
+          "seite": 3,
+          "x": 200,
+          "y": 363.6,
+          "breite": 352.8,
+          "hoehe": 24,
+          "wer": "sorgeberechtigte",
+          "bedingung": "e.alter < 16 und a.einwilligungen.hfvName",
+          "beschriftung": "Datum, Unterschrift des/der gesetzlichen Vertreter/s (Einwilligung a)",
+          "linie": { "x0": 68.1, "x1": 552.8, "y": 363.6 },
+          "hinweis": "Rechts vom Datumsfeld Text2. Einwilligung a) gilt für Kinder und Jugendliche unter 16 Jahren (Veröffentlichung von Vor- und Nachnamen und Spielberichtsdaten).",
+          "beleg": [
+            { "lage": "unten", "text": "Datum, Unterschrift des/der gesetzlichen Vertreter/s", "box": [68.2, 352.9, 274.71, 362.95] }
+          ]
+        },
+        {
+          "stelleKey": "einwilligung_b",
+          "seite": 3,
+          "x": 200,
+          "y": 218,
+          "breite": 352.8,
+          "hoehe": 26,
+          "wer": "spieler",
+          "wennMinderjaehrig": "sorgeberechtigte",
+          "bedingung": "a.einwilligungen.hfvFoto",
+          "beschriftung": "Datum, Unterschrift der Spielerin/des Spielers (bei Minderjährigen des/der gesetzlichen Vertreter/s) (Einwilligung b)",
+          "linie": { "x0": 68.1, "x1": 552.8, "y": 218 },
+          "hinweis": "Rechts vom Datumsfeld Text6. Einwilligung b) betrifft die Veröffentlichung des Spielerfotos im Internet.",
+          "beleg": [
+            { "lage": "unten", "text": "Datum, Unterschrift der Spielerin/des Spielers (bei Minderjährigen des/der gesetzlichen Vertreter/s)", "box": [68.2, 207.4, 462.38, 217.45] }
+          ]
+        }
+      ],
+      "handfelder": [
+        {
+          "key": "pass_wechsel",
+          "seite": 1,
+          "typ": "text",
+          "x": 247.4,
+          "y": 438.7,
+          "breite": 106.8,
+          "hoehe": 15.5,
+          "art": "kasten",
+          "bedeutung": "Pass-Nummer beim bisherigen Verein, soweit bekannt (Block „Vereinswechsel“)",
+          "feld": "Pass-Wechsel",
+          "linie": { "x0": 244.4, "x1": 358.8, "y": 437.1 }
+        },
+        {
+          "key": "sperre_von",
+          "seite": 1,
+          "typ": "text",
+          "x": 103.3,
+          "y": 322.4,
+          "breite": 79.9,
+          "hoehe": 15.5,
+          "art": "kasten",
+          "bedeutung": "Beginn einer laufenden Sperre („von:“)",
+          "feld": "SperrVon",
+          "linie": { "x0": 100.3, "x1": 185.8, "y": 320.8 }
+        },
+        {
+          "key": "sperre_pflichtspiele",
+          "seite": 1,
+          "typ": "text",
+          "x": 411.9,
+          "y": 322.4,
+          "breite": 28.7,
+          "hoehe": 15.5,
+          "art": "kasten",
+          "bedeutung": "Sperre nach Anzahl Pflichtspiele („oder Pflichtspiele:“)",
+          "feld": "Sperre-Spiel",
+          "linie": { "x0": 408.8, "x1": 443.9, "y": 320.8 }
+        },
+        {
+          "key": "datum_einwilligung_a",
+          "seite": 3,
+          "typ": "text",
+          "x": 67.37,
+          "y": 364.52,
+          "breite": 126.24,
+          "hoehe": 16,
+          "art": "kasten",
+          "bedeutung": "Datum zur Einwilligung a) (links auf der Unterschriftszeile)",
+          "feld": "Text2",
+          "linie": { "x0": 68.1, "x1": 552.8, "y": 363.6 }
+        },
+        {
+          "key": "datum_einwilligung_b",
+          "seite": 3,
+          "typ": "text",
+          "x": 67.93,
+          "y": 219.68,
+          "breite": 126.24,
+          "hoehe": 16,
+          "art": "kasten",
+          "bedeutung": "Datum zur Einwilligung b) (links auf der Unterschriftszeile)",
+          "feld": "Text6",
+          "linie": { "x0": 68.1, "x1": 552.8, "y": 218 }
+        }
+      ],
+      "digitaleUnterschrift": "nicht_erlaubt",
+      "digitaleUnterschriftGrund": "HFV-Vordruck: JO § 37 Nr. 2 verlangt beim Wechsel Minderjähriger die „eigenhändige Unterschrift auf dem Antragsformular“; SpO § 92: unterzeichneter Original-Antrag, mindestens 2 Jahre aufbewahren. Umstellbar, falls die HFV-Passstelle Bildschirm-Unterschriften zulässt."
+    },
+    "vollmacht": {
+      "titel": "Vollmacht zur Nutzung der stellvertretenden Abmeldung durch den aufnehmenden Verein beim Vereinswechsel über das DFBnet Pass-Online (HFV)",
+      "datei": "assets/pdf/anmeldung/hfv-vollmacht-abmeldung.pdf",
+      "quelle_url": "https://hfv-online.de/wp-content/uploads/2026/01/Vollmacht_stellvertretende_Abmeldung.pdf",
+      "quelle_stand": "Vordruck Stand 2024-05-16 (PDF-Erstellungsdatum); am 2026-09-29 auf hfv-online.de/formulare-2/ verlinkt; Kopie ins Repo am 2026-09-29",
+      "sha256": "a8f4ca6c3197a1f0f15dfdb1def12fdfe8b28fa07a566609f90f886d085a89a0",
+      "bytes": 80848,
+      "quelle_sha256": "735087e1b40a14ca468b6406ac503c2a575ba76c123ca5505000b53aa3944bab",
+      "quelle_bytes": 83757,
+      "metadaten_entfernt": true,
+      "seiten": 1,
+      "seitenformat": { "breite": 595.32, "hoehe": 841.92, "name": "A4" },
+      "formularfelder": 6,
+      "felder": {
+        "Name Vorname SpielerinSpieler": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [70.8, 544.2, 313.56, 28.8],
+          "bedeutung": "„Name, Vorname Spielerin/Spieler“ (nach „Hiermit bevollmächtige ich,“)",
+          "fuellt": "assistent",
+          "quelle": "a.nachname + \", \" + a.vorname",
+          "beleg": [
+            { "lage": "unten", "text": "Name, Vorname Spielerin/Spieler", "box": [70.82, 529.86, 222.57, 541.81] }
+          ]
+        },
+        "GebDatum": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [389.4, 544.2, 135, 28.8],
+          "bedeutung": "„Geb.-Datum“ (rechts neben dem Namen)",
+          "fuellt": "assistent",
+          "quelle": "a.geburtsdatum|TT.MM.JJJJ",
+          "beleg": [
+            { "lage": "unten", "text": "Geb.-Datum", "box": [389.47, 529.86, 443.71, 541.81] }
+          ]
+        },
+        "Name antragstellender VereinVertreten durch Person": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [70.8, 455.16, 452.76, 28.8],
+          "bedeutung": "„Name antragstellender Verein/Vertreten durch Person“ (nach „den nachfolgend genannten Verein“)",
+          "fuellt": "assistent",
+          "quelle": "konfig.verein.name_register",
+          "hinweis": "Der Zusatz „Vertreten durch Person“ (handelnde Person des Vereins) wird nicht vorausgefüllt; der Verein ergänzt ihn bei Bedarf von Hand.",
+          "beleg": [
+            { "lage": "unten", "text": "Name antragstellender Verein/Vertreten durch Person", "box": [70.82, 440.82, 317.25, 452.77] }
+          ]
+        },
+        "Name Verein": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [241.92, 410.28, 278.76, 28.8],
+          "bedeutung": "„Name Verein“ (nach „mich bei meinem aktuellen Verein“) – bisheriger Verein, bei dem abgemeldet wird",
+          "fuellt": "assistent",
+          "quelle": "a.alterVerein.name",
+          "beleg": [
+            { "lage": "unten", "text": "Name Verein", "box": [241.85, 395.56, 299.93, 407.51] },
+            { "lage": "zeile", "text": "mich bei meinem aktuellen Verein", "box": [70.82, 408.68, 239.02, 421.92] }
+          ]
+        },
+        "Ort Datum": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [70.8, 339.72, 204.48, 28.8],
+          "bedeutung": "„Ort, Datum“ (unter der Erklärung „als Spieler abzumelden.“)",
+          "fuellt": "familie_hand",
+          "quelle": null,
+          "hinweis": "Von Hand; kein vorausgefülltes Datum (Unterschrift mit Stift auf Papier).",
+          "beleg": [
+            { "lage": "unten", "text": "Ort, Datum", "box": [70.82, 325.48, 119.52, 337.43] }
+          ]
+        },
+        "Unterschrift SpielerinSpielerbei Minderjährigen Unterschrift der gesetzlichen Vertreter": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [70.8, 289.8, 452.88, 28.8],
+          "bedeutung": "„Unterschrift Spielerin/Spieler/bei Minderjährigen Unterschrift der gesetzlichen Vertreter“ – Unterschriftsfläche über der Linie",
+          "fuellt": "familie_hand",
+          "quelle": null,
+          "hinweis": "Textfeld als Unterschriftsfläche, leer lassen (siehe unterschriften, Stelle „unterschrift“).",
+          "beleg": [
+            { "lage": "unten", "text": "Unterschrift Spielerin/Spieler/bei Minderjährigen Unterschrift der gesetzlichen Vertreter", "box": [70.82, 275.56, 471.71, 287.51] }
+          ]
+        }
+      },
+      "unterschriften": [
+        {
+          "stelleKey": "unterschrift",
+          "seite": 1,
+          "x": 70.8,
+          "y": 289.8,
+          "breite": 452.88,
+          "hoehe": 28.8,
+          "wer": "spieler",
+          "wennMinderjaehrig": "sorgeberechtigte",
+          "beschriftung": "Unterschrift Spielerin/Spieler/bei Minderjährigen Unterschrift der gesetzlichen Vertreter",
+          "feld": "Unterschrift SpielerinSpielerbei Minderjährigen Unterschrift der gesetzlichen Vertreter",
+          "linie": { "x0": 70.8, "x1": 523.5, "y": 290.29 }
+        }
+      ],
+      "handfelder": [
+        {
+          "key": "ort_datum",
+          "seite": 1,
+          "typ": "text",
+          "x": 70.8,
+          "y": 339.72,
+          "breite": 204.48,
+          "hoehe": 28.8,
+          "art": "kasten",
+          "bedeutung": "„Ort, Datum“ unter der Vollmacht",
+          "feld": "Ort Datum",
+          "linie": { "x0": 70.8, "x1": 275, "y": 340.29 }
+        }
+      ],
+      "digitaleUnterschrift": "nicht_erlaubt",
+      "digitaleUnterschriftGrund": "HFV-Vordruck: gilt nur in Verbindung mit dem unterschriebenen Antrag auf Spielerlaubnis; SpO § 92 Nr. 2 (schriftliche Zustimmung des Spielers), Unterlagen mindestens 2 Jahre aufbewahren; Passstelle 2026: unterschriebene Unterlagen in Papierform. Umstellbar, falls die Passstelle zustimmt."
+    },
+    "abmeldung": {
+      "titel": "Formular zur Abmeldung der Spielberechtigung und/oder der Mitgliedschaft im Verein per Einschreiben (HFV)",
+      "datei": "assets/pdf/anmeldung/hfv-abmeldung-verein.pdf",
+      "quelle_url": "https://hfv-online.de/wp-content/uploads/2026/01/Abmeldung_bei_Verein.pdf",
+      "quelle_stand": "Vordruck Stand 2024-04-18 (PDF-Erstellungsdatum); am 2026-09-29 auf hfv-online.de/formulare-2/ verlinkt; Kopie ins Repo am 2026-09-29",
+      "sha256": "bda635145917d8675825fcff9625f27abce34a3bad8ca0d7ddf2c9df44d3981b",
+      "bytes": 94704,
+      "quelle_sha256": "26e6319bfb81788c6eac2e74cc1d1c8279240fd6b603201d28cd9a258e7e53fd",
+      "quelle_bytes": 98665,
+      "metadaten_entfernt": true,
+      "seiten": 1,
+      "seitenformat": { "breite": 595.32, "hoehe": 841.92, "name": "A4" },
+      "formularfelder": 14,
+      "felder": {
+        "1": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [212.4, 584.76, 230.52, 20.52],
+          "bedeutung": "Abschnitt „Spieler/in“ – „Name:“ (Familienname)",
+          "fuellt": "assistent",
+          "quelle": "a.nachname",
+          "beleg": [
+            { "lage": "zeile", "text": "Name:", "box": [70.82, 583.41, 99.36, 595.36] },
+            { "lage": "bereich", "text": "Spieler/in", "box": [70.82, 628.11, 124.33, 642.51] }
+          ]
+        },
+        "2": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [212.4, 563.76, 230.52, 20.52],
+          "bedeutung": "Abschnitt „Spieler/in“ – „Vorname:“",
+          "fuellt": "assistent",
+          "quelle": "a.vorname",
+          "beleg": [
+            { "lage": "zeile", "text": "Vorname:", "box": [70.82, 562.38, 113.76, 574.33] },
+            { "lage": "bereich", "text": "Spieler/in", "box": [70.82, 628.11, 124.33, 642.51] }
+          ]
+        },
+        "3": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [212.4, 542.88, 230.52, 20.4],
+          "bedeutung": "Abschnitt „Spieler/in“ – „Geb.-Datum:“",
+          "fuellt": "assistent",
+          "quelle": "a.geburtsdatum|TT.MM.JJJJ",
+          "beleg": [
+            { "lage": "zeile", "text": "Geb.-Datum:", "box": [70.82, 541.5, 127.32, 553.45] },
+            { "lage": "bereich", "text": "Spieler/in", "box": [70.82, 628.11, 124.33, 642.51] }
+          ]
+        },
+        "Straße und Hausnummer": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [212.4, 521.88, 230.52, 20.52],
+          "bedeutung": "Abschnitt „Spieler/in“ – „Straße und Hausnummer:“ (Wohnanschrift der Spielerin/des Spielers)",
+          "fuellt": "assistent",
+          "quelle": "a.anschrift.strasse",
+          "beleg": [
+            { "lage": "zeile", "text": "Straße und Hausnummer:", "box": [70.82, 520.5, 185.86, 532.45] },
+            { "lage": "bereich", "text": "Spieler/in", "box": [70.82, 628.11, 124.33, 642.51] }
+          ]
+        },
+        "Postleitzahl und Wohnort": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [212.4, 500.88, 230.52, 20.52],
+          "bedeutung": "Abschnitt „Spieler/in“ – „Postleitzahl und Wohnort:“",
+          "fuellt": "assistent",
+          "quelle": "a.anschrift.plz + \" \" + a.anschrift.ort",
+          "beleg": [
+            { "lage": "zeile", "text": "Postleitzahl und Wohnort:", "box": [70.82, 499.5, 187.47, 511.45] },
+            { "lage": "bereich", "text": "Spieler/in", "box": [70.82, 628.11, 124.33, 642.51] }
+          ]
+        },
+        "undefined": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [212.4, 417.72, 230.76, 20.52],
+          "bedeutung": "Abschnitt „Vereinsdaten“ – „Vereinsname:“ (bisheriger Verein, an den das Einschreiben geht); der Feldname im PDF lautet wörtlich „undefined“",
+          "fuellt": "assistent",
+          "quelle": "a.alterVerein.name",
+          "leerWennFehlt": true,
+          "beleg": [
+            { "lage": "zeile", "text": "Vereinsname:", "box": [70.82, 416.34, 131.71, 428.29] },
+            { "lage": "bereich", "text": "Vereinsdaten", "box": [70.82, 455.28, 141.91, 469.68] }
+          ]
+        },
+        "Empfänger Einschreiben": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [212.4, 396.6, 230.76, 20.52],
+          "bedeutung": "Abschnitt „Vereinsdaten“ – „Empfänger Einschreiben:“ (Person oder Stelle im bisherigen Verein)",
+          "fuellt": "assistent",
+          "quelle": "a.alterVerein.empfaenger",
+          "leerWennFehlt": true,
+          "hinweis": "Optionale Angabe der Familie (z. B. „Vorstand“); fehlt sie, bleibt das Feld für die Hand leer. Die Anschrift steht meist im Impressum des bisherigen Vereins.",
+          "beleg": [
+            { "lage": "zeile", "text": "Empfänger Einschreiben:", "box": [70.82, 395.32, 183.61, 407.27] },
+            { "lage": "bereich", "text": "Vereinsdaten", "box": [70.82, 455.28, 141.91, 469.68] }
+          ]
+        },
+        "Straße und Hausnummer 1": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [212.4, 370.68, 230.76, 20.52],
+          "bedeutung": "Abschnitt „Vereinsdaten“ – „Straße und Hausnummer:“ (Anschrift des bisherigen Vereins)",
+          "fuellt": "assistent",
+          "quelle": "a.alterVerein.strasse",
+          "leerWennFehlt": true,
+          "hinweis": "Optionale Angabe der Familie; fehlt sie, bleibt das Feld für die Hand leer.",
+          "beleg": [
+            { "lage": "zeile", "text": "Straße und Hausnummer:", "box": [70.82, 369.4, 185.78, 381.35] },
+            { "lage": "bereich", "text": "Vereinsdaten", "box": [70.82, 455.28, 141.91, 469.68] }
+          ]
+        },
+        "Straße und Hausnummer 2": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [212.4, 349.8, 230.76, 20.4],
+          "bedeutung": "Abschnitt „Vereinsdaten“ – „Postleitzahl und Ort:“ (Anschrift des bisherigen Vereins); der Feldname „Straße und Hausnummer 2“ ist irreführend",
+          "fuellt": "assistent",
+          "quelle": "a.alterVerein.plzOrt",
+          "leerWennFehlt": true,
+          "hinweis": "Postleitzahl und Ort in einem Wert (z. B. „12345 Beispielstadt“); fehlt er, bleibt das Feld für die Hand leer.",
+          "beleg": [
+            { "lage": "zeile", "text": "Postleitzahl und Ort:", "box": [70.82, 348.52, 162.95, 360.47] },
+            { "lage": "bereich", "text": "Vereinsdaten", "box": [70.82, 455.28, 141.91, 469.68] }
+          ]
+        },
+        "Hiermit melde ich meine Spielberechtigung bei Ihrem Verein ab": {
+          "typ": "checkbox",
+          "seite": 1,
+          "rect": [47.04, 255.12, 11.04, 13.44],
+          "bedeutung": "Kästchen vor „Hiermit melde ich meine Spielberechtigung bei Ihrem Verein ab.“ (unter „*Zutreffendes bitte ankreuzen“)",
+          "fuellt": "assistent",
+          "quelle": "a.abmeldung.weg=einschreiben",
+          "leerWennFehlt": true,
+          "hinweis": "Nur beim Weg Einschreiben. Wird das Spielrecht per Vollmacht abgemeldet, bleibt das Kästchen leer: Der Vordruck dient dann nur zur Kündigung der Mitgliedschaft.",
+          "beleg": [
+            { "lage": "rechts", "text": "Hiermit melde ich meine Spielberechtigung bei Ihrem Verein ab.", "box": [70.82, 255.06, 388.06, 268.3] }
+          ]
+        },
+        "Hiermit melde ich meine Mitgliedschaft bei Ihrem Verein ab": {
+          "typ": "checkbox",
+          "seite": 1,
+          "rect": [47.28, 234.36, 10.92, 13.44],
+          "bedeutung": "Kästchen vor „Hiermit melde ich meine Mitgliedschaft bei Ihrem Verein ab.“",
+          "fuellt": "assistent",
+          "quelle": "a.alterVerein.mitgliedschaft=kuendigen",
+          "leerWennFehlt": true,
+          "hinweis": "Kündigung nach der Satzung des bisherigen Vereins (oft nur zum Jahresende). Bei weiss_nicht oder ohne Antwort bleibt das Kästchen leer; die Familie entscheidet dann von Hand.",
+          "beleg": [
+            { "lage": "rechts", "text": "Hiermit melde ich meine Mitgliedschaft bei Ihrem Verein ab.", "box": [70.82, 232.74, 367.33, 245.98] }
+          ]
+        },
+        "Ich bleibe weiterhin passives Mitglied im Verein": {
+          "typ": "checkbox",
+          "seite": 1,
+          "rect": [47.28, 210, 10.92, 13.44],
+          "bedeutung": "Kästchen vor „Ich bleibe weiterhin passives Mitglied im Verein.“",
+          "fuellt": "assistent",
+          "quelle": "a.alterVerein.mitgliedschaft=passiv",
+          "leerWennFehlt": true,
+          "hinweis": "Bei a.alterVerein.mitgliedschaft=passiv. Bei weiss_nicht oder ohne Antwort bleibt das Kästchen leer.",
+          "beleg": [
+            { "lage": "rechts", "text": "Ich bleibe weiterhin passives Mitglied im Verein.", "box": [70.82, 210.51, 308.5, 223.75] }
+          ]
+        },
+        "Datum und Unterschrift SpielerSpielerin": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [70.8, 147.84, 326.28, 20.52],
+          "bedeutung": "„Datum und Unterschrift Spieler/Spielerin“ – Unterschriftsfläche über der Linie (Datum und Unterschrift in einer Zeile)",
+          "fuellt": "familie_hand",
+          "quelle": null,
+          "hinweis": "Von Hand, kein vorausgefülltes Datum (siehe unterschriften, Stelle „unterschrift“).",
+          "beleg": [
+            { "lage": "unten", "text": "Datum und Unterschrift Spieler/Spielerin", "box": [70.82, 133.57, 256.25, 145.52] }
+          ]
+        },
+        "Bei Minderjährigen der gesetzliche Vertreter": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [70.8, 96.12, 327.6, 20.52],
+          "bedeutung": "„Bei Minderjährigen der gesetzliche Vertreter“ – Unterschriftsfläche über der Linie",
+          "fuellt": "familie_hand",
+          "quelle": null,
+          "hinweis": "Von Hand (siehe unterschriften, Stelle „unterschrift_vertreter“).",
+          "beleg": [
+            { "lage": "unten", "text": "Bei Minderjährigen der gesetzliche Vertreter", "box": [70.82, 80.89, 272.5, 92.84] }
+          ]
+        }
+      },
+      "unterschriften": [
+        {
+          "stelleKey": "unterschrift",
+          "seite": 1,
+          "x": 70.8,
+          "y": 147.84,
+          "breite": 326.28,
+          "hoehe": 30,
+          "wer": "spieler",
+          "beschriftung": "Datum und Unterschrift Spieler/Spielerin",
+          "feld": "Datum und Unterschrift SpielerSpielerin",
+          "linie": { "x0": 70.8, "x1": 397, "y": 148.29 },
+          "hinweis": "Datum und Unterschrift stehen in einer Zeile: Datum vorn von Hand, danach die Unterschrift."
+        },
+        {
+          "stelleKey": "unterschrift_vertreter",
+          "seite": 1,
+          "x": 70.8,
+          "y": 93.67,
+          "breite": 327.6,
+          "hoehe": 30,
+          "wer": "sorgeberechtigte",
+          "bedingung": "e.minderjaehrig",
+          "beschriftung": "Bei Minderjährigen der gesetzliche Vertreter",
+          "feld": "Bei Minderjährigen der gesetzliche Vertreter",
+          "linie": { "x0": 70.8, "x1": 398.5, "y": 93.67 }
+        }
+      ],
+      "handfelder": [
+        {
+          "key": "empfaenger",
+          "seite": 1,
+          "typ": "text",
+          "x": 212.4,
+          "y": 396.6,
+          "breite": 230.76,
+          "hoehe": 20.52,
+          "art": "kasten",
+          "bedeutung": "„Empfänger Einschreiben:“ im bisherigen Verein",
+          "feld": "Empfänger Einschreiben",
+          "linie": { "x0": 212.3, "x1": 443, "y": 397.04 },
+          "hinweis": "Von Hand nur, wenn der Assistent das Feld leer lässt (leerWennFehlt)."
+        },
+        {
+          "key": "verein_strasse",
+          "seite": 1,
+          "typ": "text",
+          "x": 212.4,
+          "y": 370.68,
+          "breite": 230.76,
+          "hoehe": 20.52,
+          "art": "kasten",
+          "bedeutung": "Straße und Hausnummer des bisherigen Vereins",
+          "feld": "Straße und Hausnummer 1",
+          "linie": { "x0": 212.3, "x1": 443, "y": 371.29 },
+          "hinweis": "Von Hand nur, wenn der Assistent das Feld leer lässt (leerWennFehlt)."
+        },
+        {
+          "key": "verein_plz_ort",
+          "seite": 1,
+          "typ": "text",
+          "x": 212.4,
+          "y": 349.8,
+          "breite": 230.76,
+          "hoehe": 20.4,
+          "art": "kasten",
+          "bedeutung": "Postleitzahl und Ort des bisherigen Vereins (Feldname irreführend)",
+          "feld": "Straße und Hausnummer 2",
+          "linie": { "x0": 212.3, "x1": 443, "y": 350.29 },
+          "hinweis": "Von Hand nur, wenn der Assistent das Feld leer lässt (leerWennFehlt)."
+        },
+        {
+          "key": "haken_mitgliedschaft",
+          "seite": 1,
+          "typ": "kreuz",
+          "x": 47.28,
+          "y": 234.36,
+          "breite": 10.92,
+          "hoehe": 13.44,
+          "art": "kasten",
+          "bedeutung": "Kästchen „Hiermit melde ich meine Mitgliedschaft bei Ihrem Verein ab.“",
+          "feld": "Hiermit melde ich meine Mitgliedschaft bei Ihrem Verein ab",
+          "hinweis": "Von Hand nur, wenn a.alterVerein.mitgliedschaft nicht beantwortet ist (leerWennFehlt); sonst kreuzt der Assistent an."
+        },
+        {
+          "key": "haken_passiv",
+          "seite": 1,
+          "typ": "kreuz",
+          "x": 47.28,
+          "y": 210,
+          "breite": 10.92,
+          "hoehe": 13.44,
+          "art": "kasten",
+          "bedeutung": "Kästchen „Ich bleibe weiterhin passives Mitglied im Verein.“",
+          "feld": "Ich bleibe weiterhin passives Mitglied im Verein",
+          "hinweis": "Von Hand nur, wenn a.alterVerein.mitgliedschaft nicht beantwortet ist (leerWennFehlt); sonst kreuzt der Assistent an."
+        }
+      ],
+      "digitaleUnterschrift": "nicht_erlaubt",
+      "digitaleUnterschriftGrund": "HFV-Vordruck, geht als Einschreiben im Original an den bisherigen Verein (SpO § 93 Nr. 2: Poststempel ist der Abmeldetag); JO § 37 Nr. 2: eigenhändige Unterschrift; SpO § 92: Originale aufbewahren. Umstellbar, falls die Passstelle zustimmt."
+    },
+    "einverstaendnis_senioren": {
+      "titel": "Vorgangsdokument für die schriftliche Einverständniserklärung des gesetzlichen Vertreters zum vorzeitigen Herren- oder Frauenspielrecht gemäß Jugendordnung (HFV)",
+      "datei": "assets/pdf/anmeldung/hfv-einverstaendnis-senioren.pdf",
+      "quelle_url": "https://hfv-online.de/wp-content/uploads/2026/01/Einverstaendnis_gesetzlicher_Vertreters.pdf",
+      "quelle_stand": "Vordruck Stand 2025-06-10 (PDF-Erstellungsdatum); am 2026-09-29 auf hfv-online.de/formulare-2/ verlinkt; Kopie ins Repo am 2026-09-29",
+      "sha256": "feb4171a2a935998367d2ba66a1c94f27428c0f778cfa54e6582b43b50e0cccb",
+      "bytes": 63441,
+      "quelle_sha256": "fbc68d12333a84220776e8f2f53fd658aa1b4470636de0cfcfbb3e54ce049b8b",
+      "quelle_bytes": 67664,
+      "metadaten_entfernt": true,
+      "seiten": 1,
+      "seitenformat": { "breite": 595.32, "hoehe": 841.92, "name": "A4" },
+      "formularfelder": 5,
+      "felder": {
+        "Name Vorname SpielerSpielerin": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [70.8, 479.16, 313.56, 28.8],
+          "bedeutung": "„Name, Vorname Spieler/Spielerin“ (nach „Hiermit ich erkläre ich mich einverstanden, dass mein/meine Sohn/Tochter“)",
+          "fuellt": "assistent",
+          "quelle": "a.nachname + \", \" + a.vorname",
+          "beleg": [
+            { "lage": "unten", "text": "Name, Vorname Spieler/Spielerin", "box": [70.82, 464.82, 222.58, 476.77] }
+          ]
+        },
+        "GebDatum": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [389.4, 479.16, 135, 28.8],
+          "bedeutung": "„Geb.-Datum“ (rechts neben dem Namen)",
+          "fuellt": "assistent",
+          "quelle": "a.geburtsdatum|TT.MM.JJJJ",
+          "beleg": [
+            { "lage": "unten", "text": "Geb.-Datum", "box": [389.47, 464.82, 443.71, 476.77] }
+          ]
+        },
+        "Name antragstellender Verein": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [70.8, 383.88, 452.76, 28.8],
+          "bedeutung": "„Name antragstellender Verein“ (nach „für den nachfolgend genannten Verein“)",
+          "fuellt": "assistent",
+          "quelle": "konfig.verein.name_register",
+          "beleg": [
+            { "lage": "unten", "text": "Name antragstellender Verein", "box": [70.82, 369.64, 206.92, 381.59] }
+          ]
+        },
+        "Ort Datum": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [70.8, 254.52, 256.8, 28.8],
+          "bedeutung": "„Ort, Datum“ (unter „das zusätzliche Spielrecht für eine Herren- oder Frauenmannschaft gemäß der Jugendordnung erhalten darf.“)",
+          "fuellt": "familie_hand",
+          "quelle": null,
+          "hinweis": "Von Hand; kein vorausgefülltes Datum.",
+          "beleg": [
+            { "lage": "unten", "text": "Ort, Datum", "box": [70.82, 240.25, 119.52, 252.2] }
+          ]
+        },
+        "Unterschrift des gesetzlichen Vertreters": {
+          "typ": "text",
+          "seite": 1,
+          "rect": [70.8, 191.64, 256.68, 28.8],
+          "bedeutung": "„Unterschrift des gesetzlichen Vertreters“ – Unterschriftsfläche über der Linie",
+          "fuellt": "familie_hand",
+          "quelle": null,
+          "hinweis": "Textfeld als Unterschriftsfläche, leer lassen (siehe unterschriften, Stelle „unterschrift“).",
+          "beleg": [
+            { "lage": "unten", "text": "Unterschrift des gesetzlichen Vertreters", "box": [70.82, 177.37, 252.14, 189.32] }
+          ]
+        }
+      },
+      "unterschriften": [
+        {
+          "stelleKey": "unterschrift",
+          "seite": 1,
+          "x": 70.8,
+          "y": 191.64,
+          "breite": 256.68,
+          "hoehe": 28.8,
+          "wer": "sorgeberechtigte",
+          "beschriftung": "Unterschrift des gesetzlichen Vertreters",
+          "feld": "Unterschrift des gesetzlichen Vertreters",
+          "linie": { "x0": 70.8, "x1": 327.3, "y": 192.04 }
+        }
+      ],
+      "handfelder": [
+        {
+          "key": "ort_datum",
+          "seite": 1,
+          "typ": "text",
+          "x": 70.8,
+          "y": 254.52,
+          "breite": 256.8,
+          "hoehe": 28.8,
+          "art": "kasten",
+          "bedeutung": "„Ort, Datum“ unter der Einverständniserklärung",
+          "feld": "Ort Datum",
+          "linie": { "x0": 70.8, "x1": 327.5, "y": 255.04 }
+        }
+      ],
+      "digitaleUnterschrift": "nicht_erlaubt",
+      "digitaleUnterschriftGrund": "HFV-Vordruck: JO § 29 Nr. 5 b und § 30 Nr. 1 b verlangen die „schriftliche Einverständniserklärung des gesetzlichen Vertreters“ als Antragsunterlage; SpO § 92: Originale aufbewahren. Umstellbar, falls die Passstelle zustimmt."
+    }
+  }
+}

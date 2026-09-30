@@ -1,0 +1,77 @@
+/*
+  Leere Antworten `a` des Anmelde-Assistenten (SCHNITTSTELLEN Abschnitt 3).
+
+  Alle Felder sind vorhanden und leer (null, "" oder leere Liste/Objekt), damit
+  das Regelwerk nie auf ein fehlendes Objekt stößt. Vorgaben: Unterschrift am
+  Bildschirm, Blätter für den Fußball-Verband beim ersten Training.
+  Ohne DOM, in Node nutzbar.
+*/
+
+export function neueAntworten(sprache) {
+  return {
+    schema: 1,
+    sprache: sprache || "de",
+    wer: null,
+    vorname: "",
+    nachname: "",
+    geburtsdatum: null,
+    geburtsort: "",
+    geburtsland: null,
+    geschlecht: null,
+    spielrechtFuer: null,
+    geborenInDe: null,
+    jahreInDe: null,
+    abteilung: null,
+    spielen: null,
+    spielerpass: null,
+    alterVerein: { region: null, name: "", ort: "", land: null, verband: "", mitgliedschaft: null, empfaenger: "", strasse: "", plzOrt: "" },
+    abmeldung: { status: null, datum: null, weg: null },
+    letztesSpiel: null,
+    letztesPflichtspiel: null,
+    sperre: null,
+    sperreBis: null,
+    freigabe: null,
+    wechselLetzte6Monate: null,
+    deutsch: null,
+    staaten: [],
+    auslandGewohnt: null,
+    auslandLand: null,
+    auslandStadt: "",
+    wohnen: null,
+    wohnenSeit: null,
+    ohneElternGrund: null,
+    sorge: null,
+    andererElternteilEinverstanden: false,
+    sorgeberechtigte: [],
+    besonderes: { maedchenJungenteam: false, herrenAushilfe: false, sonderspielrecht: false, frauHerren: false },
+    karneval: { gruppe: null, tanztWoanders: null, turnier: null, abendOhneEltern: null, abholung: "", alleinNachHause: null, alleinAb: "" },
+    anschrift: { strasse: "", plz: "", ort: "" },
+    email: "",
+    telefon: "",
+    mobil: "",
+    beitrag: { gruppe: null, familie: [], senator: false, doppel: false },
+    leistungen: null,
+    zahlung: {
+      art: null,
+      kontoinhaber: null,
+      kiVorname: "",
+      kiNachname: "",
+      kiAnschriftGleich: true,
+      kiStrasse: "",
+      kiPlz: "",
+      kiOrt: "",
+      iban: "",
+      bic: "",
+      bank: "",
+    },
+    einwilligungen: { fotos: null, medien: [], hfvName: false, hfvFoto: false, fahrten: false, messenger: false },
+    notfall: { name: "", telefon: "", beziehung: "" },
+    gesundheitsbogen: null,
+    gesundheit: { allergien: "", erkrankungen: "", medikamente: "", sonstiges: "" },
+    spielerfoto: { weg: null },
+    nachweise: {},
+    satzung: false,
+    unterschriftWeg: "bildschirm",
+    hfvUnterschrift: "training",
+  };
+}
