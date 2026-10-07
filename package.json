@@ -28,7 +28,11 @@
     "tpl-bauen": "node tools/app-optik/tpl-bauen.mjs",
     "antrag-bibliotheken": "node tools/antrag-bibliotheken.mjs",
     "annahme-paket": "node tools/annahme-paket.mjs",
-    "annahme-test": "python3 server/aufnahmeantrag-annahme/test/annahme_test.py"
+    "annahme-test": "python3 server/aufnahmeantrag-annahme/test/annahme_test.py",
+    "test:anmeldung": "node tools/anmeldung-test/regeln-test.mjs && node tools/anmeldung-test/formulare-pruefen.mjs && node tools/anmeldung-test/uebersetzung-pruefen.mjs && node tools/anmeldung-test/sprache-check.mjs && node tools/anmeldung-test/konzept-pruefen.mjs",
+    "test:anmeldung-pdf": "node tools/anmeldung-test/pdf-test.mjs",
+    "test:anmeldung-e2e": "node tools/anmeldung-test/e2e.mjs",
+    "test:anmeldung-sprachen": "node tools/anmeldung-test/e2e-sprachen.mjs"
   },
   "keywords": [],
   "author": "",

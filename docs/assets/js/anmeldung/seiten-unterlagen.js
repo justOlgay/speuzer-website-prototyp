@@ -379,14 +379,15 @@ export const unterschriften = {
         for (const person of plan.liste) {
           const name = personenName(k, person.schluessel);
           const titel = unterschriftTitel(k, person.schluessel);
-          const gilt = k.t("unterschriften.gilt", { formulare: k.liste(Array.from(new Set(person.stellen.map((s) => stelleName(k, s))))) });
+          // "Diese Unterschrift gilt für:" mit einer Zeile je Blatt (keine Aufzählung in einer Zeile)
+          const gilt = { titel: k.t("unterschriften.giltFuer"), punkte: Array.from(new Set(person.stellen.map((s) => stelleName(k, s)))) };
           const feld = unterschriftFeld({
             speicher: k.strichSpeicher(person.schluessel),
             id: k.nextId("s"),
             wer: person.schluessel,
             feld: "unterschrift." + person.schluessel,
             titel: person.freiwillig ? titel + " " + k.t("allgemein.freiwillig") : titel,
-            hinweis: gilt,
+            hinweisListe: gilt,
             zusatz: person.freiwillig ? k.t("unterschriften.person.zweiteHinweis").replace(/\n/g, " ") : null,
             texte: {
               ariaLabel: k.t("unterschriften.ariaLabel"),

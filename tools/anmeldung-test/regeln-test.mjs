@@ -222,7 +222,18 @@ function testeDaten() {
   });
   wahr("Offener Punkt O68: Quelle nennt digitaleUnterschrift in data/anmeldung-formulare.json", /data\/anmeldung-formulare\.json \(digitaleUnterschrift\)/.test(punkt("O68").quelle));
   wahr("Offener Punkt O70: Quelle nennt HFV-Jugendordnung § 7 Nr. 2", /HFV-Jugendordnung § 7 Nr\. 2/.test(punkt("O70").quelle));
-  gleich("Offene Punkte: Kennungen O01 bis O71 lückenlos und in Reihenfolge", cfg.offenePunkte.map((o) => o.id), Array.from({ length: 71 }, (_, i) => "O" + String(i + 1).padStart(2, "0")));
+  // 07.10.2026 (Prüfung Orchestrator, Paket N-A2): zwei offene Punkte zur Übergabe des PDFs in der App und zum automatischen Versand
+  [
+    ["O72", "vorstand", "P1", "", /Wie übergibt die Familie das PDF in der Vereins-App\?/, /weist der Assistent in der App auf „Im Browser öffnen“ hin\.$/],
+    ["O73", "datenschutz", "P1", "U10,U11,U12,U28", /Teil C enthält Gesundheitsdaten \(Art\. 9 DSGVO\)/, /nur verschlüsselt oder getrennt auf Papier\?$/],
+  ].forEach(([id, an, prio, betrifft, muster1, muster2]) => {
+    const o = punkt(id);
+    wahr("Offener Punkt " + id + ": an " + an + ", " + prio + ", betrifft " + (betrifft || "keine Unterlage") + ", status offen",
+      !!o && o.an === an && o.prioritaet === prio && Array.isArray(o.betrifft) && o.betrifft.join(",") === betrifft && o.status === "offen");
+    wahr("Offener Punkt " + id + ": Frage", !!o && muster1.test(o.frage) && muster2.test(o.frage));
+    wahr("Offener Punkt " + id + ": Quelle nennt die Prüfung des Orchestrators vom 07.10.2026", !!o && /^Prüfung Orchestrator, 07\.10\.2026$/.test(o.quelle));
+  });
+  gleich("Offene Punkte: Kennungen O01 bis O73 lückenlos und in Reihenfolge", cfg.offenePunkte.map((o) => o.id), Array.from({ length: 73 }, (_, i) => "O" + String(i + 1).padStart(2, "0")));
   // Unterschriftsstellen: der Aufnahmeantrag nutzt die vermessenen Schlüssel
   ["s2.unterschrift", "s3.unterschrift", "s4.unterschrift"].forEach((k) => wahr("Unterschriftsstelle " + k, cfg.unterschriftStellen.aufnahmeantrag.some((s) => s.stelleKey === k) && !!felder[k]));
   wahr("Unterschriftsstelle s2.unterschrift_sorgeberechtigte (zusätzliche Zeile)", cfg.unterschriftStellen.aufnahmeantrag.some((s) => s.stelleKey === "s2.unterschrift_sorgeberechtigte"));
@@ -719,9 +730,14 @@ async function testeTexte() {
   // Alle Schlüssel des Registers haben einen Text (und umgekehrt: keine Texte ohne Schlüssel)
   ["hinweise", "frist", "weiterleitung", "mannschaft", "beitrag"].forEach((kat) => {
     R.SCHLUESSEL[kat].forEach((k) => wahr("Texte " + kat + "." + k, typeof texte[kat][k] === "string" && texte[kat][k].trim().length > 3));
-    gleich("Texte " + kat + ": keine überzähligen Texte", Object.keys(texte[kat]).filter((k) => R.SCHLUESSEL[kat].indexOf(k) < 0), []);
+    // beitrag.gruppen sind keine Hinweise des Registers, sondern die Namen der Beitragsgruppen (siehe unten, N-A2)
+    gleich("Texte " + kat + ": keine überzähligen Texte", Object.keys(texte[kat]).filter((k) => R.SCHLUESSEL[kat].indexOf(k) < 0 && !(kat === "beitrag" && k === "gruppen")), []);
     gleich("Register " + kat + ": keine doppelten Schlüssel", new Set(R.SCHLUESSEL[kat]).size, R.SCHLUESSEL[kat].length);
   });
+  // N-A2 (sprache-16): Namen der Beitragsgruppen in den Regeltexten (übersetzbar), auf Deutsch wortgleich mit data/anmeldung.json › bezeichnung
+  const gruppenTexte = texte.beitrag.gruppen || {};
+  Object.entries(cfg.beitragsgruppen).forEach(([schluessel, g]) => gleich("Texte beitrag.gruppen." + schluessel + ": wortgleich mit data/anmeldung.json › bezeichnung", gruppenTexte[schluessel], g.bezeichnung));
+  gleich("Texte beitrag.gruppen: keine Texte für unbekannte Beitragsgruppen", Object.keys(gruppenTexte).filter((k) => !(k in cfg.beitragsgruppen)), []);
   // O65: Der Hinweis zur Unterschrift von Jugendlichen bei den Fotos ist bis zur Entscheidung des Vorstands entfernt
   wahr("Texte hinweise: jugendlicher_unterschreibt_mit ist entfernt (O65)", !("jugendlicher_unterschreibt_mit" in texte.hinweise));
   // Hilfstexte für die Oberfläche
@@ -734,7 +750,12 @@ async function testeTexte() {
   // Einfache Sprache: höchstens 12 Wörter pro Satz, keine Paragraphen, keine Abkürzungen
   const alle = [];
   U_IDS.forEach((id) => ["name", "kurz", "warum", "wie", "wo"].forEach((f) => alle.push(["Unterlagen " + id + "." + f, String((texte.unterlagen[id] || {})[f] || "")])));
-  ["faelle", "hinweise", "frist", "weiterleitung", "mannschaft", "beitrag", "formulare", "unterschriften", "wer", "art", "status"].forEach((kat) => Object.entries(texte[kat]).forEach(([k, t]) => alle.push([kat + "." + k, t])));
+  ["faelle", "hinweise", "frist", "weiterleitung", "mannschaft", "beitrag", "formulare", "unterschriften", "wer", "art", "status"].forEach((kat) =>
+    Object.entries(texte[kat]).forEach(([k, t]) => {
+      if (typeof t === "object") Object.entries(t).forEach(([k2, t2]) => alle.push([kat + "." + k + "." + k2, t2])); // beitrag.gruppen.<Schlüssel>
+      else alle.push([kat + "." + k, t]);
+    })
+  );
   alle.forEach(([name, t]) => {
     const langer = saetze(t).filter((s) => woerter(s) > 12);
     pruefe("Einfache Sprache " + name + ": Sätze mit höchstens 12 Wörtern", () => assert.equal(langer.length, 0, "zu lang: " + langer.map((s) => '"' + s + '" (' + woerter(s) + ")").join(" | ")));

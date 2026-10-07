@@ -53,8 +53,9 @@ function zeichneStrich(ctx, punkte, breite) {
   ctx.stroke();
 }
 
-// o: { speicher, id, titel, hinweis, zusatz, texte: { ariaLabel, stand0, standOk,
+// o: { speicher, id, titel, hinweis, hinweisListe, zusatz, texte: { ariaLabel, stand0, standOk,
 // standZuKurz, loeschen }, beiAenderung() }
+// hinweis: ein Satz; hinweisListe: { titel, punkte: [Text, …] } – "Diese Unterschrift gilt für:" mit einer Zeile je Blatt
 export function unterschriftFeld(o) {
   const speicher = o.speicher;
   const leinwand = h("canvas", { klasse: "anm-unterschrift__leinwand", role: "img", "aria-label": o.texte.ariaLabel });
@@ -62,7 +63,9 @@ export function unterschriftFeld(o) {
   const loeschen = h("button", { type: "button", klasse: "knopf knopf--sekundaer anm-unterschrift__loeschen", "aria-label": o.texte.loeschenLang || o.texte.loeschen }, o.texte.loeschen);
   const huelle = h("div", { klasse: "anm-unterschrift", role: "group", tabindex: "-1", "aria-labelledby": o.id + "-titel", "aria-describedby": o.id + "-hinweis " + (o.zusatz ? o.id + "-zusatz " : "") + o.id + "-stand", "data-feld": o.feld, "data-unterschrift": o.wer },
     h("p", { klasse: "anm-unterschrift__titel", id: o.id + "-titel" }, o.titel),
-    o.hinweis ? h("p", { klasse: "anm-hinweis", id: o.id + "-hinweis" }, o.hinweis) : null,
+    o.hinweisListe && o.hinweisListe.punkte.length
+      ? h("div", { klasse: "anm-hinweis anm-unterschrift__gilt", id: o.id + "-hinweis" }, h("p", {}, o.hinweisListe.titel), h("ul", { klasse: "anm-liste-punkte" }, o.hinweisListe.punkte.map((x) => h("li", {}, x))))
+      : o.hinweis ? h("p", { klasse: "anm-hinweis", id: o.id + "-hinweis" }, o.hinweis) : null,
     o.zusatz ? h("p", { klasse: "anm-hinweis", id: o.id + "-zusatz" }, o.zusatz) : null,
     h("p", { klasse: "anm-fehler", id: o.id + "-f", hidden: true }),
     h("div", { klasse: "anm-unterschrift__flaeche" }, leinwand, h("span", { klasse: "anm-unterschrift__linie", "aria-hidden": "true" })),

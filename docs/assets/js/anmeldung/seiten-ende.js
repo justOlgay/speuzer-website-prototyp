@@ -185,34 +185,48 @@ function pruefBereiche(k) {
   };
   const Z = (schluessel) => k.t("pruefen.zeilen." + schluessel);
   const datum = (iso) => (iso ? k.formatDatum(iso) : "");
+  // Angaben der Familie (Namen, Orte, Nummern, Adressen) stehen jede für sich in <bdi>: Sie behalten ihre Richtung, auch
+  // mitten in einem arabischen Satz. Das <dd> trägt die Richtung der Sprache (dir); nicht das <bdi> um den ganzen Wert,
+  // sonst bestimmt das erste Zeichen die Richtung und die Teile einer arabischen Zeile stehen in falscher Reihenfolge.
+  const D = (x) => {
+    const t = x === null || x === undefined ? "" : sauber(String(x));
+    return t ? h("bdi", {}, t) : "";
+  };
+  // Aufzählung mit dem Trenner der Sprache (Arabisch "، "); die Teile sind Text oder Knoten, leere fallen weg.
+  const LISTE = (teile) => {
+    const aus = [];
+    teile.filter((x) => x !== "" && x !== null && x !== undefined).forEach((t, i) => aus.push(...(i ? [k.t("liste.trenner")] : []), t));
+    return aus;
+  };
 
   let z = bereich("person");
-  z(Z("name"), sauber([a.vorname, a.nachname].filter(Boolean).join(" ")), "name");
+  z(Z("name"), D([a.vorname, a.nachname].filter(Boolean).join(" ")), "name");
   z(Z("geboren"), datum(a.geburtsdatum) + (typeof e.alter === "number" ? " (" + e.alter + " " + k.t("allgemein.jahre") + ")" : ""), "geburt", "datum");
-  z(Z("geburtsort"), k.liste([a.geburtsort, landName(a.geburtsland, k.sprache)]), "geburt", "datum");
+  z(Z("geburtsort"), LISTE([D(a.geburtsort), landName(a.geburtsland, k.sprache)]), "geburt", "datum");
   z(Z("geschlecht"), a.geschlecht ? W("geschlecht." + a.geschlecht) : "", "geburt", "geschlecht");
 
   z = bereich("abteilung");
   z(Z("abteilung"), a.abteilung ? W("abteilung." + a.abteilung) : "", "abteilung");
-  if (gilt("mannschaft") && e.mannschaft && e.mannschaft.namen && e.mannschaft.namen.length) z(Z("mannschaft"), k.liste(e.mannschaft.namen), null);
+  if (gilt("mannschaft") && e.mannschaft && e.mannschaft.namen && e.mannschaft.namen.length) z(Z("mannschaft"), LISTE(e.mannschaft.namen.map(D)), null);
   if (gilt("spielen")) z(Z("spielen"), a.spielen === true ? Z("spielenJa") : a.spielen === false ? Z("spielenNein") : "", "spielen");
   if (gilt("alter_verein") && a.alterVerein) {
-    z(Z("alterVerein"), k.liste([a.alterVerein.name, a.alterVerein.ort, a.alterVerein.region === "ausland" ? landName(a.alterVerein.land, k.sprache) : ""]), "alter_verein");
+    z(Z("alterVerein"), LISTE([D(a.alterVerein.name), D(a.alterVerein.ort), a.alterVerein.region === "ausland" ? landName(a.alterVerein.land, k.sprache) : ""]), "alter_verein");
   }
   if (gilt("abmeldung") && a.abmeldung && a.abmeldung.status) {
     const ab = a.abmeldung;
-    const text = ab.status === "einschreiben" ? W("abmeldung.einschreiben", { datum: datum(ab.datum) }) : W("abmeldung." + ab.status) + (ab.weg === "vollmacht" ? ", " + W("abmeldung.vollmacht") : "");
+    // Zwei Teile mit dem Trenner der Sprache ("Noch nicht, mit Vollmacht"; Arabisch mit "،"), nie fest mit ", " verbunden.
+    const text = ab.status === "einschreiben" ? W("abmeldung.einschreiben", { datum: datum(ab.datum) }) : k.liste([W("abmeldung." + ab.status), ab.weg === "vollmacht" ? W("abmeldung.vollmacht") : ""]);
     z(Z("abmeldung"), text, "abmeldung", "status");
   }
   if (gilt("abmeldung") && a.alterVerein && a.alterVerein.mitgliedschaft) {
     z(Z("alteMitgliedschaft"), W("mitgliedschaft." + a.alterVerein.mitgliedschaft), "abmeldung", "mitgliedschaft");
   }
   if (gilt("karneval") && a.karneval) {
-    z(Z("karneval"), a.karneval.gruppe === "weiss_nicht" ? k.t("allgemein.weissNicht") : a.karneval.gruppe, "karneval", "gruppe");
+    z(Z("karneval"), a.karneval.gruppe === "weiss_nicht" ? k.t("allgemein.weissNicht") : D(a.karneval.gruppe), "karneval", "gruppe");
     if (k.minderjaehrig()) z(Z("abendauftritte"), jaNein(k, a.karneval.abendOhneEltern), "karneval", "abend");
     // Freiwillige Angaben zu den Abendauftritten: nur, was die Familie beantwortet hat.
     if (k.minderjaehrig() && a.karneval.abendOhneEltern === "ja") {
-      z(Z("abholung"), sauber(a.karneval.abholung), "karneval", "abholung");
+      z(Z("abholung"), D(a.karneval.abholung), "karneval", "abholung");
       const allein = a.karneval.alleinNachHause;
       z(Z("alleinNachHause"), allein === "ja" ? (a.karneval.alleinAb ? W("alleinAb", { zeit: a.karneval.alleinAb }) : W("ja")) : allein === "nein" ? W("nein") : "", "karneval", "allein");
     }
@@ -221,17 +235,17 @@ function pruefBereiche(k) {
     const staaten = k.liste((a.staaten || []).map((c) => landName(c, k.sprache)));
     z(Z("staaten"), staaten || (a.deutsch ? jaNein(k, a.deutsch) : ""), "pass", "staaten");
   }
-  if (gilt("ausland")) z(Z("ausland"), a.auslandGewohnt === "ja" ? k.liste([a.auslandStadt, landName(a.auslandLand, k.sprache)]) : jaNein(k, a.auslandGewohnt), "ausland");
+  if (gilt("ausland")) z(Z("ausland"), a.auslandGewohnt === "ja" ? LISTE([D(a.auslandStadt), landName(a.auslandLand, k.sprache)]) : jaNein(k, a.auslandGewohnt), "ausland");
   if (gilt("wohnen") && a.wohnen) z(Z("wohnen"), W("wohnen." + a.wohnen), "wohnen", "ort");
   if (gilt("sorge") && a.sorge) {
     z(Z("sorge"), W("sorge." + a.sorge), "sorge", "recht");
-    z(Z("sorgePersonen"), k.liste((a.sorgeberechtigte || []).map((p) => sauber([p.vorname, p.nachname].filter(Boolean).join(" ")))), "sorge", "personen");
+    z(Z("sorgePersonen"), LISTE((a.sorgeberechtigte || []).map((p) => D([p.vorname, p.nachname].filter(Boolean).join(" ")))), "sorge", "personen");
   }
 
   z = bereich("kontakt");
-  z(Z("anschrift"), a.anschrift ? sauber(a.anschrift.strasse + ", " + a.anschrift.plz + " " + a.anschrift.ort) : "", "kontakt", "anschrift");
-  z(Z("email"), a.email, "kontakt", "erreichen");
-  z(Z("telefon"), k.liste([a.mobil, a.telefon]), "kontakt", "erreichen");
+  z(Z("anschrift"), a.anschrift ? D(a.anschrift.strasse + ", " + a.anschrift.plz + " " + a.anschrift.ort) : "", "kontakt", "anschrift");
+  z(Z("email"), D(a.email), "kontakt", "erreichen");
+  z(Z("telefon"), LISTE([D(a.mobil), D(a.telefon)]), "kontakt", "erreichen");
 
   z = bereich("beitrag");
   const gruppeText = e.beitrag && Array.isArray(e.beitrag.gruppen) && e.beitrag.gruppen.length ? k.liste(e.beitrag.gruppen.map((g) => k.beitragsText(g))) : e.beitrag && e.beitrag.gruppe ? k.beitragsText(e.beitrag.gruppe) : "";
@@ -240,8 +254,8 @@ function pruefBereiche(k) {
   if (a.zahlung) {
     z(Z("zahlung"), a.zahlung.art ? W("zahlung." + a.zahlung.art) : "", "zahlung", "art");
     if (a.zahlung.art === "sepa") {
-      z(Z("kontoinhaber"), a.zahlung.kontoinhaber === "andere" ? sauber([a.zahlung.kiVorname, a.zahlung.kiNachname].join(" ")) : W("kontoinhaber." + a.zahlung.kontoinhaber), "zahlung", "inhaber");
-      z(Z("iban"), gruppiereIban(a.zahlung.iban), "zahlung", "iban");
+      z(Z("kontoinhaber"), a.zahlung.kontoinhaber === "andere" ? D([a.zahlung.kiVorname, a.zahlung.kiNachname].join(" ")) : W("kontoinhaber." + a.zahlung.kontoinhaber), "zahlung", "inhaber");
+      z(Z("iban"), D(gruppiereIban(a.zahlung.iban)), "zahlung", "iban");
     }
   }
 
@@ -260,7 +274,7 @@ function pruefBereiche(k) {
 
   if (gilt("notfall") && a.notfall) {
     z = bereich("notfall");
-    z(Z("notfall"), sauber(k.liste([a.notfall.name, a.notfall.telefon])), "notfall", "kontakt");
+    z(Z("notfall"), LISTE([D(a.notfall.name), D(a.notfall.telefon)]), "notfall", "kontakt");
     z(Z("gesundheitsbogen"), jaNein(k, a.gesundheitsbogen === true), "notfall", "bogen");
   }
 
@@ -314,7 +328,7 @@ export const pruefen = {
               beiKlick: () => k.geheZuAendern(r.schritt, r.teil),
             })
           : null;
-        return h("div", { klasse: "anm-pruefzeile" }, h("dt", {}, r.label), h("dd", { klasse: "anm-pruefzeile__wert" }, r.wert instanceof Node ? r.wert : h("bdi", {}, r.wert)), h("dd", { klasse: "anm-pruefzeile__aktion" }, aktion));
+        return h("div", { klasse: "anm-pruefzeile" }, h("dt", {}, r.label), h("dd", { klasse: "anm-pruefzeile__wert", dir: k.richtung() }, r.wert), h("dd", { klasse: "anm-pruefzeile__aktion" }, aktion));
       });
       const titelId = k.nextId("bt");
       return h("section", { klasse: "anm-bereich", "aria-labelledby": titelId },
@@ -395,29 +409,58 @@ function ergebnisAnsicht(k, pdf) {
   const datei = pdf.datei;
   const status = h("p", { klasse: "anm-status", role: "status" });
   const knoepfe = [];
+  // In der Vereins-App (App-Modus) kann Speichern oder Teilen scheitern. Dann tut der Assistent nicht still nichts: Eine
+  // Meldung nennt den Weg über den Browser und führt mit einem Link dorthin.
+  // Der kurze Hinweis unter den Knöpfen steht nur im App-Modus; zeigt der Status schon die Fehlermeldung mit dem Link, entfällt er.
+  const appZeile = k.appModus() ? h("p", { klasse: "anm-hinweis anm-app-hinweis", "data-app-hinweis": "" }, k.t("app.hinweisFertig"), " ", k.browserLink()) : null;
+  const zeigeStatus = (text) => {
+    status.textContent = text;
+    if (appZeile) appZeile.hidden = false;
+  };
+  const meldeAppFehler = () => {
+    status.textContent = "";
+    status.append(k.t("app.fehler"), " ", k.browserLink());
+    if (appZeile) appZeile.hidden = true;
+  };
+  // Speichert die Datei; in der App fängt es einen Fehler ab, sonst gilt das bisherige Verhalten.
+  const speichereMitMeldung = (bytes, typ, name, erfolg) => {
+    try {
+      speichern(bytes, typ, name);
+    } catch (fehler) {
+      if (!k.appModus()) throw fehler;
+      console.error("Anmeldung: Datei nicht gespeichert", fehler);
+      meldeAppFehler();
+      return false;
+    }
+    zeigeStatus(erfolg);
+    return true;
+  };
   const laden = knopf(k.t("fertig.herunterladen"), {
     aktion: "herunterladen",
     beiKlick: () => {
-      speichern(pdf.ergebnis.bytes, "application/pdf", pdf.ergebnis.dateiname);
-      k.gesichert = true;
-      status.textContent = k.t("fertig.gespeichert");
+      if (speichereMitMeldung(pdf.ergebnis.bytes, "application/pdf", pdf.ergebnis.dateiname, k.t("fertig.gespeichert"))) k.gesichert = true;
     },
   });
   const teilen = knopf(k.t("fertig.teilen"), {
     sekundaer: true,
     aktion: "teilen",
     beiKlick: () => {
-      navigator
-        .share({ files: [datei], title: pdf.ergebnis.dateiname })
+      let versprechen;
+      try {
+        versprechen = Promise.resolve(navigator.share({ files: [datei], title: pdf.ergebnis.dateiname }));
+      } catch (fehler) {
+        versprechen = Promise.reject(fehler);
+      }
+      versprechen
         .then(() => {
           k.gesichert = true;
-          status.textContent = k.t("fertig.geteilt");
+          zeigeStatus(k.t("fertig.geteilt"));
         })
         .catch((fehler) => {
           if (fehler && fehler.name === "AbortError") return;
-          speichern(pdf.ergebnis.bytes, "application/pdf", pdf.ergebnis.dateiname);
-          k.gesichert = true;
-          status.textContent = k.t("fertig.teilenFehler");
+          // Teilen geht nicht: erst die Datei speichern. In der App steht danach die Meldung mit dem Link zum Browser.
+          // (Der kurze Hinweis mit dem Link steht in der App ohnehin unter den Knöpfen.)
+          if (speichereMitMeldung(pdf.ergebnis.bytes, "application/pdf", pdf.ergebnis.dateiname, k.t("fertig.teilenFehler"))) k.gesichert = true;
         });
     },
   });
@@ -436,8 +479,7 @@ function ergebnisAnsicht(k, pdf) {
       sekundaer: true,
       aktion: "foto-speichern",
       beiKlick: () => {
-        speichern(foto.bytes, "image/jpeg", k.fotoDateiname());
-        status.textContent = k.t("fertig.gespeichert");
+        speichereMitMeldung(foto.bytes, "image/jpeg", k.fotoDateiname(), k.t("fertig.gespeichert"));
       },
     }));
   }
@@ -449,6 +491,8 @@ function ergebnisAnsicht(k, pdf) {
     teile.length ? h("div", { klasse: "anm-block" }, h("h3", { klasse: "anm-zwischentitel" }, k.t("fertig.teileTitel")), h("ul", { klasse: "anm-liste-punkte" }, teile)) : null,
     h("div", { klasse: "anm-knoepfe" }, knoepfe),
     status,
+    // Nur im App-Modus: kurzer Hinweis, falls Teilen oder Herunterladen nicht klappt, mit dem Link zum Browser
+    appZeile,
     h("h3", { klasse: "anm-zwischentitel" }, k.t("fertig.naechsteTitel")),
     naechsteSchritte(k, pdf.ergebnis),
     h("div", { klasse: "anm-block" },

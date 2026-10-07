@@ -23,6 +23,10 @@
 //  - Runde 4: Attest-Sätze in drei Fassungen je Art von U10 („pflicht“, „offen“, „verein“): Erlaubnis für das Attest, Hinweis für die Praxis auf
 //    der Attest-Vorlage, Information zum Datenschutz Nr. 5 und 8; bei „offen“ und „verein“ steht auf den eigenen Seiten nirgends „der Verband
 //    verlangt das Attest“ (Satzsuche); Attest-Vorlage bei „offen“ in allen Profilen (Attest „habe“, aber ohne Datei)
+//  - Paket N-A2 (07.10.2026): Teil A ohne Widerspruch (Begriffe „Verband“ und „Spielrecht“ beim ersten Vorkommen erklärt, Papiere zum Klären
+//    mit Namen, eigener Schritt und Tabellenzeile für die Abmeldung beim alten Verein, ein Satz zum Ausdrucken, Teil C ohne Umschlag,
+//    Passwesen und Spielausschuss erklärt); Sätze der eigenen Seiten, die die Familie unterschreibt (Mädchen, Fahrten, Auftritte am Abend,
+//    Erlaubnis für das Attest, Notfallbogen): höchstens 12 Wörter je Satz, Paragraphen nur in der Zeile „Rechtsgrundlage“ (und im Untertitel)
 // Aufruf-Optionen: --profil=a,b (nur diese Profile)  --ohne-sonderfaelle  --szenarien (Szenarien auch bei --profil)
 // Werkzeuge: pdf-lib und fontkit aus node_modules, dazu poppler (pdftotext, pdfinfo, pdfimages, pdftoppm).
 // Testbilder: tools/anmeldung-test/testbilder/ (künstliche Muster, keine echten Dokumente; fehlende Dateien
@@ -38,7 +42,7 @@ import fontkit from "@pdf-lib/fontkit";
 import { PROFILE, ladeKonfig, profil } from "./profile.mjs";
 import { auswerten } from "../../assets/js/anmeldung/regeln.js";
 import deRegeln from "../../assets/js/anmeldung/texte/de-regeln.js";
-import { erzeugePdf, benoetigteVorlagen, dateiname, TEXTE_TEIL_A } from "../../assets/js/anmeldung/pdf.js";
+import { erzeugePdf, benoetigteVorlagen, dateiname, TEXTE_TEIL_A, begriffsErklaerer } from "../../assets/js/anmeldung/pdf.js";
 
 const WURZEL = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const TESTBILDER = path.join(WURZEL, "tools", "anmeldung-test", "testbilder");
@@ -766,7 +770,7 @@ function pruefeEigeneSeiten(c) {
     ok(norm(S[seiten[0].nr - 1].titel) === norm(titel()), () => "Bericht: Titel von " + schluessel + " ist „" + S[seiten[0].nr - 1].titel + "“, erwartet „" + titel() + "“");
   }
   const attestErlaubnis = seitenVon("attest_einwilligung");
-  if (attestErlaubnis.length) ok(texte[attestErlaubnis[0].nr - 1].includes("Einwilligung zur Verarbeitung der ärztlichen Bescheinigung · Gesundheitsdaten nach Art. 9 Abs. 2 lit. a DSGVO"), "Erlaubnis für das Attest trägt den Rechtsbegriff als Untertitel");
+  if (attestErlaubnis.length) ok(texte[attestErlaubnis[0].nr - 1].includes("Einwilligung zur Verarbeitung der ärztlichen Bescheinigung (Art. 9 DSGVO)"), "Erlaubnis für das Attest trägt den Rechtsbegriff als Untertitel (SCHNITTSTELLEN Abschnitt 9)");
   const eigeneTexte = S.map((s, i) => ({ s: s, t: texte[i] })).filter((x) => x.s.art === "eigen" || x.s.art === "trennblatt").map((x) => x.t).join(" ");
   ok(!/Einwilligung zum ärztlichen Attest|Einverständnis zu Fahrten|Kopie der ärztlichen Bescheinigung|Notfallbogen|[Ää]rztliche[sn]? Attest/.test(eigeneTexte), "auf den eigenen Seiten und im Trennblatt stehen die alten Namen nicht mehr");
   // Laufzettel, soweit pdf.js ihn schreibt (Inhalt der Datei, „Für den Verein zu klären“, „Hinweise zur Datei“; die Texte der Regeln stammen von AP-1)
@@ -885,14 +889,14 @@ function pruefeEigeneSeiten(c) {
     if (nurKontakte) {
       GESUNDHEIT_FELDER.forEach(([, label]) => ok(!hatWort(label), "Notfallbogen mit Bildschirm-Unterschrift und ohne Gesundheitsbogen: kein leeres Feld „" + label + "“"));
       ok(t.includes(TEXT_KEINE_GESUNDHEIT), "Notfallbogen: Satz „Sie haben keine Angaben zur Gesundheit gemacht …“");
-      ok(!/Ich willige ausdrücklich ein/.test(t) && zaehle(t, /Art\. 9 Abs\. 2 lit\. a DSGVO/g) === 1, "Notfallbogen ohne Gesundheitsangaben und mit Bildschirm-Unterschrift: die Einwilligung nach Art. 9 für Gesundheitsangaben entfällt (Art. 9 steht nur bei der Absprache)");
+      ok(!/Ich willige ausdrücklich ein/.test(t) && zaehle(t, /Art\. 9 Abs\. 2 lit\. a DSGVO/g) === 1 && /Rechtsgrundlage: Art\. 9 Abs\. 2 lit\. a DSGVO \(ausdrückliche Einwilligung, nur für die Absprache zur Medikamentengabe\)/.test(t), "Notfallbogen ohne Gesundheitsangaben und mit Bildschirm-Unterschrift: die Einwilligung nach Art. 9 für Gesundheitsangaben entfällt (Art. 9 steht nur in der Zeile „Rechtsgrundlage“, nur für die Absprache)");
       ok(t.includes("Ohne die Absprache unten stehen auf diesem Blatt keine Angaben zur Gesundheit."), "Notfallbogen: die Fassung nur mit Kontakten sagt, dass ohne die Absprache keine Gesundheitsangaben auf dem Blatt stehen");
       ok(t.includes("nutzen sie nur im Notfall") && t.includes("Ihre Unterschrift") && t.includes("Notfallkontakte"), "Notfallbogen: kurzer Text, dass die Unterschrift nur für die Notfallkontakte gilt");
       ok(nf[0].s.entwurf && t.includes("Notfallkontakte – ohne Angaben zur Gesundheit"), "Notfallbogen: Untertitel für die Fassung nur mit Kontakten");
     } else {
       GESUNDHEIT_FELDER.forEach(([, label]) => ok(hatWort(label), "Notfallbogen: Feld „" + label + "“ steht da"));
       ok(!t.includes(TEXT_KEINE_GESUNDHEIT), "Notfallbogen: der Satz für die Fassung nur mit Kontakten steht hier nicht");
-      ok(/Ich willige ausdrücklich ein/.test(t) && zaehle(t, /Art\. 9 Abs\. 2 lit\. a DSGVO/g) === 2, "Notfallbogen mit Gesundheitsfeldern: Einwilligung nach Art. 9 (und einmal bei der Absprache)");
+      ok(/Ich willige ausdrücklich ein/.test(t) && zaehle(t, /Art\. 9 Abs\. 2 lit\. a DSGVO/g) === 1 && /Rechtsgrundlage: Art\. 9 Abs\. 2 lit\. a DSGVO \(ausdrückliche Einwilligung in die Angaben zur Gesundheit und in die Absprache zur Medikamentengabe\)/.test(t), "Notfallbogen mit Gesundheitsfeldern: Einwilligung nach Art. 9 (für die Angaben und für die Absprache), Artikel nur in der Zeile „Rechtsgrundlage“");
       GESUNDHEIT_FELDER.forEach(([name]) => {
         const wert = mit ? String(ges[name] || "").trim() : "";
         const ist = bericht.eingaben.find((x) => x.formular === "notfall" && x.name === name);
@@ -970,16 +974,16 @@ const fassungVon = (art) => (art === "offen" || art === "verein" ? art : "pflich
 const DS5_ANTRAG = "mindestens zwei Jahre ab Antragstellung, weil der Verband das verlangt (Spielordnung § 92). Danach vernichten wir sie. Auf Anforderung legen wir sie dem Verband binnen 14 Tagen im Original vor.";
 const ATTEST_TEXT = {
   pflicht: {
-    pruefung: "Der Verein nimmt die Bescheinigung entgegen und prüft, ob die Voraussetzung für das Spielrecht erfüllt ist (Jugendordnung § 9 Nr. 1).",
-    aufbewahrung: "Der Verein bewahrt sie mindestens zwei Jahre ab dem Antrag auf (Spielordnung § 92). Danach vernichtet er sie.",
-    wichtig: "Ohne diese Einwilligung kann der Verein keinen Antrag auf Spielerlaubnis stellen, weil der Verband die Bescheinigung verlangt.",
+    pruefung: "Der Verein nimmt die Bescheinigung entgegen. Er prüft damit eine Voraussetzung für das Spielrecht.",
+    aufbewahrung: "Der Verein bewahrt sie mindestens zwei Jahre ab dem Antrag auf. Danach vernichtet er sie.",
+    wichtig: "Ohne diese Einwilligung kann der Verein keinen Antrag auf Spielerlaubnis stellen. Denn der Verband verlangt die Bescheinigung.",
     vorlage: "Hinweis für die Praxis: Die Bescheinigung ist für den Fußballverein und den Hessischen Fußball-Verband bestimmt (Jugendordnung § 9 Nr. 1). Bitte tragen Sie keine Diagnosen ein. Die Aussage oben genügt.",
     ds5: "Unterlagen zum Antrag auf Spielerlaubnis (unterschriebener Antrag, Nachweise, Attest): " + DS5_ANTRAG,
     ds8: "Für Minderjährige verlangt der Verband ein Attest vom Arzt. Ohne die Erlaubnis für das Attest kann der Verein deshalb kein Spielrecht beantragen.",
   },
   offen: {
-    pruefung: "Der Verein nimmt die Bescheinigung entgegen und prüft, ob die Voraussetzung für das Spielrecht erfüllt ist (Jugendordnung § 9 Nr. 1).",
-    aufbewahrung: "Braucht der Verband sie, bewahrt der Verein sie mindestens zwei Jahre. Die Frist läuft ab dem Antrag (Spielordnung § 92). Danach vernichtet er sie.",
+    pruefung: "Der Verein nimmt die Bescheinigung entgegen. Er prüft damit eine Voraussetzung für das Spielrecht.",
+    aufbewahrung: "Braucht der Verband sie, bewahrt der Verein sie mindestens zwei Jahre. Die Frist läuft ab dem Antrag. Danach vernichtet er sie.",
     wichtig: "Ob der Verband die Bescheinigung beim Wechsel verlangt, klärt der Verein noch. Braucht der Verband sie nicht, vernichtet der Verein sie.",
     vorlage: "Hinweis für die Praxis: Die Bescheinigung ist für den Fußballverein bestimmt. Ob der Hessische Fußball-Verband sie beim Wechsel verlangt, klärt der Verein. Braucht der Verband sie nicht, vernichtet der Verein sie. Bitte tragen Sie keine Diagnosen ein. Die Aussage oben genügt.",
     ds5: "Unterlagen zum Antrag auf Spielerlaubnis (unterschriebener Antrag, Nachweise): " + DS5_ANTRAG + " Ob der Verband beim Wechsel ein Attest verlangt, klärt der Verein noch. Braucht der Verband es, gilt dieselbe Frist.",
@@ -994,7 +998,7 @@ const ATTEST_TEXT = {
     ds8: "Für Erwachsene verlangt der Verein ein Attest vom Arzt. Ohne die Erlaubnis für das Attest kann der Verein deshalb kein Spielrecht beantragen.",
   },
 };
-const ABSPRACHE_EINWILLIGUNG = "Mit dieser Unterschrift erlauben Sie den Trainern, die Angaben zu nutzen. Grundlage ist Art. 9 Abs. 2 lit. a DSGVO.";
+const ABSPRACHE_EINWILLIGUNG = "Mit dieser Unterschrift erlauben Sie den Trainern, die Angaben zu nutzen.";
 const DATENSCHUTZ_TEXT = {
   attestSofort: "Ein Attest, das der Verband nicht verlangt, vernichtet der Verein sofort.",
   kontakteDaten: "Notfallkontakte: Name, Beziehung und Telefonnummer.",
@@ -1154,6 +1158,168 @@ function pruefeRunde3(c) {
   }
 }
 
+
+// ---------------------------------------------------------------------------------------------
+// Paket N-A2 (07.10.2026): Teil A ohne Widerspruch und Sätze der eigenen Seiten
+// ---------------------------------------------------------------------------------------------
+const FAMILIE_ROLLEN = ["mitglied", "spieler", "sorgeberechtigte", "sorgeberechtigte_beide", "kontoinhaber"];
+const HFV_BLAETTER = ["hfv_antrag", "vollmacht", "einverstaendnis_senioren"]; // ohne die Abmeldung, die die Familie selbst verschickt
+// Papiere, die der Verband verlangen kann (Teil A nennt sie unter „Vielleicht braucht der Verband noch:“)
+const VERBAND_PAPIERE = ["U07", "U08", "U09", "U10", "U11", "U12", "U13", "U14", "U17", "U18", "U20", "U21", "U22", "U23", "U26", "U27", "U36", "U37", "U38", "U39", "U40"];
+// Seiten, die die Familie unterschreibt (ohne die Information zum Datenschutz, siehe O45)
+const FAMILIEN_SEITEN = ["einverstaendnis_maedchen", "einverstaendnis_fahrten", "karneval_auftritte", "attest_einwilligung", "notfall"];
+
+// Sätze eines Textes: Trennung an . ! ? und :, Abkürzungen („Art.“, „Abs.“, „Nr.“, „lit.“, „e. V.“) trennen nicht
+function saetzeNA2(roh) {
+  const t = String(roh)
+    .replace(/\b(Art|Abs|Nr|lit)\.\s/g, "$1.\u0001")
+    .replace(/\be\. V\./g, "e.\u0001V.");
+  return t
+    .split(/(?<=[.!?:])\s+/)
+    .map((x) => x.replace(/\u0001/g, " ").trim())
+    .filter(Boolean);
+}
+const woerterNA2 = (satz) => satz.split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w)).length;
+const seitenAngabeNA2 = (r) => (r.von === r.bis ? "Seite " + r.von : "Seite " + r.von + " bis " + r.bis);
+
+function pruefeNA2(c) {
+  const { b, texte, S, bericht, e, a, pfad } = c;
+  const teilASeiten = S.map((s, i) => ({ s: s, nr: i + 1 })).filter((x) => x.s.art === "teil-a");
+  const ta = ohneRahmen(teilASeiten.map((x) => texte[x.nr - 1]).join(" "));
+  const T = TEXTE_TEIL_A;
+  const plan = bericht.plan;
+  const papierWeg = a.unterschriftWeg !== "bildschirm";
+  const training = a.hfvUnterschrift !== "selbst_drucken";
+  const stiftFamilie = e.unterschriften.filter((u) => FAMILIE_ROLLEN.includes(u.wer) && erwarteteArt(b, u) === "stift");
+
+  // --- Papiere zum Klären (sprache-9): Teil A sagt nicht „Alle nötigen Unterlagen liegen bei“, wenn der Laufzettel etwas klärt ---
+  const klaeren = e.unterlagen.filter((u) => u.art === "offen" && !(b.bilder.nachweise[u.id] || []).length && !(u.formular && plan.formulare[u.formular]));
+  // Die Überschrift des Abschnitts steht ohne Anführungszeichen; mit Anführungszeichen („Das klärt der Verein mit Ihnen“) nennt sie der Satz unter „Das fehlt noch“
+  const stelleKlaeren = ta.search(/(?<!„)Das klärt der Verein mit Ihnen(?!“)/);
+  const abschnittKlaeren = stelleKlaeren >= 0 ? ta.slice(stelleKlaeren) : "";
+  if (klaeren.length) {
+    ok(!ta.includes("Alle nötigen Unterlagen liegen bei"), () => "Teil A sagt „Alle nötigen Unterlagen liegen bei“, obwohl der Laufzettel klärt: " + klaeren.map((u) => u.id).join(", "));
+    ok(ta.includes(norm(T.fehltVielleicht)), "Teil A: Hinweis „Vielleicht kommt noch etwas dazu“ unter „Das fehlt noch“");
+    ok(Boolean(abschnittKlaeren), "Teil A: Abschnitt „Das klärt der Verein mit Ihnen“ steht da, wenn der Laufzettel Papiere klärt");
+    klaeren.forEach((u) => ok(abschnittKlaeren.includes(norm(deRegeln.unterlagen[u.id].name)), () => "Teil A nennt das Papier " + u.id + " (" + deRegeln.unterlagen[u.id].name + ") unter „Das klärt der Verein mit Ihnen“"));
+    const verband = klaeren.filter((u) => VERBAND_PAPIERE.includes(u.id));
+    const verein = klaeren.filter((u) => !VERBAND_PAPIERE.includes(u.id));
+    ok(abschnittKlaeren.includes("Vielleicht braucht der Hessische Fußball-Verband") || abschnittKlaeren.includes("Vielleicht braucht der Verband noch:") ? verband.length > 0 : verband.length === 0, "Teil A: „Vielleicht braucht der Verband noch:“ nur, wenn Papiere des Verbands zu klären sind");
+    ok(abschnittKlaeren.includes(norm(T.vielleichtVerein)) === (verein.length > 0), "Teil A: „Vielleicht braucht der Verein noch:“ nur, wenn andere Papiere zu klären sind");
+  } else if (!e.fehlend.length) {
+    ok(ta.includes(norm(T.fehltKeine)), "Teil A: nichts fehlt und nichts ist zu klären: „Alle nötigen Unterlagen liegen bei“");
+  }
+
+  // --- Abmeldung beim alten Verein (sprache-10): eigener Schritt, Tabelle ---
+  const abmeldung = plan.formulare.abmeldung;
+  const abmeldungStellen = bericht.stellen.filter((s) => s.formular === "abmeldung");
+  if (abmeldung) {
+    const schritt = norm("Das Blatt " + deRegeln.formulare.abmeldung + " steht auf " + seitenAngabeNA2(abmeldung) + ". Unterschreiben Sie es mit Stift. Schicken Sie es selbst als Einschreiben an den alten Verein.");
+    ok(ta.includes(schritt), () => "Teil A: eigener Schritt zur Abmeldung beim alten Verein fehlt: " + schritt);
+    const teilASeitenNr = teilASeiten.map((x) => x.nr);
+    const zeilen = teilASeitenNr.flatMap((nr) => zeilenSeite(pfad, nr)).filter((z) => /Abmeldung beim alten Verein: /.test(z));
+    ok(zeilen.length === abmeldungStellen.length && zeilen.every((z) => /Mit Stift, selbst verschicken/.test(z) && !/beim ersten Training|nach dem Ausdrucken/.test(z)), () => "Teil A, Tabelle: Zeilen zur Abmeldung nennen „Mit Stift, selbst verschicken“ (" + zeilen.length + " Zeilen, erwartet " + abmeldungStellen.length + "): " + JSON.stringify(zeilen));
+    ok(!ta.includes("Mit Stift, selbst verschicken") || zaehle(ta, /Mit Stift, selbst verschicken/g) === abmeldungStellen.length, "Teil A, Tabelle: „Mit Stift, selbst verschicken“ nur bei der Abmeldung");
+  } else {
+    ok(!ta.includes("Mit Stift, selbst verschicken") && !ta.includes("als Einschreiben an den alten Verein"), "Teil A: ohne Blatt zur Abmeldung kein Schritt dazu");
+  }
+
+  // --- Was auf Papier muss (sprache-11): ein Satz mit den Blättern oder „Sie müssen nichts ausdrucken.“ ---
+  const formulareMitStift = [];
+  stiftFamilie.forEach((u) => {
+    if (u.formular === "abmeldung" || formulareMitStift.includes(u.formular)) return;
+    if (HFV_BLAETTER.includes(u.formular) && training) return; // druckt der Verein zum ersten Training
+    formulareMitStift.push(u.formular);
+  });
+  const erwDruck = [];
+  if (!(papierWeg && !training)) {
+    if (!papierWeg) formulareMitStift.forEach((f) => plan.formulare[f] && erwDruck.push({ von: plan.formulare[f].von, bis: plan.formulare[f].bis, name: deRegeln.formulare[f] }));
+    if (plan.attestVorlage) erwDruck.push({ von: plan.attestVorlage.von, bis: plan.attestVorlage.bis, name: ATTEST_VORLAGE_TITEL });
+    if (abmeldung) erwDruck.push({ von: abmeldung.von, bis: abmeldung.bis, name: deRegeln.formulare.abmeldung });
+    erwDruck.sort((p, q) => p.von - q.von);
+  }
+  if (papierWeg && !training) {
+    ok(!ta.includes("Ausdrucken müssen Sie nur") && !ta.includes("Sie müssen nichts ausdrucken"), "Teil A: ganze Datei auszudrucken – kein Satz „Ausdrucken müssen Sie nur“ und kein „Sie müssen nichts ausdrucken“");
+    ok(ta.includes(norm(T.abgebenAusgedruckt)) && !ta.includes("auf dem Handy mit"), "Teil A: ganze Datei auszudrucken – Teil B wird ausgedruckt und unterschrieben abgegeben (nicht auf dem Handy)");
+  } else if (!erwDruck.length) {
+    ok(ta.includes(norm(T.ausdruckenNichts)) && !ta.includes(norm(T.ausdruckenNur)), "Teil A: nichts auszudrucken: „Sie müssen nichts ausdrucken.“");
+    ok(ta.includes(norm(T.abgeben)), "Teil A: Teil B geben Sie auf dem Handy oder ausgedruckt ab");
+  } else {
+    ok(ta.includes(norm(T.ausdruckenNur)) && !ta.includes(norm(T.ausdruckenNichts)), "Teil A: „Ausdrucken müssen Sie nur:“ mit den Blättern, kein „Sie müssen nichts ausdrucken“");
+    const nachSatz = ta.slice(ta.indexOf(norm(T.ausdruckenNur)));
+    erwDruck.forEach((d) => ok(nachSatz.includes(norm(seitenAngabeNA2(d) + ": " + d.name)), () => "Teil A, „Ausdrucken müssen Sie nur:“ nennt „" + seitenAngabeNA2(d) + ": " + d.name + "“ nicht"));
+    const genannt = zaehle(nachSatz.slice(0, nachSatz.indexOf("Geben Sie Teil B")), /Seite \d+(?: bis \d+)?: /g);
+    ok(genannt === erwDruck.length, () => "Teil A, „Ausdrucken müssen Sie nur:“ nennt " + genannt + " Blätter, erwartet " + erwDruck.length);
+  }
+  // Teil C ohne Umschlag-Pflicht, solange die Übergabe offen ist (O25)
+  ok(!/Umschlag/.test(ta), "Teil A verlangt keinen Umschlag (Übergabe der Unterlagen ist offen, O25)");
+  // Das Attest-Blatt steht nur dort, wo es die Familie ausdrucken muss: auch der Satz im Schritt zum Arzt bleibt
+  if (plan.attestVorlage) ok(ta.includes(ATTEST_VORLAGE_TITEL + " steht auf Seite " + plan.attestVorlage.von), "Teil A nennt die Seite der Attest-Vorlage");
+
+  // --- Begriffe beim ersten Vorkommen erklärt (sprache-17) ---
+  const langform = /Hessische[nrms]? Fußball-Verbands? \(kurz: der Verband\)/g;
+  const ohneLangform = ta.replace(langform, "\u0002");
+  const kurzSuche = /(?<!Fußball-)\bVerbands?\b/;
+  const langformen = zaehle(ta, langform);
+  const ersteKurz = ohneLangform.search(kurzSuche);
+  if (ersteKurz >= 0 || langformen > 0) {
+    ok(langformen === 1, () => "Teil A erklärt den Verband genau einmal („Hessischer Fußball-Verband (kurz: der Verband)“), gefunden " + langformen);
+    ok(ersteKurz < 0 || ohneLangform.indexOf("\u0002") < ersteKurz, "Teil A: die Erklärung des Verbands steht vor der ersten kurzen Nennung „Verband“");
+    ok(!/Hessische[nrms]? Fußball-Verbands?(?! \(kurz: der Verband\))/.test(ohneLangform.slice(0, Math.max(0, ohneLangform.indexOf("\u0002")))), "Teil A: vor der Erklärung steht der Verband nicht schon mit vollem Namen");
+  }
+  const spielrechtErste = ta.search(/\bSpielrecht\b/);
+  if (spielrechtErste >= 0) {
+    ok(ta.slice(spielrechtErste).startsWith("Spielrecht (Erlaubnis zum Spielen)"), () => "Teil A: erste Nennung von „Spielrecht“ ohne Erklärung: " + ta.slice(spielrechtErste, spielrechtErste + 60));
+    ok(zaehle(ta, /\(Erlaubnis zum Spielen\)/g) === 1, "Teil A erklärt „Spielrecht“ genau einmal");
+  } else ok(!/Erlaubnis zum Spielen\)/.test(ta), "Teil A: keine Erklärung von „Spielrecht“ ohne das Wort");
+
+  // --- Ansprechstellen erklärt und erreichbar (sprache-8) ---
+  const stellen = { passwesen: "Passwesen (bearbeitet die Spielerpässe; erreichbar über die Geschäftsstelle):", spielausschuss: "Spielausschuss der Herren (prüft Wechsel und Fristen; erreichbar über die Geschäftsstelle):" };
+  for (const [an, label] of Object.entries(stellen)) {
+    if (e.weiterleitung.some((w) => w.an === an)) ok(ta.includes(norm(label)), () => "Teil A nennt die Stelle „" + an + "“ mit Aufgabe und Weg über die Geschäftsstelle: " + label);
+    else ok(!ta.includes(norm(label)), "Teil A nennt die Stelle „" + an + "“ nur, wenn sie sich meldet");
+  }
+  ok(!/Passwesen des Vereins/.test(ta), "Teil A: „Passwesen des Vereins“ ohne Erklärung steht nicht mehr da");
+
+  // --- Eigene Seiten, die die Familie unterschreibt: Satzlänge, Paragraphen nur in „Rechtsgrundlage“ und Untertitel (sprache-12) ---
+  const eigene = S.map((s, i) => ({ s: s, nr: i + 1 })).filter((x) => x.s.art === "eigen" && FAMILIEN_SEITEN.includes(x.s.schluessel));
+  const jeSeite = new Map();
+  eigene.forEach((x) => jeSeite.set(x.nr, x.s.schluessel));
+  const eigeneTexte = bericht.texte.filter((t) => jeSeite.has(t.seite));
+  const schluesselVorhanden = new Set(eigene.map((x) => x.s.schluessel));
+  FAMILIEN_SEITEN.forEach((sk) => {
+    if (!schluesselVorhanden.has(sk)) return;
+    const zeilen = eigeneTexte.filter((t) => jeSeite.get(t.seite) === sk && t.kennung === "rechtsgrundlage");
+    ok(zeilen.length === 1 && /^Rechtsgrundlage: \S/.test(zeilen[0].text), () => "Seite " + sk + ": genau eine Zeile „Rechtsgrundlage: …“, gefunden " + zeilen.length);
+    // die Zeile steht am Ende der Seite: nach dem Unterschriftsbereich (letzter gedruckter Text des Bausteins)
+    const alle = eigeneTexte.filter((t) => jeSeite.get(t.seite) === sk);
+    ok(alle.length > 0 && alle[alle.length - 1].kennung === "rechtsgrundlage", "Seite " + sk + ": die Zeile „Rechtsgrundlage“ ist der letzte Text der Seite");
+  });
+  eigeneTexte.forEach((t) => {
+    if (t.kennung === "rechtsgrundlage") return;
+    const ort = "Seite " + jeSeite.get(t.seite) + " (" + t.art + (t.kennung ? ", " + t.kennung : "") + ")";
+    if (t.kennung !== "untertitel") ok(!/§|\bArt\.|\bAbs\.|\blit\.|\bNr\.|DSGVO|JuSchG/.test(t.text), () => ort + ": Paragraph oder Artikel im Fließtext: „" + t.text.slice(0, 120) + "“");
+    saetzeNA2(t.text).forEach((satz) => ok(woerterNA2(satz) <= 12, () => ort + ": Satz mit " + woerterNA2(satz) + " Wörtern (höchstens 12): „" + satz + "“"));
+  });
+  ok(eigeneTexte.length > 0 || !eigene.length, "Texte der eigenen Seiten stehen im Bericht");
+
+  // --- Erlaubnis für das Attest: Erwachsene ---
+  const ae = S.map((s, i) => ({ s: s, nr: i + 1 })).find((x) => x.s.schluessel === "attest_einwilligung" && x.s.art === "eigen");
+  if (ae) {
+    const t = norm(texte[ae.nr - 1]);
+    if (e.minderjaehrig) ok(t.includes("die ärztliche Bescheinigung meines Kindes " + a.vorname + " " + a.nachname + " so:"), "Erlaubnis für das Attest (Kind): „… die ärztliche Bescheinigung meines Kindes <Name> so:“");
+    else {
+      ok(t.includes("Der Verein verarbeitet meine ärztliche Bescheinigung so:") && !/von mir/.test(t), "Erlaubnis für das Attest (Erwachsene): „meine ärztliche Bescheinigung“ statt „die ärztliche Bescheinigung von mir <Name>“");
+      ok(!t.includes("Bescheinigung von mir " + a.vorname), "Erlaubnis für das Attest (Erwachsene): der Name steht nicht im Satz (er steht im Kasten oben)");
+    }
+    const u10 = e.unterlagen.find((u) => u.id === "U10");
+    const fassung = fassungVon(u10 ? u10.art : "");
+    const vorlegen = "Der Verein legt sie dem Hessischen Fußball-Verband nur auf Anforderung vor.";
+    ok(t.includes(vorlegen) === (fassung !== "verein"), () => "Erlaubnis für das Attest (U10 „" + (u10 && u10.art) + "“): der Punkt „" + vorlegen + "“ steht nur, wenn der Verband die Bescheinigung anfordern kann");
+    if (fassung === "verein") ok(!/Hessischen Fußball-Verband/.test(t), "Erlaubnis für das Attest bei Erwachsenen: der Hessische Fußball-Verband kommt nicht vor");
+  }
+}
+
 // Alle Prüfungen für ein PDF
 async function pruefePdf(b, g, opt) {
   const { r, bericht, pfad } = g;
@@ -1289,13 +1455,16 @@ async function pruefePdf(b, g, opt) {
   if (!e.fehlend.length) ok(ta.includes("Es fehlt nichts"), "Teil A sagt, dass nichts fehlt");
   const seitenAngabe = (t) => (t.vonSeite === t.bisSeite ? "(Seite " + t.vonSeite + ")" : "(Seite " + t.vonSeite + " bis " + t.bisSeite + ")");
   ok(ta.includes(TEIL_NAME.A + " " + seitenAngabe(teile[0])) && ta.includes(TEIL_NAME.B + " " + seitenAngabe(teile[1])) && !/\(Seite (\d+) bis \1\)/.test(ta), "Teil A nennt die Teile mit ihren Namen und Seiten (eine Seite: „Seite N“)");
-  if (teilC) ok(ta.includes(TEIL_NAME.C + " (Seite " + teilC.vonSeite + " bis " + teilC.bisSeite + ")") && ta.includes("Geben Sie Teil C getrennt ab"), "Teil A erklärt Teil C");
+  if (teilC) ok(ta.includes(TEIL_NAME.C + " (Seite " + teilC.vonSeite + " bis " + teilC.bisSeite + ")") && ta.includes(norm(TEXTE_TEIL_A.abgebenC)), "Teil A erklärt Teil C (ohne Umschlag-Pflicht, solange die Übergabe offen ist)");
   ok(ta.includes("Schicken Sie die Datei nicht per WhatsApp"), "Teil A warnt vor WhatsApp");
   const stiftFamilie = e.unterschriften.filter((u) => u.wer !== "arzt" && u.wer !== "verein" && erwarteteArt(b, u) === "stift");
-  const hfvStift = stiftFamilie.filter((u) => ["hfv_antrag", "vollmacht", "abmeldung", "einverstaendnis_senioren"].includes(u.formular));
+  // Die Abmeldung beim alten Verein hat einen eigenen Schritt (sie schickt die Familie selbst); sie zählt nicht zu den Blättern, die der Verein zum ersten Training mitbringt
+  const hfvStift = stiftFamilie.filter((u) => ["hfv_antrag", "vollmacht", "einverstaendnis_senioren"].includes(u.formular));
+  const hatAbmeldungBlatt = Boolean(bericht.plan.formulare.abmeldung);
+  const training = a.hfvUnterschrift === "training";
   if (!stiftFamilie.length) ok(ta.includes(norm(TEXTE_TEIL_A.stiftKeine)), "Teil A: alles am Bildschirm unterschrieben");
-  else if (a.unterschriftWeg === "papier") ok(ta.includes(norm(a.hfvUnterschrift === "training" ? TEXTE_TEIL_A.stiftAlleTraining : TEXTE_TEIL_A.stiftAlleDrucken)), "Teil A: alles auf Papier");
-  else if (hfvStift.length) ok(ta.includes(norm(a.hfvUnterschrift === "training" ? TEXTE_TEIL_A.stiftTraining : TEXTE_TEIL_A.stiftDrucken)), "Teil A: Blätter des Verbands mit Stift (" + a.hfvUnterschrift + ")");
+  else if (a.unterschriftWeg === "papier") ok(ta.includes(norm(training ? (hatAbmeldungBlatt ? TEXTE_TEIL_A.stiftAlleTrainingOhneAbmeldung : TEXTE_TEIL_A.stiftAlleTraining) : TEXTE_TEIL_A.stiftAlleDrucken)), "Teil A: alles auf Papier");
+  else if (hfvStift.length) ok(ta.includes(norm(training ? TEXTE_TEIL_A.stiftTraining : TEXTE_TEIL_A.stiftDrucken).replace(/^Der Verband/, "Der Hessische Fußball-Verband (kurz: der Verband)")), "Teil A: Blätter des Verbands mit Stift (" + a.hfvUnterschrift + ")");
   e.unterschriften.filter((u) => u.wer !== "arzt" || bereich("attest_vorlage").length).forEach((u) => {
     const zeile = deRegeln.unterschriften[u.formular + "." + u.stelleKey];
     ok(ta.includes(norm(zeile).slice(0, 30)), "Teil A führt die Unterschrift " + u.formular + "." + u.stelleKey + " auf");
@@ -1564,6 +1733,7 @@ async function pruefePdf(b, g, opt) {
   if (!(opt && opt.habeOhneDatei)) Object.entries(a.nachweise || {}).filter(([, v]) => v === "habe").forEach(([id]) => ok((b.bilder.nachweise[id] || []).length > 0, "a.nachweise." + id + " = „habe“ nur mit hochgeladener Datei"));
   pruefeEigeneSeiten({ b: b, g: g, texte: texte, S: S, bericht: bericht, e: e, a: a, pfad: pfad, bilderSeite: bilderSeite, bereich: bereich, teilC: teilC });
   pruefeRunde3({ b: b, texte: texte, S: S, bericht: bericht, e: e, a: a, pfad: pfad });
+  pruefeNA2({ b: b, texte: texte, S: S, bericht: bericht, e: e, a: a, pfad: pfad });
   const fotoSeiten = S.filter((s) => s.art === "foto");
   ok(fotoSeiten.length === (b.bilder.spielerfoto ? 1 : 0), "Spielerfoto-Seite genau dann, wenn ein Foto mitgegeben wurde");
   const ersatz = S.filter((s) => s.art === "nachweis-ersatz");
@@ -2217,13 +2387,32 @@ function schnittstelle() {
     ok(!/\b(HFV|DFB|bzw\.|ggf\.|z\. ?B\.)|§/.test(wert), "Teil A, " + schluessel + ": keine Abkürzungen oder Paragraphen");
     ok(!/\bDu\b|\bdein/i.test(wert), "Teil A, " + schluessel + ": Sie-Form");
   }
+  // N-A2: Die Erklärung beim ersten Vorkommen („Hessischer Fußball-Verband (kurz: der Verband)“, „Spielrecht (Erlaubnis zum Spielen)“) macht
+  // aus keinem eigenen Satz von Teil A einen Satz über 12 Wörter; Endungen stimmen; nur das erste Vorkommen wird erklärt
+  for (const [schluessel, wert] of Object.entries(TEXTE_TEIL_A)) {
+    const erkl = begriffsErklaerer();
+    const lang = erkl(wert);
+    saetzeNA2(lang).forEach((satz) => ok(woerterNA2(satz) <= 12, () => "Teil A, " + schluessel + ": nach der Erklärung der Begriffe mehr als 12 Wörter: „" + satz + "“"));
+  }
+  {
+    const erkl = begriffsErklaerer();
+    gleich(erkl("Danach stellt der Verein den Antrag beim Verband."), "Danach stellt der Verein den Antrag beim Hessischen Fußball-Verband (kurz: der Verband).", "Begriffe: „beim Verband“ wird erklärt");
+    gleich(erkl("Der Verband prüft das. Ohne Spielrecht geht es nicht."), "Der Verband prüft das. Ohne Spielrecht (Erlaubnis zum Spielen) geht es nicht.", "Begriffe: nur das erste Vorkommen des Verbands wird erklärt, danach „Spielrecht“");
+    gleich(erkl("Das Spielrecht gilt."), "Das Spielrecht gilt.", "Begriffe: „Spielrecht“ wird nur einmal erklärt");
+    gleich(begriffsErklaerer()("Der Verband verlangt es."), "Der Hessische Fußball-Verband (kurz: der Verband) verlangt es.", "Begriffe: „Der Verband“ im Nominativ");
+    gleich(begriffsErklaerer()("Das Papier für den Verband."), "Das Papier für den Hessischen Fußball-Verband (kurz: der Verband).", "Begriffe: „den Verband“ im Akkusativ");
+    gleich(begriffsErklaerer()("Die Regeln des Verbands."), "Die Regeln des Hessischen Fußball-Verbands (kurz: der Verband).", "Begriffe: „des Verbands“ im Genitiv");
+    gleich(begriffsErklaerer()("Der Hessische Fußball-Verband fragt beim Verband nach."), "Der Hessische Fußball-Verband (kurz: der Verband) fragt beim Verband nach.", "Begriffe: ist der volle Name die erste Nennung, folgt nur die Kurzform");
+    gleich(begriffsErklaerer()("Sonst gilt der Fußball-Verband nicht."), "Sonst gilt der Fußball-Verband nicht.", "Begriffe: „Fußball-Verband“ allein ist kein Verband im Sinn der Erklärung");
+    gleich(begriffsErklaerer()("Nichts davon."), "Nichts davon.", "Begriffe: ohne die Wörter bleibt der Text gleich");
+  }
   // Runde 3: die neuen Sätze der Familientexte (Erlaubnis für das Attest, Absprache, Datenschutz Nr. 5 und 8, Notfall) in Einfacher Sprache
   for (const text of NEUE_SAETZE) {
     const saetze = saetzeVon(text);
     ok(saetze.length >= 1, "Neue Sätze: „" + text + "“ enthält Sätze");
     saetze.forEach((satz) => ok(woerterVon(satz) <= 12, () => "Neuer Satz mit " + woerterVon(satz) + " Wörtern (höchstens 12): „" + satz + "“"));
   }
-  gleich(saetzeVon(ABSPRACHE_EINWILLIGUNG).length, 2, "Satzzähler: „Art. 9 Abs. 2 lit. a DSGVO“ beendet keinen Satz");
+  gleich(saetzeVon("Mit dieser Unterschrift erlauben Sie den Trainern, die Angaben zu nutzen. Grundlage ist Art. 9 Abs. 2 lit. a DSGVO.").length, 2, "Satzzähler: „Art. 9 Abs. 2 lit. a DSGVO“ beendet keinen Satz");
 }
 
 // ---------------------------------------------------------------------------------------------

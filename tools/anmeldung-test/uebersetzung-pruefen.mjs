@@ -65,7 +65,6 @@ const ohneSteuer = (s) => String(s).replace(STEUER, "").replace(/\u00A0/g, " ");
 const GLEICH_ERLAUBT = {
   // Kürzel der Zahlungswelt: in allen Sprachen gleich
   "zahlung.iban.iban": "IBAN ist ein internationales Kürzel",
-  "zahlung.iban.bic": "BIC ist ein internationales Kürzel",
   "pruefen.zeilen.iban": "IBAN ist ein internationales Kürzel",
   // Wörter, die im Englischen gleich geschrieben werden
   "abschnitte.person": { en: "Wort ist im Englischen gleich" },

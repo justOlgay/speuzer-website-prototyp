@@ -175,8 +175,8 @@ export default {
     },
     U22: {
       name: "Bestätigung vom alten Verein",
-      kurz: "Der alte Verein bestätigt das Datum vom letzten Pflichtspiel. Pflichtspiele sind Spiele in Liga oder Pokal.",
-      warum: "Nach mehr als 6 Monaten ohne Pflichtspiel gibt es keine Wartezeit.",
+      kurz: "Der alte Verein bestätigt das letzte Spiel in Liga oder Pokal.",
+      warum: "Gab es 6 Monate kein Spiel in Liga oder Pokal? Dann gibt es keine Wartezeit.",
       wie: "Der neue Verein bittet den alten Verein darum.",
       wo: "Sie müssen nichts hochladen.",
     },
@@ -356,7 +356,7 @@ export default {
     keine_frauenmannschaft: "Der Verein hat keine Frauenmannschaft. Frauen ab 18 dürfen mit Antrag bei den Herren spielen. Sprechen Sie uns an.",
     vertrauensperson: "Der Verband hat für diesen Fall eine Vertrauensperson. Sie hilft beim Antrag. Bei Kindern stimmen die Eltern zu.",
     sonderspielrecht: "Kinder mit Behinderung können in einer jüngeren Altersklasse spielen. Das heißt Sonderspielrecht. Es braucht ein Gutachten von einem Facharzt. Die Jugendleitung hilft Ihnen.",
-    beide_unterschreiben_empfohlen: "Wir empfehlen: Beide Eltern unterschreiben den Aufnahmeantrag. Dem Verband reicht eine Unterschrift.",
+    beide_unterschreiben_empfohlen: "Wir empfehlen: Beide Eltern unterschreiben den Aufnahmeantrag.",
     getrennt_einverstanden: "Der andere Elternteil ist einverstanden. Deshalb unterschreibt eine Person.",
     sorge_allein_nachweis: "Sie haben das alleinige Sorgerecht. Halten Sie einen Nachweis bereit, falls der Verein danach fragt.",
     vormund_hinweis: "Der Vormund unterschreibt für das Kind. Bringen Sie den Nachweis über die Vormundschaft mit.",
@@ -478,7 +478,7 @@ export default {
     frist_wechsel_6monate: "Der alte Verein gibt nicht frei. Die Wartezeit dauert {monate} Monate. Spiele in Liga und Pokal sind ab dem {pflichtspiele} möglich. Freundschaftsspiele gehen ab dem {freundschaftsspiele}.",
     frist_freigabe_unklar: "Sie wissen nicht, ob der alte Verein freigibt. Ohne Freigabe sind Spiele in Liga und Pokal ab dem {pflichtspiele} möglich. Mit Freigabe schon ab dem {alternativ}.",
     frist_d_jung_offen: "Für diesen Jahrgang ist die Regel nicht eindeutig. Spiele in Liga und Pokal sind frühestens ab dem {alternativ} möglich. Vielleicht erst ab dem {pflichtspiele}.",
-    frist_entfaellt: "Das letzte Pflichtspiel war vor mehr als 6 Monaten. Deshalb gibt es keine Wartezeit.",
+    frist_entfaellt: "Seit über 6 Monaten gab es kein Spiel in Liga oder Pokal. Deshalb gibt es keine Wartezeit.",
     frist_herren_wp1_zustimmung: "Sie melden bis zum 30. Juni ab, und der alte Verein stimmt zu. Spiele in Liga und Pokal sind ab dem {pflichtspiele} möglich.",
     frist_herren_wp1_ohne: "Sie melden bis zum 30. Juni ab, aber der alte Verein stimmt nicht zu. Spiele in Liga und Pokal sind erst ab dem {pflichtspiele} möglich.",
     frist_herren_wp2_zustimmung: "Sie melden nach dem 30. Juni ab, und der alte Verein stimmt zu. Spiele in Liga und Pokal sind ab dem {pflichtspiele} möglich.",
@@ -504,6 +504,20 @@ export default {
     beitrag_azubi: "Für Auszubildende und Studierende beträgt der Beitrag {jahr} Euro im Jahr. Sie brauchen einen Nachweis.",
     beitrag_senator: "Senatoren zahlen {jahr} Euro im Jahr. Der Vorstand entscheidet über die Aufnahme.",
     beitrag_doppel: "Sie sind in beiden Abteilungen. Den Beitrag nennt Ihnen die Geschäftsstelle.",
+    // Namen der Beitragsgruppen (Schlüssel wie in data/anmeldung.json › beitragsgruppen). Auf Deutsch wortgleich mit
+    // › bezeichnung; die Oberfläche nutzt diese Texte und fällt auf die Daten zurück, wenn ein Schlüssel fehlt.
+    gruppen: {
+      fussball_jugend: "Kinder und Jugendliche (Fußball, mit A-Jugend)",
+      fussball_erwachsene: "Erwachsene (Fußball)",
+      fussball_passiv: "Passive, Frauen und Rentner ab 65 (Fußball)",
+      fussball_familie: "Familienbeitrag (Fußball)",
+      karneval_kinder: "Kinder und Jugendliche (Karneval)",
+      karneval_azubi: "Auszubildende und Studierende mit Nachweis (Karneval)",
+      karneval_erwachsene: "Erwachsene (Karneval)",
+      karneval_rentner: "Rentner ab 65 (Karneval)",
+      karneval_familie: "Familienbeitrag (Karneval)",
+      karneval_senator: "Senatorenmitgliedschaft (Karneval)",
+    },
   },
 
   // Namen der Papiere: einheitlich und verbindlich nach SCHNITTSTELLEN Abschnitt 9. Oberfläche, Teil A, Laufzettel und

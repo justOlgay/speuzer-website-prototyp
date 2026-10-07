@@ -30,6 +30,11 @@
 //     Textfelder im Quelltext und je Feld ein Fall im Browser), Knopf "Vorführung" im kompakten Kopf
 //     (Vereinssicht und Beispiele auf jedem Schritt), ein einziger Kasten für getrennt lebende Eltern,
 //     Feldname vor jeder Meldung in der Fehlerliste
+//   - N-A2 (07.10.2026): Sprachwahl ganz oben im ersten Bildschirm (vier Sprachen in eigener Schrift, vor Überschrift und Erklärtext),
+//     App-Modus ?app=1 bei 390 x 844 (Rahmen der Begleitseite weg, Hinweis und Link „Im Browser öffnen“ ohne ?app=1, dieselben Schritte
+//     bis „fertig“, Fehler beim Speichern und Teilen abgefangen), „Diese Unterschrift gilt für:“ als Liste, kein BIC-Feld, Arabisch
+//     (Entwurfsband rechts, Rufnummer im Hilfe-Dialog als LTR-Block, Prüfseite ohne <bdi> um den ganzen Wert), Beitragsgruppen und
+//     Übungszeiten aus den Texten der Sprache (mit abgefangenen englischen Wörterbüchern)
 //   - Screenshots je Seite nach tools/cache/anmeldung-test/e2e/
 //
 // Aufruf: node tools/anmeldung-test/e2e.mjs [--ohne-desktop] [--nur-sprache] [--nur=pruefeKarnevalUhrzeit,…]
@@ -178,7 +183,9 @@ const UHR = `(() => {
   window.Date = Uhr;
 })();`;
 
-async function neueSeite(browser, server, vp, name) {
+// optionen: Text (Abfrage, zum Beispiel "?app=1") oder { abfrage, vorLaden(page) } – vorLaden läuft vor dem Laden der Seite
+async function neueSeite(browser, server, vp, name, optionen) {
+  const o = typeof optionen === "string" ? { abfrage: optionen } : optionen || {};
   const page = await browser.newPage();
   await page.setViewport({ width: vp.breite, height: vp.hoehe, deviceScaleFactor: 1, isMobile: vp.mobil, hasTouch: vp.mobil });
   await page.evaluateOnNewDocument(UHR);
@@ -208,7 +215,8 @@ async function neueSeite(browser, server, vp, name) {
     d.accept();
   });
   page.__st = st;
-  await page.goto(server.basis + "/anmeldung/", { waitUntil: "networkidle0" });
+  if (o.vorLaden) await o.vorLaden(page);
+  await page.goto(server.basis + "/anmeldung/" + (o.abfrage || ""), { waitUntil: "networkidle0" });
   await page.waitForSelector("#anmeldung[data-bereit]", { timeout: 10000 });
   return page;
 }
@@ -787,7 +795,10 @@ async function statischeRunde3(server) {
   // Papiernamen: die Oberfläche führt keine eigenen mehr (SCHNITTSTELLEN Abschnitt 9); Begriff "Spielrecht"
   const wb = await ladeWoerterbuch();
   const alteNamen = ["Blatt für Abendauftritte", "Notfallbogen", "Datenschutz-Information", "Einwilligung zum Attest", "Lastschrift-Mandat", "Einwilligung für Fotos", "Liste der Familie\"", "Einverständnis für die Herren", "Einverständnis für das Mädchen"];
-  const text = JSON.stringify(wb);
+  // Ausnahme (Vorgabe des Orchestrators vom 07.10.2026, sprache-20): Der Hinweis zum Notfall-Medikament sagt „Im Notfallbogen in Teil C …“.
+  // SCHNITTSTELLEN Abschnitt 9 nennt das Blatt „Notfall- und Gesundheitsbogen“; die Abweichung steht im Bericht von N-A2 als offener Punkt.
+  const textOhneAusnahme = JSON.stringify({ ...wb, notfall: { ...wb.notfall, gesundheit: { ...(wb.notfall || {}).gesundheit, medikamenteHinweis: "" } } });
+  const text = textOhneAusnahme;
   ok("Papiernamen: de-oberflaeche.js hat keinen Block unterschriften.formulare und keine eigenen Papiernamen mehr", !(wb.unterschriften && wb.unterschriften.formulare) && alteNamen.every((n) => !text.includes(n)), alteNamen.filter((n) => text.includes(n)).join(", "));
   ok("Begriffe: 'Spielrecht' statt 'Spielberechtigung' oder 'Spielerlaubnis' in de-oberflaeche.js", !/Spielberechtigung|Spielerlaubnis/.test(text), (text.match(/Spielberechtigung|Spielerlaubnis/g) || []).length + " Treffer");
   const kyrillischInSchrift = zeichen.inSchrift(0x418);
@@ -798,7 +809,8 @@ async function statischeRunde3(server) {
 // Runde 4: Auf 'sorge/recht' standen zwei "Achtung"-Kästen (dieser und der Hinweis des Regelwerks); jetzt steht dort einer.
 async function pruefeGetrennteEltern(browser, server, dateien) {
   console.log("\n=== Runde 3 und 4: getrennt lebende Eltern ===");
-  const satz = "Fragen Sie den anderen Elternteil. Ist er nicht einverstanden, unterschreibt er den Aufnahmeantrag auch. Das geht nur mit Stift. Im PDF ist die Stelle markiert.";
+  // Wortlaut vom 07.10.2026 (Prüfung Orchestrator, sprache-4): erst fragen, dann sagen, was bei „Nein“ gilt
+  const satz = "Hat der andere Elternteil zugestimmt? Dann setzen Sie den Haken. Wenn nicht: Er unterschreibt den Aufnahmeantrag auch. Das geht nur mit Stift. Im PDF ist die Stelle markiert.";
   // Alle sichtbaren Kästen der Seite mit ihrer Beschriftung ("Achtung", "Info" …) und dem Merkmal des Hinweises
   const kaesten = (page) =>
     page.evaluate(() =>
@@ -820,7 +832,7 @@ async function pruefeGetrennteEltern(browser, server, dateien) {
     const e = document.querySelector("#anmeldung [data-zweiter-elternteil]");
     return { sichtbar: !!e && e.checkVisibility(), text: e ? e.innerText.replace(/\s+/g, " ").trim() : "" };
   });
-  ok("Getrennte Eltern (sorge): ohne Zustimmung erklärt der Kasten in drei kurzen Absätzen: fragen, sonst unterschreibt er auch, nur mit Stift, im PDF markiert", box.sichtbar && box.text === "Achtung " + satz, box.text);
+  ok("Getrennte Eltern (sorge): ohne Zustimmung erklärt der Kasten in drei kurzen Absätzen: Hat er zugestimmt? Haken setzen; wenn nicht, unterschreibt er auch, nur mit Stift, im PDF markiert", box.sichtbar && box.text === "Achtung " + satz, box.text);
   const auf = await kaesten(page);
   const achtung = auf.filter((x) => x.label === "Achtung");
   ok("Getrennte Eltern (sorge): genau ein Kasten 'Achtung' auf der Seite, und es ist dieser (nicht zwei, die zusammen verwirren)", achtung.length === 1 && achtung[0].zweiter, JSON.stringify(auf.map((x) => x.label + (x.key ? ":" + x.key : "") + (x.zweiter ? " [zweiter Elternteil]" : ""))));
@@ -895,12 +907,15 @@ async function pruefeSatzung(browser, server, dateien) {
   const deRegeln = (await import(pathToFileURL(path.join(ROOT, "assets", "js", "anmeldung", "texte", "de-regeln.js")).href)).default;
   const erlaubteNamen = new Set([...Object.values(deRegeln.formulare || {}), ...Object.values(deRegeln.unterschriften || {})]);
   const namen = await page.evaluate(() => ({
-    gilt: Array.from(document.querySelectorAll("#anmeldung .anm-unterschrift .anm-hinweis")).map((e) => e.textContent.replace(/\s+/g, " ").trim()).filter((x) => /^Gilt für:/.test(x)),
+    giltTitel: Array.from(document.querySelectorAll("#anmeldung .anm-unterschrift .anm-unterschrift__gilt > p")).map((e) => e.textContent.replace(/\s+/g, " ").trim()),
+    giltFelder: document.querySelectorAll("#anmeldung .anm-unterschrift").length,
+    gilt: Array.from(document.querySelectorAll("#anmeldung .anm-unterschrift .anm-unterschrift__gilt > ul > li")).map((e) => e.textContent.replace(/\s+/g, " ").trim()),
     stift: Array.from(document.querySelectorAll("#anmeldung .anm-unterschriften ul.anm-liste-punkte li")).map((e) => e.textContent.replace(/\s+/g, " ").trim()),
   }));
-  const giltPunkte = namen.gilt.flatMap((x) => x.replace(/^Gilt für:\s*/, "").split(", "));
+  const giltPunkte = namen.gilt;
   const fremd = [...giltPunkte, ...namen.stift].filter((n) => !erlaubteNamen.has(n));
-  ok("Papiernamen: 'Gilt für' und die Liste der Stift-Blätter nennen nur Namen aus den Regeltexten (" + (giltPunkte.length + namen.stift.length) + " Namen)", giltPunkte.length > 0 && namen.stift.length > 0 && fremd.length === 0, fremd.join(" | ") || namen.stift.join(" | "));
+  ok("Papiernamen: 'Diese Unterschrift gilt für:' (Liste, ein Blatt je Zeile) und die Liste der Stift-Blätter nennen nur Namen aus den Regeltexten (" + (giltPunkte.length + namen.stift.length) + " Namen)", giltPunkte.length > 0 && namen.stift.length > 0 && fremd.length === 0, fremd.join(" | ") || namen.stift.join(" | "));
+  ok("'Diese Unterschrift gilt für:' steht über einer Liste mit einem Blatt je Zeile, bei jedem Unterschriftsfeld (kein Satz mit Aufzählung, keine Zeile mit mehreren Namen)", namen.giltTitel.length === namen.giltFelder && namen.giltTitel.every((t) => t === "Diese Unterschrift gilt für:") && giltPunkte.every((n) => !/, /.test(n.replace(/\([^)]*\)/g, "")) && n.split(/\s+/).length <= 12), namen.giltTitel.join(" | ") + " – " + giltPunkte.join(" | "));
   await page.$eval(".anm-satzung", (e) => {
     e.scrollIntoView({ block: "start" });
     window.scrollBy(0, -24);
@@ -1391,7 +1406,7 @@ async function statischeRunde4() {
   const wb = await ladeWoerterbuch();
   const T = (pfad) => pfad.split(".").reduce((x, sch) => (x === undefined || x === null ? undefined : x[sch]), wb);
   ok("Neue Texte (Runde 4) stehen im Wörterbuch: drei Meldungen zur Schrift und der Knopf 'Vorführung' im Namensraum demo", ["fehler.lateinischVerein", "fehler.lateinischText", "fehler.lateinischNummer", "demo.vorfuehrung"].every((x) => typeof T(x) === "string" && T(x).length > 0) && T("demo.vorfuehrung") === "Vorführung", "");
-  ok("Getrennte Eltern: der Text des einen Kastens ist der vom Koordinator vorgeschlagene (drei kurze Absätze)", T("sorge.zweiterMitStift") === "Fragen Sie den anderen Elternteil.\nIst er nicht einverstanden, unterschreibt er den Aufnahmeantrag auch.\nDas geht nur mit Stift. Im PDF ist die Stelle markiert.", JSON.stringify(T("sorge.zweiterMitStift")));
+  ok("Getrennte Eltern: der Text des einen Kastens ist der vom Orchestrator festgelegte (drei kurze Absätze, Stand 07.10.2026)", T("sorge.zweiterMitStift") === "Hat der andere Elternteil zugestimmt? Dann setzen Sie den Haken.\nWenn nicht: Er unterschreibt den Aufnahmeantrag auch.\nDas geht nur mit Stift. Im PDF ist die Stelle markiert.", JSON.stringify(T("sorge.zweiterMitStift")));
 }
 
 // Latein-Prüfung für alle Freitextfelder, die ins PDF gehen: je Feldgruppe ein Fall (hier jedes Feld einzeln).
@@ -1472,12 +1487,12 @@ async function pruefeFreitextLatein(browser, server) {
   await weiterOk(p1, G4);
   await p1.close();
 
-  // ---- Kind neu: Bank und BIC, Gesundheitsangaben ----
+  // ---- Kind neu: Bank (ohne BIC), Gesundheitsangaben ----
   const p2 = await seiteMitBeispiel(browser, server, MOBIL, "freitext-kind", "kind-neu", null);
   s = await geheBis(p2, "zahlung", "iban");
   ok("Bank: Seite 'zahlung/iban' erreicht", s.schritt === "zahlung" && s.teil === "iban", s.schritt + "/" + s.teil);
-  const G5 = "Bank und BIC";
-  await fall(p2, G5, { pfad: "zahlung.bic", art: "text", vorsatz: wb.zahlung.iban.bic, gut: "GENODEF1S12" });
+  const G5 = "Bank";
+  ok("Bank: das Feld BIC entfällt (SEPA-Lastschrift in Euro braucht nur die IBAN); IBAN und Name der Bank bleiben", (await p2.$('[data-pfad="zahlung.bic"]')) === null && (await p2.$('[data-pfad="zahlung.iban"]')) !== null && (await p2.$('[data-pfad="zahlung.bank"]')) !== null, "");
   await fall(p2, G5, { pfad: "zahlung.bank", art: "text", vorsatz: wb.zahlung.iban.bank, gut: "Sparkasse Köln/Bonn" });
   await weiterOk(p2, G5);
   s = await geheBis(p2, "notfall", "bogen");
@@ -2184,6 +2199,9 @@ async function einzelpruefungen(browser, server, dateien, beispiele) {
     ["pruefeVerlauf", () => pruefeVerlauf(browser, server, beispiele)],
     ["pruefeTastatur", () => pruefeTastatur(browser, server)],
     ["pruefeHilfe", () => pruefeHilfe(browser, server)],
+    ["pruefeSprachwahlOben", () => pruefeSprachwahlOben(browser, server)],
+    ["pruefeAppModus", () => pruefeAppModus(browser, server, dateien)],
+    ["pruefeUebersetzbareDaten", () => pruefeUebersetzbareDaten(browser, server)],
     ["pruefeHinweiseAufSeiten", () => pruefeHinweiseAufSeiten(browser, server, beispiele)],
     ["statischeRunde3", () => statischeRunde3(server)],
     ["pruefeSatzung", () => pruefeSatzung(browser, server, dateien)],
@@ -2490,8 +2508,8 @@ async function pruefeSprache(browser, server) {
   const page = await neueSeite(browser, server, MOBIL, "sprache-ar");
   // Fehlende Sprachdateien (ar-regeln.js, tr-*.js) melden 404 – das ist hier gewollt.
   page.__st.erwartet404 = 20;
-  // Arabisch über die Sprachkarte auf der Startseite
-  await page.click('#anmeldung label[for="' + (await page.$eval('#anmeldung input[data-pfad="sprache"][data-wert="ar"]', (e) => e.id)) + '"]');
+  // Arabisch über die Sprachwahl ganz oben im Seitenkopf (Startschritt)
+  await page.click('[data-anm-sprachleiste] button[data-sprache="ar"]');
   await page.waitForFunction(() => document.getElementById("anmeldung").getAttribute("dir") === "rtl", { timeout: 5000 }).catch(() => {});
   const ar = await page.evaluate(() => {
     const w = document.getElementById("anmeldung");
@@ -2508,6 +2526,30 @@ async function pruefeSprache(browser, server) {
   });
   ok("Sprachwechsel auf Arabisch: dir=\"rtl\" und lang=\"ar\" am Assistenten", ar.dir === "rtl" && ar.lang === "ar" && ar.berechnet === "rtl", JSON.stringify({ dir: ar.dir, lang: ar.lang, css: ar.berechnet }));
   ok("Arabisch: Hinweis 'Übersetzungshilfe, verbindlich ist Deutsch' steht da", ar.hinweisSichtbar && ar.hinweis.length > 10, ar.hinweis);
+  // Entwurfsband (sprache-26): dir folgt der Sprache, der Balken steht rechts, der Text beginnt rechts
+  const band = await page.evaluate(() => {
+    const b = document.querySelector("[data-anm-band]");
+    const z = getComputedStyle(b);
+    return { dir: b.getAttribute("dir"), lang: b.getAttribute("lang"), balkenRechts: z.borderRightWidth, balkenLinks: z.borderLeftWidth, ausrichtung: z.direction };
+  });
+  ok("Arabisch: das Entwurfsband trägt dir=\"rtl\" und lang=\"ar\", der Balken steht rechts (nicht links)", band.dir === "rtl" && band.lang === "ar" && band.ausrichtung === "rtl" && band.balkenRechts === "4px" && band.balkenLinks === "0px", JSON.stringify(band));
+  // Hilfe auf Arabisch (sprache-14): die Rufnummer ist ein eigener Block von links nach rechts
+  await page.click('#anmeldung [data-aktion="hilfe"]');
+  await page.waitForSelector("dialog.anm-dialog--hilfe[open]", { timeout: 3000 });
+  const tel = await page.evaluate(() => {
+    const a = document.querySelector('dialog.anm-dialog--hilfe a[href^="tel:"]');
+    const nr = a.querySelector(".anm-tel");
+    const z = getComputedStyle(nr);
+    // sichtbare Reihenfolge der Ziffernblöcke: "069" links von "736868"
+    const t = nr.firstChild;
+    const rect = (i) => { const r = document.createRange(); r.setStart(t, i); r.setEnd(t, i + 1); return r.getBoundingClientRect(); };
+    return { text: nr.textContent, dir: nr.getAttribute("dir"), css: z.direction, bidi: z.unicodeBidi, vorneLinks: rect(0).left < rect(t.length - 1).left, textKnopf: a.textContent.replace(/\s+/g, " ").trim() };
+  });
+  ok("Arabisch (Hilfe): die Rufnummer steht als eigener Block von links nach rechts und liest sich sichtbar „069 736868“", tel.text === "069 736868" && tel.dir === "ltr" && tel.css === "ltr" && tel.bidi === "isolate" && tel.vorneLinks, JSON.stringify(tel));
+  await page.screenshot({ path: path.join(AUSGABE, MOBIL.name, "arabisch-hilfe.png"), fullPage: false });
+  protokoll.screenshots++;
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.querySelector("dialog.anm-dialog--hilfe[open]"), { timeout: 3000 });
   ok("Arabisch: kein Querscrollen", ar.scroll, "");
   const ungeschuetzt1 = await ungeschuetzterErsatztext(page);
   ok("Arabisch (Start): deutscher Ersatztext steht zeilenweise in Unicode-Isolaten", ungeschuetzt1.length === 0, ungeschuetzt1.slice(0, 3).join(" | "));
@@ -2564,7 +2606,7 @@ async function pruefeUeberschriftSprachen(browser, server) {
   const de0 = await h1();
   ok("Überschrift: auf Deutsch 'Anmelden beim FFV Sportfreunde 04', genau eine h1", de0.anzahl === 1 && de0.text === "Anmelden beim FFV Sportfreunde 04", de0.text);
   for (const code of ["en", "tr", "ar", "de"]) {
-    await klickeEtikett(page, '#anmeldung input[data-pfad="sprache"][data-wert="' + code + '"]');
+    await page.click('[data-anm-sprachleiste] button[data-sprache="' + code + '"]');
     await page.waitForFunction((c) => document.getElementById("anmeldung").getAttribute("lang") === c, { timeout: 6000 }, code);
     const ist = await h1();
     const datei = (await import(pathToFileURL(path.join(ROOT, "assets", "js", "anmeldung", "texte", code + "-oberflaeche.js")).href)).default;
@@ -2591,14 +2633,21 @@ async function pruefeArabischDurchlauf(browser, server, dateien) {
   await page.select("#anm-sprache", "ar");
   await page.waitForFunction(() => document.getElementById("anmeldung").getAttribute("dir") === "rtl", { timeout: 5000 });
   const roh = [];
-  const sammel = { gilt: "", pruefzeilen: [] };
+  const sammel = { gilt: "", giltPunkte: 0, pruefzeilen: [], pruefDom: [] };
   const ctx = neuerKontext({
     name: "arabisch-durchlauf", vp: MOBIL, modus: "beispiel", gesehen: gesehenFuer(MOBIL), touch: true, axeNeu: false, dateien,
     proSeite: async (p, s, kennung) => {
       const liste = await ungeschuetzterErsatztext(p);
       if (liste.length) roh.push(kennung + ": " + liste.slice(0, 2).join(" | "));
-      if (s.schritt === "unterschriften") sammel.gilt = await p.$eval("#anmeldung .anm-unterschrift", (e) => e.innerText.replace(/\s+/g, " "));
-      if (s.schritt === "pruefen") sammel.pruefzeilen = await p.$$eval("#anmeldung .anm-pruefzeile__wert", (l) => l.map((e) => e.textContent.replace(/\s+/g, " ").trim()));
+      if (s.schritt === "unterschriften") {
+        sammel.gilt = await p.$eval("#anmeldung .anm-unterschrift", (e) => e.innerText.replace(/\s+/g, " "));
+        sammel.giltPunkte = await p.$eval("#anmeldung .anm-unterschrift", (e) => e.querySelectorAll(".anm-unterschrift__gilt li").length);
+      }
+      if (s.schritt === "pruefen") {
+        sammel.pruefzeilen = await p.$$eval("#anmeldung .anm-pruefzeile__wert", (l) => l.map((e) => e.textContent.replace(/\s+/g, " ").trim()));
+        // sprache-13: das <dd> trägt die Richtung der Sprache; kein <bdi> um den ganzen Wert (sonst bestimmt das erste Zeichen die Richtung)
+        sammel.pruefDom = await p.$$eval("#anmeldung .anm-pruefzeile__wert", (l) => l.map((e) => ({ dir: e.getAttribute("dir"), css: getComputedStyle(e).direction, ganzesBdi: e.children.length === 1 && e.firstElementChild.tagName === "BDI" && e.firstElementChild.textContent.trim() === e.textContent.trim() && /[\u0600-\u06FF]/.test(e.textContent), text: e.textContent.replace(/\s+/g, " ").trim() })));
+      }
     },
   });
   const r = await laufe(page, ctx);
@@ -2611,7 +2660,8 @@ async function pruefeArabischDurchlauf(browser, server, dateien) {
   const fotoName = (arRegeln.unterschriften || {})["aufnahmeantrag.s3.unterschrift"];
   ok("Arabisch-Durchlauf: 'Gilt für' nennt die Papiere mit den arabischen Namen aus ar-regeln.js (zum Beispiel '" + fotoName + "')", !!fotoName && ohneIso(sammel.gilt).includes(ohneIso(fotoName)), ohneIso(sammel.gilt).slice(0, 200));
   // Aufzählungen: Trenner der Sprache (liste.trenner = "، "). Das steht in ar-oberflaeche.js erst nach der Nachrunde von AP-5.
-  weich("Arabisch-Durchlauf: 'Gilt für' zählt mit dem arabischen Komma auf (liste.trenner), nicht mit ', '", sammel.gilt.includes("،") && !/, /.test(ohneIso(sammel.gilt).replace(/\([^)]*\)/g, "")), ohneIso(sammel.gilt).slice(0, 160));
+  ok("Arabisch-Durchlauf: 'Diese Unterschrift gilt für:' steht als Liste (ein Blatt je Zeile), keine Aufzählung in einer Zeile", sammel.giltPunkte >= 2 && !/, /.test(ohneIso(sammel.gilt).replace(/\([^)]*\)/g, "")), sammel.giltPunkte + " Zeilen; " + ohneIso(sammel.gilt).slice(0, 120));
+  ok("Arabisch-Durchlauf: auf der Prüfseite trägt jeder Wert die Richtung der Sprache (dir=rtl) und kein <bdi> umschließt einen arabischen Wert ganz", sammel.pruefDom.length > 0 && sammel.pruefDom.every((z) => z.dir === "rtl" && z.css === "rtl" && !z.ganzesBdi), JSON.stringify(sammel.pruefDom.filter((z) => z.dir !== "rtl" || z.ganzesBdi).slice(0, 2)));
   weich("Arabisch-Durchlauf: auf der Prüfseite trennt das arabische Komma die Teile einer Aufzählung (zum Beispiel Geburtsort und Land), kein deutsches Ersatz-Komma", sammel.pruefzeilen.some((z) => z.includes("،")) && !sammel.pruefzeilen.some((z) => /\u2066,\s*\u2069/.test(z)), sammel.pruefzeilen.filter((z) => /,|،/.test(z)).slice(0, 2).join(" | "));
   const daten = await ergebnisPruefen(page, ctx, dateien);
   ok("Arabisch-Durchlauf: die Datei wird auch auf Arabisch erstellt", !!daten, daten ? daten.dateiname : "");
@@ -2630,6 +2680,201 @@ async function geheBis(page, schritt, teil) {
     if (r.fehler.length || !r.gewechselt) break;
   }
   return stand(page);
+}
+
+// ---------- N-A2 (07.10.2026): Sprachwahl ganz oben, App-Modus, übersetzbare Daten ----------
+
+// Sprachwahl im ersten Bildschirm (390 x 844): ganz oben im Seitenkopf, vor der Überschrift und vor dem deutschen Erklärtext des
+// Startschritts, die vier Sprachen in ihrer eigenen Schrift. Nur der Startschritt zeigt sie.
+async function pruefeSprachwahlOben(browser, server) {
+  console.log("\n=== N-A2: Sprachwahl ganz oben im ersten Bildschirm ===");
+  const page = await neueSeite(browser, server, MOBIL, "sprachwahl-oben");
+  const d = await page.evaluate(() => {
+    const leiste = document.querySelector("[data-anm-sprachleiste]");
+    const r = (e) => e.getBoundingClientRect();
+    const sichtbar = (e) => e.checkVisibility();
+    const text = document.querySelector("#anmeldung .anm-absaetze p");
+    return {
+      leisteDa: !!leiste,
+      leisteSichtbar: leiste ? sichtbar(leiste) : false,
+      knoepfe: leiste ? Array.from(leiste.querySelectorAll("button[data-sprache]")).map((b) => ({ code: b.dataset.sprache, text: b.textContent.trim(), lang: b.lang, dir: b.dir, unten: Math.round(r(b).bottom), sichtbar: sichtbar(b), gewaehlt: b.getAttribute("aria-pressed") })) : [],
+      vorUeberschrift: leiste ? r(leiste).bottom <= r(document.querySelector("h1")).top + 1 : false,
+      vorErklaertext: leiste && text ? r(leiste).bottom <= r(text).top : false,
+      hoehe: window.innerHeight,
+    };
+  });
+  ok("Sprachwahl: ganz oben im Seitenkopf, sichtbar", d.leisteDa && d.leisteSichtbar, "");
+  ok("Sprachwahl: die vier Sprachen in eigener Schrift (Deutsch, English, Türkçe, العربية)", d.knoepfe.map((k) => k.text).join(",") === "Deutsch,English,Türkçe,العربية" && d.knoepfe.map((k) => k.lang).join(",") === "de,en,tr,ar" && d.knoepfe.find((k) => k.code === "ar").dir === "rtl", d.knoepfe.map((k) => k.text).join(" | "));
+  ok("Sprachwahl: im ersten Bildschirm (390 x 844), alle vier Knöpfe ganz zu sehen", d.knoepfe.length === 4 && d.knoepfe.every((k) => k.sichtbar && k.unten <= d.hoehe), "unterste Kante: " + Math.max(...d.knoepfe.map((k) => k.unten)) + " von " + d.hoehe);
+  ok("Sprachwahl: steht vor der Überschrift und vor dem deutschen Erklärtext des Startschritts", d.vorUeberschrift && d.vorErklaertext, "");
+  ok("Sprachwahl: Deutsch ist gewählt (aria-pressed)", d.knoepfe.find((k) => k.code === "de").gewaehlt === "true" && d.knoepfe.filter((k) => k.gewaehlt === "true").length === 1, "");
+  ok("Startschritt: keine zweite Sprachwahl in der Seite (keine Sprachkarten mehr im Assistenten)", (await page.$('#anmeldung input[data-pfad="sprache"]')) === null, "");
+  await page.screenshot({ path: path.join(AUSGABE, MOBIL.name, "start-sprachwahl.png"), fullPage: false });
+  protokoll.screenshots++;
+  await page.click('[data-anm-sprachleiste] button[data-sprache="en"]');
+  await page.waitForFunction(() => document.getElementById("anmeldung").getAttribute("lang") === "en", { timeout: 6000 });
+  const en = await page.evaluate(() => ({ gewaehlt: Array.from(document.querySelectorAll("[data-anm-sprachleiste] button")).filter((b) => b.getAttribute("aria-pressed") === "true").map((b) => b.dataset.sprache), titel: (document.querySelector("[data-anm-sprachleiste] .anm-sprachleiste__titel") || {}).lang }));
+  ok("Sprachwahl: nach der Wahl von English ist English markiert, die Beschriftung folgt der Sprache", en.gewaehlt.join(",") === "en" && en.titel === "en", JSON.stringify(en));
+  await page.click('#anmeldung [data-aktion="weiter"]');
+  await page.waitForFunction(() => document.getElementById("anmeldung").dataset.schritt === "wer", { timeout: 5000 });
+  const weiter = await page.evaluate(() => ({ leiste: document.querySelector("[data-anm-sprachleiste]").checkVisibility(), auswahl: document.getElementById("anm-sprache").checkVisibility(), wert: document.getElementById("anm-sprache").value }));
+  ok("Sprachwahl: nach dem Startschritt ist die Leiste oben weg, die Auswahl in der Leiste des Assistenten zeigt die Sprache", !weiter.leiste && weiter.auswahl && weiter.wert === "en", JSON.stringify(weiter));
+  await page.select("#anm-sprache", "de");
+  ok("Sprachwahl: keine Fehler in der Konsole", page.__st.konsole.length === 0, page.__st.konsole.slice(0, 3).join(" | "));
+  await page.close();
+}
+
+// App-Modus (?app=1, wie bei den übrigen Seiten): Rahmen der Begleitseite weg, Hinweis "Im Browser öffnen" oben auf dem Startschritt und auf
+// der Fertig-Seite, Fehler beim Speichern oder Teilen werden abgefangen. Der Assistent selbst bleibt gleich: dieselben Schritte bis "fertig".
+async function pruefeAppModus(browser, server, dateien) {
+  console.log("\n=== N-A2: App-Modus (?app=1) bei 390 x 844 ===");
+  const vorher = async (page) => {
+    // Teilen schlägt fehl (Browser der App erlaubt es nicht); das Speichern prüft der Test weiter unten gezielt
+    await page.evaluateOnNewDocument(() => {
+      Object.defineProperty(navigator, "canShare", { value: () => true, configurable: true });
+      Object.defineProperty(navigator, "share", { value: () => Promise.reject(new DOMException("nicht erlaubt", "NotAllowedError")), configurable: true });
+    });
+  };
+  const normal = await neueSeite(browser, server, MOBIL, "app-modus-kontrolle", { vorLaden: vorher });
+  const kontrolle = await normal.evaluate(() => {
+    const sicht = (e) => !!e && e.checkVisibility();
+    return { appKlasse: document.documentElement.classList.contains("app-modus"), kopf: sicht(document.querySelector(".begleit-kopf")), fuss: sicht(document.querySelector(".ws-fuss")), hinweis: sicht(document.querySelector("[data-anm-apphinweis]")) };
+  });
+  ok("Ohne ?app=1: Rahmen der Begleitseite sichtbar, kein Hinweis für die App", !kontrolle.appKlasse && kontrolle.kopf && kontrolle.fuss && !kontrolle.hinweis, JSON.stringify(kontrolle));
+  await normal.close();
+
+  const page = await neueSeite(browser, server, MOBIL, "app-modus", { abfrage: "?app=1", vorLaden: vorher });
+  const d = await page.evaluate(() => {
+    const sicht = (e) => !!e && e.checkVisibility();
+    const r = (e) => e.getBoundingClientRect();
+    const hinweis = document.querySelector("[data-anm-apphinweis]");
+    const link = hinweis && hinweis.querySelector("a[data-anm-browserlink]");
+    const leiste = document.querySelector("[data-anm-sprachleiste]");
+    return {
+      appKlasse: document.documentElement.classList.contains("app-modus"),
+      kopf: sicht(document.querySelector(".begleit-kopf")),
+      fuss: sicht(document.querySelector(".ws-fuss")),
+      marke: (document.querySelector(".begleit-kopf__marke") || {}).textContent || "",
+      assistent: sicht(document.getElementById("anmeldung")),
+      h1: sicht(document.querySelector("h1")),
+      hinweisSichtbar: sicht(hinweis),
+      hinweisText: hinweis ? hinweis.textContent.replace(/\s+/g, " ").trim() : "",
+      hinweisUnten: hinweis ? Math.round(r(hinweis).bottom) : null,
+      hinweisVorAssistent: hinweis ? r(hinweis).bottom <= r(document.getElementById("anmeldung")).top : false,
+      link: link && { href: link.getAttribute("href"), target: link.getAttribute("target"), rel: link.getAttribute("rel"), text: link.textContent.trim() },
+      leisteSichtbar: sicht(leiste),
+      hoehe: window.innerHeight,
+      breite: document.documentElement.scrollWidth <= window.innerWidth,
+    };
+  });
+  const ohneApp = server.basis + "/anmeldung/";
+  ok("App-Modus: Klasse app-modus am <html>, Kopfleiste „Begleitseite zum Prototyp“ mit Navigation und Fußnote „Begleitmaterial“ sind weg", d.appKlasse && !d.kopf && !d.fuss, JSON.stringify({ kopf: d.kopf, fuss: d.fuss }));
+  ok("App-Modus: der Assistent bleibt (Überschrift, Assistent, Sprachwahl) und es gibt kein Querscrollen", d.assistent && d.h1 && d.leisteSichtbar && d.breite, "");
+  ok("App-Modus: auf dem Startschritt oben der Hinweis zum Speichern der Datei (Einfache Sprache), sichtbar im ersten Bildschirm", d.hinweisSichtbar && /^In der App kann das Speichern der PDF-Datei manchmal nicht klappen\. Dann öffnen Sie die Anmeldung im Browser\./.test(d.hinweisText) && d.hinweisUnten <= d.hoehe && d.hinweisVorAssistent, d.hinweisText + " (unten " + d.hinweisUnten + ")");
+  ok("App-Modus: Link „Im Browser öffnen“ führt auf dieselbe Seite ohne ?app=1, neuer Tab, rel=noopener", !!d.link && d.link.href === ohneApp && !/app=1/.test(d.link.href) && d.link.target === "_blank" && /\bnoopener\b/.test(d.link.rel || "") && d.link.text === "Im Browser öffnen", JSON.stringify(d.link));
+  await page.screenshot({ path: path.join(AUSGABE, MOBIL.name, "app-start.png"), fullPage: false });
+  protokoll.screenshots++;
+
+  // Der Assistent selbst bleibt gleich: dieselben Schritte bis "fertig" wie ohne ?app=1
+  await ladeBeispielPerKnopf(page, "wechsel-hessen");
+  const ctxApp = neuerKontext({ name: "app-modus", vp: MOBIL, modus: "beispiel", gesehen: new Set(), touch: true, axeImmer: false, dateien });
+  const rApp = await laufe(page, ctxApp);
+  const pageN = await neueSeite(browser, server, MOBIL, "app-modus-normal", { vorLaden: vorher });
+  await ladeBeispielPerKnopf(pageN, "wechsel-hessen");
+  const ctxN = neuerKontext({ name: "app-modus-normal", vp: MOBIL, modus: "beispiel", gesehen: new Set(), touch: true, axeImmer: false, dateien });
+  const rN = await laufe(pageN, ctxN);
+  await pageN.close();
+  ok("App-Modus: bis „fertig“ dieselben Schritte wie ohne ?app=1 (" + rApp.besucht.length + " Seiten)", rApp.besucht[rApp.besucht.length - 1].startsWith("fertig") && JSON.stringify(rApp.besucht) === JSON.stringify(rN.besucht), rApp.besucht.length + " gegen " + rN.besucht.length);
+  const daten = await ergebnisPruefen(page, ctxApp, dateien);
+  ok("App-Modus: die Datei wird erstellt", !!daten, daten ? daten.dateiname : "");
+  const f = await page.evaluate(() => {
+    const h = document.querySelector("#anmeldung [data-app-hinweis]");
+    const link = h && h.querySelector("a");
+    return { da: !!h && h.checkVisibility(), text: h ? h.textContent.replace(/\s+/g, " ").trim() : "", href: link && link.getAttribute("href"), target: link && link.getAttribute("target"), rel: link && link.getAttribute("rel") };
+  });
+  ok("App-Modus (Fertig-Seite): knapper Hinweis „Klappt das Speichern nicht?“ mit Link „Im Browser öffnen“ ohne ?app=1", f.da && /^Klappt das Speichern nicht\? Dann öffnen Sie die Anmeldung im Browser\. Im Browser öffnen$/.test(f.text) && f.href === ohneApp && f.target === "_blank" && /\bnoopener\b/.test(f.rel || ""), JSON.stringify(f));
+  // Teilen schlägt fehl und Herunterladen schlägt fehl: Statt still nichts zu tun, kommt eine Meldung mit dem Link
+  const knoepfe = await page.evaluate(() => Array.from(document.querySelectorAll('#anmeldung .anm-ergebnis [data-aktion]')).filter((e) => !e.hidden).map((e) => e.getAttribute("data-aktion")));
+  ok("App-Modus (Fertig-Seite): Knöpfe zum Herunterladen und Teilen sind da (Teilen ist hier erlaubt gestellt)", knoepfe.includes("herunterladen") && knoepfe.includes("teilen"), knoepfe.join(","));
+  await page.evaluate(() => {
+    window.__anklickSperre = HTMLAnchorElement.prototype.click;
+    HTMLAnchorElement.prototype.click = function () { throw new Error("Speichern in der App nicht möglich"); };
+  });
+  const meldung = () => page.evaluate(() => { const st = document.querySelector("#anmeldung .anm-status"); const a = st && st.querySelector("a"); return { text: st ? st.textContent.replace(/\s+/g, " ").trim() : "", href: a && a.getAttribute("href"), target: a && a.getAttribute("target"), rel: a && a.getAttribute("rel") }; });
+  await page.click('#anmeldung [data-aktion="herunterladen"]');
+  const m1 = await meldung();
+  const hinweis1 = await page.evaluate(() => { const h = document.querySelector("#anmeldung [data-app-hinweis]"); return !!h && h.checkVisibility(); });
+  ok("App-Modus: Herunterladen schlägt fehl – Meldung „Das Speichern hat nicht geklappt“ mit Link „Im Browser öffnen“ (kein stilles Nichts); der kurze Hinweis darunter entfällt dann", /^Das Speichern hat nicht geklappt\. Öffnen Sie die Anmeldung im Browser\. Im Browser öffnen$/.test(m1.text) && m1.href === ohneApp && m1.target === "_blank" && /\bnoopener\b/.test(m1.rel || "") && !hinweis1, JSON.stringify(m1));
+  await page.evaluate(() => { document.querySelector("#anmeldung .anm-status").textContent = ""; });
+  await page.click('#anmeldung [data-aktion="teilen"]');
+  await page.waitForFunction(() => /nicht geklappt/.test((document.querySelector("#anmeldung .anm-status") || {}).textContent || ""), { timeout: 4000 }).catch(() => {});
+  const m2 = await meldung();
+  ok("App-Modus: Teilen und danach Speichern schlagen fehl – Meldung mit Link", /^Das Speichern hat nicht geklappt\./.test(m2.text) && m2.href === ohneApp, JSON.stringify(m2));
+  await page.evaluate(() => { HTMLAnchorElement.prototype.click = window.__anklickSperre; document.querySelector("#anmeldung .anm-status").textContent = ""; });
+  await page.click('#anmeldung [data-aktion="teilen"]');
+  await page.waitForFunction(() => /Teilen geht hier nicht/.test((document.querySelector("#anmeldung .anm-status") || {}).textContent || ""), { timeout: 4000 }).catch(() => {});
+  const m3 = await meldung();
+  const hinweis3 = await page.evaluate(() => { const h = document.querySelector("#anmeldung [data-app-hinweis]"); const a = h && h.querySelector("a"); return { sichtbar: !!h && h.checkVisibility(), href: a && a.getAttribute("href") }; });
+  ok("App-Modus: Teilen geht nicht, Speichern klappt – der Status nennt das, der kurze Hinweis mit dem Link zum Browser steht darunter", /^Teilen geht hier nicht\. Die Datei wurde stattdessen gespeichert\.$/.test(m3.text) && hinweis3.sichtbar && hinweis3.href === ohneApp, JSON.stringify({ m3, hinweis3 }));
+  await page.screenshot({ path: path.join(AUSGABE, MOBIL.name, "app-fertig.png"), fullPage: false });
+  protokoll.screenshots++;
+  ok("App-Modus: keine Fehler in der Konsole (außer dem gewollten Fehler beim Speichern)", page.__st.konsole.filter((t) => !/Datei nicht gespeichert|Speichern in der App nicht möglich/.test(t)).length === 0, page.__st.konsole.slice(0, 3).join(" | "));
+  await page.close();
+}
+
+// Beitragsgruppen und Übungszeiten der Karnevalgruppen kommen aus den Texten der Sprache (Nachbesserung sprache-16 und sprache-24):
+// Auf Deutsch stehen sie wie in den Daten; mit abgefangenen englischen Wörterbüchern erscheinen die englischen Namen, Wochentage und "Uhr"-Muster.
+async function pruefeUebersetzbareDaten(browser, server) {
+  console.log("\n=== N-A2: Beitragsgruppen und Übungszeiten übersetzbar ===");
+  const gruppen = server.konfig.anmeldung.beitragsgruppen;
+  const karnevalGruppen = server.konfig.karnevalGruppen;
+  // Deutsch: wie in den Daten
+  const de = await seiteMitBeispiel(browser, server, MOBIL, "daten-de", "karneval-kind", "karneval");
+  const kartenDe = await de.$$eval("#anmeldung .anm-karte", (l) => l.map((k) => ({ titel: (k.querySelector(".anm-karte__titel") || {}).textContent, hinweis: ((k.querySelector(".anm-karte__hinweis") || {}).textContent || "").replace(/\s+/g, " ").trim() })));
+  const sollDe = karnevalGruppen.map((g) => ({ titel: g.name, hinweis: "Übungszeit: " + g.uebungszeit }));
+  ok("Karneval-Gruppen (Deutsch): Übungszeit steht wie in den Daten (Wochentag, Uhrzeit, Uhr, Ort)", sollDe.every((x) => kartenDe.some((k) => k.titel === x.titel && k.hinweis.startsWith(x.hinweis))), JSON.stringify(kartenDe.slice(0, 2)));
+  const nachBeitragDe = await geheBis(de, "beitrag", "gruppe");
+  const kartenBeitragDe = await de.$$eval("#anmeldung .anm-karte .anm-karte__titel", (l) => l.map((k) => k.textContent.trim()));
+  ok("Beitragsgruppen (Deutsch): Namen wie in data/anmeldung.json", nachBeitragDe.schritt === "beitrag" && kartenBeitragDe.length > 0 && kartenBeitragDe.every((t) => Object.values(gruppen).some((g) => t.startsWith(g.bezeichnung))), kartenBeitragDe.join(" | "));
+  await de.close();
+
+  // Englisch mit abgefangenen Wörterbüchern: Wochentage, Muster der Übungszeit, Namen der Beitragsgruppen
+  const wochentage = { montag: "Monday", dienstag: "Tuesday", mittwoch: "Wednesday", donnerstag: "Thursday", freitag: "Friday", samstag: "Saturday", sonntag: "Sunday" };
+  const grNamen = { fussball_jugend: "Children and youth (football, with U19)", karneval_kinder: "Children and youth (carnival)" };
+  const abfangen = async (page) => {
+    await page.setRequestInterception(true);
+    page.on("request", async (req) => {
+      const u = req.url();
+      const eins = /\/texte\/en-(oberflaeche|regeln)\.js$/.exec(u);
+      if (!eins) return req.continue();
+      const original = await (await fetch(u)).text();
+      const zusatz =
+        eins[1] === "oberflaeche"
+          ? `;export default { ...__orig, allgemein: { ...__orig.allgemein, wochentag: ${JSON.stringify(wochentage)} }, karneval: { ...__orig.karneval, gruppe: { ...__orig.karneval.gruppe, uebungszeit: "{tag}, {zeit}, {ort}", uebungszeitOhneOrt: "{tag}, {zeit}" } } };`
+          : `;export default { ...__orig, beitrag: { ...__orig.beitrag, gruppen: ${JSON.stringify(grNamen)} } };`;
+      req.respond({ status: 200, contentType: "text/javascript; charset=utf-8", body: original.replace(/export default \{/, "const __orig = {") + "\n" + zusatz });
+    });
+  };
+  const en = await neueSeite(browser, server, MOBIL, "daten-en", { vorLaden: abfangen });
+  await ladeBeispielPerKnopf(en, "karneval-kind");
+  await en.click('[data-anm-sprachleiste] button[data-sprache="en"]');
+  await en.waitForFunction(() => document.getElementById("anmeldung").getAttribute("lang") === "en", { timeout: 6000 });
+  await geheBis(en, "karneval", "gruppe");
+  const kartenEn = await en.$$eval("#anmeldung .anm-karte", (l) => l.map((k) => ({ titel: (k.querySelector(".anm-karte__titel") || {}).textContent, hinweis: ((k.querySelector(".anm-karte__hinweis") || {}).textContent || "").replace(/\s+/g, " ").trim() })));
+  const dreamboys = kartenEn.find((k) => k.titel === "Dreamboys");
+  const mittwoch = karnevalGruppen.find((g) => g.name === "Dreamboys").uebungszeit; // "Mittwoch 19:00–21:00 Uhr, Turnhalle Fridtjof-Nansen-Schule"
+  const m = /^(\S+) (\S+) Uhr, (.+)$/.exec(mittwoch);
+  ok("Karneval-Gruppen (Englisch): Wochentag und „Uhr“ stehen nach den Texten der Sprache, der Ort bleibt", !!dreamboys && !!m && dreamboys.hinweis.includes("Wednesday, " + m[2] + ", " + m[3]) && !/Mittwoch|Uhr/.test(dreamboys.hinweis), dreamboys ? dreamboys.hinweis : JSON.stringify(kartenEn));
+  const nachBeitragEn = await geheBis(en, "beitrag", "gruppe");
+  const kartenBeitragEn = await en.$$eval("#anmeldung .anm-karte .anm-karte__titel", (l) => l.map((k) => k.textContent.replace(/[⁦-⁩]/g, "").trim()));
+  const vorschlagEn = await en.$$eval("#anmeldung .anm-text--gross", (l) => l.map((k) => k.textContent.replace(/[⁦-⁩]/g, "").trim()));
+  const beitragSeite = nachBeitragEn.schritt === "beitrag";
+  ok("Beitragsgruppen (Englisch): die Auswahl nennt die Namen aus den Texten der Sprache; fehlt ein Name dort, gilt der Name aus den Daten", beitragSeite && kartenBeitragEn.some((t) => t.startsWith(grNamen.karneval_kinder)) && kartenBeitragEn.every((t) => Object.keys(grNamen).some((k) => t.startsWith(grNamen[k])) || Object.values(gruppen).some((g) => t.startsWith(g.bezeichnung))), kartenBeitragEn.join(" | "));
+  ok("Beitragsgruppen (Englisch): der Vorschlag oben nennt den Namen aus den Texten der Sprache", vorschlagEn.some((t) => t.includes(grNamen.karneval_kinder)), vorschlagEn.join(" | "));
+  await geheBis(en, "pruefen", "haupt");
+  const zeileEn = await en.$$eval("#anmeldung .anm-pruefzeile", (l) => l.filter((z) => /fee|Fee|contribution/i.test(z.querySelector("dt").textContent)).map((z) => z.querySelector(".anm-pruefzeile__wert").textContent.replace(/[⁦-⁩]/g, "").replace(/\s+/g, " ").trim()));
+  ok("Beitragsgruppen (Englisch): die Prüfseite nennt den Namen aus den Texten der Sprache", zeileEn.length > 0 && zeileEn.some((t) => t.includes(grNamen.karneval_kinder)), zeileEn.join(" | "));
+  await en.close();
 }
 
 async function pruefeVereinssicht(browser, server, beispiele) {

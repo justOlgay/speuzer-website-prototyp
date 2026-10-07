@@ -1,7 +1,9 @@
 Liberation Sans Regular (liberation-sans-regular.ttf)
 =====================================================
 
-Schrift für den Aufnahmeantrag online: Die Seite bettet sie nur dann in das
+Schrift für den Aufnahmeantrag online und den Anmelde-Assistenten (assets/js/anmeldung/pdf.js;
+dort wird sie bei jeder PDF-Erstellung eingebettet).
+Aufnahmeantrag online: Die Seite bettet sie nur dann in das
 erzeugte PDF ein, wenn ein Eintrag Zeichen enthält, die die
 PDF-Standardschrift Helvetica nicht kennt (z. B. Ş, ğ, ı, Ł). Liberation
 Sans hat dieselben Zeichenbreiten wie Helvetica/Arial, die vermessenen

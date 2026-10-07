@@ -4,9 +4,9 @@
 // ist ein Entwurf zum Vorführen für die 1. Vorsitzende und den Vorstand: Sie
 // überträgt nichts, speichert nichts und nimmt keine echten Daten an.
 //
-// Aufbau: Dieses Modul baut nur den Rahmen (Seitenkopf, Entwurfs-Band, Schalter
-// für die Vereinssicht, Knöpfe für die Beispiel-Profile, Platz für den
-// Assistenten) und bettet die Konfiguration ein (#anmeldung-konfig, siehe
+// Aufbau: Dieses Modul baut nur den Rahmen (Seitenkopf mit Sprachwahl und Hinweis
+// für die App, Entwurfs-Band, Schalter für die Vereinssicht, Knöpfe für die
+// Beispiel-Profile, Platz für den Assistenten) und bettet die Konfiguration ein (#anmeldung-konfig, siehe
 // SCHNITTSTELLEN Abschnitt 2). Den Assistenten selbst baut das Skript
 // assets/js/anmeldung/assistent.js im Browser: Seitenfolge und Ergebnis kommen
 // aus assets/js/anmeldung/regeln.js, die Texte aus
@@ -108,9 +108,39 @@ function baueKonfig(daten) {
 
 // ---------- Abschnitte ----------
 
+// Sprachwahl ganz oben (Nachbesserung sprache-1): Familien mit wenig Deutsch sollen im ersten Bildschirm sehen, dass es
+// Übersetzungen gibt. Die vier Sprachen stehen in ihrer eigenen Schrift. Die Leiste steht schon beim ersten Zeichnen da
+// (kein Sprung, wenn das Skript lädt), assistent.js verdrahtet die Knöpfe und blendet sie nach dem Startschritt aus
+// (Klasse anm-ohne-sprachleiste am <main>, anmeldung.css). Ohne Skript blendet das <noscript>-Stylesheet sie aus.
+function sprachleiste() {
+  const knoepfe = de.sprachen
+    .map(
+      (s) =>
+        `<li><button type="button" class="anm-sprachleiste__knopf" data-sprache="${escapeHtml(s.code)}" lang="${escapeHtml(s.code)}" dir="${s.dir === "rtl" ? "rtl" : "ltr"}" aria-pressed="${s.code === "de" ? "true" : "false"}">${escapeHtml(s.name)}</button></li>`
+    )
+    .join("\n        ");
+  return `<div class="anm-sprachleiste" data-anm-sprachleiste role="group" aria-labelledby="anm-sprachleiste-titel">
+      <p class="anm-sprachleiste__titel" id="anm-sprachleiste-titel" data-anm-t="start.spracheTitel">${escapeHtml(de.start.spracheTitel)}</p>
+      <ul class="anm-sprachleiste__liste" role="list">
+        ${knoepfe}
+      </ul>
+    </div>`;
+}
+
+// Hinweis nur im App-Modus (Seite mit ?app=1, Klasse app-modus am <html>, siehe APP_MODUS_KOPF; anmeldung.css zeigt ihn nur
+// dort und nur auf dem Startschritt): In der Vereins-App klappt das Speichern der Datei manchmal nicht. Der Link führt auf
+// dieselbe Seite ohne ?app=1 (assistent.js setzt die genaue Adresse; "./" ist der Rückfall).
+function appHinweis() {
+  return `<div class="anm-apphinweis" data-anm-apphinweis>
+      <p><span data-anm-t="app.hinweisStart">${escapeHtml(de.app.hinweisStart)}</span> <a href="./" target="_blank" rel="noopener" data-anm-browserlink data-anm-t="app.browser">${escapeHtml(de.app.browser)}</a></p>
+    </div>`;
+}
+
 function seitenkopfAbschnitt() {
   return `<section class="abschnitt seitenkopf">
   <div class="container">
+    ${sprachleiste()}
+    ${appHinweis()}
     <div class="anm-titelzeile">
       <h1 data-anm-t="seite.h1">${escapeHtml(de.seite.h1)}</h1>
       <button type="button" class="knopf knopf--sekundaer anm-vorfuehrknopf" data-anm-vorfuehrung aria-expanded="false" aria-controls="anm-werkzeugkasten">${escapeHtml(de.demo.vorfuehrung)}</button>
@@ -165,6 +195,16 @@ function vorfuehrAbschnitt() {
 </section>`;
 }
 
+// App-Modus vor dem ersten Zeichnen setzen (kein Sprung), gleiche Erkennung wie APP_MODUS_KOPF in
+// src/vorlagen/termine.mjs: ?app=1 auf der Website, die App-Kopie (data-app-seite) oder eine Seite unter appack.de.
+// Im App-Modus blendet anmeldung.css den Rahmen der Begleitseite aus (Kopfleiste mit Navigation, Fußnote).
+const APP_MODUS_KOPF = `<script>
+(function () {
+  var w = document.documentElement;
+  if (/(^|[?&])app=1(&|$)/.test(location.search) || w.hasAttribute("data-app-seite") || location.hostname === "appack.de") w.classList.add("app-modus");
+})();
+</script>`;
+
 function assistentAbschnitt() {
   return `<section class="abschnitt anm-assistent-abschnitt" aria-labelledby="anm-assistent-titel">
   <div class="container">
@@ -197,6 +237,8 @@ export function seite(daten) {
     kopfZusatz: "\n" + [
       `<meta name="robots" content="noindex">`,
       `<link rel="stylesheet" href="${PFAD}assets/css/anmeldung.css">`,
+      APP_MODUS_KOPF,
+      `<noscript><style>.anm-sprachleiste, .anm-apphinweis { display: none !important; }</style></noscript>`,
       `<script type="module" src="${PFAD}assets/js/anmeldung/assistent.js"></script>`,
     ].join("\n"),
     inhalt,

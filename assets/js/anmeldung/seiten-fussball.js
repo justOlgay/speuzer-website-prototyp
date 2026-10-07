@@ -389,6 +389,20 @@ function karnevalDaten(k) {
   return k.a.karneval;
 }
 
+// Übungszeit einer Gruppe aus data/karneval.json ("Mittwoch 19:00–21:00 Uhr, Turnhalle Fridtjof-Nansen-Schule"): Wochentag und
+// "Uhr" kommen aus den Texten der gewählten Sprache (allgemein.wochentag.*, karneval.gruppe.uebungszeit), der Ort bleibt
+// die deutsche Angabe des Vereins. Zeit und Ort stehen in Sprachen von rechts nach links in Isolaten (k.datentext).
+// Passt eine Angabe nicht in dieses Muster, steht sie unverändert da.
+const WOCHENTAG_SCHLUESSEL = { Montag: "montag", Dienstag: "dienstag", Mittwoch: "mittwoch", Donnerstag: "donnerstag", Freitag: "freitag", Samstag: "samstag", Sonntag: "sonntag" };
+const UEBUNGSZEIT_MUSTER = /^\s*(Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag)\s+(\d{1,2}:\d{2}(?:\s*[\u2013-]\s*\d{1,2}:\d{2})?)\s+Uhr\s*(?:,\s*(.+?))?\s*$/;
+
+function uebungszeitText(k, roh) {
+  const m = UEBUNGSZEIT_MUSTER.exec(String(roh || ""));
+  if (!m) return k.datentext(roh);
+  const werte = { tag: k.t("allgemein.wochentag." + WOCHENTAG_SCHLUESSEL[m[1]]), zeit: k.datentext(m[2]), ort: m[3] ? k.datentext(m[3]) : "" };
+  return k.t(m[3] ? "karneval.gruppe.uebungszeit" : "karneval.gruppe.uebungszeitOhneOrt", werte);
+}
+
 export const karneval = {
   id: "karneval",
   teile(k) {
@@ -408,7 +422,7 @@ export const karneval = {
       const gruppen = (k.konfig.karnevalGruppen || []).map((g) => ({
         wert: g.name,
         label: k.datentext(g.name),
-        hinweis: [g.uebungszeit ? k.t("karneval.gruppe.uebung", { zeit: k.datentext(g.uebungszeit) }) : "", vorschlag.includes(g.name) ? k.t("karneval.gruppe.passt") : ""].filter(Boolean).join(" · ") || null,
+        hinweis: [g.uebungszeit ? k.t("karneval.gruppe.uebung", { zeit: uebungszeitText(k, g.uebungszeit) }) : "", vorschlag.includes(g.name) ? k.t("karneval.gruppe.passt") : ""].filter(Boolean).join(" · ") || null,
       }));
       gruppen.push({ wert: "weiss_nicht", label: k.t("karneval.gruppe.weissNicht"), hinweis: k.t("karneval.gruppe.weissNichtHinweis") });
       return { titel: k.t("karneval.gruppe.titel"), inhalt: [kartenAuswahl(k, { pfad: "karneval.gruppe", optionen: gruppen })] };

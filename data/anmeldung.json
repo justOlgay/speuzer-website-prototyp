@@ -1,6 +1,6 @@
 {
-  "stand": "2026-09-29",
-  "version": "2026-09-29.2",
+  "stand": "2026-10-07",
+  "version": "2026-10-07.1",
   "hinweis": "Regelwerk des Anmelde-Assistenten. Alle Zahlen und Fristen stehen hier; regeln.js enthält die Logik. Nichts hier enthält Personendaten.",
   "saison": "2026/27",
   "quellenStand": [
@@ -2296,6 +2296,29 @@
       "betrifft": [],
       "status": "offen",
       "quelle": "Prüfung Orchestrator, 30.09.2026"
+    },
+    {
+      "id": "O72",
+      "an": "vorstand",
+      "prioritaet": "P1",
+      "frage": "App: Wie übergibt die Familie das PDF in der Vereins-App? In der App-Webansicht klappt Speichern oder Teilen vielleicht nicht. Für Website und App gleich wäre der automatische Versand an den Verein über die eigene Annahme (IONOS, wie beim Online-Aufnahmeantrag). Bis dahin weist der Assistent in der App auf „Im Browser öffnen“ hin.",
+      "betrifft": [],
+      "status": "offen",
+      "quelle": "Prüfung Orchestrator, 07.10.2026"
+    },
+    {
+      "id": "O73",
+      "an": "datenschutz",
+      "prioritaet": "P1",
+      "frage": "Automatischer Versand: Teil C enthält Gesundheitsdaten (Art. 9 DSGVO), dazu kommen Ausweis- und Passkopien. Dürfen sie per E-Mail an den Verein gehen, nur verschlüsselt oder getrennt auf Papier?",
+      "betrifft": [
+        "U10",
+        "U11",
+        "U12",
+        "U28"
+      ],
+      "status": "offen",
+      "quelle": "Prüfung Orchestrator, 07.10.2026"
     }
   ]
 }

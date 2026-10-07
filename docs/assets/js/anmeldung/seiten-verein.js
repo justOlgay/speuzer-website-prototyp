@@ -87,9 +87,13 @@ export const kontakt = {
 // ---------- beitrag ----------
 
 // Beitragsgruppen aus data/anmeldung.json (Objekt oder Liste), einheitlich.
+// Den Namen einer Gruppe liefern die Regeltexte der gewählten Sprache (texte/<sprache>-regeln.js › beitrag › gruppen ›
+// <Schlüssel>, auf Deutsch wortgleich mit data/anmeldung.json › bezeichnung). Fehlt der Text, gilt der Name aus den Daten.
 export function beitragsgruppen(k) {
   const roh = k.konfig.anmeldung && k.konfig.anmeldung.beitragsgruppen;
   if (!roh) return [];
+  const gruppenTexte = k.rt("beitrag", "gruppen");
+  const gruppenName = (schluessel) => (gruppenTexte && typeof gruppenTexte === "object" && typeof gruppenTexte[schluessel] === "string" && gruppenTexte[schluessel]) || "";
   const zahl = (x) => (typeof x === "number" ? x : null);
   const eintraege = Array.isArray(roh) ? roh.map((g) => ({ ...g, schluessel: g.schluessel || g.key || g.id })) : Object.entries(roh).map(([schluessel, g]) => ({ ...g, schluessel }));
   return eintraege
@@ -97,7 +101,7 @@ export function beitragsgruppen(k) {
     .map((g) => ({
       schluessel: g.schluessel,
       abteilung: String(g.abteilung || "").toLowerCase(),
-      bezeichnung: k.datentext(g.bezeichnung || g.name || g.label || g.titel || g.schluessel),
+      bezeichnung: gruppenName(g.schluessel) || k.datentext(g.bezeichnung || g.name || g.label || g.titel || g.schluessel),
       jahr: zahl(g.jahr) ?? zahl(g.jahresbeitrag) ?? zahl(g.betrag),
       monat: zahl(g.monat),
     }));
@@ -349,7 +353,6 @@ export const zahlung = {
           anzeige: (v) => gruppiereIban(bereinigeIban(v)),
           beimVerlassen: (v) => gruppiereIban(bereinigeIban(v)),
         }),
-        textfeld(k, { pfad: "zahlung.bic", label: k.t("zahlung.iban.bic"), maxlength: 24, ltr: true, grossbuchstaben: true, freiwillig: true }),
         textfeld(k, { pfad: "zahlung.bank", label: k.t("zahlung.iban.bank"), maxlength: 60, freiwillig: true }),
       ],
     };
@@ -381,8 +384,9 @@ export const zahlung = {
       const schluessel = { leer: "ibanLeer", format: "ibanFormat", land: "ibanLand", laenge: "ibanLaenge", pruefziffer: "ibanPruefziffer" }[r.grund];
       f.push({ feld: "zahlung.iban", meldung: k.t("fehler." + schluessel) });
     }
-    // BIC und Bank sind freiwillig, aber was drinsteht, kommt ins PDF.
-    f.push(...lateinFehler(k, z.bic, "zahlung.bic", "text"), ...lateinFehler(k, z.bank, "zahlung.bank", "text"));
+    // Die Bank ist freiwillig, aber was drinsteht, kommt ins PDF. Die BIC fragt der Assistent nicht mehr ab: SEPA-Lastschriften in
+    // Euro brauchen nur die IBAN. a.zahlung.bic bleibt im Schema (SCHNITTSTELLEN Abschnitt 3), bleibt aber leer.
+    f.push(...lateinFehler(k, z.bank, "zahlung.bank", "text"));
     return f;
   },
   beimVerlassen(k, teil) {

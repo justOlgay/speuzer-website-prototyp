@@ -1,7 +1,7 @@
 /*
   Texte des Regelwerks - Arabisch (العربية), Gegenstück zu regeln.js.
   Übersetzungshilfe: Verbindlich ist der deutsche Text (de-regeln.js).
-  Stand 29.09.2026. Dieselbe Schlüsselstruktur wie de-regeln.js; Platzhalter in geschweiften
+  Stand 08.10.2026. Dieselbe Schlüsselstruktur wie de-regeln.js; Platzhalter in geschweiften
   Klammern (zum Beispiel {datum}) bleiben unverändert. Stil, Begriffe und Schreibrichtung: siehe
   den Kopf von ar-oberflaeche.js (Begriffsliste, Isolate für deutsche Namen).
 
@@ -133,7 +133,7 @@ export default {
       name: `إلغاء التسجيل من النادي القديم (${D("Abmeldung")})`,
       kurz: `تلغي تسجيلك كلاعب في النادي القديم. يتم ذلك برسالة مسجلة (${D("Einschreiben")}). البريد الإلكتروني لا يكفي.`,
       warum: "يوم إلغاء التسجيل مهم. فمنه تبدأ فترة الانتظار.",
-      wie: `أرسل النموذج برسالة مسجلة (${D("Einschreiben")}). الرسالة المسجلة بالإسقاط في صندوق البريد (${D("Einwurf-Einschreiben")}) لا تكفي. احتفظ بالإيصال.`,
+      wie: `أرسل النموذج برسالة مسجلة (${D("Einschreiben")}). قل في مكتب البريد: رسالة مسجلة عادية، وليست رسالة مسجلة بالإسقاط في صندوق البريد (${D("Einwurf-Einschreiben")}). مع الرسالة المسجلة بالإسقاط تُلقى الرسالة في صندوق البريد فقط. وهذا غير مقبول. احتفظ بالإيصال.`,
       wo: "تصوّر الإيصال وترفعه. أو تسلّمه في النادي.",
     },
     U18: {
@@ -166,8 +166,8 @@ export default {
     },
     U22: {
       name: "تأكيد من النادي القديم",
-      kurz: "يؤكد النادي القديم تاريخ آخر مباراة في الدوري أو الكأس. المباريات الرسمية هي مباريات الدوري والكأس.",
-      warum: "بعد أكثر من 6 أشهر بلا مباراة في الدوري أو الكأس لا توجد فترة انتظار.",
+      kurz: "يؤكد النادي القديم آخر مباراة في الدوري أو الكأس.",
+      warum: "هل مرّت 6 أشهر بلا مباراة في الدوري أو الكأس؟ عندها لا توجد فترة انتظار.",
       wie: "يطلب النادي الجديد ذلك من النادي القديم.",
       wo: "لا يجب أن ترفع أي شيء.",
     },
@@ -305,15 +305,15 @@ export default {
     abmeldung_formlos: `رسالة بريد إلكتروني أو رسالة ${D("WhatsApp")} أو رسالة عادية ليست إلغاء التسجيل. أرسل رسالة مسجلة (${D("Einschreiben")}).`,
     abmeldung_nach_letztem_spiel: "ألغِ تسجيلك في النادي القديم فقط بعد آخر مباراة.",
     abmeldung_vor_letztem_spiel: "كانت آخر مباراة بعد إلغاء التسجيل. يرجى التحقق من التاريخين. فالاتحاد يسأل عن ذلك.",
-    nie_zwei_vereine: "لا توقّع أبدًا لصالح ناديين. هذا يُعاقَب عليه.",
+    nie_zwei_vereine: "لا توقّع أبدًا لصالح ناديين في الوقت نفسه. وإلا فسيعاقب الاتحاد اللاعب.",
     kuendigung_extra: "يجب إنهاء العضوية في النادي القديم بشكل منفصل. إلغاء التسجيل كلاعب لا يكفي لذلك.",
     vollmacht_eingabe_zeitnah: "يجب أن يُدخل النادي الجديد إلغاء التسجيل في اليوم نفسه أو في اليوم التالي. وإلا تطول فترة الانتظار.",
     wiederholter_wechsel: "حدث بالفعل تغيير للنادي خلال آخر 6 أشهر. عندها قد تطول فترة الانتظار. ويقرر الاتحاد.",
     antrag_zu_spaet: "يجب أن يصل الطلب إلى الاتحاد حتى {datum}. لقد انتهت هذه المهلة. وسيسأل النادي الاتحاد.",
     ohne_zusage_spielen: "لا يمكننا أن نعد بأن الطفل سيلعب. لكن التدريب ممكن.",
-    f17_wahrscheinlich_nicht: "بدون 5 سنوات من الإقامة لن ينجح ذلك على الأرجح. عندها لا يمكن اللعب إلا عند بلوغ 18 عامًا. والمباريات الودية غير مسموحة أيضًا.",
-    aushilfe_nur_ausnahme: "لهذه الفئة العمرية يكون ذلك ممكنًا في حالات استثنائية فقط. وتتحقق إدارة الشباب من ذلك.",
-    getrennt_zustimmung: "يرجى سؤال الطرف الآخر من الوالدين. يجب أن يوافق على التسجيل. وإلا يوقّع الاثنان.",
+    f17_wahrscheinlich_nicht: "بدون 5 سنوات من الإقامة لن يُسمح للطفل باللعب على الأرجح. عندها لا يمكن اللعب إلا عند بلوغ 18 عامًا. والمباريات الودية غير مسموحة أيضًا.",
+    aushilfe_nur_ausnahme: `لا يُسمح للشاب في هذه الفئة العمرية باللعب عند الحاجة في فريق ${D("Herren")} إلا نادرًا. وتتحقق إدارة الشباب من ذلك.`,
+    getrennt_zustimmung: `يرجى سؤال الطرف الآخر من الوالدين. يجب أن يوافق على التسجيل. والأفضل أن يوقّع هو أيضًا على طلب الانضمام (${D("Aufnahmeantrag")}).`,
     karneval_tanzt_woanders: "تشارك الراقصات والراقصون في البطولات باسم نادٍ واحد فقط.",
     beitrag_gruppe_pruefen: `فئة الرسوم: ${D("{gruppe}")}. قد لا تناسب هذه الفئة العمر. ويتحقق النادي من ذلك.`,
 
@@ -323,7 +323,7 @@ export default {
     // Infos
     frist_annahme_heute: "نحسب كأن إلغاء التسجيل يُعتمد في {abmeldung}. وإذا ألغيت التسجيل لاحقًا، تطول فترة الانتظار.",
     probetraining_versicherung: "من ليس عضوًا بعد لا يملك تأمينًا خاصًا أثناء التدريب. والأفضل أن تسجّل قبل أول تدريب.",
-    kuendigung_jahresende: `لا يمكنك مغادرة النادي إلا في نهاية العام. أرسل إنهاء العضوية برسالة مسجلة (${D("Einschreiben")}).`,
+    kuendigung_jahresende: `في نادينا لا يمكنك إنهاء العضوية إلا في نهاية العام. أرسل إشعار إنهاء العضوية برسالة مسجلة (${D("Einschreiben")}).`,
     ohne_spielrecht_kein_spiel: "بدون إذن اللعب لا يجوز للطفل المشاركة في المباريات. ولا حتى في المباريات الودية. أما التدريب فمسموح.",
     mitgliedschaft_zuerst: "أولًا تصبح عضوًا. ثم يقدّم النادي الطلب إلى الاتحاد.",
     spielerfoto_hinweis: "يجب أن تكون الصورة في النظام قبل أول مباراة. وبدون صورة لا يستطيع أحد اللعب.",
@@ -347,7 +347,7 @@ export default {
     keine_frauenmannschaft: `ليس لدى النادي فريق نسائي. يجوز للنساء من عمر 18 اللعب في فريق ${D("Herren")} بطلب. تواصل معنا.`,
     vertrauensperson: "لدى الاتحاد شخص موثوق لهذه الحالة. يساعد في تقديم الطلب. وعند الأطفال يوافق الوالدان.",
     sonderspielrecht: `يستطيع الأطفال ذوو الإعاقة اللعب في فئة عمرية أصغر. ويُسمّى هذا إذن اللعب الخاص (${D("Sonderspielrecht")}). ويتطلب تقريرًا من طبيب مختص. وتساعدك إدارة الشباب.`,
-    beide_unterschreiben_empfohlen: `نوصي بأن يوقّع الوالدان معًا على طلب الانضمام (${D("Aufnahmeantrag")}). يكفي توقيع واحد بالنسبة إلى الاتحاد.`,
+    beide_unterschreiben_empfohlen: `نوصي بأن يوقّع الوالدان معًا على طلب الانضمام (${D("Aufnahmeantrag")}).`,
     getrennt_einverstanden: "الطرف الآخر من الوالدين موافق. لذلك يوقّع شخص واحد.",
     sorge_allein_nachweis: "حق الحضانة لك وحدك. احتفظ بمستند إثبات جاهزًا في حال طلبه النادي.",
     vormund_hinweis: `يوقّع الوصي القانوني (${D("Vormund")}) عن الطفل. أحضر إثبات الوصاية.`,
@@ -428,7 +428,7 @@ export default {
     vertrauensperson: "تربطك إدارة الشباب بالشخص الموثوق لدى الاتحاد.",
     sonderspielrecht: `تساعدك إدارة الشباب في طلب إذن اللعب الخاص (${D("Sonderspielrecht")}).`,
     sonderwege: "تتحقق إدارة الشباب هل تمكن فترة انتظار أقصر.",
-    getrennte_eltern: "تتحدث إدارة الشباب معك بشأن توقيع الوالد الآخر.",
+    getrennte_eltern: "تتحدث إدارة الشباب معك بشأن توقيع الطرف الآخر من الوالدين.",
     wohnen_nicht_gemeinsam: "تسأل إدارة الشباب أين يعيش الطفل.",
     spielerpass_unklar: `يبحث النادي عن بطاقة اللاعب (${D("Spielerpass")}) في نظام الاتحاد.`,
     international_klaeren: "يبدأ النادي الإجراء مع الاتحاد. وسيخبرك.",
@@ -469,7 +469,7 @@ export default {
     frist_wechsel_6monate: "لا يمنحك النادي القديم إخلاء الطرف. تستمر فترة الانتظار {monate} أشهر. مباريات الدوري والكأس ممكنة اعتبارًا من {pflichtspiele}. والمباريات الودية ممكنة اعتبارًا من {freundschaftsspiele}.",
     frist_freigabe_unklar: "لا تعرف هل يمنحك النادي القديم إخلاء الطرف. بدون إخلاء الطرف تكون مباريات الدوري والكأس ممكنة اعتبارًا من {pflichtspiele}. ومع إخلاء الطرف اعتبارًا من {alternativ}.",
     frist_d_jung_offen: "القاعدة غير واضحة لهذه الفئة العمرية. مباريات الدوري والكأس ممكنة اعتبارًا من {alternativ} في أبكر تقدير. وربما اعتبارًا من {pflichtspiele} فقط.",
-    frist_entfaellt: "كانت آخر مباراة في الدوري أو الكأس قبل أكثر من 6 أشهر. لذلك لا توجد فترة انتظار.",
+    frist_entfaellt: "لم تُلعب أي مباراة في الدوري أو الكأس منذ أكثر من 6 أشهر. لذلك لا توجد فترة انتظار.",
     frist_herren_wp1_zustimmung: "تلغي التسجيل حتى 30 يونيو، ويوافق النادي القديم. مباريات الدوري والكأس ممكنة اعتبارًا من {pflichtspiele}.",
     frist_herren_wp1_ohne: "تلغي التسجيل حتى 30 يونيو، لكن النادي القديم لا يوافق. مباريات الدوري والكأس ممكنة فقط اعتبارًا من {pflichtspiele}.",
     frist_herren_wp2_zustimmung: "تلغي التسجيل بعد 30 يونيو، ويوافق النادي القديم. مباريات الدوري والكأس ممكنة اعتبارًا من {pflichtspiele}.",
@@ -479,8 +479,8 @@ export default {
   mannschaft: {
     mannschaft_unbekannt: "بدون تاريخ الميلاد لا يمكننا تحديد الفريق.",
     keine_mannschaft: "ليس لدى النادي فريق لمواليد {jahrgang}. ستتواصل معك إدارة الشباب. ويستمر تسجيلك.",
-    mannschaft_gefunden: `الطفل يناسب الفريق ${D("{mannschaft}")}. هل لديه إعاقة؟ اسأل إدارة الشباب عن إذن اللعب الخاص (${D("Sonderspielrecht")}).`,
-    mannschaft_mehrere: `يستطيع الطفل اللعب في هذه الفرق: ${D("{mannschaften}")}. يوزّعه المدربون. هل لديه إعاقة؟ اسأل إدارة الشباب عن إذن اللعب الخاص (${D("Sonderspielrecht")}).`,
+    mannschaft_gefunden: `الطفل يناسب الفريق ${D("{mannschaft}")}.`,
+    mannschaft_mehrere: `يستطيع الطفل اللعب في هذه الفرق: ${D("{mannschaften}")}. يوزّعه المدربون.`,
     mannschaft_2020_f2: `يلعب مواليد {jahrgang} في النادي في الفريق ${D("{mannschaft}")}. وتعدّ منطقة فرانكفورت هذه الفئة ضمن ${D("G-Jugend")}.`,
     mannschaft_herren: `يناسبك الفريق ${D("{mannschaft}")}.`,
     mannschaft_maedchen_bonus: `يجوز أن تكون الفتيات أكبر بسنة من الفتيان. ويناسب الطفل هذه الفرق: ${D("{mannschaften}")}.`,
@@ -495,6 +495,21 @@ export default {
     beitrag_azubi: "لمن يتدرب مهنيًا وللطلاب تبلغ رسوم العضوية {jahr} يورو في السنة. ويلزم إثبات.",
     beitrag_senator: "يدفع السيناتورات {jahr} يورو في السنة. ويقرر مجلس الإدارة قبول العضوية.",
     beitrag_doppel: "أنت في القسمين. يخبرك مكتب النادي برسوم العضوية.",
+    // Namen der Beitragsgruppen (Schlüssel wie in de-regeln.js): Übersetzung mit der Abteilung (ohne Doppelpunkt, der Text steht auch hinter "Wir schlagen vor:"), dahinter der deutsche Name ohne Abteilung in Klammern.
+    // karneval_azubi: Der deutsche Name steht ohne "mit Nachweis" in der Klammer; der lange Name passt bei 390 px nicht in eine Zeile
+    // (die Klammer bricht sonst um und steht verdreht), "mit Nachweis" steht im arabischen Teil.
+    gruppen: {
+      fussball_jugend: `الأطفال والشباب في كرة القدم، مع ${D("A-Jugend")} (${D("Kinder und Jugendliche")})`,
+      fussball_erwachsene: `البالغون في كرة القدم (${D("Erwachsene")})`,
+      fussball_passiv: `الأعضاء الداعمون والنساء والمتقاعدون من عمر 65 سنة فأكثر في كرة القدم (${D("Passive, Frauen und Rentner ab 65")})`,
+      fussball_familie: `رسوم عضوية العائلة في كرة القدم (${D("Familienbeitrag")})`,
+      karneval_kinder: `الأطفال والشباب في الكرنفال (${D("Kinder und Jugendliche")})`,
+      karneval_azubi: `المتدربون مهنيًا والطلاب في الكرنفال، مع مستند إثبات (${D("Auszubildende und Studierende")})`,
+      karneval_erwachsene: `البالغون في الكرنفال (${D("Erwachsene")})`,
+      karneval_rentner: `المتقاعدون من عمر 65 سنة فأكثر في الكرنفال (${D("Rentner ab 65")})`,
+      karneval_familie: `رسوم عضوية العائلة في الكرنفال (${D("Familienbeitrag")})`,
+      karneval_senator: `عضوية سيناتور في الكرنفال (${D("Senatorenmitgliedschaft")})`,
+    },
   },
 
   formulare: {

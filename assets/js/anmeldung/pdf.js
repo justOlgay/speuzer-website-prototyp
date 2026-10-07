@@ -21,6 +21,7 @@
     benoetigteVorlagen(e, a)  -> Schlüssel der Vorlagen, die erzeugePdf() braucht
     dateiname(a)              -> "Anmeldung_<Nachname>_<Vorname>.pdf"
     TEXTE_TEIL_A              Sätze von Teil A (Einfache Sprache; der Test prüft die Satzlänge)
+    begriffsErklaerer()       Erklärer für "Verband" und "Spielrecht" beim ersten Vorkommen (Teil A; für den Test)
 
   opts = { PDFLib, fontkit, schrift, vorlagen, konfig, a, e, bilder, heute,
            entwurf?: false   Fußzeile "Entwurf – vom Vorstand zu prüfen" abschalten (Standard: an)
@@ -118,7 +119,15 @@ const ABTEILUNG_TEXT = { fussball: "Fußball", karneval: "Karneval", beides: "Fu
 const GESCHLECHT_TEXT = { m: "männlich", w: "weiblich", d: "divers", ohne_angabe: "ohne Angabe" };
 const ART_KLARTEXT = { pflicht: "Pflicht", verein: "Vereinsvorgabe", freiwillig: "freiwillig", nur_wenn: "nur wenn zutreffend", offen: "offen (vielleicht nötig)" };
 const HINWEIS_ART = { warnung: "Achtung", frist: "Frist", info: "Zur Information", offen: "Der Verein klärt das" };
-const STELLE_KLARTEXT = { jugendleitung: "Jugendleitung", passwesen: "Passwesen des Vereins", geschaeftsstelle: "Geschäftsstelle", karneval: "Karnevalabteilung", spielausschuss: "Spielausschuss" };
+// Passwesen und Spielausschuss stehen mit ihrer Aufgabe da und mit dem Weg zu ihnen: Beide erreicht die Familie über die
+// Geschäftsstelle (Nachbesserung sprache-8). Dieselben Texte stehen in de-oberflaeche.js › pruefen › weiterleitungAn.
+const STELLE_KLARTEXT = {
+  jugendleitung: "Jugendleitung",
+  passwesen: "Passwesen (bearbeitet die Spielerpässe; erreichbar über die Geschäftsstelle)",
+  geschaeftsstelle: "Geschäftsstelle",
+  karneval: "Karnevalabteilung",
+  spielausschuss: "Spielausschuss der Herren (prüft Wechsel und Fristen; erreichbar über die Geschäftsstelle)",
+};
 
 // ---------------------------------------------------------------------------
 // Texte von Teil A (Einfache Sprache: Sie-Form, aktiv, höchstens 12 Wörter pro Satz).
@@ -132,18 +141,30 @@ export const TEXTE_TEIL_A = {
   teilB: "Sie geben ihn im Verein ab.",
   teilC: "Er enthält Angaben zur Gesundheit. Sie geben ihn getrennt ab.",
   weiterTitel: "So geht es weiter",
-  stiftKeine: "Sie haben alles am Bildschirm unterschrieben. Sie müssen nichts ausdrucken.",
-  stiftTraining: "Die Blätter für den Verband unterschreiben Sie beim ersten Training mit Stift. Der Verein bringt sie ausgedruckt mit.",
-  stiftDrucken: "Drucken Sie die Blätter für den Verband aus. Unterschreiben Sie an den blauen Markierungen mit Stift.",
+  // Unterschriften. Der Verband (der Hessische Fußball-Verband) verlangt für seine Blätter eine Unterschrift mit Stift. Die
+  // Sätze stehen so, dass nach der Erklärung beim ersten Vorkommen („Hessischer Fußball-Verband (kurz: der Verband)“,
+  // siehe begriffsErklaerer) kein Satz länger als 12 Wörter ist.
+  stiftKeine: "Sie haben alles am Bildschirm unterschrieben.",
+  stiftTraining: "Der Verband hat eigene Blätter. Diese unterschreiben Sie beim ersten Training mit Stift. Der Verein bringt sie ausgedruckt mit.",
+  stiftDrucken: "Der Verband hat eigene Blätter. Unterschreiben Sie diese an den blauen Markierungen mit Stift.",
   stiftAlleTraining: "Alle Blätter unterschreiben Sie beim ersten Training mit Stift. Der Verein druckt sie aus.",
+  stiftAlleTrainingOhneAbmeldung: "Alle Blätter außer der Abmeldung unterschreiben Sie beim ersten Training mit Stift. Der Verein druckt sie aus.",
   stiftAlleDrucken: "Drucken Sie die Datei aus. Unterschreiben Sie an allen blauen Markierungen mit Stift.",
   stiftRest: "Einige Vereinsblätter haben noch keine Unterschrift. Unterschreiben Sie dort an den blauen Markierungen mit Stift.",
+  // Was auf Papier sein muss (sprache-11): nur die Blätter, die die Familie selbst ausdrucken muss, mit Seite und Namen
+  ausdruckenNichts: "Sie müssen nichts ausdrucken.",
+  ausdruckenNur: "Ausdrucken müssen Sie nur:",
   satzung: "Kreuzen Sie im Aufnahmeantrag auf Seite {seite} das Kästchen zur Satzung an. Die Satzung steht auf der Internetseite des Vereins.",
   attest: "Das Blatt Ärztliche Bescheinigung (Attest) steht auf Seite {seite}. Gehen Sie damit zum Arzt. Der Arzt unterschreibt und stempelt es.",
   attestKosten: "Fragen Sie den Arzt vorher nach dem Preis.",
+  // Das Blatt „Abmeldung beim alten Verein“ (sprache-10): Die Familie unterschreibt es mit Stift und schickt es selbst.
+  abmeldung: "Das Blatt {name} steht auf {seiten}. Unterschreiben Sie es mit Stift. Schicken Sie es selbst als Einschreiben an den alten Verein.",
   fehlt: "Besorgen Sie die Unterlagen aus der Liste Das fehlt noch.",
   abgeben: "Geben Sie Teil B im Verein ab. Bringen Sie die Datei auf dem Handy mit. Oder geben Sie sie ausgedruckt ab.",
-  abgebenC: "Geben Sie Teil C getrennt ab. Legen Sie ihn in einen eigenen Umschlag.",
+  // Wer die ganze Datei ausdruckt und mit Stift unterschreibt, gibt Papier ab; die Datei auf dem Handy genügt dann nicht.
+  abgebenAusgedruckt: "Geben Sie Teil B im Verein ab. Geben Sie ihn ausgedruckt und unterschrieben ab.",
+  // Teil C: Die Übergabe der Unterlagen ist noch offen (O25). Der Text verlangt deshalb keinen Umschlag.
+  abgebenC: "Teil C gehört nicht zu den übrigen Unterlagen. Der Verein bewahrt ihn getrennt auf.",
   verband: "Danach stellt der Verein den Antrag beim Verband.",
   verein: "Danach prüft der Verein Ihre Anmeldung.",
   nichtWhatsapp: "Schicken Sie die Datei nicht per WhatsApp. Sie enthält private Daten.",
@@ -154,11 +175,15 @@ export const TEXTE_TEIL_A = {
   wieStift: "Mit Stift",
   wieStiftTraining: "Mit Stift, beim ersten Training",
   wieStiftDrucken: "Mit Stift, nach dem Ausdrucken",
+  wieStiftVerschicken: "Mit Stift, selbst verschicken",
   wieArzt: "Mit Stift, beim Arzt",
   wieVerein: "Mit Stift, durch den Verein",
   fehltTitel: "Das fehlt noch",
   fehltEinleitung: "Diese Unterlagen brauchen wir noch von Ihnen.",
   fehltKeine: "Es fehlt nichts. Alle nötigen Unterlagen liegen bei.",
+  // Gibt es Papiere, die vielleicht nötig sind (Laufzettel: „klären“), liegen nicht „alle nötigen Unterlagen“ bei (sprache-9).
+  fehltKeineSicher: "Es fehlt nichts, was sicher nötig ist.",
+  fehltVielleicht: "Vielleicht kommt noch etwas dazu. Das steht unter „Das klärt der Verein mit Ihnen“.",
   fehltNichtLesbar: "Die Datei ließ sich nicht übernehmen. Bringen Sie das Original oder eine Kopie mit.",
   fehltWie: "So bekommen Sie es:",
   fehltWo: "So geben Sie es ab:",
@@ -168,6 +193,8 @@ export const TEXTE_TEIL_A = {
   wartezeitUnsicher: "Die Zeit ist nicht sicher. Der Verein prüft das genau und sagt Ihnen Bescheid.",
   wissenTitel: "Das sollten Sie wissen",
   klaerenTitel: "Das klärt der Verein mit Ihnen",
+  vielleichtVerband: "Vielleicht braucht der Verband noch:",
+  vielleichtVerein: "Vielleicht braucht der Verein noch:",
   stellenTitel: "Diese Stellen melden sich bei Ihnen",
   kontaktTitel: "So erreichen Sie uns",
   kontaktEinleitung: "Bei Fragen rufen Sie uns an oder schreiben Sie uns.",
@@ -545,6 +572,7 @@ function baueKontext(opts) {
     flaechen: [], // Ergebnis: Flächen, die pdf.js auf Vordrucke schreibt (Prüfung auf verdeckte Vordrucktexte)
     felder: [], // Ergebnis: alle gesetzten Felder der Vordrucke
     eingaben: [], // Ergebnis: Felder für Erklärungen und Angaben der Familie (leer oder gefüllt), je Seite
+    texte: [], // Ergebnis (nur mit opts.bericht): gedruckte Texte der eigenen Seiten mit Seite, Art und Kennung (Test der Satzlänge)
     warnungen: [], // Fälle, die nie vorkommen sollen (Stelle fehlt in den Regeln, Stelle nicht vermessen); der Test wertet sie als Fehler
     rueckfall: [], // Unterschriftsstellen, die die Regeln nicht kennen und die pdf.js als Stift-Markierung ergänzt hat
   };
@@ -726,6 +754,14 @@ class Schreiber {
     this.K.eingaben.push(Object.assign({ pageRef: this.page, formular: this.formular, ausnahme: false }, info));
   }
 
+  // Für Tests (opts.bericht): gedruckter Text mit Seite, Art (absatz, liste, kaestchen, ueberschrift) und Kennung
+  // ("untertitel", "rechtsgrundlage" oder nichts). Die Läufe stehen mit Leerzeichen zusammen, wie auf dem Blatt.
+  merkeText(inhalt, art, kennung) {
+    if (this.trocken || !this.K.bericht || !this.page) return;
+    const laeufe = typeof inhalt === "string" ? [{ t: inhalt }] : inhalt;
+    this.K.texte.push({ pageRef: this.page, art: art, kennung: kennung || null, text: laeufe.map((l) => String(l.t)).join(" ") });
+  }
+
   // Wörter mit Stil aus Text oder Läufen ([{ t, fett, farbe, nutzer }]). Zwischen zwei Läufen steht ein Leerzeichen.
   // nutzer: Eingabe der Familie; Zeichen außerhalb der Schrift werden gemeldet ("Name bitte prüfen").
   woerter(inhalt, o) {
@@ -803,6 +839,7 @@ class Schreiber {
       hoehe += zh;
     }
     this.y -= opt.nach;
+    this.merkeText(inhalt, "absatz", opt.kennung);
     return hoehe + opt.nach;
   }
 
@@ -821,16 +858,21 @@ class Schreiber {
     }
     if (stufe === 2 && !this.trocken) zeichneLinie(K, this.page, RAND, this.y - 1, A4[0] - RAND, this.y - 1, 0.6, FARBE.linie);
     this.y -= stufe === 3 ? 3 : 7;
+    this.merkeText(s, "ueberschrift");
   }
 
-  // Liste mit Aufzählungszeichen oder Nummern; items: Text oder Läufe
+  // Liste mit Aufzählungszeichen oder Nummern; items: Text oder Läufe, oder { inhalt, unter: [Punkt, …] } mit Unterpunkten
+  // (kleiner Strich, eingerückt; die Nummern zählen nur die Hauptpunkte)
   liste(items, o) {
     const opt = Object.assign({ size: 10, marker: "•", nach: 3, einzug: 0 }, o || {});
     const abstandMarker = opt.markerBreite || (opt.marker === "nummer" ? 16 : 11);
-    items.forEach((it, i) => {
+    items.forEach((eintrag, i) => {
+      const it = eintrag && eintrag.unter ? eintrag.inhalt : eintrag;
       const zeilen = this.umbruch(it, BREITE - opt.einzug - abstandMarker, opt.size, opt);
       const zh = opt.size * 1.32;
       if (this.seitenAnzahl === 0 || this.y - zh * Math.min(2, zeilen.length) < UNTEN) this.neueSeite();
+      // Ein Punkt mit Unterpunkten bleibt zusammen: Die Unterpunkte stehen nicht allein oben auf der nächsten Seite.
+      if (eintrag && eintrag.unter) this.platz(zeilen.length * zh + eintrag.unter.length * (zh + 1) + 6);
       const marker = opt.marker === "nummer" ? String(i + 1) + "." : opt.marker;
       if (!this.trocken) zeichneText(this.K, this.page, marker, RAND + opt.einzug, this.y - opt.size * 0.92, opt.size, { farbe: FARBE.blau, fett: opt.marker === "nummer" });
       zeilen.forEach((z, k) => {
@@ -838,7 +880,12 @@ class Schreiber {
         this.zeichneZeile(z, RAND + opt.einzug + abstandMarker, this.y - opt.size * 0.92, opt.size, opt);
         this.y -= zh;
       });
-      this.y -= opt.nach;
+      this.y -= eintrag && eintrag.unter ? 1 : opt.nach;
+      this.merkeText(it, "liste");
+      if (eintrag && eintrag.unter) {
+        this.liste(eintrag.unter, { size: opt.size, marker: "–", markerBreite: 11, nach: 1, einzug: opt.einzug + abstandMarker, farbe: opt.farbe });
+        this.y -= opt.nach - 2;
+      }
     });
     this.y -= 2;
   }
@@ -963,6 +1010,7 @@ class Schreiber {
       this.y -= zh;
     });
     this.y -= opt.nach === undefined ? 3 : opt.nach;
+    this.merkeText(inhalt, "kaestchen");
   }
 
   // Zeile mit Schreiblinien: felder = [{ label, wert, w, name, wer, ausnahme }] (w als Anteil). Ein Wert steht über der
@@ -1719,6 +1767,9 @@ function vereinKurz(K) {
   return K.verein.name || "FFV Sportfreunde 04";
 }
 
+// Der Name des Vereins am Ende eines Satzes: "… e. V." trägt den Punkt schon, es folgt kein zweiter ("e. V..").
+const vereinsNameAmSatzende = (K) => vereinsName(K).replace(/\.+$/, "") + ".";
+
 // Anschriftszeilen des Vereins aus konfig.verein.anschrift (Besuchsadresse, wenn vorhanden auch Postfach)
 function vereinAnschrift(K) {
   const an = objekt(K.verein.anschrift);
@@ -1778,12 +1829,18 @@ function mannschaftText(K) {
 // Titelblock einer Seite: Überschrift, Untertitel und Angaben zur Person
 function titelBlock(K, S, titel, untertitel, extra) {
   S.ueberschrift(titel, 1);
-  if (untertitel) S.absatz(untertitel, { size: 9.5, farbe: FARBE.tinte2, nach: 8 });
+  if (untertitel) S.absatz(untertitel, { size: 9.5, farbe: FARBE.tinte2, nach: 8, kennung: "untertitel" });
   const paare = [
     ["Name", K.person.name],
     ["Geburtsdatum", geburtsText(K)],
   ].concat(extra || []);
   S.angabenKasten(paare);
+}
+
+// Kleine Zeile am Ende einer eigenen Seite (Nachbesserung sprache-12): Paragraphen und Artikel stehen nicht im Fließtext der
+// Seiten, die die Familie unterschreibt, sondern hier. Der Test prüft die Satzlänge der Seiten ohne diese Zeile.
+function rechtsgrundlage(S, zeile) {
+  S.absatz("Rechtsgrundlage: " + zeile, { size: 7.5, farbe: FARBE.tinte3, nach: 0, kennung: "rechtsgrundlage" });
 }
 
 // Unterschriftsblock am Ende einer eigenen Seite. Die Stelle wird nie stumm ausgelassen: kennen die Regeln sie nicht,
@@ -1907,36 +1964,41 @@ function seiteDatenschutz(K, S) {
 }
 
 // --- Einverständnis: Mädchen in einer Jungenmannschaft (JO § 14 Nr. 6) ------------------------------------------
+// Texte in Einfacher Sprache (höchstens 12 Wörter je Satz); Paragraphen stehen nur in der Zeile "Rechtsgrundlage".
 
 function seiteMaedchen(K, S) {
   const klasse = text(K.e.altersklasse);
-  titelBlock(K, S, eintragName("einverstaendnis_maedchen"), "Mädchen in einer Jungenmannschaft – Jugendordnung des Hessischen Fußball-Verbandes, § 14 Nr. 6", [
+  titelBlock(K, S, eintragName("einverstaendnis_maedchen"), "Mädchen in einer Jungenmannschaft", [
     ["Altersklasse", klasse ? klasse + "-Jugend" : ""],
     ["Mannschaft", mannschaftText(K)],
   ]);
   const g = { size: 10, nach: 6 };
-  S.absatz([{ t: "Ich bin damit einverstanden, dass meine Tochter" }, { t: K.person.name, fett: true, nutzer: true }, { t: "beim " + vereinsName(K) + " am Spielbetrieb einer Juniorenmannschaft der Jungen teilnimmt." }], g);
+  S.absatz([{ t: "Ich bin damit einverstanden. Meine Tochter" }, { t: K.person.name, fett: true, nutzer: true }, { t: "nimmt am Spielbetrieb einer Jungenmannschaft teil." }], { size: 10, nach: 2 });
+  S.absatz("Sie spielt für den " + vereinsNameAmSatzende(K), g);
   S.ueberschrift("Das gilt dafür", 3);
   S.liste(
     [
       "Der Verein hat keine eigene Mädchenmannschaft. Mädchen dürfen deshalb bei den Jungen spielen.",
-      "Nach der Jugendordnung dürfen Mädchen bis einschließlich B-Jugend in Jungenmannschaften spielen. Bis einschließlich C-Jugend darf ein Mädchen ein Jahr älter sein als die Jungen der Altersklasse.",
-      "In der B- und C-Jugend verlangt der Verband dafür das schriftliche Einverständnis der Eltern. Diese Erklärung ersetzt es.",
+      "Nach der Jugendordnung dürfen Mädchen bis einschließlich B-Jugend in Jungenmannschaften spielen. Bis einschließlich C-Jugend darf ein Mädchen ein Jahr älter sein. Es darf also älter sein als die Jungen der Altersklasse.",
+      "Für B- und C-Jugend verlangt der Verband das schriftliche Einverständnis der Eltern. Diese Erklärung ersetzt es.",
       "Das Einverständnis gilt, bis Sie es widerrufen. Dafür genügt eine Nachricht an die Jugendleitung.",
     ],
     { size: 10, nach: 4 }
   );
   S.abstand(6);
+  S.platz(84 + 16); // Unterschrift und Zeile "Rechtsgrundlage" bleiben zusammen
   unterschriftFuer(K, S, "einverstaendnis_maedchen", "unterschrift");
+  rechtsgrundlage(S, "Jugendordnung des Hessischen Fußball-Verbandes, § 14 Nr. 6.");
 }
 
 // --- Einverständnis: Fahrten und Messenger-Gruppe (Schutzkonzept 6.4 und 6.11) ----------------------------------
+// Texte in Einfacher Sprache (höchstens 12 Wörter je Satz); Nummern und Artikel stehen nur in der Zeile "Rechtsgrundlage".
 
 function seiteFahrten(K, S) {
   const ew = objekt(K.a.einwilligungen);
   // Unter einer Bildschirm-Unterschrift bleibt kein Kästchen offen: ohne Antwort steht ein Satz statt der Kästchen
   const amBildschirm = seiteAmBildschirm(K, "einverstaendnis_fahrten", "unterschrift");
-  titelBlock(K, S, eintragName("einverstaendnis_fahrten"), "Präventions- und Schutzkonzept des Vereins (Stand Mai 2025), Nr. 6.4, 6.6 und 6.11", [["Mannschaft", mannschaftText(K)]]);
+  titelBlock(K, S, eintragName("einverstaendnis_fahrten"), "Schutzkonzept des Vereins (Stand Mai 2025)", [["Mannschaft", mannschaftText(K)]]);
   const g = { size: 10, nach: 5 };
   const frage = (name, antwort, ja, nein, ohneAntwort) => {
     const beantwortet = typeof antwort === "boolean";
@@ -1949,7 +2011,7 @@ function seiteFahrten(K, S) {
     S.eingabe({ name: name, leer: !beantwortet && !amBildschirm });
   };
   S.ueberschrift("Fahrten zu Spielen und Veranstaltungen", 2);
-  S.absatz("Nach dem Schutzkonzept fahren Trainer, Betreuer und andere Erwachsene Kinder im privaten Auto nur, wenn mindestens zwei Kinder mitfahren. Die Fahrt läuft über vereinbarte Treffpunkte. Ausnahmen gibt es nur mit Ihrer dokumentierten Zustimmung.", g);
+  S.absatz("Das steht im Schutzkonzept des Vereins. Trainer, Betreuer und andere Erwachsene dürfen Kinder im privaten Auto fahren. Dann müssen mindestens zwei Kinder mitfahren. Die Fahrt läuft über vereinbarte Treffpunkte. Ausnahmen gibt es nur mit Ihrer dokumentierten Zustimmung.", g);
   frage(
     "fahrten",
     ew.fahrten,
@@ -1958,9 +2020,9 @@ function seiteFahrten(K, S) {
     "Sie haben dazu nichts angegeben. Ihr Kind fährt dann nicht in Fahrgemeinschaften mit."
   );
   S.abstand(4);
-  S.absatz("Bei Übernachtungen informiert der Verein die Eltern vorher (Nr. 6.6).", { size: 9.5, farbe: FARBE.tinte2, nach: 6 });
+  S.absatz("Bei Übernachtungen informiert der Verein die Eltern vorher.", { size: 9.5, farbe: FARBE.tinte2, nach: 6 });
   S.ueberschrift("Messenger-Gruppe", 2);
-  S.absatz("Trainer und Betreuer schreiben Kindern keine Einzelnachrichten. Die Verständigung läuft nur über offizielle Gruppen, in denen die Eltern dabei sind (Nr. 6.11).", g);
+  S.absatz("Trainer und Betreuer schreiben Kindern keine Einzelnachrichten. Die Verständigung läuft nur über offizielle Gruppen. Die Eltern sind dort dabei.", g);
   frage(
     "messenger",
     ew.messenger,
@@ -1970,8 +2032,10 @@ function seiteFahrten(K, S) {
   );
   if (ew.messenger === true && hatText(K.a.mobil)) S.feldZeile([{ label: "Telefonnummer für die Gruppe", wert: text(K.a.mobil), w: 1, name: "messengerTelefon" }], { hoehe: 22 });
   S.abstand(2);
-  S.absatz("Diese Einwilligungen sind freiwillig (Art. 6 Abs. 1 lit. a DSGVO). Sie können sie jederzeit mit Wirkung für die Zukunft widerrufen. Eine Nachricht an die Jugendleitung genügt.", { size: 9, farbe: FARBE.tinte2, nach: 8 });
+  S.absatz("Diese Einwilligungen sind freiwillig. Sie können sie jederzeit mit Wirkung für die Zukunft widerrufen. Eine Nachricht an die Jugendleitung genügt.", { size: 9, farbe: FARBE.tinte2, nach: 8 });
+  S.platz(84 + 16); // Unterschrift und Zeile "Rechtsgrundlage" bleiben zusammen
   unterschriftFuer(K, S, "einverstaendnis_fahrten", "unterschrift");
+  rechtsgrundlage(S, "Präventions- und Schutzkonzept des Vereins, Nr. 6.4, 6.6 und 6.11; Art. 6 Abs. 1 lit. a DSGVO (Einwilligung).");
 }
 
 // --- Karneval: Erlaubnis für Auftritte am Abend (Erziehungsbeauftragung, JuSchG §§ 1, 2, 5) ---------------------
@@ -1996,13 +2060,14 @@ function seiteKarnevalAuftritte(K, S) {
   if (k.alleinNachHause === "ja" && zeit) allein = "Mein Kind darf die Veranstaltung um " + zeit + " Uhr allein verlassen.";
   else if (k.alleinNachHause === "nein") allein = "Mein Kind darf die Veranstaltung nicht allein verlassen.";
   if (!hatText(k.abholung) || !allein) K.hinweiseIntern.push(eintragName("karneval_auftritte") + ": Abholung oder Heimweg sind nicht angegeben – vor dem ersten Abendauftritt klären.");
-  titelBlock(K, S, eintragName("karneval_auftritte"), "Erziehungsbeauftragung nach dem Jugendschutzgesetz (§ 1 Abs. 1 Nr. 4, §§ 2 und 5 JuSchG)", [
+  // Texte in Einfacher Sprache (höchstens 12 Wörter je Satz); die Paragraphen stehen nur in der Zeile "Rechtsgrundlage".
+  titelBlock(K, S, eintragName("karneval_auftritte"), "Erziehungsbeauftragung nach dem Jugendschutzgesetz", [
     ["Abteilung", "Karneval"],
     ["Gruppe", gruppe],
   ]);
   const g = { size: 10, nach: 6 };
-  S.absatz("Auftritte und Veranstaltungen der Karnevalskampagne finden oft am Abend statt. Kinder und Jugendliche unter 16 Jahren dürfen bei öffentlichen Tanzveranstaltungen nur mit einer personensorgeberechtigten oder erziehungsbeauftragten Person bleiben. Für Auftritte der Brauchtumspflege oder der künstlerischen Betätigung gelten Ausnahmen: Kinder dürfen bis 22 Uhr, Jugendliche unter 16 Jahren bis 24 Uhr auch ohne Begleitung bleiben (§ 5 JuSchG).", g);
-  S.absatz([{ t: "Ich beauftrage die Trainerinnen und Betreuer der Karnevalabteilung des " + vereinsName(K) + ", mein Kind" }, { t: K.person.name, fett: true, nutzer: true }, { t: "bei den Auftritten der Kampagne " + text(K.cfg.saison) + " zu begleiten. Für diese Zeit übernehmen sie die Erziehungsaufgaben (erziehungsbeauftragte Personen)." }], g);
+  S.absatz("Auftritte und Veranstaltungen der Karnevalskampagne finden oft am Abend statt. Unter 16 Jahren darf man bei öffentlichen Tanzveranstaltungen nur mit Begleitung bleiben. Das ist eine Person mit Sorgerecht oder eine Person mit Erziehungsauftrag. Für Auftritte der Brauchtumspflege oder der künstlerischen Betätigung gelten Ausnahmen. Kinder dürfen bis 22 Uhr auch ohne Begleitung bleiben. Jugendliche unter 16 Jahren dürfen bis 24 Uhr auch ohne Begleitung bleiben.", g);
+  S.absatz([{ t: "Ich beauftrage die Trainerinnen und Betreuer der Karnevalabteilung. Die Abteilung gehört zum " + vereinsNameAmSatzende(K) + " Sie begleiten mein Kind" }, { t: K.person.name, fett: true, nutzer: true }, { t: "bei den Auftritten. Das gilt für die Kampagne " + text(K.cfg.saison) + ". Für diese Zeit übernehmen sie die Erziehungsaufgaben. Sie sind dann erziehungsbeauftragte Personen." }], g);
   S.ueberschrift("Erreichbarkeit und Abholung", 3);
   S.absatz("Im Notfall und für die Abholung bin ich unter dieser Nummer erreichbar:", { size: 10, nach: 2 });
   const ohneAntwort = amBildschirm ? KEINE : "";
@@ -2017,14 +2082,16 @@ function seiteKarnevalAuftritte(K, S) {
   S.ueberschrift("Das sollten Sie wissen", 3);
   S.liste(
     [
-      "Ihr Kind trägt einen Ausweis bei sich. Auf Verlangen muss es sein Alter nachweisen (§ 2 JuSchG).",
+      "Ihr Kind trägt einen Ausweis bei sich. Auf Verlangen muss es sein Alter nachweisen.",
       "Die Erlaubnis gilt für die Kampagne " + text(K.cfg.saison) + ". Sie können sie jederzeit widerrufen.",
       "Die Karnevalabteilung sagt Ihnen rechtzeitig, wann und wo die Auftritte sind.",
     ],
     { size: 10, nach: 3 }
   );
   S.abstand(6);
+  S.platz(84 + 16); // Unterschrift und Zeile "Rechtsgrundlage" bleiben zusammen
   unterschriftFuer(K, S, "karneval_auftritte", "unterschrift");
+  rechtsgrundlage(S, "Jugendschutzgesetz (JuSchG): § 1 Abs. 1 Nr. 4 (Erziehungsbeauftragung), § 2 (Ausweis), § 5 (Ausnahmen für Auftritte).");
 }
 
 // --- Teil C: Trennblatt, Attest, Einwilligung zum Attest, Notfallbogen -----------------------------------------
@@ -2038,9 +2105,9 @@ function seiteTrennblatt(K, S, plan) {
   S.ueberschrift("So geben Sie Teil C ab", 2);
   S.liste(
     [
-      "Legen Sie die Seiten in einen eigenen, verschlossenen Umschlag.",
-      "Schreiben Sie den Namen des Mitglieds auf den Umschlag.",
-      "Geben Sie den Umschlag persönlich ab. Schicken Sie Teil C nicht per WhatsApp oder normaler E-Mail.",
+      "Teil C gehört nicht zu den übrigen Unterlagen.",
+      "Der Verein bewahrt ihn getrennt auf.",
+      "Schicken Sie Teil C nicht per WhatsApp oder normaler E-Mail.",
     ],
     { size: 11, nach: 5 }
   );
@@ -2106,24 +2173,33 @@ function seiteAttestEinwilligung(K, S) {
   // Ist offen, ob der Verband das Attest beim Wechsel überhaupt verlangt (U10 „offen“), steht das nicht als Tatsache da:
   // Braucht der Verband es nicht, vernichtet der Verein es (Datensparsamkeit). Bei Erwachsenen (U10 „verein“) verlangt der
   // Verein das Attest selbst, der Verband nicht. Bei „pflicht“ bleibt der Text wie er war.
+  // Texte in Einfacher Sprache (höchstens 12 Wörter je Satz); Paragraphen stehen nur in der Zeile "Rechtsgrundlage".
   const fassung = attestFassung(K);
-  titelBlock(K, S, attestEinwilligungName(), "Einwilligung zur Verarbeitung der ärztlichen Bescheinigung · Gesundheitsdaten nach Art. 9 Abs. 2 lit. a DSGVO");
+  titelBlock(K, S, attestEinwilligungName(), "Einwilligung zur Verarbeitung der ärztlichen Bescheinigung (Art. 9 DSGVO)");
   const g = { size: 10, nach: 6 };
   S.absatz("Die ärztliche Bescheinigung ist ein Gesundheitsdatum. Der Verein darf sie nur mit Ihrer ausdrücklichen Einwilligung verarbeiten.", g);
-  S.absatz([{ t: "Ich willige ein, dass der " + vereinsName(K) + " die ärztliche Bescheinigung " + (minder ? "meines Kindes" : "von mir"), fett: false }, { t: K.person.name, fett: true, nutzer: true }, { t: "in dieser Weise verarbeitet:" }], g);
+  // Erwachsene: „meine ärztliche Bescheinigung“ (der Name steht im Kasten oben); bei Kindern folgt der Name des Kindes.
+  const verantwortlich = "Ich willige ein. Verantwortlich ist der " + vereinsNameAmSatzende(K) + " ";
+  S.absatz(
+    minder
+      ? [{ t: verantwortlich + "Der Verein verarbeitet die ärztliche Bescheinigung meines Kindes" }, { t: K.person.name, fett: true, nutzer: true }, { t: "so:" }]
+      : verantwortlich + "Der Verein verarbeitet meine ärztliche Bescheinigung so:",
+    g
+  );
   S.liste(
     [
       fassung === "verein"
         ? "Der Verein nimmt die Bescheinigung entgegen und prüft sie."
-        : "Der Verein nimmt die Bescheinigung entgegen und prüft, ob die Voraussetzung für das Spielrecht erfüllt ist (Jugendordnung § 9 Nr. 1).",
+        : "Der Verein nimmt die Bescheinigung entgegen. Er prüft damit eine Voraussetzung für das Spielrecht.",
       "Der Verein bewahrt sie nur im Passwesen auf. Trainer und Betreuer erhalten sie nicht. Sie steht in keiner App.",
-      "Der Verein legt sie dem Hessischen Fußball-Verband nur vor, wenn dieser sie anfordert.",
+      // Erwachsene: Der Verband bekommt die Bescheinigung nicht, der Punkt entfällt.
+      fassung === "verein" ? null : "Der Verein legt sie dem Hessischen Fußball-Verband nur auf Anforderung vor.",
       {
-        pflicht: "Der Verein bewahrt sie mindestens zwei Jahre ab dem Antrag auf (Spielordnung § 92). Danach vernichtet er sie.",
-        offen: "Braucht der Verband sie, bewahrt der Verein sie mindestens zwei Jahre. Die Frist läuft ab dem Antrag (Spielordnung § 92). Danach vernichtet er sie.",
+        pflicht: "Der Verein bewahrt sie mindestens zwei Jahre ab dem Antrag auf. Danach vernichtet er sie.",
+        offen: "Braucht der Verband sie, bewahrt der Verein sie mindestens zwei Jahre. Die Frist läuft ab dem Antrag. Danach vernichtet er sie.",
         verein: "Der Verband braucht sie nicht. Der Verein vernichtet sie nach der Prüfung.",
       }[fassung],
-    ],
+    ].filter(Boolean),
     { size: 10, nach: 4 }
   );
   S.ueberschrift("Wichtig", 3);
@@ -2131,16 +2207,19 @@ function seiteAttestEinwilligung(K, S) {
     [
       "Die Einwilligung ist freiwillig. Sie können sie jederzeit mit Wirkung für die Zukunft widerrufen. Eine E-Mail an die Geschäftsstelle genügt.",
       {
-        pflicht: "Ohne diese Einwilligung kann der Verein keinen Antrag auf Spielerlaubnis stellen, weil der Verband die Bescheinigung verlangt.",
+        pflicht: "Ohne diese Einwilligung kann der Verein keinen Antrag auf Spielerlaubnis stellen. Denn der Verband verlangt die Bescheinigung.",
         offen: "Ob der Verband die Bescheinigung beim Wechsel verlangt, klärt der Verein noch. Braucht der Verband sie nicht, vernichtet der Verein sie.",
         verein: "Ohne diese Einwilligung kann der Verein keinen Antrag auf Spielerlaubnis stellen. Denn der Verein verlangt die Bescheinigung selbst.",
       }[fassung],
-      "Auf der Bescheinigung stehen keine Diagnosen, nur die Aussage der Ärztin oder des Arztes.",
+      "Auf der Bescheinigung stehen keine Diagnosen. Dort steht nur die Aussage der Ärztin oder des Arztes.",
     ],
     { size: 10, nach: 4 }
   );
   S.abstand(8);
+  S.platz(84 + 16); // Unterschrift und Zeile "Rechtsgrundlage" bleiben zusammen
   unterschriftFuer(K, S, "attest", "einwilligung");
+  // Bei Erwachsenen (U10 „verein“) beruft sich die Seite nicht auf die Ordnungen des Verbands.
+  rechtsgrundlage(S, fassung === "verein" ? "Art. 9 Abs. 2 lit. a DSGVO (ausdrückliche Einwilligung)." : "Art. 9 Abs. 2 lit. a DSGVO (ausdrückliche Einwilligung); Jugendordnung des Hessischen Fußball-Verbandes, § 9 Nr. 1; Spielordnung, § 92.");
 }
 
 // Der Notfallbogen in drei Fassungen:
@@ -2198,23 +2277,30 @@ function seiteNotfall(K, S) {
     S.ueberschrift("Ihre Unterschrift", 3);
     S.absatz("Mit Ihrer Unterschrift bestätigen Sie die Notfallkontakte. Die Trainerinnen, Trainer und Betreuer der Mannschaft nutzen sie nur im Notfall. Ohne die Absprache unten stehen auf diesem Blatt keine Angaben zur Gesundheit. Der Verein bewahrt den Bogen getrennt von den übrigen Unterlagen auf. Er löscht ihn beim Austritt.", { size: 9, nach: 4 });
   } else {
-    S.ueberschrift("Einwilligung", 3);
-    S.absatz("Ich willige ausdrücklich ein, dass die Trainerinnen, Trainer und Betreuer der Mannschaft diese Angaben zur Gesundheit im Notfall und zur Vorsorge nutzen (Art. 9 Abs. 2 lit. a DSGVO). Der Verein bewahrt den Bogen getrennt von den übrigen Unterlagen auf. Er löscht ihn beim Austritt oder auf Widerruf. Die Einwilligung ist freiwillig und jederzeit für die Zukunft widerrufbar.", { size: 9, nach: 4 });
+    S.ueberschrift("Einwilligung in die Angaben zur Gesundheit", 3);
+    S.absatz("Ich willige ausdrücklich ein. Die Trainerinnen, Trainer und Betreuer der Mannschaft dürfen diese Angaben nutzen. Das gilt im Notfall und zur Vorsorge. Der Verein bewahrt den Bogen getrennt von den übrigen Unterlagen auf. Er löscht ihn beim Austritt oder auf Widerruf. Die Einwilligung ist freiwillig und jederzeit für die Zukunft widerrufbar.", { size: 9, nach: 4 });
   }
   unterschriftFuer(K, S, "notfall", "unterschrift");
   // Absprache zur Medikamentengabe: immer mit Stift, getrennt von der Unterschrift oben. Mit der Absprache kommen
-  // Gesundheitsdaten auf das Blatt; die Stift-Unterschrift dort ist die Einwilligung dafür (Art. 9 Abs. 2 lit. a DSGVO).
-  S.platz(255);
+  // Gesundheitsdaten auf das Blatt; die Stift-Unterschrift dort ist die Einwilligung dafür (Art. 9 Abs. 2 lit. a DSGVO, siehe
+  // die Zeile "Rechtsgrundlage" am Ende der Seite).
+  S.platz(255 + 16);
   S.ueberschrift("Absprache zur Medikamentengabe – nur mit Stift", 2);
-  S.absatz("Nur ausfüllen, wenn Ihr Kind während des Trainings oder bei Spielen ein Medikament braucht. Sprechen Sie das mit dem Trainer ab. Diese Absprache unterschreiben eine Person mit Sorgerecht und der Trainer getrennt mit Stift. Die Unterschrift oben gilt dafür nicht.", { size: 9.5, farbe: FARBE.tinte2, nach: 2 });
+  S.absatz("Nur ausfüllen, wenn Ihr Kind im Training oder Spiel ein Medikament braucht. Sprechen Sie das mit dem Trainer ab. Diese Absprache unterschreiben eine Person mit Sorgerecht und der Trainer. Beide unterschreiben getrennt mit Stift. Die Unterschrift oben gilt dafür nicht.", { size: 9.5, farbe: FARBE.tinte2, nach: 2 });
   S.feldZeile([{ name: "medikament", label: "Medikament", w: 1.2, ausnahme: true }, { name: "wannWieViel", label: "Wann und wie viel", w: 1.2, ausnahme: true }, { name: "werGibtEs", label: "Wer gibt es?", w: 1, ausnahme: true }], { hoehe: 22 });
   S.feldZeile([{ name: "abgesprochenAm", label: "Abgesprochen am", w: 1, ausnahme: true }, { name: "abgesprochenMit", label: "mit (Trainerin oder Trainer)", w: 1.6, ausnahme: true }], { hoehe: 22 });
   S.abstand(5);
-  S.absatz("Mit dieser Unterschrift erlauben Sie den Trainern, die Angaben zu nutzen. Grundlage ist Art. 9 Abs. 2 lit. a DSGVO.", { size: 9.5, nach: 4 });
+  S.absatz("Mit dieser Unterschrift erlauben Sie den Trainern, die Angaben zu nutzen.", { size: 9.5, nach: 4 });
   S.stiftZeilen("notfall", [
     { stelleKey: "absprache_eltern", wer: "absprache_eltern", label: "Unterschrift (eine Person mit Sorgerecht)" },
     { stelleKey: "absprache_trainer", wer: "absprache_trainer", label: "Unterschrift (Trainerin oder Trainer)" },
   ]);
+  rechtsgrundlage(
+    S,
+    nurKontakte
+      ? "Art. 9 Abs. 2 lit. a DSGVO (ausdrückliche Einwilligung, nur für die Absprache zur Medikamentengabe)."
+      : "Art. 9 Abs. 2 lit. a DSGVO (ausdrückliche Einwilligung in die Angaben zur Gesundheit und in die Absprache zur Medikamentengabe)."
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -2236,18 +2322,103 @@ function wieText(K, u) {
   if (u.wer === "arzt") return T.wieArzt;
   if (u.wer === "verein") return T.wieVerein;
   if (stelleArt(K, u.formular, u.wer, u.stelleKey) === "bild") return T.wieBildschirm;
+  // Die Abmeldung beim alten Verein bringt der Verein nicht zum Verband: Die Familie schickt sie selbst (sprache-10).
+  if (u.formular === "abmeldung") return T.wieStiftVerschicken;
   return K.a.hfvUnterschrift === "selbst_drucken" ? T.wieStiftDrucken : T.wieStiftTraining;
+}
+
+// "Seite 16" oder "Seite 16 bis 18"
+const seitenText = (von, bis) => (von === bis || bis === undefined ? "Seite " + von : "Seite " + von + " bis " + bis);
+
+// Begriffe, die Teil A beim ersten Vorkommen erklärt (sprache-17): Teil A muss ohne die Oberfläche lesbar sein, und dort stehen
+// "Verband" und "Spielrecht" ohne Erklärung. Jeder Text von Teil A läuft in der Reihenfolge, in der er auf dem Blatt steht,
+// durch denselben Erklärer. Die erste Nennung des Verbands wird zu "Hessischer Fußball-Verband (kurz: der Verband)" (mit der
+// Endung, die der Satz verlangt), die erste Nennung von "Spielrecht" zu "Spielrecht (Erlaubnis zum Spielen)". Spätere
+// Nennungen bleiben kurz. Der Erklärer gehört zu einem Aufbau von Teil A (er merkt sich, was erklärt ist).
+const VERBAND_MUSTER = /(?:\b(Der|der|Den|den|Dem|dem|Des|des|Beim|beim|Vom|vom|Zum|zum)\s+)?(Hessische[nrms]?\s+Fußball-Verbands?|(?<!Fußball-)\bVerbands?)\b/;
+const SPIELRECHT_MUSTER = /\bSpielrecht\b/;
+const VERBAND_KURZ = " (kurz: der Verband)";
+const SPIELRECHT_ERKLAERUNG = " (Erlaubnis zum Spielen)";
+
+export function begriffsErklaerer() {
+  let verband = false;
+  let spielrecht = false;
+  return (roh) => {
+    let t = roh === undefined || roh === null ? "" : String(roh);
+    if (!verband) {
+      const m = VERBAND_MUSTER.exec(t);
+      if (m) {
+        verband = true;
+        const artikel = m[1] || "";
+        const nomen = m[2];
+        let name = nomen;
+        if (!/^Hessische/.test(nomen)) {
+          const endung = { der: "e", den: "en", dem: "en", des: "en", beim: "en", vom: "en", zum: "en" }[artikel.toLowerCase()];
+          name = "Hessisch" + (endung === undefined ? "er" : endung) + " Fußball-" + nomen;
+        }
+        const vorn = artikel ? m[0].slice(0, m[0].length - nomen.length) : "";
+        t = t.slice(0, m.index) + vorn + name + VERBAND_KURZ + t.slice(m.index + m[0].length);
+      }
+    }
+    if (!spielrecht) {
+      const m = SPIELRECHT_MUSTER.exec(t);
+      if (m) {
+        spielrecht = true;
+        t = t.slice(0, m.index + m[0].length) + SPIELRECHT_ERKLAERUNG + t.slice(m.index + m[0].length);
+      }
+    }
+    return t;
+  };
+}
+
+// Papiere, die vielleicht nötig sind und noch nicht vorliegen: Der Laufzettel führt sie mit "klären" (sprache-9). Teil A nennt
+// sie mit Namen, damit Teil A nicht "alles liegt bei" sagt, solange der Laufzettel etwas klärt.
+const VERBAND_UNTERLAGEN = new Set(["U07", "U08", "U09", "U10", "U11", "U12", "U13", "U14", "U17", "U18", "U20", "U21", "U22", "U23", "U26", "U27", "U36", "U37", "U38", "U39", "U40"]);
+
+function unterlagenZuKlaeren(K, plan) {
+  return liste(K.e.unterlagen).filter((u) => u.art === "offen" && unterlageStatus(K, plan, u) === "klären");
+}
+
+// Blätter, die die Familie selbst ausdrucken muss (sprache-11): nur die, die wirklich auf Papier müssen.
+//  - Attest-Vorlage für die Ärztin oder den Arzt und Abmeldung beim alten Verein: immer (Arzt und Post brauchen Papier)
+//  - Blätter mit einer Stift-Stelle der Familie: beim Weg "alles auf Papier" und dem ersten Training druckt der Verein sie aus,
+//    sonst die Familie. Bei "selbst ausdrucken" gehört dazu die ganze Datei (dann gibt es keine Liste).
+//  - Blätter des Verbands (HFV): am Bildschirm unterschrieben druckt sie der Verein zum ersten Training, wenn die Familie
+//    "beim ersten Training" wählt; sonst druckt sie die Familie.
+// Rückgabe: { alles: true } wenn die ganze Datei auszudrucken ist, sonst { blaetter: [{ name, von, bis }] }.
+function druckListe(K, plan, stifte) {
+  const papierWeg = K.a.unterschriftWeg !== "bildschirm";
+  const training = K.a.hfvUnterschrift !== "selbst_drucken";
+  if (papierWeg && !training) return { alles: true, blaetter: [] };
+  const blaetter = [];
+  const merke = (name, r) => r && blaetter.push({ name: name, von: r.von, bis: r.bis });
+  if (!papierWeg) {
+    const formulare = [];
+    stifte.forEach((u) => {
+      if (u.formular === "abmeldung" || formulare.includes(u.formular)) return;
+      if (HFV_FORMULARE.includes(u.formular) && training) return; // druckt der Verein zum ersten Training
+      formulare.push(u.formular);
+    });
+    formulare.forEach((f) => merke(deRegeln.formulare[f] || f, plan.formulare[f]));
+  }
+  if (plan.attestVorlage) merke(ATTEST_VORLAGE_NAME, plan.attestVorlage);
+  if (plan.formulare.abmeldung) merke(deRegeln.formulare.abmeldung, plan.formulare.abmeldung);
+  blaetter.sort((p, q) => p.von - q.von);
+  return { alles: false, blaetter: blaetter };
 }
 
 function seiteTeilA(K, S, plan) {
   const T = TEXTE_TEIL_A;
   const e = K.e;
   const et = K.eText;
+  const E = begriffsErklaerer();
+  // Läufe ([{ t, fett, … }]): jeder Text läuft durch den Erklärer, Eingaben der Familie (nutzer) nicht
+  const ER = (laeufe) => laeufe.map((l) => (l.nutzer ? l : Object.assign({}, l, { t: E(l.t) })));
   const zwischen = { size: 10.5, nach: 4 };
   const hatC = !!plan.teile.C;
   const von = (t) => plan.teile[t].von;
   const bis = (t) => plan.teile[t].bis;
-  const seiten = (t) => (von(t) === bis(t) ? "Seite " + von(t) : "Seite " + von(t) + " bis " + bis(t));
+  const seiten = (t) => seitenText(von(t), bis(t));
 
   S.ueberschrift(T.titel, 1);
   S.absatz([{ t: K.person.name, fett: true, nutzer: true }, { t: "· " + vereinKurz(K) }], { size: 12, nach: 8 });
@@ -2264,24 +2435,38 @@ function seiteTeilA(K, S, plan) {
   const schritte = [];
   const gezeichnet = alleStellen(K).filter((u) => plan.stelleSeite(u.formular, u.stelleKey) != null);
   const stifte = gezeichnet.filter((u) => FAMILIE_WER.includes(u.wer) && stelleArt(K, u.formular, u.wer, u.stelleKey) === "stift");
-  const stifteHfv = stifte.filter((u) => HFV_FORMULARE.includes(u.formular));
+  const hatAbmeldung = !!plan.formulare.abmeldung;
+  const stifteAndere = stifte.filter((u) => u.formular !== "abmeldung");
+  const stifteHfv = stifteAndere.filter((u) => HFV_FORMULARE.includes(u.formular));
   const training = K.a.hfvUnterschrift !== "selbst_drucken";
-  if (!stifte.length) schritte.push(T.stiftKeine);
-  else if (K.a.unterschriftWeg !== "bildschirm") schritte.push(training ? T.stiftAlleTraining : T.stiftAlleDrucken);
+  // 1. Unterschriften. Die Abmeldung beim alten Verein hat einen eigenen Schritt weiter unten.
+  const erster = [];
+  if (!stifte.length) erster.push(T.stiftKeine);
+  else if (K.a.unterschriftWeg !== "bildschirm") erster.push(training ? (hatAbmeldung ? T.stiftAlleTrainingOhneAbmeldung : T.stiftAlleTraining) : T.stiftAlleDrucken);
   else {
-    if (stifteHfv.length) schritte.push(training ? T.stiftTraining : T.stiftDrucken);
-    if (stifte.length > stifteHfv.length) schritte.push(T.stiftRest);
+    if (stifteHfv.length) erster.push(training ? T.stiftTraining : T.stiftDrucken);
+    if (stifteAndere.length > stifteHfv.length) erster.push(T.stiftRest);
   }
-  if (K.a.satzung !== true && plan.formulare.aufnahmeantrag) schritte.push(ersetzePlatzhalter(T.satzung, { seite: plan.formulare.aufnahmeantrag.von }));
+  // 2. Was auf Papier muss: ein Satz mit den Blättern, oder "Sie müssen nichts ausdrucken."
+  const druck = druckListe(K, plan, stifteAndere);
+  if (!druck.alles && !druck.blaetter.length) erster.push(T.ausdruckenNichts);
+  if (erster.length) schritte.push(E(erster.join(" ")));
+  if (!druck.alles && druck.blaetter.length) {
+    schritte.push({ inhalt: E(T.ausdruckenNur), unter: druck.blaetter.map((b) => E(seitenText(b.von, b.bis) + ": " + b.name)) });
+  }
+  if (K.a.satzung !== true && plan.formulare.aufnahmeantrag) schritte.push(E(ersetzePlatzhalter(T.satzung, { seite: plan.formulare.aufnahmeantrag.von })));
   if (plan.attestVorlage) {
-    schritte.push(ersetzePlatzhalter(T.attest, { seite: plan.attestVorlage.von }) + " " + T.attestKosten);
+    schritte.push(E(ersetzePlatzhalter(T.attest, { seite: plan.attestVorlage.von }) + " " + T.attestKosten));
+  }
+  if (hatAbmeldung) {
+    schritte.push(E(ersetzePlatzhalter(T.abmeldung, { name: deRegeln.formulare.abmeldung, seiten: seitenText(plan.formulare.abmeldung.von, plan.formulare.abmeldung.bis) })));
   }
   const fehlend = liste(e.fehlend);
-  if (fehlend.length) schritte.push(T.fehlt);
-  schritte.push(T.abgeben);
-  if (hatC) schritte.push(T.abgebenC);
-  schritte.push(K.a.spielen === true && e.status ? T.verband : T.verein);
-  schritte.push(T.nichtWhatsapp);
+  if (fehlend.length) schritte.push(E(T.fehlt));
+  schritte.push(E(druck.alles ? T.abgebenAusgedruckt : T.abgeben));
+  if (hatC) schritte.push(E(T.abgebenC));
+  schritte.push(E(K.a.spielen === true && e.status ? T.verband : T.verein));
+  schritte.push(E(T.nichtWhatsapp));
   S.liste(schritte, { size: 10.5, marker: "nummer", nach: 4 });
 
   // --- Wo unterschreiben Sie? ---
@@ -2305,32 +2490,35 @@ function seiteTeilA(K, S, plan) {
   // --- Das fehlt noch ---
   S.ueberschrift(T.fehltTitel, 2);
   const nichtLesbar = Object.keys(plan.nachweise).filter((id) => plan.nachweise[id].nichtLesbar >= plan.nachweise[id].dateien && !fehlend.includes(id));
-  if (!fehlend.length && !nichtLesbar.length) S.absatz(T.fehltKeine, zwischen);
-  else {
+  const klaeren = unterlagenZuKlaeren(K, plan);
+  if (!fehlend.length && !nichtLesbar.length) {
+    S.absatz(E(klaeren.length ? T.fehltKeineSicher : T.fehltKeine), zwischen);
+  } else {
     S.absatz(T.fehltEinleitung, { size: 10, nach: 4 });
     nichtLesbar.forEach((id) => {
       S.kaestchenZeile(false, [{ t: unterlageName(K, id), fett: true }], { size: 10.5, nach: 1 });
-      S.absatz(T.fehltNichtLesbar, { size: 10, einzug: 18, nach: 5 });
+      S.absatz(E(T.fehltNichtLesbar), { size: 10, einzug: 18, nach: 5 });
     });
     fehlend.forEach((id) => {
       const u = liste(et.unterlagen).find((x) => x.id === id) || { id: id, werte: {} };
       S.kaestchenZeile(false, [{ t: unterlageName(K, id), fett: true }], { size: 10.5, nach: 1 });
-      S.absatz([{ t: T.fehltWie, fett: true }, { t: unterlageText(K, u, "wie") }], { size: 10, einzug: 18, nach: 1 });
-      S.absatz([{ t: T.fehltWo, fett: true }, { t: unterlageText(K, u, "wo") }], { size: 10, einzug: 18, nach: 5 });
+      S.absatz(ER([{ t: T.fehltWie, fett: true }, { t: unterlageText(K, u, "wie") }]), { size: 10, einzug: 18, nach: 1 });
+      S.absatz(ER([{ t: T.fehltWo, fett: true }, { t: unterlageText(K, u, "wo") }]), { size: 10, einzug: 18, nach: 5 });
     });
   }
+  if (klaeren.length) S.absatz(E(T.fehltVielleicht), { size: 10, farbe: FARBE.tinte2, nach: 4 });
 
   // --- Wann darf gespielt werden? ---
   if (K.a.spielen === true && e.status) {
     S.ueberschrift(T.wartezeitTitel, 2);
     const fr = et.frist;
     const satz = ersetzePlatzhalter(deRegeln.frist[fr.key], fr.werte);
-    S.absatz(satz, { size: 10.5, nach: 3 });
-    S.absatz(fr.unsicher ? T.wartezeitUnsicher : T.wartezeitSchaetzung, { size: 10, farbe: FARBE.tinte2, nach: 4 });
+    S.absatz(E(satz), { size: 10.5, nach: 3 });
+    S.absatz(E(fr.unsicher ? T.wartezeitUnsicher : T.wartezeitSchaetzung), { size: 10, farbe: FARBE.tinte2, nach: 4 });
     const m = objekt(et.mannschaft);
     if (m.hinweisKey && deRegeln.mannschaft[m.hinweisKey]) {
       S.ueberschrift(T.mannschaftTitel, 2);
-      S.absatz(ersetzePlatzhalter(deRegeln.mannschaft[m.hinweisKey], m.werte), { size: 10.5, nach: 4 });
+      S.absatz(E(ersetzePlatzhalter(deRegeln.mannschaft[m.hinweisKey], m.werte)), { size: 10.5, nach: 4 });
     }
   }
 
@@ -2338,9 +2526,9 @@ function seiteTeilA(K, S, plan) {
   const b = objekt(et.beitrag);
   if (b.hinweisKey && b.hinweisKey !== "beitrag_offen" && deRegeln.beitrag[b.hinweisKey]) {
     S.ueberschrift("Der Beitrag", 2);
-    S.absatz(ersetzePlatzhalter(deRegeln.beitrag[b.hinweisKey], b.werte), zwischen);
+    S.absatz(E(ersetzePlatzhalter(deRegeln.beitrag[b.hinweisKey], b.werte)), zwischen);
     const gebuehr = liste(et.unterlagen).find((u) => u.id === "U35");
-    if (gebuehr && deRegeln.unterlagen.U35) S.absatz(unterlageText(K, gebuehr, "kurz"), zwischen);
+    if (gebuehr && deRegeln.unterlagen.U35) S.absatz(E(unterlageText(K, gebuehr, "kurz")), zwischen);
   }
 
   // --- Das sollten Sie wissen ---
@@ -2350,16 +2538,25 @@ function seiteTeilA(K, S, plan) {
   const offen = hw.filter((h) => h.art === "offen");
   if (wichtig.length || info.length) {
     S.ueberschrift(T.wissenTitel, 2);
-    if (wichtig.length) S.liste(wichtig.map((h) => [{ t: HINWEIS_ART[h.art] + ":", fett: true, farbe: FARBE.blau }, { t: hinweisText(h) }]), { size: 10, nach: 2 });
-    if (info.length) S.liste(info.map((h) => hinweisText(h)), { size: 10, nach: 2 });
+    if (wichtig.length) S.liste(wichtig.map((h) => ER([{ t: HINWEIS_ART[h.art] + ":", fett: true, farbe: FARBE.blau }, { t: hinweisText(h) }])), { size: 10, nach: 2 });
+    if (info.length) S.liste(info.map((h) => E(hinweisText(h))), { size: 10, nach: 2 });
   }
-  if (offen.length || liste(et.weiterleitung).length) {
+  if (offen.length || klaeren.length || liste(et.weiterleitung).length) {
     S.ueberschrift(T.klaerenTitel, 2);
-    if (offen.length) S.liste(offen.map((h) => hinweisText(h)), { size: 10, nach: 3 });
+    // Papiere, die vielleicht nötig sind (Laufzettel: "klären"), mit Namen. Was der Verband verlangen kann, steht für sich.
+    if (klaeren.length) {
+      const verbandListe = klaeren.filter((u) => VERBAND_UNTERLAGEN.has(u.id));
+      const vereinListe = klaeren.filter((u) => !VERBAND_UNTERLAGEN.has(u.id));
+      const gruppen = [];
+      if (verbandListe.length) gruppen.push({ inhalt: E(T.vielleichtVerband), unter: verbandListe.map((u) => E(unterlageName(K, u.id))) });
+      if (vereinListe.length) gruppen.push({ inhalt: E(T.vielleichtVerein), unter: vereinListe.map((u) => E(unterlageName(K, u.id))) });
+      S.liste(gruppen, { size: 10, nach: 3 });
+    }
+    if (offen.length) S.liste(offen.map((h) => E(hinweisText(h))), { size: 10, nach: 3 });
     const wl = liste(et.weiterleitung);
     if (wl.length) {
       S.ueberschrift(T.stellenTitel, 3);
-      S.liste(wl.map((w) => [{ t: (STELLE_KLARTEXT[w.an] || w.an) + ":", fett: true }, { t: deRegeln.weiterleitung[w.key] || "" }]), { size: 10, nach: 3 });
+      S.liste(wl.map((w) => ER([{ t: (STELLE_KLARTEXT[w.an] || w.an) + ":", fett: true }, { t: deRegeln.weiterleitung[w.key] || "" }])), { size: 10, nach: 3 });
     }
   }
 
@@ -3048,6 +3245,7 @@ function fuelleBericht(K, plan, teile) {
   b.seiten = K.seiten.map((x, i) => ({ nr: i + 1, teil: x.teil, art: x.art, schluessel: x.schluessel || null, titel: x.titel || "", eigen: x.eigen, entwurf: !!x.entwurf }));
   b.stellen = K.stellen.map((st) => ({ formular: st.formular, stelleKey: st.stelleKey, wer: st.wer, seite: nr(st.pageRef), art: st.art, bild: st.bild || null, text: st.text || null, zusatz: st.zusatz === true, rueckfall: st.rueckfall === true, y: st.y }));
   b.eingaben = K.eingaben.map((x) => ({ seite: nr(x.pageRef), formular: x.formular || null, name: x.name, leer: x.leer === true, ausnahme: x.ausnahme === true, wert: x.wert === undefined ? null : x.wert }));
+  b.texte = K.texte.map((x) => ({ seite: nr(x.pageRef), art: x.art, kennung: x.kennung, text: x.text }));
   b.warnungen = K.warnungen.slice();
   b.felder = K.felder.slice();
   b.flaechen = K.flaechen.map((f) => ({ seite: nr(f.pageRef), art: f.art, x: f.x, y: f.y, b: f.b, h: f.h }));

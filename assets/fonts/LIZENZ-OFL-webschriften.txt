@@ -1,34 +1,13 @@
-Liberation Sans Regular (liberation-sans-regular.ttf)
-=====================================================
+Copyright-Vermerke der selbst gehosteten Webschriften (aus den name-Tabellen der Dateien gelesen, 07.10.2026)
+=====================================================================================================
 
-Schrift für den Aufnahmeantrag online und den Anmelde-Assistenten (assets/js/anmeldung/pdf.js;
-dort wird sie bei jeder PDF-Erstellung eingebettet).
-Aufnahmeantrag online: Die Seite bettet sie nur dann in das
-erzeugte PDF ein, wenn ein Eintrag Zeichen enthält, die die
-PDF-Standardschrift Helvetica nicht kennt (z. B. Ş, ğ, ı, Ł). Liberation
-Sans hat dieselben Zeichenbreiten wie Helvetica/Arial, die vermessenen
-Feldbreiten des Vereinsformulars gelten also für beide.
+inter.woff2:                          Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter)
+barlow-condensed-600.woff2, -700.woff2: Copyright 2017 The Barlow Project Authors (https://github.com/jpt/barlow)
+open-sans-400.woff2, -700.woff2:      Copyright 2020 The Open Sans Project Authors (https://github.com/googlefonts/opensans)
 
-Fassung: Liberation Fonts 2.1.5 (https://github.com/liberationfonts),
-Datei LiberationSans-Regular.ttf, unverändert (nicht verkleinert, nicht
-umbenannt, nicht umgewandelt), entnommen aus dem Lieferumfang von
-LibreOffice. 410.712 Byte,
-SHA-256 76d04c18ea243f426b7de1f3ad208e927008f961dc5945e5aad352d0dfde8ee8.
-Das PDF enthält nur die tatsächlich benutzten Zeichen (Teilmenge, die
-pdf-lib beim Einbetten bildet); für so erzeugte Dokumente gilt die
-Lizenz nach ihrem eigenen Wortlaut nicht.
+Alle drei Schriften stehen unter der SIL Open Font License, Version 1.1. Lizenztext:
 
-Digitized data copyright (c) 2010 Google Corporation
-	with Reserved Font Arimo, Tinos and Cousine.
-Copyright (c) 2012 Red Hat, Inc.
-	with Reserved Font Name Liberation.
-
-This Font Software is licensed under the SIL Open Font License,
-Version 1.1.
-
-This license is copied below, and is also available with a FAQ at:
-http://scripts.sil.org/OFL
-
+-----------------------------------------------------------
 SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
 
 PREAMBLE The goals of the Open Font License (OFL) are to stimulate

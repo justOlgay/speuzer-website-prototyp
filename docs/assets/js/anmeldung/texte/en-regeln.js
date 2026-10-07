@@ -1,7 +1,7 @@
 /*
   Texte des Regelwerks - Englisch (British English), Gegenstück zu regeln.js.
   Übersetzungshilfe: Verbindlich ist der deutsche Text (de-regeln.js).
-  Stand 29.09.2026. Dieselbe Schlüsselstruktur wie de-regeln.js; Platzhalter in geschweiften
+  Stand 08.10.2026. Dieselbe Schlüsselstruktur wie de-regeln.js; Platzhalter in geschweiften
   Klammern (zum Beispiel {datum}) bleiben unverändert. Stil und Begriffe: siehe die Begriffsliste
   oben in en-oberflaeche.js.
 
@@ -130,7 +130,7 @@ export default {
       name: "Deregistration from the old club (Abmeldung)",
       kurz: "You deregister as a player from the old club. This works by registered letter (Einschreiben). An email is not enough.",
       warum: "The day of the deregistration counts. The waiting period starts then.",
-      wie: "Send the form as a registered letter (Einschreiben). A drop-off registered letter (Einwurf-Einschreiben) is not enough. Keep the receipt.",
+      wie: "Send the form as a registered letter (Einschreiben). At the post office, say: normal registered letter, not a drop-off registered letter (Einwurf-Einschreiben). With a drop-off registered letter the letter only goes into the letterbox. That is not valid. Keep the receipt.",
       wo: "You photograph the receipt and upload it. Or you hand it in at the club.",
     },
     U18: {
@@ -163,8 +163,8 @@ export default {
     },
     U22: {
       name: "Confirmation from the old club",
-      kurz: "The old club confirms the date of the last league or cup match. These are matches in the league or in the cup.",
-      warum: "After more than 6 months without a league or cup match there is no waiting period.",
+      kurz: "The old club confirms the last league or cup match.",
+      warum: "Was there no league or cup match for 6 months? Then there is no waiting period.",
       wie: "The new club asks the old club for it.",
       wo: "You do not have to upload anything.",
     },
@@ -302,15 +302,15 @@ export default {
     abmeldung_formlos: "An email, a WhatsApp message or a simple letter is not a deregistration. Send a registered letter (Einschreiben).",
     abmeldung_nach_letztem_spiel: "Only deregister from the old club after the last match.",
     abmeldung_vor_letztem_spiel: "The last match was after the deregistration. Please check both dates. The association will ask about this.",
-    nie_zwei_vereine: "Never sign for two clubs. This is punished.",
+    nie_zwei_vereine: "Never sign for two clubs at the same time. Otherwise the association punishes the player.",
     kuendigung_extra: "Cancel the membership at the old club separately. The deregistration as a player is not enough for this.",
     vollmacht_eingabe_zeitnah: "The new club must enter the deregistration on the same day or the next day. Otherwise the waiting period gets longer.",
     wiederholter_wechsel: "There was already a change in the last 6 months. Then the waiting period can be longer. The association decides.",
     antrag_zu_spaet: "The application must reach the association by {datum}. This deadline has passed. The club will ask the association.",
     ohne_zusage_spielen: "We cannot promise that the child may play. Training is possible.",
-    f17_wahrscheinlich_nicht: "Without 5 years of residence this probably does not work. Then playing is only possible at 18. Friendly matches are not allowed either.",
-    aushilfe_nur_ausnahme: "For this birth year this only works in exceptional cases. The youth department checks this.",
-    getrennt_zustimmung: "Please ask the other parent. He or she should agree to the registration. Otherwise both sign.",
+    f17_wahrscheinlich_nicht: "Without 5 years of residence the child is probably not allowed to play. Then playing is only possible from the age of 18. Friendly matches are not allowed either.",
+    aushilfe_nur_ausnahme: "For this birth year the young person is only rarely allowed to help out in the men’s team (Herren). The youth department checks this.",
+    getrennt_zustimmung: "Please ask the other parent. He or she must agree to the registration. Best of all, he or she also signs the membership application (Aufnahmeantrag).",
     karneval_tanzt_woanders: "Dancers start at tournaments for one club only.",
     beitrag_gruppe_pruefen: "The fee group {gruppe} may not fit the age. The club checks this.",
 
@@ -320,7 +320,7 @@ export default {
     // Infos
     frist_annahme_heute: "We calculate as if the deregistration counts on {abmeldung}. If you deregister later, the waiting period gets longer.",
     probetraining_versicherung: "Anyone who is not a member yet has no insurance of their own at training. It is best to register before the first training.",
-    kuendigung_jahresende: "You can only leave the club at the end of the year. Send the cancellation as a registered letter (Einschreiben).",
+    kuendigung_jahresende: "In our club you can only cancel your membership at the end of the year. Send the cancellation as a registered letter (Einschreiben).",
     ohne_spielrecht_kein_spiel: "Without permission to play a child may not take part in matches. Not even in friendly matches. Training is allowed.",
     mitgliedschaft_zuerst: "First you become a member. Then the club makes the application to the association.",
     spielerfoto_hinweis: "The photo must be in the system before the first match. Without a photo nobody may play.",
@@ -344,7 +344,7 @@ export default {
     keine_frauenmannschaft: "The club has no women’s team. Women from 18 may play in the men’s team (Herren) with an application. Talk to us.",
     vertrauensperson: "The association has a person of trust for this case. This person helps with the application. For children, the parents agree.",
     sonderspielrecht: "Children with a disability can play in a younger age group. This is called special permission to play (Sonderspielrecht). It needs a report from a specialist doctor. The youth department helps you.",
-    beide_unterschreiben_empfohlen: "We recommend: both parents sign the membership application (Aufnahmeantrag). One signature is enough for the association.",
+    beide_unterschreiben_empfohlen: "We recommend: both parents sign the membership application (Aufnahmeantrag).",
     getrennt_einverstanden: "The other parent agrees. That is why one person signs.",
     sorge_allein_nachweis: "You have sole custody. Keep proof ready in case the club asks for it.",
     vormund_hinweis: "The legal guardian (Vormund) signs for the child. Bring the proof of the guardianship.",
@@ -466,7 +466,7 @@ export default {
     frist_wechsel_6monate: "The old club does not release you. The waiting period lasts {monate} months. League and cup matches are possible from {pflichtspiele}. Friendly matches are possible from {freundschaftsspiele}.",
     frist_freigabe_unklar: "You do not know whether the old club releases you. Without a release, league and cup matches are possible from {pflichtspiele}. With a release, from {alternativ}.",
     frist_d_jung_offen: "For this birth year the rule is not clear. League and cup matches are possible from {alternativ} at the earliest. Perhaps only from {pflichtspiele}.",
-    frist_entfaellt: "The last league or cup match was more than 6 months ago. So there is no waiting period.",
+    frist_entfaellt: "For more than 6 months there has been no league or cup match. So there is no waiting period.",
     frist_herren_wp1_zustimmung: "You deregister by 30 June, and the old club agrees. League and cup matches are possible from {pflichtspiele}.",
     frist_herren_wp1_ohne: "You deregister by 30 June, but the old club does not agree. League and cup matches are only possible from {pflichtspiele}.",
     frist_herren_wp2_zustimmung: "You deregister after 30 June, and the old club agrees. League and cup matches are possible from {pflichtspiele}.",
@@ -476,8 +476,8 @@ export default {
   mannschaft: {
     mannschaft_unbekannt: "Without a date of birth we cannot name the team.",
     keine_mannschaft: "For the birth year {jahrgang} the club has no team. The youth department will contact you. Your registration continues.",
-    mannschaft_gefunden: "The child fits the team {mannschaft}. Does the child have a disability? Ask the youth department about special permission to play (Sonderspielrecht).",
-    mannschaft_mehrere: "The child can play in these teams: {mannschaften}. The coaches decide which one. Does the child have a disability? Ask the youth department about special permission to play (Sonderspielrecht).",
+    mannschaft_gefunden: "The child fits the team {mannschaft}.",
+    mannschaft_mehrere: "The child can play in these teams: {mannschaften}. The coaches decide which one.",
     mannschaft_2020_f2: "Children born in {jahrgang} play in the {mannschaft} at the club. The Frankfurt district counts this birth year as G-Jugend.",
     mannschaft_herren: "You fit the {mannschaft}.",
     mannschaft_maedchen_bonus: "Girls may be one year older than the boys. The child fits these teams: {mannschaften}.",
@@ -492,6 +492,19 @@ export default {
     beitrag_azubi: "For trainees and students the fee is {jahr} euros a year. You need proof.",
     beitrag_senator: "Senators pay {jahr} euros a year. The board decides on the admission.",
     beitrag_doppel: "You are in both departments. The club office tells you the fee.",
+    // Namen der Beitragsgruppen (Schlüssel wie in de-regeln.js): Übersetzung mit der Abteilung (ohne Doppelpunkt, der Text steht auch hinter "Wir schlagen vor:"), dahinter der deutsche Name ohne Abteilung in Klammern.
+    gruppen: {
+      fussball_jugend: "Children and young people in football, including A-Jugend (Kinder und Jugendliche)",
+      fussball_erwachsene: "Adults in football (Erwachsene)",
+      fussball_passiv: "Passive members, women and pensioners aged 65 and over in football (Passive, Frauen und Rentner ab 65)",
+      fussball_familie: "Family fee in football (Familienbeitrag)",
+      karneval_kinder: "Children and young people in carnival (Kinder und Jugendliche)",
+      karneval_azubi: "Trainees and students in carnival, with proof (Auszubildende und Studierende mit Nachweis)",
+      karneval_erwachsene: "Adults in carnival (Erwachsene)",
+      karneval_rentner: "Pensioners aged 65 and over in carnival (Rentner ab 65)",
+      karneval_familie: "Family fee in carnival (Familienbeitrag)",
+      karneval_senator: "Senator membership in carnival (Senatorenmitgliedschaft)",
+    },
   },
 
   formulare: {

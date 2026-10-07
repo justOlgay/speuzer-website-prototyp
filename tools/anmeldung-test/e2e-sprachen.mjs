@@ -240,21 +240,21 @@ async function pruefeUnterschriftenSeite(page, code, sprache, dict, kennung) {
       hakenDa: !!haken,
       angekreuzt: haken ? haken.checked : null,
       pflicht: haken ? haken.getAttribute("aria-required") : null,
-      gilt: Array.from(document.querySelectorAll('#anmeldung .anm-unterschrift p[id$="-hinweis"]')).map((p) => p.textContent),
+      giltTitel: Array.from(document.querySelectorAll("#anmeldung .anm-unterschrift .anm-unterschrift__gilt > p")).map((p) => p.textContent),
+      gilt: Array.from(document.querySelectorAll("#anmeldung .anm-unterschrift .anm-unterschrift__gilt > ul > li")).map((li) => li.textContent),
     };
   });
   ok(kennung + ": Satzung-Block steht auf der Unterschriftenseite (Kästchen, nicht angekreuzt)", !!dom && dom.hakenDa && dom.angekreuzt === false, dom ? "" : "kein Satzung-Block");
   if (!dom) return;
   ok(kennung + ": Satzung-Block übersetzt, deutscher Name (Satzung) in Klammern", ohneSteuer(dom.titel) === ohneSteuer(erwartet.titel) && ohneSteuer(dom.label).includes(ohneSteuer(erwartet.label)) && /\(Satzung\)/.test(ohneSteuer(dom.text)), ohneSteuer(dom.titel) + " | " + ohneSteuer(dom.label).slice(0, 80));
   if (dom.linkText !== null) ok(kennung + ": Satzung-Link und Zusatz für Screenreader übersetzt", ohneSteuer(dom.linkText).includes(ohneSteuer(erwartet.link)) && ohneSteuer(dom.linkZusatz || "").includes(ohneSteuer(erwartet.linkZusatz)), ohneSteuer(dom.linkText) + " | " + ohneSteuer(dom.linkZusatz || ""));
-  // "Gilt für: A, B, C": der Trenner der Sprache (Arabisch: ، ; sonst ", ") zwischen den Namen, kein anderer.
-  const vorne = ohneSteuer(dict.unterschriften.gilt.split("{formulare}")[0]);
-  const listen = dom.gilt.map((t) => ohneSteuer(t)).filter((t) => t.startsWith(vorne)).map((t) => t.slice(vorne.length).trim());
+  // "Diese Unterschrift gilt für:" mit einer Zeile je Blatt (N-A2): kein Trenner zwischen Namen in einer Zeile. Die Überschrift der Liste
+  // steht im Wörterbuch der Sprache (unterschriften.giltFuer); solange die Übersetzung fehlt, steht der deutsche Text in Isolaten.
   const aussen = (t) => t.replace(/\([^()]*\)/g, "");
-  const fremd = sprache.rtl ? /,/ : /\u060C/;
-  const richtig = sprache.rtl ? /\u060C/ : /, /;
-  const trennerOk = listen.length > 0 && listen.every((t) => !fremd.test(aussen(t))) && listen.some((t) => richtig.test(aussen(t)));
-  ok(kennung + ": \"Gilt für\"-Liste trennt die Namen mit " + (sprache.rtl ? "dem arabischen Komma (،)" : "Komma und Leerzeichen"), trennerOk, listen.slice(0, 2).join(" || ").slice(0, 200));
+  const punkte = dom.gilt.map((t) => ohneSteuer(t));
+  const titel = dom.giltTitel.map((t) => ohneSteuer(t));
+  const titelSoll = dict.unterschriften.giltFuer ? ohneSteuer(dict.unterschriften.giltFuer) : null;
+  ok(kennung + ": \"Diese Unterschrift gilt für:\" steht als Liste, ein Blatt je Zeile, ohne Trenner zwischen Namen", punkte.length > 0 && titel.length > 0 && punkte.every((t) => !/[,\u060C]/.test(aussen(t))) && (titelSoll === null || titel.every((t) => t === titelSoll)), titel.slice(0, 1).join("") + " | " + punkte.slice(0, 3).join(" || ").slice(0, 200));
 }
 
 // Ergebnisseite: Die Teile der Datei tragen die übersetzten Titel (fertig.teilTitel), nicht die deutschen aus dem PDF-Modul.
@@ -336,8 +336,7 @@ async function fotoSatzung(page, code, beispiel) {
 }
 
 async function waehleSpracheAufStart(page, code) {
-  const id = await page.$eval('#anmeldung input[data-pfad="sprache"][data-wert="' + code + '"]', (e) => e.id);
-  await page.click('#anmeldung label[for="' + id + '"]');
+  await page.click('[data-anm-sprachleiste] button[data-sprache="' + code + '"]');
   await page.waitForFunction((c) => document.getElementById("anmeldung").getAttribute("lang") === c, { timeout: 8000 }, code);
   await warte(150);
 }

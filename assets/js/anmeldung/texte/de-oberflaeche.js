@@ -98,6 +98,15 @@ export default {
     datei: "Datei",
     keineAngabe: "keine Angabe",
     jahre: "Jahre",
+    wochentag: {
+      montag: "Montag",
+      dienstag: "Dienstag",
+      mittwoch: "Mittwoch",
+      donnerstag: "Donnerstag",
+      freitag: "Freitag",
+      samstag: "Samstag",
+      sonntag: "Sonntag",
+    },
   },
 
   kopf: {
@@ -165,6 +174,17 @@ export default {
     karnevalWofuer: "Fragen zum Tanzen",
     anrufen: "Anrufen",
     schreiben: "E-Mail schreiben",
+  },
+
+  // ---------- App ----------
+  // In der Vereins-App (Seite mit ?app=1) klappt Speichern oder Teilen der Datei manchmal nicht.
+  // Der Link "Im Browser öffnen" führt auf dieselbe Seite ohne ?app=1.
+
+  app: {
+    hinweisStart: "In der App kann das Speichern der PDF-Datei manchmal nicht klappen. Dann öffnen Sie die Anmeldung im Browser.",
+    hinweisFertig: "Klappt das Speichern nicht? Dann öffnen Sie die Anmeldung im Browser.",
+    fehler: "Das Speichern hat nicht geklappt. Öffnen Sie die Anmeldung im Browser.",
+    browser: "Im Browser öffnen",
   },
 
   // ---------- Fehlermeldungen ----------
@@ -420,7 +440,7 @@ export default {
       titel: "Wann war das letzte Spiel?",
       hinweis: "Wenn Sie ein Datum nicht wissen, lassen Sie das Feld leer.",
       letztes: "Letztes Spiel",
-      pflicht: "Letztes Punktspiel oder Pokalspiel",
+      pflicht: "Letztes Spiel in Liga oder Pokal",
       pflichtHinweis: "Freundschaftsspiele zählen hier nicht.",
     },
     sperre: {
@@ -465,10 +485,10 @@ export default {
   wohnen: {
     ort: {
       titel: { kind: "Wo lebt Ihr Kind?", selbst: "Wo leben Sie?" },
-      gemeinsam: { kind: "Mit mir zusammen in Deutschland", selbst: "Mit meinen Eltern in Deutschland" },
-      gemeinsamHinweis: { kind: "Wir sind zusammen gemeldet.", selbst: "Wir sind zusammen gemeldet." },
-      nicht_gemeinsam: { kind: "Mit mir in Deutschland", selbst: "Mit meinen Eltern in Deutschland" },
-      nicht_gemeinsamHinweis: { kind: "Wir sind nicht zusammen gemeldet.", selbst: "Wir sind nicht zusammen gemeldet." },
+      gemeinsam: { kind: "Mit mir an derselben Adresse", selbst: "Mit meinen Eltern an derselben Adresse" },
+      gemeinsamHinweis: { kind: "Wir sind beim Amt unter derselben Adresse gemeldet.", selbst: "Wir sind beim Amt unter derselben Adresse gemeldet." },
+      nicht_gemeinsam: { kind: "In Deutschland, aber an einer anderen Adresse", selbst: "In Deutschland, aber nicht bei meinen Eltern" },
+      nicht_gemeinsamHinweis: { kind: "Wir sind beim Amt unter verschiedenen Adressen gemeldet.", selbst: "Wir sind beim Amt unter verschiedenen Adressen gemeldet." },
       verwandte: "Bei Verwandten in Deutschland",
       ohne_eltern: "Ohne Eltern in Deutschland",
     },
@@ -544,6 +564,9 @@ export default {
       weissNicht: "Das weiß ich nicht",
       weissNichtHinweis: "Der Verein sagt es Ihnen.",
       uebung: "Übungszeit: {zeit}",
+      // Wochentag und "Uhr" folgen der Sprache; der Ort steht, wie im Verein üblich, auf Deutsch (siehe seiten-fussball.js).
+      uebungszeit: "{tag} {zeit} Uhr, {ort}",
+      uebungszeitOhneOrt: "{tag} {zeit} Uhr",
       passt: "Passt zum Alter",
     },
     woanders: {
@@ -658,7 +681,6 @@ export default {
       titel: "Wie lautet die IBAN?",
       iban: "IBAN",
       ibanHinweis: "Die IBAN steht auf Ihrer Bankkarte.\nLeerzeichen sind egal.",
-      bic: "BIC",
       bank: "Name der Bank",
     },
   },
@@ -717,7 +739,7 @@ export default {
       allergien: "Allergien",
       erkrankungen: "Erkrankungen",
       medikamente: "Medikamente",
-      medikamenteHinweis: "Braucht Ihr Kind ein Notfall-Medikament? Zum Beispiel Asthmaspray oder einen Adrenalin-Pen. Sprechen Sie mit dem Trainer. Im Notfallbogen in Teil C gibt es Zeilen für die Absprache.",
+      medikamenteHinweis: "Braucht Ihr Kind ein Notfall-Medikament? Zum Beispiel Asthmaspray oder einen Adrenalin-Pen. Sprechen Sie mit dem Trainer. Der Notfall- und Gesundheitsbogen in Teil C hat Zeilen dafür.",
       sonstiges: "Sonstiges",
     },
   },
@@ -788,13 +810,13 @@ export default {
     },
     hierTitel: "Diese Unterschriften geben Sie hier ab",
     hierHinweis: "Zeichnen Sie mit Finger, Stift oder Maus.",
-    gilt: "Gilt für: {formulare}",
+    giltFuer: "Diese Unterschrift gilt für:",
     person: {
       mitglied: { kind: "Unterschrift von {name}", selbst: "Ihre Unterschrift" },
       sorgeberechtigte: "Unterschrift von {person}",
       ersteEltern: "Unterschrift: Mutter oder Vater",
       zweiteEltern: "Unterschrift: zweiter Elternteil",
-      zweiteHinweis: "Diese Unterschrift ist freiwillig.\nDem Verband reicht eine Unterschrift.\nWir empfehlen: Beide Eltern unterschreiben.",
+      zweiteHinweis: "Diese Unterschrift ist freiwillig.\nWir empfehlen: Beide Eltern unterschreiben.",
       kontoinhaber: "Unterschrift des Kontoinhabers: {person}",
       spieler: "Unterschrift der Spielerin oder des Spielers",
       ersteSorge: "Ihre Unterschrift",
@@ -891,7 +913,7 @@ export default {
         formlos: "Nur per Mail oder Nachricht",
         noch_nicht: "Noch nicht",
         weiss_nicht: "Weiß nicht",
-        vollmacht: "Mit Vollmacht",
+        vollmacht: "mit Vollmacht",
         weg: "Weg: {weg}",
       },
       mitgliedschaft: { kuendigen: "Ich kündige", passiv: "Bleibt als passives Mitglied", weiss_nicht: "Weiß nicht" },
@@ -928,10 +950,10 @@ export default {
     weiterleitungTitel: "Diese Stellen melden sich bei Ihnen:",
     weiterleitungAn: {
       jugendleitung: "Jugendleitung",
-      passwesen: "Passwesen des Vereins",
+      passwesen: "Passwesen (bearbeitet die Spielerpässe; erreichbar über die Geschäftsstelle)",
       geschaeftsstelle: "Geschäftsstelle",
       karneval: "Karnevalabteilung",
-      spielausschuss: "Spielausschuss",
+      spielausschuss: "Spielausschuss der Herren (prüft Wechsel und Fristen; erreichbar über die Geschäftsstelle)",
     },
     hinweisArt: {
       warnung: "Achtung",
@@ -976,7 +998,7 @@ export default {
     unterschriftDrucken: "Drucken Sie die Datei aus. Unterschreiben Sie an allen blauen Markierungen mit Stift.",
     unterschriftDruckenTeil: "Drucken Sie die Blätter für den Fußball-Verband aus. Unterschreiben Sie an den blauen Markierungen mit Stift.",
     unterschriftTrainingAlle: "Alle Blätter unterschreiben Sie beim ersten Training mit Stift. Der Verein druckt sie aus.",
-    unterschriftFertig: "Sie haben alles am Bildschirm unterschrieben. Sie müssen nichts ausdrucken.",
+    unterschriftFertig: "Sie haben alles am Bildschirm unterschrieben. Was Sie ausdrucken müssen, steht in Teil A der Datei.",
     fehltTitel: "Diese Unterlagen fehlen noch:",
     fehltHinweis: "Bringen Sie sie mit, sobald Sie sie haben.",
     abgeben: "Geben Sie die Unterlagen im Verein ab.\nBringen Sie die Datei auf dem Handy mit. Oder geben Sie sie ausgedruckt ab.",

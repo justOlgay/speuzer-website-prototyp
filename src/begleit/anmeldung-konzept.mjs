@@ -17,7 +17,7 @@
 //     Gesundheit, Absprache zur Medikamentengabe), Attest beim Vereinswechsel, Erlaubnis für Auftritte am Abend, lateinische Schrift,
 //     Vorführung, Datenschutz.
 //   - Die Listen in den Abschnitten 10 bis 12 spiegeln data/anmeldung.json ›
-//     offenePunkte (Version 2026-09-29.2, O01 bis O71): jeder Punkt genau eine Zeile
+//     offenePunkte (Version 2026-10-07.1, O01 bis O73): jeder Punkt genau eine Zeile
 //     mit der kleinen Nummer (Anker #o01 …). P1 steht immer sichtbar, P2 und P3 dürfen
 //     in einem Aufklapper stehen. Die Prioritäten unten (PRIO) sind ein Abzug aus der
 //     Datei; tools/anmeldung-test/konzept-pruefen.mjs vergleicht die gebaute Seite mit
@@ -37,11 +37,11 @@
 // Diese Seite liegt immer unter "/anmeldung-konzept/" (Tiefe 1), daher "../".
 const PFAD = "../";
 const STAND_RECHERCHE = "29.09.2026";
-const STAND_ABGLEICH = "30.09.2026";
-const REGELWERK_VERSION = "2026-09-29.2";
+const STAND_ABGLEICH = "07.10.2026";
+const REGELWERK_VERSION = "2026-10-07.1";
 const PROTOTYP = `${PFAD}anmeldung/`;
 
-// Prioritäten der offenen Punkte (Abzug aus data/anmeldung.json › offenePunkte, Version 2026-09-29.2, O01 bis O71).
+// Prioritäten der offenen Punkte (Abzug aus data/anmeldung.json › offenePunkte, Version 2026-10-07.1, O01 bis O73).
 const PRIO = {
   O01: "P1", O02: "P1", O03: "P1", O04: "P1", O05: "P1", O06: "P1", O07: "P2", O08: "P1",
   O09: "P1", O10: "P1", O11: "P1", O12: "P1", O13: "P1", O14: "P1", O15: "P1", O16: "P1",
@@ -52,6 +52,7 @@ const PRIO = {
   O49: "P3", O50: "P3", O51: "P3", O52: "P3", O53: "P3", O54: "P2", O55: "P2", O56: "P3",
   O57: "P3", O58: "P2", O59: "P2", O60: "P2", O61: "P2", O62: "P1", O63: "P3", O64: "P3",
   O65: "P2", O66: "P1", O67: "P1", O68: "P1", O69: "P2", O70: "P2", O71: "P2",
+  O72: "P1", O73: "P1",
 };
 const ANZAHL_PUNKTE = Object.keys(PRIO).length;
 
@@ -264,7 +265,7 @@ function abschnitt(id, inhalt) {
 // ---------- Fragen an den HFV (zuerst, weil andere Abschnitte darauf verweisen) ----------
 
 // Alle offenen Punkte, die die Passstelle beantworten muss (an: "hfv_passstelle" in
-// data/anmeldung.json, Version 2026-09-29.2), in der Reihenfolge der Nummern. Der Wortlaut
+// data/anmeldung.json, Version 2026-10-07.1), in der Reihenfolge der Nummern. Der Wortlaut
 // folgt der Datei; O07 gilt als weitgehend geklärt.
 const HFV_PUNKTE = [
   ["O01", "Reicht ein Scan oder eine digitale Unterschrift, oder muss das Papier-Original mit Stift vorliegen? Darf der Verein rein digital archivieren?"],
@@ -449,6 +450,7 @@ function assistentAbschnitt() {
       "**Hilfe-Knopf.** Auf jeder Seite steht an derselben Stelle ein Hilfe-Knopf mit den Kontaktdaten des Vereins. Ansprechpersonen, Sprachen und Sprechzeiten im Vereinsheim müssen wir noch festlegen, und die Ansprechpersonen müssen zustimmen. {o:O52} {offen}",
       "**Ehrliche Grenzen.** Wo eine Regel nicht sicher ist, sagt der Assistent das: „Vielleicht nötig – der Verein sagt Ihnen Bescheid.“ Auf dem Laufzettel steht der Punkt dann als „klären“. Fristen schätzt der Assistent nur ({a:wartefristen}).",
       "**Nichts wird gesendet oder gespeichert.** Alle Angaben und Fotos bleiben im Browser. Fotos werden dort neu kodiert, das entfernt Standort- und Kameradaten. Ein Knopf löscht alle Angaben. Ob ein Zwischenstand gespeichert werden soll, entscheidet der Verein später. Die Beispiele im Prototyp nutzen nur erfundene Daten. Ihre Telefonnummern stammen aus der Liste der Bundesnetzagentur für Medien.",
+      "**Website und App aus einem Guss.** Der Assistent ist in Website und Vereins-App dieselbe Seite. In der App fällt nur der Begleitrahmen weg. Offen ist die Übergabe der Datei in der App ({o:O72}). Dafür ist der automatische Versand über die eigene Annahme vorgesehen, mit Schutz für die Gesundheitsdaten ({o:O73}).",
       "**Vorführung.** Der Knopf „Vorführung“ öffnet auf jeder Frageseite fünf Beispiele und die Sicht des Vereins. Ein Beispiel füllt alle Angaben aus. Die Sicht des Vereins zeigt bei Unterlagen und Fristen die Quelle. Der Knopf ist für die Vorführung gedacht, nicht für Familien.",
     ])}`;
   return abschnitt("assistent", inhalt);
@@ -548,7 +550,7 @@ function unterschriftAbschnitt() {
 
 // ---------- 6. Fälle ----------
 
-// F01–F18 heißen wie in data/anmeldung.json › faelle (Version 2026-09-29.2). Die Hinweise
+// F01–F18 heißen wie in data/anmeldung.json › faelle (Version 2026-10-07.1). Die Hinweise
 // stammen aus der Synthese (Abschnitt 2.3) und der Vollständigkeitsprüfung (F15–F18 und die
 // Korrekturen K3, K4, K6, K7); die Verweise O.. nennen den offenen Punkt zur jeweiligen Lücke.
 const FAELLE = [
@@ -903,7 +905,7 @@ function datenschutzAbschnitt() {
 
 // ---------- 10. Entscheidungen ----------
 
-// Jede Zeile ist ein offener Punkt aus data/anmeldung.json › offenePunkte (Version 2026-09-29.2)
+// Jede Zeile ist ein offener Punkt aus data/anmeldung.json › offenePunkte (Version 2026-10-07.1)
 // und trägt seine kleine Nummer. Die Listen sind nach dem Empfänger geordnet (an: vorstand,
 // kassierer, datenschutz, versicherung, kreis_frankfurt, grosser_rat_bdk, jugendleitung, regelwerk);
 // das Passwesen sammelt die Punkte zum Betrieb von DFBnet (O24 und O25 an den Vorstand, O69 und O70
@@ -953,6 +955,11 @@ const VORSTAND_SICHTBAR = [
     "O68",
     "Dürfen Vereinsunterlagen am Bildschirm unterschrieben werden?",
     "Das wäre eine einfache elektronische Unterschrift. Die Form bestimmt der Verein selbst: Die Satzung verlangt Schriftform, nach § 127 BGB kann eine elektronische Übermittlung reichen. HFV-Vordrucke bleiben Stift. Der Laufzettel im PDF bittet den Vorstand, das zu bestätigen ({a:unterschrift})."
+  ),
+  punktZeile(
+    "O72",
+    "Wie übergibt die Familie das PDF in der Vereins-App?",
+    "In der App-Webansicht klappt Speichern oder Teilen der Datei vielleicht nicht. Für Website und App gleich wäre der automatische Versand an den Verein über die eigene Annahme (IONOS), wie beim Online-Aufnahmeantrag. Bis dahin weist der Assistent in der App auf „Im Browser öffnen“ hin."
   ),
 ];
 
@@ -1083,6 +1090,11 @@ const DATENSCHUTZ_SICHTBAR = [
     "O67",
     "Welche Rechtsgrundlage gilt für die Notfallkontakte ohne Angaben zur Gesundheit: Art. 6 Abs. 1 lit. b oder lit. f DSGVO?",
     "Art. 9 DSGVO (ausdrückliche Einwilligung) passt nur zur Fassung mit Angaben zur Gesundheit. Für die Fassung „nur Notfallkontakte“ braucht die Information zum Datenschutz eine eigene Rechtsgrundlage. Der Entwurf im PDF nennt beide: lit. b für Mitgliedschaft und Fürsorge im Training, lit. f (berechtigtes Interesse) für weitere Kontaktpersonen. Der Vorstand bestätigt die Wahl."
+  ),
+  punktZeile(
+    "O73",
+    "Dürfen Gesundheitsdaten aus Teil C sowie Ausweis- und Passkopien per E-Mail an den Verein gehen?",
+    "Beim automatischen Versand kämen sie mit. Möglich ist: nur verschlüsselt, oder Teil C und die Kopien getrennt auf Papier. Gesundheitsdaten brauchen besonderen Schutz (Art. 9 DSGVO)."
   ),
 ];
 

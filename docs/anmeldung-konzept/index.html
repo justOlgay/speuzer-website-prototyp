@@ -148,7 +148,7 @@
     <h1>Anmeldung neu gedacht – ein Assistent statt eines Formulars</h1>
     <p class="seitenkopf__lead">Heute meldet eine Familie ihr Kind mit dem Aufnahmeantrag an. Der Antrag fragt nur einen Teil dessen ab, was Verband und Verein wissen müssen. Ein Anmelde-Assistent stellt Schritt für Schritt nur die Fragen, die im jeweiligen Fall nötig sind. Am Ende steht ein vollständiges PDF für die Familie und den Verein.</p>
     <p class="knopfzeile"><a class="knopf" href="../anmeldung/">Prototyp ansehen</a></p>
-    <p class="meta">Stand der Recherche: 29.09.2026. Abgeglichen mit dem Prototyp am 30.09.2026 (Regelwerk Version 2026-09-29.2 mit 71 offenen Punkten). Grundlage sind die Ordnungen des Hessischen Fußball-Verbands (HFV) für die Saison 2026/27, die Vereinsunterlagen und weitere Quellen (<a href="#quellen">Abschnitt 14</a>). Der Prototyp ist ein Entwurf zum Anschauen. Er sendet und speichert nichts. Die Seite ersetzt keine Rechtsberatung.</p>
+    <p class="meta">Stand der Recherche: 29.09.2026. Abgeglichen mit dem Prototyp am 07.10.2026 (Regelwerk Version 2026-10-07.1 mit 73 offenen Punkten). Grundlage sind die Ordnungen des Hessischen Fußball-Verbands (HFV) für die Saison 2026/27, die Vereinsunterlagen und weitere Quellen (<a href="#quellen">Abschnitt 14</a>). Der Prototyp ist ein Entwurf zum Anschauen. Er sendet und speichert nichts. Die Seite ersetzt keine Rechtsberatung.</p>
     <div class="hinweis inhalt fluss konzept-box">
     <p><strong>So lesen Sie die Kennzeichen</strong></p>
     <p><span class="tag tag--heim">Pflicht</span> Verband, FIFA oder Gesetz schreiben es vor.</p>
@@ -274,6 +274,7 @@
     <li><strong>Hilfe-Knopf.</strong> Auf jeder Seite steht an derselben Stelle ein Hilfe-Knopf mit den Kontaktdaten des Vereins. Ansprechpersonen, Sprachen und Sprechzeiten im Vereinsheim müssen wir noch festlegen, und die Ansprechpersonen müssen zustimmen. <span class="konzept-onr">O52</span> <span class="tag tag--warn">offen</span></li>
     <li><strong>Ehrliche Grenzen.</strong> Wo eine Regel nicht sicher ist, sagt der Assistent das: „Vielleicht nötig – der Verein sagt Ihnen Bescheid.“ Auf dem Laufzettel steht der Punkt dann als „klären“. Fristen schätzt der Assistent nur (<a href="#wartefristen">Abschnitt 8</a>).</li>
     <li><strong>Nichts wird gesendet oder gespeichert.</strong> Alle Angaben und Fotos bleiben im Browser. Fotos werden dort neu kodiert, das entfernt Standort- und Kameradaten. Ein Knopf löscht alle Angaben. Ob ein Zwischenstand gespeichert werden soll, entscheidet der Verein später. Die Beispiele im Prototyp nutzen nur erfundene Daten. Ihre Telefonnummern stammen aus der Liste der Bundesnetzagentur für Medien.</li>
+    <li><strong>Website und App aus einem Guss.</strong> Der Assistent ist in Website und Vereins-App dieselbe Seite. In der App fällt nur der Begleitrahmen weg. Offen ist die Übergabe der Datei in der App (<a class="konzept-onr" href="#o72">O72</a>). Dafür ist der automatische Versand über die eigene Annahme vorgesehen, mit Schutz für die Gesundheitsdaten (<a class="konzept-onr" href="#o73">O73</a>).</li>
     <li><strong>Vorführung.</strong> Der Knopf „Vorführung“ öffnet auf jeder Frageseite fünf Beispiele und die Sicht des Vereins. Ein Beispiel füllt alle Angaben aus. Die Sicht des Vereins zeigt bei Unterlagen und Fristen die Quelle. Der Knopf ist für die Vorführung gedacht, nicht für Familien.</li>
   </ul>
     <p class="meta"><a href="#verzeichnis">Zum Inhaltsverzeichnis</a></p>
@@ -545,6 +546,7 @@
         <tr id="o31" data-prio="P1"><td><span class="tag tag--heim">P1</span><br><span class="konzept-onr">O31</span></td><td><p class="konzept-frage">Verzichten wir auf beitragsfreie oder befristete Probemitgliedschaften?</p><p class="konzept-warum">Mitgliedschaften, die schon beim Eintritt auf weniger als 12 Monate angelegt sind, sind nicht versichert. Das gilt auch für eine Mitgliedschaft nur für die Karnevalskampagne.</p></td></tr>
         <tr id="o66" data-prio="P1"><td><span class="tag tag--heim">P1</span><br><span class="konzept-onr">O66</span></td><td><p class="konzept-frage">Reparieren wir die Weiterleitung der Satzungsadresse im Aufnahmeantrag, oder ändern wir die Adresse im Vordruck?</p><p class="konzept-warum">Die Adresse im Aufnahmeantrag führt ins Leere (Fehler 401, geprüft am 29.09.2026). Die Satzung liegt unter der Download-Adresse der Website. Der Assistent verlinkt dorthin (Abschnitt 5).</p></td></tr>
         <tr id="o68" data-prio="P1"><td><span class="tag tag--heim">P1</span><br><span class="konzept-onr">O68</span></td><td><p class="konzept-frage">Dürfen Vereinsunterlagen am Bildschirm unterschrieben werden?</p><p class="konzept-warum">Das wäre eine einfache elektronische Unterschrift. Die Form bestimmt der Verein selbst: Die Satzung verlangt Schriftform, nach § 127 BGB kann eine elektronische Übermittlung reichen. HFV-Vordrucke bleiben Stift. Der Laufzettel im PDF bittet den Vorstand, das zu bestätigen (Abschnitt 5).</p></td></tr>
+        <tr id="o72" data-prio="P1"><td><span class="tag tag--heim">P1</span><br><span class="konzept-onr">O72</span></td><td><p class="konzept-frage">Wie übergibt die Familie das PDF in der Vereins-App?</p><p class="konzept-warum">In der App-Webansicht klappt Speichern oder Teilen der Datei vielleicht nicht. Für Website und App gleich wäre der automatische Versand an den Verein über die eigene Annahme (IONOS), wie beim Online-Aufnahmeantrag. Bis dahin weist der Assistent in der App auf „Im Browser öffnen“ hin.</p></td></tr>
         </tbody>
       </table>
     </div>
@@ -620,6 +622,7 @@
         <thead><tr><th scope="col">Prio · Nr.</th><th scope="col">Entscheidung</th></tr></thead>
         <tbody>
         <tr id="o67" data-prio="P1"><td><span class="tag tag--heim">P1</span><br><span class="konzept-onr">O67</span></td><td><p class="konzept-frage">Welche Rechtsgrundlage gilt für die Notfallkontakte ohne Angaben zur Gesundheit: Art. 6 Abs. 1 lit. b oder lit. f DSGVO?</p><p class="konzept-warum">Art. 9 DSGVO (ausdrückliche Einwilligung) passt nur zur Fassung mit Angaben zur Gesundheit. Für die Fassung „nur Notfallkontakte“ braucht die Information zum Datenschutz eine eigene Rechtsgrundlage. Der Entwurf im PDF nennt beide: lit. b für Mitgliedschaft und Fürsorge im Training, lit. f (berechtigtes Interesse) für weitere Kontaktpersonen. Der Vorstand bestätigt die Wahl.</p></td></tr>
+        <tr id="o73" data-prio="P1"><td><span class="tag tag--heim">P1</span><br><span class="konzept-onr">O73</span></td><td><p class="konzept-frage">Dürfen Gesundheitsdaten aus Teil C sowie Ausweis- und Passkopien per E-Mail an den Verein gehen?</p><p class="konzept-warum">Beim automatischen Versand kämen sie mit. Möglich ist: nur verschlüsselt, oder Teil C und die Kopien getrennt auf Papier. Gesundheitsdaten brauchen besonderen Schutz (Art. 9 DSGVO).</p></td></tr>
         </tbody>
       </table>
     </div>
@@ -865,7 +868,7 @@
     <li>Info-Blatt, 8. Januar 2014; Unterlagenliste, 14. Juni 2021; Zusatzerklärung, 8. Januar 2014</li>
     <li>Schutzkonzept, Stand Mai 2025</li>
     <li>Vereinsdaten (Mannschaften, Unterlagen, Karneval), Stand 22. bis 28. September 2026</li>
-    <li>Regelwerk des Anmelde-Assistenten (Prototyp), Version 2026-09-29.2, mit den offenen Punkten O01 bis O71</li>
+    <li>Regelwerk des Anmelde-Assistenten (Prototyp), Version 2026-10-07.1, mit den offenen Punkten O01 bis O73</li>
   </ul>
     <h3>Einfache Sprache und Statistik</h3>
     <ul class="konzept-liste konzept-quellen">

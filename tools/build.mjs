@@ -445,7 +445,8 @@ async function main() {
 
     mkdirSync(path.join(DOCS, url), { recursive: true });
     writeFileSync(path.join(DOCS, url, "index.html"), html, "utf8");
-    begleitGeschrieben.push({ url, title: seite.title });
+    // noindex: Seite nicht in die Sitemap (Sitemap nennt nur indexierbare Seiten; Anmelde-Assistent, 07.10.2026)
+    begleitGeschrieben.push({ url, title: seite.title, noindex: /noindex/i.test(seite.kopfZusatz ?? "") });
   }
 
   // K1: Klick-Prototyp der App (docs/app-konzept/) – neun eigenständige
@@ -560,7 +561,7 @@ async function main() {
   // (siehe screenshotHuelle() dort).
   const sitemapEintraege = [
     `  <url><loc>${BASIS_URL}</loc></url>`,
-    ...begleitGeschrieben.map((s) => `  <url><loc>${BASIS_URL.replace(/\/$/, "")}${s.url}</loc></url>`),
+    ...begleitGeschrieben.filter((s) => !s.noindex).map((s) => `  <url><loc>${BASIS_URL.replace(/\/$/, "")}${s.url}</loc></url>`),
     // K1: Sitemap-Eintrag nur für die Rahmenseite (docs/app-konzept/index.html),
     // nicht für die neun Bildschirm-Attrappen (siehe oben).
     `  <url><loc>${BASIS_URL}app-konzept/</loc></url>`,

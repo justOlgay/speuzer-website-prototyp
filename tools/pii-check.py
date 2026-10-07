@@ -3,7 +3,10 @@
 Speuzer Website Prototyp – Datenschutz-Gate (P0)
 
 Durchsucht data/, src/ und docs/ (Text- und HTML-Dateien) nach personenbezogenen
-Daten und Demodaten-Resten. Gibt bei jedem Treffer "Datei:Zeile: Treffer" aus.
+Daten und Demodaten-Resten. Zusätzlich (07.10.2026): private Namen aus der lokalen,
+gitignorierten Liste tools/cache/pii-namen.txt (eine Zeile je Name, # = Kommentar) in
+allen Textdateien des Repos außer tools/cache/, .git/ und node_modules/ – die Namen selbst
+stehen nie in der Ausgabe. Gibt bei jedem Treffer "Datei:Zeile: Treffer" aus.
 Exit 1 bei mindestens einem Treffer, Exit 0 wenn sauber.
 """
 
@@ -171,8 +174,40 @@ def pruefe_zeile(pfad_rel, zeilennr, zeile, treffer):
             treffer.append((pfad_rel, zeilennr, f"Demodaten-Rest: '{text}'"))
 
 
+NAMENSLISTE = ROOT / "tools" / "cache" / "pii-namen.txt"
+NAMENS_AUSNAHMEN = {".git", "node_modules"}
+
+
+def lade_private_namen():
+    if not NAMENSLISTE.exists():
+        return []
+    namen = [z.strip() for z in NAMENSLISTE.read_text(encoding="utf-8").splitlines()]
+    return [re.compile(r"(?<![\w])" + re.escape(n) + r"(?![\w])", re.IGNORECASE) for n in namen if n and not n.startswith("#")]
+
+
+def pruefe_private_namen(treffer):
+    muster = lade_private_namen()
+    if not muster:
+        print("pii-check: Hinweis – keine private Namensliste (tools/cache/pii-namen.txt), Namensprüfung übersprungen.")
+        return
+    for pfad in sorted(ROOT.rglob("*")):
+        teile = pfad.relative_to(ROOT).parts
+        if not pfad.is_file() or not teile or teile[0] in NAMENS_AUSNAHMEN or teile[:2] == ("tools", "cache"):
+            continue
+        if not ist_text_datei(pfad) or pfad.name in FREMDCODE_DATEIEN:
+            continue
+        try:
+            inhalt = pfad.read_text(encoding="utf-8", errors="strict")
+        except (UnicodeDecodeError, OSError):
+            continue
+        for zeilennr, zeile in enumerate(inhalt.splitlines(), start=1):
+            if any(m.search(zeile) for m in muster):
+                treffer.append((str(pfad.relative_to(ROOT)), zeilennr, "privater Name aus pii-namen.txt"))
+
+
 def main():
     treffer = []
+    pruefe_private_namen(treffer)
 
     for ordnername in DURCHSUCHTE_ORDNER:
         ordner = ROOT / ordnername

@@ -1,5 +1,5 @@
 /*
-  Regelwerk des Anmelde-Assistenten FFV Sportfreunde 04 (Stand 2026-09-29, Saison 2026/27)
+  Regelwerk des Anmelde-Assistenten FFV Sportfreunde 04 (Stand 2026-10-07, Saison 2026/27)
 
   Reine Funktionen ohne Browser- und Zeitzugriff: Das Heute-Datum kommt immer als
   Parameter "JJJJ-MM-TT" hinein, die Konfiguration (data/anmeldung.json und weitere
@@ -30,7 +30,7 @@
   Datenschutz: Das Modul liest nur die übergebenen Antworten. Es speichert und sendet nichts.
 */
 
-export const VERSION = "2026-09-29.2";
+export const VERSION = "2026-10-07.1";
 
 // ---------------------------------------------------------------------------
 // Schlüssel-Register: alle Schlüssel, die auswerten() zurückgeben kann. Zu jedem

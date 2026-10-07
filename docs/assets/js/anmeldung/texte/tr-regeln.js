@@ -1,7 +1,7 @@
 /*
   Texte des Regelwerks - Türkisch (Türkçe), Gegenstück zu regeln.js.
   Übersetzungshilfe: Verbindlich ist der deutsche Text (de-regeln.js).
-  Stand 29.09.2026. Dieselbe Schlüsselstruktur wie de-regeln.js; Platzhalter in geschweiften
+  Stand 08.10.2026. Dieselbe Schlüsselstruktur wie de-regeln.js; Platzhalter in geschweiften
   Klammern (zum Beispiel {datum}) bleiben unverändert und bekommen keine türkische Endung
   ("{datum} tarihine kadar", "{pflichtspiele} tarihinden itibaren"). Stil und Begriffe: siehe die
   Begriffsliste oben in tr-oberflaeche.js.
@@ -131,7 +131,7 @@ export default {
       name: "Eski kulüpteki kayıt silme (Abmeldung)",
       kurz: "Eski kulüpte oyuncu olarak kaydınızı sildirirsiniz. Bu, taahhütlü mektupla (Einschreiben) olur. E-posta yetmez.",
       warum: "Kayıt silme günü önemlidir. Bekleme süresi o günden başlar.",
-      wie: "Formu taahhütlü mektup (Einschreiben) olarak gönderin. Kapıya bırakma tipi taahhütlü mektup (Einwurf-Einschreiben) yetmez. Makbuzu saklayın.",
+      wie: "Formu taahhütlü mektup (Einschreiben) olarak gönderin. Postanede şunu söyleyin: normal taahhütlü mektup, kapıya bırakma tipi taahhütlü mektup (Einwurf-Einschreiben) değil. Kapıya bırakma tipinde mektup yalnızca posta kutusuna atılır. Bu geçerli değildir. Makbuzu saklayın.",
       wo: "Makbuzun fotoğrafını çekip yüklersiniz. Ya da kulüpte teslim edersiniz.",
     },
     U18: {
@@ -164,8 +164,8 @@ export default {
     },
     U22: {
       name: "Eski kulüpten onay",
-      kurz: "Eski kulüp, son lig veya kupa maçının tarihini onaylar. Bunlar lig ya da kupadaki maçlardır.",
-      warum: "6 aydan uzun süre lig veya kupa maçı yoksa bekleme süresi olmaz.",
+      kurz: "Eski kulüp, son lig veya kupa maçını onaylar.",
+      warum: "6 ay boyunca lig veya kupa maçı olmadı mı? O zaman bekleme süresi yok.",
       wie: "Yeni kulüp bunu eski kulüpten ister.",
       wo: "Hiçbir şey yüklemenize gerek yok.",
     },
@@ -303,15 +303,15 @@ export default {
     abmeldung_formlos: "E-posta, WhatsApp mesajı ya da sıradan bir mektup kayıt silme sayılmaz. Taahhütlü mektup (Einschreiben) gönderin.",
     abmeldung_nach_letztem_spiel: "Eski kulüpteki kaydınızı ancak son maçtan sonra sildirin.",
     abmeldung_vor_letztem_spiel: "Son maç, kayıt silmeden sonraydı. Lütfen iki tarihi de kontrol edin. Federasyon bunu sorar.",
-    nie_zwei_vereine: "Asla iki kulüp için imza atmayın. Bu cezalandırılır.",
+    nie_zwei_vereine: "Aynı anda iki kulüp için asla imza atmayın. Yoksa federasyon oyuncuyu cezalandırır.",
     kuendigung_extra: "Eski kulüpteki üyelikten ayrıca çıkın. Oyuncu olarak kaydı sildirmek bunun için yetmez.",
     vollmacht_eingabe_zeitnah: "Yeni kulüp kayıt silmeyi aynı gün ya da ertesi gün sisteme girmelidir. Aksi halde bekleme süresi uzar.",
     wiederholter_wechsel: "Son 6 ayda zaten bir kulüp değişikliği oldu. O zaman bekleme süresi daha uzun olabilir. Federasyon karar verir.",
     antrag_zu_spaet: "Başvuru {datum} tarihine kadar federasyonda olmalıdır. Bu süre geçti. Kulüp federasyona sorar.",
     ohne_zusage_spielen: "Çocuğun oynayabileceğinin sözünü veremeyiz. Antrenman yapabilir.",
-    f17_wahrscheinlich_nicht: "5 yıllık ikamet olmadan bu büyük olasılıkla olmaz. O zaman oynamak ancak 18 yaşında mümkündür. Hazırlık maçlarına da izin verilmez.",
-    aushilfe_nur_ausnahme: "Bu doğum yılı için bu ancak istisnai durumlarda mümkündür. Gençlik birimi bunu kontrol eder.",
-    getrennt_zustimmung: "Lütfen diğer ebeveyne sorun. Kayda razı olmalı. Yoksa ikisi de imzalar.",
+    f17_wahrscheinlich_nicht: "5 yıllık ikamet olmadan çocuğun büyük olasılıkla oynamasına izin verilmez. O zaman oynamak ancak 18 yaşında mümkündür. Hazırlık maçlarına da izin verilmez.",
+    aushilfe_nur_ausnahme: "Bu doğum yılında genç, gerektiğinde Herren (yetişkin erkek takımı) takımında ancak nadiren oynayabilir. Gençlik birimi bunu kontrol eder.",
+    getrennt_zustimmung: "Lütfen diğer ebeveyne sorun. Kayda razı olması gerekir. En iyisi, üyelik başvurusunu (Aufnahmeantrag) o da imzalasın.",
     karneval_tanzt_woanders: "Dansçılar turnuvalarda yalnızca bir kulüp adına yarışır.",
     beitrag_gruppe_pruefen: "Aidat grubu: {gruppe}. Bu grup yaşa uygun olmayabilir. Kulüp bunu kontrol eder.",
 
@@ -321,7 +321,7 @@ export default {
     // Infos
     frist_annahme_heute: "Şöyle hesaplıyoruz: Kayıt silme, {abmeldung} tarihinde geçerli olur. Daha geç sildirirseniz bekleme süresi uzar.",
     probetraining_versicherung: "Henüz üye olmayanların antrenmanda kendi sigortası yoktur. En iyisi ilk antrenmandan önce kayıt olmaktır.",
-    kuendigung_jahresende: "Kulüpten ancak yıl sonunda ayrılabilirsiniz. Üyelikten çıkma bildirimini taahhütlü mektupla (Einschreiben) gönderin.",
+    kuendigung_jahresende: "Kulübümüzde ancak yıl sonunda üyelikten çıkabilirsiniz. Üyelikten çıkma bildirimini taahhütlü mektupla (Einschreiben) gönderin.",
     ohne_spielrecht_kein_spiel: "Oynama izni olmadan çocuk maçlara katılamaz. Hazırlık maçlarına da katılamaz. Antrenman serbesttir.",
     mitgliedschaft_zuerst: "Önce üye olursunuz. Sonra kulüp federasyona başvuruyu yapar.",
     spielerfoto_hinweis: "Fotoğraf ilk maçtan önce sistemde olmalıdır. Fotoğraf yoksa kimse oynayamaz.",
@@ -345,7 +345,7 @@ export default {
     keine_frauenmannschaft: "Kulübün kadın takımı yok. 18 yaşından itibaren kadınlar başvuruyla Herren (yetişkin erkek takımı) takımında oynayabilir. Bizimle konuşun.",
     vertrauensperson: "Federasyonun bu durum için güvenilir bir irtibat kişisi var. Bu kişi başvuruda yardım eder. Çocuklarda ebeveynler onay verir.",
     sonderspielrecht: "Engelli çocuklar daha genç bir yaş grubunda oynayabilir. Buna özel oynama izni (Sonderspielrecht) denir. Bunun için bir uzman doktordan rapor gerekir. Gençlik birimi size yardım eder.",
-    beide_unterschreiben_empfohlen: "Önerimiz: İki ebeveyn de üyelik başvurusunu (Aufnahmeantrag) imzalasın. Federasyon için bir imza yeterlidir.",
+    beide_unterschreiben_empfohlen: "Önerimiz: İki ebeveyn de üyelik başvurusunu (Aufnahmeantrag) imzalasın.",
     getrennt_einverstanden: "Diğer ebeveyn razı. Bu yüzden bir kişi imzalar.",
     sorge_allein_nachweis: "Velayet hakkı tek başınıza sizde. Kulüp isterse göstermek için bir belge hazır tutun.",
     vormund_hinweis: "Vasi (Vormund) çocuk adına imzalar. Vasilik belgesini getirin.",
@@ -467,7 +467,7 @@ export default {
     frist_wechsel_6monate: "Eski kulüp sizi serbest bırakmaz. Bekleme süresi {monate} ay sürer. Lig ve kupa maçları {pflichtspiele} tarihinden itibaren mümkündür. Hazırlık maçları {freundschaftsspiele} tarihinden itibaren mümkündür.",
     frist_freigabe_unklar: "Eski kulübün sizi serbest bırakıp bırakmadığını bilmiyorsunuz. Serbest bırakma olmazsa lig ve kupa maçları {pflichtspiele} tarihinden itibaren mümkündür. Serbest bırakma olursa {alternativ} tarihinden itibaren.",
     frist_d_jung_offen: "Bu doğum yılı için kural net değil. Lig ve kupa maçları en erken {alternativ} tarihinden itibaren mümkündür. Belki ancak {pflichtspiele} tarihinden itibaren.",
-    frist_entfaellt: "Son lig veya kupa maçı 6 aydan daha önceydi. Bu yüzden bekleme süresi yok.",
+    frist_entfaellt: "6 aydan uzun süredir lig veya kupa maçı olmadı. Bu yüzden bekleme süresi yok.",
     frist_herren_wp1_zustimmung: "30 Haziran’a kadar kaydı sildirirsiniz ve eski kulüp onay verir. Lig ve kupa maçları {pflichtspiele} tarihinden itibaren mümkündür.",
     frist_herren_wp1_ohne: "30 Haziran’a kadar kaydı sildirirsiniz ama eski kulüp onay vermez. Lig ve kupa maçları ancak {pflichtspiele} tarihinden itibaren mümkündür.",
     frist_herren_wp2_zustimmung: "30 Haziran’dan sonra kaydı sildirirsiniz ve eski kulüp onay verir. Lig ve kupa maçları {pflichtspiele} tarihinden itibaren mümkündür.",
@@ -477,8 +477,8 @@ export default {
   mannschaft: {
     mannschaft_unbekannt: "Doğum tarihi olmadan takımı söyleyemeyiz.",
     keine_mannschaft: "{jahrgang} doğum yılı için kulübün takımı yok. Gençlik birimi sizinle iletişime geçecek. Kaydınız devam eder.",
-    mannschaft_gefunden: "Çocuk şu takıma uyuyor: {mannschaft}. Engeli var mı? Özel oynama izni (Sonderspielrecht) için gençlik birimine sorun.",
-    mannschaft_mehrere: "Çocuk şu takımlarda oynayabilir: {mannschaften}. Antrenörler onu yerleştirir. Engeli var mı? Özel oynama izni (Sonderspielrecht) için gençlik birimine sorun.",
+    mannschaft_gefunden: "Çocuk şu takıma uyuyor: {mannschaft}.",
+    mannschaft_mehrere: "Çocuk şu takımlarda oynayabilir: {mannschaften}. Antrenörler onu yerleştirir.",
     mannschaft_2020_f2: "{jahrgang} doğum yılı kulüpte {mannschaft} takımında oynar. Frankfurt bölgesi bu yılı G-Jugend sayar.",
     mannschaft_herren: "Şu takıma uyuyorsunuz: {mannschaft}.",
     mannschaft_maedchen_bonus: "Kızlar erkeklerden bir yaş büyük olabilir. Çocuk şu takımlara uyuyor: {mannschaften}.",
@@ -493,6 +493,19 @@ export default {
     beitrag_azubi: "Çıraklar ve öğrenciler için aidat yılda {jahr} Euro. Bir belge gerekir.",
     beitrag_senator: "Senatörler yılda {jahr} Euro öder. Kabul kararını yönetim kurulu verir.",
     beitrag_doppel: "İki bölümdesiniz. Aidatı size kulüp ofisi söyler.",
+    // Namen der Beitragsgruppen (Schlüssel wie in de-regeln.js): Übersetzung mit der Abteilung (ohne Doppelpunkt, der Text steht auch hinter "Wir schlagen vor:"), dahinter der deutsche Name ohne Abteilung in Klammern.
+    gruppen: {
+      fussball_jugend: "Futbolda çocuklar ve gençler, A-Jugend dahil (Kinder und Jugendliche)",
+      fussball_erwachsene: "Futbolda yetişkinler (Erwachsene)",
+      fussball_passiv: "Futbolda pasif üyeler, kadınlar ve 65 yaş ve üstü emekliler (Passive, Frauen und Rentner ab 65)",
+      fussball_familie: "Futbolda aile aidatı (Familienbeitrag)",
+      karneval_kinder: "Karnavalda çocuklar ve gençler (Kinder und Jugendliche)",
+      karneval_azubi: "Karnavalda belgesi olan çıraklar ve öğrenciler (Auszubildende und Studierende mit Nachweis)",
+      karneval_erwachsene: "Karnavalda yetişkinler (Erwachsene)",
+      karneval_rentner: "Karnavalda 65 yaş ve üstü emekliler (Rentner ab 65)",
+      karneval_familie: "Karnavalda aile aidatı (Familienbeitrag)",
+      karneval_senator: "Karnavalda senatörlük üyeliği (Senatorenmitgliedschaft)",
+    },
   },
 
   formulare: {

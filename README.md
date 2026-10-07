@@ -21,7 +21,9 @@ Die Inhalte stammen von der Live-Seite sportfreunde04.de sowie aus den öffentli
 appack- und fussball.de-Schnittstellen, **Stand 11.09.2026**.
 
 Der Prototyp ist indexierbar, damit die Lighthouse-SEO-Prüfung (is-crawlable) bestanden
-wird; er kennzeichnet sich auf jeder Seite als Testumgebung.
+wird; er kennzeichnet sich auf jeder Seite als Testumgebung. Ausnahme: Die Entwurfsseiten
+`/anmeldung/` und `/anmeldung-konzept/` tragen `noindex` und stehen deshalb nicht in der Sitemap
+(Lighthouse prüft nur Sitemap-Seiten).
 
 ## Aufbau der Ordner
 
@@ -69,6 +71,21 @@ Vorstand außerhalb der nachgebildeten appack-Website und der
 Workspace-Seiten, mit eigener schmaler Kopfleiste statt der Hülle. Die
 Module liegen unter `src/begleit/` (Vorlage `src/vorlagen/begleit.html`) und
 werden nach `docs/vorher-nachher/`, `docs/app/` sowie `docs/404.html` gebaut.
+
+### Anmelde-Assistent (Entwurf)
+
+`/anmeldung/` führt eine Familie in Einfacher Sprache (Übersetzungshilfe Englisch, Türkisch, Arabisch)
+durch die Anmeldung und erzeugt im Browser ein PDF mit allen Unterlagen (Teil A für die Familie, Teil B
+für den Verein, Teil C vertraulich). Es wird nichts gesendet und nichts gespeichert. `/anmeldung-konzept/`
+erklärt das Konzept und listet die offenen Entscheidungen (O-Nummern) für Vorstand, Kasse und Passstelle.
+Beide Seiten sind `noindex` und nicht Teil des appack-Pakets.
+
+- Regelwerk: `data/anmeldung.json` (Fälle, Unterlagen, Fristen, offene Punkte), `assets/js/anmeldung/regeln.js`
+- PDF: `assets/js/anmeldung/pdf.js`, Vordrucke in `assets/pdf/anmeldung/`, Zuordnung `data/anmeldung-formulare.json`
+  (erzeugt mit `tools/anmeldung-test/formulare-erzeugen.mjs`)
+- Oberfläche und Texte: `assets/js/anmeldung/`, `assets/js/anmeldung/texte/` (de, en, tr, ar)
+- Seiten: `src/begleit/anmeldung.mjs`, `src/begleit/anmeldung-konzept.mjs`
+- Tests: `tools/anmeldung-test/` (siehe Befehle `test:anmeldung…`)
 
 ## Befehle
 
@@ -129,7 +146,7 @@ npm run antrag-bibliotheken
                   aufnahmeantrag.js, Feldpositionen data/aufnahmeantrag-felder.json):
                   Sie füllt das Vereins-PDF im Browser aus, ohne Daten zu übertragen;
                   tools/appack-paket.mjs legt die Skripte mit in den Ordner web/.
-npm run vorstand-pdf
+npm run vorstand-pdf   (Kopie in den Vereinsordner nur mit Umgebungsvariable VEREIN_ORDNER)
                   Baut das Vorstandsdokument „Website-Vergleich Live-Seite und
                   appack-Fassung“ als A4-PDF (tools/vorstand-pdf/bauen.mjs, Texte aus
                   tools/vorstand-pdf/texte.mjs). Nimmt zwölf neue Screenshots auf – die

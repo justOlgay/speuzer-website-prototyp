@@ -43,13 +43,8 @@ export const start = {
   id: "start",
   teile: () => ["haupt"],
   render(k) {
-    const sprachen = kartenAuswahl(k, {
-      pfad: "sprache",
-      legende: k.t("start.spracheTitel"),
-      klasse: "anm-sprachwahl",
-      optionen: k.sprachen.map((s) => ({ wert: s.code, label: s.name, lang: s.code, dir: s.dir })),
-      beiWahl: (code) => k.wechsleSprache(code),
-    });
+    // Die Sprachwahl steht nicht in dieser Seite, sondern ganz oben im Seitenkopf (src/begleit/anmeldung.mjs, verdrahtet in
+    // assistent.js): Sie soll im ersten Bildschirm stehen, vor dem deutschen Erklärtext. Dort steht auch der Hinweis für die App.
     return {
       titel: k.t("start.titel"),
       weiterText: k.t("start.los"),
@@ -60,7 +55,6 @@ export const start = {
         h("ul", { klasse: "anm-liste-punkte" }, k.tl("start.brauchen").map((x) => h("li", {}, x))),
         h("p", { klasse: "anm-text" }, k.t("start.dauer")),
         ...absaetze(k.t("start.datenschutz")),
-        sprachen,
         h("p", { klasse: "anm-hinweis" }, k.t("start.hilfe")),
       ],
     };

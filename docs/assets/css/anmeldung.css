@@ -16,6 +16,118 @@
   margin: 0;
 }
 
+/* Arabisch: assistent.js setzt dir="rtl" am Band. Der Balken steht dann dort, wo der Text beginnt (rechts);
+   .hinweis (komponenten.css) zeichnet ihn mit border-left. */
+.anm-band[dir="rtl"] {
+  border-left: 0;
+  border-right: 4px solid var(--warn);
+  border-radius: var(--r-md) 0 0 var(--r-md);
+}
+
+/* ---------- App-Modus ----------
+   Die Vereins-App öffnet die Seite mit ?app=1; ein Skript im Kopf (src/begleit/anmeldung.mjs, APP_MODUS_KOPF) setzt
+   die Klasse app-modus am <html>, bevor etwas gezeichnet wird. Dann entfällt der Rahmen der Begleitseite (Kopfleiste mit
+   Navigation und Fußnote "Begleitmaterial"). Der Assistent selbst bleibt gleich. */
+.app-modus .begleit-kopf,
+.app-modus .ws-fuss {
+  display: none;
+}
+
+/* Hinweis ganz oben auf dem Startschritt, nur im App-Modus: Speichern der Datei klappt in der App manchmal nicht. */
+.anm-apphinweis {
+  display: none;
+  margin-block-end: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+  border-inline-start: 4px solid var(--blau-700);
+  border-radius: var(--r-md);
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+  background: var(--blau-100);
+  color: var(--ink);
+  font-size: var(--fs-md);
+}
+
+.anm-apphinweis p {
+  margin: 0;
+}
+
+.anm-apphinweis a {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.app-modus .anm-apphinweis {
+  display: block;
+}
+
+/* ---------- Sprachwahl ganz oben im Seitenkopf ----------
+   Steht über der Überschrift, damit sie im ersten Bildschirm sichtbar ist (auch am Handy). Nur der Startschritt
+   zeigt sie; danach wählt man die Sprache in der Leiste des Assistenten. assistent.js setzt dafür die Klasse
+   anm-ohne-sprachleiste am <main>. Die vier Namen stehen in ihrer eigenen Schrift (lang/dir am Knopf). */
+.anm-sprachleiste {
+  margin-block-end: var(--sp-4);
+}
+
+.anm-sprachleiste__titel {
+  margin: 0 0 var(--sp-2);
+  font-weight: 700;
+  color: var(--blau-900);
+}
+
+.anm-sprachleiste__liste {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .anm-sprachleiste__liste {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    max-width: 40rem;
+  }
+}
+
+.anm-sprachleiste__knopf {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  padding: var(--sp-2) var(--sp-3);
+  border: 2px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color var(--t-kurz), background var(--t-kurz);
+}
+
+.anm-sprachleiste__knopf:hover {
+  border-color: var(--blau-600);
+}
+
+.anm-sprachleiste__knopf[aria-pressed="true"] {
+  border-color: var(--blau-700);
+  background: var(--blau-50);
+  font-weight: 700;
+}
+
+.anm-sprachleiste__knopf:focus-visible {
+  outline: var(--fokus);
+  outline-offset: 2px;
+}
+
+.anm-ohne-sprachleiste .anm-sprachleiste,
+.anm-ohne-sprachleiste .anm-apphinweis {
+  display: none;
+}
+
 /* ---------- Kompakter Seitenkopf ----------
    assistent.js setzt die Klasse anm-kompakt an <main>, sobald die Fragen
    beginnen (nicht auf "start" und "fertig"). Dann rückt die Frage nach oben:
@@ -915,6 +1027,16 @@
   outline-offset: 4px;
 }
 
+/* "Diese Unterschrift gilt für:" mit einer Zeile je Blatt */
+.anm-unterschrift__gilt p {
+  margin: 0;
+}
+
+.anm-unterschrift__gilt ul {
+  margin: var(--sp-1) 0 0;
+  padding-inline-start: 1.25rem;
+}
+
 .anm-unterschrift__titel {
   font-weight: 700;
 }
@@ -1187,6 +1309,14 @@
   overflow-wrap: normal;
   word-break: keep-all;
   unicode-bidi: isolate;
+}
+
+/* Rufnummer im Knopf "Anrufen": ein eigener Block von links nach rechts, auch im arabischen Satz ("069 736868"). */
+.anm-tel {
+  display: inline-block;
+  direction: ltr;
+  unicode-bidi: isolate;
+  white-space: nowrap;
 }
 
 /* Arabisch: Systemschrift, keine Rücksicht auf die schmale Kopfschrift. */

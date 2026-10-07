@@ -33,6 +33,12 @@
     - "Ändern" auf der Prüfseite führt zur Seite; danach geht es zur
       nächsten unvollständigen Seite oder zurück zur Prüfung.
     - Am Ende erzeugt pdf-lader.js das PDF.
+    - Die Sprachwahl steht nicht in einer Seite des Assistenten, sondern ganz oben im Seitenkopf
+      (src/begleit/anmeldung.mjs, [data-anm-sprachleiste]): So ist sie im ersten Bildschirm zu sehen,
+      vor dem deutschen Erklärtext. Nur der Startschritt zeigt sie (Klasse anm-ohne-sprachleiste am <main>).
+    - App-Modus (Seite mit ?app=1, Klasse app-modus am <html>, vom Skript im Seitenkopf gesetzt): Der Assistent
+      bleibt gleich; der Hinweis "Im Browser öffnen" steht oben auf dem Startschritt und auf der Fertig-Seite
+      (k.appModus, k.browserUrl).
 */
 
 import { zeigeFehlerAnFeldern, fokusZiel, feldBezeichnung, h, anhaengen } from "./bausteine.js";
@@ -176,6 +182,26 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
           .map((zeile) => (zeile.trim() ? "\u2066" + zeile + "\u2069" : zeile))
           .join("\n")
       : text;
+
+  // Schreibrichtung der gewählten Sprache ("ltr" oder "rtl").
+  k.richtung = () => (istRtl() ? "rtl" : "ltr");
+
+  // App-Modus: Die Vereins-App öffnet die Seite mit ?app=1; ein Skript im Seitenkopf setzt die Klasse app-modus
+  // am <html>, bevor etwas gezeichnet wird. Der Assistent bleibt gleich, nur ein Hinweis kommt dazu.
+  k.appModus = () => document.documentElement.classList.contains("app-modus");
+  // Dieselbe Seite ohne ?app=1: Dort klappt Speichern und Teilen der Datei im Browser.
+  k.browserUrl = () => {
+    try {
+      const u = new URL(location.href);
+      u.searchParams.delete("app");
+      u.hash = "";
+      return u.toString();
+    } catch (e) {
+      return "./";
+    }
+  };
+  // Link "Im Browser öffnen" (neuer Tab, ohne Rückbezug auf die App).
+  k.browserLink = () => h("a", { href: k.browserUrl(), target: "_blank", rel: "noopener", klasse: "anm-browserlink", "data-aktion": "im-browser-oeffnen" }, k.t("app.browser"));
 
   // Deutsche Angaben aus der Konfiguration (Namen der Beitragsgruppen und der
   // Karnevalsgruppen, Übungszeiten): in Sprachen von rechts nach links in Isolaten.
@@ -363,6 +389,10 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
   // Der Seitenkopf über dem Assistenten (h1, Lead, Entwurfs-Band, Werkzeuge) wird
   // kompakt, sobald die Fragen beginnen: Die Klasse sitzt am umgebenden <main>.
   const seitenwurzel = wurzel.closest("main") || document.body;
+  // Sprachwahl im Seitenkopf (siehe oben) und Hinweis für die App
+  const sprachleiste = document.querySelector("[data-anm-sprachleiste]");
+  const appHinweis = document.querySelector("[data-anm-apphinweis]");
+  const entwurfsband = document.querySelector("[data-anm-band]");
 
   function fuelleSprachen() {
     spracheAuswahl.textContent = "";
@@ -370,9 +400,24 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
     spracheAuswahl.value = k.sprache;
   }
 
+  // Knöpfe der Sprachleiste: gewählte Sprache markieren
+  function zeigeSprachwahl() {
+    if (!sprachleiste) return;
+    for (const b of sprachleiste.querySelectorAll("[data-sprache]")) b.setAttribute("aria-pressed", String(b.getAttribute("data-sprache") === k.sprache));
+  }
+  if (sprachleiste) {
+    sprachleiste.addEventListener("click", (e) => {
+      const knopfEl = e.target.closest("[data-sprache]");
+      if (knopfEl && sprachleiste.contains(knopfEl)) wechsleSprache(knopfEl.getAttribute("data-sprache"));
+    });
+  }
+
   function aktualisiereKopf() {
     // Kompakter Seitenkopf bei allen Fragen; auf "start" und "fertig" steht er voll da.
     seitenwurzel.classList.toggle("anm-kompakt", k.schritt !== "start" && k.schritt !== "fertig");
+    // Sprachwahl und App-Hinweis oben stehen nur auf dem Startschritt.
+    seitenwurzel.classList.toggle("anm-ohne-sprachleiste", k.schritt !== "start");
+    zeigeSprachwahl();
     zurueckKnopf.textContent = k.t("kopf.zurueck");
     zurueckKnopf.setAttribute("aria-label", k.t("kopf.zurueckLang"));
     zurueckKnopf.hidden = k.tiefe <= 0;
@@ -404,6 +449,16 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
       el.setAttribute("lang", k.sprache);
       el.setAttribute("dir", info.dir || "ltr");
     }
+    // Das Entwurfs-Band und der Hinweis für die App folgen der Sprache als Ganzes (Balken und Text auf der Seite, wo der
+    // Text beginnt), nicht nur ihre Sätze.
+    for (const kasten of [entwurfsband, appHinweis]) {
+      if (!kasten) continue;
+      kasten.setAttribute("lang", k.sprache);
+      kasten.setAttribute("dir", info.dir || "ltr");
+    }
+    // Link "Im Browser öffnen": dieselbe Seite ohne ?app=1
+    for (const a of document.querySelectorAll("[data-anm-browserlink]")) a.setAttribute("href", k.browserUrl());
+    zeigeSprachwahl();
   }
 
   k.melde = (text) => {
@@ -689,7 +744,8 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
     hilfeDialog.textContent = "";
     const kontakte = k.tl("hilfe.kontakte").map((c) => {
       const zeile = [];
-      if (c.tel) zeile.push(h("a", { klasse: "knopf", href: "tel:" + c.tel.replace(/\D/g, "") }, k.t("hilfe.anrufen") + ": " + c.tel));
+      // Die Rufnummer ist ein eigener Block von links nach rechts, auch im arabischen Satz ("069 736868").
+      if (c.tel) zeile.push(h("a", { klasse: "knopf", href: "tel:" + c.tel.replace(/\D/g, "") }, k.t("hilfe.anrufen") + ": ", h("span", { klasse: "anm-tel", dir: "ltr" }, c.tel)));
       if (c.mail) {
         // Zwei Zeilen im Knopf: die Aufgabe und darunter die Adresse (mit Umbruchstellen vor "@" und vor Punkten).
         const adresse = [];

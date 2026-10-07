@@ -1,7 +1,7 @@
 /*
   Texte der Oberfläche des Anmelde-Assistenten - Englisch (British English).
   Übersetzungshilfe: Verbindlich ist der deutsche Text (de-oberflaeche.js), das PDF bleibt deutsch.
-  Stand 29.09.2026. Dieselbe Schlüsselstruktur wie de-oberflaeche.js, aber ohne "sprachen" und
+  Stand 08.10.2026. Dieselbe Schlüsselstruktur wie de-oberflaeche.js, aber ohne "sprachen" und
   ohne "demo" (die Vorführung bleibt deutsch). Fehlt hier ein Eintrag, gilt der deutsche.
   Prüfung: node tools/anmeldung-test/uebersetzung-pruefen.mjs
 
@@ -134,6 +134,15 @@ export default {
     datei: "File",
     keineAngabe: "not specified",
     jahre: "years",
+    wochentag: {
+      montag: "Monday",
+      dienstag: "Tuesday",
+      mittwoch: "Wednesday",
+      donnerstag: "Thursday",
+      freitag: "Friday",
+      samstag: "Saturday",
+      sonntag: "Sunday",
+    },
   },
 
   kopf: {
@@ -201,6 +210,17 @@ export default {
     karnevalWofuer: "Questions about dancing",
     anrufen: "Call",
     schreiben: "Write an email",
+  },
+
+  // ---------- App ----------
+  // In der Vereins-App (Seite mit ?app=1) klappt Speichern oder Teilen der Datei manchmal nicht.
+  // Der Link "Im Browser öffnen" führt auf dieselbe Seite ohne ?app=1.
+
+  app: {
+    hinweisStart: "In the app, saving the PDF file sometimes does not work. Then open the registration in the browser.",
+    hinweisFertig: "Is saving not working? Then open the registration in the browser.",
+    fehler: "Saving did not work. Open the registration in the browser.",
+    browser: "Open in browser",
   },
 
   // ---------- Fehlermeldungen ----------
@@ -412,7 +432,7 @@ export default {
   abmeldung: {
     status: {
       titel: { kind: "Has your child been deregistered from the old club?", selbst: "Have you been deregistered from the old club?" },
-      hinweis: "An email to the old club is not enough.\nThe Hessian Football Association (Hessischer Fußball-Verband, HFV) needs a registered letter (Einschreiben).\nOr you sign the authorisation for the deregistration (Vollmacht für die Abmeldung).",
+      hinweis: "We mean deregistration as a player.\nThis does not end the membership in the old club.\nAn email to the old club is not enough.\nThe Hessian Football Association (Hessischer Fußball-Verband, HFV) needs a registered letter (Einschreiben).\nOr you sign the authorisation for the deregistration (Vollmacht für die Abmeldung).",
       einschreiben: "Yes, by registered letter (Einschreiben)",
       einschreibenHinweis: "You have the receipt from the post office.",
       formlos: "Yes, but only by email or message",
@@ -498,10 +518,10 @@ export default {
   wohnen: {
     ort: {
       titel: { kind: "Where does your child live?", selbst: "Where do you live?" },
-      gemeinsam: { kind: "With me in Germany", selbst: "With my parents in Germany" },
-      gemeinsamHinweis: { kind: "We are registered at the same address.", selbst: "We are registered at the same address." },
-      nicht_gemeinsam: { kind: "With me in Germany", selbst: "With my parents in Germany" },
-      nicht_gemeinsamHinweis: { kind: "We are not registered at the same address.", selbst: "We are not registered at the same address." },
+      gemeinsam: { kind: "With me at the same address", selbst: "With my parents at the same address" },
+      gemeinsamHinweis: { kind: "We are registered with the authorities at the same address.", selbst: "We are registered with the authorities at the same address." },
+      nicht_gemeinsam: { kind: "In Germany, but at a different address", selbst: "In Germany, but not with my parents" },
+      nicht_gemeinsamHinweis: { kind: "We are registered with the authorities at different addresses.", selbst: "We are registered with the authorities at different addresses." },
       verwandte: "With relatives in Germany",
       ohne_eltern: "Without parents in Germany",
     },
@@ -538,7 +558,7 @@ export default {
       einverstanden: "The other parent agrees.",
       einverstandenHinweis: "Please ask them first.",
     },
-    zweiterMitStift: "Ask the other parent.\nIf they do not agree, they sign the membership application (Aufnahmeantrag) as well.\nThis only works with a pen. The spot is marked in the PDF.",
+    zweiterMitStift: "Has the other parent agreed? Then tick the box.\nIf not: he or she signs the membership application (Aufnahmeantrag) too.\nThis only works with a pen. The spot is marked in the PDF.",
     personen: {
       titel: { kind: "Who decides for {name}?", selbst: "Who decides for you?" },
       hinweis: "We ask for the phone number later.",
@@ -575,6 +595,9 @@ export default {
       weissNicht: "I do not know",
       weissNichtHinweis: "The club will tell you.",
       uebung: "Practice time: {zeit}",
+      // Wochentag und "Uhr" folgen der Sprache; der Ort steht, wie im Verein üblich, auf Deutsch (siehe seiten-fussball.js).
+      uebungszeit: "{tag} {zeit}, {ort}",
+      uebungszeitOhneOrt: "{tag} {zeit}",
       passt: "Fits the age",
     },
     woanders: {
@@ -688,7 +711,6 @@ export default {
       titel: "What is the IBAN?",
       iban: "IBAN",
       ibanHinweis: "The IBAN is on your bank card.\nSpaces do not matter.",
-      bic: "BIC",
       bank: "Name of the bank",
     },
   },
@@ -747,7 +769,7 @@ export default {
       allergien: "Allergies",
       erkrankungen: "Illnesses",
       medikamente: "Medication",
-      medikamenteHinweis: "For an asthma spray or an emergency pen, please agree the details in writing.",
+      medikamenteHinweis: "Does your child need emergency medication? For example an asthma spray or an adrenaline pen. Talk to the coach. The emergency and health form (Notfall- und Gesundheitsbogen) in Part C has lines for this.",
       sonstiges: "Other",
     },
   },
@@ -816,13 +838,13 @@ export default {
     },
     hierTitel: "You sign these here",
     hierHinweis: "Draw with your finger, a pen or the mouse.",
-    gilt: "Applies to: {formulare}",
+    giltFuer: "This signature applies to:",
     person: {
       mitglied: { kind: "Signature of {name}", selbst: "Your signature" },
       sorgeberechtigte: "Signature of {person}",
       ersteEltern: "Signature: mother or father",
       zweiteEltern: "Signature: second parent",
-      zweiteHinweis: "This signature is voluntary.\nOne signature is enough for the association.\nWe recommend: both parents sign.",
+      zweiteHinweis: "This signature is voluntary.\nWe recommend: both parents sign.",
       kontoinhaber: "Signature of the account holder: {person}",
       spieler: "Signature of the player",
       ersteSorge: "Your signature",
@@ -919,7 +941,7 @@ export default {
         formlos: "Only by email or message",
         noch_nicht: "Not yet",
         weiss_nicht: "Do not know",
-        vollmacht: "With authorisation (Vollmacht)",
+        vollmacht: "with authorisation (Vollmacht)",
         weg: "Method: {weg}",
       },
       mitgliedschaft: { kuendigen: "I cancel", passiv: "Stays as a passive member", weiss_nicht: "Do not know" },
@@ -955,10 +977,10 @@ export default {
     weiterleitungTitel: "These offices will contact you:",
     weiterleitungAn: {
       jugendleitung: "Youth department (Jugendleitung)",
-      passwesen: "Player pass office of the club (Passwesen)",
+      passwesen: "Player pass office (Passwesen; handles the player passes; reachable through the club office)",
       geschaeftsstelle: "Club office (Geschäftsstelle)",
       karneval: "Carnival department (Karnevalabteilung)",
-      spielausschuss: "Match committee (Spielausschuss)",
+      spielausschuss: "Match committee of the men’s team (Spielausschuss der Herren; checks club changes and deadlines; reachable through the club office)",
     },
     hinweisArt: {
       warnung: "Attention",
@@ -1003,7 +1025,7 @@ export default {
     unterschriftDrucken: "Print the file. Sign at all blue marks with a pen.",
     unterschriftDruckenTeil: "Print the pages for the Hessian Football Association (Hessischer Fußball-Verband, HFV). Sign at the blue marks with a pen.",
     unterschriftTrainingAlle: "You sign all pages with a pen at the first training. The club prints them.",
-    unterschriftFertig: "You have signed everything on the screen. You do not need to print anything.",
+    unterschriftFertig: "You have signed everything on the screen. What you have to print out is in Part A of the file.",
     fehltTitel: "These documents are still missing:",
     fehltHinweis: "Bring them as soon as you have them.",
     abgeben: "Hand in the documents at the club.\nBring the file on your phone. Or hand it in printed.",

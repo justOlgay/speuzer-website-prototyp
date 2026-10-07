@@ -1,7 +1,7 @@
 /*
   Texte der Oberfläche des Anmelde-Assistenten - Türkisch (Türkçe).
   Übersetzungshilfe: Verbindlich ist der deutsche Text (de-oberflaeche.js), das PDF bleibt deutsch.
-  Stand 29.09.2026. Dieselbe Schlüsselstruktur wie de-oberflaeche.js, aber ohne "sprachen" und
+  Stand 08.10.2026. Dieselbe Schlüsselstruktur wie de-oberflaeche.js, aber ohne "sprachen" und
   ohne "demo" (die Vorführung bleibt deutsch). Fehlt hier ein Eintrag, gilt der deutsche.
   Prüfung: node tools/anmeldung-test/uebersetzung-pruefen.mjs
 
@@ -137,6 +137,15 @@ export default {
     datei: "Dosya",
     keineAngabe: "belirtilmemiş",
     jahre: "yaş",
+    wochentag: {
+      montag: "Pazartesi",
+      dienstag: "Salı",
+      mittwoch: "Çarşamba",
+      donnerstag: "Perşembe",
+      freitag: "Cuma",
+      samstag: "Cumartesi",
+      sonntag: "Pazar",
+    },
   },
 
   kopf: {
@@ -204,6 +213,17 @@ export default {
     karnevalWofuer: "Dans hakkında sorular",
     anrufen: "Ara",
     schreiben: "E-posta yaz",
+  },
+
+  // ---------- App ----------
+  // In der Vereins-App (Seite mit ?app=1) klappt Speichern oder Teilen der Datei manchmal nicht.
+  // Der Link "Im Browser öffnen" führt auf dieselbe Seite ohne ?app=1.
+
+  app: {
+    hinweisStart: "Uygulamada PDF dosyasını kaydetmek bazen çalışmayabilir. O zaman kayıt sayfasını tarayıcıda açın.",
+    hinweisFertig: "Kaydetme çalışmıyor mu? O zaman kayıt sayfasını tarayıcıda açın.",
+    fehler: "Kaydetme çalışmadı. Kayıt sayfasını tarayıcıda açın.",
+    browser: "Tarayıcıda aç",
   },
 
   // ---------- Fehlermeldungen ----------
@@ -415,7 +435,7 @@ export default {
   abmeldung: {
     status: {
       titel: { kind: "Çocuğunuzun eski kulüpteki kaydı silindi mi?", selbst: "Eski kulüpteki kaydınız silindi mi?" },
-      hinweis: "Eski kulübe e-posta göndermek yetmez.\nHessen Futbol Federasyonu (Hessischer Fußball-Verband, HFV) taahhütlü mektup (Einschreiben) ister.\nYa da kayıt silme için vekâletnameyi (Vollmacht für die Abmeldung) imzalarsınız.",
+      hinweis: "Burada oyuncu olarak kayıt silme kastedilir.\nBununla eski kulüpteki üyelik sona ermez.\nEski kulübe e-posta göndermek yetmez.\nHessen Futbol Federasyonu (Hessischer Fußball-Verband, HFV) taahhütlü mektup (Einschreiben) ister.\nYa da kayıt silme için vekâletnameyi (Vollmacht für die Abmeldung) imzalarsınız.",
       einschreiben: "Evet, taahhütlü mektupla (Einschreiben)",
       einschreibenHinweis: "Postanın makbuzu sizde.",
       formlos: "Evet, ama sadece e-posta ya da mesajla",
@@ -501,10 +521,10 @@ export default {
   wohnen: {
     ort: {
       titel: { kind: "Çocuğunuz nerede yaşıyor?", selbst: "Nerede yaşıyorsunuz?" },
-      gemeinsam: { kind: "Benimle birlikte Almanya’da", selbst: "Ebeveynlerimle birlikte Almanya’da" },
-      gemeinsamHinweis: { kind: "Aynı adreste kayıtlıyız.", selbst: "Aynı adreste kayıtlıyız." },
-      nicht_gemeinsam: { kind: "Benimle birlikte Almanya’da", selbst: "Ebeveynlerimle birlikte Almanya’da" },
-      nicht_gemeinsamHinweis: { kind: "Aynı adreste kayıtlı değiliz.", selbst: "Aynı adreste kayıtlı değiliz." },
+      gemeinsam: { kind: "Benimle aynı adreste", selbst: "Ebeveynlerimle aynı adreste" },
+      gemeinsamHinweis: { kind: "Resmî olarak aynı adreste kayıtlıyız.", selbst: "Resmî olarak aynı adreste kayıtlıyız." },
+      nicht_gemeinsam: { kind: "Almanya’da, ama başka bir adreste", selbst: "Almanya’da, ama ebeveynlerimle değil" },
+      nicht_gemeinsamHinweis: { kind: "Resmî olarak farklı adreslerde kayıtlıyız.", selbst: "Resmî olarak farklı adreslerde kayıtlıyız." },
       verwandte: "Almanya’da akrabaların yanında",
       ohne_eltern: "Almanya’da ebeveynler olmadan",
     },
@@ -541,7 +561,7 @@ export default {
       einverstanden: "Diğer ebeveyn razı.",
       einverstandenHinweis: "Lütfen önceden ona sorun.",
     },
-    zweiterMitStift: "Diğer ebeveyne sorun.\nRazı değilse, üyelik başvurusunu (Aufnahmeantrag) o da imzalar.\nBu yalnızca kalemle mümkündür. PDF’de ilgili yer işaretlidir.",
+    zweiterMitStift: "Diğer ebeveyn onay verdi mi? O zaman kutucuğu işaretleyin.\nOnay vermediyse, üyelik başvurusunu (Aufnahmeantrag) o da imzalar.\nBu yalnızca kalemle mümkündür. PDF’de ilgili yer işaretlidir.",
     personen: {
       titel: { kind: "{name} için kim karar veriyor?", selbst: "Sizin için kim karar veriyor?" },
       hinweis: "Telefon numarasını sonra soracağız.",
@@ -578,6 +598,9 @@ export default {
       weissNicht: "Bilmiyorum",
       weissNichtHinweis: "Kulüp size söyler.",
       uebung: "Prova zamanı: {zeit}",
+      // Wochentag und "Uhr" folgen der Sprache; der Ort steht, wie im Verein üblich, auf Deutsch (siehe seiten-fussball.js).
+      uebungszeit: "{tag} saat {zeit}, {ort}",
+      uebungszeitOhneOrt: "{tag} saat {zeit}",
       passt: "Yaşa uygun",
     },
     woanders: {
@@ -691,7 +714,6 @@ export default {
       titel: "IBAN nedir?",
       iban: "IBAN",
       ibanHinweis: "IBAN, banka kartınızın üzerinde yazar.\nBoşlukların önemi yok.",
-      bic: "BIC",
       bank: "Bankanın adı",
     },
   },
@@ -750,7 +772,7 @@ export default {
       allergien: "Alerjiler",
       erkrankungen: "Hastalıklar",
       medikamente: "İlaçlar",
-      medikamenteHinweis: "Astım spreyi ya da acil durum kalemi varsa lütfen yazılı bir anlaşma yapın.",
+      medikamenteHinweis: "Çocuğunuzun acil durum ilacı gerekiyor mu? Örneğin astım spreyi ya da adrenalin kalemi. Antrenörle konuşun. C bölümündeki acil durum ve sağlık formunda (Notfall- und Gesundheitsbogen) bunun için satırlar var.",
       sonstiges: "Diğer",
     },
   },
@@ -819,13 +841,13 @@ export default {
     },
     hierTitel: "Bunları burada imzalıyorsunuz",
     hierHinweis: "Parmağınızla, kalemle ya da fareyle çizin.",
-    gilt: "Geçerli olduğu yerler: {formulare}",
+    giltFuer: "Bu imza şunlar için geçerlidir:",
     person: {
       mitglied: { kind: "İmza: {name}", selbst: "İmzanız" },
       sorgeberechtigte: "İmza: {person}",
       ersteEltern: "İmza: anne ya da baba",
       zweiteEltern: "İmza: ikinci ebeveyn",
-      zweiteHinweis: "Bu imza isteğe bağlıdır.\nFederasyon için bir imza yeterlidir.\nÖnerimiz: İki ebeveyn de imzalasın.",
+      zweiteHinweis: "Bu imza isteğe bağlıdır.\nÖnerimiz: İki ebeveyn de imzalasın.",
       kontoinhaber: "Hesap sahibinin imzası: {person}",
       spieler: "Oyuncunun imzası",
       ersteSorge: "İmzanız",
@@ -922,7 +944,7 @@ export default {
         formlos: "Sadece e-posta ya da mesajla",
         noch_nicht: "Henüz değil",
         weiss_nicht: "Bilmiyorum",
-        vollmacht: "Vekâletnameyle (Vollmacht)",
+        vollmacht: "vekâletnameyle (Vollmacht)",
         weg: "Yöntem: {weg}",
       },
       mitgliedschaft: { kuendigen: "Üyelikten çıkıyorum", passiv: "Pasif üye olarak kalıyor", weiss_nicht: "Bilmiyorum" },
@@ -958,10 +980,10 @@ export default {
     weiterleitungTitel: "Bu birimler sizinle iletişime geçer:",
     weiterleitungAn: {
       jugendleitung: "Gençlik birimi (Jugendleitung)",
-      passwesen: "Kulübün lisans birimi (Passwesen)",
+      passwesen: "Lisans birimi (Passwesen; oyuncu lisanslarıyla ilgilenir; kulüp ofisi üzerinden ulaşılabilir)",
       geschaeftsstelle: "Kulüp ofisi (Geschäftsstelle)",
       karneval: "Karnaval bölümü (Karnevalabteilung)",
-      spielausschuss: "Maç komitesi (Spielausschuss)",
+      spielausschuss: "Herren (yetişkin erkek takımı) maç komitesi (Spielausschuss; geçişleri ve süreleri kontrol eder; kulüp ofisi üzerinden ulaşılabilir)",
     },
     hinweisArt: {
       warnung: "Dikkat",
@@ -1006,7 +1028,7 @@ export default {
     unterschriftDrucken: "Dosyayı yazdırın. Tüm mavi işaretlerde kalemle imza atın.",
     unterschriftDruckenTeil: "Hessen Futbol Federasyonu (Hessischer Fußball-Verband, HFV) sayfalarını yazdırın. Mavi işaretlerde kalemle imza atın.",
     unterschriftTrainingAlle: "Tüm sayfaları ilk antrenmanda kalemle imzalarsınız. Kulüp bunları yazdırır.",
-    unterschriftFertig: "Her şeyi ekranda imzaladınız. Hiçbir şey yazdırmanız gerekmiyor.",
+    unterschriftFertig: "Her şeyi ekranda imzaladınız. Neleri yazdırmanız gerektiği dosyanın A bölümünde yazıyor.",
     fehltTitel: "Bu evraklar hâlâ eksik:",
     fehltHinweis: "Elinize geçer geçmez getirin.",
     abgeben: "Evrakı kulüpte teslim edin.\nDosyayı telefonunuzla getirin. Ya da yazdırıp teslim edin.",

@@ -1,4 +1,8 @@
 Fremdbibliotheken für den Aufnahmeantrag online (assets/js/antrag/)
+
+Auch der Anmelde-Assistent (assets/js/anmeldung/pdf-lader.js) lädt beide Bündel bei jeder
+PDF-Erstellung (pdf-lib und fontkit immer). Wer die Dateien umbenennt oder entfernt, bricht
+auch den Assistenten.
 ======================================================================
 
 Die Seite „Aufnahmeantrag online“ (src/seiten/aufnahmeantrag.mjs, im
