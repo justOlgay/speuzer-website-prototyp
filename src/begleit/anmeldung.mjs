@@ -90,6 +90,7 @@ function baueKonfig(daten) {
       mail: verein.mail ?? "",
       tel_geschaeftsstelle: verein.tel_geschaeftsstelle ?? "",
       vereinsnummer: verein.vereinsnummer ?? "",
+      vereinsnummerHfv: verein.vereinsnummer_hfv ?? "",
       satzungUrl: satzungUrl(daten),
       anschrift: sportstaette
         ? { strasse: sportstaette.strasse, plz: sportstaette.plz, ort: sportstaette.ort }

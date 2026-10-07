@@ -62,9 +62,9 @@ const LOKAL_BASIS = `http://localhost:${PORT}`;
 
 const DATEINAME = "Speuzer Website - Vergleich Live-Seite und appack-Fassung 15.09.2026.pdf";
 const PDF_PFAD = path.join(CACHE, DATEINAME);
-const VEREIN_ORDNER =
-  "/Users/olgayozkan/Library/CloudStorage/SynologyDrive-Drive/Eigene Dokumente/08_Privat & Familie/Personen/[entfernt]/Speuzer/Verein";
-const VEREIN_PDF_PFAD = path.join(VEREIN_ORDNER, DATEINAME);
+// Ablageort der Kopie (privater Vereinsordner) nur aus der Umgebung, nie fest im Repo: VEREIN_ORDNER=/pfad/zum/Verein
+const VEREIN_ORDNER = process.env.VEREIN_ORDNER || "";
+const VEREIN_PDF_PFAD = VEREIN_ORDNER ? path.join(VEREIN_ORDNER, DATEINAME) : "";
 
 const PDF_TITEL = "Website-Vergleich Live-Seite und appack-Fassung – FFV Sportfreunde 04";
 const PDF_AUTOR = "Olgay Özkan";
@@ -1187,8 +1187,12 @@ async function main() {
     console.log("PDF-Metadaten setzen …");
     setzePdfMetadaten(PDF_PFAD, PDF_TITEL, PDF_AUTOR);
 
-    console.log(`Kopie ablegen: ${VEREIN_PDF_PFAD}`);
-    copyFileSync(PDF_PFAD, VEREIN_PDF_PFAD);
+    if (VEREIN_PDF_PFAD) {
+      console.log(`Kopie ablegen: ${VEREIN_PDF_PFAD}`);
+      copyFileSync(PDF_PFAD, VEREIN_PDF_PFAD);
+    } else {
+      console.log("Keine Kopie in den Vereinsordner: Umgebungsvariable VEREIN_ORDNER ist nicht gesetzt.");
+    }
 
     const groesse = statSync(PDF_PFAD).size;
     console.log(`\nFertig. PDF: ${PDF_PFAD} (${(groesse / 1024 / 1024).toFixed(2)} MB)`);

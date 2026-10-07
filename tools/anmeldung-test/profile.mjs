@@ -40,6 +40,7 @@ export function ladeKonfig() {
       mail: verein.mail,
       tel_geschaeftsstelle: verein.tel_geschaeftsstelle,
       vereinsnummer: verein.vereinsnummer,
+      vereinsnummerHfv: verein.vereinsnummer_hfv,
       anschrift: {
         strasse: verein.sportstaette.strasse,
         plz: verein.sportstaette.plz,

@@ -231,7 +231,7 @@ const PFADE = new Set([
     "beitrag.gruppe", "beitrag.jahr", "beitrag.monat", "beitrag.aufnahmegebuehr", "beitrag.zuschlagOhneSepa", "beitrag.hinweisKey"].map((p) => "e." + p),
   // konfig (Abschnitt 2)
   ...["anmeldung", "formulare", "aufnahmeantragFelder", "beitraege", "karnevalGruppen", "stand",
-    "verein.name", "verein.name_register", "verein.mail", "verein.tel_geschaeftsstelle", "verein.vereinsnummer", "verein.anschrift"].map((p) => "konfig." + p),
+    "verein.name", "verein.name_register", "verein.mail", "verein.tel_geschaeftsstelle", "verein.vereinsnummer", "verein.vereinsnummerHfv", "verein.anschrift"].map((p) => "konfig." + p),
 ]);
 const FORMULAR_SCHLUESSEL = ["aufnahmeantrag", "hfv_antrag", "vollmacht", "abmeldung", "einverstaendnis_senioren", "attest", "datenschutz", "notfall",
   "einverstaendnis_fahrten", "einverstaendnis_maedchen", "karneval_auftritte", "familienliste"];
@@ -505,7 +505,7 @@ async function vergleicheMitOriginal(K, form, kopieDoc, kopieBytes, kopiePfad, o
 const KAESTCHEN_SPIEL = "Hiermit melde ich meine Spielberechtigung bei Ihrem Verein ab";
 const KAESTCHEN_MITGLIED = "Hiermit melde ich meine Mitgliedschaft bei Ihrem Verein ab";
 const KAESTCHEN_PASSIV = "Ich bleibe weiterhin passives Mitglied im Verein";
-const BEISPIEL_KONFIG = { verein: { name: "FFV Sportfreunde 04", name_register: "Frankfurter Fußballverein Sportfreunde 1904 e. V.", vereinsnummer: "24053" } };
+const BEISPIEL_KONFIG = { verein: { name: "FFV Sportfreunde 04", name_register: "Frankfurter Fußballverein Sportfreunde 1904 e. V.", vereinsnummer: "24053", vereinsnummerHfv: "34024108" } };
 const BEISPIEL_PERSON = { nachname: "Mustermann", vorname: "Mia", geburtsdatum: "2014-03-27", anschrift: { strasse: "Beispielweg 12", plz: "60000", ort: "Beispielstadt" } };
 const ABMELDUNG_BEISPIELE = [
   {

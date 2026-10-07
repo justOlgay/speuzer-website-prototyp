@@ -379,7 +379,7 @@ export default {
   abmeldung: {
     status: {
       titel: { kind: "Ist Ihr Kind beim alten Verein abgemeldet?", selbst: "Sind Sie beim alten Verein abgemeldet?" },
-      hinweis: "Eine Mail an den alten Verein reicht nicht.\nDer Fußball-Verband braucht ein Einschreiben.\nOder Sie unterschreiben die Vollmacht für die Abmeldung.",
+      hinweis: "Gemeint ist die Abmeldung als Spieler.\nDie Mitgliedschaft im alten Verein endet damit nicht.\nEine Mail an den alten Verein reicht nicht.\nDer Fußball-Verband braucht ein Einschreiben.\nOder Sie unterschreiben die Vollmacht für die Abmeldung.",
       einschreiben: "Ja, per Einschreiben",
       einschreibenHinweis: "Sie haben den Beleg von der Post.",
       formlos: "Ja, aber nur per Mail oder Nachricht",
@@ -507,7 +507,7 @@ export default {
     },
     // Getrennt lebende Eltern ohne Zustimmung: ein einziger Kasten auf "sorge" und auf "unterschriften"
     // (Runde 4: ersetzt den Kasten des Regelwerks "getrennt_zustimmung" auf der Seite "sorge").
-    zweiterMitStift: "Fragen Sie den anderen Elternteil.\nIst er nicht einverstanden, unterschreibt er den Aufnahmeantrag auch.\nDas geht nur mit Stift. Im PDF ist die Stelle markiert.",
+    zweiterMitStift: "Hat der andere Elternteil zugestimmt? Dann setzen Sie den Haken.\nWenn nicht: Er unterschreibt den Aufnahmeantrag auch.\nDas geht nur mit Stift. Im PDF ist die Stelle markiert.",
     personen: {
       titel: { kind: "Wer entscheidet für {name}?", selbst: "Wer entscheidet für Sie?" },
       hinweis: "Wir fragen später nach der Telefonnummer.",
@@ -717,7 +717,7 @@ export default {
       allergien: "Allergien",
       erkrankungen: "Erkrankungen",
       medikamente: "Medikamente",
-      medikamenteHinweis: "Bei Asthmaspray oder Notfallpen bitte eine schriftliche Absprache treffen.",
+      medikamenteHinweis: "Braucht Ihr Kind ein Notfall-Medikament? Zum Beispiel Asthmaspray oder einen Adrenalin-Pen. Sprechen Sie mit dem Trainer. Im Notfallbogen in Teil C gibt es Zeilen für die Absprache.",
       sonstiges: "Sonstiges",
     },
   },

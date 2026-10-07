@@ -481,7 +481,7 @@ function erwarteHfvAntrag(b) {
   const av = a.alterVerein || {};
   const T = {};
   T.AntragVerein = konfig.verein.name_register;
-  T.AntragNr = konfig.verein.vereinsnummer;
+  T.AntragNr = konfig.verein.vereinsnummerHfv;
   T.Familienname = a.nachname;
   T.Vorname = a.vorname;
   T.Strasse = a.anschrift.strasse;
@@ -1287,7 +1287,8 @@ async function pruefePdf(b, g, opt) {
   }
   e.fehlend.forEach((id) => ok(ta.includes(norm(deRegeln.unterlagen[id].name)), "Teil A nennt die fehlende Unterlage " + id));
   if (!e.fehlend.length) ok(ta.includes("Es fehlt nichts"), "Teil A sagt, dass nichts fehlt");
-  ok(ta.includes(TEIL_NAME.A + " (Seite 1 bis " + teile[0].bisSeite + ")") && ta.includes(TEIL_NAME.B + " (Seite " + teile[1].vonSeite + " bis " + teile[1].bisSeite + ")"), "Teil A nennt die Teile mit ihren Namen und Seiten");
+  const seitenAngabe = (t) => (t.vonSeite === t.bisSeite ? "(Seite " + t.vonSeite + ")" : "(Seite " + t.vonSeite + " bis " + t.bisSeite + ")");
+  ok(ta.includes(TEIL_NAME.A + " " + seitenAngabe(teile[0])) && ta.includes(TEIL_NAME.B + " " + seitenAngabe(teile[1])) && !/\(Seite (\d+) bis \1\)/.test(ta), "Teil A nennt die Teile mit ihren Namen und Seiten (eine Seite: „Seite N“)");
   if (teilC) ok(ta.includes(TEIL_NAME.C + " (Seite " + teilC.vonSeite + " bis " + teilC.bisSeite + ")") && ta.includes("Geben Sie Teil C getrennt ab"), "Teil A erklärt Teil C");
   ok(ta.includes("Schicken Sie die Datei nicht per WhatsApp"), "Teil A warnt vor WhatsApp");
   const stiftFamilie = e.unterschriften.filter((u) => u.wer !== "arzt" && u.wer !== "verein" && erwarteteArt(b, u) === "stift");
@@ -1975,7 +1976,7 @@ async function sonderfaelle() {
     let dreiSeitig = 0;
     for (let n = 0; n <= 12; n++) {
       const b = bereite("vollmacht-und-kuendigung", "bild", 0, (a) => {
-        for (let i = 0; i < n; i++) a.sorgeberechtigte.push({ rolle: "andere", vorname: "Weitere" + i, nachname: "Mustermann", telefon: "0160 55501" + (10 + i), email: "" });
+        for (let i = 0; i < n; i++) a.sorgeberechtigte.push({ rolle: "andere", vorname: "Weitere" + i, nachname: "Mustermann", telefon: "0176 040690" + (10 + i), email: "" });
       });
       const g = await baue(b, "laufzettel-umbruch-" + n + ".pdf");
       const texte = textSeiten(g.pfad);

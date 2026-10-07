@@ -2247,15 +2247,16 @@ function seiteTeilA(K, S, plan) {
   const hatC = !!plan.teile.C;
   const von = (t) => plan.teile[t].von;
   const bis = (t) => plan.teile[t].bis;
+  const seiten = (t) => (von(t) === bis(t) ? "Seite " + von(t) : "Seite " + von(t) + " bis " + bis(t));
 
   S.ueberschrift(T.titel, 1);
   S.absatz([{ t: K.person.name, fett: true, nutzer: true }, { t: "· " + vereinKurz(K) }], { size: 12, nach: 8 });
   S.absatz(ersetzePlatzhalter(T.einleitung, { anzahl: ZAHLWORT[hatC ? 3 : 2] }), { size: 11, nach: 4 });
   const teile = [
-    [{ t: TEIL_ANZEIGE.A + " (Seite " + von("A") + " bis " + bis("A") + "):", fett: true }, { t: T.teilA }],
-    [{ t: TEIL_ANZEIGE.B + " (Seite " + von("B") + " bis " + bis("B") + "):", fett: true }, { t: T.teilB }],
+    [{ t: TEIL_ANZEIGE.A + " (" + seiten("A") + "):", fett: true }, { t: T.teilA }],
+    [{ t: TEIL_ANZEIGE.B + " (" + seiten("B") + "):", fett: true }, { t: T.teilB }],
   ];
-  if (hatC) teile.push([{ t: TEIL_ANZEIGE.C + " (Seite " + von("C") + " bis " + bis("C") + "):", fett: true }, { t: T.teilC }]);
+  if (hatC) teile.push([{ t: TEIL_ANZEIGE.C + " (" + seiten("C") + "):", fett: true }, { t: T.teilC }]);
   S.liste(teile, { size: 10.5, nach: 3 });
 
   // --- So geht es weiter ---

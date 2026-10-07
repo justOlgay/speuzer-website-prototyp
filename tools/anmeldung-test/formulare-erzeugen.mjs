@@ -52,7 +52,7 @@ const ANTRAG = {
   ),
   AntragNr: F(
     "„Vereinsnummer“ (Spaltenüberschrift rechts) – Nummer des antragstellenden Vereins, Zeile „Antrag stellender Verein:“",
-    "assistent", "konfig.verein.vereinsnummer", [["oben", "Vereinsnummer"], ["zeile", "Antrag stellender Verein:"]],
+    "assistent", "konfig.verein.vereinsnummerHfv", [["oben", "Vereinsnummer"], ["zeile", "Antrag stellender Verein:"]],
   ),
   StammVerein: F(
     "„Stammverein (bei JFV):“ – nur für Spieler*innen eines Jugendfördervereins (JFV); der FFV ist kein JFV, daher leer",

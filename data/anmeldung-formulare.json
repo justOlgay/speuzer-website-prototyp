@@ -178,7 +178,7 @@
           "maxLaenge": 8,
           "bedeutung": "„Vereinsnummer“ (Spaltenüberschrift rechts) – Nummer des antragstellenden Vereins, Zeile „Antrag stellender Verein:“",
           "fuellt": "assistent",
-          "quelle": "konfig.verein.vereinsnummer",
+          "quelle": "konfig.verein.vereinsnummerHfv",
           "beleg": [
             { "lage": "oben", "text": "Vereinsnummer", "box": [462.9, 727.81, 522.88, 736.74] },
             { "lage": "zeile", "text": "Antrag stellender Verein:", "box": [59.1, 710.61, 146.65, 719.54] }
