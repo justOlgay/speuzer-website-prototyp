@@ -233,6 +233,23 @@ function testeDaten() {
     wahr("Offener Punkt " + id + ": Frage", !!o && muster1.test(o.frage) && muster2.test(o.frage));
     wahr("Offener Punkt " + id + ": Quelle nennt die Prüfung des Orchestrators vom 07.10.2026", !!o && /^Prüfung Orchestrator, 07\.10\.2026$/.test(o.quelle));
   });
+  // 08.10.2026 (Entscheidung der Jugendleitung): O26 ist entschieden, O68 bleibt offen und trägt den Stand; O65 bleibt offen
+  const o26b = punkt("O26");
+  const o68b = punkt("O68");
+  wahr("Offener Punkt O26: Status entschieden (an vorstand, P1, betrifft U01 und U04)",
+    !!o26b && o26b.status === "entschieden" && o26b.an === "vorstand" && o26b.prioritaet === "P1" && o26b.betrifft.join(",") === "U01,U04");
+  gleich("Offener Punkt O26: Entscheidung", o26b.entscheidung,
+    "Ein Elternteil reicht (Jugendleitung, 08.10.2026). Ausnahme: getrennt lebende Eltern ohne Einverständnis – dann unterschreibt der andere Elternteil mit Stift.");
+  wahr("Offener Punkt O26: die Frage nennt keine Empfehlung „beide“ mehr", !/empfiehlt/.test(o26b.frage) && /Einer oder beide/.test(o26b.frage));
+  wahr("Offener Punkt O68: Status bleibt offen, mit Stand der Jugendleitung",
+    !!o68b && o68b.status === "offen" && o68b.stand === "Jugendleitung befürwortet (08.10.2026); Beschluss des Vorstands steht aus.");
+  wahr("Offener Punkt O65: bleibt offen, ohne Entscheidung", punkt("O65").status === "offen" && !("entscheidung" in punkt("O65")));
+  const STATUS_PUNKT = ["offen", "weitgehend_geklaert", "entschieden"];
+  wahr("Offene Punkte: Status nur offen, weitgehend_geklaert oder entschieden", cfg.offenePunkte.every((o) => STATUS_PUNKT.includes(o.status)),
+    cfg.offenePunkte.filter((o) => !STATUS_PUNKT.includes(o.status)).map((o) => o.id).join(","));
+  gleich("Offene Punkte: nur entschiedene Punkte tragen eine Entscheidung", cfg.offenePunkte.filter((o) => "entscheidung" in o).map((o) => o.id + ":" + o.status), ["O26:entschieden"]);
+  gleich("Offene Punkte: ein entschiedener Punkt ist genau O26", cfg.offenePunkte.filter((o) => o.status === "entschieden").map((o) => o.id), ["O26"]);
+  gleich("Daten: Stand und Version 08.10.2026", [cfg.stand, cfg.version], ["2026-10-08", "2026-10-08.1"]);
   gleich("Offene Punkte: Kennungen O01 bis O73 lückenlos und in Reihenfolge", cfg.offenePunkte.map((o) => o.id), Array.from({ length: 73 }, (_, i) => "O" + String(i + 1).padStart(2, "0")));
   // Unterschriftsstellen: der Aufnahmeantrag nutzt die vermessenen Schlüssel
   ["s2.unterschrift", "s3.unterschrift", "s4.unterschrift"].forEach((k) => wahr("Unterschriftsstelle " + k, cfg.unterschriftStellen.aufnahmeantrag.some((s) => s.stelleKey === k) && !!felder[k]));
@@ -518,6 +535,16 @@ function testeFaelleUndRegeln() {
   });
   const getrenntJa = R.auswerten(BAUSTEINE.kind({ sorge: "getrennt_bei_mir", andererElternteilEinverstanden: true }), konfig, HEUTE_STANDARD).unterschriften.find((u) => u.stelleKey === "s2.unterschrift");
   gleich("Getrennte Eltern mit Einverständnis: eine Unterschrift", getrenntJa.wer, "sorgeberechtigte");
+  // O26 (Jugendleitung, 08.10.2026): Ein Elternteil reicht. Nur getrennt lebende Eltern ohne Einverständnis: der andere Elternteil zusätzlich (mit Stift).
+  const zweiteZeile = (antworten) => R.auswerten(BAUSTEINE.kind(antworten), konfig, HEUTE_STANDARD).unterschriften.filter((u) => u.stelleKey === "s2.unterschrift_sorgeberechtigte").map((u) => u.wer);
+  ["beide", "allein", "vormund", "pflege"].forEach((sorge) => gleich("O26 Sorge " + sorge + ": keine zweite Zeile auf Seite 2, ein Elternteil reicht", zweiteZeile({ sorge: sorge }), []));
+  gleich("O26 getrennt lebend mit Einverständnis: keine zweite Zeile", zweiteZeile({ sorge: "getrennt_bei_mir", andererElternteilEinverstanden: true }), []);
+  gleich("O26 getrennt lebend ohne Einverständnis: der andere Elternteil unterschreibt zusätzlich", zweiteZeile({ sorge: "getrennt_bei_mir", andererElternteilEinverstanden: false }), ["sorgeberechtigte_beide"]);
+  gleich("O26 getrennt lebend, Einverständnis unbeantwortet: der andere Elternteil unterschreibt zusätzlich", zweiteZeile({ sorge: "getrennt_bei_mir", andererElternteilEinverstanden: null }), ["sorgeberechtigte_beide"]);
+  gleich("O26 Erwachsene: keine zweite Zeile", R.auswerten(BAUSTEINE.erwachsen({}), konfig, HEUTE_STANDARD).unterschriften.filter((u) => u.stelleKey === "s2.unterschrift_sorgeberechtigte").length, 0);
+  const hinweiseSorge = (antworten) => R.auswerten(BAUSTEINE.kind(antworten), konfig, HEUTE_STANDARD).hinweise.map((h) => h.key);
+  wahr("O26 Sorge beide: kein Hinweis „beide unterschreiben“ (Schlüssel beide_unterschreiben_empfohlen entfällt)",
+    !hinweiseSorge({ sorge: "beide" }).includes("beide_unterschreiben_empfohlen") && !R.SCHLUESSEL.hinweise.includes("beide_unterschreiben_empfohlen"));
   // Einwilligungen a und b: Unterschriften nur bei Zustimmung, Namens-Einwilligung nur unter 16
   const einw = (alter, name, foto) => R.auswerten(BAUSTEINE.kind({ geburtsdatum: alter, einwilligungen: { hfvName: name, hfvFoto: foto } }), konfig, HEUTE_STANDARD).unterschriften.filter((u) => u.formular === "hfv_antrag").map((u) => u.stelleKey);
   wahr("HFV-Einwilligung a und b bei 9 Jahren", einw("2017-05-05", true, true).includes("einwilligung_a") && einw("2017-05-05", true, true).includes("einwilligung_b"));
@@ -738,6 +765,8 @@ async function testeTexte() {
   const gruppenTexte = texte.beitrag.gruppen || {};
   Object.entries(cfg.beitragsgruppen).forEach(([schluessel, g]) => gleich("Texte beitrag.gruppen." + schluessel + ": wortgleich mit data/anmeldung.json › bezeichnung", gruppenTexte[schluessel], g.bezeichnung));
   gleich("Texte beitrag.gruppen: keine Texte für unbekannte Beitragsgruppen", Object.keys(gruppenTexte).filter((k) => !(k in cfg.beitragsgruppen)), []);
+  // O26 (Jugendleitung, 08.10.2026): Ein Elternteil reicht; der Hinweis „Beide Eltern unterschreiben“ entfällt
+  wahr("Texte hinweise: beide_unterschreiben_empfohlen ist entfernt (O26)", !("beide_unterschreiben_empfohlen" in texte.hinweise));
   // O65: Der Hinweis zur Unterschrift von Jugendlichen bei den Fotos ist bis zur Entscheidung des Vorstands entfernt
   wahr("Texte hinweise: jugendlicher_unterschreibt_mit ist entfernt (O65)", !("jugendlicher_unterschreibt_mit" in texte.hinweise));
   // Hilfstexte für die Oberfläche
@@ -963,6 +992,10 @@ function pruefeZufall(fall, texte, nr) {
     lokal(!ids.some((u) => ["U28", "U29", "U33", "U30", "U24", "U23", "U25"].includes(u)), "Kinder-Unterlage bei Erwachsenen: " + ids.join(","));
     lokal(!e.faelle.some((f) => ["F13", "F14", "F15", "F16", "F17", "F18", "F03", "F04", "F05", "F06", "F07"].includes(f)), "Kinderfall bei Erwachsenen");
   }
+  // O26 (Jugendleitung, 08.10.2026): Ein Elternteil reicht. Den zweiten Elternteil gibt es nur bei getrennt lebenden Eltern ohne Einverständnis.
+  lokal(e.unterschriften.some((u) => u.wer === "sorgeberechtigte_beide") === (e.minderjaehrig === true && a.sorge === "getrennt_bei_mir" && a.andererElternteilEinverstanden !== true),
+    "zweiter Elternteil nur bei getrennt lebenden Eltern ohne Einverständnis");
+  lokal(!e.hinweise.some((h) => h.key === "beide_unterschreiben_empfohlen"), "entfernter Hinweis beide_unterschreiben_empfohlen erscheint (O26)");
   if (e.minderjaehrig === true) {
     lokal(!e.unterschriften.some((u) => u.wer === "mitglied"), "Mitglieds-Unterschrift bei Minderjährigen");
     lokal(!e.faelle.some((f) => ["F10", "F11", "F12"].includes(f)), "Erwachsenen-Fall bei Minderjährigen");

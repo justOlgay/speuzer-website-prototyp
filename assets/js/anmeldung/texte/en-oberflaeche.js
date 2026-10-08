@@ -843,8 +843,6 @@ export default {
       mitglied: { kind: "Signature of {name}", selbst: "Your signature" },
       sorgeberechtigte: "Signature of {person}",
       ersteEltern: "Signature: mother or father",
-      zweiteEltern: "Signature: second parent",
-      zweiteHinweis: "This signature is voluntary.\nWe recommend: both parents sign.",
       kontoinhaber: "Signature of the account holder: {person}",
       spieler: "Signature of the player",
       ersteSorge: "Your signature",

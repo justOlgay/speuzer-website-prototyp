@@ -1,6 +1,6 @@
 {
-  "stand": "2026-10-07",
-  "version": "2026-10-07.1",
+  "stand": "2026-10-08",
+  "version": "2026-10-08.1",
   "hinweis": "Regelwerk des Anmelde-Assistenten. Alle Zahlen und Fristen stehen hier; regeln.js enthält die Logik. Nichts hier enthält Personendaten.",
   "saison": "2026/27",
   "quellenStand": [
@@ -1342,7 +1342,7 @@
       },
       {
         "stelleKey": "s2.unterschrift_sorgeberechtigte",
-        "bedeutung": "Aufnahmeantrag (Seite 2), zusätzliche Zeile: beide sorgeberechtigten Personen (nur bei Minderjährigen und Empfehlung beide)"
+        "bedeutung": "Aufnahmeantrag (Seite 2), zusätzliche Zeile: zweiter Elternteil, mit Stift (nur bei Minderjährigen, getrennt lebenden Eltern und fehlendem Einverständnis des anderen Elternteils)"
       },
       {
         "stelleKey": "s3.unterschrift",
@@ -1782,12 +1782,13 @@
       "id": "O26",
       "an": "vorstand",
       "prioritaet": "P1",
-      "frage": "Vereinsregel für die Unterschrift der Eltern: Einer oder beide? Der Assistent empfiehlt beide beim Aufnahmeantrag und der Foto-Einwilligung.",
+      "frage": "Vereinsregel für die Unterschrift der Eltern: Einer oder beide?",
       "betrifft": [
         "U01",
         "U04"
       ],
-      "status": "offen",
+      "status": "entschieden",
+      "entscheidung": "Ein Elternteil reicht (Jugendleitung, 08.10.2026). Ausnahme: getrennt lebende Eltern ohne Einverständnis – dann unterschreibt der andere Elternteil mit Stift.",
       "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
     },
     {
@@ -2264,6 +2265,7 @@
         "U29"
       ],
       "status": "offen",
+      "stand": "Jugendleitung befürwortet (08.10.2026); Beschluss des Vorstands steht aus.",
       "quelle": "Prüfung Orchestrator, 30.09.2026; data/anmeldung-formulare.json (digitaleUnterschrift)"
     },
     {

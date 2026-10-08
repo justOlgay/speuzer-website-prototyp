@@ -1,5 +1,5 @@
 /*
-  Regelwerk des Anmelde-Assistenten FFV Sportfreunde 04 (Stand 2026-10-07, Saison 2026/27)
+  Regelwerk des Anmelde-Assistenten FFV Sportfreunde 04 (Stand 2026-10-08, Saison 2026/27)
 
   Reine Funktionen ohne Browser- und Zeitzugriff: Das Heute-Datum kommt immer als
   Parameter "JJJJ-MM-TT" hinein, die Konfiguration (data/anmeldung.json und weitere
@@ -30,7 +30,7 @@
   Datenschutz: Das Modul liest nur die übergebenen Antworten. Es speichert und sendet nichts.
 */
 
-export const VERSION = "2026-10-07.1";
+export const VERSION = "2026-10-08.1";
 
 // ---------------------------------------------------------------------------
 // Schlüssel-Register: alle Schlüssel, die auswerten() zurückgeben kann. Zu jedem
@@ -52,7 +52,7 @@ export const SCHLUESSEL = {
     "wechsel_lv_anfrage", "entschaedigung_hinweis", "nachtraegliche_freigabe", "sperre_laeuft", "sonderwege_jugend",
     "e_aelter_juni", "international_dauer", "international_unter10", "zuzug_pruefen", "maedchen_jungenteam",
     "herren_aushilfe", "herren_ohne_antrag", "frau_herren", "keine_frauenmannschaft", "vertrauensperson",
-    "sonderspielrecht", "beide_unterschreiben_empfohlen", "getrennt_einverstanden", "sorge_allein_nachweis",
+    "sonderspielrecht", "getrennt_einverstanden", "sorge_allein_nachweis",
     "vormund_hinweis", "pflege_hinweis", "f17_moeglich_5_jahre", "austausch_ein_jahr",
     "karneval_gruppe_vorschlag", "karneval_kein_attest", "karneval_abend", "passiv_hinweis", "senator_vorstand",
     "kontoinhaber_andere", "bildung_teilhabe", "beitragserlass", "medikamente_absprache", "passiv_alter_verein",
@@ -1063,20 +1063,18 @@ function bestimmeFormulare(unterlagen) {
 }
 
 // Wer unterschreibt? Erwachsene selbst. Bei Minderjährigen die Sorgeberechtigten: Der HFV verlangt einen gesetzlichen
-// Vertreter (SpO § 92 Nr. 1, JO § 37 Nr. 2). Nach Zivilrecht vertreten Eltern gemeinsam (BGB § 1629); deshalb die
-// Empfehlung "beide" beim Aufnahmeantrag (Vorstandsentscheidung offen). Bei getrennt lebenden Eltern entscheidet der
-// Elternteil, bei dem das Kind lebt, im Alltag allein (BGB § 1687), sofern der andere einverstanden ist.
+// Vertreter (SpO § 92 Nr. 1, JO § 37 Nr. 2). Entscheidung der Jugendleitung vom 08.10.2026 (O26): Ein Elternteil reicht.
+// Bei "beide", "allein", "vormund" und "pflege" unterschreibt eine Person mit Sorgerecht (bzw. der Vormund).
+// Ausnahme: Leben die Eltern getrennt und der andere Elternteil ist nicht einverstanden, unterschreibt er zusätzlich mit
+// Stift. Grund ist die gemeinsame Vertretung (BGB § 1629): Ohne Zustimmung darf ein Elternteil nicht allein für beide
+// handeln. Mit Einverständnis entscheidet der Elternteil, bei dem das Kind lebt, im Alltag allein (BGB § 1687).
 //   erste     wer unterschreibt die gedruckte Zeile des Aufnahmeantrags (Seite 2) und die Foto-Einwilligung (Seite 3)
-//   zweite    zusätzliche Zeile für beide Eltern auf Seite 2 (nur bei Empfehlung "beide"), sonst null
+//   zweite    zusätzliche Zeile auf Seite 2, nur bei getrennt lebenden Eltern ohne Einverständnis, sonst null
 //   einer     wer unterschreibt die übrigen Blätter
 function rollen(p) {
   if (p.minor !== true) return { erste: "mitglied", zweite: null, einer: "mitglied" };
-  switch (p.sorge) {
-    case "beide": return { erste: "sorgeberechtigte", zweite: "sorgeberechtigte_beide", einer: "sorgeberechtigte" };
-    case "getrennt_bei_mir":
-      return { erste: "sorgeberechtigte", zweite: p.a.andererElternteilEinverstanden === true ? null : "sorgeberechtigte_beide", einer: "sorgeberechtigte" };
-    default: return { erste: "sorgeberechtigte", zweite: null, einer: "sorgeberechtigte" };
-  }
+  const zweite = p.sorge === "getrennt_bei_mir" && p.a.andererElternteilEinverstanden !== true ? "sorgeberechtigte_beide" : null;
+  return { erste: "sorgeberechtigte", zweite: zweite, einer: "sorgeberechtigte" };
 }
 
 function bestimmeUnterschriften(p, formulare) {
@@ -1273,7 +1271,6 @@ function sammleHinweise(p, e) {
 
   // --- Sorgerecht und Unterschriften ---
   if (minor) {
-    if (p.sorge === "beide") h("info", "beide_unterschreiben_empfohlen");
     if (p.sorge === "getrennt_bei_mir") {
       if (p.a.andererElternteilEinverstanden === true) h("info", "getrennt_einverstanden");
       else { h("warnung", "getrennt_zustimmung"); w("jugendleitung", "getrennte_eltern"); }

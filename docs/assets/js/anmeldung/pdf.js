@@ -91,7 +91,7 @@ const WER_KLARTEXT = {
   mitglied: "Mitglied (Sie selbst)",
   spieler: "Spielerin oder Spieler",
   sorgeberechtigte: "eine Person mit Sorgerecht",
-  sorgeberechtigte_beide: "zweiter Elternteil (empfohlen)",
+  sorgeberechtigte_beide: "zweiter Elternteil (nötig)", // nur bei getrennt lebenden Eltern ohne Einverständnis (O26)
   kontoinhaber: "Kontoinhaberin oder Kontoinhaber",
   arzt: "Ärztin oder Arzt (mit Stempel)",
   verein: "Verein (mit Stempel)",
@@ -1060,7 +1060,7 @@ class Schreiber {
       zeichneLinie(K, this.page, xOD, yLinie, xOD + wOD, yLinie, 0.5, FARBE.tinte3);
       zeichneText(K, this.page, "Ort, Datum", xOD, yLinie - 8.5, 7.5, { farbe: FARBE.tinte3 });
       zeichneLinie(K, this.page, xU, yLinie, xU + wU, yLinie, 0.5, FARBE.tinte3);
-      const bes = "Unterschrift" + (o.name ? ": " + sicher(K, o.name, true) : "") + " (" + werKlartext(o.wer, K) + ")";
+      const bes = "Unterschrift" + (o.name ? ": " + sicher(K, o.name, true) : "") + " (" + werKlartext(o.wer) + ")";
       let g = 7.5;
       while (mess(K, bes, g) > wU && g > 5.5) g -= 0.2;
       zeichneText(K, this.page, bes, xU, yLinie - 8.5, g, { farbe: FARBE.tinte3 });
@@ -1103,8 +1103,7 @@ class Schreiber {
 // ---------------------------------------------------------------------------
 
 // Wer unterschreibt in Klartext für Markierungen und Übersichten (kurz)
-function werKlartext(wer, K) {
-  if (wer === "sorgeberechtigte_beide") return K && K.a.sorge === "getrennt_bei_mir" ? "zweiter Elternteil (nötig)" : "zweiter Elternteil (empfohlen)";
+function werKlartext(wer) {
   return WER_KLARTEXT[wer] || wer;
 }
 
@@ -1133,7 +1132,9 @@ function bildSchluessel(K, wer) {
   const hat = (k) => u[k] && u[k].bytes && u[k].bytes.length;
   if (wer === "mitglied") return hat("mitglied") ? "mitglied" : null;
   if (wer === "sorgeberechtigte") return hat("sorgeberechtigte") ? "sorgeberechtigte" : null;
-  if (wer === "sorgeberechtigte_beide") return hat("sorgeberechtigte_2") ? "sorgeberechtigte_2" : null;
+  // Ein Elternteil reicht (Jugendleitung, 08.10.2026). Nur getrennt lebende Eltern ohne Einverständnis brauchen den zweiten Elternteil,
+  // und er unterschreibt mit Stift: Die Oberfläche kennt dafür kein Bild, die Stelle bekommt immer die Markierung.
+  if (wer === "sorgeberechtigte_beide") return null;
   if (wer === "spieler") return hat("spieler") ? "spieler" : null;
   if (wer === "kontoinhaber") {
     const ki = text(objekt(K.a.zahlung).kontoinhaber);
@@ -1182,7 +1183,7 @@ function zeichneMarkierung(K, page, st, wer) {
   const size = 6.6;
   const x = st.x + 3;
   const ziel = "Hier mit Stift unterschreiben:";
-  const wt = sicher(K, werKlartext(wer, K), false);
+  const wt = sicher(K, werKlartext(wer), false);
   const einzeilig = ziel + " " + wt;
   const oben = st.y + st.hoehe;
   const fit = mess(K, einzeilig, size) <= st.breite - 6;
@@ -1850,7 +1851,7 @@ function unterschriftFuer(K, S, formular, stelleKey) {
   const r = stelleRolle(K, formular, stelleKey);
   if (r.rueckfall) {
     K.rueckfall.push({ formular: formular, stelleKey: stelleKey, wer: r.wer });
-    K.warnungen.push("Unterschriftsstelle " + formular + "." + stelleKey + " fehlt in den Regeln: Stift-Markierung für " + werKlartext(r.wer, K) + " ergänzt");
+    K.warnungen.push("Unterschriftsstelle " + formular + "." + stelleKey + " fehlt in den Regeln: Stift-Markierung für " + werKlartext(r.wer) + " ergänzt");
   }
   S.unterschriftBlock({ formular: formular, stelleKey: stelleKey, wer: r.wer, name: personName(K, r.wer), stift: r.rueckfall, rueckfall: r.rueckfall });
 }
@@ -2314,7 +2315,7 @@ const HFV_FORMULARE = ["hfv_antrag", "vollmacht", "abmeldung", "einverstaendnis_
 const unterlageName = (K, id) => (deRegeln.unterlagen[id] && deRegeln.unterlagen[id].name) || id;
 const unterlageText = (K, u, feld) => ersetzePlatzhalter(objekt(deRegeln.unterlagen[u.id])[feld], u.werte);
 const hinweisText = (h) => ersetzePlatzhalter(deRegeln.hinweise[h.key], h.werte);
-const werLabel = (K, wer) => (wer === "sorgeberechtigte_beide" ? (K.a.sorge === "getrennt_bei_mir" ? "Der zweite Elternteil (nötig)" : "Der zweite Elternteil (empfohlen)") : deRegeln.wer[wer] || werKlartext(wer, K));
+const werLabel = (wer) => (wer === "sorgeberechtigte_beide" ? "Der zweite Elternteil (nötig)" : deRegeln.wer[wer] || werKlartext(wer));
 
 // Wie unterschreibt die Familie an dieser Stelle? (Text der Tabelle in Teil A)
 function wieText(K, u) {
@@ -2480,7 +2481,7 @@ function seiteTeilA(K, S, plan) {
       verlangt.map((u) => [
         String(plan.stelleSeite(u.formular, u.stelleKey) || ""),
         deRegeln.unterschriften[u.formular + "." + u.stelleKey] || u.formular + " " + u.stelleKey,
-        werLabel(K, u.wer),
+        werLabel(u.wer),
         wieText(K, u),
       ]),
       { size: 9 }

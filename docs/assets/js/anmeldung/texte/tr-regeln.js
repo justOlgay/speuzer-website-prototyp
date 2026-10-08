@@ -345,7 +345,6 @@ export default {
     keine_frauenmannschaft: "Kulübün kadın takımı yok. 18 yaşından itibaren kadınlar başvuruyla Herren (yetişkin erkek takımı) takımında oynayabilir. Bizimle konuşun.",
     vertrauensperson: "Federasyonun bu durum için güvenilir bir irtibat kişisi var. Bu kişi başvuruda yardım eder. Çocuklarda ebeveynler onay verir.",
     sonderspielrecht: "Engelli çocuklar daha genç bir yaş grubunda oynayabilir. Buna özel oynama izni (Sonderspielrecht) denir. Bunun için bir uzman doktordan rapor gerekir. Gençlik birimi size yardım eder.",
-    beide_unterschreiben_empfohlen: "Önerimiz: İki ebeveyn de üyelik başvurusunu (Aufnahmeantrag) imzalasın.",
     getrennt_einverstanden: "Diğer ebeveyn razı. Bu yüzden bir kişi imzalar.",
     sorge_allein_nachweis: "Velayet hakkı tek başınıza sizde. Kulüp isterse göstermek için bir belge hazır tutun.",
     vormund_hinweis: "Vasi (Vormund) çocuk adına imzalar. Vasilik belgesini getirin.",
@@ -527,7 +526,7 @@ export default {
 
   unterschriften: {
     "aufnahmeantrag.s2.unterschrift": "Üyelik başvurusu (Aufnahmeantrag)",
-    "aufnahmeantrag.s2.unterschrift_sorgeberechtigte": "Üyelik başvurusu (Aufnahmeantrag): iki ebeveynin imzası",
+    "aufnahmeantrag.s2.unterschrift_sorgeberechtigte": "Üyelik başvurusu (Aufnahmeantrag): ikinci ebeveynin imzası",
     "aufnahmeantrag.s3.unterschrift": "Fotoğraflar için izin",
     "aufnahmeantrag.s4.unterschrift": "Otomatik çekim için izin (Lastschrift)",
     "datenschutz.kenntnisnahme": "Veri koruma bilgisinin (Datenschutz) alındığına dair imza",

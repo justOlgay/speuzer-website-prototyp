@@ -846,8 +846,6 @@ export default {
       mitglied: { kind: "İmza: {name}", selbst: "İmzanız" },
       sorgeberechtigte: "İmza: {person}",
       ersteEltern: "İmza: anne ya da baba",
-      zweiteEltern: "İmza: ikinci ebeveyn",
-      zweiteHinweis: "Bu imza isteğe bağlıdır.\nÖnerimiz: İki ebeveyn de imzalasın.",
       kontoinhaber: "Hesap sahibinin imzası: {person}",
       spieler: "Oyuncunun imzası",
       ersteSorge: "İmzanız",

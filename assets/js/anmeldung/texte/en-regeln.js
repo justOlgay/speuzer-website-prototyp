@@ -344,7 +344,6 @@ export default {
     keine_frauenmannschaft: "The club has no women’s team. Women from 18 may play in the men’s team (Herren) with an application. Talk to us.",
     vertrauensperson: "The association has a person of trust for this case. This person helps with the application. For children, the parents agree.",
     sonderspielrecht: "Children with a disability can play in a younger age group. This is called special permission to play (Sonderspielrecht). It needs a report from a specialist doctor. The youth department helps you.",
-    beide_unterschreiben_empfohlen: "We recommend: both parents sign the membership application (Aufnahmeantrag).",
     getrennt_einverstanden: "The other parent agrees. That is why one person signs.",
     sorge_allein_nachweis: "You have sole custody. Keep proof ready in case the club asks for it.",
     vormund_hinweis: "The legal guardian (Vormund) signs for the child. Bring the proof of the guardianship.",
@@ -526,7 +525,7 @@ export default {
 
   unterschriften: {
     "aufnahmeantrag.s2.unterschrift": "Membership application (Aufnahmeantrag)",
-    "aufnahmeantrag.s2.unterschrift_sorgeberechtigte": "Membership application (Aufnahmeantrag): signature of both parents",
+    "aufnahmeantrag.s2.unterschrift_sorgeberechtigte": "Membership application (Aufnahmeantrag): signature of the second parent",
     "aufnahmeantrag.s3.unterschrift": "Permission for photos",
     "aufnahmeantrag.s4.unterschrift": "Permission for direct debit (Lastschrift)",
     "datenschutz.kenntnisnahme": "Acknowledgement of the information on data protection (Datenschutz)",

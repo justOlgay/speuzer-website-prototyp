@@ -356,7 +356,6 @@ export default {
     keine_frauenmannschaft: "Der Verein hat keine Frauenmannschaft. Frauen ab 18 dürfen mit Antrag bei den Herren spielen. Sprechen Sie uns an.",
     vertrauensperson: "Der Verband hat für diesen Fall eine Vertrauensperson. Sie hilft beim Antrag. Bei Kindern stimmen die Eltern zu.",
     sonderspielrecht: "Kinder mit Behinderung können in einer jüngeren Altersklasse spielen. Das heißt Sonderspielrecht. Es braucht ein Gutachten von einem Facharzt. Die Jugendleitung hilft Ihnen.",
-    beide_unterschreiben_empfohlen: "Wir empfehlen: Beide Eltern unterschreiben den Aufnahmeantrag.",
     getrennt_einverstanden: "Der andere Elternteil ist einverstanden. Deshalb unterschreibt eine Person.",
     sorge_allein_nachweis: "Sie haben das alleinige Sorgerecht. Halten Sie einen Nachweis bereit, falls der Verein danach fragt.",
     vormund_hinweis: "Der Vormund unterschreibt für das Kind. Bringen Sie den Nachweis über die Vormundschaft mit.",
@@ -542,7 +541,7 @@ export default {
 
   unterschriften: {
     "aufnahmeantrag.s2.unterschrift": "Aufnahmeantrag",
-    "aufnahmeantrag.s2.unterschrift_sorgeberechtigte": "Aufnahmeantrag: Unterschrift von beiden Eltern",
+    "aufnahmeantrag.s2.unterschrift_sorgeberechtigte": "Aufnahmeantrag: Unterschrift des zweiten Elternteils",
     "aufnahmeantrag.s3.unterschrift": "Erlaubnis für Fotos",
     "aufnahmeantrag.s4.unterschrift": "Erlaubnis für die Lastschrift",
     "datenschutz.kenntnisnahme": "Kenntnis der Information zum Datenschutz",

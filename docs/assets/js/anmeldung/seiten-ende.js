@@ -28,7 +28,7 @@ const HINWEIS_ORT = {
   wiederholter_wechsel: "abmeldung/wechsel",
   ohne_spielrecht_kein_spiel: "spielen", spielerpass_unklar: "spielerpass",
   wohnen_nicht_gemeinsam: "wohnen/ort", austausch_ein_jahr: "wohnen/grund", f17_wahrscheinlich_nicht: "wohnen/dauer", f17_moeglich_5_jahre: "wohnen/dauer",
-  getrennt_einverstanden: "sorge/recht", beide_unterschreiben_empfohlen: "sorge/recht",
+  getrennt_einverstanden: "sorge/recht",
   sorge_allein_nachweis: "sorge/recht", vormund_hinweis: "sorge/recht", pflege_hinweis: "sorge/recht",
   maedchen_jungenteam: "besonderes", herren_aushilfe: "besonderes", frau_herren: "besonderes", sonderspielrecht: "besonderes",
   keine_frauenmannschaft: "besonderes", vertrauensperson: "geburt/geschlecht",
@@ -304,7 +304,6 @@ function pruefBereiche(k) {
   if (a.unterschriftWeg === "bildschirm") {
     for (const p of plan.liste) {
       const u = k.bilder.unterschriften[p.schluessel];
-      if (!u && p.freiwillig) continue;
       const name = unterschriftTitel(k, p.schluessel);
       z(name, u ? h("img", { klasse: "anm-vorschau-unterschrift", src: k.vorschauUrl("unterschrift-" + p.schluessel, u.bytes, "image/png"), alt: k.t("unterschriften.standOk") + ": " + name }) : W("nichtUnterschrieben"), "unterschriften");
     }

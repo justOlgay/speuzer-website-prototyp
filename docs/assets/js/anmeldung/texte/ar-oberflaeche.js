@@ -854,8 +854,6 @@ export default {
       mitglied: { kind: "توقيع {name}", selbst: "توقيعك" },
       sorgeberechtigte: "توقيع {person}",
       ersteEltern: "التوقيع: الأم أو الأب",
-      zweiteEltern: "التوقيع: الطرف الآخر من الوالدين",
-      zweiteHinweis: "هذا التوقيع اختياري.\nنوصي بأن يوقّع الوالدان معًا.",
       kontoinhaber: "توقيع صاحب الحساب: {person}",
       spieler: "توقيع اللاعب",
       ersteSorge: "توقيعك",

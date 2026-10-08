@@ -157,7 +157,8 @@ export const PROFILE = [
       keineHinweise: ["attest_aktuell", "spielerfoto_hinweis"],
       weiterleitung: ["karneval:gruppe_einteilung", "karneval:turnier", "karneval:kostueme"],
       beitrag: { gruppe: "karneval_kinder", jahr: 108, monat: 9, hinweisKey: "beitrag_standard" },
-      unterschriften: [{ formular: "karneval_auftritte", stelleKey: "unterschrift", wer: "sorgeberechtigte" }, { formular: "aufnahmeantrag", stelleKey: "s2.unterschrift", wer: "sorgeberechtigte" }, { formular: "aufnahmeantrag", stelleKey: "s2.unterschrift_sorgeberechtigte", wer: "sorgeberechtigte_beide" }],
+      unterschriften: [{ formular: "karneval_auftritte", stelleKey: "unterschrift", wer: "sorgeberechtigte" }, { formular: "aufnahmeantrag", stelleKey: "s2.unterschrift", wer: "sorgeberechtigte" }],
+      keineUnterschriften: [{ formular: "aufnahmeantrag", stelleKey: "s2.unterschrift_sorgeberechtigte" }],
       schritteMit: ["karneval", "sorge", "leistungen", "notfall", "unterschriften"], schritteOhne: ["mannschaft", "spielen", "spielerpass", "pass", "ausland", "wohnen", "spielerfoto", "abmeldung"],
     }),
 
@@ -183,12 +184,11 @@ export const PROFILE = [
       keineUnterlagen: ["U12", "U13", "U17", "U18", "U19", "U26"], nachweis: ["U09", "U10"],
       formulare: ["aufnahmeantrag", "datenschutz", "hfv_antrag", "attest", "einverstaendnis_fahrten", "notfall"], keineFormulare: ["abmeldung", "vollmacht"],
       frist: { regel: "R1", pflichtspieleAb: HEUTE, freundschaftsspieleAb: HEUTE, unsicher: false, key: "frist_neu" },
-      hinweise: ["ohne_spielrecht_kein_spiel", "mitgliedschaft_zuerst", "attest_aktuell", "spielerfoto_hinweis", "mitgliedschaft_beginn", "beide_unterschreiben_empfohlen", "maedchen_jungenteam"],
+      hinweise: ["ohne_spielrecht_kein_spiel", "mitgliedschaft_zuerst", "attest_aktuell", "spielerfoto_hinweis", "mitgliedschaft_beginn", "maedchen_jungenteam"],
       weiterleitung: [],
       beitrag: { gruppe: "fussball_jugend", jahr: 108, hinweisKey: "beitrag_standard" },
       unterschriften: [
         { formular: "aufnahmeantrag", stelleKey: "s2.unterschrift", wer: "sorgeberechtigte" },
-        { formular: "aufnahmeantrag", stelleKey: "s2.unterschrift_sorgeberechtigte", wer: "sorgeberechtigte_beide" },
         { formular: "aufnahmeantrag", stelleKey: "s3.unterschrift", wer: "sorgeberechtigte" },
         { formular: "aufnahmeantrag", stelleKey: "s4.unterschrift", wer: "kontoinhaber" },
         { formular: "hfv_antrag", stelleKey: "spieler", wer: "spieler" },
@@ -196,6 +196,8 @@ export const PROFILE = [
         { formular: "hfv_antrag", stelleKey: "einwilligung_a", wer: "sorgeberechtigte" },
         { formular: "attest", stelleKey: "arzt", wer: "arzt" },
       ],
+      // O26 (Jugendleitung, 08.10.2026): Ein Elternteil reicht, auch wenn beide Eltern das Sorgerecht haben
+      keineUnterschriften: [{ formular: "aufnahmeantrag", stelleKey: "s2.unterschrift_sorgeberechtigte" }],
       schritteMit: ["mannschaft", "spielen", "spielerpass", "pass", "ausland", "sorge", "leistungen", "zahlung", "notfall", "spielerfoto", "nachweise", "pruefen", "fertig"],
       schritteOhne: ["alter_verein", "abmeldung", "wohnen", "karneval", "besonderes"],
       fehlend: ["U09", "U10"],
@@ -346,7 +348,7 @@ export const PROFILE = [
     {
       faelle: ["F03", "F14"], keineFaelle: ["F15", "F16", "F17", "F18"], status: "neu", altersklasse: "E",
       unterlagen: { U25: "pflicht", U09: "pflicht", U10: "pflicht" }, nachweis: ["U25", "U09", "U10"],
-      hinweise: ["vormund_hinweis"], keineHinweise: ["beide_unterschreiben_empfohlen", "ohne_zusage_spielen"], weiterleitung: ["jugendleitung:sonderfall_kind"],
+      hinweise: ["vormund_hinweis"], keineHinweise: ["ohne_zusage_spielen"], weiterleitung: ["jugendleitung:sonderfall_kind"],
       unterschriften: [{ formular: "aufnahmeantrag", stelleKey: "s2.unterschrift", wer: "sorgeberechtigte" }],
       keineUnterschriften: [{ formular: "aufnahmeantrag", stelleKey: "s2.unterschrift_sorgeberechtigte" }],
       frist: { regel: "R1", pflichtspieleAb: HEUTE }, fehlend: ["U09", "U10", "U25"],
@@ -431,7 +433,7 @@ export const PROFILE = [
   profilEintrag("getrennt-lebende-eltern", "Getrennt lebende Eltern (der andere Elternteil ist nicht gefragt)", "Junge, 9 Jahre, lebt bei der Mutter, der Vater weiß noch nichts von der Anmeldung.", HEUTE,
     kind({ vorname: "Ben", geburtsdatum: "2017-02-14", geschlecht: "m", sorge: "getrennt_bei_mir", andererElternteilEinverstanden: false, sorgeberechtigte: [elternBeide()[0]] }),
     {
-      faelle: ["F03"], hinweise: ["getrennt_zustimmung"], keineHinweise: ["getrennt_einverstanden", "beide_unterschreiben_empfohlen"], weiterleitung: ["jugendleitung:getrennte_eltern"],
+      faelle: ["F03"], hinweise: ["getrennt_zustimmung"], keineHinweise: ["getrennt_einverstanden"], weiterleitung: ["jugendleitung:getrennte_eltern"],
       unterschriften: [{ formular: "aufnahmeantrag", stelleKey: "s2.unterschrift", wer: "sorgeberechtigte" }, { formular: "aufnahmeantrag", stelleKey: "s2.unterschrift_sorgeberechtigte", wer: "sorgeberechtigte_beide" }, { formular: "hfv_antrag", stelleKey: "erziehungsberechtigte", wer: "sorgeberechtigte" }],
     }),
 

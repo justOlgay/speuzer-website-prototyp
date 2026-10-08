@@ -15,7 +15,10 @@
 //                    (Anker #o26); die Priorität an der Zeile stimmt mit dem Regelwerk; der Text der
 //                    Zeile passt zur Frage im Regelwerk; es gibt keine Zeile ohne O-Nummer und kein
 //                    Kennzeichen „neu“ mehr (Hinweis); O67 (Rechtsgrundlage der Notfallkontakte) und
-//                    O68 (Bildschirm-Unterschrift der Vereinsunterlagen) stehen sichtbar mit ihrem Inhalt da
+//                    O68 (Bildschirm-Unterschrift der Vereinsunterlagen) stehen sichtbar mit ihrem Inhalt da;
+//                    Punkte mit Status „entschieden“ (O26, Jugendleitung 08.10.2026) tragen das Kennzeichen
+//                    „Entschieden“ und den Wortlaut der Entscheidung, haben kein P-Kennzeichen mehr und zählen
+//                    nicht als offene P1-Frage; O68 steht weiter offen mit dem Stand der Jugendleitung
 //   3  Namen         die Namen der Papiere und die Teile A, B und C stehen so auf der Seite, wie sie im
 //                    Prototyp heißen (assets/js/anmeldung/texte); die alten Namen kommen nicht vor;
 //                    im Fließtext steht „Spielrecht“
@@ -193,7 +196,7 @@ const alleTexte = normal(
 );
 
 console.log(`Konzeptseite prüfen: ${path.relative(ROOT, SEITE)}`);
-console.log(`Regelwerk: ${path.relative(ROOT, REGELWERK)} (Version ${regelwerk.version}, ${punkte.length} offene Punkte)`);
+console.log(`Regelwerk: ${path.relative(ROOT, REGELWERK)} (Version ${regelwerk.version}, ${punkte.length} Punkte, davon ${punkte.filter((x) => x.status === "entschieden").length} entschieden)`);
 
 // ---------- 1. Rahmen ----------
 
@@ -228,9 +231,12 @@ gruppe("2  Offene Punkte gegen data/anmeldung.json");
   const nachId = new Map();
   for (const z of zeilen) nachId.set(z.attrs.id, [...(nachId.get(z.attrs.id) || []), z]);
 
+  // Status „entschieden“ (O26): Der Punkt zählt nicht mehr als offene P1-Frage, seine Zeile zeigt die Entscheidung.
+  const entschieden = punkte.filter((p) => p.status === "entschieden");
   const p1 = punkte.filter((p) => p.prioritaet === "P1");
+  const p1Offen = p1.filter((p) => p.status !== "entschieden");
   const p1FehltImText = p1.filter((p) => !imText.includes(p.id)).map((p) => p.id);
-  pruefe(`alle ${p1.length} P1-Punkte stehen mit ihrer O-Nummer auf der Seite`, p1FehltImText.length === 0, p1FehltImText.map((o) => `${o} fehlt`));
+  pruefe(`alle ${p1.length} P1-Punkte (${p1Offen.length} offen, ${p1.length - p1Offen.length} entschieden) stehen mit ihrer O-Nummer auf der Seite`, p1FehltImText.length === 0, p1FehltImText.map((o) => `${o} fehlt`));
 
   const p1Versteckt = [];
   const p1OhneZeile = [];
@@ -298,16 +304,40 @@ gruppe("2  Offene Punkte gegen data/anmeldung.json");
   };
   pruefe("O67: Rechtsgrundlage der Notfallkontakte (Art. 6 Abs. 1 lit. b oder f) steht sichtbar auf der Seite",
     sichtbarMit("O67", [/Notfallkontakte/, /Art\. 6/, /lit\. b/, /lit\. f/]));
-  pruefe("O68: Bildschirm-Unterschrift der Vereinsunterlagen (§ 127 BGB) steht sichtbar auf der Seite",
-    sichtbarMit("O68", [/Bildschirm/, /§ 127 BGB/, /Stift/]));
+  pruefe("O68: Bildschirm-Unterschrift der Vereinsunterlagen (§ 127 BGB) steht sichtbar auf der Seite, mit dem Stand der Jugendleitung (befürwortet, Beschluss des Vorstands steht aus)",
+    sichtbarMit("O68", [/Bildschirm/, /§ 127 BGB/, /Stift/, /Jugendleitung befürwortet \(08\.10\.2026\)/, /Beschluss des Vorstands steht aus/]));
+
+  // Entschiedene Punkte: sichtbar, Kennzeichen „Entschieden“ statt P-Kennzeichen, Wortlaut der Entscheidung aus dem Regelwerk
+  const entschiedenFehler = [];
+  for (const p of entschieden) {
+    const z = (nachId.get(p.id.toLowerCase()) || [])[0];
+    if (!z) {
+      entschiedenFehler.push(`${p.id}: keine Zeile mit Anker`);
+      continue;
+    }
+    const marken = alle(z, (k) => (k.attrs.class || "").split(/\s+/).includes("tag")).map((k) => textVon(k));
+    if (hatVorfahr(z, (e) => e.tag === "details")) entschiedenFehler.push(`${p.id}: steht im Aufklapper`);
+    if (!marken.some((m) => m.toLowerCase() === "entschieden")) entschiedenFehler.push(`${p.id}: das Kennzeichen „Entschieden“ fehlt (gefunden: ${marken.join(", ") || "keins"})`);
+    if (marken.some((m) => /^P[123]$/.test(m))) entschiedenFehler.push(`${p.id}: trägt noch ein P-Kennzeichen und zählt damit als offene Frage`);
+    if (!p.entscheidung || !textVon(z).includes(normal(p.entscheidung))) entschiedenFehler.push(`${p.id}: der Wortlaut der Entscheidung aus dem Regelwerk steht nicht in der Zeile`);
+  }
+  pruefe(`jeder entschiedene Punkt (${entschieden.map((p) => p.id).join(", ") || "keiner"}) steht sichtbar mit dem Kennzeichen „Entschieden“ und dem Wortlaut der Entscheidung, ohne P-Kennzeichen`, entschiedenFehler.length === 0, entschiedenFehler);
+  const aufSeiteEntschieden = zeilen.filter((z) => z.attrs["data-status"] === "entschieden").map((z) => z.attrs.id.toUpperCase()).sort();
+  pruefe("die Seite kennzeichnet genau die Punkte als entschieden, die im Regelwerk entschieden sind (O68 und die anderen bleiben offen)",
+    JSON.stringify(aufSeiteEntschieden) === JSON.stringify(entschieden.map((p) => p.id).sort()),
+    [`Seite: ${aufSeiteEntschieden.join(", ") || "keiner"}`, `Regelwerk: ${entschieden.map((p) => p.id).join(", ") || "keiner"}`]);
+  const kopfMarken = alle(baum, (k) => (k.attrs.class || "").split(/\s+/).includes("tag")).map((k) => textVon(k).toLowerCase());
+  pruefe("die Legende „So lesen Sie die Kennzeichen“ erklärt das Kennzeichen „Entschieden“", entschieden.length === 0 || (kopfMarken.includes("entschieden") && /Der Punkt ist entschieden/.test(seiteText)));
+  pruefe("keine Empfehlung „beide Eltern unterschreiben“ mehr (O26 ist entschieden: ein Elternteil reicht)", !/Wir empfehlen beide|empfiehlt beide|Empfehlung:\s*Beide Eltern|Seine Unterschrift ist freiwillig/.test(seiteText));
 
   // Stand des Regelwerks
   const version = /Regelwerk Version (\d{4}-\d{2}-\d{2}(?:\.\d+)?)/.exec(seiteText);
   hinweis(`die Seite nennt die Version des Regelwerks (${regelwerk.version})`, !!version && version[1] === regelwerk.version,
     [`Seite: ${version ? version[1] : "keine Angabe"}, Regelwerk: ${regelwerk.version}`]);
-  const anzahl = /mit (\d+) offenen Punkten/.exec(seiteText);
-  hinweis(`die Seite nennt die Zahl der offenen Punkte (${punkte.length})`, !!anzahl && Number(anzahl[1]) === punkte.length,
-    [`Seite: ${anzahl ? anzahl[1] : "keine Angabe"}, Regelwerk: ${punkte.length}`]);
+  const anzahl = /mit (\d+) offenen Punkten(?:, davon (\d+) entschieden)?/.exec(seiteText);
+  hinweis(`die Seite nennt die Zahl der Punkte (${punkte.length}) und wie viele davon entschieden sind (${entschieden.length})`,
+    !!anzahl && Number(anzahl[1]) === punkte.length && Number(anzahl[2] || 0) === entschieden.length,
+    [`Seite: ${anzahl ? anzahl[1] + ", davon entschieden: " + (anzahl[2] || "keine Angabe") : "keine Angabe"}, Regelwerk: ${punkte.length}, davon entschieden: ${entschieden.length}`]);
 
   // Fälle heißen wie im Regelwerk
   const faelle = Object.entries(regelwerk.faelle || {});
@@ -374,8 +404,9 @@ gruppe("4  Endstand in den Abschnitten „Assistent“, „PDF“ und „Untersc
   kriterium("b1 Unterschrift: Vereinsunterlagen am Bildschirm, Vordrucke des HFV mit Stift", U, [/Am Bildschirm/, /Mit Stift/, /Vordrucke des HFV/]);
   kriterium("b2 Satzungs-Haken ist Pflicht; der Link führt auf die Satzung der Website, die Adresse im Vordruck ist defekt (O66)", U,
     [/Satzung/, /Haken/, /Pflicht/, /Satzung der Website/, /Adresse im Vordruck/, /defekt/, /O66/]);
-  kriterium("b3 zweiter Elternteil freiwillig; bei getrennt lebenden Eltern ohne Einverständnis Stift-Unterschrift nötig", U,
-    [/Zweiter Elternteil/, /freiwillig/, /getrennt/, /nicht einverstanden/, /nötig/, /nur mit Stift/]);
+  kriterium("b3 ein Elternteil reicht (Jugendleitung, O26); Ausnahme zweiter Elternteil: getrennt lebende Eltern ohne Einverständnis, Stift-Unterschrift nötig", U,
+    [/Ein Elternteil reicht/, /Jugendleitung/, /08\.10\.2026/, /O26/, /Zweiter Elternteil \(nötig\)/, /getrennt/, /nicht einverstanden/, /nur mit Stift/]);
+  pruefe("b3 der zweite Elternteil ist nicht mehr freiwillig oder empfohlen", U.length > 0 && !/Seine Unterschrift ist freiwillig|Wir empfehlen beide|Empfehlung/.test(U), ["Abschnitt „Die Unterschrift“ nennt noch eine freiwillige oder empfohlene zweite Unterschrift"]);
   kriterium("b4 keine leeren Erklärungsfelder unter einer Bildschirm-Unterschrift; sonst wird die Stelle zur Stift-Stelle", U,
     [/leeren Erklärungsfelder/, /Stift-Stelle/, /Bildschirm-Unterschrift/]);
   kriterium("c  Notfall- und Gesundheitsbogen: Art. 9 mit Angaben, nur Notfallkontakte ohne Angaben, Absprache immer getrennt mit Stift", P,

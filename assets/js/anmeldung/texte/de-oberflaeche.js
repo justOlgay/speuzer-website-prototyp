@@ -815,8 +815,6 @@ export default {
       mitglied: { kind: "Unterschrift von {name}", selbst: "Ihre Unterschrift" },
       sorgeberechtigte: "Unterschrift von {person}",
       ersteEltern: "Unterschrift: Mutter oder Vater",
-      zweiteEltern: "Unterschrift: zweiter Elternteil",
-      zweiteHinweis: "Diese Unterschrift ist freiwillig.\nWir empfehlen: Beide Eltern unterschreiben.",
       kontoinhaber: "Unterschrift des Kontoinhabers: {person}",
       spieler: "Unterschrift der Spielerin oder des Spielers",
       ersteSorge: "Ihre Unterschrift",

@@ -205,10 +205,11 @@ async function haekchenSatzung(page) {
   }
 }
 
-async function unterschreiben(page, ohneZweite) {
+async function unterschreiben(page) {
   await haekchenSatzung(page);
   const felder = await page.$$eval("#anmeldung .anm-unterschrift", (l) => l.map((e) => e.getAttribute("data-unterschrift")));
-  const gezeichnet = felder.filter((w) => !(ohneZweite && w === "sorgeberechtigte_2"));
+  // Ein Elternteil reicht (O26, Jugendleitung 08.10.2026): kein zweites Feld der Eltern, in keiner Sprache
+  const gezeichnet = felder;
   for (const wer of gezeichnet) {
     const canvas = await page.$('#anmeldung .anm-unterschrift[data-unterschrift="' + wer + '"] canvas');
     await zeichne(page, canvas);
@@ -244,6 +245,9 @@ async function pruefeUnterschriftenSeite(page, code, sprache, dict, kennung) {
       gilt: Array.from(document.querySelectorAll("#anmeldung .anm-unterschrift .anm-unterschrift__gilt > ul > li")).map((li) => li.textContent),
     };
   });
+  // O26 (Jugendleitung, 08.10.2026): Ein Elternteil reicht. In keiner Sprache gibt es ein zweites Unterschriftsfeld der Eltern.
+  const feldNamen = await page.$$eval("#anmeldung .anm-unterschrift", (l) => l.map((e) => e.getAttribute("data-unterschrift")));
+  ok(kennung + ": ein Elternteil reicht: höchstens ein Unterschriftsfeld der Eltern, kein zweites Feld", !feldNamen.includes("sorgeberechtigte_2") && feldNamen.filter((w) => /^sorgeberechtigte/.test(w)).length <= 1, feldNamen.join(","));
   ok(kennung + ": Satzung-Block steht auf der Unterschriftenseite (Kästchen, nicht angekreuzt)", !!dom && dom.hakenDa && dom.angekreuzt === false, dom ? "" : "kein Satzung-Block");
   if (!dom) return;
   ok(kennung + ": Satzung-Block übersetzt, deutscher Name (Satzung) in Klammern", ohneSteuer(dom.titel) === ohneSteuer(erwartet.titel) && ohneSteuer(dom.label).includes(ohneSteuer(erwartet.label)) && /\(Satzung\)/.test(ohneSteuer(dom.text)), ohneSteuer(dom.titel) + " | " + ohneSteuer(dom.label).slice(0, 80));
@@ -386,7 +390,7 @@ async function durchlauf(browser, server, sprache, beispiel, muster, txt) {
         await pruefeUnterschriftenSeite(page, code, sprache, dict, kennung);
         await fotoSatzung(page, code, beispiel.id);
       }
-      await unterschreiben(page, beispiel.id === "kind-neu");
+      await unterschreiben(page);
     }
     // Karneval: die beiden freiwilligen Fragen zum Abholen und zum Heimweg (nur nach "Ja" bei den Abendauftritten)
     if (s.teil === "abholung" || s.teil === "allein") {

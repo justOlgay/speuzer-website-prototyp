@@ -226,11 +226,11 @@ export const nachweise = {
 // Wer aus e.unterschriften unterschreibt selbst (nicht Arzt oder Verein).
 const FAMILIE = ["mitglied", "sorgeberechtigte", "sorgeberechtigte_beide", "kontoinhaber", "spieler"];
 // Schlüssel in bilder.unterschriften (SCHNITTSTELLEN Abschnitt 6): mitglied
-// (Erwachsene), sorgeberechtigte und sorgeberechtigte_2 (Eltern), kontoinhaber
-// (nur, wenn eine andere Person das Konto hat), spieler.
-const REIHENFOLGE = ["mitglied", "sorgeberechtigte", "sorgeberechtigte_2", "kontoinhaber", "spieler"];
-// Die zweite Unterschrift der Eltern ist freiwillig: dem Verband reicht eine.
-const FREIWILLIG = ["sorgeberechtigte_2"];
+// (Erwachsene), sorgeberechtigte (eine Person mit Sorgerecht; Entscheidung der Jugendleitung
+// vom 08.10.2026: Ein Elternteil reicht), kontoinhaber (nur, wenn eine andere Person das Konto
+// hat), spieler. Den zweiten Elternteil (getrennt lebende Eltern ohne Einverständnis) gibt es
+// hier nicht: Er unterschreibt mit Stift, Hinweis und Stift-Stelle stehen im PDF.
+const REIHENFOLGE = ["mitglied", "sorgeberechtigte", "kontoinhaber", "spieler"];
 
 // Plan der Unterschriften: Für welche Person gibt es ein Feld am Bildschirm
 // (wer, Stellen), welche Seiten unterschreibt die Familie mit Stift? Ob
@@ -263,9 +263,6 @@ export function unterschriftenPlan(k) {
     // die eigene Unterschrift des Kontoinhabers ("Erlaubnis für die Lastschrift").
     merke(s.wer, s.formular + "." + s.stelleKey);
   }
-  // Sind beide Eltern sorgeberechtigt, bietet der Assistent ein zweites,
-  // freiwilliges Feld an – überall, wo die erste Unterschrift steht.
-  if (k.a.sorge === "beide" && personen.has("sorgeberechtigte")) personen.set("sorgeberechtigte_2", personen.get("sorgeberechtigte").slice());
   // Ist der Kontoinhaber dieselbe Person wie ein anderer Unterzeichner, gilt
   // dessen Unterschrift auch für das Lastschrift-Mandat (kein eigenes Feld).
   let alias = null;
@@ -277,7 +274,7 @@ export function unterschriftenPlan(k) {
       personen.delete("kontoinhaber");
     }
   }
-  const liste = REIHENFOLGE.filter((s) => personen.has(s)).map((schluessel) => ({ schluessel, stellen: personen.get(schluessel), freiwillig: FREIWILLIG.includes(schluessel) }));
+  const liste = REIHENFOLGE.filter((s) => personen.has(s)).map((schluessel) => ({ schluessel, stellen: personen.get(schluessel) }));
   return { liste, stift, alias, papier };
 }
 
@@ -285,7 +282,6 @@ function personenName(k, schluessel) {
   const sorge = k.a.sorgeberechtigte || [];
   const voll = (p) => sauber([p && p.vorname, p && p.nachname].filter(Boolean).join(" "));
   if (schluessel === "sorgeberechtigte") return voll(sorge[0]) || k.t("unterschriften.person.ersteSorge");
-  if (schluessel === "sorgeberechtigte_2") return voll(sorge[1]);
   if (schluessel === "kontoinhaber") return sauber([(k.a.zahlung || {}).kiVorname, (k.a.zahlung || {}).kiNachname].filter(Boolean).join(" "));
   return "";
 }
@@ -297,7 +293,6 @@ export function unterschriftTitel(k, schluessel) {
   if (schluessel === "sorgeberechtigte") {
     return k.a.sorge === "beide" ? k.t("unterschriften.person.ersteEltern") : k.t("unterschriften.person.sorgeberechtigte", { person: personenName(k, schluessel) });
   }
-  if (schluessel === "sorgeberechtigte_2") return k.t("unterschriften.person.zweiteEltern");
   return k.t("unterschriften.person.kontoinhaber", { person: personenName(k, schluessel) });
 }
 
@@ -386,9 +381,8 @@ export const unterschriften = {
             id: k.nextId("s"),
             wer: person.schluessel,
             feld: "unterschrift." + person.schluessel,
-            titel: person.freiwillig ? titel + " " + k.t("allgemein.freiwillig") : titel,
+            titel,
             hinweisListe: gilt,
-            zusatz: person.freiwillig ? k.t("unterschriften.person.zweiteHinweis").replace(/\n/g, " ") : null,
             texte: {
               ariaLabel: k.t("unterschriften.ariaLabel"),
               stand0: k.t("unterschriften.stand0"),
@@ -458,7 +452,6 @@ export const unterschriften = {
     // Am Bildschirm ist der Haken bei der Satzung Pflicht, auf Papier freiwillig.
     if (k.a.unterschriftWeg === "bildschirm" && k.a.satzung !== true) f.push({ feld: "satzung", meldung: k.t("fehler.satzung") });
     for (const person of plan.liste) {
-      if (person.freiwillig) continue;
       if (!k.bilder.unterschriften[person.schluessel]) f.push({ feld: "unterschrift." + person.schluessel, meldung: k.t("fehler.unterschrift") });
     }
     if (plan.stift.length && !k.a.hfvUnterschrift) f.push({ feld: "hfvUnterschrift", meldung: k.t("fehler.hfvUnterschrift") });

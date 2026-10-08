@@ -415,8 +415,8 @@ async function unterschreiben(page, ctx) {
   }
   if (!ctx.ohneSatzung) await haekchenSatzung(page);
   const felder = await page.$$eval("#anmeldung .anm-unterschrift", (l) => l.map((e) => e.getAttribute("data-unterschrift")));
-  // Die zweite Elternunterschrift ist freiwillig: in einem Profil bleibt sie absichtlich leer.
-  const gezeichnet = felder.filter((w) => !(ctx.ohneZweite && w === "sorgeberechtigte_2"));
+  // Ein Elternteil reicht (O26, Jugendleitung 08.10.2026): Es gibt kein zweites Feld der Eltern, auch nicht bei "Beide Eltern".
+  const gezeichnet = felder;
   for (const wer of gezeichnet) {
     const canvas = await page.$('#anmeldung .anm-unterschrift[data-unterschrift="' + wer + '"] canvas');
     await zeichne(page, canvas, ctx.touch);
@@ -916,6 +916,16 @@ async function pruefeSatzung(browser, server, dateien) {
   const fremd = [...giltPunkte, ...namen.stift].filter((n) => !erlaubteNamen.has(n));
   ok("Papiernamen: 'Diese Unterschrift gilt für:' (Liste, ein Blatt je Zeile) und die Liste der Stift-Blätter nennen nur Namen aus den Regeltexten (" + (giltPunkte.length + namen.stift.length) + " Namen)", giltPunkte.length > 0 && namen.stift.length > 0 && fremd.length === 0, fremd.join(" | ") || namen.stift.join(" | "));
   ok("'Diese Unterschrift gilt für:' steht über einer Liste mit einem Blatt je Zeile, bei jedem Unterschriftsfeld (kein Satz mit Aufzählung, keine Zeile mit mehreren Namen)", namen.giltTitel.length === namen.giltFelder && namen.giltTitel.every((t) => t === "Diese Unterschrift gilt für:") && giltPunkte.every((n) => !/, /.test(n.replace(/\([^)]*\)/g, "")) && n.split(/\s+/).length <= 12), namen.giltTitel.join(" | ") + " – " + giltPunkte.join(" | "));
+  // O26 (Jugendleitung, 08.10.2026): Ein Elternteil reicht. Das Beispiel "kind-neu" hat "Beide Eltern": trotzdem nur ein Feld für die Eltern,
+  // kein zweites, freiwilliges, und kein Text dazu.
+  const eltern = await page.evaluate(() => ({
+    felder: Array.from(document.querySelectorAll("#anmeldung .anm-unterschrift")).map((e) => e.getAttribute("data-unterschrift")),
+    titel: Array.from(document.querySelectorAll("#anmeldung .anm-unterschrift .anm-unterschrift__titel")).map((e) => e.textContent.replace(/\s+/g, " ").trim()),
+    text: document.getElementById("anmeldung").innerText.replace(/\s+/g, " "),
+  }));
+  ok("O26: bei 'Beide Eltern' genau ein Unterschriftsfeld für die Eltern (sorgeberechtigte), kein zweites Feld", eltern.felder.filter((w) => /^sorgeberechtigte/.test(w)).join(",") === "sorgeberechtigte", eltern.felder.join(","));
+  ok("O26: kein Text zur zweiten, freiwilligen Unterschrift ('zweiter Elternteil', 'freiwillig', 'Beide Eltern unterschreiben') auf der Unterschriften-Seite",
+    !/zweiter Elternteil|Diese Unterschrift ist freiwillig|Beide Eltern unterschreiben/.test(eltern.text) && !eltern.titel.some((t) => /freiwillig|zweite/i.test(t)), eltern.titel.join(" | "));
   await page.$eval(".anm-satzung", (e) => {
     e.scrollIntoView({ block: "start" });
     window.scrollBy(0, -24);
@@ -1708,7 +1718,7 @@ async function main() {
         const gesehen = gesehenFuer(vp);
         for (const id of ids) {
           const page = await neueSeite(browser, server, vp, "beispiel-" + id + "-" + vp.name);
-          const ctx = neuerKontext({ name: id, vp, modus: "beispiel", gesehen, touch: vp.mobil, axeImmer: vp.mobil, dateien, ohneZweite: id === "kind-neu" });
+          const ctx = neuerKontext({ name: id, vp, modus: "beispiel", gesehen, touch: vp.mobil, axeImmer: vp.mobil, dateien });
           await ladeBeispielPerKnopf(page, id);
           const r = await laufe(page, ctx);
           const ende = r.besucht[r.besucht.length - 1];
@@ -1814,9 +1824,10 @@ async function unterschriftenNachweisen(page, ctx, daten) {
   const a = daten.attrappe;
   if (a) {
     const unterschriften = a.unterschriften || {};
-    const erwartet = feldNamen.filter((w) => !(ctx.ohneZweite && w === "sorgeberechtigte_2"));
+    const erwartet = feldNamen;
     const fehlt = erwartet.filter((w) => !unterschriften[w] || !unterschriften[w].png);
-    const zuviel = ctx.ohneZweite ? Object.keys(unterschriften).filter((w) => w === "sorgeberechtigte_2") : [];
+    // Ein Elternteil reicht (O26): Es gibt kein Bild einer zweiten Elternunterschrift.
+    const zuviel = Object.keys(unterschriften).filter((w) => w === "sorgeberechtigte_2");
     return { ok: fehlt.length === 0 && zuviel.length === 0, detail: "fehlt in bilder.unterschriften: " + fehlt.join(",") + (zuviel.length ? "; unerwartet: " + zuviel.join(",") : "") };
   }
   return { ok: true, detail: "Attrappe nicht aktiv" };

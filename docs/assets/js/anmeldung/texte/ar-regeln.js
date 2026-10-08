@@ -347,7 +347,6 @@ export default {
     keine_frauenmannschaft: `ليس لدى النادي فريق نسائي. يجوز للنساء من عمر 18 اللعب في فريق ${D("Herren")} بطلب. تواصل معنا.`,
     vertrauensperson: "لدى الاتحاد شخص موثوق لهذه الحالة. يساعد في تقديم الطلب. وعند الأطفال يوافق الوالدان.",
     sonderspielrecht: `يستطيع الأطفال ذوو الإعاقة اللعب في فئة عمرية أصغر. ويُسمّى هذا إذن اللعب الخاص (${D("Sonderspielrecht")}). ويتطلب تقريرًا من طبيب مختص. وتساعدك إدارة الشباب.`,
-    beide_unterschreiben_empfohlen: `نوصي بأن يوقّع الوالدان معًا على طلب الانضمام (${D("Aufnahmeantrag")}).`,
     getrennt_einverstanden: "الطرف الآخر من الوالدين موافق. لذلك يوقّع شخص واحد.",
     sorge_allein_nachweis: "حق الحضانة لك وحدك. احتفظ بمستند إثبات جاهزًا في حال طلبه النادي.",
     vormund_hinweis: `يوقّع الوصي القانوني (${D("Vormund")}) عن الطفل. أحضر إثبات الوصاية.`,
@@ -531,7 +530,7 @@ export default {
 
   unterschriften: {
     "aufnahmeantrag.s2.unterschrift": `طلب الانضمام (${D("Aufnahmeantrag")})`,
-    "aufnahmeantrag.s2.unterschrift_sorgeberechtigte": `طلب الانضمام (${D("Aufnahmeantrag")}): توقيع الوالدين معًا`,
+    "aufnahmeantrag.s2.unterschrift_sorgeberechtigte": `طلب الانضمام (${D("Aufnahmeantrag")}): توقيع الطرف الآخر من الوالدين`,
     "aufnahmeantrag.s3.unterschrift": "إذن لاستخدام الصور",
     "aufnahmeantrag.s4.unterschrift": `إذن الخصم المباشر (${D("Lastschrift")})`,
     "datenschutz.kenntnisnahme": `الاطلاع على معلومات حماية البيانات (${D("Datenschutz")})`,

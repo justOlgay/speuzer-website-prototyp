@@ -362,7 +362,8 @@ function vorlagenFuer(e, a) {
   return v;
 }
 
-const SIGNATUREN = () => ({ mitglied: TESTDATEIEN.sig1, sorgeberechtigte: TESTDATEIEN.sig2, sorgeberechtigte_2: TESTDATEIEN.sig3, kontoinhaber: TESTDATEIEN.sig4 });
+// Ein Elternteil reicht (O26): Die Oberfläche kennt kein zweites Unterschriftsbild der Eltern.
+const SIGNATUREN = () => ({ mitglied: TESTDATEIEN.sig1, sorgeberechtigte: TESTDATEIEN.sig2, kontoinhaber: TESTDATEIEN.sig4 });
 
 // Antworten und Bilder je Variante
 //  bild:   Bildschirm-Unterschriften, alle Nachweise als "habe" mit Bildern, Foto
@@ -434,7 +435,7 @@ function bildFuerWer(b, wer) {
   const z = b.a.zahlung || {};
   if (wer === "mitglied") return u.mitglied ? "mitglied" : null;
   if (wer === "sorgeberechtigte") return u.sorgeberechtigte ? "sorgeberechtigte" : null;
-  if (wer === "sorgeberechtigte_beide") return u.sorgeberechtigte_2 ? "sorgeberechtigte_2" : null;
+  if (wer === "sorgeberechtigte_beide") return null; // der zweite Elternteil (nötig bei getrennt lebenden Eltern ohne Einverständnis) unterschreibt immer mit Stift
   if (wer === "spieler") return u.spieler ? "spieler" : null;
   if (wer === "kontoinhaber") {
     if (z.kontoinhaber === "sorgeberechtigt") return u.sorgeberechtigte ? "sorgeberechtigte" : null;
@@ -471,7 +472,7 @@ const WER_TEXT = {
   mitglied: "Mitglied (Sie selbst)",
   spieler: "Spielerin oder Spieler",
   sorgeberechtigte: "eine Person mit Sorgerecht",
-  sorgeberechtigte_beide: "zweiter Elternteil (empfohlen)",
+  sorgeberechtigte_beide: "zweiter Elternteil (nötig)",
   kontoinhaber: "Kontoinhaberin oder Kontoinhaber",
   arzt: "Ärztin oder Arzt (mit Stempel)",
   verein: "Verein (mit Stempel)",
@@ -1545,7 +1546,7 @@ async function pruefePdf(b, g, opt) {
     const seg = S[z.seite - 1];
     ok(seg && (seg.schluessel === u.formular || (u.formular === "attest" && /^attest_/.test(seg.schluessel))), "Unterschrift " + u.formular + "." + u.stelleKey + " steht auf Seite " + z.seite + " (" + (seg && seg.schluessel) + ")");
     if (art === "stift") {
-      const werText = u.wer === "sorgeberechtigte_beide" && a.sorge === "getrennt_bei_mir" ? "zweiter Elternteil (nötig)" : WER_TEXT[u.wer];
+      const werText = WER_TEXT[u.wer];
       ok(texte[z.seite - 1].includes(werText) || texte[z.seite - 1].includes(werText.split(" ").slice(0, 3).join(" ")), () => "Markierung mit „" + werText + "“ fehlt auf Seite " + z.seite);
     }
     if (art === "bild" && u.formular === "aufnahmeantrag") {
@@ -1915,13 +1916,36 @@ async function sonderfaelle() {
     b.bilder.unterschriften = { mitglied: TESTDATEIEN.sig1 };
     const g = await baue(b, "regel-nur-mitglied.pdf");
     ok(g.bericht.stellen.filter((s) => s.art === "bild").length === 0, "ohne Bild der Eltern bleiben alle Stellen der Eltern Stift-Stellen");
-    // beide Eltern, aber ohne zweites Bild: nur die zweite Stelle bleibt Stift
+    // O26 (Jugendleitung, 08.10.2026): Ein Elternteil reicht. Bei "beide Eltern" gibt es nur die eine Zeile auf Seite 2 des Aufnahmeantrags
     const b2 = bereite("kind-neu-deutsch-f", "bild", 0);
-    delete b2.bilder.unterschriften.sorgeberechtigte_2;
-    const g2 = await baue(b2, "regel-ohne-zweites-bild.pdf");
+    const g2 = await baue(b2, "regel-beide-eltern-eine-zeile.pdf");
     const zweite = g2.bericht.stellen.find((s) => s.stelleKey === "s2.unterschrift_sorgeberechtigte");
     const erste = g2.bericht.stellen.find((s) => s.stelleKey === "s2.unterschrift");
-    ok(zweite && zweite.art === "stift" && erste && erste.art === "bild", "fehlt nur das zweite Bild, bleibt nur die zweite Stelle leer");
+    ok(!zweite && erste && erste.art === "bild" && erste.wer === "sorgeberechtigte", "beide Eltern: nur eine Unterschrift auf Seite 2 des Aufnahmeantrags, keine zweite Stelle");
+    ok(g2.bericht.stellen.filter((s) => s.formular === "aufnahmeantrag" && s.stelleKey.startsWith("s2.")).length === 1, "beide Eltern: genau eine Stelle auf Seite 2 des Aufnahmeantrags");
+    ok(!g2.bericht.stellen.some((s) => s.wer === "sorgeberechtigte_beide"), "beide Eltern: keine Stelle für einen zweiten Elternteil im ganzen PDF");
+    const t2 = textSeiten(g2.pfad).join("\n");
+    ok(!/zweite[rn]? Elternteil/i.test(t2) && !t2.includes("Erziehungsberechtigte/r: " + (b2.a.sorgeberechtigte[1] || {}).vorname + " "), "beide Eltern: im ganzen PDF steht nichts vom zweiten Elternteil");
+    // getrennt lebende Eltern ohne Einverständnis: der andere Elternteil unterschreibt zusätzlich, immer mit Stift („zweiter Elternteil (nötig)“),
+    // auch dann, wenn ein Bild vorläge. Sein Name steht neben der Linie, wenn er bekannt ist.
+    const b2g = bereite("getrennt-lebende-eltern", "bild", 0, (a) => {
+      a.sorgeberechtigte = [a.sorgeberechtigte[0], { rolle: "vater", vorname: "Karl", nachname: "Mustermann" }];
+    });
+    b2g.bilder.unterschriften.sorgeberechtigte_2 = TESTDATEIEN.sig3;
+    const g2g = await baue(b2g, "regel-getrennt-ohne-einverstaendnis.pdf");
+    const zweiteG = g2g.bericht.stellen.find((s) => s.stelleKey === "s2.unterschrift_sorgeberechtigte");
+    const ersteG = g2g.bericht.stellen.find((s) => s.stelleKey === "s2.unterschrift");
+    ok(zweiteG && zweiteG.art === "stift" && zweiteG.wer === "sorgeberechtigte_beide" && ersteG && ersteG.art === "bild", "getrennt lebend ohne Einverständnis: zweite Stelle immer Stift, erste am Bildschirm");
+    const tg = textSeiten(g2g.pfad);
+    ok(zweiteG && tg[zweiteG.seite - 1].includes("zweiter Elternteil (nötig)") && !tg.join("\n").includes("zweiter Elternteil (empfohlen)"), "getrennt lebend ohne Einverständnis: Markierung „zweiter Elternteil (nötig)“, nie „(empfohlen)“");
+    ok(tg.join("\n").includes("Der zweite Elternteil (nötig)"), "getrennt lebend ohne Einverständnis: Teil A nennt „Der zweite Elternteil (nötig)“ in der Tabelle der Unterschriften");
+    await pruefePdf(b2g, g2g, { tief: false, bilder: true, nachweise: false });
+    // getrennt lebend mit Einverständnis: eine Unterschrift genügt
+    const b2h = bereite("getrennt-lebende-eltern", "bild", 0, (a) => {
+      a.andererElternteilEinverstanden = true;
+    });
+    const g2h = await baue(b2h, "regel-getrennt-mit-einverstaendnis.pdf");
+    ok(!g2h.bericht.stellen.some((s) => s.stelleKey === "s2.unterschrift_sorgeberechtigte") && !textSeiten(g2h.pfad).join("\n").includes("zweiter Elternteil"), "getrennt lebend mit Einverständnis: keine zweite Stelle");
     // kein Wert für unterschriftWeg: wie Papier
     const b3 = bereite("kind-neu-deutsch-f", "bild", 0, (a) => {
       delete a.unterschriftWeg;

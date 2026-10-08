@@ -17,9 +17,11 @@
 //     Gesundheit, Absprache zur Medikamentengabe), Attest beim Vereinswechsel, Erlaubnis für Auftritte am Abend, lateinische Schrift,
 //     Vorführung, Datenschutz.
 //   - Die Listen in den Abschnitten 10 bis 12 spiegeln data/anmeldung.json ›
-//     offenePunkte (Version 2026-10-07.1, O01 bis O73): jeder Punkt genau eine Zeile
+//     offenePunkte (Version 2026-10-08.1, O01 bis O73): jeder Punkt genau eine Zeile
 //     mit der kleinen Nummer (Anker #o01 …). P1 steht immer sichtbar, P2 und P3 dürfen
-//     in einem Aufklapper stehen. Die Prioritäten unten (PRIO) sind ein Abzug aus der
+//     in einem Aufklapper stehen. Ein Punkt mit Status „entschieden“ (O26, Jugendleitung
+//     08.10.2026) trägt das Kennzeichen „Entschieden“ und nennt die Entscheidung; er zählt
+//     nicht mehr als offene Frage. Die Prioritäten unten (PRIO) sind ein Abzug aus der
 //     Datei; tools/anmeldung-test/konzept-pruefen.mjs vergleicht die gebaute Seite mit
 //     der Datei und schlägt an, wenn beide auseinanderlaufen.
 //   - Die Seite selbst liest nichts aus data/*.json: Regeln, Zahlen und offene Punkte
@@ -32,16 +34,16 @@
 //
 // Kleine Auszeichnungssprache in den Texten (siehe md()):
 //   **fett**   [Text](#anker)   {pflicht} {verein} {offen}   {p1} {p2} {p3}   {br}
-//   {a:id} = Verweis „Abschnitt N“   {o:O26} = kleine Nummer eines offenen Punkts
+//   {entschieden}   {a:id} = Verweis „Abschnitt N“   {o:O26} = kleine Nummer eines offenen Punkts
 
 // Diese Seite liegt immer unter "/anmeldung-konzept/" (Tiefe 1), daher "../".
 const PFAD = "../";
 const STAND_RECHERCHE = "29.09.2026";
-const STAND_ABGLEICH = "07.10.2026";
-const REGELWERK_VERSION = "2026-10-07.1";
+const STAND_ABGLEICH = "08.10.2026";
+const REGELWERK_VERSION = "2026-10-08.1";
 const PROTOTYP = `${PFAD}anmeldung/`;
 
-// Prioritäten der offenen Punkte (Abzug aus data/anmeldung.json › offenePunkte, Version 2026-10-07.1, O01 bis O73).
+// Prioritäten der offenen Punkte (Abzug aus data/anmeldung.json › offenePunkte, Version 2026-10-08.1, O01 bis O73).
 const PRIO = {
   O01: "P1", O02: "P1", O03: "P1", O04: "P1", O05: "P1", O06: "P1", O07: "P2", O08: "P1",
   O09: "P1", O10: "P1", O11: "P1", O12: "P1", O13: "P1", O14: "P1", O15: "P1", O16: "P1",
@@ -55,6 +57,14 @@ const PRIO = {
   O72: "P1", O73: "P1",
 };
 const ANZAHL_PUNKTE = Object.keys(PRIO).length;
+
+// Entschiedene Punkte (data/anmeldung.json › offenePunkte, Status „entschieden“): Sie zählen nicht mehr als offene Frage.
+// Die Zeile trägt das Kennzeichen „Entschieden“ statt der Priorität und nennt die Entscheidung; der Text steht wörtlich in
+// der Datei (Feld „entscheidung“), tools/anmeldung-test/konzept-pruefen.mjs vergleicht ihn.
+const ENTSCHIEDEN = {
+  O26: "Ein Elternteil reicht (Jugendleitung, 08.10.2026). Ausnahme: getrennt lebende Eltern ohne Einverständnis – dann unterschreibt der andere Elternteil mit Stift.",
+};
+const ANZAHL_ENTSCHIEDEN = Object.keys(ENTSCHIEDEN).length;
 
 // Die Zeilen der Karnevalabteilung stehen im Abschnitt „Karneval“ und sind dort sichtbar;
 // alle übrigen Punkte mit P2 oder P3 stehen in Aufklappern. Verweise (Links) auf eine Nummer
@@ -96,6 +106,7 @@ const KENNZEICHEN = {
   p1: '<span class="tag tag--heim">P1</span>',
   p2: '<span class="tag">P2</span>',
   p3: '<span class="tag tag--auswaerts">P3</span>',
+  entschieden: '<span class="tag tag--heim">Entschieden</span>',
 };
 
 // Kleine Nummer eines offenen Punkts. Als Link nur, wenn die Zeile sichtbar ist.
@@ -118,7 +129,7 @@ function md(text, mitLinks = true) {
   });
   t = t.replace(/\{o:(O\d{2})\}/g, (_m, oid) => onrMarke(oid, mitLinks));
   t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
-  t = t.replace(/\{(pflicht|verein|offen|p1|p2|p3)\}/g, (_m, k) => KENNZEICHEN[k]);
+  t = t.replace(/\{(pflicht|verein|offen|p1|p2|p3|entschieden)\}/g, (_m, k) => KENNZEICHEN[k]);
   t = t.replaceAll("{br}", "<br>");
   return t;
 }
@@ -162,7 +173,7 @@ function prioText(oids) {
 // mit Auszeichnung (md) oder { html } (fertiges, sicheres HTML). breit: mehr Mindestbreite
 // bei vielen Spalten oder Text.
 // Eine Zeile ist eine Liste von Zellen oder ein Objekt { id, prio, zellen }.
-// Zeilen mit id bekommen den Anker (#o26) und data-prio.
+// Zeilen mit id bekommen den Anker (#o26), data-prio und, wenn der Punkt entschieden ist, data-status="entschieden".
 function tabelle({ beschriftung, spalten, zeilen, breit = false, ersteSpalte = "" }) {
   const kopf = spalten.map((s) => `<th scope="col">${escapeHtml(s)}</th>`).join("");
   const koerper = zeilen
@@ -170,7 +181,7 @@ function tabelle({ beschriftung, spalten, zeilen, breit = false, ersteSpalte = "
       const zellen = Array.isArray(z) ? z : z.zellen;
       const attr = Array.isArray(z)
         ? ""
-        : `${z.id ? ` id="${z.id}"` : ""}${z.prio ? ` data-prio="${z.prio}"` : ""}`;
+        : `${z.id ? ` id="${z.id}"` : ""}${z.prio ? ` data-prio="${z.prio}"` : ""}${z.status ? ` data-status="${z.status}"` : ""}`;
       return `<tr${attr}>${zellen.map((zelle) => `<td>${typeof zelle === "string" ? md(zelle, false) : zelle.html}</td>`).join("")}</tr>`;
     })
     .join("\n        ");
@@ -195,13 +206,20 @@ function frageUndWarum(entscheidung, warum) {
 }
 
 // Zeile einer Entscheidungstabelle für einen offenen Punkt: Priorität und kleine Nummer
-// in der ersten Zelle, dann die Entscheidung mit dem Warum.
+// in der ersten Zelle, dann die Entscheidung mit dem Warum. Ein entschiedener Punkt zeigt
+// statt der Priorität das Kennzeichen „Entschieden“ und seine Entscheidung (ENTSCHIEDEN) vor dem Warum;
+// die Priorität bleibt als data-prio an der Zeile (sie steht so im Regelwerk).
 function punktZeile(oid, entscheidung, warum) {
   if (!PRIO[oid]) throw new Error(`anmeldung-konzept: unbekannter offener Punkt "${oid}"`);
+  const fertig = ENTSCHIEDEN[oid];
   return {
     id: oid.toLowerCase(),
     prio: PRIO[oid],
-    zellen: [`{${PRIO[oid].toLowerCase()}}{br}{o:${oid}}`, frageUndWarum(entscheidung, warum)],
+    ...(fertig ? { status: "entschieden" } : {}),
+    zellen: [
+      `{${fertig ? "entschieden" : PRIO[oid].toLowerCase()}}{br}{o:${oid}}`,
+      frageUndWarum(entscheidung, fertig ? `**${fertig}** ${warum}` : warum),
+    ],
   };
 }
 
@@ -265,7 +283,7 @@ function abschnitt(id, inhalt) {
 // ---------- Fragen an den HFV (zuerst, weil andere Abschnitte darauf verweisen) ----------
 
 // Alle offenen Punkte, die die Passstelle beantworten muss (an: "hfv_passstelle" in
-// data/anmeldung.json, Version 2026-10-07.1), in der Reihenfolge der Nummern. Der Wortlaut
+// data/anmeldung.json, Version 2026-10-08.1), in der Reihenfolge der Nummern. Der Wortlaut
 // folgt der Datei; O07 gilt als weitgehend geklärt.
 const HFV_PUNKTE = [
   ["O01", "Reicht ein Scan oder eine digitale Unterschrift, oder muss das Papier-Original mit Stift vorliegen? Darf der Verein rein digital archivieren?"],
@@ -310,7 +328,7 @@ function kopfAbschnitt() {
     )}</p>
     <p class="knopfzeile"><a class="knopf" href="${PROTOTYP}">Prototyp ansehen</a></p>
     <p class="meta">${md(
-      `Stand der Recherche: ${STAND_RECHERCHE}. Abgeglichen mit dem Prototyp am ${STAND_ABGLEICH} (Regelwerk Version ${REGELWERK_VERSION} mit ${ANZAHL_PUNKTE} offenen Punkten). Grundlage sind die Ordnungen des Hessischen Fußball-Verbands (HFV) für die Saison 2026/27, die Vereinsunterlagen und weitere Quellen ({a:quellen}). Der Prototyp ist ein Entwurf zum Anschauen. Er sendet und speichert nichts. Die Seite ersetzt keine Rechtsberatung.`
+      `Stand der Recherche: ${STAND_RECHERCHE}. Abgeglichen mit dem Prototyp am ${STAND_ABGLEICH} (Regelwerk Version ${REGELWERK_VERSION} mit ${ANZAHL_PUNKTE} offenen Punkten, davon ${ANZAHL_ENTSCHIEDEN} entschieden). Grundlage sind die Ordnungen des Hessischen Fußball-Verbands (HFV) für die Saison 2026/27, die Vereinsunterlagen und weitere Quellen ({a:quellen}). Der Prototyp ist ein Entwurf zum Anschauen. Er sendet und speichert nichts. Die Seite ersetzt keine Rechtsberatung.`
     )}</p>
     ${kasten(
       "",
@@ -319,6 +337,7 @@ function kopfAbschnitt() {
     ${p("{verein} Regel oder Praxis des Vereins.")}
     ${p("{offen} Nicht belegt oder unsicher. Wir müssen nachfragen.")}
     ${p("{p1} {p2} {p3} Dringlichkeit eines offenen Punkts. P1 muss vor dem Livegang geklärt sein.")}
+    ${p("{entschieden} Der Punkt ist entschieden. Die Zeile nennt die Entscheidung und zählt nicht mehr als offene Frage.")}
     <p><span class="konzept-onr">O26</span> Nummer des offenen Punkts im Regelwerk des Prototyps. Damit können wir im Gespräch auf eine Zeile verweisen.</p>
     <p class="meta">${md(
       "Kürzel: JO = Jugendordnung des HFV. SpO = Spielordnung des HFV. DFB = Deutscher Fußball-Bund. DFBnet = Online-System des DFB, in dem Vereine Anträge einreichen. LSB = Landessportbund Hessen."
@@ -346,8 +365,8 @@ function kurzAbschnitt() {
   const inhalt = `${liste([
     "**Das Problem.** Der Aufnahmeantrag fragt vieles nicht ab, was der HFV für das Spielrecht braucht. Fehlende Angaben und Unterlagen müssen einzeln nachgefordert werden. Dazu sind Vereinsunterlagen von 2014 und 2021 veraltet. {a:warum}",
     "**Die Lösung.** Ein Assistent im Browser fragt Schritt für Schritt in Einfacher Sprache. Er bietet Übersetzungshilfe auf Englisch, Türkisch und Arabisch. Am Ende erzeugt er ein PDF mit allen Unterlagen. Ein Prototyp zum Ausprobieren liegt vor. {a:assistent}, {a:pdf}",
-    "**Die Unterschrift.** Vereinsunterlagen unterschreibt die Familie am Bildschirm, nachdem sie die Satzung gelesen hat. Die Vordrucke des HFV unterschreibt sie mit Stift, denn der Verband verlangt die eigenhändige Unterschrift. {a:unterschrift}",
-    "**Der Vorstand entscheidet zuerst:** Wie sichern wir den Unfallschutz beim Probetraining ({o:O27})? Wann beginnt die Mitgliedschaft ({o:O30})? Was gilt für die Unterschrift der Eltern ({o:O26})? Wo liegen die Originale ({o:O24})? Dazu kommen die Bildschirm-Unterschrift der Vereinsunterlagen ({o:O68}) und die Rechtsgrundlage für die Notfallkontakte ({o:O67}). {a:entscheiden}",
+    "**Die Unterschrift.** Vereinsunterlagen unterschreibt die Familie am Bildschirm, nachdem sie die Satzung gelesen hat. Die Vordrucke des HFV unterschreibt sie mit Stift, denn der Verband verlangt die eigenhändige Unterschrift. Es reicht ein Elternteil. Die Jugendleitung hat das am 08.10.2026 entschieden ({o:O26}). {a:unterschrift}",
+    "**Der Vorstand entscheidet zuerst:** Wie sichern wir den Unfallschutz beim Probetraining ({o:O27})? Wann beginnt die Mitgliedschaft ({o:O30})? Wo liegen die Originale ({o:O24})? Dazu kommt der Beschluss zur Bildschirm-Unterschrift der Vereinsunterlagen ({o:O68}). Die Jugendleitung befürwortet sie. Offen ist auch die Rechtsgrundlage für die Notfallkontakte ({o:O67}). {a:entscheiden}",
     `**Beim HFV zu klären:** ${HFV_PUNKTE.length} Fragen an die Passstelle, ${HFV_P1.length} davon mit P1. Die P1-Fragen sollten vor dem Livegang beantwortet sein. {a:hfv-fragen}`,
     "**Beim Karneval eilt es.** Der Meldeschluss für den Fastnachtszug 2027 ist der 30.09.2026 ({o:O29}). Dazu laufen zwei Anmeldewege parallel ({o:O28}). {a:karneval}",
   ])}
@@ -509,7 +528,7 @@ function unterschriftAbschnitt() {
         [
           "**Vereinsunterlagen:** Aufnahmeantrag mit Erlaubnis für Fotos und Erlaubnis für die Lastschrift, Information zum Datenschutz (Kenntnisnahme), Einverständnisse und Erlaubnisse des Vereins",
           "Am Bildschirm, mit Finger oder Maus.",
-          "Die Form bestimmt der Verein selbst. Die Satzung verlangt Schriftform. Nach § 127 BGB kann dafür auch eine elektronische Übermittlung reichen. Der Online-Aufnahmeantrag arbeitet schon so. Der Vorstand muss es noch bestätigen ({o:O68}). {offen}",
+          "Die Form bestimmt der Verein selbst. Die Satzung verlangt Schriftform. Nach § 127 BGB kann dafür auch eine elektronische Übermittlung reichen. Der Online-Aufnahmeantrag arbeitet schon so. Die Jugendleitung befürwortet es (08.10.2026). Der Beschluss des Vorstands steht aus ({o:O68}). {offen}",
         ],
         [
           "**Vordrucke des HFV:** Antrag auf Spielerlaubnis, Vollmacht für die Abmeldung, Abmeldung beim alten Verein, Einverständnis für Spiele bei den Herren",
@@ -530,7 +549,8 @@ function unterschriftAbschnitt() {
     ${liste([
       "**Wahl.** Die Familie wählt „Am Bildschirm, wo es erlaubt ist“ oder „Ich unterschreibe alles auf Papier“.",
       "**Satzung zuerst.** Vor der Bildschirm-Unterschrift liest die Familie die Satzung und setzt den Haken „Ich habe die Satzung gelesen.“ Der Haken ist Pflicht. Der Link führt auf die Satzung der Website, nicht auf die Adresse im Vordruck. Die Adresse im Vordruck ist defekt ({o:O66}). Auf dem Papierweg ist der Haken freiwillig. Dann kreuzt die Familie das Kästchen im Ausdruck von Hand an.",
-      "**Zweiter Elternteil.** Seine Unterschrift ist freiwillig. Dem Verband reicht eine Unterschrift. Wir empfehlen beide. Leben die Eltern getrennt und der andere Elternteil ist nicht einverstanden, ist seine Unterschrift nötig. Sie geht nur mit Stift, und die Stelle im PDF ist markiert.",
+      "**Ein Elternteil reicht.** Der Assistent zeigt nur ein Unterschriftsfeld für die Eltern, auch wenn beide Eltern das Sorgerecht haben. Das hat die Jugendleitung am 08.10.2026 entschieden ({o:O26}).",
+      "**Zweiter Elternteil (nötig).** Das gilt nur, wenn die Eltern getrennt leben und der andere Elternteil nicht einverstanden ist. Dann muss auch er unterschreiben. Das geht nur mit Stift, und die Stelle im PDF ist markiert. Grund ist die gemeinsame Vertretung nach § 1629 BGB: Ohne Zustimmung darf ein Elternteil nicht allein für beide handeln.",
       "**Keine leeren Erklärungsfelder.** Eine Bildschirm-Unterschrift steht nur unter Angaben, die schon dastehen. Auf den eigenen Blättern des Vereins steht „–“ oder ein Satz statt eines leeren Feldes. Fehlt auf dem Aufnahmeantrag eine Erklärung, zum Beispiel zu den Fotos, zur IBAN oder zur Liste der Familienmitglieder, wird die Stelle zur Stift-Stelle. So ergänzt nach der Unterschrift niemand etwas von Hand.",
       "**Stift-Blätter.** Die Vordrucke des HFV kommen vorausgefüllt ins PDF, die Stellen sind blau markiert. Die Familie wählt: Sie unterschreibt beim ersten Training und der Verein bringt die Blätter ausgedruckt mit, oder sie druckt selbst aus.",
       "**Umstellbar.** Jedes Formular hat einen Schalter. Erlaubt die Passstelle Bildschirm-Unterschriften, ändern wir nur den Schalter ({o:O01}).",
@@ -539,10 +559,9 @@ function unterschriftAbschnitt() {
     ${liste([
       "Für den Antrag auf Spielerlaubnis genügt ein gesetzlicher Vertreter (SpO § 92 Nr. 1). Ob auch ein kleines Kind selbst auf der Zeile „Spieler“ unterschreiben muss, ist offen ({o:O11}).",
       "Nach Zivilrecht vertreten Eltern ihr Kind gemeinsam (§ 1629 BGB).",
-      "**Empfehlung:** Beide Eltern unterschreiben. Oder ein Elternteil bestätigt, dass der andere einverstanden ist. Bei „alleiniges Sorgerecht“ unterschreibt eine Person.",
-      "Bei getrennt lebenden Eltern entscheidet der Elternteil, bei dem das Kind lebt, Alltagsfragen allein (§ 1687 BGB). Ob der Vereinsbeitritt dazu zählt, sagt das Gesetz nicht. {offen} Der Assistent fragt deshalb, ob der andere Elternteil einverstanden ist.",
+      "**Entscheidung der Jugendleitung (08.10.2026):** Ein Elternteil reicht. Bei „alleiniges Sorgerecht“, Vormund und Pflegeperson unterschreibt eine Person. {o:O26}",
+      "Bei getrennt lebenden Eltern entscheidet der Elternteil, bei dem das Kind lebt, Alltagsfragen allein (§ 1687 BGB). Ob der Vereinsbeitritt dazu zählt, sagt das Gesetz nicht. {offen} Der Assistent fragt deshalb, ob der andere Elternteil einverstanden ist. Ohne Einverständnis unterschreibt der andere Elternteil zusätzlich mit Stift.",
       "Bei Vormund, Pflegefamilie oder Heim klärt die Jugendleitung persönlich ({a:faelle}).",
-      "Die Regel für den Verein legt der Vorstand fest ({o:O26}, {a:entscheiden}).",
       "Die Erlaubnis für Fotos unterschreiben bisher nur die Eltern. Ob Jugendliche ab 14 oder ab 16 Jahren zusätzlich selbst unterschreiben, entscheidet der Vorstand ({o:O65}).",
     ])}`;
   return abschnitt("unterschrift", inhalt);
@@ -550,7 +569,7 @@ function unterschriftAbschnitt() {
 
 // ---------- 6. Fälle ----------
 
-// F01–F18 heißen wie in data/anmeldung.json › faelle (Version 2026-10-07.1). Die Hinweise
+// F01–F18 heißen wie in data/anmeldung.json › faelle (Version 2026-10-08.1). Die Hinweise
 // stammen aus der Synthese (Abschnitt 2.3) und der Vollständigkeitsprüfung (F15–F18 und die
 // Korrekturen K3, K4, K6, K7); die Verweise O.. nennen den offenen Punkt zur jeweiligen Lücke.
 const FAELLE = [
@@ -905,7 +924,7 @@ function datenschutzAbschnitt() {
 
 // ---------- 10. Entscheidungen ----------
 
-// Jede Zeile ist ein offener Punkt aus data/anmeldung.json › offenePunkte (Version 2026-10-07.1)
+// Jede Zeile ist ein offener Punkt aus data/anmeldung.json › offenePunkte (Version 2026-10-08.1)
 // und trägt seine kleine Nummer. Die Listen sind nach dem Empfänger geordnet (an: vorstand,
 // kassierer, datenschutz, versicherung, kreis_frankfurt, grosser_rat_bdk, jugendleitung, regelwerk);
 // das Passwesen sammelt die Punkte zum Betrieb von DFBnet (O24 und O25 an den Vorstand, O69 und O70
@@ -919,7 +938,7 @@ const VORSTAND_SICHTBAR = [
   punktZeile(
     "O26",
     "Unterschreibt ein Elternteil, oder müssen beide Eltern unterschreiben?",
-    "Für den HFV genügt ein Elternteil, nach Zivilrecht vertreten beide gemeinsam. Der Assistent empfiehlt beide beim Aufnahmeantrag und bei der Erlaubnis für Fotos ({a:unterschrift})."
+    "Für den HFV genügt ein Elternteil. Nach Zivilrecht vertreten beide Eltern gemeinsam (§ 1629 BGB). Deshalb braucht es bei getrennt lebenden Eltern ohne Einverständnis den zweiten Elternteil ({a:unterschrift})."
   ),
   punktZeile(
     "O27",
@@ -954,7 +973,7 @@ const VORSTAND_SICHTBAR = [
   punktZeile(
     "O68",
     "Dürfen Vereinsunterlagen am Bildschirm unterschrieben werden?",
-    "Das wäre eine einfache elektronische Unterschrift. Die Form bestimmt der Verein selbst: Die Satzung verlangt Schriftform, nach § 127 BGB kann eine elektronische Übermittlung reichen. HFV-Vordrucke bleiben Stift. Der Laufzettel im PDF bittet den Vorstand, das zu bestätigen ({a:unterschrift})."
+    "Das wäre eine einfache elektronische Unterschrift. Die Form bestimmt der Verein selbst: Die Satzung verlangt Schriftform, nach § 127 BGB kann eine elektronische Übermittlung reichen. HFV-Vordrucke bleiben Stift. Der Laufzettel im PDF bittet den Vorstand, das zu bestätigen ({a:unterschrift}). Stand: Jugendleitung befürwortet (08.10.2026); Beschluss des Vorstands steht aus."
   ),
   punktZeile(
     "O72",
@@ -1200,7 +1219,7 @@ function entscheidungsListe({ name, sichtbar, weitere, titelWeitere }) {
 
 function entscheidenAbschnitt() {
   const inhalt = `${p(
-    "Die Listen sind nach Dringlichkeit geordnet. P1 muss vor dem Livegang geklärt sein und steht immer sichtbar. P2 und P3 eilen weniger und stehen unter jeder Liste in einem Aufklapper. Jede Zeile trägt ihre Nummer aus dem Regelwerk des Prototyps, zum Beispiel O26."
+    "Die Listen sind nach Dringlichkeit geordnet. P1 muss vor dem Livegang geklärt sein und steht immer sichtbar. P2 und P3 eilen weniger und stehen unter jeder Liste in einem Aufklapper. Ein entschiedener Punkt trägt das Kennzeichen „Entschieden“ und nennt die Entscheidung. Jede Zeile trägt ihre Nummer aus dem Regelwerk des Prototyps, zum Beispiel O26."
   )}
     ${kasten(
       "offen",
