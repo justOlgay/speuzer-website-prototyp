@@ -72,7 +72,7 @@ export default {
       name: "Antrag auf Spielerlaubnis",
       kurz: "Mit diesem Antrag bittet der Verein den Hessischen Fußball-Verband um das Spielrecht.",
       warum: "Nur mit Spielrecht darf man bei Spielen mitmachen.",
-      wie: "Der Assistent füllt das Blatt vor. Sie unterschreiben mit einem Stift.",
+      wie: "Der Assistent füllt das Blatt vor. Sie unterschreiben es.",
       wo: "Der Verein schickt den Antrag an den Verband. Das Original bleibt im Verein.",
     },
     U08: {
@@ -149,7 +149,7 @@ export default {
       name: "Vollmacht für die Abmeldung",
       kurz: "Mit der Vollmacht meldet der neue Verein Sie beim alten Verein ab.",
       warum: "Das spart den Gang zur Post. Der Tag der Eingabe zählt als Tag der Abmeldung.",
-      wie: "Sie unterschreiben das Blatt mit einem Stift. Der Verein gibt die Abmeldung sofort ein.",
+      wie: "Sie unterschreiben das Blatt. Der Verein gibt die Abmeldung sofort ein.",
       wo: "Sie geben das Blatt im Verein ab. Der Verein meldet am selben Tag ab.",
     },
     U19: {
@@ -184,7 +184,7 @@ export default {
       name: "Einverständnis für Spiele bei den Herren",
       kurz: "Der Jugendliche ist noch nicht 18 und soll bei den Herren spielen.",
       warum: "Der Verband verlangt dafür das Einverständnis der Eltern.",
-      wie: "Sie unterschreiben das Blatt mit einem Stift. Dazu braucht es ein Attest.",
+      wie: "Sie unterschreiben das Blatt. Dazu braucht es ein Attest.",
       wo: "Der Verein schickt es an den Verband.",
     },
     U24: {

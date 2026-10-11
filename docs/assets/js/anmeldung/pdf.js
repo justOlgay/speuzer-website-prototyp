@@ -36,6 +36,15 @@
   - Unterschriften: Vereinsformulare mit digitaleUnterschrift "erlaubt" bekommen bei a.unterschriftWeg
     "bildschirm" das Unterschriftsbild der Person samt Ort und Datum. Alle anderen Stellen bleiben leer
     und tragen die Markierung "Hier mit Stift unterschreiben" (PLAN Annahme A1).
+    Die Blätter des Verbands (HFV-Vordrucke, digitaleUnterschrift "nicht_erlaubt") folgen dem Schalter
+    data/anmeldung.json › unterschriftHfv (regeln.js: unterschriftHfv). "bildschirm" (Entscheidung der Jugendleitung vom
+    11.10.2026, O68) behandelt sie wie die Vereinsformulare; das Kind als Spielerin oder Spieler und der zweite Elternteil
+    haben ein freiwilliges Feld. Bleibt das Feld des zweiten Elternteils oder die Zeile des Kindes in der Abmeldung leer, steht dort
+    die Stift-Markierung und der Laufzettel nennt es. Bleibt die Zeile des Kindes im Antrag auf Spielerlaubnis leer, bleibt sie
+    ohne Markierung (Art "leer"): Kleine Kinder können noch nicht schreiben, das Passwesen entscheidet, ob die Unterschrift nötig
+    ist (Jugendleitung, 11.10.2026, Nachbesserung Runde 2). "stift" ist das Verhalten bis zum 11.10.2026: Die Blätter des Verbands
+    bleiben für die Unterschrift mit Stift offen (JO § 37 Nr. 2: eigenhändige Unterschrift; SpO § 92: unterzeichneter
+    Original-Antrag). Ärztin oder Arzt und Verein unterschreiben immer mit Stift.
   - Eine Bildschirm-Unterschrift steht nur unter Angaben, die schon dastehen (Runde 2): auf eigenen Seiten steht „–“
     oder ein Satz statt eines leeren Feldes; fehlt auf dem Vordruck des Aufnahmeantrags eine Erklärung (Foto, IBAN,
     Familienmitglieder) oder auf dem Blatt zum Heimweg die Antwort, wird die Stelle zur Stift-Stelle. Auf dem
@@ -49,7 +58,7 @@
 */
 
 import deRegeln from "./texte/de-regeln.js";
-import { auswerten } from "./regeln.js";
+import { auswerten, unterschriftHfv } from "./regeln.js";
 
 // ---------------------------------------------------------------------------
 // Konstanten
@@ -154,6 +163,11 @@ export const TEXTE_TEIL_A = {
   stiftAlleTrainingOhneAbmeldung: "Alle Blätter außer der Abmeldung unterschreiben Sie beim ersten Training mit Stift. Der Verein druckt sie aus.",
   stiftAlleDrucken: "Drucken Sie die Datei aus. Unterschreiben Sie an allen blauen Markierungen mit Stift.",
   stiftRest: "Einige Vereinsblätter haben noch keine Unterschrift. Unterschreiben Sie dort an den blauen Markierungen mit Stift.",
+  // Blätter des Verbands am Bildschirm unterschrieben (Entscheidung der Jugendleitung vom 11.10.2026): Was noch offen ist, sind die
+  // freiwilligen Felder, die leer blieben und eine Stift-Markierung tragen (zweiter Elternteil; das Kind bei der Abmeldung beim alten Verein),
+  // und Stellen ohne vollständige Erklärung. Die Familie druckt sie aus. Die leere Zeile des Kindes im Antrag auf Spielerlaubnis gehört nicht
+  // dazu: Sie bleibt ohne Markierung (Art „leer“, Tabelle: wieLeer).
+  stiftOffen: "Einige Unterschriften fehlen noch. Unterschreiben Sie diese an den blauen Markierungen mit Stift.",
   // Was auf Papier sein muss (sprache-11): nur die Blätter, die die Familie selbst ausdrucken muss, mit Seite und Namen
   ausdruckenNichts: "Sie müssen nichts ausdrucken.",
   ausdruckenNur: "Ausdrucken müssen Sie nur:",
@@ -162,6 +176,8 @@ export const TEXTE_TEIL_A = {
   attestKosten: "Fragen Sie den Arzt vorher nach dem Preis.",
   // Das Blatt „Abmeldung beim alten Verein“ (sprache-10): Die Familie unterschreibt es mit Stift und schickt es selbst.
   abmeldung: "Das Blatt {name} steht auf {seiten}. Unterschreiben Sie es mit Stift. Schicken Sie es selbst als Einschreiben an den alten Verein.",
+  // Am Bildschirm unterschrieben (Modus „bildschirm“): Die Unterschriften stehen schon auf dem Blatt, es geht nur noch an den alten Verein.
+  abmeldungBildschirm: "Das Blatt {name} steht auf {seiten}. Schicken Sie das Blatt an Ihren alten Verein. Am sichersten per Einschreiben.",
   fehlt: "Besorgen Sie die Unterlagen aus der Liste Das fehlt noch.",
   abgeben: "Geben Sie Teil B im Verein ab. Bringen Sie die Datei auf dem Handy mit. Oder geben Sie sie ausgedruckt ab.",
   // Wer die ganze Datei ausdruckt und mit Stift unterschreibt, gibt Papier ab; die Datei auf dem Handy genügt dann nicht.
@@ -175,6 +191,7 @@ export const TEXTE_TEIL_A = {
   unterschriftenEinleitung: "Diese Tabelle zeigt alle Unterschriften. Die Seitenzahl steht in der ersten Spalte.",
   unterschriftenKeine: "Für Ihre Anmeldung gibt es keine Unterschriften.",
   wieBildschirm: "Am Bildschirm erledigt",
+  wieLeer: "Nicht unterschrieben (freiwillig)",
   wieStift: "Mit Stift",
   wieStiftTraining: "Mit Stift, beim ersten Training",
   wieStiftDrucken: "Mit Stift, nach dem Ausdrucken",
@@ -1127,6 +1144,10 @@ function personName(K, wer) {
   return "";
 }
 
+// Gelten die Blätter des Verbands als Bildschirm-Unterschrift? Der Schalter data/anmeldung.json › unterschriftHfv steht in
+// regeln.js (unterschriftHfv): "bildschirm" seit der Entscheidung der Jugendleitung vom 11.10.2026 (O68), "stift" ist der Weg zurück.
+const hfvAmBildschirm = (K) => unterschriftHfv(K.konfig) === "bildschirm";
+
 // Schlüssel in bilder.unterschriften für eine Rolle. Die Oberfläche fragt den Kontoinhaber nur dann eigens
 // nach einer Unterschrift, wenn er eine andere Person ist (kontoinhaber = "andere"); ist es das Mitglied
 // oder die Person mit Sorgerecht, gilt deren Unterschrift auch für das SEPA-Mandat. Fehlt das passende
@@ -1136,9 +1157,11 @@ function bildSchluessel(K, wer) {
   const hat = (k) => u[k] && u[k].bytes && u[k].bytes.length;
   if (wer === "mitglied") return hat("mitglied") ? "mitglied" : null;
   if (wer === "sorgeberechtigte") return hat("sorgeberechtigte") ? "sorgeberechtigte" : null;
-  // Ein Elternteil reicht (Jugendleitung, 08.10.2026). Nur getrennt lebende Eltern ohne Einverständnis brauchen den zweiten Elternteil,
-  // und er unterschreibt mit Stift: Die Oberfläche kennt dafür kein Bild, die Stelle bekommt immer die Markierung.
-  if (wer === "sorgeberechtigte_beide") return null;
+  // Ein Elternteil reicht (Jugendleitung, 08.10.2026). Nur getrennt lebende Eltern ohne Einverständnis brauchen den zweiten Elternteil.
+  // Im Modus "stift" unterschreibt er mit Stift: Die Oberfläche kennt dafür kein Bild, die Stelle bekommt immer die Markierung.
+  // Im Modus "bildschirm" (Jugendleitung, 11.10.2026) hat er ein eigenes, freiwilliges Feld (Bild "sorgeberechtigte_2"); fehlt es,
+  // bleibt die Markierung.
+  if (wer === "sorgeberechtigte_beide") return hfvAmBildschirm(K) && hat("sorgeberechtigte_2") ? "sorgeberechtigte_2" : null;
   if (wer === "spieler") return hat("spieler") ? "spieler" : null;
   if (wer === "kontoinhaber") {
     const ki = text(objekt(K.a.zahlung).kontoinhaber);
@@ -1150,10 +1173,13 @@ function bildSchluessel(K, wer) {
 }
 
 // Darf an dieser Stelle des Formulars am Bildschirm unterschrieben werden?
+// "erlaubt": Vereinsformular. "nicht_erlaubt": Blatt des Verbands (JO § 37 Nr. 2: eigenhändige Unterschrift, SpO § 92:
+// unterzeichneter Original-Antrag); dort entscheidet der Schalter unterschriftHfv (Jugendleitung, 11.10.2026): "bildschirm" lässt
+// die Unterschrift am Bildschirm zu, "stift" nicht.
 function digitalErlaubt(K, formular) {
   if (K.a.unterschriftWeg !== "bildschirm") return false;
   const eintrag = K.formulare[formular];
-  if (eintrag && eintrag.digitaleUnterschrift) return eintrag.digitaleUnterschrift === "erlaubt";
+  if (eintrag && eintrag.digitaleUnterschrift) return eintrag.digitaleUnterschrift === "erlaubt" || hfvAmBildschirm(K);
   return true; // eigene Blätter des Vereins
 }
 
@@ -1210,12 +1236,30 @@ function zeichneMarkierung(K, page, st, wer) {
   }
 }
 
+// Rollen, deren Unterschrift am Bildschirm freiwillig ist (nur im Modus "bildschirm"): das Kind als Spielerin oder Spieler und der
+// zweite Elternteil. Bleibt das Feld leer, steht an der Stelle die Stift-Markierung, und der Laufzettel nennt es. Einzige Ausnahme:
+// die Zeile des Kindes im Antrag auf Spielerlaubnis, siehe stelleEntscheidung (Art "leer", ohne Markierung).
+const FREIWILLIG_GRUND = {
+  spieler: "Die Unterschrift der Spielerin oder des Spielers wurde am Bildschirm nicht geleistet (freiwillig).",
+  sorgeberechtigte_beide: "Die Unterschrift des zweiten Elternteils wurde am Bildschirm nicht geleistet.",
+};
+
 // Entscheidung für eine Stelle: "bild" (Unterschriftsbild vorhanden, erlaubt und alle Erklärungen auf der Seite
-// beantwortet) oder "stift". grund: warum ein mögliches Bild nicht gesetzt wird (unbeantwortete Erklärung).
+// beantwortet), "stift" oder "leer". grund: warum ein mögliches Bild nicht gesetzt wird (unbeantwortete Erklärung, leeres freiwilliges Feld).
+// "leer" gibt es nur für die Zeile der Spielerin oder des Spielers im Antrag auf Spielerlaubnis, wenn das Kind im Modus "bildschirm"
+// nicht unterschrieben hat: Kleine Kinder können noch nicht schreiben, deshalb bleibt die Zeile ohne Markierung und das Passwesen
+// entscheidet, ob die Unterschrift nötig ist (Jugendleitung, 11.10.2026, Nachbesserung Runde 2; offene Frage O11). Die Abmeldung beim
+// alten Verein geht ohnehin auf Papier per Einschreiben: Dort bleibt die Stift-Markierung.
 function stelleEntscheidung(K, formular, wer, stelleKey) {
   if (wer === "arzt" || wer === "verein") return { art: "stift", grund: "" };
   const key = bildSchluessel(K, wer);
-  if (!(key && digitalErlaubt(K, formular) && K.sig && K.sig[key])) return { art: "stift", grund: "" };
+  if (!(key && digitalErlaubt(K, formular) && K.sig && K.sig[key])) {
+    if (stelleKey && FREIWILLIG_GRUND[wer] && hfvAmBildschirm(K) && digitalErlaubt(K, formular)) {
+      if (formular === "hfv_antrag" && wer === "spieler") return { art: "leer", grund: "" };
+      return { art: "stift", grund: FREIWILLIG_GRUND[wer] };
+    }
+    return { art: "stift", grund: "" };
+  }
   const grund = stelleKey ? erklaerungFehlt(K, formular, stelleKey) : "";
   return grund ? { art: "stift", grund: grund } : { art: "bild", grund: "" };
 }
@@ -1262,10 +1306,10 @@ function erklaerungFehlt(K, formular, stelleKey) {
   return "";
 }
 
-// Eine Unterschriftsstelle zeichnen: Bild (digital) oder Markierung (Stift).
+// Eine Unterschriftsstelle zeichnen: Bild (digital), Markierung (Stift) oder nichts (leer: Zeile des Kindes im Antrag auf Spielerlaubnis).
 // st: { x, y, breite, hoehe }; spec: { formular, stelleKey, wer, stift, zusatz, rueckfall }.
 // stift: immer Markierung (Zusatz-Stellen und Rückfälle); zusatz: keine Stelle der Regeln; rueckfall: die Regeln kennen die Stelle nicht.
-// Gibt { art: "bild" | "stift" } zurück und trägt die Stelle in K.stellen ein.
+// Gibt { art: "bild" | "stift" | "leer" } zurück und trägt die Stelle in K.stellen ein.
 function zeichneStelle(K, page, st, spec) {
   const ent = spec.stift ? { art: "stift", grund: "" } : stelleEntscheidung(K, spec.formular, spec.wer, spec.stelleKey);
   const art = ent.art;
@@ -1279,7 +1323,7 @@ function zeichneStelle(K, page, st, spec) {
     const sig = K.sig[key];
     const m = Math.min(st.breite / sig.breitePx, st.hoehe / sig.hoehePx, MAX_PT_JE_PX);
     page.drawImage(sig.img, { x: st.x, y: st.y, width: sig.breitePx * m, height: sig.hoehePx * m });
-  } else {
+  } else if (art !== "leer") {
     zeichneMarkierung(K, page, st, spec.wer);
   }
   K.stellen.push({ formular: spec.formular, stelleKey: spec.stelleKey, wer: spec.wer, pageRef: page, art: art, bild: key, zusatz: spec.zusatz === true, rueckfall: spec.rueckfall === true, x: st.x, y: st.y, breite: st.breite, hoehe: st.hoehe });
@@ -1693,6 +1737,30 @@ function stelleAusJson(K, formular, stelleKey) {
   return liste(eintrag && eintrag.unterschriften).find((s) => s.stelleKey === stelleKey) || null;
 }
 
+// Datum der Anmeldung bei einer Bildschirm-Unterschrift auf den Blättern des Verbands. Auf Papier trägt die Familie es von Hand
+// ein; am Bildschirm entsteht die Unterschrift beim Anmelden, deshalb setzt der Baukasten den Tag der Anmeldung dazu (wie auf dem
+// Aufnahmeantrag). Datumsfelder des Vordrucks (handfelder in data/anmeldung-formulare.json), je Stelle:
+//   ort: true   „Ort, Datum“ (Vollmacht, Einverständnis für Spiele bei den Herren)
+//   ort: false  nur „Datum“ (Einwilligungen a und b auf Seite 3 des Antrags auf Spielerlaubnis)
+// Der Antrag auf Spielerlaubnis hat auf Seite 1 kein Datumsfeld neben den Unterschriften („Tag der Antragstellung“ trägt der Verein ein).
+// Die Abmeldung beim alten Verein hat eine Zeile „Datum und Unterschrift“: Dort steht das Datum vorn (siehe DATUM_VORN).
+const HFV_DATUMSFELDER = {
+  "hfv_antrag.einwilligung_a": { feld: "datum_einwilligung_a", ort: false },
+  "hfv_antrag.einwilligung_b": { feld: "datum_einwilligung_b", ort: false },
+  "vollmacht.unterschrift": { feld: "ort_datum", ort: true },
+  "einverstaendnis_senioren.unterschrift": { feld: "ort_datum", ort: true },
+};
+// Abmeldung beim alten Verein: Datum und Unterschrift in einer Zeile; vorn das Datum, daneben das Bild
+const DATUM_VORN = "abmeldung.unterschrift";
+
+function schreibeDatumHfv(K, page, x, yLinie, breite, t) {
+  const roh = sicher(K, t, true);
+  let g = 10;
+  while (mess(K, roh, g) > breite - 3 && g > 6) g -= 0.25;
+  schreibeAufVorlage(K, page, "datum", roh, x + 1.5, yLinie + 3, g);
+  return mess(K, roh, g);
+}
+
 // Zeichnet alle Stellen, die die Regeln für dieses Formular verlangen, und die Hinweise des HFV-Antrags.
 // seiten: die kopierten Seiten im Hauptdokument; startNr: Seitennummer der ersten Seite im PDF.
 // Gibt die stelleKeys zurück, an denen ein Bild sitzt.
@@ -1713,8 +1781,21 @@ function zeichneVorlagenStellen(K, formular, seiten) {
       zeichneText(K, page, sicher(K, st.beschriftung, false), st.linie.x0, st.linie.y - 8.5, 7, { farbe: FARBE.tinte });
       merkeFlaeche(K, page, "linie", st.linie.x0, st.linie.y - 10.5, st.linie.x1 - st.linie.x0, 12);
     }
-    const r = zeichneStelle(K, page, st, { formular: formular, stelleKey: u.stelleKey, wer: u.wer });
-    if (r.art === "bild") bilder.push(u.stelleKey);
+    const kurz = formular + "." + u.stelleKey;
+    const amBildschirm = hfvAmBildschirm(K) && FAMILIE_WER.includes(u.wer) && stelleArt(K, formular, u.wer, u.stelleKey) === "bild";
+    // Abmeldung beim alten Verein: Das Datum steht vorn in der Zeile, das Bild daneben.
+    let kasten = st;
+    if (amBildschirm && kurz === DATUM_VORN) {
+      const b = schreibeDatumHfv(K, page, st.x, st.linie ? st.linie.y : st.y, st.breite, K.heuteDe);
+      kasten = Object.assign({}, st, { x: st.x + b + 10, breite: st.breite - b - 10 });
+    }
+    const r = zeichneStelle(K, page, kasten, { formular: formular, stelleKey: u.stelleKey, wer: u.wer });
+    if (r.art === "bild") {
+      bilder.push(u.stelleKey);
+      const d = amBildschirm ? HFV_DATUMSFELDER[kurz] : null;
+      const hf = d ? liste(objekt(K.formulare[formular]).handfelder).find((f) => f.key === d.feld) : null;
+      if (hf && hf.linie) schreibeDatumHfv(K, page, hf.x, hf.linie.y, hf.breite, d.ort ? ortDatumText(K) : K.heuteDe);
+    }
   }
   if (formular === "hfv_antrag") zeichneHfvHinweise(K, seiten);
   return bilder;
@@ -2321,9 +2402,13 @@ function wieText(K, u) {
   const T = TEXTE_TEIL_A;
   if (u.wer === "arzt") return T.wieArzt;
   if (u.wer === "verein") return T.wieVerein;
-  if (stelleArt(K, u.formular, u.wer, u.stelleKey) === "bild") return T.wieBildschirm;
+  const art = stelleArt(K, u.formular, u.wer, u.stelleKey);
+  if (art === "bild") return T.wieBildschirm;
+  if (art === "leer") return T.wieLeer; // Zeile des Kindes im Antrag auf Spielerlaubnis: nicht unterschrieben, ohne Markierung
   // Die Abmeldung beim alten Verein bringt der Verein nicht zum Verband: Die Familie schickt sie selbst (sprache-10).
   if (u.formular === "abmeldung") return T.wieStiftVerschicken;
+  // Am Bildschirm unterschrieben (Modus „bildschirm“): Eine Stift-Stelle ist ein leer gebliebenes Feld. Die Familie druckt das Blatt aus.
+  if (hfvAmBildschirm(K) && K.a.unterschriftWeg === "bildschirm") return T.wieStiftDrucken;
   return K.a.hfvUnterschrift === "selbst_drucken" ? T.wieStiftDrucken : T.wieStiftTraining;
 }
 
@@ -2383,20 +2468,22 @@ function unterlagenZuKlaeren(K, plan) {
 //  - Attest-Vorlage für die Ärztin oder den Arzt und Abmeldung beim alten Verein: immer (Arzt und Post brauchen Papier)
 //  - Blätter mit einer Stift-Stelle der Familie: beim Weg "alles auf Papier" und dem ersten Training druckt der Verein sie aus,
 //    sonst die Familie. Bei "selbst ausdrucken" gehört dazu die ganze Datei (dann gibt es keine Liste).
-//  - Blätter des Verbands (HFV): am Bildschirm unterschrieben druckt sie der Verein zum ersten Training, wenn die Familie
-//    "beim ersten Training" wählt; sonst druckt sie die Familie.
+//  - Blätter des Verbands (HFV) im Modus „stift“: am Bildschirm unterschrieben druckt sie der Verein zum ersten Training, wenn die
+//    Familie "beim ersten Training" wählt; sonst druckt sie die Familie. Im Modus „bildschirm“ (Jugendleitung, 11.10.2026) steht
+//    nur noch auf der Liste, was wirklich eine Stift-Stelle hat (leeres freiwilliges Feld); das druckt immer die Familie.
 // Rückgabe: { alles: true } wenn die ganze Datei auszudrucken ist, sonst { blaetter: [{ name, von, bis }] }.
 function druckListe(K, plan, stifte) {
   const papierWeg = K.a.unterschriftWeg !== "bildschirm";
   const training = K.a.hfvUnterschrift !== "selbst_drucken";
   if (papierWeg && !training) return { alles: true, blaetter: [] };
+  const hfvImTraining = training && !hfvAmBildschirm(K); // druckt der Verein zum ersten Training
   const blaetter = [];
   const merke = (name, r) => r && blaetter.push({ name: name, von: r.von, bis: r.bis });
   if (!papierWeg) {
     const formulare = [];
     stifte.forEach((u) => {
       if (u.formular === "abmeldung" || formulare.includes(u.formular)) return;
-      if (HFV_FORMULARE.includes(u.formular) && training) return; // druckt der Verein zum ersten Training
+      if (HFV_FORMULARE.includes(u.formular) && hfvImTraining) return;
       formulare.push(u.formular);
     });
     formulare.forEach((f) => merke(deRegeln.formulare[f] || f, plan.formulare[f]));
@@ -2443,6 +2530,7 @@ function seiteTeilA(K, S, plan) {
   const erster = [];
   if (!stifte.length) erster.push(T.stiftKeine);
   else if (K.a.unterschriftWeg !== "bildschirm") erster.push(training ? (hatAbmeldung ? T.stiftAlleTrainingOhneAbmeldung : T.stiftAlleTraining) : T.stiftAlleDrucken);
+  else if (hfvAmBildschirm(K)) erster.push(T.stiftOffen); // Blätter des Verbands am Bildschirm: offen sind nur leer gebliebene Stellen
   else {
     if (stifteHfv.length) erster.push(training ? T.stiftTraining : T.stiftDrucken);
     if (stifteAndere.length > stifteHfv.length) erster.push(T.stiftRest);
@@ -2459,7 +2547,11 @@ function seiteTeilA(K, S, plan) {
     schritte.push(E(ersetzePlatzhalter(T.attest, { seite: plan.attestVorlage.von }) + " " + T.attestKosten));
   }
   if (hatAbmeldung) {
-    schritte.push(E(ersetzePlatzhalter(T.abmeldung, { name: deRegeln.formulare.abmeldung, seiten: seitenText(plan.formulare.abmeldung.von, plan.formulare.abmeldung.bis) })));
+    // Am Bildschirm unterschrieben steht alles auf dem Blatt: Die Familie schickt es nur noch ab. Fehlt noch eine Unterschrift
+    // (leeres freiwilliges Feld, Papierweg), gilt der bisherige Satz mit Stift.
+    const abmeldungMitStift = stifte.some((u) => u.formular === "abmeldung");
+    const abmeldungText = hfvAmBildschirm(K) && !abmeldungMitStift ? T.abmeldungBildschirm : T.abmeldung;
+    schritte.push(E(ersetzePlatzhalter(abmeldungText, { name: deRegeln.formulare.abmeldung, seiten: seitenText(plan.formulare.abmeldung.von, plan.formulare.abmeldung.bis) })));
   }
   const fehlend = liste(e.fehlend);
   if (fehlend.length) schritte.push(E(T.fehlt));
@@ -2761,6 +2853,24 @@ function seiteLaufzettel(K, S, plan) {
   }
   const digital = alleStellen(K).some((u) => stelleArt(K, u.formular, u.wer, u.stelleKey) === "bild");
   if (digital) pruef.push("Unterschriften am Bildschirm gezeichnet (einfache elektronische Signatur) auf Vereinsunterlagen. Der Vorstand bestätigt, dass die Satzung (Schriftform, § 127 BGB) das zulässt.");
+  // Blätter des Verbands am Bildschirm unterschrieben (Entscheidung der Jugendleitung vom 11.10.2026, O68). Das Passwesen prüft beim Antrag,
+  // ob der Verband die Bildschirm-Unterschrift annimmt; sonst druckt der Verein das Blatt aus und lässt es mit Stift unterschreiben.
+  // Ausnahmen nennt der Satz: Stift-Stellen (leeres Feld des zweiten Elternteils oder des Kindes in der Abmeldung) und die leere Zeile des
+  // Kindes im Antrag auf Spielerlaubnis (Art "leer"); zu ihr sagt ein eigener Satz, dass das Passwesen entscheidet.
+  const kindLeer = K.stellen.some((st) => st.art === "leer");
+  if (hfvAmBildschirm(K) && K.stellen.some((st) => st.art === "bild" && HFV_FORMULARE.includes(st.formular))) {
+    const ausnahmen = [];
+    if (K.stellen.some((st) => st.art === "stift" && FAMILIE_WER.includes(st.wer) && !st.zusatz)) ausnahmen.push("an den Stift-Stellen (siehe „Hinweise zur Datei“)");
+    if (kindLeer) ausnahmen.push("an der Unterschriftszeile des Kindes im Antrag auf Spielerlaubnis");
+    pruef.push(
+      (ausnahmen.length
+        ? "Die Unterschriften der Familie sind am Bildschirm geleistet, auch auf den Blättern des Verbands (Entscheidung der Jugendleitung vom 11.10.2026), außer " + ausnahmen.join(" und ") + "."
+        : "Alle Unterschriften der Familie sind am Bildschirm geleistet, auch auf den Blättern des Verbands (Entscheidung der Jugendleitung vom 11.10.2026).") +
+        " Verlangt der Verband ein Original mit Stift, das Blatt ausdrucken und unterschreiben lassen."
+    );
+  }
+  // Das Kind hat im Antrag auf Spielerlaubnis nicht unterschrieben (freiwilliges Feld, Modus "bildschirm"): Das Passwesen entscheidet (O11).
+  if (kindLeer) pruef.push("Das Kind hat den Antrag nicht unterschrieben. Das Passwesen entscheidet, ob das nötig ist.");
   if (a.satzung !== true) pruef.push("Aufnahmeantrag Seite 1: Das Kästchen „Satzung zur Kenntnis genommen“ ist offen. Die Familie kreuzt es von Hand an.");
   if (plan.formulare.datenschutz && K.entwurf) pruef.push("Die " + eintragName("datenschutz") + ", alle Einverständnisse und Erlaubnisse sowie der " + eintragName("notfall") + " sind Entwürfe. Der Vorstand gibt die Texte frei (Fußzeile „Entwurf“).");
   if (pruef.length) {

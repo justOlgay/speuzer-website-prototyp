@@ -674,6 +674,64 @@ async function pruefeModule(konfigLive, konfigBegleit, beispiele) {
     ok("PDF " + id + ": Paket erzeugt Byte für Byte dasselbe PDF wie die Quelle (ohne Entwurfsvermerk)", Buffer.compare(Buffer.from(p1.bytes), Buffer.from(p2.bytes)) === 0 && p1.seiten === p2.seiten && p1.seiten > 0, p2.seiten + " Seiten, " + p2.bytes.length + " Byte");
   }
 
+  // M9 (11.10.2026): Der Schalter unterschriftHfv (data/anmeldung.json, Jugendleitung) steht im Paket auf „bildschirm“, die Konfiguration trägt ihn auch ohne das
+  // Kapitel offenePunkte. Mit Unterschriftsbildern (Elternteil, Kind, Mitglied) liefert das Paket dasselbe PDF wie die Quelle, und alle Unterschriften der Familie
+  // stehen am Bildschirm (auch auf den Blättern des Verbands).
+  {
+    ok("Konfiguration des Pakets: unterschriftHfv.wert = bildschirm, ohne das Kapitel offenePunkte", !!konfigLive.anmeldung.unterschriftHfv && konfigLive.anmeldung.unterschriftHfv.wert === "bildschirm" && !("offenePunkte" in konfigLive.anmeldung), JSON.stringify(konfigLive.anmeldung.unterschriftHfv && konfigLive.anmeldung.unterschriftHfv.wert));
+    ok("Paket: regeln.unterschriftHfv(konfig) liefert „bildschirm“, wie die Quelle", paketRegeln.unterschriftHfv(konfigLive) === "bildschirm" && quellRegeln.unterschriftHfv(konfigBegleit) === "bildschirm");
+    const bildDatei = (i) => {
+      const b = new Uint8Array(fs.readFileSync(path.join(ROOT, "tools", "anmeldung-test", "testbilder", "unterschrift-" + i + ".png")));
+      const dv = new DataView(b.buffer, b.byteOffset, b.byteLength);
+      return { bytes: b, breitePx: dv.getUint32(16) * 0.75, hoehePx: dv.getUint32(20) * 0.75 };
+    };
+    const unterschriften = { mitglied: bildDatei(1), sorgeberechtigte: bildDatei(2), spieler: bildDatei(3), kontoinhaber: bildDatei(4) };
+    for (const id of ["kind-neu", "herren-wechsel"]) {
+      const a = beispiele.beispielAntworten(id, HEUTE, konfigBegleit);
+      a.unterschriftWeg = "bildschirm";
+      a.satzung = true;
+      const e1 = quellRegeln.auswerten(kopie(a), konfigBegleit, HEUTE);
+      const e2 = paketRegeln.auswerten(kopie(a), konfigLive, HEUTE);
+      const schluessel = quellPdf.benoetigteVorlagen(e1, a);
+      const bilder = () => ({ spielerfoto: null, nachweise: {}, unterschriften: Object.assign({}, unterschriften) }); // flache Kopie: kopie() (JSON) würde die Bytes zerstören
+      const p1 = await quellPdf.erzeugePdf({ PDFLib, fontkit, schrift: new Uint8Array(schriftQuelle), vorlagen: Object.fromEntries(schluessel.map((x) => [x, vorlagenQuelle[x]])), konfig: konfigBegleit, a: kopie(a), e: e1, bilder: bilder(), heute: HEUTE, entwurf: false });
+      const p2 = await paketPdf.erzeugePdf({ PDFLib, fontkit, schrift: schriftPaket, vorlagen: Object.fromEntries(schluessel.map((x) => [x, vorlagenPaket[x]])), konfig: konfigLive, a: kopie(a), e: e2, bilder: bilder(), heute: HEUTE, entwurf: false });
+      ok("PDF mit Unterschriftsbildern " + id + ": Paket erzeugt Byte für Byte dasselbe PDF wie die Quelle", Buffer.compare(Buffer.from(p1.bytes), Buffer.from(p2.bytes)) === 0 && p1.seiten === p2.seiten, p2.seiten + " Seiten");
+      const datei = path.join(AUSGABE, "unterschriften-" + id + ".pdf");
+      fs.writeFileSync(datei, p2.bytes);
+      const text = poppler("pdftotext", ["-layout", datei, "-"]).replace(/\s+/g, " ");
+      ok("PDF mit Unterschriftsbildern " + id + ": Teil A „Sie haben alles am Bildschirm unterschrieben.“ und im Laufzettel der Satz zu den Blättern des Verbands", text.includes("Sie haben alles am Bildschirm unterschrieben.") && text.includes("Alle Unterschriften der Familie sind am Bildschirm geleistet, auch auf den Blättern des Verbands (Entscheidung der Jugendleitung vom 11.10.2026)."), "");
+    }
+    // Nachbesserung Runde 2 (11.10.2026): Das Feld des Kindes bleibt leer. Die Zeile des Kindes im Antrag auf Spielerlaubnis bleibt ohne Markierung (Art „leer“),
+    // Teil A nennt das Blatt nicht unter „Ausdrucken müssen Sie nur“, der Laufzettel sagt, dass das Passwesen entscheidet. Das Paket liefert dasselbe PDF wie die Quelle.
+    {
+      const a = beispiele.beispielAntworten("kind-neu", HEUTE, konfigBegleit);
+      a.unterschriftWeg = "bildschirm";
+      a.satzung = true;
+      const e1 = quellRegeln.auswerten(kopie(a), konfigBegleit, HEUTE);
+      const e2 = paketRegeln.auswerten(kopie(a), konfigLive, HEUTE);
+      const schluessel = quellPdf.benoetigteVorlagen(e1, a);
+      const bilder = () => {
+        const u = Object.assign({}, unterschriften); // flache Kopie (siehe oben)
+        delete u.spieler;
+        return { spielerfoto: null, nachweise: {}, unterschriften: u };
+      };
+      const p1 = await quellPdf.erzeugePdf({ PDFLib, fontkit, schrift: new Uint8Array(schriftQuelle), vorlagen: Object.fromEntries(schluessel.map((x) => [x, vorlagenQuelle[x]])), konfig: konfigBegleit, a: kopie(a), e: e1, bilder: bilder(), heute: HEUTE, entwurf: false });
+      const p2 = await paketPdf.erzeugePdf({ PDFLib, fontkit, schrift: schriftPaket, vorlagen: Object.fromEntries(schluessel.map((x) => [x, vorlagenPaket[x]])), konfig: konfigLive, a: kopie(a), e: e2, bilder: bilder(), heute: HEUTE, entwurf: false });
+      ok("PDF mit Unterschriftsbildern kind-neu, Feld des Kindes leer: Paket erzeugt Byte für Byte dasselbe PDF wie die Quelle", Buffer.compare(Buffer.from(p1.bytes), Buffer.from(p2.bytes)) === 0 && p1.seiten === p2.seiten, p2.seiten + " Seiten");
+      const datei = path.join(AUSGABE, "unterschriften-kind-neu-kind-leer.pdf");
+      fs.writeFileSync(datei, p2.bytes);
+      const text = poppler("pdftotext", ["-layout", datei, "-"]).replace(/\s+/g, " ");
+      ok("PDF kind-neu, Feld des Kindes leer: Teil A „Sie haben alles am Bildschirm unterschrieben.“, Laufzettel „Das Kind hat den Antrag nicht unterschrieben. Das Passwesen entscheidet, ob das nötig ist.“, kein „Einige Unterschriften fehlen noch“",
+        text.includes("Sie haben alles am Bildschirm unterschrieben.") && text.includes("Das Kind hat den Antrag nicht unterschrieben. Das Passwesen entscheidet, ob das nötig ist.") && !text.includes("Einige Unterschriften fehlen noch") && text.includes("Nicht unterschrieben (freiwillig)"), "");
+      const seiten = Number(/Pages:\s+(\d+)/.exec(poppler("pdfinfo", [datei]))[1]);
+      let antrag = 0;
+      for (let i = 1; i <= seiten && !antrag; i++) if (/Antrag auf Spielerlaubnis \/ Vereinswechsel/.test(poppler("pdftotext", ["-layout", "-f", String(i), "-l", String(i), datei, "-"]))) antrag = i;
+      const marker = antrag ? (poppler("pdftotext", ["-layout", "-f", String(antrag), "-l", String(antrag), datei, "-"]).match(/Hier mit Stift unterschreiben/g) || []).length : -1;
+      ok("PDF kind-neu, Feld des Kindes leer: Antrag auf Spielerlaubnis Seite 1 mit nur einer Markierung (Verein), keine für das Kind", marker === 1, "Seite " + antrag + ", Markierungen " + marker);
+    }
+  }
+
   // Gegenprobe: Mit entwurf = true (so läuft die Begleitseite) steht der Vermerk im PDF – die Prüfung auf "Entwurf" im PDF-Text kann also anschlagen
   {
     const a = beispiele.beispielAntworten("kind-neu", HEUTE, konfigBegleit);

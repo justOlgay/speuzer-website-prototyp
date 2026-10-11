@@ -309,6 +309,15 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
       return null;
     }
   };
+  // Unterschreibt die Familie auch die Blätter des Verbands am Bildschirm? Schalter data/anmeldung.json › unterschriftHfv
+  // (regeln.js: unterschriftHfv): "bildschirm" seit der Entscheidung der Jugendleitung vom 11.10.2026, "stift" ist der Weg zurück.
+  k.hfvAmBildschirm = () => {
+    try {
+      return regeln.unterschriftHfv(konfig) === "bildschirm";
+    } catch (e) {
+      return false;
+    }
+  };
   k.name = () => standardWerte().name;
   // Texte einer Unterlage: aus den Regeltexten der Sprache; fehlt der Name dort,
   // gilt der deutsche Titel aus data/anmeldung.json, zuletzt die Kennung.

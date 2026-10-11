@@ -61,7 +61,7 @@ export default {
       name: "Oynama izni başvurusu (Antrag auf Spielerlaubnis)",
       kurz: "Kulüp bu başvuruyla Hessen Futbol Federasyonu’ndan (Hessischer Fußball-Verband, HFV) oynama izni (Spielrecht) ister.",
       warum: "Maçlara ancak oynama izni olan kişiler katılabilir.",
-      wie: "Asistan formu önceden doldurur. Kalemle imzalarsınız.",
+      wie: "Asistan formu önceden doldurur. Formu siz imzalarsınız.",
       wo: "Kulüp başvuruyu federasyona gönderir. Orijinali kulüpte kalır.",
     },
     U08: {
@@ -138,7 +138,7 @@ export default {
       name: "Kayıt silme için vekâletname (Vollmacht für die Abmeldung)",
       kurz: "Vekâletname (Vollmacht) ile yeni kulüp, kaydınızı eski kulüpten sildirir.",
       warum: "Bu, postaneye gitmekten kurtarır. Girişin yapıldığı gün, kayıt silme günü sayılır.",
-      wie: "Sayfayı kalemle imzalarsınız. Kulüp kayıt silmeyi hemen girer.",
+      wie: "Sayfayı imzalarsınız. Kulüp kayıt silmeyi hemen girer.",
       wo: "Sayfayı kulüpte teslim edersiniz. Kulüp aynı gün kaydı sildirir.",
     },
     U19: {
@@ -173,7 +173,7 @@ export default {
       name: "Herren takımındaki maçlar için onay",
       kurz: "Genç henüz 18 yaşında değil ve Herren (yetişkin erkek takımı) takımında oynayacak.",
       warum: "Federasyon bunun için ebeveynlerin onayını ister.",
-      wie: "Sayfayı kalemle imzalarsınız. Ayrıca sağlık raporu (Attest) gerekir.",
+      wie: "Sayfayı imzalarsınız. Ayrıca sağlık raporu (Attest) gerekir.",
       wo: "Kulüp bunu federasyona gönderir.",
     },
     U24: {

@@ -40,7 +40,7 @@ const HINWEIS_ORT = {
 };
 
 // Nicht in der Liste: "getrennt_zustimmung". Auf der Seite "sorge/recht" sagt der eine Kasten
-// "sorge.zweiterMitStift" (seiten-person.js) dasselbe und dazu, dass der Stift nötig ist; zwei
+// "sorge.zweiterAmBildschirm" bzw. "sorge.zweiterMitStift" (seiten-person.js) dasselbe und dazu, wie der andere Elternteil unterschreibt; zwei
 // Kästen mit "Achtung" nebeneinander verwirren. Auf der Prüf- und der Endseite steht der Hinweis weiter.
 function hinweisOrt(x) {
   return x.schritt || HINWEIS_ORT[x.key] || null;
@@ -290,13 +290,17 @@ function pruefBereiche(k) {
 
   z = bereich("unterschriften");
   const plan = unterschriftenPlan(k);
-  z(Z("unterschriftWeg"), a.unterschriftWeg ? W("unterschriftWeg." + a.unterschriftWeg) : "", "unterschriften");
+  // Modus "bildschirm" (Entscheidung der Jugendleitung vom 11.10.2026): "Am Bildschirm" ohne den Zusatz "wo es erlaubt ist"
+  z(Z("unterschriftWeg"), a.unterschriftWeg ? W("unterschriftWeg." + (a.unterschriftWeg === "bildschirm" && plan.hfvBildschirm ? "bildschirmAlles" : a.unterschriftWeg)) : "", "unterschriften");
   z(Z("satzung"), a.satzung === true ? W("ja") : W("satzungVonHand"), "unterschriften");
   if (a.unterschriftWeg === "bildschirm") {
     for (const p of plan.liste) {
       const u = k.bilder.unterschriften[p.schluessel];
       const name = unterschriftTitel(k, p.schluessel);
-      z(name, u ? h("img", { klasse: "anm-vorschau-unterschrift", src: k.vorschauUrl("unterschrift-" + p.schluessel, u.bytes, "image/png"), alt: k.t("unterschriften.standOk") + ": " + name }) : W("nichtUnterschrieben"), "unterschriften");
+      // Freiwillige Felder: leer ist erlaubt. Beim Kind steht neutral "nicht unterschrieben (freiwillig)" (im Antrag auf Spielerlaubnis
+      // bleibt die Zeile dann leer, das Passwesen entscheidet); beim zweiten Elternteil sagt die Zeile, dass er mit Stift unterschreibt.
+      const leer = p.schluessel === "spieler" ? "nichtUnterschriebenFreiwillig" : p.freiwillig ? "mitStift" : "nichtUnterschrieben";
+      z(name, u ? h("img", { klasse: "anm-vorschau-unterschrift", src: k.vorschauUrl("unterschrift-" + p.schluessel, u.bytes, "image/png"), alt: k.t("unterschriften.standOk") + ": " + name }) : W(leer), "unterschriften");
     }
   }
   if (plan.stift.length) z(Z("hfvUnterschrift"), a.hfvUnterschrift ? W("hfvUnterschrift." + a.hfvUnterschrift) : "", "unterschriften");
@@ -381,6 +385,10 @@ function naechsteSchritte(k, pdf) {
       schritte.push(k.a.hfvUnterschrift === "training" ? k.t("fertig.unterschriftTrainingAlle") : k.t("fertig.unterschriftDrucken"));
     } else if (k.a.hfvUnterschrift === "training") schritte.push(k.t("fertig.unterschriftTraining"));
     else schritte.push(k.t("fertig.unterschriftDruckenTeil"));
+  } else if (plan.liste.some((p) => p.stiftBeiLeer && !k.bilder.unterschriften[p.schluessel])) {
+    // Modus "bildschirm": Ein freiwilliges Feld blieb leer und im PDF steht dafür eine Stift-Markierung (zweiter Elternteil, Kind bei
+    // der Abmeldung). Die leere Zeile des Kindes im Antrag auf Spielerlaubnis zählt nicht: Sie bleibt ohne Markierung.
+    schritte.push(k.t("fertig.unterschriftRest"));
   } else schritte.push(k.t("fertig.unterschriftFertig"));
   const fehlend = Array.isArray(e.fehlend) ? e.fehlend : [];
   const eintraege = [];

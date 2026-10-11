@@ -32,7 +32,18 @@
 //    Karneval ohne Blatt zu Auftritten, ohne Gruppenname (stattdessen ein Satz), ohne Zuschlag im Laufzettel
 //  - M1, Runde 2 (11.10.2026): Blatt „Fahrten und Messenger“: nur Karneval ohne Fußball sagt „Veranstaltungen des Vereins“ (Überschrift und Satz,
 //    kein „Turnier“, keine Spiele), Fußball und „beides“ behalten „Spielen und Veranstaltungen“ (Sonderfall 13, dazu die Prüfung je Profil)
-// Aufruf-Optionen: --profil=a,b (nur diese Profile)  --ohne-sonderfaelle  --szenarien (Szenarien auch bei --profil)
+//  - M9 (11.10.2026): Schalter unterschriftHfv (Jugendleitung): Der Hauptlauf prüft den Stand der Daten („bildschirm“: alle Unterschriften der
+//    Familie am Bildschirm, auch auf den Blättern des Verbands, mit Datum der Anmeldung; freiwillige Felder für das Kind und den zweiten Elternteil,
+//    leer gelassen: der zweite Elternteil und das Kind bei der Abmeldung mit Stift-Markierung und Satz im Laufzettel; Teil A „Ausdrucken müssen Sie nur“; Satz im Laufzettel). Danach läuft ein Teil der
+//    Profile (Kind neu, Wechsel Hessen, Herren, getrennt ohne Einverständnis, Vollmacht, A-Jugend bei den Herren) mit dem Schalter „stift“
+//    (Stand bis 11.10.2026) und dieselben Prüfungen mit den Erwartungen des alten Verhaltens. Der Schalter wird nur im Test umgelegt (Kopie der
+//    Konfiguration im Speicher), data/anmeldung.json bleibt unverändert.
+//  - M9, Runde 2 (11.10.2026): Die leere Zeile des Kindes im Antrag auf Spielerlaubnis (Modus „bildschirm“) bleibt ohne Markierung (Art „leer“): kein
+//    Bild, keine Stift-Markierung, Teil A nennt das Blatt nicht unter „Ausdrucken müssen Sie nur“ (Kind neu ohne Attest-Vorlage: „Sie müssen nichts
+//    ausdrucken.“), der Laufzettel sagt „Das Kind hat den Antrag nicht unterschrieben. Das Passwesen entscheidet, ob das nötig ist.“; die Abmeldung
+//    beim alten Verein und der zweite Elternteil behalten die Stift-Markierung; im Modus „stift“ gibt es den neuen Satz nicht.
+// Aufruf-Optionen: --profil=a,b (nur diese Profile)  --ohne-sonderfaelle  --szenarien (Szenarien auch bei --profil)  --ohne-stift (ohne den Lauf mit dem Schalter „stift“)
+//   --nur-schalter (nur die Läufe zum Schalter unterschriftHfv, ohne Profile, Sonderfälle und Rückfälle)
 // Werkzeuge: pdf-lib und fontkit aus node_modules, dazu poppler (pdftotext, pdfinfo, pdfimages, pdftoppm).
 // Testbilder: tools/anmeldung-test/testbilder/ (künstliche Muster, keine echten Dokumente; fehlende Dateien
 // erzeugt der Test, soweit möglich, selbst).
@@ -57,8 +68,18 @@ const RENDER_PROFILE = ["kind-neu-deutsch-f", "vollmacht-und-kuendigung", "kind-
 const ARGUMENTE = process.argv.slice(2);
 const NUR_PROFILE = (ARGUMENTE.find((x) => x.startsWith("--profil=")) || "").replace("--profil=", "").split(",").filter(Boolean);
 const OHNE_SONDERFAELLE = ARGUMENTE.includes("--ohne-sonderfaelle");
-const MIT_SZENARIEN = ARGUMENTE.includes("--szenarien") || (!NUR_PROFILE.length && !OHNE_SONDERFAELLE);
+const MIT_SZENARIEN = !ARGUMENTE.includes("--nur-schalter") && (ARGUMENTE.includes("--szenarien") || (!NUR_PROFILE.length && !OHNE_SONDERFAELLE));
+const OHNE_STIFT = ARGUMENTE.includes("--ohne-stift");
+const NUR_SCHALTER = ARGUMENTE.includes("--nur-schalter");
 const konfig = ladeKonfig();
+// Schalter unterschriftHfv (data/anmeldung.json, Entscheidung der Jugendleitung vom 11.10.2026): Die Erwartungen der Prüfungen richten sich nach dem
+// Stand in `konfig` (Kopie im Speicher). Der Hauptlauf nutzt den Stand der Daten, der Lauf „Modus stift“ legt ihn um.
+const modusHfv = () => ((konfig.anmeldung.unterschriftHfv || {}).wert === "bildschirm" ? "bildschirm" : "stift");
+const hfvBild = () => modusHfv() === "bildschirm";
+function setzeModusHfv(modus) {
+  konfig.anmeldung.unterschriftHfv = Object.assign({}, konfig.anmeldung.unterschriftHfv, { wert: modus });
+}
+const HFV_VORDRUCKE = ["hfv_antrag", "vollmacht", "abmeldung", "einverstaendnis_senioren"];
 const SCHRIFT = new Uint8Array(readFileSync(path.join(WURZEL, "assets", "fonts", "liberation-sans-regular.ttf")));
 
 // ---------------------------------------------------------------------------------------------
@@ -367,8 +388,15 @@ function vorlagenFuer(e, a) {
   return v;
 }
 
-// Ein Elternteil reicht (O26): Die Oberfläche kennt kein zweites Unterschriftsbild der Eltern.
-const SIGNATUREN = () => ({ mitglied: TESTDATEIEN.sig1, sorgeberechtigte: TESTDATEIEN.sig2, kontoinhaber: TESTDATEIEN.sig4 });
+// Ein Elternteil reicht (O26): Die Oberfläche kennt kein zweites Unterschriftsbild der Eltern für das Aufnahme-Formular.
+// Modus „bildschirm“ (M9): Die freiwilligen Felder des Kindes (spieler) und des zweiten Elternteils (sorgeberechtigte_2) geben nur manche Läufe mit
+// (je nach Nummer des Profils), die anderen lassen sie leer. Modus „stift“: pdf.js ignoriert beide Bilder; die Läufe geben sie trotzdem mit.
+const SIGNATUREN = (index) => {
+  const u = { mitglied: TESTDATEIEN.sig1, sorgeberechtigte: TESTDATEIEN.sig2, kontoinhaber: TESTDATEIEN.sig4 };
+  if (index % 2 === 0) u.spieler = TESTDATEIEN.sig3;
+  if (index % 3 === 0) u.sorgeberechtigte_2 = TESTDATEIEN.sig3;
+  return u;
+};
 
 // Antworten und Bilder je Variante
 //  bild:   Bildschirm-Unterschriften, alle Nachweise als "habe" mit Bildern, Foto
@@ -383,7 +411,7 @@ function bereite(profilId, variante, index, aendern) {
   if (variante === "papier") a.unterschriftWeg = "papier";
   else a.unterschriftWeg = "bildschirm";
   const bilder = { spielerfoto: null, nachweise: {}, unterschriften: {} };
-  if (variante === "bild" || variante === "papier") bilder.unterschriften = SIGNATUREN();
+  if (variante === "bild" || variante === "papier") bilder.unterschriften = SIGNATUREN(index);
   if (typeof aendern === "function") aendern(a, p);
   let e = auswerten(a, konfig, p.heute);
   // Wie die Oberfläche (seiten-unterlagen.js, Schritt „nachweise“): jede Nachweis-Unterlage der Liste beginnt mit „fehlt“;
@@ -433,14 +461,16 @@ function staatenErwartet(a) {
 const digitalErlaubtErw = (a, formular) => {
   if (a.unterschriftWeg !== "bildschirm") return false;
   const f = konfig.formulare.formulare[formular];
-  return f ? f.digitaleUnterschrift === "erlaubt" : true;
+  // Vereinsformulare („erlaubt“) immer; Blätter des Verbands („nicht_erlaubt“) nur im Modus „bildschirm“
+  return f ? f.digitaleUnterschrift === "erlaubt" || hfvBild() : true;
 };
 function bildFuerWer(b, wer) {
   const u = b.bilder.unterschriften;
   const z = b.a.zahlung || {};
   if (wer === "mitglied") return u.mitglied ? "mitglied" : null;
   if (wer === "sorgeberechtigte") return u.sorgeberechtigte ? "sorgeberechtigte" : null;
-  if (wer === "sorgeberechtigte_beide") return null; // der zweite Elternteil (nötig bei getrennt lebenden Eltern ohne Einverständnis) unterschreibt immer mit Stift
+  // der zweite Elternteil (nötig bei getrennt lebenden Eltern ohne Einverständnis): im Modus „stift“ immer mit Stift, im Modus „bildschirm“ mit seinem freiwilligen Bild
+  if (wer === "sorgeberechtigte_beide") return hfvBild() && u.sorgeberechtigte_2 ? "sorgeberechtigte_2" : null;
   if (wer === "spieler") return u.spieler ? "spieler" : null;
   if (wer === "kontoinhaber") {
     if (z.kontoinhaber === "sorgeberechtigt") return u.sorgeberechtigte ? "sorgeberechtigte" : null;
@@ -473,7 +503,11 @@ function erklaerungFehltErw(b, s) {
 function erwarteteArt(b, s) {
   if (s.wer === "arzt" || s.wer === "verein") return "stift";
   if (erklaerungFehltErw(b, s)) return "stift";
-  return digitalErlaubtErw(b.a, s.formular) && bildFuerWer(b, s.wer) ? "bild" : "stift";
+  if (digitalErlaubtErw(b.a, s.formular) && bildFuerWer(b, s.wer)) return "bild";
+  // M9, Runde 2: Das Kind hat im Antrag auf Spielerlaubnis nicht unterschrieben (Modus „bildschirm“, freiwilliges Feld): Die Zeile bleibt leer, ohne
+  // Markierung. Die Abmeldung beim alten Verein und der zweite Elternteil bekommen weiter die Stift-Markierung.
+  if (s.formular === "hfv_antrag" && s.wer === "spieler" && digitalErlaubtErw(b.a, s.formular)) return "leer";
+  return "stift";
 }
 const WER_TEXT = {
   mitglied: "Mitglied (Sie selbst)",
@@ -1280,12 +1314,19 @@ function pruefeNA2(c) {
   const abmeldung = plan.formulare.abmeldung;
   const abmeldungStellen = bericht.stellen.filter((s) => s.formular === "abmeldung");
   if (abmeldung) {
-    const schritt = norm("Das Blatt " + deRegeln.formulare.abmeldung + " steht auf " + seitenAngabeNA2(abmeldung) + ". Unterschreiben Sie es mit Stift. Schicken Sie es selbst als Einschreiben an den alten Verein.");
+    // Modus „bildschirm“ (M9): Stehen alle Unterschriften der Familie schon als Bild auf dem Blatt, geht es nur noch an den alten Verein.
+    // Fehlt eine (leeres freiwilliges Feld, Papierweg), gilt der Satz mit Stift.
+    const abmeldungMitStift = stiftFamilie.some((u) => u.formular === "abmeldung");
+    const schritt = hfvBild() && !abmeldungMitStift
+      ? norm("Das Blatt " + deRegeln.formulare.abmeldung + " steht auf " + seitenAngabeNA2(abmeldung) + ". Schicken Sie das Blatt an Ihren alten Verein. Am sichersten per Einschreiben.")
+      : norm("Das Blatt " + deRegeln.formulare.abmeldung + " steht auf " + seitenAngabeNA2(abmeldung) + ". Unterschreiben Sie es mit Stift. Schicken Sie es selbst als Einschreiben an den alten Verein.");
     ok(ta.includes(schritt), () => "Teil A: eigener Schritt zur Abmeldung beim alten Verein fehlt: " + schritt);
+    ok(!(hfvBild() && !abmeldungMitStift) || !ta.includes("Unterschreiben Sie es mit Stift. Schicken Sie es selbst als Einschreiben"), "Teil A (Modus bildschirm): bei Bildschirm-Unterschriften steht kein „Unterschreiben Sie es mit Stift“ zur Abmeldung");
     const teilASeitenNr = teilASeiten.map((x) => x.nr);
     const zeilen = teilASeitenNr.flatMap((nr) => zeilenSeite(pfad, nr)).filter((z) => /Abmeldung beim alten Verein: /.test(z));
-    ok(zeilen.length === abmeldungStellen.length && zeilen.every((z) => /Mit Stift, selbst verschicken/.test(z) && !/beim ersten Training|nach dem Ausdrucken/.test(z)), () => "Teil A, Tabelle: Zeilen zur Abmeldung nennen „Mit Stift, selbst verschicken“ (" + zeilen.length + " Zeilen, erwartet " + abmeldungStellen.length + "): " + JSON.stringify(zeilen));
-    ok(!ta.includes("Mit Stift, selbst verschicken") || zaehle(ta, /Mit Stift, selbst verschicken/g) === abmeldungStellen.length, "Teil A, Tabelle: „Mit Stift, selbst verschicken“ nur bei der Abmeldung");
+    const sollStiftAbm = abmeldungStellen.filter((s) => s.art === "stift").length;
+    ok(zeilen.length === abmeldungStellen.length && zeilen.filter((z) => /Mit Stift, selbst verschicken/.test(z)).length === sollStiftAbm && zeilen.filter((z) => /Am Bildschirm erledigt/.test(z)).length === abmeldungStellen.length - sollStiftAbm && zeilen.every((z) => !/beim ersten Training|nach dem Ausdrucken/.test(z)), () => "Teil A, Tabelle: Zeilen zur Abmeldung nennen „Mit Stift, selbst verschicken“ (Stift-Stellen: " + sollStiftAbm + ") oder „Am Bildschirm erledigt“ (" + zeilen.length + " Zeilen, erwartet " + abmeldungStellen.length + "): " + JSON.stringify(zeilen));
+    ok(zaehle(ta, /Mit Stift, selbst verschicken/g) === sollStiftAbm, "Teil A, Tabelle: „Mit Stift, selbst verschicken“ nur bei Stift-Stellen der Abmeldung");
   } else {
     ok(!ta.includes("Mit Stift, selbst verschicken") && !ta.includes("als Einschreiben an den alten Verein"), "Teil A: ohne Blatt zur Abmeldung kein Schritt dazu");
   }
@@ -1294,7 +1335,7 @@ function pruefeNA2(c) {
   const formulareMitStift = [];
   stiftFamilie.forEach((u) => {
     if (u.formular === "abmeldung" || formulareMitStift.includes(u.formular)) return;
-    if (HFV_BLAETTER.includes(u.formular) && training) return; // druckt der Verein zum ersten Training
+    if (HFV_BLAETTER.includes(u.formular) && training && !hfvBild()) return; // Modus „stift“: druckt der Verein zum ersten Training; Modus „bildschirm“: druckt die Familie
     formulareMitStift.push(u.formular);
   });
   const erwDruck = [];
@@ -1530,7 +1571,10 @@ async function pruefePdf(b, g, opt) {
   const training = a.hfvUnterschrift === "training";
   if (!stiftFamilie.length) ok(ta.includes(norm(TEXTE_TEIL_A.stiftKeine)), "Teil A: alles am Bildschirm unterschrieben");
   else if (a.unterschriftWeg === "papier") ok(ta.includes(norm(training ? (hatAbmeldungBlatt ? TEXTE_TEIL_A.stiftAlleTrainingOhneAbmeldung : TEXTE_TEIL_A.stiftAlleTraining) : TEXTE_TEIL_A.stiftAlleDrucken)), "Teil A: alles auf Papier");
-  else if (hfvStift.length) ok(ta.includes(norm(training ? TEXTE_TEIL_A.stiftTraining : TEXTE_TEIL_A.stiftDrucken).replace(/^Der Verband/, "Der Hessische Fußball-Verband (kurz: der Verband)")), "Teil A: Blätter des Verbands mit Stift (" + a.hfvUnterschrift + ")");
+  else if (hfvBild()) {
+    ok(ta.includes(norm(TEXTE_TEIL_A.stiftOffen)), "Teil A (Modus bildschirm): „Einige Unterschriften fehlen noch …“ bei leeren Stift-Stellen");
+    ok(!ta.includes("Der Hessische Fußball-Verband (kurz: der Verband) hat eigene Blätter") && !ta.includes("Diese unterschreiben Sie beim ersten Training mit Stift"), "Teil A (Modus bildschirm): kein Satz mehr, die Blätter des Verbands müssten mit Stift unterschrieben werden");
+  } else if (hfvStift.length) ok(ta.includes(norm(training ? TEXTE_TEIL_A.stiftTraining : TEXTE_TEIL_A.stiftDrucken).replace(/^Der Verband/, "Der Hessische Fußball-Verband (kurz: der Verband)")), "Teil A: Blätter des Verbands mit Stift (" + a.hfvUnterschrift + ")");
   e.unterschriften.filter((u) => u.wer !== "arzt" || bereich("attest_vorlage").length).forEach((u) => {
     const zeile = deRegeln.unterschriften[u.formular + "." + u.stelleKey];
     ok(ta.includes(norm(zeile).slice(0, 30)), "Teil A führt die Unterschrift " + u.formular + "." + u.stelleKey + " auf");
@@ -1539,7 +1583,7 @@ async function pruefePdf(b, g, opt) {
   else ok(!ta.includes("das Kästchen zur Satzung an"), "Teil A verlangt kein Kästchen zur Satzung, wenn es schon angekreuzt ist");
 
   // Seitenzahlen in Teil A und im Laufzettel stimmen mit dem fertigen PDF überein
-  for (const z of bericht.stellen.filter((s) => (s.art === "bild" || s.art === "stift") && !s.zusatz)) {
+  for (const z of bericht.stellen.filter((s) => (s.art === "bild" || s.art === "stift" || s.art === "leer") && !s.zusatz)) {
     const label = deRegeln.unterschriften[z.formular + "." + z.stelleKey];
     ok(new RegExp("\\b" + z.seite + " " + norm(label).slice(0, 18).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).test(ta), () => "Teil A nennt für " + z.formular + "." + z.stelleKey + " nicht die Seite " + z.seite);
   }
@@ -1592,9 +1636,10 @@ async function pruefePdf(b, g, opt) {
   ok(rot === 0, "auf den eigenen Seiten kommt eine rote Farbe vor (" + rot + ")");
 
   // --- Unterschriften ---
+  const DATUMSFELD_HFV = { "hfv_antrag.einwilligung_a": { feld: "datum_einwilligung_a", ort: false }, "hfv_antrag.einwilligung_b": { feld: "datum_einwilligung_b", ort: false }, "vollmacht.unterschrift": { feld: "ort_datum", ort: true }, "einverstaendnis_senioren.unterschrift": { feld: "ort_datum", ort: true } };
   const woerter = {};
   const grau = {};
-  const stellenAlle = bericht.stellen.filter((s) => s.art === "bild" || s.art === "stift");
+  const stellenAlle = bericht.stellen.filter((s) => s.art === "bild" || s.art === "stift" || s.art === "leer");
   const stellen = stellenAlle.filter((s) => !s.zusatz); // Stellen der Regeln (und Rückfälle, die es nie geben soll)
   const zusatzStellen = stellenAlle.filter((s) => s.zusatz); // Stift-Zeilen der Medikamenten-Absprache
   const bilderSeite = opt.bilder === false ? null : bilderJeSeite(pfad);
@@ -1621,7 +1666,55 @@ async function pruefePdf(b, g, opt) {
       ok(norm(textImRechteck(woerter[nr], [hf.x - 1, hf.y - 3, hf.breite + 2, 13], 0)) === ortDatum, () => "Ort und Datum „" + ortDatum + "“ fehlen neben der Unterschrift " + u.stelleKey + " (Seite " + nr + "), gelesen „" + textImRechteck(woerter[nr], [hf.x - 1, hf.y - 3, hf.breite + 2, 13], 0) + "“");
     }
     if (art === "bild" && ["datenschutz", "einverstaendnis_fahrten", "einverstaendnis_maedchen", "heimweg", "notfall", "attest"].includes(u.formular)) ok(texte[z.seite - 1].includes(ortDatum), "Ort und Datum fehlen bei " + u.formular + " auf Seite " + z.seite);
-    if (["hfv_antrag", "vollmacht", "abmeldung", "einverstaendnis_senioren"].includes(u.formular)) ok(art === "stift", "HFV-Vordruck " + u.formular + "." + u.stelleKey + " wird nie am Bildschirm unterschrieben");
+    // Modus „stift“: Die Blätter des Verbands werden nie am Bildschirm unterschrieben. Modus „bildschirm“ (M9): Die Stellen der Familie folgen den Bildern
+    // (die Art stimmt schon oben: erwarteteArt); mit Bild steht neben der Unterschrift das Datum der Anmeldung, wo der Vordruck ein Datumsfeld hat.
+    if (HFV_VORDRUCKE.includes(u.formular) && !hfvBild()) ok(art === "stift", "Modus stift: HFV-Vordruck " + u.formular + "." + u.stelleKey + " wird nie am Bildschirm unterschrieben");
+    if (HFV_VORDRUCKE.includes(u.formular) && hfvBild()) {
+      if (u.wer === "verein" || u.wer === "arzt") ok(art === "stift", "Modus bildschirm: " + u.formular + "." + u.stelleKey + " (" + u.wer + ") bleibt Stift");
+      const df = DATUMSFELD_HFV[u.formular + "." + u.stelleKey];
+      const form = konfig.formulare.formulare[u.formular];
+      if (df) {
+        const hf = form.handfelder.find((h) => h.key === df.feld);
+        const nrD = S.findIndex((x) => x.schluessel === u.formular) + hf.seite;
+        if (!woerter[nrD]) woerter[nrD] = woerterSeite(pfad, nrD);
+        const gelesen = norm(textImRechteck(woerter[nrD], [hf.x - 1, hf.linie.y - 1, hf.breite + 2, 14], 0));
+        const soll = art === "bild" ? (df.ort ? ortDatum : heuteDe) : "";
+        ok(gelesen === soll, () => "Modus bildschirm: " + (art === "bild" ? "Datum" : "kein Datum") + " neben " + u.formular + "." + u.stelleKey + " (Seite " + nrD + "): erwartet „" + soll + "“, gelesen „" + gelesen + "“");
+      }
+      if (u.formular === "abmeldung" && u.stelleKey === "unterschrift") {
+        const st = form.unterschriften.find((x) => x.stelleKey === "unterschrift");
+        const nrD = S.findIndex((x) => x.schluessel === "abmeldung") + st.seite;
+        if (!woerter[nrD]) woerter[nrD] = woerterSeite(pfad, nrD);
+        const gelesen = norm(textImRechteck(woerter[nrD], [st.x - 1, st.linie.y - 1, 70, 14], 0));
+        const soll = art === "bild" ? heuteDe : "";
+        ok(gelesen === soll, () => "Modus bildschirm: Datum vorn in der Zeile „Datum und Unterschrift“ (Abmeldung, Seite " + nrD + "): erwartet „" + soll + "“, gelesen „" + gelesen + "“");
+      }
+    }
+    // Freiwillige Felder (Modus „bildschirm“): leer gelassen steht die Stift-Markierung und der Laufzettel nennt es
+    if (hfvBild() && a.unterschriftWeg === "bildschirm" && ["spieler", "sorgeberechtigte_beide"].includes(u.wer) && art === "stift") {
+      const grund = { spieler: "Die Unterschrift der Spielerin oder des Spielers wurde am Bildschirm nicht geleistet (freiwillig).", sorgeberechtigte_beide: "Die Unterschrift des zweiten Elternteils wurde am Bildschirm nicht geleistet." }[u.wer];
+      const js = konfig.formulare.formulare[u.formular].unterschriften.find((x) => x.stelleKey === u.stelleKey);
+      const meldung = deRegeln.formulare[u.formular] + " Seite " + js.seite + ": " + grund + " Die Unterschrift steht deshalb als Stift-Markierung im Formular.";
+      ok(bericht.hinweise.some((h) => h === meldung), () => "Laufzettel (Bericht) nennt das leere freiwillige Feld " + u.formular + "." + u.stelleKey + ": „" + meldung + "“");
+      ok(norm(lz).includes(norm(meldung)), () => "Laufzettel (Text) nennt das leere freiwillige Feld " + u.formular + "." + u.stelleKey);
+    }
+    // M9, Runde 2: leere Zeile des Kindes im Antrag auf Spielerlaubnis: kein Bild, keine Markierung, keine Meldung zur Datei; der Laufzettel nennt es
+    // mit dem Satz „Das Kind hat den Antrag nicht unterschrieben. …“, Teil A führt die Zeile mit „Nicht unterschrieben (freiwillig)“
+    if (art === "leer") {
+      ok(u.formular === "hfv_antrag" && u.wer === "spieler" && hfvBild() && a.unterschriftWeg === "bildschirm", "„leer“ gibt es nur für die Zeile des Kindes im Antrag auf Spielerlaubnis (Modus bildschirm)");
+      const js = konfig.formulare.formulare.hfv_antrag.unterschriften.find((x) => x.stelleKey === u.stelleKey);
+      const nrL = S.findIndex((x) => x.schluessel === "hfv_antrag") + js.seite;
+      if (!woerter[nrL]) woerter[nrL] = woerterSeite(pfad, nrL);
+      const imKasten = textImRechteck(woerter[nrL], [js.x, js.y, js.breite, js.hoehe], 0);
+      ok(imKasten === "", () => "Zeile des Kindes im Antrag auf Spielerlaubnis (Seite " + nrL + "): leer, ohne Markierung, gelesen „" + imKasten + "“");
+      ok(!z.bild, "Zeile des Kindes im Antrag auf Spielerlaubnis: kein Bild");
+      ok(zaehle(norm(lz), new RegExp(esc(LAUFZETTEL_KIND_LEER), "g")) === 1, () => "Laufzettel nennt das leere Kinderfeld genau einmal: „" + LAUFZETTEL_KIND_LEER + "“");
+      ok(!bericht.hinweise.some((h) => h.startsWith(deRegeln.formulare.hfv_antrag + " Seite ")), "Hinweise zur Datei: keine Stift-Meldung zum leeren Kinderfeld im Antrag auf Spielerlaubnis");
+      const taZeilen = S.flatMap((x, i) => (x.art === "teil-a" ? zeilenSeite(pfad, i + 1) : [])).filter((zl) => zl.includes(deRegeln.unterschriften["hfv_antrag.spieler"].slice(0, 36)));
+      ok(taZeilen.length === 1 && /Nicht unterschrieben \(freiwillig\)/.test(taZeilen[0]) && !/Mit Stift|Am Bildschirm erledigt/.test(taZeilen[0]), () => "Teil A, Tabelle: die Zeile des Kindes im Antrag steht mit „Nicht unterschrieben (freiwillig)“: " + JSON.stringify(taZeilen));
+    } else if (u.formular === "hfv_antrag" && u.wer === "spieler") {
+      ok(!norm(lz).includes(norm(LAUFZETTEL_KIND_LEER)), "Laufzettel: der Satz zum leeren Kinderfeld steht nur, wenn die Zeile leer blieb");
+    }
     if (u.wer === "arzt" || u.wer === "verein") ok(art === "stift", u.wer + " unterschreibt nie am Bildschirm");
   }
   ok(stellenAlle.length === bericht.stellen.filter((s) => s.art !== "nein-hinweis").length, "alle gezeichneten Stellen sind bekannt");
@@ -1695,7 +1788,10 @@ async function pruefePdf(b, g, opt) {
         if (jf.fuellt === "assistent") continue;
         const nr = hfv[0].nr + jf.seite - 1;
         if (!woerter[nr]) woerter[nr] = woerterSeite(pfad, nr);
-        ok(textImRechteck(woerter[nr], jf.rect, 1) === "", () => "HFV-Antrag: Feld " + feldName + " (" + jf.fuellt + ") muss leer bleiben, enthält „" + textImRechteck(woerter[nr], jf.rect, 1) + "“");
+        // Modus „bildschirm“: Die Datumsfelder der Einwilligungen a und b (Text2, Text6) tragen das Datum der Anmeldung, wenn die Unterschrift dort ein Bild ist
+        const datumStelle = { Text2: "einwilligung_a", Text6: "einwilligung_b" }[feldName];
+        const mitDatum = hfvBild() && datumStelle && (bericht.stellen.find((st) => st.formular === "hfv_antrag" && st.stelleKey === datumStelle) || {}).art === "bild";
+        ok(textImRechteck(woerter[nr], jf.rect, 1) === (mitDatum ? heuteDe : ""), () => "HFV-Antrag: Feld " + feldName + " (" + jf.fuellt + ") " + (mitDatum ? "trägt das Datum der Anmeldung" : "muss leer bleiben") + ", enthält „" + textImRechteck(woerter[nr], jf.rect, 1) + "“");
       }
     }
   }
@@ -1811,6 +1907,94 @@ const liste = (x) => (Array.isArray(x) ? x : []);
 // ---------------------------------------------------------------------------------------------
 // Sonderfälle
 // ---------------------------------------------------------------------------------------------
+// 7. Unterschriftsregel im Einzelnen. Gilt für beide Modi des Schalters unterschriftHfv; die Erwartungen richten sich nach hfvBild().
+async function unterschriftsregeln() {
+  const m = modusHfv();
+  kontext = "Unterschriftsregel (Modus " + m + ")";
+  {
+    // nur ein Bild für das Mitglied: alle Stellen für Eltern bleiben Stift
+    const b = bereite("kind-neu-deutsch-f", "bild", 0);
+    b.bilder.unterschriften = { mitglied: TESTDATEIEN.sig1 };
+    const g = await baue(b, "regel-nur-mitglied-" + m + ".pdf");
+    ok(g.bericht.stellen.filter((s) => s.art === "bild").length === 0, "ohne Bild der Eltern bleiben alle Stellen der Eltern Stift-Stellen");
+    // O26 (Jugendleitung, 08.10.2026): Ein Elternteil reicht. Bei "beide Eltern" gibt es nur die eine Zeile auf Seite 2 des Aufnahmeantrags
+    const b2 = bereite("kind-neu-deutsch-f", "bild", 0);
+    const g2 = await baue(b2, "regel-beide-eltern-eine-zeile-" + m + ".pdf");
+    const zweite = g2.bericht.stellen.find((s) => s.stelleKey === "s2.unterschrift_sorgeberechtigte");
+    const erste = g2.bericht.stellen.find((s) => s.stelleKey === "s2.unterschrift");
+    ok(!zweite && erste && erste.art === "bild" && erste.wer === "sorgeberechtigte", "beide Eltern: nur eine Unterschrift auf Seite 2 des Aufnahmeantrags, keine zweite Stelle");
+    ok(g2.bericht.stellen.filter((s) => s.formular === "aufnahmeantrag" && s.stelleKey.startsWith("s2.")).length === 1, "beide Eltern: genau eine Stelle auf Seite 2 des Aufnahmeantrags");
+    ok(!g2.bericht.stellen.some((s) => s.wer === "sorgeberechtigte_beide"), "beide Eltern: keine Stelle für einen zweiten Elternteil im ganzen PDF");
+    const t2 = textSeiten(g2.pfad).join("\n");
+    ok(!/zweite[rn]? Elternteil/i.test(t2) && !t2.includes("Erziehungsberechtigte/r: " + (b2.a.sorgeberechtigte[1] || {}).vorname + " "), "beide Eltern: im ganzen PDF steht nichts vom zweiten Elternteil");
+    // getrennt lebende Eltern ohne Einverständnis: der andere Elternteil unterschreibt zusätzlich („zweiter Elternteil (nötig)“). Sein Name steht neben der
+    // Linie, wenn er bekannt ist. Modus „stift“: immer mit Stift, auch wenn ein Bild vorläge. Modus „bildschirm“ (M9): mit seinem freiwilligen Bild
+    // (sorgeberechtigte_2); fehlt es, steht die Stift-Markierung und der Laufzettel nennt es.
+    const getrennt = (mitBild) => bereite("getrennt-lebende-eltern", "bild", mitBild ? 0 : 1, (a) => {
+      a.sorgeberechtigte = [a.sorgeberechtigte[0], { rolle: "vater", vorname: "Karl", nachname: "Mustermann" }];
+    });
+    const b2g = getrennt(true);
+    b2g.bilder.unterschriften.sorgeberechtigte_2 = TESTDATEIEN.sig3;
+    const g2g = await baue(b2g, "regel-getrennt-ohne-einverstaendnis-" + m + ".pdf");
+    const zweiteG = g2g.bericht.stellen.find((s) => s.stelleKey === "s2.unterschrift_sorgeberechtigte");
+    const ersteG = g2g.bericht.stellen.find((s) => s.stelleKey === "s2.unterschrift");
+    const tg = textSeiten(g2g.pfad);
+    if (hfvBild()) {
+      ok(zweiteG && zweiteG.art === "bild" && zweiteG.bild === "sorgeberechtigte_2" && zweiteG.wer === "sorgeberechtigte_beide" && ersteG && ersteG.art === "bild" && ersteG.bild === "sorgeberechtigte", "getrennt lebend ohne Einverständnis (Modus bildschirm): beide Stellen am Bildschirm, die zweite mit dem Bild sorgeberechtigte_2");
+      ok(zweiteG && !tg[zweiteG.seite - 1].includes("Hier mit Stift unterschreiben"), "getrennt lebend ohne Einverständnis (Modus bildschirm): mit seinem Bild keine Stift-Markierung auf Seite 2");
+      ok(!g2g.bericht.hinweise.some((h) => /zweiten Elternteils/.test(h)), "getrennt lebend ohne Einverständnis (Modus bildschirm): mit seinem Bild kein Hinweis im Laufzettel");
+      ok(tg.join("\n").includes("Erziehungsberechtigte/r: Karl Mustermann"), "getrennt lebend ohne Einverständnis (Modus bildschirm): sein Name steht neben der Linie");
+    } else {
+      ok(zweiteG && zweiteG.art === "stift" && zweiteG.wer === "sorgeberechtigte_beide" && ersteG && ersteG.art === "bild", "getrennt lebend ohne Einverständnis (Modus stift): zweite Stelle immer Stift, erste am Bildschirm");
+      ok(zweiteG && tg[zweiteG.seite - 1].includes("zweiter Elternteil (nötig)") && !tg.join("\n").includes("zweiter Elternteil (empfohlen)"), "getrennt lebend ohne Einverständnis (Modus stift): Markierung „zweiter Elternteil (nötig)“, nie „(empfohlen)“");
+      ok(!g2g.bericht.hinweise.some((h) => /zweiten Elternteils/.test(h)), "getrennt lebend ohne Einverständnis (Modus stift): kein Satz zu einem leeren Feld (es gibt kein Feld)");
+    }
+    ok(tg.join("\n").includes("Der zweite Elternteil (nötig)"), "getrennt lebend ohne Einverständnis: Teil A nennt „Der zweite Elternteil (nötig)“ in der Tabelle der Unterschriften");
+    await pruefePdf(b2g, g2g, { tief: false, bilder: true, nachweise: false });
+    // ohne sein Bild: in beiden Modi die Stift-Markierung „zweiter Elternteil (nötig)“; im Modus „bildschirm“ nennt der Laufzettel den Fall
+    const b2n = getrennt(false);
+    delete b2n.bilder.unterschriften.sorgeberechtigte_2;
+    const g2n = await baue(b2n, "regel-getrennt-ohne-bild-" + m + ".pdf");
+    const zweiteN = g2n.bericht.stellen.find((s) => s.stelleKey === "s2.unterschrift_sorgeberechtigte");
+    const tn = textSeiten(g2n.pfad);
+    ok(zweiteN && zweiteN.art === "stift" && tn[zweiteN.seite - 1].includes("zweiter Elternteil (nötig)"), "getrennt lebend ohne Einverständnis, ohne sein Bild: Stift-Markierung „zweiter Elternteil (nötig)“ (beide Modi)");
+    const lzN = tn.filter((tx, i) => g2n.bericht.seiten[i].art === "laufzettel").join(" ");
+    const satzZweite = "Aufnahmeantrag Seite 2: Die Unterschrift des zweiten Elternteils wurde am Bildschirm nicht geleistet. Die Unterschrift steht deshalb als Stift-Markierung im Formular.";
+    ok(hfvBild() === g2n.bericht.hinweise.includes(satzZweite) && hfvBild() === norm(lzN).includes(satzZweite), () => "getrennt lebend ohne Einverständnis, ohne sein Bild: der Laufzettel " + (hfvBild() ? "nennt" : "nennt nicht") + " das leere Feld des zweiten Elternteils");
+    await pruefePdf(b2n, g2n, { tief: false, bilder: true, nachweise: false });
+    // getrennt lebend mit Einverständnis: eine Unterschrift genügt
+    const b2h = bereite("getrennt-lebende-eltern", "bild", 0, (a) => {
+      a.andererElternteilEinverstanden = true;
+    });
+    const g2h = await baue(b2h, "regel-getrennt-mit-einverstaendnis-" + m + ".pdf");
+    ok(!g2h.bericht.stellen.some((s) => s.stelleKey === "s2.unterschrift_sorgeberechtigte") && !textSeiten(g2h.pfad).join("\n").includes("zweiter Elternteil"), "getrennt lebend mit Einverständnis: keine zweite Stelle");
+    // kein Wert für unterschriftWeg: wie Papier
+    const b3 = bereite("kind-neu-deutsch-f", "bild", 0, (a) => {
+      delete a.unterschriftWeg;
+    });
+    b3.a.unterschriftWeg = undefined;
+    const g3 = await baue(b3, "regel-ohne-weg-" + m + ".pdf");
+    ok(g3.bericht.stellen.every((s) => s.art !== "bild"), "ohne Angabe zum Weg wird nichts am Bildschirm unterschrieben");
+    // Kontoinhaber ist die Person mit Sorgerecht: deren Bild gilt für das Mandat
+    const b4 = bereite("kind-neu-deutsch-f", "bild", 0);
+    delete b4.bilder.unterschriften.kontoinhaber;
+    const g4 = await baue(b4, "regel-kontoinhaber-alias-" + m + ".pdf");
+    const sepa = g4.bericht.stellen.find((s) => s.stelleKey === "s4.unterschrift");
+    ok(sepa && sepa.art === "bild" && sepa.bild === "sorgeberechtigte", "Kontoinhaber = Person mit Sorgerecht: deren Unterschrift gilt auch für das Mandat");
+    // Erwachsene: Bild "mitglied"
+    const b5 = bereite("herren-neu-deutsch", "bild", 0);
+    delete b5.bilder.unterschriften.kontoinhaber;
+    const g5 = await baue(b5, "regel-erwachsen-" + m + ".pdf");
+    ok(g5.bericht.stellen.filter((s) => s.art === "bild").every((s) => s.bild === "mitglied"), "Erwachsene unterschreiben mit ihrem eigenen Bild");
+    const hfvS = g5.bericht.stellen.filter((s) => s.formular === "hfv_antrag");
+    if (hfvBild()) {
+      ok(hfvS.filter((s) => s.art === "bild").length >= 1 && hfvS.filter((s) => s.wer === "mitglied").every((s) => s.art === "bild") && hfvS.filter((s) => s.wer === "verein").every((s) => s.art === "stift"), "Modus bildschirm: Antrag auf Spielerlaubnis von Erwachsenen mit dem Bild des Mitglieds, nur der Verein bleibt Stift");
+    } else {
+      ok(hfvS.every((s) => s.art === "stift" || s.art === "nein-hinweis"), "Modus stift: HFV-Antrag von Erwachsenen bleibt Stift");
+    }
+  }
+}
+
 async function sonderfaelle() {
   const basis = "kind-neu-deutsch-f";
 
@@ -1973,64 +2157,8 @@ async function sonderfaelle() {
     ok(g3.bericht.seiten.filter((s) => s.art === "foto").length === 0 && textSeiten(g3.pfad).join("\n").includes("ließ sich nicht einlesen"), "unlesbares Foto: keine Seite, Hinweis auf dem Laufzettel");
   }
 
-  // 7. Unterschriftsregel im Einzelnen
-  kontext = "Unterschriftsregel";
-  {
-    // nur ein Bild für das Mitglied: alle Stellen für Eltern bleiben Stift
-    const b = bereite("kind-neu-deutsch-f", "bild", 0);
-    b.bilder.unterschriften = { mitglied: TESTDATEIEN.sig1 };
-    const g = await baue(b, "regel-nur-mitglied.pdf");
-    ok(g.bericht.stellen.filter((s) => s.art === "bild").length === 0, "ohne Bild der Eltern bleiben alle Stellen der Eltern Stift-Stellen");
-    // O26 (Jugendleitung, 08.10.2026): Ein Elternteil reicht. Bei "beide Eltern" gibt es nur die eine Zeile auf Seite 2 des Aufnahmeantrags
-    const b2 = bereite("kind-neu-deutsch-f", "bild", 0);
-    const g2 = await baue(b2, "regel-beide-eltern-eine-zeile.pdf");
-    const zweite = g2.bericht.stellen.find((s) => s.stelleKey === "s2.unterschrift_sorgeberechtigte");
-    const erste = g2.bericht.stellen.find((s) => s.stelleKey === "s2.unterschrift");
-    ok(!zweite && erste && erste.art === "bild" && erste.wer === "sorgeberechtigte", "beide Eltern: nur eine Unterschrift auf Seite 2 des Aufnahmeantrags, keine zweite Stelle");
-    ok(g2.bericht.stellen.filter((s) => s.formular === "aufnahmeantrag" && s.stelleKey.startsWith("s2.")).length === 1, "beide Eltern: genau eine Stelle auf Seite 2 des Aufnahmeantrags");
-    ok(!g2.bericht.stellen.some((s) => s.wer === "sorgeberechtigte_beide"), "beide Eltern: keine Stelle für einen zweiten Elternteil im ganzen PDF");
-    const t2 = textSeiten(g2.pfad).join("\n");
-    ok(!/zweite[rn]? Elternteil/i.test(t2) && !t2.includes("Erziehungsberechtigte/r: " + (b2.a.sorgeberechtigte[1] || {}).vorname + " "), "beide Eltern: im ganzen PDF steht nichts vom zweiten Elternteil");
-    // getrennt lebende Eltern ohne Einverständnis: der andere Elternteil unterschreibt zusätzlich, immer mit Stift („zweiter Elternteil (nötig)“),
-    // auch dann, wenn ein Bild vorläge. Sein Name steht neben der Linie, wenn er bekannt ist.
-    const b2g = bereite("getrennt-lebende-eltern", "bild", 0, (a) => {
-      a.sorgeberechtigte = [a.sorgeberechtigte[0], { rolle: "vater", vorname: "Karl", nachname: "Mustermann" }];
-    });
-    b2g.bilder.unterschriften.sorgeberechtigte_2 = TESTDATEIEN.sig3;
-    const g2g = await baue(b2g, "regel-getrennt-ohne-einverstaendnis.pdf");
-    const zweiteG = g2g.bericht.stellen.find((s) => s.stelleKey === "s2.unterschrift_sorgeberechtigte");
-    const ersteG = g2g.bericht.stellen.find((s) => s.stelleKey === "s2.unterschrift");
-    ok(zweiteG && zweiteG.art === "stift" && zweiteG.wer === "sorgeberechtigte_beide" && ersteG && ersteG.art === "bild", "getrennt lebend ohne Einverständnis: zweite Stelle immer Stift, erste am Bildschirm");
-    const tg = textSeiten(g2g.pfad);
-    ok(zweiteG && tg[zweiteG.seite - 1].includes("zweiter Elternteil (nötig)") && !tg.join("\n").includes("zweiter Elternteil (empfohlen)"), "getrennt lebend ohne Einverständnis: Markierung „zweiter Elternteil (nötig)“, nie „(empfohlen)“");
-    ok(tg.join("\n").includes("Der zweite Elternteil (nötig)"), "getrennt lebend ohne Einverständnis: Teil A nennt „Der zweite Elternteil (nötig)“ in der Tabelle der Unterschriften");
-    await pruefePdf(b2g, g2g, { tief: false, bilder: true, nachweise: false });
-    // getrennt lebend mit Einverständnis: eine Unterschrift genügt
-    const b2h = bereite("getrennt-lebende-eltern", "bild", 0, (a) => {
-      a.andererElternteilEinverstanden = true;
-    });
-    const g2h = await baue(b2h, "regel-getrennt-mit-einverstaendnis.pdf");
-    ok(!g2h.bericht.stellen.some((s) => s.stelleKey === "s2.unterschrift_sorgeberechtigte") && !textSeiten(g2h.pfad).join("\n").includes("zweiter Elternteil"), "getrennt lebend mit Einverständnis: keine zweite Stelle");
-    // kein Wert für unterschriftWeg: wie Papier
-    const b3 = bereite("kind-neu-deutsch-f", "bild", 0, (a) => {
-      delete a.unterschriftWeg;
-    });
-    b3.a.unterschriftWeg = undefined;
-    const g3 = await baue(b3, "regel-ohne-weg.pdf");
-    ok(g3.bericht.stellen.every((s) => s.art !== "bild"), "ohne Angabe zum Weg wird nichts am Bildschirm unterschrieben");
-    // Kontoinhaber ist die Person mit Sorgerecht: deren Bild gilt für das Mandat
-    const b4 = bereite("kind-neu-deutsch-f", "bild", 0);
-    delete b4.bilder.unterschriften.kontoinhaber;
-    const g4 = await baue(b4, "regel-kontoinhaber-alias.pdf");
-    const sepa = g4.bericht.stellen.find((s) => s.stelleKey === "s4.unterschrift");
-    ok(sepa && sepa.art === "bild" && sepa.bild === "sorgeberechtigte", "Kontoinhaber = Person mit Sorgerecht: deren Unterschrift gilt auch für das Mandat");
-    // Erwachsene: Bild "mitglied"
-    const b5 = bereite("herren-neu-deutsch", "bild", 0);
-    delete b5.bilder.unterschriften.kontoinhaber;
-    const g5 = await baue(b5, "regel-erwachsen.pdf");
-    ok(g5.bericht.stellen.filter((s) => s.art === "bild").every((s) => s.bild === "mitglied"), "Erwachsene unterschreiben mit ihrem eigenen Bild");
-    ok(g5.bericht.stellen.filter((s) => s.formular === "hfv_antrag").every((s) => s.art === "stift" || s.art === "nein-hinweis"), "HFV-Antrag von Erwachsenen bleibt Stift");
-  }
+  // 7. Unterschriftsregel im Einzelnen (Erwartungen je nach Modus des Schalters unterschriftHfv, siehe unterschriftsregeln())
+  await unterschriftsregeln();
 
   // 7b. Satzung nicht bestätigt (Runde 3, Punkt 4): Seite 2 des Aufnahmeantrags braucht das Kästchen zur Satzung auf Seite 1.
   //     Fehlt es bei einer Bildschirm-Unterschrift, wird die Unterschrift dort zur Stift-Stelle; der Laufzettel nennt den Grund.
@@ -2473,6 +2601,185 @@ async function rueckfaelle() {
 }
 
 // ---------------------------------------------------------------------------------------------
+// M9 (11.10.2026): Schalter unterschriftHfv
+// ---------------------------------------------------------------------------------------------
+const LAUFZETTEL_HFV_ALLE = "Alle Unterschriften der Familie sind am Bildschirm geleistet, auch auf den Blättern des Verbands (Entscheidung der Jugendleitung vom 11.10.2026). Verlangt der Verband ein Original mit Stift, das Blatt ausdrucken und unterschreiben lassen.";
+const LAUFZETTEL_HFV_REST = "Die Unterschriften der Familie sind am Bildschirm geleistet, auch auf den Blättern des Verbands (Entscheidung der Jugendleitung vom 11.10.2026), außer an den Stift-Stellen (siehe „Hinweise zur Datei“). Verlangt der Verband ein Original mit Stift, das Blatt ausdrucken und unterschreiben lassen.";
+// Runde 2: leere Zeile des Kindes im Antrag auf Spielerlaubnis (ohne Markierung); der eigene Satz sagt, dass das Passwesen entscheidet
+const LAUFZETTEL_KIND_LEER = "Das Kind hat den Antrag nicht unterschrieben. Das Passwesen entscheidet, ob das nötig ist.";
+const LAUFZETTEL_HFV_KIND = "Die Unterschriften der Familie sind am Bildschirm geleistet, auch auf den Blättern des Verbands (Entscheidung der Jugendleitung vom 11.10.2026), außer an der Unterschriftszeile des Kindes im Antrag auf Spielerlaubnis. Verlangt der Verband ein Original mit Stift, das Blatt ausdrucken und unterschreiben lassen.";
+const LAUFZETTEL_HFV_REST_KIND = "Die Unterschriften der Familie sind am Bildschirm geleistet, auch auf den Blättern des Verbands (Entscheidung der Jugendleitung vom 11.10.2026), außer an den Stift-Stellen (siehe „Hinweise zur Datei“) und an der Unterschriftszeile des Kindes im Antrag auf Spielerlaubnis. Verlangt der Verband ein Original mit Stift, das Blatt ausdrucken und unterschreiben lassen.";
+const LAUFZETTEL_HFV_SAETZE = [LAUFZETTEL_HFV_ALLE, LAUFZETTEL_HFV_REST, LAUFZETTEL_HFV_KIND, LAUFZETTEL_HFV_REST_KIND];
+
+// Teile des PDFs als Text: Laufzettel und Teil A
+function laufzettelUndTeilA(g) {
+  const t = textSeiten(g.pfad);
+  const teil = (art) => norm(t.filter((tx, i) => g.bericht.seiten[i].art === art).join(" "));
+  return { lz: teil("laufzettel"), ta: teil("teil-a"), t: t };
+}
+
+// Modus „bildschirm“ (Standard): das Kind als Spielerin oder Spieler, Erwachsene, Papierweg, Sätze im Laufzettel und in Teil A
+async function bildschirmModusTests() {
+  const T = TEXTE_TEIL_A;
+  // Kind: freiwilliges Feld mit und ohne Bild (Wechsel in Hessen: Antrag auf Spielerlaubnis und Abmeldung beim alten Verein haben je eine Zeile für das Kind).
+  // Runde 2: Ohne Bild bleibt die Zeile im Antrag leer, ohne Markierung (Art „leer“); nur die Abmeldung beim alten Verein bekommt die Stift-Markierung.
+  for (const mitBild of [true, false]) {
+    kontext = "Modus bildschirm: Wechsel Hessen, Kind als Spielerin oder Spieler " + (mitBild ? "mit" : "ohne") + " Unterschrift";
+    const b = bereite("wechsel-d-ohne-freigabe", "bild", 1);
+    if (mitBild) b.bilder.unterschriften.spieler = TESTDATEIEN.sig3;
+    else delete b.bilder.unterschriften.spieler;
+    const g = await baue(b, "modus-bildschirm-kind-" + (mitBild ? "mit" : "ohne") + ".pdf");
+    await pruefePdf(b, g, { tief: false, bilder: true, nachweise: false });
+    const { lz, ta } = laufzettelUndTeilA(g);
+    const stelle = (f, k) => g.bericht.stellen.find((st) => st.formular === f && st.stelleKey === k) || {};
+    const antrag = stelle("hfv_antrag", "spieler");
+    const abm = stelle("abmeldung", "unterschrift");
+    ok(antrag.wer === "spieler" && abm.wer === "spieler", "Kind: beide Zeilen für die Spielerin oder den Spieler stehen im PDF (Antrag auf Spielerlaubnis, Abmeldung beim alten Verein)");
+    ok(antrag.art === (mitBild ? "bild" : "leer") && abm.art === (mitBild ? "bild" : "stift"), "Kind: Unterschrift " + (mitBild ? "als Bild an beiden Zeilen" : "fehlt: Antrag auf Spielerlaubnis leer (ohne Markierung), Abmeldung als Stift-Markierung"));
+    ok(stelle("hfv_antrag", "erziehungsberechtigte").art === "bild" && stelle("abmeldung", "unterschrift_vertreter").art === "bild" && stelle("hfv_antrag", "verein").art === "stift", "Eltern unterschreiben am Bildschirm, der Verein bleibt Stift (Antrag auf Spielerlaubnis, Abmeldung)");
+    const erwSatz = mitBild ? LAUFZETTEL_HFV_ALLE : LAUFZETTEL_HFV_REST_KIND;
+    ok(lz.includes(norm(erwSatz)) && LAUFZETTEL_HFV_SAETZE.filter((x) => lz.includes(norm(x))).length === 1, "Laufzettel: Satz zu den Blättern des Verbands (" + (mitBild ? "alle Unterschriften am Bildschirm" : "außer an den Stift-Stellen und an der Zeile des Kindes im Antrag") + ")");
+    ok(lz.includes("Alle Unterschriften der Familie sind am Bildschirm geleistet") === mitBild, "Laufzettel: „Alle Unterschriften der Familie sind am Bildschirm geleistet“ nur, wenn es stimmt");
+    ok(lz.includes(norm(LAUFZETTEL_KIND_LEER)) === !mitBild, "Laufzettel: „Das Kind hat den Antrag nicht unterschrieben. Das Passwesen entscheidet, ob das nötig ist.“ nur, wenn die Zeile leer blieb");
+    ok(mitBild ? ta.includes(norm(T.stiftKeine)) : ta.includes(norm(T.stiftOffen)) && !ta.includes(norm(T.stiftKeine)), "Teil A: " + (mitBild ? "„Sie haben alles am Bildschirm unterschrieben.“" : "„Einige Unterschriften fehlen noch …“ (die Abmeldung)"));
+    const nachSatz = ta.includes(norm(T.ausdruckenNur)) ? ta.slice(ta.indexOf(norm(T.ausdruckenNur)), ta.indexOf("Geben Sie Teil B")) : "";
+    ok(nachSatz.includes(deRegeln.formulare.abmeldung), "Teil A, „Ausdrucken müssen Sie nur:“ nennt die Abmeldung beim alten Verein (Einschreiben braucht Papier)");
+    ok(!nachSatz.includes(deRegeln.formulare.hfv_antrag), "Teil A, „Ausdrucken müssen Sie nur:“ nennt den Antrag auf Spielerlaubnis nie (auch nicht bei leerer Zeile des Kindes)");
+    ok(!ta.includes("beim ersten Training") && !ta.includes("Der Verein bringt sie ausgedruckt mit") && !ta.includes("bringt der Verein die Blätter"), "Teil A: kein Satz mehr zum ersten Training und zu Blättern, die der Verein ausgedruckt mitbringt (Modus bildschirm)");
+    ok(ta.includes("Am sichersten per Einschreiben") === mitBild, () => "Teil A: Abmeldung beim alten Verein: " + (mitBild ? "„Schicken Sie das Blatt an Ihren alten Verein. Am sichersten per Einschreiben.“" : "mit Stift unterschreiben und selbst als Einschreiben schicken"));
+    ok(!/Mit Stift, beim ersten Training/.test(ta) && !/Mit Stift, nach dem Ausdrucken/.test(ta), "Teil A, Tabelle: nie „Mit Stift, beim ersten Training“ und nie „Mit Stift, nach dem Ausdrucken“ (Modus bildschirm, Antrag leer oder am Bildschirm)");
+    ok(/Mit Stift, selbst verschicken/.test(ta) === !mitBild && /Nicht unterschrieben \(freiwillig\)/.test(ta) === !mitBild, "Teil A, Tabelle: leere Zeile des Kindes „Nicht unterschrieben (freiwillig)“, leere Zeile bei der Abmeldung „Mit Stift, selbst verschicken“, sonst nur „Am Bildschirm erledigt“");
+    // Teil A, „Wo unterschreiben Sie?“: alle Blätter der Familie „Am Bildschirm“ (nur der Verein und die Ärztin oder der Arzt mit Stift)
+    const wie = g.bericht.stellen.filter((st) => FAMILIE_ROLLEN.includes(st.wer) && st.art);
+    ok(wie.every((st) => st.art === (st.stelleKey === "unterschrift" && st.formular === "abmeldung" ? (mitBild ? "bild" : "stift") : st.stelleKey === "spieler" ? (mitBild ? "bild" : "leer") : "bild")), "Alle Stellen der Familie sind Bilder (nur die leere Zeile des Kindes im Antrag bleibt leer, die leere Zeile bei der Abmeldung steht mit Stift)");
+  }
+  // Kind neu (kein Wechsel, keine Abmeldung): das Kind kann noch nicht schreiben, das Feld bleibt leer (Nachbesserung Runde 2).
+  // Mit allen Nachweisen gibt es keine Attest-Vorlage: Teil A sagt „Sie müssen nichts ausdrucken.“ Fehlt der Nachweis, steht nur die Attest-Vorlage in der Liste, nie der Antrag.
+  for (const fall of [{ name: "Nachweise liegen bei", index: 1, attestVorlage: false }, { name: "Nachweis fehlt, Attest-Vorlage im PDF", index: 3, attestVorlage: true }]) {
+    for (const mitBild of [false, true]) {
+      kontext = "Modus bildschirm: Kind neu, " + (mitBild ? "Kind unterschreibt" : "Feld des Kindes leer") + " (" + fall.name + ")";
+      const b = bereite("kind-neu-deutsch-f", "bild", fall.index);
+      if (mitBild) b.bilder.unterschriften.spieler = TESTDATEIEN.sig3;
+      else delete b.bilder.unterschriften.spieler;
+      const g = await baue(b, "modus-bildschirm-kind-neu-" + (mitBild ? "mit" : "leer") + "-" + (fall.attestVorlage ? "attest" : "nachweise") + ".pdf");
+      await pruefePdf(b, g, { tief: false, bilder: true, nachweise: false });
+      const { lz, ta } = laufzettelUndTeilA(g);
+      const stelle = (f, k) => g.bericht.stellen.find((st) => st.formular === f && st.stelleKey === k) || {};
+      const antrag = stelle("hfv_antrag", "spieler");
+      ok(Boolean(g.bericht.plan.attestVorlage) === fall.attestVorlage, () => "Vorbedingung: Attest-Vorlage im PDF = " + fall.attestVorlage + ", ist " + Boolean(g.bericht.plan.attestVorlage));
+      ok(!g.bericht.stellen.some((st) => st.formular === "abmeldung"), "Kind neu: keine Abmeldung beim alten Verein");
+      ok(antrag.wer === "spieler" && antrag.art === (mitBild ? "bild" : "leer"), "Kind neu: Zeile des Kindes im Antrag auf Spielerlaubnis " + (mitBild ? "mit Bild" : "leer, ohne Markierung") + " (art " + antrag.art + ")");
+      ok(g.bericht.stellen.filter((st) => st.art === "stift" && FAMILIE_ROLLEN.includes(st.wer)).length === 0, "Kind neu: keine Stift-Stelle der Familie");
+      ok(ta.includes(norm(T.stiftKeine)) && !ta.includes(norm(T.stiftOffen)), "Teil A: „Sie haben alles am Bildschirm unterschrieben.“, nicht „Einige Unterschriften fehlen noch“");
+      ok(lz.includes(norm(LAUFZETTEL_KIND_LEER)) === !mitBild, "Laufzettel: Satz zum leeren Feld des Kindes nur, wenn es leer blieb");
+      ok(lz.includes(norm(mitBild ? LAUFZETTEL_HFV_ALLE : LAUFZETTEL_HFV_KIND)) && LAUFZETTEL_HFV_SAETZE.filter((x) => lz.includes(norm(x))).length === 1, "Laufzettel: Satz zu den Blättern des Verbands (" + (mitBild ? "alle Unterschriften am Bildschirm" : "außer an der Unterschriftszeile des Kindes im Antrag") + ")");
+      ok(!g.bericht.hinweise.some((h) => /nicht geleistet/.test(h)) && !lz.includes("Die Unterschrift steht deshalb als Stift-Markierung"), "Hinweise zur Datei: keine Stift-Meldung zu leeren Feldern");
+      const nachSatz = ta.includes(norm(T.ausdruckenNur)) ? ta.slice(ta.indexOf(norm(T.ausdruckenNur)), ta.indexOf("Geben Sie Teil B")) : "";
+      if (!fall.attestVorlage) {
+        ok(ta.includes(norm(T.ausdruckenNichts)) && !ta.includes(norm(T.ausdruckenNur)), "Teil A: „Sie müssen nichts ausdrucken.“ (kein Blatt auszudrucken, keine Attest-Vorlage)");
+      } else {
+        ok(nachSatz.includes(ATTEST_VORLAGE_TITEL) && !ta.includes(norm(T.ausdruckenNichts)), "Teil A: „Ausdrucken müssen Sie nur:“ nennt die Attest-Vorlage");
+      }
+      ok(!nachSatz.includes(deRegeln.formulare.hfv_antrag), "Teil A, „Ausdrucken müssen Sie nur:“ nennt den Antrag auf Spielerlaubnis nicht");
+      ok(!/Mit Stift, nach dem Ausdrucken|Mit Stift, beim ersten Training|Mit Stift, selbst verschicken/.test(ta), "Teil A, Tabelle „Wo unterschreiben Sie?“: kein „Mit Stift …“ für die Familie (nur „beim Arzt“ und „durch den Verein“)");
+      ok(/Nicht unterschrieben \(freiwillig\)/.test(ta) === !mitBild, "Teil A, Tabelle: „Nicht unterschrieben (freiwillig)“ nur bei leerer Zeile des Kindes");
+      // Genau eine Markierung „Hier mit Stift unterschreiben“ im Antrag auf Spielerlaubnis: die des Vereins (nicht die des Kindes)
+      const antragSeite = g.bericht.seiten.findIndex((x) => x.schluessel === "hfv_antrag") + 1;
+      ok(zaehle(textSeiten(g.pfad)[antragSeite - 1], /Hier mit Stift unterschreiben/g) === 1, "Antrag auf Spielerlaubnis Seite 1: nur die Markierung des Vereins, keine für das Kind");
+    }
+  }
+  // Erwachsene (Herren neu): Mitglied unterschreibt den Antrag auf Spielerlaubnis am Bildschirm, kein Feld für ein Kind
+  {
+    kontext = "Modus bildschirm: Erwachsene";
+    const b = bereite("herren-neu-deutsch", "bild", 1);
+    const g = await baue(b, "modus-bildschirm-herren.pdf");
+    await pruefePdf(b, g, { tief: false, bilder: true, nachweise: false });
+    const { lz, ta } = laufzettelUndTeilA(g);
+    const hfvS = g.bericht.stellen.filter((st) => st.formular === "hfv_antrag" && st.art !== "nein-hinweis");
+    ok(hfvS.filter((st) => st.wer === "mitglied").every((st) => st.art === "bild" && st.bild === "mitglied") && hfvS.filter((st) => st.wer === "mitglied").length >= 1, "Herren: Antrag auf Spielerlaubnis mit dem Bild des Mitglieds");
+    ok(!g.bericht.stellen.some((st) => st.wer === "spieler"), "Herren: keine Stelle für „Spielerin oder Spieler“ als Kind");
+    ok(lz.includes(norm(LAUFZETTEL_HFV_ALLE)), "Laufzettel (Herren): Satz zu den Blättern des Verbands");
+    ok(ta.includes(norm(T.stiftKeine)), "Teil A (Herren): alles am Bildschirm unterschrieben");
+    // Datum neben den Einwilligungen auf Seite 3 steht (pruefePdf prüft es Stelle für Stelle)
+  }
+  // Wechsel mit Vollmacht: Vollmacht mit Ort und Datum; A-Jugend bei den Herren: Einverständnis mit Ort und Datum (pruefePdf prüft die Stellen)
+  for (const id of ["vollmacht-wechsel", "a-jugend-aushilfe-herren"]) {
+    kontext = "Modus bildschirm: " + id;
+    const b = bereite(id, "bild", 0);
+    const g = await baue(b, "modus-bildschirm-" + id + ".pdf");
+    await pruefePdf(b, g, { tief: true, bilder: true, nachweise: false });
+    const blatt = id === "vollmacht-wechsel" ? ["vollmacht", "unterschrift"] : ["einverstaendnis_senioren", "unterschrift"];
+    const st = g.bericht.stellen.find((x) => x.formular === blatt[0] && x.stelleKey === blatt[1]);
+    ok(st && st.art === "bild" && st.bild === "sorgeberechtigte", id + ": " + blatt[0] + " mit dem Bild der Person mit Sorgerecht");
+    const t = textSeiten(g.pfad)[st.seite - 1];
+    ok(t.includes(b.a.anschrift.ort + ", " + datumDe(b.heute)), id + ": „Ort, Datum“ steht auf dem Blatt " + blatt[0]);
+  }
+  // Papierweg im Modus „bildschirm“: nichts am Bildschirm, kein Satz zu den Blättern des Verbands im Laufzettel, alles Stift
+  {
+    kontext = "Modus bildschirm: alles auf Papier";
+    const b = bereite("kind-neu-deutsch-f", "papier", 0);
+    const g = await baue(b, "modus-bildschirm-papier.pdf");
+    await pruefePdf(b, g, { tief: false, bilder: true, nachweise: false });
+    const { lz } = laufzettelUndTeilA(g);
+    ok(g.bericht.stellen.every((st) => st.art !== "bild"), "Papier: keine Bildschirm-Unterschrift, auch nicht auf den Blättern des Verbands");
+    ok(!lz.includes("Alle Unterschriften der Familie sind am Bildschirm geleistet") && !lz.includes("Entscheidung der Jugendleitung vom 11.10.2026") && !lz.includes("Das Kind hat den Antrag nicht unterschrieben"), "Papier: der Laufzettel sagt nichts von Bildschirm-Unterschriften auf den Blättern des Verbands und nichts zum leeren Feld des Kindes");
+    ok(!g.bericht.stellen.some((st) => st.art === "leer"), "Papier: keine Stelle ohne Markierung (alles Stift)");
+    ok(!g.bericht.hinweise.some((h) => /nicht geleistet/.test(h)), "Papier: kein Hinweis zu leeren freiwilligen Feldern");
+  }
+}
+
+// Modus „stift“ (Stand bis 11.10.2026): dieselben Prüfungen mit den Erwartungen des alten Verhaltens, dazu Sätze, die es im Modus „bildschirm“ nicht gibt
+const STIFT_PROFILE = ["kind-neu-deutsch-f", "wechsel-d-ohne-freigabe", "wechsel-d-mit-freigabe", "herren-neu-deutsch", "getrennt-lebende-eltern", "vollmacht-und-kuendigung", "a-jugend-aushilfe-herren"];
+
+async function stiftModusTests() {
+  const T = TEXTE_TEIL_A;
+  console.log("\nModus „stift“ (Schalter unterschriftHfv = stift, Stand bis 11.10.2026):");
+  const zeilen = [];
+  for (const id of STIFT_PROFILE) {
+    const index = PROFILE.findIndex((p) => p.id === id);
+    for (const v of ["bild", "papier"]) {
+      kontext = "Modus stift: " + id + " (" + v + ")";
+      const vor = anzahl;
+      const vorFehler = fehler.length;
+      const b = bereite(id, v, index);
+      const g = await baue(b, "modus-stift-" + id + "-" + v + ".pdf");
+      await pruefePdf(b, g, { tief: v === "bild", bilder: true, nachweise: v === "bild" });
+      const { lz, ta } = laufzettelUndTeilA(g);
+      // Die Blätter des Verbands bleiben Stift-Stellen, nur die Vereinsunterlagen bekommen Bilder
+      const hfvStellen = g.bericht.stellen.filter((st) => HFV_VORDRUCKE.includes(st.formular) && st.art !== "nein-hinweis");
+      ok(hfvStellen.every((st) => st.art === "stift"), "Modus stift: alle Stellen auf den Blättern des Verbands sind Stift-Stellen (" + hfvStellen.length + ")");
+      ok(!g.bericht.stellen.some((st) => st.wer === "sorgeberechtigte_beide" && st.art === "bild") && !g.bericht.stellen.some((st) => st.bild === "spieler" || st.bild === "sorgeberechtigte_2"), "Modus stift: die Bilder spieler und sorgeberechtigte_2 bleiben unbenutzt, auch wenn sie mitgegeben werden");
+      ok(!lz.includes("Alle Unterschriften der Familie sind am Bildschirm geleistet") && !lz.includes("Entscheidung der Jugendleitung vom 11.10.2026") && !lz.includes("Das Kind hat den Antrag nicht unterschrieben") && !g.bericht.hinweise.some((h) => /nicht geleistet/.test(h)), "Modus stift: kein Satz im Laufzettel zu Blättern des Verbands am Bildschirm und zu leeren freiwilligen Feldern");
+      ok(!g.bericht.stellen.some((st) => st.art === "leer") && !/Nicht unterschrieben \(freiwillig\)/.test(ta), "Modus stift: keine Stelle ohne Markierung, Teil A ohne „Nicht unterschrieben (freiwillig)“");
+      const mitStiftBlatt = hfvStellen.some((st) => st.wer !== "verein" && st.wer !== "arzt");
+      if (v === "bild" && mitStiftBlatt) {
+        const training = b.a.hfvUnterschrift === "training";
+        const ohneAbm = hfvStellen.some((st) => st.formular !== "abmeldung" && st.wer !== "verein" && st.wer !== "arzt");
+        if (ohneAbm) ok(ta.includes(norm(training ? T.stiftTraining : T.stiftDrucken).replace(/^Der Verband/, "Der Hessische Fußball-Verband (kurz: der Verband)")), "Modus stift: Teil A nennt die Blätter des Verbands mit Stift (" + b.a.hfvUnterschrift + ")");
+        ok(!ta.includes(norm(T.stiftOffen)) && !ta.includes("Am sichersten per Einschreiben"), "Modus stift: kein Satz des Modus bildschirm in Teil A");
+      }
+      zeilen.push(id.padEnd(32) + v.padEnd(8) + (g.r.seiten + " S").padEnd(7) + ("Stifte " + g.bericht.stellen.filter((st) => st.art === "stift").length + "/Bilder " + g.bericht.stellen.filter((st) => st.art === "bild").length).padEnd(20) + String(anzahl - vor).padStart(5) + " Prüfungen  " + (fehler.length - vorFehler ? fehler.length - vorFehler + " FEHLER" : "ok"));
+    }
+  }
+  console.log(zeilen.join("\n"));
+  await unterschriftsregeln();
+}
+
+// Ablauf der Läufe zum Schalter: erst der Stand der Daten, dann „stift“; der Schalter wird danach zurückgesetzt
+async function schalterLaeufe() {
+  const ausgang = modusHfv();
+  try {
+    if (ausgang === "bildschirm") await bildschirmModusTests();
+    if (!OHNE_STIFT) {
+      setzeModusHfv(ausgang === "bildschirm" ? "stift" : "bildschirm");
+      await (ausgang === "bildschirm" ? stiftModusTests() : bildschirmModusTests());
+    }
+  } finally {
+    setzeModusHfv(ausgang);
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
 // Schnittstelle und Quelltext
 // ---------------------------------------------------------------------------------------------
 function schnittstelle() {
@@ -2561,7 +2868,7 @@ async function haupt() {
   const zeilen = [];
   let index = 0;
   for (const p of PROFILE) {
-    if (NUR_PROFILE.length && !NUR_PROFILE.includes(p.id)) {
+    if (NUR_SCHALTER || (NUR_PROFILE.length && !NUR_PROFILE.includes(p.id))) {
       index += 1;
       continue;
     }
@@ -2597,13 +2904,16 @@ async function haupt() {
   if (MIT_SZENARIEN) await szenarien();
   kontext = "";
   if (!OHNE_SONDERFAELLE) {
-    await sonderfaelle();
-    await rueckfaelle();
+    if (!NUR_SCHALTER) {
+      await sonderfaelle();
+      await rueckfaelle();
+    }
+    await schalterLaeufe();
   }
   schnittstelle();
   kontext = "";
   const renderDateien = readdirSync(RENDER).filter((f) => f.endsWith(".png"));
-  if (!NUR_PROFILE.length) ok(renderDateien.length >= 4 * 12, "Renderings der vier ausgewählten Profile liegen vor (" + renderDateien.length + " Bilder)");
+  if (!NUR_PROFILE.length && !NUR_SCHALTER) ok(renderDateien.length >= 4 * 12, "Renderings der vier ausgewählten Profile liegen vor (" + renderDateien.length + " Bilder)");
   rmSync(path.join(AUSGABE, "_grau.pgm"), { force: true });
   console.log("\n" + anzahl + " Einzelprüfungen in " + ((Date.now() - start) / 1000).toFixed(0) + " s, " + fehler.length + " Fehler");
   writeFileSync(path.join(AUSGABE, "fehler.txt"), fehler.join("\n") + "\n");

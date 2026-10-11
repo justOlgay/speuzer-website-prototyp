@@ -1,6 +1,6 @@
 {
   "stand": "2026-10-11",
-  "version": "2026-10-11.1",
+  "version": "2026-10-11.2",
   "hinweis": "Regelwerk des Anmelde-Assistenten. Alle Zahlen und Fristen stehen hier; regeln.js enthält die Logik. Nichts hier enthält Personendaten.",
   "saison": "2026/27",
   "quellenStand": [
@@ -1256,7 +1256,7 @@
       },
       {
         "stelleKey": "s2.unterschrift_sorgeberechtigte",
-        "bedeutung": "Aufnahmeantrag (Seite 2), zusätzliche Zeile: zweiter Elternteil, mit Stift (nur bei Minderjährigen, getrennt lebenden Eltern und fehlendem Einverständnis des anderen Elternteils)"
+        "bedeutung": "Aufnahmeantrag (Seite 2), zusätzliche Zeile: zweiter Elternteil (nur bei Minderjährigen, getrennt lebenden Eltern und fehlendem Einverständnis des anderen Elternteils); im Modus „bildschirm“ in einem eigenen Feld am Bildschirm, leer gelassen und im Modus „stift“ mit Stift"
       },
       {
         "stelleKey": "s3.unterschrift",
@@ -1276,11 +1276,11 @@
     "hfv_antrag": [
       {
         "stelleKey": "spieler",
-        "bedeutung": "Unterschrift der Spielerin oder des Spielers (nur mit Stift)"
+        "bedeutung": "Unterschrift der Spielerin oder des Spielers (im Modus „bildschirm“ bei Minderjährigen ein freiwilliges Feld am Bildschirm; bleibt es leer, bleibt die Zeile ohne Markierung und das Passwesen entscheidet, ob die Unterschrift nötig ist; im Modus „stift“ mit Stift)"
       },
       {
         "stelleKey": "erziehungsberechtigte",
-        "bedeutung": "Unterschrift der Erziehungsberechtigten (nur mit Stift)"
+        "bedeutung": "Unterschrift der Erziehungsberechtigten (im Modus „bildschirm“ am Bildschirm, im Modus „stift“ mit Stift)"
       },
       {
         "stelleKey": "verein",
@@ -1352,6 +1352,11 @@
       }
     ]
   },
+  "unterschriftHfv": {
+    "wert": "bildschirm",
+    "bemerkung": "Schalter für die Blätter des Verbands (Antrag auf Spielerlaubnis, Vollmacht für die Abmeldung, Abmeldung beim alten Verein, Einverständnis für Spiele bei den Herren). „bildschirm“ (Entscheidung der Jugendleitung vom 11.10.2026, O68): Die Familie unterschreibt auch diese Blätter am Bildschirm. „stift“ (Stand bis 11.10.2026): Diese Blätter bleiben für die Unterschrift mit Stift offen. Widerspricht der Verband, stellen wir den Wert auf „stift“ zurück; im Code ändert sich dafür nichts. Ärztin oder Arzt (Attest) und Verein unterschreiben immer mit Stift. Im Modus „bildschirm“ ist die Unterschrift des Kindes im Antrag auf Spielerlaubnis freiwillig: Bleibt die Zeile leer, bleibt sie ohne Markierung, und das Passwesen entscheidet, ob sie nötig ist (Jugendleitung, 11.10.2026, offene Frage O11).",
+    "quelle": "Jugendleitung, 11.10.2026; HFV-Jugendordnung § 37 Nr. 2 (eigenhändige Unterschrift) und HFV-Spielordnung § 92 (unterzeichneter Original-Antrag), Stand 2026-07; Antwort der Passstelle steht aus (O01)"
+  },
   "kontakte": {
     "telefon": "069 736868",
     "geschaeftsstelle": {
@@ -1386,8 +1391,8 @@
         "U18",
         "R13"
       ],
-      "status": "offen",
-      "stand": "Frage an das Passwesen: Reicht ein Scan oder Foto des unterschriebenen Antrags auf Spielerlaubnis? (Excel an die 1. Vorsitzende, Nr. 6)",
+      "status": "entschieden",
+      "entscheidung": "Vorerst gilt O68: Alles wird am Bildschirm unterschrieben, auch die Blätter des Verbands (Jugendleitung, 11.10.2026). Die Antwort der Passstelle steht aus. Verlangt sie das Papier-Original mit Stift, stellen wir den Schalter unterschriftHfv auf „stift“ zurück.",
       "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
     },
     {
@@ -1522,7 +1527,7 @@
         "R13"
       ],
       "status": "offen",
-      "stand": "Frage an das Passwesen (Excel Nr. 7). Vorschlag: Ein Elternteil reicht; das Kind unterschreibt mit, wenn es schreiben kann.",
+      "stand": "Frage an das Passwesen (Excel Nr. 7). Vorschlag: Ein Elternteil reicht; das Kind unterschreibt mit, wenn es schreiben kann. Bis zur Antwort gilt (Jugendleitung, 11.10.2026): Kann das Kind nicht schreiben, bleibt die Zeile im Antrag leer, ohne Markierung. Der Laufzettel nennt es, und das Passwesen entscheidet.",
       "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
     },
     {
@@ -1714,7 +1719,7 @@
         "U07"
       ],
       "status": "offen",
-      "stand": "Vorschlag: PDF per E-Mail, HFV-Blätter mit Stift beim Trainer oder im Vereinsheim, Gesundheitsdaten auf Papier (Excel Nr. 2). Die Mitgliederverwaltung prüft beim Erfassen, ob alles ausgefüllt ist (1. Vorsitzende, 11.10.2026).",
+      "stand": "Vorschlag: PDF per E-Mail, Gesundheitsdaten auf Papier (Excel Nr. 2). Die Blätter des Verbands unterschreibt die Familie seit dem 11.10.2026 am Bildschirm (O68). Die Mitgliederverwaltung prüft beim Erfassen, ob alles ausgefüllt ist (1. Vorsitzende, 11.10.2026).",
       "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
     },
     {
@@ -1727,7 +1732,7 @@
         "U04"
       ],
       "status": "entschieden",
-      "entscheidung": "Ein Elternteil reicht (Jugendleitung, 08.10.2026). Ausnahme: getrennt lebende Eltern ohne Einverständnis – dann unterschreibt der andere Elternteil mit Stift.",
+      "entscheidung": "Ein Elternteil reicht (Jugendleitung, 08.10.2026). Ausnahme: getrennt lebende Eltern ohne Einverständnis – dann unterschreibt der andere Elternteil zusätzlich, seit dem 11.10.2026 am Bildschirm (O68), sonst mit Stift.",
       "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
     },
     {
@@ -2236,16 +2241,20 @@
       "id": "O68",
       "an": "vorstand",
       "prioritaet": "P1",
-      "frage": "Dürfen Vereinsunterlagen am Bildschirm unterschrieben werden? Das wäre eine einfache elektronische Unterschrift. Die Form bestimmt der Verein selbst (Satzung, § 127 BGB). HFV-Vordrucke bleiben Stift.",
+      "frage": "Dürfen Vereinsunterlagen am Bildschirm unterschrieben werden? Das wäre eine einfache elektronische Unterschrift. Die Form bestimmt der Verein selbst (Satzung, § 127 BGB). Für die Blätter des Verbands (HFV-Vordrucke) war zuerst Stift vorgesehen.",
       "betrifft": [
         "U01",
         "U04",
         "U05",
         "U06",
+        "U07",
+        "U17",
+        "U18",
+        "U23",
         "U29"
       ],
-      "status": "offen",
-      "stand": "Jugendleitung befürwortet (08.10.2026). Rückfrage der 1. Vorsitzenden zu „mit Stift“ beantwortet; Antwort steht aus (Excel Nr. 1).",
+      "status": "entschieden",
+      "entscheidung": "Alles wird am Bildschirm unterschrieben, auch die Blätter des Verbands (Jugendleitung, 11.10.2026). Widerspricht der Verband, stellen wir die Blätter des Verbands wieder auf Stift um.",
       "quelle": "Prüfung Orchestrator, 30.09.2026; data/anmeldung-formulare.json (digitaleUnterschrift)"
     },
     {

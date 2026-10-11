@@ -7,15 +7,16 @@
 //  - Wartefristen mit Rechenbeispielen, alle Fälle F01-F18 und alle Regeln R1-R9, R13-R15
 //  - die Reihenfolge der Schritte
 //  - die Texte (Vollständigkeit, Einfache Sprache, Platzhalter)
+//  - der Schalter unterschriftHfv (Jugendleitung, 11.10.2026): Daten, Hilfsfunktion, Rollen in beiden Modi gleich
 //  - Eigenschaften über tausende zufällige Antworten (Zufallsprüfung mit festem Startwert)
 //  - keine DOM- und Zeit-Zugriffe, keine Personennamen, Unveränderlichkeit der Eingaben
 
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import * as R from "../../assets/js/anmeldung/regeln.js";
-import { ladeKonfig, PROFILE, BAUSTEINE, HEUTE_STANDARD } from "./profile.mjs";
+import { ladeKonfig, PROFILE, BAUSTEINE, HEUTE_STANDARD, profil } from "./profile.mjs";
 
 const WURZEL = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const konfig = ladeKonfig();
@@ -90,7 +91,7 @@ function testeDatum() {
   gleich("altersklasse: ungültig", R.altersklasse("kein Datum", konfig), null);
   gleich("altersklasse: ohne Konfiguration", R.altersklasse("2014-05-10", {}), null);
   gleich("VERSION ist Text", typeof R.VERSION, "string");
-  gleich("Exporte", Object.keys(R).sort().join(","), ["SCHLUESSEL", "VERSION", "alterAm", "altersklasse", "auswerten", "istMinderjaehrig", "optionenBesonderes", "schritte", "unbekannteSchluessel"].sort().join(","));
+  gleich("Exporte", Object.keys(R).sort().join(","), ["SCHLUESSEL", "VERSION", "alterAm", "altersklasse", "auswerten", "istMinderjaehrig", "optionenBesonderes", "schritte", "unbekannteSchluessel", "unterschriftHfv"].sort().join(","));
   pruefe("konfig.anmeldung fehlt: klare Fehlermeldung", () => assert.throws(() => R.auswerten({}, {}, HEUTE_STANDARD), /konfig\.anmeldung fehlt/));
   pruefe("schritte ohne Antworten läuft", () => assert.ok(R.schritte(null, konfig, HEUTE_STANDARD).length > 5));
 }
@@ -215,7 +216,7 @@ function testeDaten() {
   const punkt = (id) => cfg.offenePunkte.find((o) => o.id === id);
   [
     ["O67", "datenschutz", "P1", "U28,U06", /Art\. 6 Abs\. 1 lit\. b DSGVO/, /oder lit\. f/, "offen"],
-    ["O68", "vorstand", "P1", "U01,U04,U05,U06,U29", /am Bildschirm unterschrieben/, /§ 127 BGB/, "offen"],
+    ["O68", "vorstand", "P1", "U01,U04,U05,U06,U07,U17,U18,U23,U29", /am Bildschirm unterschrieben/, /§ 127 BGB/, "entschieden"],
     ["O69", "jugendleitung", "P2", "U18", /Vollmacht für die Abmeldung/, /in DFBnet ein/, "offen"],
     ["O70", "jugendleitung", "P2", "U07", /Kreisjugendwart \(HFV-Jugendordnung § 7 Nr\. 2\)/, /Wer meldet, bis wann\?$/, "vorgemerkt"],
     ["O71", "vorstand", "P2", "", /Wer pflegt Fristen, Beträge und Gebühren/, /Beitragsordnung oder Verbandsordnungen ändern\?$/, "geregelt"],
@@ -244,30 +245,35 @@ function testeDaten() {
   const o68b = punkt("O68");
   wahr("Offener Punkt O26: Status entschieden (an vorstand, P1, betrifft U01 und U04)",
     !!o26b && o26b.status === "entschieden" && o26b.an === "vorstand" && o26b.prioritaet === "P1" && o26b.betrifft.join(",") === "U01,U04");
-  gleich("Offener Punkt O26: Entscheidung", o26b.entscheidung,
-    "Ein Elternteil reicht (Jugendleitung, 08.10.2026). Ausnahme: getrennt lebende Eltern ohne Einverständnis – dann unterschreibt der andere Elternteil mit Stift.");
+  gleich("Offener Punkt O26: Entscheidung (mit dem Hinweis auf O68 vom 11.10.2026)", o26b.entscheidung,
+    "Ein Elternteil reicht (Jugendleitung, 08.10.2026). Ausnahme: getrennt lebende Eltern ohne Einverständnis – dann unterschreibt der andere Elternteil zusätzlich, seit dem 11.10.2026 am Bildschirm (O68), sonst mit Stift.");
   wahr("Offener Punkt O26: die Frage nennt keine Empfehlung „beide“ mehr", !/empfiehlt/.test(o26b.frage) && /Einer oder beide/.test(o26b.frage));
   // 11.10.2026 (Antworten der 1. Vorsitzenden, Paket M2): fünf Stände. Nur „offen“ ist eine offene Frage und trägt „stand“;
   // die übrigen vier tragen „entscheidung“. Neu gegenüber dem 08.10.: geregelt („so machen wir es“), entfaellt, vorgemerkt („später“).
-  wahr("Offener Punkt O68: bleibt offen, mit Stand der Jugendleitung und der Rückfrage zu „mit Stift“",
-    !!o68b && o68b.status === "offen" && !("entscheidung" in o68b) &&
-      o68b.stand === "Jugendleitung befürwortet (08.10.2026). Rückfrage der 1. Vorsitzenden zu „mit Stift“ beantwortet; Antwort steht aus (Excel Nr. 1).");
+  // 11.10.2026 (Jugendleitung, Paket M9): O68 ist entschieden, O01 folgt O68. Der Wortlaut steht fest und wird so auf der Konzeptseite gezeigt.
+  wahr("Offener Punkt O68: entschieden, ohne „stand“ (Jugendleitung, 11.10.2026)", !!o68b && o68b.status === "entschieden" && !("stand" in o68b));
+  gleich("Offener Punkt O68: Entscheidung", o68b.entscheidung,
+    "Alles wird am Bildschirm unterschrieben, auch die Blätter des Verbands (Jugendleitung, 11.10.2026). Widerspricht der Verband, stellen wir die Blätter des Verbands wieder auf Stift um.");
+  wahr("Offener Punkt O68: die Frage nennt „HFV-Vordrucke bleiben Stift“ nicht mehr als Stand (die Entscheidung widerspräche ihr)", !/HFV-Vordrucke bleiben Stift/.test(o68b.frage));
+  const o01b = punkt("O01");
+  wahr("Offener Punkt O01: entschieden, ohne „stand“; verweist auf O68, die Antwort der Passstelle und den Schalter unterschriftHfv",
+    !!o01b && o01b.status === "entschieden" && !("stand" in o01b) && /O68/.test(o01b.entscheidung) && /Antwort der Passstelle steht aus/.test(o01b.entscheidung) && /unterschriftHfv/.test(o01b.entscheidung) && /„stift“/.test(o01b.entscheidung));
   const STATUS_PUNKT = ["offen", "entschieden", "geregelt", "entfaellt", "vorgemerkt"];
   wahr("Offene Punkte: Status nur offen, entschieden, geregelt, entfaellt oder vorgemerkt (weitgehend_geklaert gibt es nicht mehr)", cfg.offenePunkte.every((o) => STATUS_PUNKT.includes(o.status)),
     cfg.offenePunkte.filter((o) => !STATUS_PUNKT.includes(o.status)).map((o) => o.id + ":" + o.status).join(","));
   const STAND_11_10 = {
-    entschieden: ["O26", "O27", "O30", "O31", "O65", "O66"],
+    entschieden: ["O01", "O26", "O27", "O30", "O31", "O65", "O66", "O68"],
     geregelt: ["O02", "O03", "O04", "O05", "O06", "O07", "O08", "O09", "O10", "O12", "O13", "O14", "O15", "O16",
       "O17", "O18", "O19", "O20", "O21", "O22", "O23", "O32", "O33", "O34", "O37", "O38", "O39", "O40",
       "O41", "O42", "O43", "O44", "O50", "O52", "O54", "O60", "O61", "O62", "O63", "O64", "O71"],
     entfaellt: ["O28", "O29", "O35", "O36", "O49", "O51", "O55", "O56", "O57"],
     vorgemerkt: ["O46", "O47", "O48", "O53", "O58", "O59", "O70"],
-    offen: ["O01", "O11", "O24", "O25", "O45", "O67", "O68", "O69", "O72", "O73"],
+    offen: ["O11", "O24", "O25", "O45", "O67", "O69", "O72", "O73"],
   };
   Object.keys(STAND_11_10).forEach((status) =>
     gleich("Offene Punkte: Stand " + status + " (" + STAND_11_10[status].length + ")", cfg.offenePunkte.filter((o) => o.status === status).map((o) => o.id), STAND_11_10[status]));
-  gleich("Offene Punkte: Zahl je Stand (6 entschieden, 41 geregelt, 9 entfällt, 7 später, 10 offen; zusammen 73)",
-    Object.keys(STAND_11_10).map((status) => cfg.offenePunkte.filter((o) => o.status === status).length), [6, 41, 9, 7, 10]);
+  gleich("Offene Punkte: Zahl je Stand (8 entschieden, 41 geregelt, 9 entfällt, 7 später, 8 offen; zusammen 73; seit M9 sind O01 und O68 entschieden)",
+    Object.keys(STAND_11_10).map((status) => cfg.offenePunkte.filter((o) => o.status === status).length), [8, 41, 9, 7, 8]);
   wahr("Offene Punkte: nur offene Punkte tragen „stand“ (nie leer), alle übrigen „entscheidung“ (nie leer), nie beides",
     cfg.offenePunkte.every((o) => o.status === "offen"
       ? typeof o.stand === "string" && o.stand.trim().length > 0 && !("entscheidung" in o)
@@ -287,7 +293,7 @@ function testeDaten() {
       punkt("O13").entscheidung === "Nicht nötig für den Start. Der Assistent nennt keine Bearbeitungszeiten." &&
       punkt("O48").entscheidung === "Satzungslink siehe O66. Die alten Info-Blätter später ersetzen." &&
       punkt("O58").entscheidung === "Zum 1. Januar 2027 prüfen.");
-  gleich("Daten: Stand und Version 11.10.2026", [cfg.stand, cfg.version], ["2026-10-11", "2026-10-11.1"]);
+  gleich("Daten: Stand und Version 11.10.2026 (Version .2 seit dem Schalter unterschriftHfv, Paket M9)", [cfg.stand, cfg.version], ["2026-10-11", "2026-10-11.2"]);
   gleich("Offene Punkte: Kennungen O01 bis O73 lückenlos und in Reihenfolge", cfg.offenePunkte.map((o) => o.id), Array.from({ length: 73 }, (_, i) => "O" + String(i + 1).padStart(2, "0")));
   // Entscheidungen der 1. Vorsitzenden vom 11.10.2026: Heimweg (U41), Beginn der Mitgliedschaft (R15), Aufnahmegebühr (U35)
   const u41 = cfg.unterlagen.U41;
@@ -1235,6 +1241,46 @@ function testeQuelltext() {
   });
 }
 
+// ---------- 11.10.2026 (Jugendleitung, Paket M9): Schalter unterschriftHfv ----------
+
+async function testeSchalterHfv() {
+  const sch = cfg.unterschriftHfv;
+  wahr("Schalter unterschriftHfv: steht in data/anmeldung.json, Wert „bildschirm“ (Standard seit 11.10.2026)", !!sch && typeof sch === "object" && sch.wert === "bildschirm");
+  wahr("Schalter unterschriftHfv: Bemerkung nennt die Entscheidung, die Blätter des Verbands und den Weg zurück („stift“)",
+    typeof sch.bemerkung === "string" && /Entscheidung der Jugendleitung vom 11\.10\.2026/.test(sch.bemerkung) && /Antrag auf Spielerlaubnis/.test(sch.bemerkung) &&
+      /Abmeldung beim alten Verein/.test(sch.bemerkung) && /Einverständnis für Spiele bei den Herren/.test(sch.bemerkung) && /„stift“/.test(sch.bemerkung) && /Ärztin oder Arzt/.test(sch.bemerkung));
+  wahr("Schalter unterschriftHfv: Quelle nennt Jugendleitung, JO § 37 Nr. 2 und SpO § 92", typeof sch.quelle === "string" && /Jugendleitung, 11\.10\.2026/.test(sch.quelle) && /Jugendordnung § 37 Nr\. 2/.test(sch.quelle) && /Spielordnung § 92/.test(sch.quelle));
+  const ohneSchalter = (wert) => ({ anmeldung: Object.assign({}, cfg, { unterschriftHfv: wert }) });
+  gleich("unterschriftHfv(konfig): „bildschirm“", R.unterschriftHfv(ohneSchalter({ wert: "bildschirm" })), "bildschirm");
+  gleich("unterschriftHfv(konfig): „stift“", R.unterschriftHfv(ohneSchalter({ wert: "stift" })), "stift");
+  gleich("unterschriftHfv(konfig): ein einfacher Text statt eines Objekts gilt auch", [R.unterschriftHfv(ohneSchalter("bildschirm")), R.unterschriftHfv(ohneSchalter("stift"))], ["bildschirm", "stift"]);
+  gleich("unterschriftHfv(konfig): fehlt der Schalter, gilt „stift“ (der vorsichtige Weg)", R.unterschriftHfv({ anmeldung: {} }), "stift");
+  gleich("unterschriftHfv(konfig): ein unbekannter Wert gilt als „stift“", [R.unterschriftHfv(ohneSchalter({ wert: "Bildschirm" })), R.unterschriftHfv(ohneSchalter({ wert: "" })), R.unterschriftHfv(ohneSchalter({ wert: null })), R.unterschriftHfv(ohneSchalter(42))], ["stift", "stift", "stift", "stift"]);
+  gleich("unterschriftHfv(konfig): ohne Konfiguration gilt „stift“", [R.unterschriftHfv(undefined), R.unterschriftHfv(null), R.unterschriftHfv({})], ["stift", "stift", "stift"]);
+  // Die Rollen ändern sich mit dem Schalter nicht: auswerten() liefert in beiden Modi dieselben Unterschriften, Formulare und Schritte.
+  // Wie unterschrieben wird, entscheiden Oberfläche und pdf.js.
+  const stiftKonfig = tiefKopie(konfig);
+  stiftKonfig.anmeldung.unterschriftHfv.wert = "stift";
+  let verschieden = [];
+  PROFILE.forEach((p) => {
+    const a = R.auswerten(tiefKopie(p.a), konfig, p.heute);
+    const b = R.auswerten(tiefKopie(p.a), stiftKonfig, p.heute);
+    if (JSON.stringify(a) !== JSON.stringify(b)) verschieden.push(p.id);
+    if (JSON.stringify(R.schritte(tiefKopie(p.a), konfig, p.heute)) !== JSON.stringify(R.schritte(tiefKopie(p.a), stiftKonfig, p.heute))) verschieden.push(p.id + " (Schritte)");
+  });
+  wahr("Schalter unterschriftHfv: auswerten() und schritte() sind in beiden Modi gleich (alle " + PROFILE.length + " Profile)", verschieden.length === 0, verschieden.join(", "));
+  // Texte der Unterlagen für die Blätter des Verbands sagen nicht mehr „mit einem Stift“ (sie gelten für beide Modi)
+  const texte = (await import(pathToFileURL(path.join(WURZEL, "assets/js/anmeldung/texte/de-regeln.js")).href)).default;
+  ["U07", "U18", "U23"].forEach((u) => wahr(u + ": Text „wie“ ist für beide Modi richtig (ohne „mit einem Stift“, mit „unterschreiben“)", /unterschreiben/.test(texte.unterlagen[u].wie) && !/Stift/.test(texte.unterlagen[u].wie), texte.unterlagen[u].wie));
+  // Der zweite Elternteil und das Kind als Spielerin oder Spieler bleiben in den Rollen (beide Modi)
+  const getrennt = R.auswerten(tiefKopie(profil("getrennt-lebende-eltern").a), konfig, HEUTE_STANDARD);
+  wahr("Getrennt lebende Eltern ohne Einverständnis: Stelle aufnahmeantrag.s2.unterschrift_sorgeberechtigte für „sorgeberechtigte_beide“ (in beiden Modi)",
+    getrennt.unterschriften.some((u) => u.formular === "aufnahmeantrag" && u.stelleKey === "s2.unterschrift_sorgeberechtigte" && u.wer === "sorgeberechtigte_beide"));
+  const kindNeu = R.auswerten(tiefKopie(profil("kind-neu-deutsch-f").a), konfig, HEUTE_STANDARD);
+  wahr("Kind neu: Stellen hfv_antrag.spieler und hfv_antrag.verein (Rollen „spieler“ und „verein“) bleiben",
+    kindNeu.unterschriften.some((u) => u.formular === "hfv_antrag" && u.stelleKey === "spieler" && u.wer === "spieler") && kindNeu.unterschriften.some((u) => u.formular === "hfv_antrag" && u.stelleKey === "verein" && u.wer === "verein"));
+}
+
 // ---------- Ablauf ----------
 
 testeDatum();
@@ -1248,6 +1294,7 @@ const texte = await testeTexte();
 testeNamen(texte);
 await testeZufall(texte);
 testeFaelleUndRegeln();
+await testeSchalterHfv();
 testeAttestBeiWechsel();
 testeFotoEinwilligungJugendlicher();
 await testeFotoTexte(texte);

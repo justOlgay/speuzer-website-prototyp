@@ -14,6 +14,10 @@
 // Prüfungen, was der Assistent an erzeugePdf() übergibt und was zurückkommt,
 // auch mit dem echten Baustein gültig.
 //
+// Test-Option hfv (starteTestserver({ hfv: "stift" }) oder ANM_HFV=stift): überschreibt den Schalter
+// unterschriftHfv (data/anmeldung.json, Jugendleitung 11.10.2026) in der eingebetteten Konfiguration
+// dieses Servers. So lässt sich der Modus „stift“ (Stand bis 11.10.2026) prüfen, ohne die Datei zu ändern.
+//
 // Aufruf allein: node tools/anmeldung-test/testserver.mjs  (Adresse wird gezeigt)
 
 import { createServer } from "node:http";
@@ -173,7 +177,13 @@ export async function starteTestserver(optionen) {
       attrappen.set("/" + neueKonfig.formulare.formulare[schluessel].datei, { inhalt: v.bytes, typ: MIME[".pdf"] });
     }
   }
-  const konfigGeaendert = !status.regeln || !status.formulare;
+  const hfv = o.hfv || process.env.ANM_HFV || "";
+  if (hfv) {
+    if (!["bildschirm", "stift"].includes(hfv)) throw new Error('Test-Option hfv: "bildschirm" oder "stift", nicht "' + hfv + '"');
+    neueKonfig.anmeldung = neueKonfig.anmeldung || {};
+    neueKonfig.anmeldung.unterschriftHfv = Object.assign({}, neueKonfig.anmeldung.unterschriftHfv, { wert: hfv });
+  }
+  const konfigGeaendert = !status.regeln || !status.formulare || Boolean(hfv);
   const seiteAngepasst = konfigGeaendert
     ? seite.replace(treffer[1], JSON.stringify(neueKonfig).replace(/</g, "\\u003c"))
     : seite;
@@ -233,6 +243,7 @@ export async function starteTestserver(optionen) {
     port,
     basis: "http://127.0.0.1:" + port,
     status,
+    hfv: neueKonfig.anmeldung && neueKonfig.anmeldung.unterschriftHfv ? neueKonfig.anmeldung.unterschriftHfv.wert : null,
     konfig: neueKonfig,
     anfragen,
     sperre: (pfad) => gesperrt.add(pfad),

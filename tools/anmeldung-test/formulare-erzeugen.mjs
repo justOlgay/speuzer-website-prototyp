@@ -369,7 +369,7 @@ const STELLEN = {
         stelleKey: "erziehungsberechtigte", seite: 1, x: 226, y: 74.2, breite: 154.8, hoehe: 34, wer: "sorgeberechtigte", bedingung: "e.minderjaehrig",
         beschriftung: "Unterschrift der Erziehungsberechtigten (nur bei Minderjährigen)", linie: { x0: 226, x1: 380.8, y: 74.2 },
         belege: [["unten", "Unterschrift der Erziehungsberechtigten"], ["unten", "(nur bei Minderjährigen)"]],
-        hinweis: "JO § 37 Nr. 2: Beim Wechsel Minderjähriger ist die Zustimmung des gesetzlichen Vertreters durch eigenhändige Unterschrift auf dem Antragsformular zu bestätigen.",
+        hinweis: "JO § 37 Nr. 2: Beim Wechsel Minderjähriger ist die Zustimmung des gesetzlichen Vertreters durch eigenhändige Unterschrift auf dem Antragsformular zu bestätigen. Entscheidung der Jugendleitung vom 11.10.2026: Die Familie unterschreibt trotzdem am Bildschirm (Schalter unterschriftHfv in data/anmeldung.json).",
       },
       {
         stelleKey: "verein", seite: 1, x: 395.8, y: 74.2, breite: 157, hoehe: 34, wer: "verein",
@@ -457,7 +457,7 @@ const BESCHREIBUNG = {
   fuellt: "assistent = der Assistent füllt das Feld aus den Antworten; verein = Feld des Vereins oder des HFV, leer lassen; familie_hand = die Familie schreibt es von Hand, leer lassen.",
   quelle: "Wert bzw. Bedingung als kleiner Ausdruck. Pfade: a.… = Antworten (Schnittstellen Abschnitt 3), e.… = Ergebnis der Regeln (Abschnitt 5), konfig.… = Konfiguration (Abschnitt 2). Textfelder: Pfad, optional mit |Format (TT.MM.JJJJ = ISO-Datum in deutscher Schreibweise, z. B. 2026-12-31 als 31.12.2026; STAATEN = ISO-Länderkürzel als deutsche Bezeichnungen, mit Komma getrennt); Teile mit + verbinden (feste Texte in Anführungszeichen). Kästchen: Bedingung mit =, !=, <, in [x,y], enthält, und, oder, nicht; ein Pfad allein gilt bei Wahrheitswerten. bedingung (bei Textfeldern und Unterschriften): nur füllen bzw. nur nötig, wenn die Bedingung gilt. leerWennFehlt: true (nur bei fuellt=assistent) = fehlt der Wert (nicht beantwortet oder leer), bleibt das Feld bzw. Kästchen leer und wird von Hand ausgefüllt; ohne diese Angabe braucht der Assistent den Wert. Ist der Wert leer, bleibt das Feld leer. null = keine Quelle (Feld bleibt leer).",
   stellen: "unterschriften: Stellen für Unterschriften; stelleKey ist der Schlüssel, den e.unterschriften[].stelleKey verwendet. wer = wer laut Vordruck unterschreibt (mitglied, spieler, sorgeberechtigte, kontoinhaber, verein); wennMinderjaehrig = wer bei Minderjährigen stattdessen unterschreibt; bedingung = nur dann nötig. Kasten = Fläche über der gedruckten Linie für das Unterschriftsbild oder die Markierung; linie = gedruckte Schreiblinie (x0, x1, Höhe y); gedruckt: false = Linie und Beschriftung fehlen im Vordruck, der PDF-Baukasten zeichnet sie mit. handfelder: Stellen, die die Familie von Hand ausfüllt (typ text oder kreuz); feld = zugehöriges Formularfeld im PDF; hat es fuellt=assistent mit leerWennFehlt, schreibt die Familie nur dann von Hand, wenn der Assistent es leer lässt.",
-  digitaleUnterschrift: "erlaubt = Vereinsformular, die Unterschrift darf am Bildschirm gezeichnet und als Bild eingesetzt werden; nicht_erlaubt = HFV-Vordruck, die Stellen bleiben leer und werden für die Unterschrift mit Stift markiert (digitaleUnterschriftGrund nennt die Regel; umstellbar, falls die HFV-Passstelle zustimmt).",
+  digitaleUnterschrift: "erlaubt = Vereinsformular, die Unterschrift darf am Bildschirm gezeichnet und als Bild eingesetzt werden; nicht_erlaubt = HFV-Vordruck, für den der Verband die Unterschrift mit Stift vorsieht (digitaleUnterschriftGrund nennt die Regel). Ob die Familie diese Blätter am Bildschirm oder mit Stift unterschreibt, bestimmt der Schalter data/anmeldung.json › unterschriftHfv: „bildschirm“ (Entscheidung der Jugendleitung vom 11.10.2026) setzt das Unterschriftsbild ein, „stift“ lässt die Stellen leer und markiert sie für die Unterschrift mit Stift.",
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -482,7 +482,7 @@ const META = {
     quelle_sha256: "141193a74971f987d8f26bc0f33ac82c7c1283bfef70577d16b0001c3f9a3af8",
     quelle_bytes: 278105,
     digitaleUnterschrift: "nicht_erlaubt",
-    digitaleUnterschriftGrund: "HFV-Vordruck: JO § 37 Nr. 2 verlangt beim Wechsel Minderjähriger die „eigenhändige Unterschrift auf dem Antragsformular“; SpO § 92: unterzeichneter Original-Antrag, mindestens 2 Jahre aufbewahren. Umstellbar, falls die HFV-Passstelle Bildschirm-Unterschriften zulässt.",
+    digitaleUnterschriftGrund: "HFV-Vordruck: JO § 37 Nr. 2 verlangt beim Wechsel Minderjähriger die „eigenhändige Unterschrift auf dem Antragsformular“; SpO § 92: unterzeichneter Original-Antrag, mindestens 2 Jahre aufbewahren. Der Schalter unterschriftHfv in data/anmeldung.json entscheidet seit dem 11.10.2026, ob die Familie das Blatt am Bildschirm unterschreibt („bildschirm“) oder mit Stift („stift“).",
   },
   vollmacht: {
     datei: "hfv-vollmacht-abmeldung.pdf",
@@ -492,7 +492,7 @@ const META = {
     quelle_sha256: "735087e1b40a14ca468b6406ac503c2a575ba76c123ca5505000b53aa3944bab",
     quelle_bytes: 83757,
     digitaleUnterschrift: "nicht_erlaubt",
-    digitaleUnterschriftGrund: "HFV-Vordruck: gilt nur in Verbindung mit dem unterschriebenen Antrag auf Spielerlaubnis; SpO § 92 Nr. 2 (schriftliche Zustimmung des Spielers), Unterlagen mindestens 2 Jahre aufbewahren; Passstelle 2026: unterschriebene Unterlagen in Papierform. Umstellbar, falls die Passstelle zustimmt.",
+    digitaleUnterschriftGrund: "HFV-Vordruck: gilt nur in Verbindung mit dem unterschriebenen Antrag auf Spielerlaubnis; SpO § 92 Nr. 2 (schriftliche Zustimmung des Spielers), Unterlagen mindestens 2 Jahre aufbewahren; Passstelle 2026: unterschriebene Unterlagen in Papierform. Der Schalter unterschriftHfv in data/anmeldung.json entscheidet seit dem 11.10.2026, ob die Familie das Blatt am Bildschirm unterschreibt („bildschirm“) oder mit Stift („stift“).",
   },
   abmeldung: {
     datei: "hfv-abmeldung-verein.pdf",
@@ -502,7 +502,7 @@ const META = {
     quelle_sha256: "26e6319bfb81788c6eac2e74cc1d1c8279240fd6b603201d28cd9a258e7e53fd",
     quelle_bytes: 98665,
     digitaleUnterschrift: "nicht_erlaubt",
-    digitaleUnterschriftGrund: "HFV-Vordruck, geht als Einschreiben im Original an den bisherigen Verein (SpO § 93 Nr. 2: Poststempel ist der Abmeldetag); JO § 37 Nr. 2: eigenhändige Unterschrift; SpO § 92: Originale aufbewahren. Umstellbar, falls die Passstelle zustimmt.",
+    digitaleUnterschriftGrund: "HFV-Vordruck, geht als Einschreiben im Original an den bisherigen Verein (SpO § 93 Nr. 2: Poststempel ist der Abmeldetag); JO § 37 Nr. 2: eigenhändige Unterschrift; SpO § 92: Originale aufbewahren. Der Schalter unterschriftHfv in data/anmeldung.json entscheidet seit dem 11.10.2026, ob die Familie das Blatt am Bildschirm unterschreibt („bildschirm“) oder mit Stift („stift“).",
   },
   einverstaendnis_senioren: {
     datei: "hfv-einverstaendnis-senioren.pdf",
@@ -512,7 +512,7 @@ const META = {
     quelle_sha256: "fbc68d12333a84220776e8f2f53fd658aa1b4470636de0cfcfbb3e54ce049b8b",
     quelle_bytes: 67664,
     digitaleUnterschrift: "nicht_erlaubt",
-    digitaleUnterschriftGrund: "HFV-Vordruck: JO § 29 Nr. 5 b und § 30 Nr. 1 b verlangen die „schriftliche Einverständniserklärung des gesetzlichen Vertreters“ als Antragsunterlage; SpO § 92: Originale aufbewahren. Umstellbar, falls die Passstelle zustimmt.",
+    digitaleUnterschriftGrund: "HFV-Vordruck: JO § 29 Nr. 5 b und § 30 Nr. 1 b verlangen die „schriftliche Einverständniserklärung des gesetzlichen Vertreters“ als Antragsunterlage; SpO § 92: Originale aufbewahren. Der Schalter unterschriftHfv in data/anmeldung.json entscheidet seit dem 11.10.2026, ob die Familie das Blatt am Bildschirm unterschreibt („bildschirm“) oder mit Stift („stift“).",
   },
 };
 

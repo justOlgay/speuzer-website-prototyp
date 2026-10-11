@@ -60,7 +60,7 @@ export default {
       name: "Application for permission to play (Antrag auf Spielerlaubnis)",
       kurz: "With this application the club asks the Hessian Football Association (Hessischer Fußball-Verband, HFV) for permission to play (Spielrecht).",
       warum: "Only with permission to play may a person take part in matches.",
-      wie: "The assistant fills in the form in advance. You sign with a pen.",
+      wie: "The assistant fills in the form in advance. You sign it.",
       wo: "The club sends the application to the association. The original stays at the club.",
     },
     U08: {
@@ -137,7 +137,7 @@ export default {
       name: "Authorisation for the deregistration (Vollmacht für die Abmeldung)",
       kurz: "With the authorisation (Vollmacht) the new club deregisters you from the old club.",
       warum: "This saves the trip to the post office. The day of entry counts as the day of deregistration.",
-      wie: "You sign the sheet with a pen. The club enters the deregistration straight away.",
+      wie: "You sign the sheet. The club enters the deregistration straight away.",
       wo: "You hand in the sheet at the club. The club deregisters you on the same day.",
     },
     U19: {
@@ -172,7 +172,7 @@ export default {
       name: "Consent for matches in the men’s team (Herren)",
       kurz: "The young person is not 18 yet and should play in the men’s team (Herren).",
       warum: "The association requires the consent of the parents for this.",
-      wie: "You sign the sheet with a pen. A medical certificate (Attest) is also needed.",
+      wie: "You sign the sheet. A medical certificate (Attest) is also needed.",
       wo: "The club sends it to the association.",
     },
     U24: {

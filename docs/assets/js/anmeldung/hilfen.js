@@ -110,8 +110,10 @@ export function pruefeDatum(t, m, j, heute, optionen) {
 // ---------- Sorgerecht ----------
 
 // Getrennt lebende Eltern, und der andere Elternteil ist nicht einverstanden
-// (oder es ist offen): Dann muss er den Aufnahmeantrag mit Stift unterschreiben.
-// Das PDF markiert die Stelle "zweiter Elternteil (nötig)".
+// (oder es ist offen): Dann muss er den Aufnahmeantrag auch unterschreiben. Im Modus
+// "bildschirm" (Entscheidung der Jugendleitung vom 11.10.2026) hat er ein eigenes Feld am
+// Bildschirm, im Modus "stift" unterschreibt er mit Stift. Ist das Feld leer, markiert
+// das PDF die Stelle "zweiter Elternteil (nötig)".
 export function zweiterElternteilNoetig(a) {
   return !!a && a.sorge === "getrennt_bei_mir" && a.andererElternteilEinverstanden !== true;
 }

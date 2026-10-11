@@ -20,7 +20,7 @@
 //
 // Stand 11.10.2026 (Paket M2): Die Antworten der 1. Vorsitzenden sind eingearbeitet.
 //   - Die Listen in den Abschnitten 10 bis 12 spiegeln data/anmeldung.json › offenePunkte
-//     (Version 2026-10-11.1, O01 bis O73): jeder Punkt genau eine Zeile mit Kennzeichen und kleiner
+//     (Version 2026-10-11.2, O01 bis O73): jeder Punkt genau eine Zeile mit Kennzeichen und kleiner
 //     Nummer (Anker #o01 …). Ein Punkt hat einen von fünf Ständen: entschieden, geregelt, entfällt,
 //     später (Status „vorgemerkt“) oder offen. Nur „offen“ zählt als offene Frage und trägt P1, P2 oder P3.
 //   - Die Seite liest die Punkte beim Bau (seite(daten), daten.anmeldung.offenePunkte). Stand, Priorität,
@@ -34,6 +34,9 @@
 //   - Karneval gehört nicht zur Anmeldung (Entscheidung vom 11.10.2026): keine Gruppenwahl, keine Turniere,
 //     keine Auftritte. Neu im Assistenten: das Blatt „Heimweg nach dem Training“. Beim Probetraining sind
 //     Nichtmitglieder nicht über den Verein versichert; der Assistent weist darauf hin.
+//   - Paket M9 (11.10.2026, Jugendleitung): Die Familie unterschreibt alles am Bildschirm, auch die Blätter des
+//     Verbands (O68, O01). Ein Schalter in data/anmeldung.json (unterschriftHfv) stellt die Blätter des Verbands
+//     auf Stift zurück, falls der Verband widerspricht. Abschnitt 5 „Unterschrift“ beschreibt beide Wege.
 //
 // Liegt wie /vorher-nachher/ und /app/ außerhalb der Hülle (docs/index.html) und
 // außerhalb der Workspace-Seiten (docs/ws/) – eigene Vorlage src/vorlagen/begleit.html,
@@ -48,7 +51,7 @@
 const PFAD = "../";
 const STAND_RECHERCHE = "29.09.2026";
 const STAND_ABGLEICH = "11.10.2026";
-const REGELWERK_VERSION = "2026-10-11.1";
+const REGELWERK_VERSION = "2026-10-11.2";
 const PROTOTYP = `${PFAD}anmeldung/`;
 
 // ---------- Stand der Punkte (data/anmeldung.json › offenePunkte, beim Bau gesetzt) ----------
@@ -368,7 +371,7 @@ function abschnitt(id, inhalt) {
 
 // ---------- Fragen an den HFV (zuerst, weil andere Abschnitte darauf verweisen) ----------
 
-// Alle Punkte, die die Passstelle betreffen (an: "hfv_passstelle" in data/anmeldung.json, Version 2026-10-11.1),
+// Alle Punkte, die die Passstelle betreffen (an: "hfv_passstelle" in data/anmeldung.json, Version 2026-10-11.2),
 // in der Reihenfolge der Nummern. Der Wortlaut der Frage folgt der Datei; Stand und Text dazu kommen aus der Datei
 // (punktZeile). Seit dem 11.10.2026 gilt: Der Assistent folgt den Vordrucken des HFV, das Passwesen klärt Sonderfälle.
 const HFV_PUNKTE = [
@@ -475,9 +478,9 @@ function kurzAbschnitt() {
   const inhalt = `${liste([
     "**Das Problem.** Der Aufnahmeantrag fragt vieles nicht ab, was der HFV für das Spielrecht braucht. Fehlende Angaben und Unterlagen müssen einzeln nachgefordert werden. Dazu sind Vereinsunterlagen von 2014 und 2021 veraltet. {a:warum}",
     "**Die Lösung.** Ein Assistent im Browser fragt Schritt für Schritt in Einfacher Sprache. Er bietet Übersetzungshilfe auf Englisch, Türkisch und Arabisch. Am Ende erzeugt er ein PDF mit allen Unterlagen. Ein Prototyp zum Ausprobieren liegt vor. {a:assistent}, {a:pdf}",
-    "**Die Unterschrift.** Vereinsunterlagen unterschreibt die Familie am Bildschirm, nachdem sie die Satzung gelesen hat. Die Vordrucke des HFV unterschreibt sie mit Stift, denn der Verband verlangt die eigenhändige Unterschrift. Es reicht ein Elternteil. Die Jugendleitung hat das am 08.10.2026 entschieden ({o:O26}). {a:unterschrift}",
+    "**Die Unterschrift.** Die Familie unterschreibt alles am Bildschirm, nachdem sie die Satzung gelesen hat. Das gilt auch für die Blätter des Verbands. Das hat die Jugendleitung am 11.10.2026 entschieden ({o:O68}). Widerspricht der Verband, stellen wir diese Blätter wieder auf Stift um. Es reicht ein Elternteil ({o:O26}). Das Kind und der andere Elternteil bei getrennt lebenden Eltern haben ein freiwilliges Feld. {a:unterschrift}",
     "**Entschieden am 11.10.2026.** Die 1. Vorsitzende hat die Fragen beantwortet. Nichtmitglieder sind beim Probetraining nicht über den Verein versichert ({o:O27}). Die Mitgliedschaft beginnt am Tag der Anmeldung ({o:O30}). Es gibt keine Probemitgliedschaft ({o:O31}). {a:entscheiden}",
-    `**Noch offen: ${z.offen} Punkte.** Sie stehen im Excel an die 1. Vorsitzende. Zum Beispiel: Wo liegen die Originale ({o:O24})? Dürfen Vereinsunterlagen am Bildschirm unterschrieben werden ({o:O68})? Welche Rechtsgrundlage gilt für die Notfallkontakte ({o:O67})?`,
+    `**Noch offen: ${z.offen} Punkte.** Sie stehen im Excel an die 1. Vorsitzende. Zum Beispiel: Wo liegen die Originale ({o:O24})? Wie übergibt die Familie das PDF in der Vereins-App ({o:O72})? Welche Rechtsgrundlage gilt für die Notfallkontakte ({o:O67})?`,
     `**Beim HFV.** Der Assistent folgt den Vordrucken des HFV. Sonderfälle klärt das Passwesen im Einzelfall. Von ${hfv.length} Fragen sind ${zaehle(hfv).offen} offen. {a:hfv-fragen}`,
     "**Karneval.** Karneval gehört nicht zur Anmeldung im Assistenten. Die Karnevalabteilung klärt ihre Fragen selbst ({o:O28}). {a:karneval}",
   ])}
@@ -548,7 +551,7 @@ const SCHRITTE = [
   ],
   [
     "Unterschrift",
-    "Die Familie wählt: am Bildschirm oder auf Papier. Vor der Bildschirm-Unterschrift setzt sie den Haken bei der Satzung. Vereinsunterlagen unterschreibt sie am Bildschirm, die Vordrucke des HFV mit Stift ({a:unterschrift}).",
+    "Die Familie wählt: am Bildschirm oder auf Papier. Vor der Bildschirm-Unterschrift setzt sie den Haken bei der Satzung. Am Bildschirm unterschreibt sie alles, auch die Blätter des Verbands ({a:unterschrift}).",
   ],
   [
     "Fertig",
@@ -615,7 +618,7 @@ function pdfAbschnitt() {
     })}
     ${liste([
       "**Laufzettel.** Das Deckblatt für den Verein fasst den Fall zusammen. Es nennt Alter, Altersklasse, vorhandene und fehlende Unterlagen und die geschätzte Wartefrist. Dazu stehen dort alle Punkte, die der Verein klären muss. Auch das, was der Vorstand noch bestätigen muss: zum Beispiel die Bildschirm-Unterschrift und die Freigabe der Entwurfsblätter. Teil A für die Familie enthält keine Paragrafen. Die Quellen zeigt der Prototyp in der Sicht des Vereins.",
-      "**Antrag auf Spielerlaubnis.** Das ist das offizielle, ausfüllbare PDF des Verbands. Der Assistent befüllt es. Die Felder des Vereins und die Bearbeitungsvermerke bleiben leer. Die Stellen für die Unterschrift sind blau markiert. Auf Seite 3 steht die freiwillige Erlaubnis für Name und Foto im Internet.",
+      "**Antrag auf Spielerlaubnis.** Das ist das offizielle, ausfüllbare PDF des Verbands. Der Assistent befüllt es. Die Felder des Vereins und die Bearbeitungsvermerke bleiben leer. Die Unterschriften der Familie stehen als Bild im Formular, auf Seite 3 mit dem Datum der Anmeldung. Blau markiert sind die Stellen für den Verein (Unterschrift und Stempel) und leer gebliebene Felder. Die Zeile des Kindes bleibt ohne Markierung, wenn das Kind nicht unterschreibt. Auf Seite 3 steht die freiwillige Erlaubnis für Name und Foto im Internet.",
       "**Attest vom Arzt.** Bei der Erstanmeldung Minderjähriger verlangt der Verband ein Attest (JO § 9 Nr. 1). Beim Vereinswechsel folgt der Assistent dem Vordruck des HFV ({o:O04}, {o:O05}). Hat die Familie ein Attest, kommt die Erlaubnis für das Attest mit ins PDF. Ist das Attest Pflicht und fehlt es, liegt die Vorlage für die Ärztin oder den Arzt bei. Auf dem Attest steht nur „keine Bedenken“. Diagnosen gehören nicht ins PDF.",
       "**Notfall- und Gesundheitsbogen.** Er ist freiwillig und nur für Kinder. Die Familie nennt zuerst einen Notfallkontakt und wählt dann, ob sie einen Gesundheitsbogen ausfüllt. Mit Angaben zur Gesundheit gilt die ausdrückliche Einwilligung nach Art. 9 DSGVO. Ohne Angaben zeigt der Bogen nur die Notfallkontakte. Die Rechtsgrundlage dafür klärt der Vorstand ({o:O67}). Die Absprache zur Medikamentengabe unterschreiben eine Person mit Sorgerecht und der Trainer immer getrennt mit Stift.",
       "**Heimweg nach dem Training.** Dieses Blatt gehört zu Teil B, wenn Minderjährige Fußball spielen oder tanzen. Die Eltern kreuzen an: allein nach Hause oder abgeholt. Das klärt die Aufsichtspflicht. Der Verein gibt eine Kopie an das Trainerteam. Ohne Antwort wird die Stelle zur Stift-Stelle.",
@@ -629,7 +632,7 @@ function pdfAbschnitt() {
 // ---------- 5. Unterschrift ----------
 
 function unterschriftAbschnitt() {
-  const inhalt = `${p("Nicht jede Unterschrift darf am Bildschirm stehen. Deshalb gibt es zwei Wege und einen Sonderfall.")}
+  const inhalt = `${p("Seit dem 11.10.2026 unterschreibt die Familie alles am Bildschirm, auch die Blätter des Verbands. Das hat die Jugendleitung entschieden ({o:O68}). Nur die Ärztin oder der Arzt und der Verein unterschreiben immer mit Stift. Ein Schalter in den Daten stellt die Blätter des Verbands auf Stift zurück.")}
     ${tabelle({
       beschriftung: "Wege für die Unterschrift",
       spalten: ["Unterlagen", "So wird unterschrieben", "Grund"],
@@ -639,12 +642,12 @@ function unterschriftAbschnitt() {
         [
           "**Vereinsunterlagen:** Aufnahmeantrag mit Erlaubnis für Fotos und Erlaubnis für die Lastschrift, Information zum Datenschutz (Kenntnisnahme), Einverständnisse und Erlaubnisse des Vereins",
           "Am Bildschirm, mit Finger oder Maus.",
-          "Die Form bestimmt der Verein selbst. Die Satzung verlangt Schriftform. Nach § 127 BGB kann dafür auch eine elektronische Übermittlung reichen. Der Online-Aufnahmeantrag arbeitet schon so. Die Jugendleitung befürwortet es (08.10.2026). Die Antwort der 1. Vorsitzenden steht aus ({o:O68}). {offen}",
+          "Die Form bestimmt der Verein selbst. Die Satzung verlangt Schriftform. Nach § 127 BGB kann dafür auch eine elektronische Übermittlung reichen. Der Online-Aufnahmeantrag arbeitet schon so. Die Jugendleitung hat es am 11.10.2026 entschieden ({o:O68}).",
         ],
         [
-          "**Vordrucke des HFV:** Antrag auf Spielerlaubnis, Vollmacht für die Abmeldung, Abmeldung beim alten Verein, Einverständnis für Spiele bei den Herren",
-          "Mit Stift auf Papier.",
-          "Beim Wechsel Minderjähriger verlangt JO § 37 Nr. 2 die „eigenhändige Unterschrift auf dem Antragsformular“. SpO § 92 verlangt den „unterzeichneten Original-Antrag“ und 2 Jahre Aufbewahrung. Laut Passstelle 2026 (Folie 6) muss das Papier bei der Antragstellung vorliegen.",
+          "**Blätter des Verbands:** Antrag auf Spielerlaubnis, Vollmacht für die Abmeldung, Abmeldung beim alten Verein, Einverständnis für Spiele bei den Herren",
+          "Am Bildschirm, mit Finger oder Maus. Mit dem Schalter „stift“: mit Stift auf Papier.",
+          "Beim Wechsel Minderjähriger verlangt JO § 37 Nr. 2 die „eigenhändige Unterschrift auf dem Antragsformular“. SpO § 92 verlangt den „unterzeichneten Original-Antrag“ und 2 Jahre Aufbewahrung. Laut Passstelle 2026 (Folie 6) muss das Papier bei der Antragstellung vorliegen. Die Jugendleitung hat trotzdem entschieden: Wir beginnen am Bildschirm. Die Antwort der Passstelle steht aus ({o:O01}). Verlangt der Verband das Original mit Stift, stellen wir den Schalter zurück.",
         ],
         [
           "**Immer mit Stift:** Attest der Ärztin oder des Arztes, Stempel des Vereins, Absprache zur Medikamentengabe",
@@ -654,24 +657,26 @@ function unterschriftAbschnitt() {
       ],
     })}
     ${p(
-      "Eine am Bildschirm gezeichnete Unterschrift ist rechtlich eine einfache elektronische Signatur. Gleichgestellt ist nur die qualifizierte elektronische Signatur (eIDAS Art. 25). Für den HFV-Teil reicht die gezeichnete Unterschrift deshalb nicht sicher."
+      "Eine am Bildschirm gezeichnete Unterschrift ist rechtlich eine einfache elektronische Signatur. Gleichgestellt ist nur die qualifizierte elektronische Signatur (eIDAS Art. 25). Ob die gezeichnete Unterschrift für den HFV-Teil reicht, ist deshalb nicht sicher. Die Jugendleitung nimmt das in Kauf ({o:O68}). Der Laufzettel im PDF sagt dem Verein, was zu tun ist, wenn der Verband ein Original mit Stift verlangt."
     )}
     <h3>So läuft die Unterschrift im Assistenten</h3>
     ${liste([
-      "**Wahl.** Die Familie wählt „Am Bildschirm, wo es erlaubt ist“ oder „Ich unterschreibe alles auf Papier“.",
+      "**Wahl.** Die Familie wählt „Am Bildschirm“ oder „Ich unterschreibe alles auf Papier“. Mit dem Schalter „stift“ heißt die erste Wahl „Am Bildschirm, wo es erlaubt ist“.",
       "**Satzung zuerst.** Vor der Bildschirm-Unterschrift liest die Familie die Satzung und setzt den Haken „Ich habe die Satzung gelesen.“ Der Haken ist Pflicht. Der Link führt auf die Satzung der Website, nicht auf die Adresse im Vordruck. Die Adresse im Vordruck ist defekt ({o:O66}). Auf dem Papierweg ist der Haken freiwillig. Dann kreuzt die Familie das Kästchen im Ausdruck von Hand an.",
       "**Ein Elternteil reicht.** Der Assistent zeigt nur ein Unterschriftsfeld für die Eltern, auch wenn beide Eltern das Sorgerecht haben. Das hat die Jugendleitung am 08.10.2026 entschieden ({o:O26}).",
-      "**Zweiter Elternteil (nötig).** Das gilt nur, wenn die Eltern getrennt leben und der andere Elternteil nicht einverstanden ist. Dann muss auch er unterschreiben. Das geht nur mit Stift, und die Stelle im PDF ist markiert. Grund ist die gemeinsame Vertretung nach § 1629 BGB: Ohne Zustimmung darf ein Elternteil nicht allein für beide handeln.",
+      "**Zweiter Elternteil (nötig).** Das gilt nur, wenn die Eltern getrennt leben und der andere Elternteil nicht einverstanden ist. Dann muss auch er unterschreiben. Er hat ein eigenes Feld am Bildschirm. Das Feld ist freiwillig. Bleibt es leer, ist die Stelle im PDF mit Stift markiert, und der Laufzettel nennt es. Mit dem Schalter „stift“ gibt es kein Feld, er unterschreibt mit Stift. Grund ist die gemeinsame Vertretung nach § 1629 BGB: Ohne Zustimmung darf ein Elternteil nicht allein für beide handeln.",
+      "**Das Kind als Spielerin oder Spieler.** Der Antrag auf Spielerlaubnis und die Abmeldung beim alten Verein haben eine Zeile für die Spielerin oder den Spieler. Bei Minderjährigen zeigt der Assistent dafür ein freiwilliges Feld: „Kann Ihr Kind schon schreiben? Dann unterschreibt es hier selbst.“ Kleine Kinder können das noch nicht. Bleibt das Feld leer, bleibt die Zeile im Antrag auf Spielerlaubnis ohne Markierung. Teil A nennt das Blatt dann nicht bei „Ausdrucken müssen Sie nur“, die Prüfseite zeigt „Nicht unterschrieben (freiwillig)“, und der Laufzettel sagt: „Das Kind hat den Antrag nicht unterschrieben. Das Passwesen entscheidet, ob das nötig ist.“ Nur die Abmeldung beim alten Verein bekommt bei leerem Feld die Stift-Markierung, denn sie geht ohnehin auf Papier per Einschreiben. Ob ein kleines Kind unterschreiben muss, fragen wir die Passstelle ({o:O11}).",
       "**Keine leeren Erklärungsfelder.** Eine Bildschirm-Unterschrift steht nur unter Angaben, die schon dastehen. Auf den eigenen Blättern des Vereins steht „–“ oder ein Satz statt eines leeren Feldes. Fehlt auf dem Aufnahmeantrag eine Erklärung, zum Beispiel zu den Fotos, zur IBAN oder zur Liste der Familienmitglieder, wird die Stelle zur Stift-Stelle. So ergänzt nach der Unterschrift niemand etwas von Hand.",
-      "**Stift-Blätter.** Die Vordrucke des HFV kommen vorausgefüllt ins PDF, die Stellen sind blau markiert. Die Familie wählt: Sie unterschreibt beim ersten Training und der Verein bringt die Blätter ausgedruckt mit, oder sie druckt selbst aus.",
-      "**Umstellbar.** Jedes Formular hat einen Schalter. Erlaubt die Passstelle Bildschirm-Unterschriften, ändern wir nur den Schalter ({o:O01}).",
+      "**Datum.** Eine Unterschrift am Bildschirm trägt Ort und Datum der Anmeldung. Das gilt auch auf den Blättern des Verbands, wo der Vordruck ein Datumsfeld neben der Unterschrift hat.",
+      "**Was auf Papier bleibt.** Teil A nennt nur Blätter, die wirklich auf Papier müssen. Das sind die Vorlage für die Ärztin oder den Arzt und die Abmeldung beim alten Verein (Einschreiben). Dazu kommen Stellen, an denen ein freiwilliges Feld leer blieb: der zweite Elternteil und das Kind bei der Abmeldung. Die leere Zeile des Kindes im Antrag auf Spielerlaubnis zählt nicht dazu. Sonst steht dort: „Sie müssen nichts ausdrucken.“",
+      "**Schalter.** Ein Wert in den Daten (unterschriftHfv in data/anmeldung.json) steht auf „bildschirm“. Auf „stift“ gestellt gilt wieder der Stand bis 11.10.2026: Die Blätter des Verbands kommen vorausgefüllt ins PDF, die Stellen sind blau markiert. Die Familie wählt, ob sie beim ersten Training unterschreibt und der Verein die Blätter ausgedruckt mitbringt, oder ob sie selbst ausdruckt. Im Programm ändert sich dafür nichts ({o:O68}, {o:O01}).",
     ])}
     <h3>Wer unterschreibt?</h3>
     ${liste([
-      "Für den Antrag auf Spielerlaubnis genügt ein gesetzlicher Vertreter (SpO § 92 Nr. 1). Ob auch ein kleines Kind selbst auf der Zeile „Spieler“ unterschreiben muss, ist offen ({o:O11}).",
+      "Für den Antrag auf Spielerlaubnis genügt ein gesetzlicher Vertreter (SpO § 92 Nr. 1). Ob auch ein kleines Kind selbst auf der Zeile „Spieler“ unterschreiben muss, ist offen ({o:O11}). Bis dahin bietet der Assistent dem Kind ein freiwilliges Feld. Bleibt es leer, bleibt die Zeile im Antrag ohne Markierung, und das Passwesen entscheidet.",
       "Nach Zivilrecht vertreten Eltern ihr Kind gemeinsam (§ 1629 BGB).",
       "**Entscheidung der Jugendleitung (08.10.2026):** Ein Elternteil reicht. Bei „alleiniges Sorgerecht“, Vormund und Pflegeperson unterschreibt eine Person. {o:O26}",
-      "Bei getrennt lebenden Eltern entscheidet der Elternteil, bei dem das Kind lebt, Alltagsfragen allein (§ 1687 BGB). Ob der Vereinsbeitritt dazu zählt, sagt das Gesetz nicht. {offen} Der Assistent fragt deshalb, ob der andere Elternteil einverstanden ist. Ohne Einverständnis unterschreibt der andere Elternteil zusätzlich mit Stift.",
+      "Bei getrennt lebenden Eltern entscheidet der Elternteil, bei dem das Kind lebt, Alltagsfragen allein (§ 1687 BGB). Ob der Vereinsbeitritt dazu zählt, sagt das Gesetz nicht. {offen} Der Assistent fragt deshalb, ob der andere Elternteil einverstanden ist. Ohne Einverständnis unterschreibt der andere Elternteil zusätzlich, am Bildschirm oder mit Stift.",
       "Bei Vormund, Pflegefamilie oder Heim klärt die Jugendleitung persönlich ({a:faelle}).",
       "Die Erlaubnis für Fotos unterschreiben nur die Eltern. Jugendliche unterschreiben nicht zusätzlich. Das hat die 1. Vorsitzende am 11.10.2026 entschieden ({o:O65}).",
     ])}`;
@@ -1035,7 +1040,7 @@ function datenschutzAbschnitt() {
 
 // ---------- 10. Entscheidungen und offene Punkte ----------
 
-// Jede Zeile ist ein Punkt aus data/anmeldung.json › offenePunkte (Version 2026-10-11.1). Hier steht nur die kurze Frage
+// Jede Zeile ist ein Punkt aus data/anmeldung.json › offenePunkte (Version 2026-10-11.2). Hier steht nur die kurze Frage
 // (bei offenen Punkten dazu der Hintergrund). Stand, Priorität und der Text zum Stand kommen aus der Datei (punktZeile).
 // Die Listen sind nach dem Empfänger geordnet (an: vorstand, kassierer, datenschutz, versicherung, kreis_frankfurt,
 // grosser_rat_bdk, jugendleitung, regelwerk); das Passwesen sammelt die Punkte zum Betrieb von DFBnet (O24 und O25 an den
@@ -1053,8 +1058,8 @@ const VORSTAND = [
   ["O66", "Reparieren wir die Weiterleitung der Satzungsadresse im Aufnahmeantrag, oder ändern wir die Adresse im Vordruck?"],
   [
     "O68",
-    "Dürfen Vereinsunterlagen am Bildschirm unterschrieben werden?",
-    "Das wäre eine einfache elektronische Unterschrift. Die Form bestimmt der Verein selbst: Die Satzung verlangt Schriftform, nach § 127 BGB kann eine elektronische Übermittlung reichen. HFV-Vordrucke bleiben Stift. Der Laufzettel im PDF bittet den Vorstand, das zu bestätigen ({a:unterschrift}).",
+    "Dürfen alle Unterlagen am Bildschirm unterschrieben werden, auch die Blätter des Verbands?",
+    "Das ist eine einfache elektronische Unterschrift. Die Form bestimmt der Verein selbst: Die Satzung verlangt Schriftform, nach § 127 BGB kann eine elektronische Übermittlung reichen. Für die Blätter des Verbands verlangt JO § 37 Nr. 2 die eigenhändige Unterschrift. Der Laufzettel im PDF nennt das dem Verein ({a:unterschrift}).",
   ],
   [
     "O72",

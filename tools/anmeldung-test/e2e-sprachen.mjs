@@ -30,11 +30,13 @@
 //     die übersetzten Titel (fertig.teilTitel); alle sechs Meldungen zu "lateinische Buchstaben"
 //     (Name, Ort, Verein, Anschrift, Nummer, Text) mit Text in anderer Schrift im Feld; der Kasten für
 //     getrennt lebende Eltern auf "sorge" und "unterschriften"
+//   - Nachbesserung M9, Runde 2 (11.10.2026, Modus „bildschirm“): Feld des Kindes leer – der Hinweis am Feld ist ein einziger Satz (ohne den Satz zum
+//     Ausdruck mit Stift), Weiter geht, die Prüfseite zeigt in der Sprache „Nicht unterschrieben (freiwillig)“, die Fertig-Seite „alles am Bildschirm unterschrieben“
 //   - Bildschirmfotos von start, name, nachweise, unterschriften (auch der Ausschnitt mit Satzung und
 //     "Gilt für"), fertig (und Hilfe, Fehlermeldung, Heimweg, getrennte Eltern, lateinische
 //     Buchstaben) nach tools/cache/anmeldung-test/sprachen/
 //
-// Aufruf: node tools/anmeldung-test/e2e-sprachen.mjs [--sprache=ar] [--ein-beispiel] [--mangeltest]
+// Aufruf: node tools/anmeldung-test/e2e-sprachen.mjs [--sprache=ar] [--ein-beispiel] [--mangeltest] [--hfv=stift]
 //         --mangeltest: entfernt im Testserver einige Schlüssel aus der englischen Datei und prüft, dass
 //         der Durchlauf das bemerkt (Beweis, dass der Test einen fehlenden Text erkennt); Ausgabe nach
 //         tools/cache/anmeldung-test/sprachen-mangeltest/
@@ -57,6 +59,9 @@ const MOBIL = { name: "390x844", breite: 390, hoehe: 844 };
 
 const ARG_SPRACHE = (process.argv.find((a) => a.startsWith("--sprache=")) || "").split("=")[1] || null;
 const EIN_BEISPIEL = process.argv.includes("--ein-beispiel");
+// Schalter unterschriftHfv (data/anmeldung.json, Jugendleitung 11.10.2026): Standard ist der Stand der Daten („bildschirm“); --hfv=stift legt ihn nur im
+// Testserver um (Stand bis 11.10.2026), die Datei bleibt unverändert.
+const ARG_HFV = (process.argv.find((a) => a.startsWith("--hfv=")) || "").split("=")[1] || null;
 
 const NAMEN = { en: "Englisch", tr: "Türkisch", ar: "Arabisch" };
 const BEISPIELE = [
@@ -225,9 +230,13 @@ async function unterschreiben(page) {
 
 const ohneSteuer = (t) => String(t).replace(/[\u2060\u2066-\u2069\u200E\u200F\u202A-\u202E]/g, "").replace(/\u00A0/g, " ").replace(/\s+/g, " ").trim();
 
+// Modus des Schalters unterschriftHfv im laufenden Testserver (siehe starteTestserver({ hfv }))
+let SERVER_MODUS = "bildschirm";
+const serverModus = () => SERVER_MODUS;
+
 // Satzung-Block auf der Seite "unterschriften" und die "Gilt für"-Hinweise der Unterschriftsfelder.
 // Vor dem Unterschreiben aufrufen (die Felder sind dann noch leer).
-async function pruefeUnterschriftenSeite(page, code, sprache, dict, kennung) {
+async function pruefeUnterschriftenSeite(page, code, sprache, dict, kennung, beispielId) {
   const erwartet = dict.unterschriften.satzung;
   const dom = await page.evaluate(() => {
     const b = document.querySelector("#anmeldung .anm-satzung");
@@ -251,6 +260,32 @@ async function pruefeUnterschriftenSeite(page, code, sprache, dict, kennung) {
   const feldNamen = await page.$$eval("#anmeldung .anm-unterschrift", (l) => l.map((e) => e.getAttribute("data-unterschrift")));
   ok(kennung + ": ein Elternteil reicht: höchstens ein Unterschriftsfeld der Eltern, kein zweites Feld", !feldNamen.includes("sorgeberechtigte_2") && feldNamen.filter((w) => /^sorgeberechtigte/.test(w)).length <= 1, feldNamen.join(","));
   ok(kennung + ": Satzung-Block steht auf der Unterschriftenseite (Kästchen, nicht angekreuzt)", !!dom && dom.hakenDa && dom.angekreuzt === false, dom ? "" : "kein Satzung-Block");
+  // M9 (11.10.2026): Wahl „Am Bildschirm“ und das freiwillige Feld des Kindes (Modus „bildschirm“) tragen den Text der Sprache; im Modus „stift“ gibt es das Feld nicht
+  const bildschirmModus = serverModus() !== "stift";
+  const feldDom = await page.evaluate(() => ({
+    wahl: Array.from(document.querySelectorAll('#anmeldung input[data-pfad="unterschriftWeg"]')).map((i) => ({ wert: i.getAttribute("data-wert"), text: i.closest("label").innerText })),
+    felder: Array.from(document.querySelectorAll("#anmeldung .anm-unterschrift")).map((f) => ({
+      wer: f.getAttribute("data-unterschrift"),
+      titel: (f.querySelector(".anm-unterschrift__titel") || { textContent: "" }).textContent,
+      zusatz: (f.querySelector('[id$="-zusatz"]') || { textContent: "" }).textContent,
+    })),
+  }));
+  const erstesWahl = ohneSteuer(feldDom.wahl.find((w) => w.wert === "bildschirm").text);
+  const weg = dict.unterschriften.weg;
+  // Der Hinweis nennt die Blätter für den Fußball-Verband nur, wenn die Anmeldung welche hat (nicht bei „Karneval Kind“)
+  const mitVerbandsblaettern = beispielId !== "karneval-kind";
+  ok(kennung + ": die Wahl „Am Bildschirm“ trägt den Text der Sprache (" + (bildschirmModus ? "alles am Bildschirm" + (mitVerbandsblaettern ? ", auch die Blätter des Verbands" : ", nur Vereinsunterlagen") : "wo es erlaubt ist") + ")", bildschirmModus
+    ? erstesWahl.includes(ohneSteuer(weg.bildschirmAlles)) && (mitVerbandsblaettern ? erstesWahl.includes(ohneSteuer(weg.bildschirmAllesHinweis)) && !erstesWahl.includes(ohneSteuer(weg.bildschirmHinweis)) : erstesWahl.includes(ohneSteuer(weg.bildschirmHinweis)) && !erstesWahl.includes(ohneSteuer(weg.bildschirmAllesHinweis)))
+    : erstesWahl.includes(ohneSteuer(weg.bildschirm)) && erstesWahl.includes(ohneSteuer(weg.bildschirmHinweis)), erstesWahl.slice(0, 120));
+  const kindFeld = feldDom.felder.find((f) => f.wer === "spieler");
+  if (bildschirmModus && kindFeld) {
+    const vorlage = ohneSteuer(dict.unterschriften.person.spieler.kind).split("{name}");
+    const titelKind = ohneSteuer(kindFeld.titel);
+    ok(kennung + ": Feld des Kindes (freiwillig): Titel „" + vorlage.join("…") + "“ mit dem Zusatz der Sprache für „freiwillig“", titelKind.startsWith(vorlage[0]) && titelKind.includes(vorlage[1]) && titelKind.includes(ohneSteuer(dict.allgemein.freiwillig)), titelKind);
+    ok(kennung + ": Feld des Kindes: Hinweis in der Sprache („Kann Ihr Kind schon schreiben? …“), ohne deutschen Text", ohneSteuer(kindFeld.zusatz) === ohneSteuer(dict.unterschriften.person.spielerHinweis.kind.replace(/\n/g, " ")), ohneSteuer(kindFeld.zusatz));
+  } else if (!bildschirmModus) {
+    ok(kennung + ": Modus stift: kein Feld für das Kind", !kindFeld, feldDom.felder.map((f) => f.wer).join(","));
+  }
   if (!dom) return;
   ok(kennung + ": Satzung-Block übersetzt, deutscher Name (Satzung) in Klammern", ohneSteuer(dom.titel) === ohneSteuer(erwartet.titel) && ohneSteuer(dom.label).includes(ohneSteuer(erwartet.label)) && /\(Satzung\)/.test(ohneSteuer(dom.text)), ohneSteuer(dom.titel) + " | " + ohneSteuer(dom.label).slice(0, 80));
   if (dom.linkText !== null) ok(kennung + ": Satzung-Link und Zusatz für Screenreader übersetzt", ohneSteuer(dom.linkText).includes(ohneSteuer(erwartet.link)) && ohneSteuer(dom.linkZusatz || "").includes(ohneSteuer(erwartet.linkZusatz)), ohneSteuer(dom.linkText) + " | " + ohneSteuer(dom.linkZusatz || ""));
@@ -389,7 +424,7 @@ async function durchlauf(browser, server, sprache, beispiel, muster, txt) {
     if (s.schritt === "unterschriften") {
       if (!gefotografiert.has("satzung")) {
         gefotografiert.add("satzung");
-        await pruefeUnterschriftenSeite(page, code, sprache, dict, kennung);
+        await pruefeUnterschriftenSeite(page, code, sprache, dict, kennung, beispiel.id);
         await fotoSatzung(page, code, beispiel.id);
       }
       await unterschreiben(page);
@@ -594,13 +629,14 @@ async function einzelSorge(browser, server, sprache, muster, dict) {
       const b = document.querySelector("#anmeldung [data-zweiter-elternteil]");
       return b && b.getClientRects().length ? b.innerText : null;
     });
-  const zeilen = String(dict.sorge.zweiterMitStift).split("\n").map(ohneSteuer);
+  // Modus „bildschirm“ (M9): Kasten „Das geht am Bildschirm. Oder mit Stift im Ausdruck.“; Modus „stift“: „Das geht nur mit Stift.“
+  const zeilen = String(serverModus() === "stift" ? dict.sorge.zweiterMitStift : dict.sorge.zweiterAmBildschirm).split("\n").map(ohneSteuer);
   ok(kennung + ": bei 'beide Eltern' steht der Kasten nicht da", (await kastenText()) === null);
   const getrennt = await page.$eval('#anmeldung input[data-pfad="sorge"][data-wert="getrennt_bei_mir"]', (e) => e.id);
   await page.click('#anmeldung label[for="' + getrennt + '"]');
   await warte(200);
   const t1 = await kastenText();
-  ok(kennung + ": Kasten mit dem Hinweis 'nur mit Stift' erscheint, in der Sprache", t1 !== null && zeilen.every((z) => ohneSteuer(t1).includes(z)), t1 ? ohneSteuer(t1).slice(0, 160) : "kein Kasten");
+  ok(kennung + ": Kasten zum anderen Elternteil (" + (serverModus() === "stift" ? "nur mit Stift" : "am Bildschirm oder mit Stift im Ausdruck") + ") erscheint, in der Sprache", t1 !== null && zeilen.every((z) => ohneSteuer(t1).includes(z)), t1 ? ohneSteuer(t1).slice(0, 160) : "kein Kasten");
   const p1 = await seitenPruefung(page, muster);
   ok(kennung + ": Seite 'sorge' ohne deutschen Text und ohne Textschlüssel", p1.treffer.length === 0, p1.treffer.slice(0, 2).join(" | "));
   await foto(page, code, "einzeln", "getrennte-eltern");
@@ -622,6 +658,56 @@ async function einzelSorge(browser, server, sprache, muster, dict) {
   }
   const t2 = s.schritt === "unterschriften" ? await kastenText() : null;
   ok(kennung + ": derselbe Kasten steht auf der Unterschriftenseite", t2 !== null && zeilen.every((z) => ohneSteuer(t2).includes(z)), s.schritt + (t2 ? " | " + ohneSteuer(t2).slice(0, 100) : ""));
+  ok(kennung + ": keine Fehler in der Konsole, keine Warnung \"Text fehlt\"", page.__st.konsole.length === 0 && page.__st.warnungen.length === 0, page.__st.konsole.concat(page.__st.warnungen).slice(0, 3).join(" | "));
+  await page.close();
+}
+
+// Nachbesserung M9, Runde 2 (11.10.2026): Das Feld des Kindes bleibt leer (Modus „bildschirm“). Der Hinweis am Feld ist ein einziger Satz, Weiter geht, die
+// Prüfseite zeigt das leere Feld in der Sprache neutral („Nicht unterschrieben (freiwillig)“, nicht „mit Stift“), die Fertig-Seite sagt, dass alles am
+// Bildschirm unterschrieben ist (die Zeile des Kindes im Antrag auf Spielerlaubnis bleibt ohne Markierung).
+async function einzelKindLeer(browser, server, sprache, muster, dict) {
+  if (serverModus() === "stift") return;
+  const code = sprache.code;
+  const kennung = NAMEN[code] + ", Feld des Kindes leer";
+  const page = await neueSeite(browser, server, code + "-kind-leer");
+  await waehleSpracheAufStart(page, code);
+  await ladeBeispiel(page, "kind-neu");
+  let s = await stand(page);
+  for (let i = 0; i < 60 && s.schritt !== "unterschriften"; i++) {
+    const r = await klickeWeiter(page, s);
+    if (!r.gewechselt) break;
+    s = await stand(page);
+  }
+  ok(kennung + ": Schritt 'unterschriften' erreicht", s.schritt === "unterschriften", s.schritt);
+  const hinweis = dict.unterschriften.person.spielerHinweis;
+  ok(kennung + ": Hinweis am Feld des Kindes ist ein einziger Satz, ohne den Satz zum Ausdruck mit Stift", !String(hinweis.kind).includes("\n") && !String(hinweis.selbst).includes("\n"), String(hinweis.kind));
+  await haekchenSatzung(page);
+  const canvas = await page.$('#anmeldung .anm-unterschrift[data-unterschrift="sorgeberechtigte"] canvas');
+  await zeichne(page, canvas);
+  await page.waitForFunction(() => document.querySelectorAll("#anmeldung .anm-unterschrift--fertig").length >= 1, { timeout: 5000 }).catch(() => {});
+  const zusatz = await page.$eval('#anmeldung .anm-unterschrift[data-unterschrift="spieler"] [id$="-zusatz"]', (e) => e.textContent).catch(() => "");
+  ok(kennung + ": Hinweis am Feld des Kindes steht in der Sprache und ist der Satz ohne den zum Ausdruck", ohneSteuer(zusatz) === ohneSteuer(String(hinweis.kind).replace(/\n/g, " ")), ohneSteuer(zusatz));
+  const r = await klickeWeiter(page, s);
+  ok(kennung + ": Weiter geht ohne die Unterschrift des Kindes", r.gewechselt && r.fehler.length === 0, JSON.stringify(r));
+  s = await stand(page);
+  ok(kennung + ": Prüfseite erreicht", s.schritt === "pruefen", s.schritt);
+  if (s.schritt === "pruefen") {
+    const zeilen = await page.$$eval("#anmeldung .anm-pruefzeile", (l) => l.map((z) => ({ label: (z.querySelector("dt") || { textContent: "" }).textContent, wert: (z.querySelector(".anm-pruefzeile__wert") || { textContent: "" }).textContent })));
+    const vorlage = ohneSteuer(dict.unterschriften.person.spieler.kind).split("{name}");
+    // Die Zeile des Kindes trägt den Vornamen (Beispiel „Kind neu“: Mila); „İmza: {name}“ im Türkischen beginnt wie die Zeile der Eltern
+    const kind = zeilen.find((z) => ohneSteuer(z.label).startsWith(vorlage[0]) && ohneSteuer(z.label).includes(vorlage[1]) && ohneSteuer(z.label).includes("Mila")) || { label: "", wert: "" };
+    ok(kennung + ": Prüfseite: das leere Feld des Kindes steht in der Sprache als „" + ohneSteuer(dict.pruefen.werte.nichtUnterschriebenFreiwillig) + "“ (nicht „mit Stift“)", ohneSteuer(kind.wert) === ohneSteuer(dict.pruefen.werte.nichtUnterschriebenFreiwillig) && ohneSteuer(kind.wert) !== ohneSteuer(dict.pruefen.werte.mitStift), ohneSteuer(kind.label) + " = " + ohneSteuer(kind.wert));
+    const p = await seitenPruefung(page, muster);
+    ok(kennung + ": Prüfseite ohne deutschen Text und ohne Textschlüssel", p.treffer.length === 0, p.treffer.slice(0, 2).join(" | "));
+    await foto(page, code, "kind-leer", "pruefen");
+    const r2 = await klickeWeiter(page, s);
+    ok(kennung + ": Weiter zur Fertig-Seite", r2.gewechselt && r2.fehler.length === 0, JSON.stringify(r2));
+    await page.waitForFunction(() => document.querySelector('#anmeldung [data-status="fertig"], #anmeldung [data-status="fehler"]'), { timeout: 30000 }).catch(() => {});
+    const schritte = await page.$eval("#anmeldung .anm-naechste", (e) => e.innerText).catch(() => "");
+    const zeilenFertig = String(dict.fertig.unterschriftFertig).split("\n").map(ohneSteuer).filter(Boolean);
+    const rest = String(dict.fertig.unterschriftRest).split("\n").map(ohneSteuer).filter(Boolean);
+    ok(kennung + ": Fertig-Seite: „alles am Bildschirm unterschrieben“ in der Sprache, nicht „Einige Unterschriften fehlen noch“", zeilenFertig.every((z) => ohneSteuer(schritte).includes(z)) && !rest.some((z) => ohneSteuer(schritte).includes(z)), ohneSteuer(schritte).slice(0, 160));
+  }
   ok(kennung + ": keine Fehler in der Konsole, keine Warnung \"Text fehlt\"", page.__st.konsole.length === 0 && page.__st.warnungen.length === 0, page.__st.konsole.concat(page.__st.warnungen).slice(0, 3).join(" | "));
   await page.close();
 }
@@ -691,8 +777,9 @@ async function main() {
   }
 
   // 2. Server und Browser
-  const server = await starteTestserver();
-  console.log("\nServer: " + server.basis + " (docs/)");
+  const server = await starteTestserver(ARG_HFV ? { hfv: ARG_HFV } : {});
+  SERVER_MODUS = server.hfv;
+  console.log("\nServer: " + server.basis + " (docs/), Schalter unterschriftHfv: " + server.hfv);
   if (MANGELTEST) await erzeugeMangel();
   const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ["--no-first-run"] });
   try {
@@ -715,6 +802,7 @@ async function main() {
       await einzelpruefungen(browser, server, s, muster, txt);
       await einzelLateinisch(browser, server, s, dict);
       await einzelSorge(browser, server, s, muster, dict);
+      await einzelKindLeer(browser, server, s, muster, dict);
     }
   } finally {
     await browser.close();

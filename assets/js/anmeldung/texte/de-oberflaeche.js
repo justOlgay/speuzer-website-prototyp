@@ -518,6 +518,8 @@ export default {
     // Getrennt lebende Eltern ohne Zustimmung: ein einziger Kasten auf "sorge" und auf "unterschriften"
     // (Runde 4: ersetzt den Kasten des Regelwerks "getrennt_zustimmung" auf der Seite "sorge").
     zweiterMitStift: "Hat der andere Elternteil zugestimmt? Dann setzen Sie den Haken.\nWenn nicht: Er unterschreibt den Aufnahmeantrag auch.\nDas geht nur mit Stift. Im PDF ist die Stelle markiert.",
+    // Modus "bildschirm" (Entscheidung der Jugendleitung vom 11.10.2026): Er kann am Bildschirm unterschreiben (eigenes Feld im Schritt "Unterschriften").
+    zweiterAmBildschirm: "Hat der andere Elternteil zugestimmt? Dann setzen Sie den Haken.\nWenn nicht: Er unterschreibt den Aufnahmeantrag auch.\nDas geht am Bildschirm. Oder mit Stift im Ausdruck.",
     personen: {
       titel: { kind: "Wer entscheidet für {name}?", selbst: "Wer entscheidet für Sie?" },
       hinweis: "Wir fragen später nach der Telefonnummer.",
@@ -758,6 +760,9 @@ export default {
     weg: {
       bildschirm: "Am Bildschirm, wo es erlaubt ist",
       bildschirmHinweis: "Vereinsunterlagen unterschreiben Sie hier mit dem Finger.",
+      // Modus "bildschirm" (Entscheidung der Jugendleitung vom 11.10.2026): auch die Blätter für den Fußball-Verband
+      bildschirmAlles: "Am Bildschirm",
+      bildschirmAllesHinweis: "Sie unterschreiben alles hier mit dem Finger. Auch die Blätter für den Fußball-Verband.",
       papier: "Ich unterschreibe alles auf Papier",
       papierHinweis: "Sie drucken die Datei aus und unterschreiben mit Stift.",
     },
@@ -781,7 +786,15 @@ export default {
       sorgeberechtigte: "Unterschrift von {person}",
       ersteEltern: "Unterschrift: Mutter oder Vater",
       kontoinhaber: "Unterschrift des Kontoinhabers: {person}",
-      spieler: "Unterschrift der Spielerin oder des Spielers",
+      // Modus "bildschirm": freiwilliges Feld für das Kind als Spielerin oder Spieler (Antrag auf Spielerlaubnis, Abmeldung beim alten Verein)
+      spieler: { kind: "Unterschrift von {name}", selbst: "Ihre Unterschrift" },
+      spielerHinweis: {
+        kind: "Kann Ihr Kind schon schreiben? Dann unterschreibt es hier selbst.",
+        selbst: "Sie sind noch nicht 18. Unterschreiben Sie hier auch selbst.",
+      },
+      // Modus "bildschirm": Feld für den anderen Elternteil (getrennt lebende Eltern ohne Einverständnis)
+      zweiteEltern: "Unterschrift: der andere Elternteil",
+      zweiteHinweis: "Der andere Elternteil unterschreibt hier selbst.\nOder er unterschreibt später mit Stift im Ausdruck.",
       ersteSorge: "Ihre Unterschrift",
     },
     stand0: "Noch nicht unterschrieben",
@@ -892,7 +905,7 @@ export default {
       },
       zahlung: { sepa: "Lastschrift", rechnung: "Rechnung" },
       kontoinhaber: { mitglied: "Ich selbst", sorgeberechtigt: "Ich selbst", andere: "Eine andere Person" },
-      unterschriftWeg: { bildschirm: "Am Bildschirm, wo es erlaubt ist", papier: "Alles auf Papier" },
+      unterschriftWeg: { bildschirm: "Am Bildschirm, wo es erlaubt ist", bildschirmAlles: "Am Bildschirm", papier: "Alles auf Papier" },
       hfvUnterschrift: { training: "Beim ersten Training", selbst_drucken: "Selbst ausdrucken" },
       habe: "Habe ich",
       fehlt: "Fehlt noch",
@@ -900,6 +913,8 @@ export default {
       fotoDa: "Foto ist da",
       unterschrieben: "Unterschrieben",
       nichtUnterschrieben: "Noch nicht unterschrieben",
+      nichtUnterschriebenFreiwillig: "Nicht unterschrieben (freiwillig)",
+      mitStift: "Nicht am Bildschirm – mit Stift im Ausdruck",
       betragJahr: "{gruppe}, {jahr} Euro im Jahr",
     },
     hinweiseTitel: "Das sollten Sie wissen",
@@ -959,6 +974,8 @@ export default {
     unterschriftDruckenTeil: "Drucken Sie die Blätter für den Fußball-Verband aus. Unterschreiben Sie an den blauen Markierungen mit Stift.",
     unterschriftTrainingAlle: "Alle Blätter unterschreiben Sie beim ersten Training mit Stift. Der Verein druckt sie aus.",
     unterschriftFertig: "Sie haben alles am Bildschirm unterschrieben. Was Sie ausdrucken müssen, steht in Teil A der Datei.",
+    // Modus "bildschirm": ein freiwilliges Feld (Kind, anderer Elternteil) blieb leer
+    unterschriftRest: "Einige Unterschriften fehlen noch. Das sind die blauen Markierungen im PDF.\nUnterschreiben Sie dort mit Stift. Was Sie ausdrucken müssen, steht in Teil A der Datei.",
     fehltTitel: "Diese Unterlagen fehlen noch:",
     fehltHinweis: "Bringen Sie sie mit, sobald Sie sie haben.",
     abgeben: "Geben Sie die Unterlagen im Verein ab.\nBringen Sie die Datei auf dem Handy mit. Oder geben Sie sie ausgedruckt ab.",

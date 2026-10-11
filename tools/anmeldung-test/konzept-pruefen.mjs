@@ -340,7 +340,7 @@ gruppe("2  Stand der Punkte gegen data/anmeldung.json");
   hinweis("keine Zeile und kein Text mit dem Kennzeichen „neu“ (Punkte ohne O-Nummer gibt es nicht mehr)", neuMarken.length === 0 && neuText.length === 0,
     [...neuMarken.map((k) => `Kennzeichen „neu“: ${textVon(k.tag === "tr" ? k : k.eltern || k).slice(0, 80)}`), ...neuText.map((t) => `Text: ${t}`)]);
 
-  // O67 und O68 stehen sichtbar mit ihrem Inhalt auf der Seite (beide bleiben offen)
+  // O67 steht offen, O68 und O01 stehen entschieden (11.10.2026, Jugendleitung) sichtbar mit ihrem Inhalt auf der Seite
   const sichtbarMit = (oid, muster) => {
     const z = (nachId.get(oid.toLowerCase()) || [])[0];
     if (!z) return false;
@@ -349,8 +349,11 @@ gruppe("2  Stand der Punkte gegen data/anmeldung.json");
   };
   pruefe("O67: Rechtsgrundlage der Notfallkontakte (Art. 6 Abs. 1 lit. b oder f) steht sichtbar auf der Seite",
     sichtbarMit("O67", [/Notfallkontakte/, /Art\. 6/, /lit\. b/, /lit\. f/]));
-  pruefe("O68: Bildschirm-Unterschrift der Vereinsunterlagen (§ 127 BGB) steht sichtbar auf der Seite, mit dem Stand (Jugendleitung befürwortet, Antwort der 1. Vorsitzenden steht aus)",
-    sichtbarMit("O68", [/Bildschirm/, /§ 127 BGB/, /Stift/, /Jugendleitung befürwortet \(08\.10\.2026\)/, /Antwort steht aus/]));
+  pruefe("O68: Entscheidung der Jugendleitung steht sichtbar auf der Seite (alles am Bildschirm, auch die Blätter des Verbands; sonst wieder auf Stift)",
+    sichtbarMit("O68", [/Bildschirm/, /Blätter des Verbands/, /Stift/, /Jugendleitung, 11\.10\.2026/, /Widerspricht der Verband/]));
+  pruefe("O68 und O01 sind entschieden: Kennzeichen „Entschieden“, nicht „offen“; O01 verweist auf O68, die Antwort der Passstelle und den Schalter",
+    sichtbarMit("O01", [/Vorerst gilt O68/, /Antwort der Passstelle steht aus/, /unterschriftHfv/, /„stift“/]) &&
+      ["O01", "O68"].every((id) => (nachId.get(id.toLowerCase()) || [])[0] && nachId.get(id.toLowerCase())[0].attrs["data-status"] === "entschieden"));
 
   // 2.5 Kasten „Stand“ ganz oben: Datum, Gesamtzahl und Zahl je Stand kommen aus den Daten
   const kasten = alle(baum, (k) => k.attrs.id === "stand")[0];
@@ -485,11 +488,25 @@ gruppe("4  Endstand in den Abschnitten „Assistent“, „PDF“ und „Untersc
     text.length ? alleEnthalten(text, muster).map((m) => "fehlt: " + m) : ["Abschnitt nicht gefunden"]);
 
   kriterium("a  Teile und Namen: Teil A, B und C stehen im Abschnitt „Was im PDF steht“", P, ["Teil A – Für Sie", "Teil B – Für den Verein", "Teil C – Vertraulich, getrennt abgeben"]);
-  kriterium("b1 Unterschrift: Vereinsunterlagen am Bildschirm, Vordrucke des HFV mit Stift", U, [/Am Bildschirm/, /Mit Stift/, /Vordrucke des HFV/]);
+  kriterium("b1 Unterschrift: alles am Bildschirm, auch die Blätter des Verbands (Jugendleitung, 11.10.2026, O68); Schalter „stift“ als Weg zurück; Antwort der Passstelle O01", U,
+    [/Am Bildschirm/, /Blätter des Verbands/, /11\.10\.2026/, /O68/, /Schalter/, /„stift“/, /O01/, /Mit Stift/, /Ärztin oder der Arzt/, /Stempel des Vereins/]);
+  pruefe("b1 die Seite sagt nicht mehr, die Vordrucke des HFV würden mit Stift unterschrieben (ohne Schalter „stift“)",
+    U.length > 0 && !/Vordrucke des HFV unterschreibt sie mit Stift|Vordrucke des HFV\W{1,4}Mit Stift auf Papier|Die Vordrucke des HFV unterschreibt/.test(U) && !/Jugendleitung befürwortet/.test(U),
+    ["Abschnitt „Die Unterschrift“ beschreibt noch den Stand bis 11.10.2026 als aktuell"]);
+  kriterium("b1 Recht: einfache elektronische Signatur, § 127 BGB, eIDAS; der Laufzettel nennt dem Verein den Weg bei einem Original mit Stift", U,
+    [/einfache elektronische Signatur/, /§ 127 BGB/, /eIDAS/, /JO § 37 Nr\. 2/, /SpO § 92/, /Laufzettel/, /Original mit Stift/]);
   kriterium("b2 Satzungs-Haken ist Pflicht; der Link führt auf die Satzung der Website, die Adresse im Vordruck ist defekt (O66)", U,
     [/Satzung/, /Haken/, /Pflicht/, /Satzung der Website/, /Adresse im Vordruck/, /defekt/, /O66/]);
-  kriterium("b3 ein Elternteil reicht (Jugendleitung, O26); Ausnahme zweiter Elternteil: getrennt lebende Eltern ohne Einverständnis, Stift-Unterschrift nötig", U,
-    [/Ein Elternteil reicht/, /Jugendleitung/, /08\.10\.2026/, /O26/, /Zweiter Elternteil \(nötig\)/, /getrennt/, /nicht einverstanden/, /nur mit Stift/]);
+  kriterium("b3 ein Elternteil reicht (Jugendleitung, O26); Ausnahme zweiter Elternteil: getrennt lebende Eltern ohne Einverständnis, eigenes freiwilliges Feld am Bildschirm, leer: Stift-Markierung", U,
+    [/Ein Elternteil reicht/, /Jugendleitung/, /08\.10\.2026/, /O26/, /Zweiter Elternteil \(nötig\)/, /getrennt/, /nicht einverstanden/, /eigenes Feld am Bildschirm/, /freiwillig/, /mit Stift markiert/, /Laufzettel nennt es/]);
+  kriterium("b3 das Kind als Spielerin oder Spieler: freiwilliges Feld „Kann Ihr Kind schon schreiben? Dann unterschreibt es hier selbst.“, leer: Zeile im Antrag ohne Markierung, Laufzettel sagt, dass das Passwesen entscheidet; nur die Abmeldung bekommt die Stift-Markierung; offene Frage O11", U,
+    [/Das Kind als Spielerin oder Spieler/, /Kann Ihr Kind schon schreiben\? Dann unterschreibt es hier selbst\./, /freiwilliges Feld/, /Zeile im Antrag auf Spielerlaubnis ohne Markierung/, /Nicht unterschrieben \(freiwillig\)/,
+      /Das Kind hat den Antrag nicht unterschrieben\. Das Passwesen entscheidet, ob das nötig ist\./, /Nur die Abmeldung beim alten Verein bekommt bei leerem Feld die Stift-Markierung/, /O11/]);
+  pruefe("b3 das leere Kinderfeld heißt nicht mehr „mit Stift markiert“ (nur der zweite Elternteil und die Abmeldung)",
+    U.length > 0 && !/Bleibt es leer, ist die Stelle im PDF mit Stift markiert, und der Laufzettel nennt es\. Ob ein kleines Kind/.test(U) && !/Sonst unterschreibt es später mit Stift/.test(U),
+    ["Abschnitt „Die Unterschrift“ sagt beim Kind noch, die leere Stelle sei mit Stift markiert"]);
+  kriterium("b3 Datum und Papier: Ort und Datum der Anmeldung auch auf den Blättern des Verbands; Teil A nennt nur, was auf Papier muss („Sie müssen nichts ausdrucken.“); Schalter unterschriftHfv in data/anmeldung.json", U,
+    [/Ort und Datum der Anmeldung/, /Datumsfeld/, /Sie müssen nichts ausdrucken/, /Abmeldung beim alten Verein \(Einschreiben\)/, /unterschriftHfv/, /data\/anmeldung\.json/, /bildschirm/, /stift/]);
   pruefe("b3 der zweite Elternteil ist nicht mehr freiwillig oder empfohlen", U.length > 0 && !/Seine Unterschrift ist freiwillig|Wir empfehlen beide|Empfehlung/.test(U), ["Abschnitt „Die Unterschrift“ nennt noch eine freiwillige oder empfohlene zweite Unterschrift"]);
   kriterium("b4 keine leeren Erklärungsfelder unter einer Bildschirm-Unterschrift; sonst wird die Stelle zur Stift-Stelle", U,
     [/leeren Erklärungsfelder/, /Stift-Stelle/, /Bildschirm-Unterschrift/]);

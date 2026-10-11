@@ -388,10 +388,11 @@ export const sorge = {
       const einverstanden = h("div", { klasse: "anm-block" },
         kaestchen(k, { pfad: "andererElternteilEinverstanden", label: k.t("sorge.recht.einverstanden"), hinweis: k.t("sorge.recht.einverstandenHinweis") }));
       k.bedingt(einverstanden, () => k.a.sorge === "getrennt_bei_mir");
-      // Ohne Zustimmung des anderen Elternteils muss er selbst mit Stift unterschreiben. Dieser Kasten ist
+      // Ohne Zustimmung des anderen Elternteils muss er selbst unterschreiben: im Modus "bildschirm" (Entscheidung der
+      // Jugendleitung vom 11.10.2026) am Bildschirm oder mit Stift, sonst nur mit Stift. Dieser Kasten ist
       // der einzige "Achtung"-Kasten der Seite (der Hinweis "getrennt_zustimmung" des Regelwerks steht hier
       // nicht, siehe HINWEIS_ORT in seiten-ende.js).
-      const zweiter = h("div", { klasse: "anm-block", "data-zweiter-elternteil": "" }, hinweisKasten("offen", k.t("pruefen.hinweisArt.warnung"), absaetze(k.t("sorge.zweiterMitStift"))));
+      const zweiter = h("div", { klasse: "anm-block", "data-zweiter-elternteil": "" }, hinweisKasten("offen", k.t("pruefen.hinweisArt.warnung"), absaetze(k.t(k.hfvAmBildschirm() ? "sorge.zweiterAmBildschirm" : "sorge.zweiterMitStift"))));
       k.bedingt(zweiter, () => zweiterElternteilNoetig(k.a));
       return {
         titel: k.t("sorge.recht.titel"),

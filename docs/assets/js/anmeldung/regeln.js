@@ -12,6 +12,8 @@
                                  entfallen, Entscheidung der 1. Vorsitzenden vom 11.10.2026), Unterschriften,
                                  Hinweisen, Fristen, Weiterleitung, Beitrag und Fehlend-Liste
     alterAm, altersklasse, istMinderjaehrig  kleine Hilfen
+    unterschriftHfv(konfig)      Schalter „Blätter des Verbands am Bildschirm oder mit Stift“ (data/anmeldung.json ›
+                                 unterschriftHfv): "bildschirm" (Entscheidung der Jugendleitung vom 11.10.2026) oder "stift"
 
   Grundsätze:
   - Jede Regel nennt ihre Quelle (Dokument, Paragraph, Stand). Kürzel: JO = HFV-Jugendordnung
@@ -31,7 +33,7 @@
   Datenschutz: Das Modul liest nur die übergebenen Antworten. Es speichert und sendet nichts.
 */
 
-export const VERSION = "2026-10-11.1";
+export const VERSION = "2026-10-11.2";
 
 // ---------------------------------------------------------------------------
 // Schlüssel-Register: alle Schlüssel, die auswerten() zurückgeben kann. Zu jedem
@@ -278,6 +280,20 @@ export function altersklasse(geburtsdatum, konfig) {
 export function istMinderjaehrig(a, heute) {
   const alter = alterAm(a && a.geburtsdatum, heute);
   return alter === null ? null : alter < 18;
+}
+
+// Wie unterschreibt die Familie die Blätter des Verbands (HFV-Vordrucke: Antrag auf Spielerlaubnis, Vollmacht, Abmeldung beim
+// alten Verein, Einverständnis für Spiele bei den Herren)? Der Schalter steht in data/anmeldung.json › unterschriftHfv.wert:
+//   "bildschirm"  Alle Unterschriften der Familie entstehen am Bildschirm, auch auf den Blättern des Verbands (Entscheidung der
+//                 Jugendleitung vom 11.10.2026, Punkt O68; Standard). Ärztin oder Arzt und Verein unterschreiben weiter mit Stift.
+//   "stift"       Bisheriges Verhalten: Die Blätter des Verbands bleiben für die Unterschrift mit Stift offen (JO § 37 Nr. 2:
+//                 eigenhändige Unterschrift; SpO § 92: unterzeichneter Original-Antrag). Das ist der Weg zurück, falls der Verband
+//                 die Bildschirm-Unterschrift nicht anerkennt.
+// Fehlt der Schalter oder hat er einen anderen Wert, gilt "stift": im Zweifel der vorsichtige Weg.
+export function unterschriftHfv(konfig) {
+  const schalter = konfig && konfig.anmeldung && konfig.anmeldung.unterschriftHfv;
+  const wert = schalter && typeof schalter === "object" ? schalter.wert : schalter;
+  return wert === "bildschirm" ? "bildschirm" : "stift";
 }
 
 // ---------------------------------------------------------------------------
@@ -1047,9 +1063,11 @@ function bestimmeFormulare(unterlagen) {
 // Wer unterschreibt? Erwachsene selbst. Bei Minderjährigen die Sorgeberechtigten: Der HFV verlangt einen gesetzlichen
 // Vertreter (SpO § 92 Nr. 1, JO § 37 Nr. 2). Entscheidung der Jugendleitung vom 08.10.2026 (O26): Ein Elternteil reicht.
 // Bei "beide", "allein", "vormund" und "pflege" unterschreibt eine Person mit Sorgerecht (bzw. der Vormund).
-// Ausnahme: Leben die Eltern getrennt und der andere Elternteil ist nicht einverstanden, unterschreibt er zusätzlich mit
-// Stift. Grund ist die gemeinsame Vertretung (BGB § 1629): Ohne Zustimmung darf ein Elternteil nicht allein für beide
-// handeln. Mit Einverständnis entscheidet der Elternteil, bei dem das Kind lebt, im Alltag allein (BGB § 1687).
+// Ausnahme: Leben die Eltern getrennt und der andere Elternteil ist nicht einverstanden, unterschreibt er zusätzlich. Grund
+// ist die gemeinsame Vertretung (BGB § 1629): Ohne Zustimmung darf ein Elternteil nicht allein für beide handeln. Mit
+// Einverständnis entscheidet der Elternteil, bei dem das Kind lebt, im Alltag allein (BGB § 1687). Wie er unterschreibt,
+// steht nicht hier: Im Modus "bildschirm" (unterschriftHfv, Entscheidung der Jugendleitung vom 11.10.2026) hat er ein eigenes
+// Feld am Bildschirm (bleibt es leer, steht dort eine Stift-Markierung); im Modus "stift" unterschreibt er nur mit Stift.
 //   erste     wer unterschreibt die gedruckte Zeile des Aufnahmeantrags (Seite 2) und die Foto-Einwilligung (Seite 3)
 //   zweite    zusätzliche Zeile auf Seite 2, nur bei getrennt lebenden Eltern ohne Einverständnis, sonst null
 //   einer     wer unterschreibt die übrigen Blätter
@@ -1075,7 +1093,11 @@ function bestimmeUnterschriften(p, formulare) {
         break;
       case "datenschutz": st(f, "kenntnisnahme", r.einer); break;
       case "hfv_antrag":
-        // HFV-Vordrucke nur mit Stift (JO § 37 Nr. 2: eigenhändige Unterschrift; SpO § 92: Original 2 Jahre aufbewahren)
+        // Blätter des Verbands: JO § 37 Nr. 2 verlangt die eigenhändige Unterschrift, SpO § 92 den unterzeichneten Original-Antrag
+        // (2 Jahre aufbewahren). Entscheidung der Jugendleitung vom 11.10.2026 (O68): Die Familie unterschreibt trotzdem am
+        // Bildschirm; verlangt der Verband das Original mit Stift, stellt der Schalter unterschriftHfv zurück. Die Rollen
+        // bleiben in beiden Fällen gleich; ob Bild, Stift-Markierung oder (leere Zeile des Kindes) keine Markierung entsteht, entscheiden
+        // Oberfläche und pdf.js.
         st(f, "spieler", minor ? "spieler" : "mitglied");
         if (minor) st(f, "erziehungsberechtigte", r.einer);
         st(f, "verein", "verein");

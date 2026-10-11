@@ -228,20 +228,31 @@ const FAMILIE = ["mitglied", "sorgeberechtigte", "sorgeberechtigte_beide", "kont
 // Schlüssel in bilder.unterschriften (SCHNITTSTELLEN Abschnitt 6): mitglied
 // (Erwachsene), sorgeberechtigte (eine Person mit Sorgerecht; Entscheidung der Jugendleitung
 // vom 08.10.2026: Ein Elternteil reicht), kontoinhaber (nur, wenn eine andere Person das Konto
-// hat), spieler. Den zweiten Elternteil (getrennt lebende Eltern ohne Einverständnis) gibt es
-// hier nicht: Er unterschreibt mit Stift, Hinweis und Stift-Stelle stehen im PDF.
-const REIHENFOLGE = ["mitglied", "sorgeberechtigte", "kontoinhaber", "spieler"];
+// hat). Dazu kommen im Modus "bildschirm" (Schalter unterschriftHfv, Entscheidung der Jugendleitung
+// vom 11.10.2026) zwei freiwillige Felder: spieler (das Kind als Spielerin oder Spieler) und
+// sorgeberechtigte_2 (der zweite Elternteil bei getrennt lebenden Eltern ohne Einverständnis).
+// Bleibt ein freiwilliges Feld leer, steht im PDF an der Stelle die Stift-Markierung. Einzige Ausnahme
+// (Nachbesserung Runde 2): Die Zeile des Kindes im Antrag auf Spielerlaubnis bleibt dann leer, ohne
+// Markierung (kleine Kinder können noch nicht schreiben; das Passwesen entscheidet, ob die Unterschrift
+// nötig ist). Im Modus "stift" gibt es beide Felder nicht: Der zweite Elternteil unterschreibt mit Stift
+// (Hinweis und Stift-Stelle stehen im PDF), und die Blätter des Verbands sind Stift-Blätter.
+const REIHENFOLGE = ["mitglied", "sorgeberechtigte", "sorgeberechtigte_2", "kontoinhaber", "spieler"];
+const FREIWILLIG = ["spieler", "sorgeberechtigte_2"];
+// Stellen, die im PDF ohne Markierung bleiben, wenn das freiwillige Feld leer ist (Gegenstück: Art "leer" in pdf.js).
+const OHNE_MARKIERUNG = ["hfv_antrag.spieler"];
 
 // Plan der Unterschriften: Für welche Person gibt es ein Feld am Bildschirm
-// (wer, Stellen), welche Seiten unterschreibt die Familie mit Stift? Ob
+// (wer, Stellen, freiwillig), welche Seiten unterschreibt die Familie mit Stift? Ob
 // eine Stelle am Bildschirm erlaubt ist, steht je Formular in
-// konfig.formulare (digitaleUnterschrift). Bei "alles auf Papier" ist keine
+// konfig.formulare (digitaleUnterschrift: "erlaubt" = Vereinsformular; "nicht_erlaubt" =
+// Blatt des Verbands, dort entscheidet der Schalter unterschriftHfv). Bei "alles auf Papier" ist keine
 // Stelle am Bildschirm erlaubt. `stellen` sind Schlüssel wie
 // "aufnahmeantrag.s3.unterschrift"; ihre Namen stehen in den Regeltexten.
 export function unterschriftenPlan(k) {
   const e = k.ergebnis() || {};
   const formulare = (k.konfig.formulare && k.konfig.formulare.formulare) || {};
   const papier = k.a.unterschriftWeg === "papier";
+  const hfvBildschirm = k.hfvAmBildschirm();
   const personen = new Map();
   const stift = [];
   const merke = (schluessel, stelle) => {
@@ -254,9 +265,15 @@ export function unterschriftenPlan(k) {
     // Ohne Eintrag ist es ein eigenes Blatt des Vereins (Datenschutz, Notfall,
     // Einverständnisse), das am Bildschirm unterschrieben werden darf.
     const eintrag = formulare[s.formular];
-    const digital = !papier && (eintrag && eintrag.digitaleUnterschrift ? eintrag.digitaleUnterschrift === "erlaubt" : !eintrag);
+    const digital = !papier && (eintrag && eintrag.digitaleUnterschrift ? eintrag.digitaleUnterschrift === "erlaubt" || hfvBildschirm : !eintrag);
     if (!digital) {
       if (!stift.includes(s.formular)) stift.push(s.formular);
+      continue;
+    }
+    // Der zweite Elternteil hat nur im Modus "bildschirm" ein eigenes Feld; sonst unterschreibt er mit Stift
+    // (der Hinweiskasten erklärt es, die Stift-Stelle steht im PDF).
+    if (s.wer === "sorgeberechtigte_beide") {
+      if (hfvBildschirm) merke("sorgeberechtigte_2", s.formular + "." + s.stelleKey);
       continue;
     }
     // Das Lastschrift-Mandat steht im Aufnahmeantrag (Seite 4); für die Familie ist es
@@ -274,14 +291,21 @@ export function unterschriftenPlan(k) {
       personen.delete("kontoinhaber");
     }
   }
-  const liste = REIHENFOLGE.filter((s) => personen.has(s)).map((schluessel) => ({ schluessel, stellen: personen.get(schluessel) }));
-  return { liste, stift, alias, papier };
+  // stiftBeiLeer: Bleibt das freiwillige Feld leer, entsteht im PDF mindestens eine Stift-Markierung (zweiter Elternteil; das Kind
+  // bei der Abmeldung beim alten Verein). Ohne Markierung bleibt nur die Zeile des Kindes im Antrag auf Spielerlaubnis.
+  const liste = REIHENFOLGE.filter((s) => personen.has(s)).map((schluessel) => {
+    const stellen = personen.get(schluessel);
+    const freiwillig = FREIWILLIG.includes(schluessel);
+    return { schluessel, stellen, freiwillig, stiftBeiLeer: freiwillig && stellen.some((x) => !OHNE_MARKIERUNG.includes(x)) };
+  });
+  return { liste, stift, alias, papier, hfvBildschirm };
 }
 
 function personenName(k, schluessel) {
   const sorge = k.a.sorgeberechtigte || [];
   const voll = (p) => sauber([p && p.vorname, p && p.nachname].filter(Boolean).join(" "));
   if (schluessel === "sorgeberechtigte") return voll(sorge[0]) || k.t("unterschriften.person.ersteSorge");
+  if (schluessel === "sorgeberechtigte_2") return voll(sorge[1]);
   if (schluessel === "kontoinhaber") return sauber([(k.a.zahlung || {}).kiVorname, (k.a.zahlung || {}).kiNachname].filter(Boolean).join(" "));
   return "";
 }
@@ -293,6 +317,7 @@ export function unterschriftTitel(k, schluessel) {
   if (schluessel === "sorgeberechtigte") {
     return k.a.sorge === "beide" ? k.t("unterschriften.person.ersteEltern") : k.t("unterschriften.person.sorgeberechtigte", { person: personenName(k, schluessel) });
   }
+  if (schluessel === "sorgeberechtigte_2") return k.t("unterschriften.person.zweiteEltern");
   return k.t("unterschriften.person.kontoinhaber", { person: personenName(k, schluessel) });
 }
 
@@ -306,6 +331,14 @@ function formularName(k, id) {
 // zum Beispiel "Erlaubnis für Fotos" oder "Erlaubnis für das Attest". Fehlt der Text, gilt der Name des Papiers.
 function stelleName(k, schluessel) {
   return k.rt("unterschriften", schluessel) || formularName(k, schluessel.split(".")[0]);
+}
+
+// Gehören Blätter des Verbands (HFV-Vordrucke, digitaleUnterschrift "nicht_erlaubt") zu dieser Anmeldung? Nur dann nennt die Wahl
+// "Am Bildschirm" sie (Modus "bildschirm"); wer nur Karneval oder passiv anmeldet, hat keine.
+function hatVerbandsblaetter(k) {
+  const e = k.ergebnis() || {};
+  const defs = (k.konfig.formulare && k.konfig.formulare.formulare) || {};
+  return (Array.isArray(e.formulare) ? e.formulare : []).some((f) => defs[f] && defs[f].digitaleUnterschrift === "nicht_erlaubt");
 }
 
 // Satzung: Kästchen "Ich habe die Satzung gelesen." mit Link (Aufnahmeantrag Seite 1,
@@ -358,6 +391,8 @@ export const unterschriften = {
     if (!k.a.unterschriftWeg) k.a.unterschriftWeg = "bildschirm";
     if (!k.a.hfvUnterschrift) k.a.hfvUnterschrift = "training";
     const unten = h("div", { klasse: "anm-unterschriften" });
+    // Modus "bildschirm" (Schalter unterschriftHfv): Die Familie unterschreibt auch die Blätter des Verbands am Bildschirm.
+    const hfvBildschirm = k.hfvAmBildschirm();
 
     function zeichne() {
       unten.textContent = "";
@@ -367,7 +402,7 @@ export const unterschriften = {
       // auf den zweiten Elternteil; erst danach die Unterschriftsfelder.
       unten.append(satzungBlock(k));
       if (zweiterElternteilNoetig(k.a)) {
-        unten.append(h("div", { klasse: "anm-block", "data-zweiter-elternteil": "" }, hinweisKasten("offen", k.t("pruefen.hinweisArt.warnung"), absaetze(k.t("sorge.zweiterMitStift")))));
+        unten.append(h("div", { klasse: "anm-block", "data-zweiter-elternteil": "" }, hinweisKasten("offen", k.t("pruefen.hinweisArt.warnung"), absaetze(k.t(hfvBildschirm ? "sorge.zweiterAmBildschirm" : "sorge.zweiterMitStift")))));
       }
       if (plan.liste.length) {
         unten.append(h("h3", { klasse: "anm-zwischentitel" }, k.t("unterschriften.hierTitel")), h("p", { klasse: "anm-hinweis" }, k.t("unterschriften.hierHinweis")));
@@ -376,13 +411,16 @@ export const unterschriften = {
           const titel = unterschriftTitel(k, person.schluessel);
           // "Diese Unterschrift gilt für:" mit einer Zeile je Blatt (keine Aufzählung in einer Zeile)
           const gilt = { titel: k.t("unterschriften.giltFuer"), punkte: Array.from(new Set(person.stellen.map((s) => stelleName(k, s)))) };
+          // Freiwillige Felder: das Kind trägt den Zusatz "(freiwillig)" und einen Hinweis, der zweite Elternteil nur den Hinweis.
+          const hinweisKey = { spieler: "unterschriften.person.spielerHinweis", sorgeberechtigte_2: "unterschriften.person.zweiteHinweis" }[person.schluessel];
           const feld = unterschriftFeld({
             speicher: k.strichSpeicher(person.schluessel),
             id: k.nextId("s"),
             wer: person.schluessel,
             feld: "unterschrift." + person.schluessel,
-            titel,
+            titel: person.schluessel === "spieler" ? titel + " " + k.t("allgemein.freiwillig") : titel,
             hinweisListe: gilt,
+            zusatz: person.freiwillig && hinweisKey ? k.t(hinweisKey).replace(/\n/g, " ") : null,
             texte: {
               ariaLabel: k.t("unterschriften.ariaLabel"),
               stand0: k.t("unterschriften.stand0"),
@@ -421,9 +459,11 @@ export const unterschriften = {
           }));
       }
       if (!plan.liste.length && !plan.stift.length) unten.append(h("p", { klasse: "anm-text" }, k.t("unterschriften.nichts")));
-      // Verein: Quellenhinweis zur Unterschriftsform je Formular.
+      // Verein: Quellenhinweis zur Unterschriftsform je Formular. Bei den Blättern des Verbands steht der Stand des Schalters
+      // unterschriftHfv dabei (Jugendleitung, 11.10.2026).
       const defs = (k.konfig.formulare && k.konfig.formulare.formulare) || {};
-      const zeilen = Object.keys(defs).filter((id) => defs[id].digitaleUnterschriftGrund).map((id) => h("li", {}, id + ": " + defs[id].digitaleUnterschrift + " – " + defs[id].digitaleUnterschriftGrund));
+      const zeilen = Object.keys(defs).filter((id) => defs[id].digitaleUnterschriftGrund).map((id) =>
+        h("li", {}, id + ": " + defs[id].digitaleUnterschrift + (defs[id].digitaleUnterschrift === "erlaubt" ? "" : " (Schalter unterschriftHfv: " + (hfvBildschirm ? "bildschirm" : "stift") + ")") + " – " + defs[id].digitaleUnterschriftGrund));
       if (zeilen.length) unten.append(vereinsKasten(k, h("ul", {}, zeilen)));
       k.nachRender(() => nachEinfuegen.forEach((f) => f()));
     }
@@ -432,7 +472,9 @@ export const unterschriften = {
       kartenAuswahl(k, {
         pfad: "unterschriftWeg",
         optionen: [
-          { wert: "bildschirm", label: k.t("unterschriften.weg.bildschirm"), hinweis: k.t("unterschriften.weg.bildschirmHinweis") },
+          hfvBildschirm
+            ? { wert: "bildschirm", label: k.t("unterschriften.weg.bildschirmAlles"), hinweis: k.t(hatVerbandsblaetter(k) ? "unterschriften.weg.bildschirmAllesHinweis" : "unterschriften.weg.bildschirmHinweis") }
+            : { wert: "bildschirm", label: k.t("unterschriften.weg.bildschirm"), hinweis: k.t("unterschriften.weg.bildschirmHinweis") },
           { wert: "papier", label: k.t("unterschriften.weg.papier"), hinweis: k.t("unterschriften.weg.papierHinweis") },
         ],
         beiWahl: () => {
@@ -452,6 +494,7 @@ export const unterschriften = {
     // Am Bildschirm ist der Haken bei der Satzung Pflicht, auf Papier freiwillig.
     if (k.a.unterschriftWeg === "bildschirm" && k.a.satzung !== true) f.push({ feld: "satzung", meldung: k.t("fehler.satzung") });
     for (const person of plan.liste) {
+      if (person.freiwillig) continue; // Kind und zweiter Elternteil: leer ist erlaubt (im PDF Stift-Markierung oder, beim Antrag des Kindes, leere Zeile)
       if (!k.bilder.unterschriften[person.schluessel]) f.push({ feld: "unterschrift." + person.schluessel, meldung: k.t("fehler.unterschrift") });
     }
     if (plan.stift.length && !k.a.hfvUnterschrift) f.push({ feld: "hfvUnterschrift", meldung: k.t("fehler.hfvUnterschrift") });
