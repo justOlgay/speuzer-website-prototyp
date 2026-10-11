@@ -944,3 +944,10 @@ API) liegen in `tools/cache/app-optik/termine-umsetzung/` (nicht im Repo).
 - Website-Menü (Worksheet MENU, Eintrag #33 „Termine“): Link `https://cdn.appack.de/sportfreunde04/workspace/web/termine.html`, Vollbild im Rahmen.
 - `TERMINE_SEITE_MODUL` in Startseite_v3.tpl zeigt auf das Seitenmodul.
 - **Rückweg:** Im App-Menü „Termine“ entfernen, Terminmodul wieder aufnehmen und in „Termine“ umbenennen; MENU-Eintrag #33 zurück auf `https://shorturl.appack.de/sportfreunde04_Application_1780401660369`; `TERMINE_SEITE_MODUL` zurück; Seitenlink des Moduls 1783345459688 wieder `Spielplan-App.html`, Titel „Spielplan & Tabellen“.
+
+### Neue statische Seite `Schwarzes-Brett-Hinweise.html` (11.10.2026)
+
+Regelseite des Moduls „Schwarzes Brett“ (Pinnwand `sportfreunde04_Application_1780401660387`, Einstellungen › Regelseite),
+liegt an der Workspace-Wurzel. Entscheidung der 1. Vorsitzenden: Aushänge sind für alle sichtbar; wer einen Aushang aufgibt,
+erfährt vorher, dass der Name aus dem Profil erscheint und welche Kontaktdaten er selbst in den Text schreibt.
+Rückweg: in den Pinnwand-Einstellungen die Regelseite leeren.
