@@ -1,6 +1,6 @@
 /*
   Seiten des Assistenten zu Kontakt, Beitrag und Einwilligungen: kontakt,
-  beitrag, leistungen, zahlung, einwilligungen, notfall (SCHNITTSTELLEN
+  beitrag, leistungen, zahlung, einwilligungen, heimweg, notfall (SCHNITTSTELLEN
   Abschnitt 4). Aufbau der Seiten: siehe seiten-person.js.
 */
 
@@ -299,8 +299,6 @@ export const zahlung = {
   render(k, teil) {
     const z = zahlungDaten(k);
     if (teil === "art") {
-      const e = k.ergebnis();
-      const zuschlag = (e && e.beitrag && e.beitrag.zuschlagOhneSepa) || (k.konfig.beitraege || {}).zuschlag_ohne_sepa;
       return {
         titel: k.t("zahlung.art.titel"),
         inhalt: [
@@ -308,7 +306,7 @@ export const zahlung = {
             pfad: "zahlung.art",
             optionen: [
               { wert: "sepa", label: k.t("zahlung.art.sepa"), hinweis: k.t("zahlung.art.sepaHinweis") },
-              { wert: "rechnung", label: k.t("zahlung.art.rechnung"), hinweis: k.t("zahlung.art.rechnungHinweis") + (zuschlag ? " " + k.t("zahlung.art.zuschlag", { zuschlag }) : "") },
+              { wert: "rechnung", label: k.t("zahlung.art.rechnung"), hinweis: k.t("zahlung.art.rechnungHinweis") },
             ],
           }),
         ],
@@ -463,12 +461,15 @@ export const einwilligungen = {
         ],
       };
     }
+    // Nur Karneval (ohne Fußball): keine Spiele und Turniere im Satz zur Fahrt (Entscheidung der 1. Vorsitzenden vom
+    // 11.10.2026). Fußball und "beides" behalten den bisherigen Satz. Das PDF-Blatt (pdf.js, seiteFahrten) folgt derselben Regel.
+    const fahrtenSatz = k.a.abteilung === "karneval" ? "einwilligungen.fahrten.fahrtenKarneval" : "einwilligungen.fahrten.fahrten";
     return {
       titel: k.t("einwilligungen.fahrten.titel"),
       inhalt: [
         h("p", { klasse: "anm-hinweis" }, k.t("einwilligungen.fahrten.hinweis")),
         h("div", { klasse: "anm-karten" },
-          kaestchen(k, { pfad: "einwilligungen.fahrten", label: k.t("einwilligungen.fahrten.fahrten"), hinweis: k.t("einwilligungen.fahrten.fahrtenHinweis") }),
+          kaestchen(k, { pfad: "einwilligungen.fahrten", label: k.t(fahrtenSatz), hinweis: k.t("einwilligungen.fahrten.fahrtenHinweis") }),
           kaestchen(k, { pfad: "einwilligungen.messenger", label: k.t("einwilligungen.fahrten.messenger"), hinweis: k.t("einwilligungen.fahrten.messengerHinweis") })),
       ],
     };
@@ -492,6 +493,34 @@ export const einwilligungen = {
       ein.messenger = ein.messenger === true;
     }
   },
+};
+
+// ---------- heimweg ----------
+
+// Aufsichtspflicht (Entscheidung der 1. Vorsitzenden vom 11.10.2026): Darf das Kind nach dem Training allein nach Hause oder
+// wartet es, bis es abgeholt wird? Der Schritt gilt für Minderjährige, die trainieren oder tanzen (Fußball oder Karneval),
+// nie für Passive und nie für Erwachsene; regeln.schritte() nimmt ihn auf. Eine Pflichtfrage auf einer Seite. Die Antwort
+// steht auf der Prüfseite und auf dem Blatt "Heimweg nach dem Training" (Teil B der Datei, Unterlage U41).
+export const heimweg = {
+  id: "heimweg",
+  teile: () => ["haupt"],
+  render(k) {
+    return {
+      titel: k.t("heimweg.titel"),
+      inhalt: [
+        ...absaetze(k.t("heimweg.hinweis"), "anm-hinweis"),
+        kartenAuswahl(k, {
+          pfad: "heimweg",
+          optionen: [
+            { wert: "allein", label: k.t("heimweg.allein"), hinweis: k.t("heimweg.alleinHinweis") },
+            { wert: "abholen", label: k.t("heimweg.abholen"), hinweis: k.t("heimweg.abholenHinweis") },
+          ],
+        }),
+        ...absaetze(k.t("heimweg.aendern"), "anm-hinweis"),
+      ],
+    };
+  },
+  pruefe: (k) => fehlerWenn(k.a.heimweg !== "allein" && k.a.heimweg !== "abholen", "heimweg", k.t("fehler.wahl")),
 };
 
 // ---------- notfall ----------

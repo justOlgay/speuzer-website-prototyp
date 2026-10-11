@@ -25,7 +25,7 @@
 //     Name im Text, Unterschriftsbild auf Seite 2 des Aufnahmeantrags; Läufe mit
 //     unterschriftWeg = bildschirm und = papier (poppler: pdfinfo, pdftotext, pdfimages)
 //   - Satzung (Haken, Link), getrennt lebende Eltern, Namen in lateinischer Schrift,
-//     Sonderzeichen bis ins PDF, Karneval (Abholung, Heimweg), Attest im Unterschriftenplan
+//     Sonderzeichen bis ins PDF, Heimweg nach dem Training (M1), Attest im Unterschriftenplan
 //   - Runde 4: lateinische Schrift in allen Freitextfeldern, die ins PDF gehen (Abdeckung aller
 //     Textfelder im Quelltext und je Feld ein Fall im Browser), Knopf "Vorführung" im kompakten Kopf
 //     (Vereinssicht und Beispiele auf jedem Schritt), ein einziger Kasten für getrennt lebende Eltern,
@@ -33,11 +33,15 @@
 //   - N-A2 (07.10.2026): Sprachwahl ganz oben im ersten Bildschirm (vier Sprachen in eigener Schrift, vor Überschrift und Erklärtext),
 //     App-Modus ?app=1 bei 390 x 844 (Rahmen der Begleitseite weg, Hinweis und Link „Im Browser öffnen“ ohne ?app=1, dieselben Schritte
 //     bis „fertig“, Fehler beim Speichern und Teilen abgefangen), „Diese Unterschrift gilt für:“ als Liste, kein BIC-Feld, Arabisch
-//     (Entwurfsband rechts, Rufnummer im Hilfe-Dialog als LTR-Block, Prüfseite ohne <bdi> um den ganzen Wert), Beitragsgruppen und
-//     Übungszeiten aus den Texten der Sprache (mit abgefangenen englischen Wörterbüchern)
+//     (Entwurfsband rechts, Rufnummer im Hilfe-Dialog als LTR-Block, Prüfseite ohne <bdi> um den ganzen Wert), Beitragsgruppen aus den
+//     Texten der Sprache (mit abgefangenem englischem Wörterbuch; die Übungszeiten der Karnevalgruppen sind seit M1 entfallen)
+//   - M1 (11.10.2026): Heimweg nach dem Training als eigene Pflichtseite für Minderjährige, die trainieren oder tanzen (Texte, Fehlermeldung,
+//     Prüfseite mit „Ändern“, nie bei Passiven und Erwachsenen, Antwort im PDF); kein Schritt „karneval“ mehr; kein Zuschlag ohne Lastschrift
+//   - M1, Runde 2 (11.10.2026): Satz zur Fahrt je Abteilung (nur Karneval: „… zu Veranstaltungen des Vereins …“, kein „Turnier“ auf den Seiten
+//     des Karneval-Kindes; Fußball und „beides“: „… zu Spielen und Turnieren …“); keine karnevalGruppen in der eingebetteten Konfiguration
 //   - Screenshots je Seite nach tools/cache/anmeldung-test/e2e/
 //
-// Aufruf: node tools/anmeldung-test/e2e.mjs [--ohne-desktop] [--nur-sprache] [--nur=pruefeKarnevalUhrzeit,…]
+// Aufruf: node tools/anmeldung-test/e2e.mjs [--ohne-desktop] [--nur-sprache] [--nur=pruefeHeimweg,…]
 //         (ANM_ATTRAPPEN=pdf erzwingt die Attrappe des PDF-Bausteins, auch wenn assets/js/anmeldung/pdf.js da ist)
 // Ausgabe: eine Zeile je Prüfung, am Ende Zusammenfassung; Exit 0 nur, wenn alles bestanden ist.
 
@@ -55,7 +59,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", ".
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const AXE = fs.readFileSync(path.join(ROOT, "node_modules", "axe-core", "axe.min.js"), "utf8");
 // Mit --nur=<Name,Name> laufen nur die genannten Einzelprüfungen (siehe einzelpruefungen()), zum Beispiel
-// --nur=pruefeKarnevalUhrzeit. Das schnelle Prüfen einer Änderung; die Ausgabe liegt dann in e2e-nur/.
+// --nur=pruefeHeimweg. Das schnelle Prüfen einer Änderung; die Ausgabe liegt dann in e2e-nur/.
 const NUR = (process.argv.find((a) => a.startsWith("--nur=")) || "").slice("--nur=".length).split(",").filter(Boolean);
 const AUSGABE = path.join(ROOT, "tools", "cache", "anmeldung-test", NUR.length ? "e2e-nur" : "e2e");
 const DATEIEN = path.join(AUSGABE, "dateien");
@@ -66,8 +70,8 @@ const NUR_SPRACHE = process.argv.includes("--nur-sprache");
 // Die 27 Schritte aus SCHNITTSTELLEN Abschnitt 4.
 const SCHRITTE = [
   "start", "wer", "name", "geburt", "abteilung", "mannschaft", "spielen", "spielerpass", "alter_verein", "abmeldung",
-  "pass", "ausland", "wohnen", "sorge", "besonderes", "karneval", "kontakt", "beitrag", "leistungen", "zahlung",
-  "einwilligungen", "notfall", "spielerfoto", "nachweise", "unterschriften", "pruefen", "fertig",
+  "pass", "ausland", "wohnen", "sorge", "besonderes", "kontakt", "beitrag", "leistungen", "zahlung",
+  "einwilligungen", "heimweg", "notfall", "spielerfoto", "nachweise", "unterschriften", "pruefen", "fertig",
 ];
 
 const MOBIL = { name: "390x844", breite: 390, hoehe: 844, mobil: true };
@@ -1125,174 +1129,315 @@ async function pruefeSonderzeichenPdf(browser, server, dateien) {
   await page.close();
 }
 
-// Karneval: zwei freiwillige Fragen (Abholung, allein nach Hause), nur bei Minderjährigen mit Abendauftritten.
-async function pruefeKarnevalFragen(browser, server, dateien) {
-  console.log("\n=== Runde 3: Karneval, Abholung und Heimweg ===");
-  // Reihenfolge der Teilseiten an der Seite selbst (ohne Browser-Ablauf)
-  const p0 = await neueSeite(browser, server, MOBIL, "karneval-teile");
-  const teile = await p0.evaluate(async () => {
-    const { karneval } = await import("/assets/js/anmeldung/seiten-fussball.js");
-    const k = (minor, abend) => ({ minderjaehrig: () => minor, a: { karneval: { abendOhneEltern: abend } } });
-    return { kindJa: karneval.teile(k(true, "ja")), kindNein: karneval.teile(k(true, "nein")), kindOffen: karneval.teile(k(true, null)), erwachsenJa: karneval.teile(k(false, "ja")) };
-  });
-  ok("Karneval: die Fragen kommen nur bei minderjährig und abendOhneEltern = ja", JSON.stringify(teile.kindJa) === JSON.stringify(["gruppe", "woanders", "turnier", "abend", "abholung", "allein"]) && JSON.stringify(teile.kindNein) === JSON.stringify(["gruppe", "woanders", "turnier", "abend"]) && JSON.stringify(teile.kindOffen) === JSON.stringify(["gruppe", "woanders", "turnier", "abend"]) && JSON.stringify(teile.erwachsenJa) === JSON.stringify(["gruppe", "woanders", "turnier"]), JSON.stringify(teile));
-  await p0.close();
+// ---------- M1 (11.10.2026): Heimweg nach dem Training, Karneval ohne eigenen Schritt ----------
 
-  const page = await seiteMitBeispiel(browser, server, MOBIL, "karneval-fragen", "karneval-kind", null);
-  const a0 = await geheBis(page, "karneval", "abend");
-  ok("Karneval: Seite 'abend' erreicht (Abendauftritte: ja)", a0.schritt === "karneval" && a0.teil === "abend", a0.schritt + "/" + a0.teil);
-  const r1 = await klickeWeiter(page, a0);
-  const s1 = await stand(page);
-  ok("Karneval: nach 'Ja' folgt die Frage 'Wer holt Ihr Kind ab?'", r1.gewechselt && s1.teil === "abholung", s1.schritt + "/" + s1.teil);
-  const titel1 = await page.$eval("#anm-titel", (e) => e.textContent.trim());
-  const feld1 = await page.$eval('#anmeldung input[data-pfad="karneval.abholung"]', (e) => ({ wert: e.value, max: e.getAttribute("maxlength"), pflicht: e.getAttribute("aria-required") }));
-  ok("Karneval: Überschrift 'Wer holt Ihr Kind ab?', Namensfeld höchstens 80 Zeichen, freiwillig", titel1 === "Wer holt Ihr Kind ab?" && feld1.max === "80" && !feld1.pflicht, JSON.stringify({ titel1, ...feld1 }));
-  await page.screenshot({ path: path.join(AUSGABE, MOBIL.name, "karneval-abholung.png"), fullPage: false });
-  protokoll.screenshots++;
-  // freiwillig: leer lassen geht
-  await tippe(page, '#anmeldung input[data-pfad="karneval.abholung"]', "");
-  const r2 = await klickeWeiter(page, s1);
-  const s2 = await stand(page);
-  ok("Karneval: die Frage nach der Abholung ist freiwillig (leer geht weiter zu 'allein nach Hause')", r2.gewechselt && s2.teil === "allein" && r2.fehler.length === 0, s2.schritt + "/" + s2.teil);
-  const titel2 = await page.$eval("#anm-titel", (e) => e.textContent.trim());
-  ok("Karneval: Überschrift 'Darf Ihr Kind allein nach Hause gehen?', Ja ist vorgewählt, 'Ab wie viel Uhr?' erscheint", titel2 === "Darf Ihr Kind allein nach Hause gehen?" && (await sichtbarIn(page, '#anmeldung input[data-pfad="karneval.alleinAb"]')), titel2);
-  await page.screenshot({ path: path.join(AUSGABE, MOBIL.name, "karneval-allein.png"), fullPage: false });
-  protokoll.screenshots++;
-  // ungültige Uhrzeit
-  await tippe(page, '#anmeldung input[data-pfad="karneval.alleinAb"]', "25:99");
-  const r3 = await klickeWeiter(page, s2);
-  ok("Karneval: eine ungültige Uhrzeit (25:99) wird mit einem Beispiel abgewiesen", !r3.gewechselt && r3.fehler.some((f) => f === "Bitte schreiben Sie die Uhrzeit so: 21:30."), r3.fehler.join(" | "));
-  // gültige Uhrzeit ohne Doppelpunkt wird zu HH:MM
-  await tippe(page, '#anmeldung input[data-pfad="karneval.alleinAb"]', "2145");
-  const r4 = await klickeWeiter(page, s2);
-  const s4 = await stand(page);
-  ok("Karneval: '2145' wird als 21:45 angenommen, es geht weiter zu 'kontakt'", r4.gewechselt && s4.schritt === "kontakt", s4.schritt + "/" + s4.teil);
-  // Prüfseite
-  const p = await geheBis(page, "pruefen");
-  const zeilen = await page.evaluate(() => Array.from(document.querySelectorAll("#anmeldung .anm-pruefzeile")).map((z) => ({ label: (z.querySelector("dt") || {}).textContent, wert: (z.querySelector(".anm-pruefzeile__wert") || {}).textContent })));
-  const allein = zeilen.find((z) => /Allein nach Hause/.test(z.label || ""));
-  const abholung = zeilen.find((z) => /Wer holt ab/.test(z.label || ""));
-  ok("Karneval: die Prüfseite zeigt 'Allein nach Hause: Ja, ab 21:45 Uhr'; die leere Abholung fehlt in der Liste", p.schritt === "pruefen" && !!allein && allein.wert.trim() === "Ja, ab 21:45 Uhr" && !abholung, JSON.stringify(zeilen.filter((z) => /Allein|holt|Abend/.test(z.label || ""))));
-  await klickeWeiter(page, p);
-  const daten = await ergebnisPruefen(page, { name: "karneval-fragen", vp: MOBIL }, dateien);
-  if (daten && daten.attrappe) {
-    const kv = daten.attrappe.a.karneval;
-    ok("Karneval: a.karneval.{abholung, alleinNachHause, alleinAb} erreichen den PDF-Baustein", kv.abholung === "" && kv.alleinNachHause === "ja" && kv.alleinAb === "21:45", JSON.stringify(kv));
-    const pdf = await pdfHerunterladenUndPruefen(browser, server, page, "Karneval-Fragen", daten, { satzungOffen: false });
-    if (pdf) weich("Karneval: die Erlaubnisseite im PDF nennt die Uhrzeit 21:45 (füllt AP-3)", ohneLeer(pdfText(pdf.pfad)).includes("21:45"), "");
-  }
-  await page.close();
-
-  // Mit Abholung ausgefüllt, und "Nein" bei den Abendauftritten: keine Zusatzfragen, Felder leer.
-  const q = await seiteMitBeispiel(browser, server, MOBIL, "karneval-nein", "karneval-kind", null);
-  const b0 = await geheBis(q, "karneval", "abend");
-  await klickeEtikett(q, '#anmeldung input[data-pfad="karneval.abendOhneEltern"][data-wert="nein"]');
-  const rb = await klickeWeiter(q, b0);
-  const sb = await stand(q);
-  ok("Karneval: bei 'Nein' zu den Abendauftritten kommen die Fragen nicht", rb.gewechselt && sb.schritt === "kontakt", sb.schritt + "/" + sb.teil);
-  await q.close();
+// Zeilen der Prüfseite: { label, wert }
+async function pruefZeilen(page) {
+  return page.$$eval("#anmeldung .anm-pruefzeile", (l) =>
+    l.map((z) => ({
+      label: (z.querySelector("dt") || {}).textContent.replace(/[⁦-⁩]/g, "").trim(),
+      wert: ((z.querySelector(".anm-pruefzeile__wert") || {}).textContent || "").replace(/[⁦-⁩]/g, "").replace(/\s+/g, " ").trim(),
+    }))
+  );
 }
 
-// Karneval, "Darf Ihr Kind allein nach Hause gehen?": Bei "Ja" ist die Uhrzeit Pflicht, sonst stünde auf der Erlaubnis im PDF
-// nur "–" (Runde 4, Punkt 7). "Nein" und keine Antwort gehen weiter; die Frage bleibt freiwillig.
-async function pruefeKarnevalUhrzeit(browser, server, dateien) {
-  console.log("\n=== Runde 4: Karneval, bei 'Ja' ist die Uhrzeit Pflicht ===");
-  const MELDUNG = "Bitte schreiben Sie die Uhrzeit so: 21:30.";
-  const feld = '#anmeldung input[data-pfad="karneval.alleinAb"]';
-  const wahlSel = (wert) => '#anmeldung input[data-pfad="karneval.alleinNachHause"][data-wert="' + wert + '"]';
-  const zustandFeld = () =>
-    page0.$eval(feld, (e) => {
-      const f = e.closest("[data-feld]").querySelector(":scope > .anm-fehler");
-      return { invalid: e.getAttribute("aria-invalid"), pflicht: e.getAttribute("aria-required"), amFeld: f && !f.hidden ? f.textContent.trim() : "", etikett: e.closest("[data-feld]").querySelector("label").textContent.trim() };
+// Tippt alle Seiten bis zur genannten aus dem Profil ein (wie laufe() im Modus "eingabe", aber mit Ziel). Die Unterschrift
+// am Bildschirm zeichnet unterschreiben().
+async function tippeBis(page, profil, schritt, teil) {
+  for (let i = 0; i < 90; i++) {
+    const s = await stand(page);
+    if (s.schritt === schritt && (!teil || s.teil === teil)) return s;
+    await fuelleSeite(page, profil);
+    if (s.schritt === "unterschriften") await unterschreiben(page, { touch: false });
+    const r = await klickeWeiter(page, s);
+    if (r.fehler.length || !r.gewechselt) break;
+  }
+  return stand(page);
+}
+
+// Aufsichtspflicht (Entscheidung der 1. Vorsitzenden vom 11.10.2026): Darf das Kind nach dem Training allein nach Hause?
+// Eine Pflichtfrage auf einer eigenen Seite, nur für Minderjährige, die trainieren oder tanzen (Fußball, Karneval, beides),
+// nie für Passive und Erwachsene. Der Schritt "karneval" (Gruppe, Turnier, Abendauftritte) gibt es nicht mehr.
+async function pruefeHeimweg(browser, server, dateien, beispiele) {
+  console.log("\n=== M1: Heimweg nach dem Training, Karneval ohne eigenen Schritt ===");
+  const wb = await ladeWoerterbuch();
+  const T = (pfad) => pfad.split(".").reduce((x, sch) => (x === undefined || x === null ? undefined : x[sch]), wb);
+  const seitenModul = await import(pathToFileURL(path.join(ROOT, "assets", "js", "anmeldung", "seiten.js")).href);
+  const reihenfolge = seitenModul.REIHENFOLGE;
+  ok("Heimweg: eigener Schritt im Abschnitt 'unterlagen', gleich nach 'einwilligungen' und vor 'notfall'", seitenModul.ABSCHNITT_VON.heimweg === "unterlagen" && reihenfolge.indexOf("heimweg") === reihenfolge.indexOf("einwilligungen") + 1 && reihenfolge.indexOf("notfall") === reihenfolge.indexOf("heimweg") + 1, reihenfolge.join(" › "));
+  ok("Karneval: den Schritt 'karneval' gibt es nicht mehr (keine Seite, kein Abschnitt, keine Reihenfolge)", !("karneval" in seitenModul.SEITEN) && !("karneval" in seitenModul.ABSCHNITT_VON) && !reihenfolge.includes("karneval") && Object.keys(seitenModul.SEITEN).length === 27, Object.keys(seitenModul.SEITEN).length + " Seiten");
+  ok("Heimweg: die Seite hat genau eine Teilseite und die Pflichtprüfung meldet ohne Antwort 'Bitte wählen Sie eine Antwort.'", JSON.stringify(seitenModul.SEITEN.heimweg.teile({ a: {} })) === JSON.stringify(["haupt"]) && seitenModul.SEITEN.heimweg.pruefe({ a: { heimweg: null }, t: (p) => T(p) }, "haupt").length === 1 && seitenModul.SEITEN.heimweg.pruefe({ a: { heimweg: "allein" }, t: (p) => T(p) }, "haupt").length === 0 && seitenModul.SEITEN.heimweg.pruefe({ a: { heimweg: "abholen" }, t: (p) => T(p) }, "haupt").length === 0 && seitenModul.SEITEN.heimweg.pruefe({ a: { heimweg: "egal" }, t: (p) => T(p) }, "haupt")[0].meldung === "Bitte wählen Sie eine Antwort.", "");
+  const SOLL = {
+    titel: "Darf Ihr Kind nach dem Training allein nach Hause?",
+    absaetze: ["Während des Trainings passt der Verein auf Ihr Kind auf.", "Sagen Sie uns: Wie kommt Ihr Kind danach nach Hause?", "Sie können das jederzeit ändern. Sagen Sie es dann dem Trainer."],
+    karten: [
+      { wert: "allein", titel: "Allein nach Hause", hinweis: "Mein Kind darf nach dem Training allein nach Hause gehen." },
+      { wert: "abholen", titel: "Wird abgeholt", hinweis: "Mein Kind wartet, bis es abgeholt wird." },
+    ],
+  };
+  ok("Heimweg: die Texte im Wörterbuch (Titel, Hinweis, beide Optionen, Satz zum Ändern) stimmen wörtlich",
+    T("heimweg.titel") === SOLL.titel && T("heimweg.hinweis") === SOLL.absaetze.slice(0, 2).join("\n") && T("heimweg.aendern") === SOLL.absaetze[2] &&
+    T("heimweg.allein") === SOLL.karten[0].titel && T("heimweg.alleinHinweis") === SOLL.karten[0].hinweis && T("heimweg.abholen") === SOLL.karten[1].titel && T("heimweg.abholenHinweis") === SOLL.karten[1].hinweis &&
+    T("pruefen.zeilen.heimweg") === "Heimweg" && T("pruefen.werte.heimweg.allein") === "Allein nach Hause" && T("pruefen.werte.heimweg.abholen") === "Wird abgeholt",
+    "");
+  ok("Karneval: die Texte der entfallenen Fragen (Gruppe, Turnier, Abendauftritte, Abholung, Uhrzeit, Zuschlag) stehen nicht mehr im Wörterbuch",
+    T("karneval") === undefined && T("fehler.uhrzeit") === undefined && T("zahlung.art.zuschlag") === undefined && T("allgemein.wochentag") === undefined &&
+    T("pruefen.zeilen.karneval") === undefined && T("pruefen.zeilen.abendauftritte") === undefined && T("pruefen.zeilen.abholung") === undefined && T("pruefen.zeilen.alleinNachHause") === undefined && T("pruefen.werte.alleinAb") === undefined,
+    "");
+
+  // ---- A: die Seite (390 px), Fußball-Kind aus dem Beispiel "Kind neu" (Antwort: abgeholt) ----
+  {
+    const page = await seiteMitBeispiel(browser, server, MOBIL, "heimweg-seite", "kind-neu", null);
+    const s0 = await geheBis(page, "heimweg", "haupt");
+    ok("Heimweg: Seite erreicht (Fußball-Kind, gleich nach den Einwilligungen)", s0.schritt === "heimweg" && s0.teil === "haupt", s0.schritt + "/" + s0.teil);
+    const inhalt = await page.evaluate(() => {
+      const w = document.getElementById("anmeldung");
+      const gruppe = w.querySelector('fieldset[data-feld="heimweg"]');
+      return {
+        titel: (w.querySelector("#anm-titel") || {}).textContent.trim(),
+        absaetze: Array.from(w.querySelectorAll(".anm-absaetze p")).map((p) => p.textContent.trim()),
+        karten: Array.from(w.querySelectorAll('input[data-pfad="heimweg"]')).map((i) => {
+          const l = w.querySelector('label[for="' + i.id + '"]');
+          return { wert: i.getAttribute("data-wert"), titel: (l.querySelector(".anm-karte__titel") || {}).textContent.trim(), hinweis: ((l.querySelector(".anm-karte__hinweis") || {}).textContent || "").trim(), gewaehlt: i.checked };
+        }),
+        pflicht: gruppe ? gruppe.getAttribute("aria-required") : null,
+        rolle: gruppe ? gruppe.getAttribute("role") : null,
+        abschnitt: (w.ownerDocument.querySelector('.anm-abschnitte__punkt[aria-current="step"]') || { getAttribute: () => null }).getAttribute("data-abschnitt"),
+        weiter: (w.querySelector('[data-aktion="weiter"]') || {}).textContent,
+      };
+    });
+    ok("Heimweg: Frage, Hinweis und Satz zum Ändern wie vorgegeben", inhalt.titel === SOLL.titel && JSON.stringify(inhalt.absaetze) === JSON.stringify(SOLL.absaetze), JSON.stringify(inhalt.absaetze));
+    ok("Heimweg: zwei Antworten 'Allein nach Hause' und 'Wird abgeholt' mit ihren Hinweisen; die Antwort aus dem Beispiel ist gewählt", JSON.stringify(inhalt.karten.map((x) => ({ wert: x.wert, titel: x.titel, hinweis: x.hinweis }))) === JSON.stringify(SOLL.karten) && inhalt.karten.map((x) => x.gewaehlt).join() === "false,true", JSON.stringify(inhalt.karten));
+    ok("Heimweg: Pflichtfrage (Auswahlgruppe mit aria-required), Abschnitt 'Unterlagen' ist markiert, Knopf 'Weiter'", inhalt.pflicht === "true" && inhalt.rolle === "radiogroup" && inhalt.abschnitt === "unterlagen" && inhalt.weiter === "Weiter", JSON.stringify({ pflicht: inhalt.pflicht, rolle: inhalt.rolle, abschnitt: inhalt.abschnitt, weiter: inhalt.weiter }));
+    ok("Heimweg: keine Uhrzeit und kein Feld für einen Namen auf der Seite", (await page.$$('#anmeldung input[type="text"], #anmeldung textarea')).length === 0, "");
+    fs.mkdirSync(path.join(AUSGABE, MOBIL.name), { recursive: true });
+    await page.screenshot({ path: path.join(AUSGABE, MOBIL.name, "heimweg.png"), fullPage: false });
+    protokoll.screenshots++;
+    await axePruefen(page, "390x844 heimweg/haupt (M1)");
+    const breit = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, innen: window.innerWidth }));
+    ok("Heimweg: kein Querscrollen bei 390 px", breit.scroll <= breit.innen, breit.scroll + " gegen " + breit.innen);
+    const klein = await kleineTippflaechen(page);
+    ok("Heimweg: Tippflächen mindestens 44 px", klein.length === 0, klein.slice(0, 3).join(" | "));
+    // Unterschrift am Bildschirm wie bei den übrigen Vereinsunterlagen: „Diese Unterschrift gilt für:“ nennt das Blatt zum Heimweg
+    const su = await geheBis(page, "unterschriften", "haupt");
+    const gilt = await page.$$eval("#anmeldung .anm-unterschrift__gilt li", (l) => l.map((x) => x.textContent.trim()));
+    ok("Heimweg: die Unterschriftenseite nennt das Blatt 'Heimweg nach dem Training' unter 'Diese Unterschrift gilt für:' (am Bildschirm, wie die übrigen Vereinsunterlagen)", su.schritt === "unterschriften" && gilt.includes("Heimweg nach dem Training") && gilt.includes("Einverständnis für Fahrten und Messenger-Gruppe"), gilt.join(" | "));
+    await page.close();
+  }
+
+  // ---- B: Pflichtfrage, Prüfseite, Ändern, Passiv und die Datei (Kind neu, eingetippt, ohne Antwort aus dem Beispiel) ----
+  {
+    const profil = profilKindNeu(beispiele, server);
+    delete profil.heimweg;
+    const eingabe = await neueSeite(browser, server, MOBIL, "heimweg-pflicht-eingabe");
+    const s1 = await tippeBis(eingabe, profil, "heimweg", "haupt");
+    ok("Heimweg ohne Antwort: Seite erreicht (alles davor ist eingetippt)", s1.schritt === "heimweg", s1.schritt + "/" + s1.teil);
+    const gewaehlt0 = await eingabe.$$eval('#anmeldung input[data-pfad="heimweg"]', (l) => l.filter((e) => e.checked).length);
+    const r1 = await klickeWeiter(eingabe, s1);
+    ok("Heimweg ohne Antwort: Weiter bleibt auf der Seite und meldet 'Bitte wählen Sie eine Antwort.'", gewaehlt0 === 0 && !r1.gewechselt && r1.fehler.some((f) => f.includes("Bitte wählen Sie eine Antwort.")), "gewählt: " + gewaehlt0 + "; " + r1.fehler.join(" | "));
+    const kasten = await eingabe.$eval('fieldset[data-feld="heimweg"]', (e) => ({ invalid: e.getAttribute("aria-invalid"), sichtbar: !!e.querySelector(".anm-fehler:not([hidden])") }));
+    ok("Heimweg ohne Antwort: die Auswahl ist als fehlerhaft markiert und die Fehlerzeile sichtbar", kasten.invalid === "true" || kasten.sichtbar, JSON.stringify(kasten));
+    await eingabe.screenshot({ path: path.join(AUSGABE, MOBIL.name, "heimweg-pflicht.png"), fullPage: false });
+    await axePruefen(eingabe, "390x844 heimweg/haupt ohne Antwort (Fehlerliste)");
+    await klickeEtikett(eingabe, '#anmeldung input[data-pfad="heimweg"][data-wert="allein"]');
+    await warte(150);
+    const boxWeg = await eingabe.evaluate(() => { const b = document.querySelector("#anmeldung .anm-fehlerbox"); return !b || b.hidden; });
+    ok("Heimweg: nach der Wahl verschwindet die Fehlermeldung sofort", boxWeg, "");
+    const r2 = await klickeWeiter(eingabe, s1);
+    const s2 = await stand(eingabe);
+    ok("Heimweg: mit Antwort geht es weiter zum Notfallkontakt", r2.gewechselt && r2.fehler.length === 0 && s2.schritt === "notfall", s2.schritt + "/" + s2.teil);
+
+    // Prüfseite: Zeile 'Heimweg' mit der gewählten Antwort
+    const sp = await tippeBis(eingabe, profil, "pruefen", "haupt");
+    ok("Heimweg: Prüfseite erreicht", sp.schritt === "pruefen", sp.schritt);
+    let zeilen = await pruefZeilen(eingabe);
+    let z = zeilen.find((x) => x.label === "Heimweg");
+    ok("Heimweg: die Prüfseite zeigt die Zeile 'Heimweg' mit 'Allein nach Hause'", !!z && z.wert === "Allein nach Hause", JSON.stringify(zeilen.filter((x) => /Heimweg|Notfall|Fahrten/.test(x.label))));
+    ok("Heimweg: die Prüfseite hat keine Zeilen mehr zu Karneval-Gruppe, Abendauftritten, Abholung und Zuschlag", !zeilen.some((x) => /Karneval-Gruppe|Abendauftritte|Wer holt ab|Zuschlag/.test(x.label + " " + x.wert)), "");
+    await eingabe.$eval('#anmeldung button[aria-label="Heimweg ändern"]', (b) => b.scrollIntoView({ block: "center" }));
+    await eingabe.screenshot({ path: path.join(AUSGABE, MOBIL.name, "pruefen-heimweg.png"), fullPage: false });
+    protokoll.screenshots++;
+    // Ändern: zurück zur Seite, andere Antwort, zurück zur Prüfung
+    await eingabe.click('#anmeldung button[aria-label="Heimweg ändern"]');
+    await eingabe.waitForFunction(() => document.getElementById("anmeldung").dataset.schritt === "heimweg", { timeout: 4000 });
+    const vorGewaehlt = await eingabe.$eval('#anmeldung input[data-pfad="heimweg"][data-wert="allein"]', (e) => e.checked);
+    const weiterText = await eingabe.$eval('#anmeldung [data-aktion="weiter"]', (e) => e.textContent);
+    ok("Heimweg ändern: die Seite zeigt die bisherige Antwort, der Knopf heißt 'Speichern und zurück zur Prüfung'", vorGewaehlt && weiterText === "Speichern und zurück zur Prüfung", weiterText);
+    await klickeEtikett(eingabe, '#anmeldung input[data-pfad="heimweg"][data-wert="abholen"]');
+    const sa = await stand(eingabe);
+    await klickeWeiter(eingabe, sa);
+    const nachAenderung = await stand(eingabe);
+    zeilen = await pruefZeilen(eingabe);
+    z = zeilen.find((x) => x.label === "Heimweg");
+    ok("Heimweg ändern: zurück auf der Prüfseite, dort steht jetzt 'Wird abgeholt'", nachAenderung.schritt === "pruefen" && !!z && z.wert === "Wird abgeholt", nachAenderung.schritt + "; " + JSON.stringify(z));
+
+    // Passive Mitglieder haben keinen Heimweg: Abteilung ändern auf 'Nur unterstützen'
+    await eingabe.click('#anmeldung button[aria-label="Abteilung ändern"]');
+    await eingabe.waitForFunction(() => document.getElementById("anmeldung").dataset.schritt === "abteilung", { timeout: 4000 });
+    await klickeEtikett(eingabe, '#anmeldung input[data-pfad="abteilung"][data-wert="passiv"]');
+    const sb = await stand(eingabe);
+    await klickeWeiter(eingabe, sb);
+    let nachPassiv = await stand(eingabe);
+    if (nachPassiv.schritt !== "pruefen") nachPassiv = await tippeBis(eingabe, profil, "pruefen", "haupt");
+    zeilen = await pruefZeilen(eingabe);
+    ok("Passiv: ohne Heimweg und ohne Notfallkontakt auf der Prüfseite", nachPassiv.schritt === "pruefen" && !zeilen.some((x) => x.label === "Heimweg" || x.label === "Notfallkontakt"), nachPassiv.schritt + "; " + zeilen.map((x) => x.label).join(", "));
+    // Zurück zu Fußball: die Antwort zum Heimweg ist noch da
+    await eingabe.click('#anmeldung button[aria-label="Abteilung ändern"]');
+    await eingabe.waitForFunction(() => document.getElementById("anmeldung").dataset.schritt === "abteilung", { timeout: 4000 });
+    await klickeEtikett(eingabe, '#anmeldung input[data-pfad="abteilung"][data-wert="fussball"]');
+    const sc = await stand(eingabe);
+    await klickeWeiter(eingabe, sc);
+    let nachFussball = await stand(eingabe);
+    if (nachFussball.schritt !== "pruefen") nachFussball = await tippeBis(eingabe, profil, "pruefen", "haupt");
+    zeilen = await pruefZeilen(eingabe);
+    z = zeilen.find((x) => x.label === "Heimweg");
+    ok("Passiv und zurück zu Fußball: die Zeile 'Heimweg' ist wieder da, mit der Antwort 'Wird abgeholt'", nachFussball.schritt === "pruefen" && !!z && z.wert === "Wird abgeholt", nachFussball.schritt + "; " + JSON.stringify(z));
+
+    // Datei: die Antwort erreicht den PDF-Baustein und steht im PDF
+    await klickeWeiter(eingabe, nachFussball);
+    const daten = await ergebnisPruefen(eingabe, { name: "heimweg-pflicht", vp: MOBIL }, dateien);
+    ok("Heimweg: Datei erstellt", !!daten, "");
+    if (daten && daten.attrappe) {
+      ok("Heimweg: a.heimweg = 'abholen' erreicht den PDF-Baustein; keine Karneval-Antworten mehr in a", daten.attrappe.a.heimweg === "abholen" && !("karneval" in daten.attrappe.a), JSON.stringify({ heimweg: daten.attrappe.a.heimweg, karneval: daten.attrappe.a.karneval }));
+    }
+    if (daten) {
+      const pdf = await pdfHerunterladenUndPruefen(browser, server, eingabe, "Heimweg Kind neu", daten, { satzungOffen: false });
+      if (pdf) {
+        const text = ohneLeer(pdfText(pdf.pfad));
+        ok("Heimweg: das PDF hat das Blatt 'Heimweg nach dem Training' mit beiden Sätzen", text.includes("Heimweg nach dem Training") && text.includes("Mein Kind darf nach dem Training allein nach Hause gehen.") && text.includes("Mein Kind wird nach dem Training abgeholt. Es wartet am Trainingsort."), "");
+        ok("Heimweg: das PDF nennt auf dem Laufzettel die Kopie an das Trainerteam und in Teil A die Zeile des Blatts", text.includes("Heimweg nach dem Training: Kopie an das Trainerteam.") && /Heimweg nach dem Training\s+Eine Person mit Sorgerecht\s+Am Bildschirm erledigt/.test(ohneLeer(pdfText(pdf.pfad, 1)) + " " + ohneLeer(pdfText(pdf.pfad, 2))), "");
+        ok("Heimweg: kein Blatt zu Auftritten am Abend im PDF", !/Auftritte am Abend|Erziehungsbeauftragung/.test(text), "");
+      }
+    }
+    ok("Heimweg: keine Fehler in der Konsole", eingabe.__st.konsole.length === 0, eingabe.__st.konsole.slice(0, 3).join(" | "));
+    await eingabe.close();
+  }
+
+  // ---- C: alle Beispiele auf der Prüfseite: Zeile 'Heimweg' nur bei Kindern, die trainieren oder tanzen ----
+  for (const [id, soll] of [["kind-neu", "Wird abgeholt"], ["wechsel-hessen", "Allein nach Hause"], ["ausland-kind", "Allein nach Hause"], ["karneval-kind", "Wird abgeholt"], ["herren-wechsel", null]]) {
+    const page = await seiteMitBeispiel(browser, server, MOBIL, "heimweg-beispiel-" + id, id, null);
+    const besucht = [];
+    for (let i = 0; i < 90; i++) {
+      const s = await stand(page);
+      besucht.push(s.schritt);
+      if (s.schritt === "pruefen") break;
+      if (s.schritt === "unterschriften") await unterschreiben(page, { touch: false });
+      const r = await klickeWeiter(page, s);
+      if (r.fehler.length || !r.gewechselt) break;
+    }
+    const zeilen = await pruefZeilen(page);
+    const z = zeilen.find((x) => x.label === "Heimweg");
+    ok("Beispiel " + id + ": " + (soll ? "Seite 'heimweg' kommt vor, die Prüfseite zeigt 'Heimweg: " + soll + "'" : "keine Seite 'heimweg' und keine Zeile 'Heimweg' (Erwachsene)"), (besucht.includes("heimweg") === (soll !== null)) && (soll === null ? !z : !!z && z.wert === soll), besucht.join(" › ") + "; " + JSON.stringify(z));
+    ok("Beispiel " + id + ": nie ein Schritt 'karneval'", !besucht.includes("karneval"), "");
+    if (id === "karneval-kind") {
+      const reihe = Array.from(new Set(besucht)); // je Schritt einmal (die Teilseiten zählen nicht doppelt)
+      const iE = reihe.indexOf("einwilligungen");
+      ok("Beispiel Karneval-Kind: Abteilung › Sorge › Kontakt › Beitrag › … › Einwilligungen › Heimweg › Notfall (ohne Gruppe, Turnier, Abendauftritte)", reihe.indexOf("abteilung") < reihe.indexOf("sorge") && reihe.indexOf("sorge") < reihe.indexOf("kontakt") && reihe[iE + 1] === "heimweg" && reihe[iE + 2] === "notfall" && !reihe.includes("mannschaft") && !reihe.includes("spielerfoto"), reihe.join(" › "));
+      ok("Beispiel Karneval-Kind: Prüfseite ohne Zeilen zu Karneval-Gruppe, Abendauftritten, Abholung und 'Allein nach Hause' (so hieß früher die Frage zum Abend)", !zeilen.some((x) => /^(Karneval-Gruppe|Abendauftritte|Wer holt ab|Allein nach Hause)$/.test(x.label)), zeilen.map((x) => x.label).join(", "));
+    }
+    await page.close();
+  }
+
+  // ---- D: der Hinweis 'kein Attest' (früher auf der Gruppenseite) steht jetzt auf der Seite 'abteilung' ----
+  {
+    const page = await seiteMitBeispiel(browser, server, MOBIL, "karneval-hinweis", "karneval-kind", "abteilung");
+    const dom = await hinweiseImDom(page);
+    ok("Karneval: der Hinweis 'Für Karneval brauchen Sie kein Attest' steht auf der Seite 'abteilung' (zugeklappt unter 'Weitere Hinweise')", dom.aufklapperSchluessel.includes("karneval_kein_attest") && dom.offenSchluessel.length === 0 && dom.aufklapperAnzahl === 1, JSON.stringify({ offen: dom.offenSchluessel, aufklapper: dom.aufklapperSchluessel }));
+    await page.close();
+  }
+}
+
+// ---------- M1, Runde 2 (11.10.2026): Satz zur Fahrt je Abteilung, keine Karnevalgruppen in der Konfiguration ----------
+
+// Fußball und "beides" lesen "<Name> darf zu Spielen und Turnieren mitfahren.", wer nur im Karneval ist, liest "<Name> darf zu
+// Veranstaltungen des Vereins mitfahren." (Entscheidung der 1. Vorsitzenden: keine Turniere und Auftritte in der Karneval-Anmeldung).
+// Die Prüfseite zeigt nur die Zeile "Fahrten" mit Ja oder Nein, keinen Satz. Das PDF-Blatt prüft der pdf-test (Fahrten je Abteilung).
+async function pruefeFahrtenSatz(browser, server, beispiele) {
+  console.log("\n=== M1 Runde 2: Satz zur Fahrt je Abteilung, keine Karnevalgruppen in der Konfiguration ===");
+  const wb = await ladeWoerterbuch();
+  const T = (pfad) => pfad.split(".").reduce((x, sch) => (x === undefined || x === null ? undefined : x[sch]), wb);
+  ok("Fahrten: das Wörterbuch hat den neuen Satz 'fahrtenKarneval' und behält den bisherigen Satz", T("einwilligungen.fahrten.fahrtenKarneval") === "{name} darf zu Veranstaltungen des Vereins mitfahren." && T("einwilligungen.fahrten.fahrten") === "{name} darf zu Spielen und Turnieren mitfahren.", "");
+  ok("Konfiguration: die in die gebaute Seite eingebettete Konfiguration enthält keine karnevalGruppen mehr", !("karnevalGruppen" in server.konfig), Object.keys(server.konfig).join(", "));
+  const vorname = (id) => beispiele.beispielAntworten(id, HEUTE, server.konfig).vorname;
+  const VERBOTEN = /Turnier|Auftritt|Kostüm/;
+  // Satz des Kästchens "Fahrten" und der sichtbare Text der Seite
+  const lesen = (page) =>
+    page.evaluate(() => {
+      const w = document.getElementById("anmeldung");
+      const i = w.querySelector('input[data-pfad="einwilligungen.fahrten"]');
+      const l = i ? w.querySelector('label[for="' + i.id + '"]') : null;
+      return {
+        satz: l ? ((l.querySelector(".anm-karte__titel") || {}).textContent || "").trim() : null,
+        seite: w.innerText.replace(/\s+/g, " "),
+      };
     });
 
-  // ---- A: "Ja" ohne gültige Uhrzeit bleibt auf der Seite ----
-  const page0 = await seiteMitBeispiel(browser, server, MOBIL, "karneval-uhrzeit", "karneval-kind", null);
-  const s0 = await geheBis(page0, "karneval", "allein");
-  ok("Karneval-Uhrzeit: Seite 'karneval/allein' erreicht (im Beispiel 'Ja' und 21:30)", s0.schritt === "karneval" && s0.teil === "allein", s0.schritt + "/" + s0.teil);
-  const z0 = await zustandFeld();
-  ok("Karneval-Uhrzeit: das Feld 'Ab wie viel Uhr?' ist ein Pflichtfeld (aria-required), ohne den Zusatz 'freiwillig'", z0.pflicht === "true" && !/freiwillig/.test(z0.etikett), JSON.stringify(z0));
-  const falle = [
-    ["leer", ""],
-    ["nur Leerzeichen", "   "],
-    ["einem Wort", "abends"],
-    ["einer ungültigen Uhrzeit", "25:99"],
-  ];
-  for (const [was, wert] of falle) {
-    await tippe(page0, feld, wert);
-    const r = await klickeWeiter(page0, s0);
-    const z = r.gewechselt ? { invalid: null, amFeld: "(Seite gewechselt)" } : await zustandFeld();
-    ok("Karneval-Uhrzeit: 'Ja' mit " + was + " bleibt auf der Seite; Liste und Feld nennen '" + MELDUNG + "'", !r.gewechselt && JSON.stringify(r.fehler) === JSON.stringify([MELDUNG]) && z.invalid === "true" && z.amFeld === MELDUNG, "Liste: " + r.fehler.join(" | ") + "; am Feld: " + z.amFeld);
-    if (r.gewechselt) {
-      await page0.close(); // die Seite hat die Eingabe angenommen: der Rest dieser Prüfung hätte kein Ziel mehr
-      return;
+  // ---- A: Karneval-Kind: der neue Satz; auf keiner Seite bis zur Prüfung steht etwas zu Turnieren, Auftritten oder Kostümen ----
+  {
+    const page = await seiteMitBeispiel(browser, server, MOBIL, "fahrten-karneval", "karneval-kind", null);
+    const besucht = [];
+    let fahrten = null;
+    for (let i = 0; i < 90; i++) {
+      const s = await stand(page);
+      const l = await lesen(page);
+      besucht.push({ ort: s.schritt + "/" + s.teil, seite: l.seite });
+      if (s.schritt === "einwilligungen" && s.teil === "fahrten") {
+        fahrten = l;
+        await page.screenshot({ path: path.join(AUSGABE, MOBIL.name, "fahrten-karneval.png"), fullPage: false });
+        protokoll.screenshots++;
+      }
+      if (s.schritt === "pruefen") break;
+      if (s.schritt === "unterschriften") await unterschreiben(page, { touch: false });
+      const r = await klickeWeiter(page, s);
+      if (r.fehler.length || !r.gewechselt) break;
     }
-    if (was === "leer") {
-      await page0.screenshot({ path: path.join(AUSGABE, MOBIL.name, "karneval-uhrzeit-fehlt.png"), fullPage: false });
-      protokoll.screenshots++;
-      await axePruefen(page0, "Karneval-Uhrzeit fehlt (Fehlerliste, aria-invalid, aria-required)");
-    }
+    const soll = vorname("karneval-kind") + " darf zu Veranstaltungen des Vereins mitfahren.";
+    ok("Fahrten Karneval-Kind: die Seite 'Fahrten und Nachrichten' zeigt '" + soll + "'", !!fahrten && fahrten.satz === soll, fahrten ? fahrten.satz : "Seite nicht erreicht: " + besucht.map((x) => x.ort).join(" › "));
+    ok("Fahrten Karneval-Kind: der Satz nennt weder Spiele noch Turniere, und auf der Seite steht nichts zu Turnieren, Auftritten oder Kostümen", !!fahrten && !/Spiel|Turnier/.test(fahrten.satz) && !VERBOTEN.test(fahrten.seite), fahrten ? fahrten.satz : "");
+    const treffer = besucht.filter((x) => VERBOTEN.test(x.seite)).map((x) => x.ort);
+    ok("Karneval-Kind: auf keiner der " + besucht.length + " Seiten bis zur Prüfung steht 'Turnier', 'Auftritt' oder 'Kostüm'", besucht.length > 10 && treffer.length === 0, treffer.join(", "));
+    const letzte = besucht[besucht.length - 1];
+    ok("Karneval-Kind: die Prüfseite ist erreicht", !!letzte && letzte.ort === "pruefen/haupt", letzte ? letzte.ort : "");
+    const zeilen = await pruefZeilen(page);
+    const z = zeilen.find((x) => x.label === "Fahrten");
+    ok("Karneval-Kind: die Prüfseite zeigt die Zeile 'Fahrten' mit 'Ja', ohne Satz", !!z && z.wert === "Ja", JSON.stringify(z));
+    ok("Karneval-Kind: keine Fehler in der Konsole", page.__st.konsole.length === 0, page.__st.konsole.slice(0, 3).join(" | "));
+    await page.close();
   }
-  // Eine gültige Uhrzeit in anderer Schreibweise geht weiter und wird auf der Prüfseite als HH:MM gezeigt.
-  await tippe(page0, feld, "21 Uhr 30");
-  const rA = await klickeWeiter(page0, s0);
-  const sA = await stand(page0);
-  ok("Karneval-Uhrzeit: '21 Uhr 30' wird angenommen, es geht weiter zu 'kontakt'", rA.gewechselt && rA.fehler.length === 0 && sA.schritt === "kontakt", sA.schritt + "/" + sA.teil);
-  const pA = await geheBis(page0, "pruefen");
-  const zeileA = await page0.evaluate(() => Array.from(document.querySelectorAll("#anmeldung .anm-pruefzeile")).filter((z) => /Allein nach Hause/.test((z.querySelector("dt") || {}).textContent || "")).map((z) => (z.querySelector(".anm-pruefzeile__wert") || {}).textContent.trim()));
-  ok("Karneval-Uhrzeit: die Prüfseite zeigt 'Allein nach Hause: Ja, ab 21:30 Uhr'", pA.schritt === "pruefen" && zeileA.length === 1 && zeileA[0] === "Ja, ab 21:30 Uhr", JSON.stringify(zeileA));
-  await page0.close();
 
-  // ---- B: "Nein" geht ohne Uhrzeit; die Meldung verschwindet sofort, wenn man von "Ja" auf "Nein" wechselt ----
-  const pageB = await seiteMitBeispiel(browser, server, MOBIL, "karneval-uhrzeit-nein", "karneval-kind", null);
-  const sB = await geheBis(pageB, "karneval", "allein");
-  await tippe(pageB, feld, "");
-  const rB1 = await klickeWeiter(pageB, sB);
-  const boxDa = await pageB.$eval("#anmeldung .anm-fehlerbox", (e) => !e.hidden);
-  await klickeEtikett(pageB, wahlSel("nein"));
-  const boxWeg = await pageB.evaluate(() => ({ box: !document.querySelector("#anmeldung .anm-fehlerbox").hidden, feld: !!document.querySelector('#anmeldung input[data-pfad="karneval.alleinAb"]').closest(".anm-block") && document.querySelector('#anmeldung input[data-pfad="karneval.alleinAb"]').closest(".anm-block").checkVisibility() }));
-  ok("Karneval-Uhrzeit: wechselt man von 'Ja' (Meldung sichtbar) auf 'Nein', verschwinden Meldung und Uhrzeit-Feld sofort", !rB1.gewechselt && boxDa && !boxWeg.box && !boxWeg.feld, JSON.stringify({ meldungVorher: boxDa, nachher: boxWeg }));
-  const rB2 = await klickeWeiter(pageB, sB);
-  const sB2 = await stand(pageB);
-  ok("Karneval-Uhrzeit: 'Nein' geht ohne Uhrzeit weiter zu 'kontakt'", rB2.gewechselt && rB2.fehler.length === 0 && sB2.schritt === "kontakt", sB2.schritt + "/" + sB2.teil);
-  const pB = await geheBis(pageB, "pruefen");
-  const zeileB = await pageB.evaluate(() => Array.from(document.querySelectorAll("#anmeldung .anm-pruefzeile")).filter((z) => /Allein nach Hause/.test((z.querySelector("dt") || {}).textContent || "")).map((z) => (z.querySelector(".anm-pruefzeile__wert") || {}).textContent.trim()));
-  ok("Karneval-Uhrzeit: die Prüfseite zeigt 'Allein nach Hause: Nein'", pB.schritt === "pruefen" && zeileB.length === 1 && zeileB[0] === "Nein", JSON.stringify(zeileB));
-  await klickeWeiter(pageB, pB);
-  const datenB = await ergebnisPruefen(pageB, { name: "karneval-uhrzeit-nein", vp: MOBIL }, dateien);
-  if (datenB && datenB.attrappe) {
-    const kv = datenB.attrappe.a.karneval;
-    ok("Karneval-Uhrzeit: beim PDF-Baustein kommt 'Nein' ohne Uhrzeit an (alleinNachHause = nein, alleinAb leer)", kv.alleinNachHause === "nein" && kv.alleinAb === "", JSON.stringify(kv));
+  // ---- B: Fußball-Kind (Beispiel 'Kind neu'): der bisherige Satz ----
+  {
+    const page = await seiteMitBeispiel(browser, server, MOBIL, "fahrten-fussball", "kind-neu", null);
+    const s = await geheBis(page, "einwilligungen", "fahrten");
+    const l = await lesen(page);
+    const soll = vorname("kind-neu") + " darf zu Spielen und Turnieren mitfahren.";
+    ok("Fahrten Fußball-Kind: die Seite 'Fahrten und Nachrichten' zeigt '" + soll + "'", s.schritt === "einwilligungen" && s.teil === "fahrten" && l.satz === soll, s.schritt + "/" + s.teil + "; " + l.satz);
+    await page.screenshot({ path: path.join(AUSGABE, MOBIL.name, "fahrten-fussball.png"), fullPage: false });
+    protokoll.screenshots++;
+    await page.close();
   }
-  await pageB.close();
 
-  // ---- C: keine Antwort geht ebenfalls (die Frage ist freiwillig) ----
-  // Der Weg zu einer unbeantworteten Frage: bei den Abendauftritten erst 'Nein' (leert die Antworten), zurück, dann 'Ja'.
-  const pageC = await seiteMitBeispiel(browser, server, MOBIL, "karneval-uhrzeit-keine", "karneval-kind", null);
-  const abend = await geheBis(pageC, "karneval", "abend");
-  await klickeEtikett(pageC, '#anmeldung input[data-pfad="karneval.abendOhneEltern"][data-wert="nein"]');
-  await klickeWeiter(pageC, abend);
-  await pageC.click('#anmeldung [data-aktion="zurueck"]');
-  await pageC.waitForFunction(() => document.getElementById("anmeldung").dataset.teil === "abend", { timeout: 4000 });
-  await klickeEtikett(pageC, '#anmeldung input[data-pfad="karneval.abendOhneEltern"][data-wert="ja"]');
-  await klickeWeiter(pageC, await stand(pageC)); // abholung (leer)
-  const sC = await klickeWeiter(pageC, await stand(pageC)); // allein
-  const sC1 = await stand(pageC);
-  const unbeantwortet = await pageC.$$eval('#anmeldung input[data-pfad="karneval.alleinNachHause"]', (l) => ({ anzahl: l.length, gewaehlt: l.filter((e) => e.checked).length }));
-  ok("Karneval-Uhrzeit: Seite 'allein' ohne Antwort erreicht (weder Ja noch Nein gewählt, Uhrzeit-Feld verborgen)", sC1.teil === "allein" && unbeantwortet.anzahl === 2 && unbeantwortet.gewaehlt === 0 && !(await sichtbarIn(pageC, feld)), JSON.stringify({ stand: sC1, unbeantwortet }));
-  const rC = await klickeWeiter(pageC, sC1);
-  const sC2 = await stand(pageC);
-  ok("Karneval-Uhrzeit: ohne Antwort geht es weiter zu 'kontakt' (die Frage ist freiwillig)", rC.gewechselt && rC.fehler.length === 0 && sC2.schritt === "kontakt", sC2.schritt + "/" + sC2.teil);
-  const pC = await geheBis(pageC, "pruefen");
-  const zeileC = await pageC.evaluate(() => Array.from(document.querySelectorAll("#anmeldung .anm-pruefzeile")).filter((z) => /Allein nach Hause/.test((z.querySelector("dt") || {}).textContent || "")).length);
-  ok("Karneval-Uhrzeit: ohne Antwort fehlt die Zeile 'Allein nach Hause' auf der Prüfseite", pC.schritt === "pruefen" && zeileC === 0, String(zeileC));
-  await klickeWeiter(pageC, pC);
-  const datenC = await ergebnisPruefen(pageC, { name: "karneval-uhrzeit-keine", vp: MOBIL }, dateien);
-  if (datenC && datenC.attrappe) {
-    const kv = datenC.attrappe.a.karneval;
-    ok("Karneval-Uhrzeit: beim PDF-Baustein kommt keine Antwort an (alleinNachHause = null, alleinAb leer)", kv.alleinNachHause === null && kv.alleinAb === "", JSON.stringify(kv));
+  // ---- C: Kind in Fußball und Karneval ("beides"): der bisherige Satz ----
+  {
+    const page = await seiteMitBeispiel(browser, server, MOBIL, "fahrten-beides", "kind-neu", "abteilung");
+    await klickeEtikett(page, '#anmeldung input[data-pfad="abteilung"][data-wert="beides"]');
+    const s = await geheBis(page, "einwilligungen", "fahrten");
+    const l = await lesen(page);
+    const soll = vorname("kind-neu") + " darf zu Spielen und Turnieren mitfahren.";
+    ok("Fahrten Kind in Fußball und Karneval: der bisherige Satz '" + soll + "'", s.schritt === "einwilligungen" && s.teil === "fahrten" && l.satz === soll, s.schritt + "/" + s.teil + "; " + l.satz);
+    await page.close();
   }
-  await pageC.close();
+
+  // ---- D: Abteilung in derselben Sitzung von Fußball auf Karneval gewechselt: der Satz folgt der Abteilung ----
+  {
+    const page = await seiteMitBeispiel(browser, server, MOBIL, "fahrten-wechsel", "kind-neu", "abteilung");
+    await klickeEtikett(page, '#anmeldung input[data-pfad="abteilung"][data-wert="karneval"]');
+    const s = await geheBis(page, "einwilligungen", "fahrten");
+    const l = await lesen(page);
+    const name = vorname("kind-neu");
+    ok("Fahrten, Abteilung auf Karneval gewechselt: der Satz heißt jetzt '… zu Veranstaltungen des Vereins …'", s.schritt === "einwilligungen" && s.teil === "fahrten" && l.satz === name + " darf zu Veranstaltungen des Vereins mitfahren.", s.schritt + "/" + s.teil + "; " + l.satz);
+    await page.close();
+  }
 }
 
 // Attest: Hochladen heißt "habe"; danach nennt der Schritt 'unterschriften' die Erlaubnis für das Attest.
@@ -1382,7 +1527,6 @@ async function statischeRunde4() {
     "zahlung.kiPlz": "nur fünf Ziffern (Prüfung /^\\d{5}$/)",
     "zahlung.iban": "IBAN-Prüfung (A bis Z und 0 bis 9); pdf.js lässt alles andere weg",
     jahreInDe: "Zahl von 0 bis 18",
-    "karneval.alleinAb": "Uhrzeit HH:MM (normalisiereUhrzeit)",
   };
   const normal = (x) => x.replace(/\s+/g, " ").trim();
   let felder = 0;
@@ -1727,6 +1871,10 @@ async function main() {
           ok("Profil " + id + " (" + vp.name + ") bis 'fertig' durchgeklickt, Datei erstellt", erreicht && !!daten, r.besucht.length + " Seiten: " + Array.from(new Set(r.besucht.map((x) => x.split("/")[0]))).join(" › "));
           r.besucht.forEach((b) => alleSchritte.add(b.split("/")[0]));
           protokoll.profile.push({ name: id, viewport: vp.name, modus: "beispiel", seiten: r.besucht, datei: daten && daten.dateiname });
+          // M1 (11.10.2026): Heimweg nur bei Minderjährigen, die trainieren oder tanzen; den Schritt "karneval" gibt es nicht mehr
+          const besuchteSchritte = r.besucht.map((x) => x.split("/")[0]);
+          const mitHeimweg = ["kind-neu", "wechsel-hessen", "ausland-kind", "karneval-kind"].includes(id);
+          ok("Profil " + id + " (" + vp.name + "): Seite 'heimweg' " + (mitHeimweg ? "kommt vor (Minderjährige, die trainieren oder tanzen)" : "kommt nicht vor (Erwachsene)") + ", nie ein Schritt 'karneval'", besuchteSchritte.includes("heimweg") === mitHeimweg && !besuchteSchritte.includes("karneval"), besuchteSchritte.join(" › "));
           if (daten) {
             const nachweis = await unterschriftenNachweisen(page, ctx, daten);
             const uKeys = daten.attrappe ? Object.keys(daten.attrappe.unterschriften || {}).join(", ") : "";
@@ -1867,6 +2015,7 @@ function profilGeschwister(beispiele) {
     staaten: ["DE"],
     auslandGewohnt: "nein",
     einwilligungen: { fotos: "nein", medien: [], hfvName: true, hfvFoto: false, fahrten: true, messenger: true },
+    heimweg: "allein",
     notfall: { name: "Erika Beispiel", telefon: "0176 04069087", beziehung: "Oma" },
     gesundheitsbogen: false,
     spielerfoto: { weg: "verein" },
@@ -1907,6 +2056,7 @@ function profilMaedchenC(beispiele) {
     leistungen: "ja",
     zahlung: { art: "rechnung" },
     einwilligungen: { fotos: "ja", medien: ["intern", "presse"], hfvName: true, hfvFoto: true, fahrten: true, messenger: false },
+    heimweg: "abholen",
     notfall: { name: "Iryna Beispiel", telefon: "0176 04069033", beziehung: "Tante" },
     gesundheitsbogen: true,
     gesundheit: { allergien: "Pollen", erkrankungen: "", medikamente: "Asthmaspray", sonstiges: "" },
@@ -2221,8 +2371,8 @@ async function einzelpruefungen(browser, server, dateien, beispiele) {
     ["statischeRunde4", () => statischeRunde4()],
     ["pruefeFreitextLatein", () => pruefeFreitextLatein(browser, server)],
     ["pruefeSonderzeichenPdf", () => pruefeSonderzeichenPdf(browser, server, dateien)],
-    ["pruefeKarnevalFragen", () => pruefeKarnevalFragen(browser, server, dateien)],
-    ["pruefeKarnevalUhrzeit", () => pruefeKarnevalUhrzeit(browser, server, dateien)],
+    ["pruefeHeimweg", () => pruefeHeimweg(browser, server, dateien, beispiele)],
+    ["pruefeFahrtenSatz", () => pruefeFahrtenSatz(browser, server, beispiele)],
     ["pruefeAttestImPlan", () => pruefeAttestImPlan(browser, server, dateien)],
     ["pruefeSprache", () => pruefeSprache(browser, server)],
     ["pruefeArabischDurchlauf", () => pruefeArabischDurchlauf(browser, server, dateien)],
@@ -2833,36 +2983,29 @@ async function pruefeAppModus(browser, server, dateien) {
   await page.close();
 }
 
-// Beitragsgruppen und Übungszeiten der Karnevalgruppen kommen aus den Texten der Sprache (Nachbesserung sprache-16 und sprache-24):
-// Auf Deutsch stehen sie wie in den Daten; mit abgefangenen englischen Wörterbüchern erscheinen die englischen Namen, Wochentage und "Uhr"-Muster.
+// Die Namen der Beitragsgruppen kommen aus den Texten der Sprache (Nachbesserung sprache-16): Auf Deutsch stehen sie wie in den Daten;
+// mit einem abgefangenen englischen Wörterbuch erscheinen die englischen Namen. (Die Übungszeiten der Karnevalgruppen sind mit dem Schritt
+// "karneval" entfallen, Entscheidung der 1. Vorsitzenden vom 11.10.2026.)
 async function pruefeUebersetzbareDaten(browser, server) {
-  console.log("\n=== N-A2: Beitragsgruppen und Übungszeiten übersetzbar ===");
+  console.log("\n=== N-A2: Beitragsgruppen übersetzbar ===");
   const gruppen = server.konfig.anmeldung.beitragsgruppen;
-  const karnevalGruppen = server.konfig.karnevalGruppen;
   // Deutsch: wie in den Daten
-  const de = await seiteMitBeispiel(browser, server, MOBIL, "daten-de", "karneval-kind", "karneval");
-  const kartenDe = await de.$$eval("#anmeldung .anm-karte", (l) => l.map((k) => ({ titel: (k.querySelector(".anm-karte__titel") || {}).textContent, hinweis: ((k.querySelector(".anm-karte__hinweis") || {}).textContent || "").replace(/\s+/g, " ").trim() })));
-  const sollDe = karnevalGruppen.map((g) => ({ titel: g.name, hinweis: "Übungszeit: " + g.uebungszeit }));
-  ok("Karneval-Gruppen (Deutsch): Übungszeit steht wie in den Daten (Wochentag, Uhrzeit, Uhr, Ort)", sollDe.every((x) => kartenDe.some((k) => k.titel === x.titel && k.hinweis.startsWith(x.hinweis))), JSON.stringify(kartenDe.slice(0, 2)));
-  const nachBeitragDe = await geheBis(de, "beitrag", "gruppe");
+  const de = await seiteMitBeispiel(browser, server, MOBIL, "daten-de", "karneval-kind", "beitrag");
+  const nachBeitragDe = await stand(de);
   const kartenBeitragDe = await de.$$eval("#anmeldung .anm-karte .anm-karte__titel", (l) => l.map((k) => k.textContent.trim()));
   ok("Beitragsgruppen (Deutsch): Namen wie in data/anmeldung.json", nachBeitragDe.schritt === "beitrag" && kartenBeitragDe.length > 0 && kartenBeitragDe.every((t) => Object.values(gruppen).some((g) => t.startsWith(g.bezeichnung))), kartenBeitragDe.join(" | "));
   await de.close();
 
-  // Englisch mit abgefangenen Wörterbüchern: Wochentage, Muster der Übungszeit, Namen der Beitragsgruppen
-  const wochentage = { montag: "Monday", dienstag: "Tuesday", mittwoch: "Wednesday", donnerstag: "Thursday", freitag: "Friday", samstag: "Saturday", sonntag: "Sunday" };
+  // Englisch mit abgefangenem Wörterbuch: Namen der Beitragsgruppen
   const grNamen = { fussball_jugend: "Children and youth (football, with U19)", karneval_kinder: "Children and youth (carnival)" };
   const abfangen = async (page) => {
     await page.setRequestInterception(true);
     page.on("request", async (req) => {
       const u = req.url();
-      const eins = /\/texte\/en-(oberflaeche|regeln)\.js$/.exec(u);
+      const eins = /\/texte\/en-regeln\.js$/.exec(u);
       if (!eins) return req.continue();
       const original = await (await fetch(u)).text();
-      const zusatz =
-        eins[1] === "oberflaeche"
-          ? `;export default { ...__orig, allgemein: { ...__orig.allgemein, wochentag: ${JSON.stringify(wochentage)} }, karneval: { ...__orig.karneval, gruppe: { ...__orig.karneval.gruppe, uebungszeit: "{tag}, {zeit}, {ort}", uebungszeitOhneOrt: "{tag}, {zeit}" } } };`
-          : `;export default { ...__orig, beitrag: { ...__orig.beitrag, gruppen: ${JSON.stringify(grNamen)} } };`;
+      const zusatz = `;export default { ...__orig, beitrag: { ...__orig.beitrag, gruppen: ${JSON.stringify(grNamen)} } };`;
       req.respond({ status: 200, contentType: "text/javascript; charset=utf-8", body: original.replace(/export default \{/, "const __orig = {") + "\n" + zusatz });
     });
   };
@@ -2870,12 +3013,6 @@ async function pruefeUebersetzbareDaten(browser, server) {
   await ladeBeispielPerKnopf(en, "karneval-kind");
   await en.click('[data-anm-sprachleiste] button[data-sprache="en"]');
   await en.waitForFunction(() => document.getElementById("anmeldung").getAttribute("lang") === "en", { timeout: 6000 });
-  await geheBis(en, "karneval", "gruppe");
-  const kartenEn = await en.$$eval("#anmeldung .anm-karte", (l) => l.map((k) => ({ titel: (k.querySelector(".anm-karte__titel") || {}).textContent, hinweis: ((k.querySelector(".anm-karte__hinweis") || {}).textContent || "").replace(/\s+/g, " ").trim() })));
-  const dreamboys = kartenEn.find((k) => k.titel === "Dreamboys");
-  const mittwoch = karnevalGruppen.find((g) => g.name === "Dreamboys").uebungszeit; // "Mittwoch 19:00–21:00 Uhr, Turnhalle Fridtjof-Nansen-Schule"
-  const m = /^(\S+) (\S+) Uhr, (.+)$/.exec(mittwoch);
-  ok("Karneval-Gruppen (Englisch): Wochentag und „Uhr“ stehen nach den Texten der Sprache, der Ort bleibt", !!dreamboys && !!m && dreamboys.hinweis.includes("Wednesday, " + m[2] + ", " + m[3]) && !/Mittwoch|Uhr/.test(dreamboys.hinweis), dreamboys ? dreamboys.hinweis : JSON.stringify(kartenEn));
   const nachBeitragEn = await geheBis(en, "beitrag", "gruppe");
   const kartenBeitragEn = await en.$$eval("#anmeldung .anm-karte .anm-karte__titel", (l) => l.map((k) => k.textContent.replace(/[⁦-⁩]/g, "").trim()));
   const vorschlagEn = await en.$$eval("#anmeldung .anm-text--gross", (l) => l.map((k) => k.textContent.replace(/[⁦-⁩]/g, "").trim()));

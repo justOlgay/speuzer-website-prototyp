@@ -1,7 +1,7 @@
 /*
   Texte der Oberfläche des Anmelde-Assistenten - Türkisch (Türkçe).
   Übersetzungshilfe: Verbindlich ist der deutsche Text (de-oberflaeche.js), das PDF bleibt deutsch.
-  Stand 08.10.2026. Dieselbe Schlüsselstruktur wie de-oberflaeche.js, aber ohne "sprachen" und
+  Stand 11.10.2026. Dieselbe Schlüsselstruktur wie de-oberflaeche.js, aber ohne "sprachen" und
   ohne "demo" (die Vorführung bleibt deutsch). Fehlt hier ein Eintrag, gilt der deutsche.
   Prüfung: node tools/anmeldung-test/uebersetzung-pruefen.mjs
 
@@ -91,6 +91,7 @@
   Erlaubnis für Fotos = fotoğraflar için izin
   Erlaubnis für die Lastschrift = otomatik çekim için izin
   Satzung = tüzük
+  Heimweg = eve dönüş
 */
 
 export default {
@@ -137,15 +138,6 @@ export default {
     datei: "Dosya",
     keineAngabe: "belirtilmemiş",
     jahre: "yaş",
-    wochentag: {
-      montag: "Pazartesi",
-      dienstag: "Salı",
-      mittwoch: "Çarşamba",
-      donnerstag: "Perşembe",
-      freitag: "Cuma",
-      samstag: "Cumartesi",
-      sonntag: "Pazar",
-    },
   },
 
   kopf: {
@@ -244,7 +236,6 @@ export default {
     lateinischText: "Lütfen Latin harfleriyle yazın.",
     lateinischNummer: "Lütfen numarayı 0’dan 9’a kadar olan rakamlarla yazın.",
     satzung: "Lütfen kulüp tüzüğünü (Satzung) okuyun ve kutucuğu işaretleyin.",
-    uhrzeit: "Lütfen saati şöyle yazın: 21:30.",
     datumLeer: "Lütfen tarihi yazın.",
     datumUnvollstaendig: "Lütfen gün, ay ve yılı yazın.",
     datumUnvollstaendigMonat: "Lütfen ay ve yılı yazın.",
@@ -592,42 +583,6 @@ export default {
     frauHerrenHinweis: "Bunun için federasyona başvuru gerekir.",
   },
 
-  karneval: {
-    gruppe: {
-      titel: { kind: "{name} hangi grupta dans etmek istiyor?", selbst: "Hangi grupta dans etmek istersiniz?" },
-      weissNicht: "Bilmiyorum",
-      weissNichtHinweis: "Kulüp size söyler.",
-      uebung: "Prova zamanı: {zeit}",
-      // Wochentag und "Uhr" folgen der Sprache; der Ort steht, wie im Verein üblich, auf Deutsch (siehe seiten-fussball.js).
-      uebungszeit: "{tag} saat {zeit}, {ort}",
-      uebungszeitOhneOrt: "{tag} saat {zeit}",
-      passt: "Yaşa uygun",
-    },
-    woanders: {
-      titel: { kind: "{name} başka bir kulüpte de dans ediyor mu?", selbst: "Başka bir kulüpte de dans ediyor musunuz?" },
-    },
-    turnier: {
-      titel: { kind: "{name} turnuvalara katılsın mı?", selbst: "Turnuvalara katılmak ister misiniz?" },
-      hinweis: "Turnuvalarda gruplar birbirine karşı dans eder.",
-    },
-    abend: {
-      titel: { kind: "{name} akşamları ebeveynler olmadan sahne alabilir mi?", selbst: "Akşamları sahne alabilir misiniz?" },
-      hinweis: "Akşamları partilerde ve karnaval gösterilerinde sahne alınır.\nAkşam gösterileri için ayrı bir form var.",
-    },
-    abholung: {
-      titel: { kind: "Çocuğunuzu kim alacak?", selbst: "Sizi kim alacak?" },
-      hinweis: "Bu soru isteğe bağlıdır.\nBöylece kulüp, gösteriden sonra kimin alacağını bilir.",
-      name: "Almaya gelecek kişinin adı",
-      nameHinweis: "Birden fazla kişi varsa tüm adları yazın.",
-    },
-    allein: {
-      titel: { kind: "Çocuğunuz eve tek başına gidebilir mi?", selbst: "Eve tek başınıza gidebilir misiniz?" },
-      hinweis: "Bu soru isteğe bağlıdır.\nYanıt daha sonra akşam gösterileri için izin belgesinde yer alır.",
-      ab: "Saat kaçtan itibaren?",
-      abHinweis: "Saati şöyle yazın: 21:30.",
-    },
-  },
-
   kontakt: {
     anschrift: {
       titel: { kind: "{name} nerede oturuyor?", selbst: "Nerede oturuyorsunuz?" },
@@ -656,7 +611,7 @@ export default {
       andere: "Başka bir grup seçebilirsiniz.",
       legende: "Aidat grubu",
       proJahr: "Yılda {jahr} Euro",
-      doppel: "Futbol ve karnavaldasınız.\nBunun için ayrı bir aidat geçerli olabilir.\nKulüp size haber verir.",
+      doppel: "Hem futbolda hem karnavalda mısınız?\nAyrı bir aidat hakkında bilgi isteyin.",
       vorgeschlagen: "Öneri",
     },
     familie: {
@@ -696,7 +651,6 @@ export default {
       sepaHinweis: "Kulüp aidatı yılda bir kez hesabınızdan çeker.",
       rechnung: "Fatura",
       rechnungHinweis: "Aidatı kendiniz havale edersiniz.",
-      zuschlag: "Bunun için yılda {zuschlag} Euro ek ücret alınabilir.",
     },
     inhaber: {
       titel: "Hesap kimin?",
@@ -745,10 +699,22 @@ export default {
       titel: "Geziler ve mesajlar",
       hinweis: "İkisi de isteğe bağlıdır. Bunu sonra değiştirebilirsiniz.",
       fahrten: "{name} maçlara ve turnuvalara gidebilir.",
+      fahrtenKarneval: "{name} kulüp etkinliklerine gidebilir.",
       fahrtenHinweis: "Örneğin diğer ebeveynlerin arabalarıyla.",
       messenger: "{name} takımın mesajlaşma grubuna katılabilir.",
       messengerHinweis: "Orada tarihler ve anlaşmalar yer alır.",
     },
+  },
+
+  // Aufsichtspflicht: Minderjährige, die trainieren oder tanzen (Schritt "heimweg").
+  heimweg: {
+    titel: "Çocuğunuz antrenmandan sonra eve tek başına gidebilir mi?",
+    hinweis: "Antrenman sırasında kulüp çocuğunuza göz kulak olur.\nBize söyleyin: Çocuğunuz antrenmandan sonra eve nasıl gider?",
+    allein: "Eve tek başına",
+    alleinHinweis: "Çocuğum antrenmandan sonra eve tek başına gidebilir.",
+    abholen: "Biri gelip alır",
+    abholenHinweis: "Çocuğum biri gelip alana kadar bekler.",
+    aendern: "Bunu istediğiniz zaman değiştirebilirsiniz. Değiştirirseniz antrenöre söyleyin.",
   },
 
   notfall: {
@@ -899,10 +865,6 @@ export default {
       alterVerein: "Önceki kulüp",
       alteMitgliedschaft: "Eski kulüpteki üyelik",
       abmeldung: "Kayıt silme",
-      karneval: "Karnaval grubu",
-      abendauftritte: "Akşam gösterileri",
-      abholung: "Alacak kişi",
-      alleinNachHause: "Eve tek başına",
       staaten: "Vatandaşlık",
       ausland: "Yurt dışında son yaşanan yer",
       wohnen: "Oturulan yer",
@@ -920,6 +882,7 @@ export default {
       hfv: "Hessen Futbol Federasyonu (HFV)",
       fahrten: "Geziler",
       messenger: "Mesajlaşma grubu",
+      heimweg: "Eve dönüş",
       notfall: "Acil durum kişisi",
       gesundheitsbogen: "Sağlık formu",
       spielerfoto: "Oyuncu fotoğrafı",
@@ -934,7 +897,7 @@ export default {
       nein: "Hayır",
       weissNicht: "Bilmiyorum",
       satzungVonHand: "Hayır – elle işaretlersiniz",
-      alleinAb: "Evet, {zeit} saatinden itibaren",
+      heimweg: { allein: "Eve tek başına", abholen: "Biri gelip alır" },
       geschlecht: { m: "Erkek", w: "Kadın", d: "Divers (diğer)", ohne_angabe: "Belirtilmemiş" },
       abteilung: { fussball: "Futbol", karneval: "Karnaval", beides: "Futbol ve karnaval", passiv: "Sadece destek" },
       abmeldung: {

@@ -116,29 +116,6 @@ export function zweiterElternteilNoetig(a) {
   return !!a && a.sorge === "getrennt_bei_mir" && a.andererElternteilEinverstanden !== true;
 }
 
-// ---------- Uhrzeit ----------
-
-// Liest eine Uhrzeit wie "21:30", "21.30", "21 Uhr 30", "2130", "930" oder "21"
-// und gibt "HH:MM" zurück, sonst null.
-export function normalisiereUhrzeit(text) {
-  const s = String(text === null || text === undefined ? "" : text)
-    .trim()
-    .replace(/\s*uhr\s*/gi, ":")
-    .replace(/:+$/, "")
-    .replace(/\s+/g, "");
-  let m = /^(\d{1,2})[:.,h](\d{2})$/i.exec(s);
-  if (!m) m = /^(\d{1,2})(\d{2})$/.exec(s); // "2130", "930"
-  if (!m) {
-    const nurStunde = /^(\d{1,2})$/.exec(s); // nur die Stunde
-    if (nurStunde) m = [null, nurStunde[1], "00"];
-  }
-  if (!m) return null;
-  const stunde = Number(m[1]);
-  const minute = Number(m[2]);
-  if (stunde > 23 || minute > 59) return null;
-  return zweistellig(stunde) + ":" + zweistellig(minute);
-}
-
 // ---------- IBAN ----------
 // SEPA-Länder mit der Länge ihrer IBAN (European Payments Council). Andere
 // Länder (zum Beispiel die Türkei) gelten nicht als SEPA-fähig – der

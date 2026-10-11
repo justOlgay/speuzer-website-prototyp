@@ -12,6 +12,7 @@ export default {
     U17: { name: "Beleg vom Einschreiben", kurz: "Der Einlieferungsbeleg der Post.", warum: "Er zeigt den Tag der Abmeldung.", wie: "Fotografieren Sie den Beleg.", wo: "" },
     U18: { name: "Vollmacht", kurz: "Sie erlauben uns, Ihr Kind abzumelden.", warum: "", wie: "", wo: "" },
     U28: { name: "Gesundheitsbogen", kurz: "Freiwillige Angaben zur Gesundheit.", warum: "", wie: "", wo: "" },
+    U41: { name: "Heimweg nach dem Training", kurz: "Sie sagen, wie Ihr Kind nach Hause kommt.", warum: "", wie: "", wo: "" },
   },
   hinweise: {
     abmeldung_mail: "Eine Mail an den alten Verein reicht nicht. Schicken Sie ein Einschreiben.",

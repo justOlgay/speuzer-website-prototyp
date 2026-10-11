@@ -58,6 +58,7 @@ export function probetrainingAbschnitt(pfad, herrenMailtoHref = "") {
       <li><p>Probetraining beim Team</p></li>
       <li><p>Aufnahmeantrag stellen</p></li>
     </ol>
+    <p class="meta">Beim Probetraining ist man noch nicht über den Verein versichert.</p>
     <p class="knopfzeile">
       <a class="knopf" href="${escapeHtml(PROBETRAINING_MAILTO)}">E-Mail an die Jugendleitung</a>
     </p>

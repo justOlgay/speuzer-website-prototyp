@@ -39,6 +39,9 @@
     - App-Modus (Seite mit ?app=1, Klasse app-modus am <html>, vom Skript im Seitenkopf gesetzt): Der Assistent
       bleibt gleich; der Hinweis "Im Browser öffnen" steht oben auf dem Startschritt und auf der Fertig-Seite
       (k.appModus, k.browserUrl).
+    - Live-Fassung (Livegang, M6): Die Konfiguration trägt dann sprachen (nur diese Sprachen stehen zur Wahl, die
+      Sprachwahl oben auf der Seite baut src/begleit/anmeldung.mjs mit derselben Liste) und live = true (pdf-lader.js
+      lässt den Entwurfsvermerk im PDF weg). Ohne diese Angaben gilt alles wie auf der Begleitseite.
 */
 
 import { zeigeFehlerAnFeldern, fokusZiel, feldBezeichnung, h, anhaengen } from "./bausteine.js";
@@ -129,7 +132,8 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
     konfig,
     regeln,
     heute: heuteIso(),
-    sprachen: deTexte.sprachen,
+    // Live-Fassung: nur die Sprachen aus der Konfiguration (Deutsch immer); sonst alle vier der Begleitseite.
+    sprachen: Array.isArray(konfig.sprachen) ? deTexte.sprachen.filter((s) => s.code === "de" || konfig.sprachen.includes(s.code)) : deTexte.sprachen,
     a: neueAntworten("de"),
     bilder: { spielerfoto: null, nachweise: {}, unterschriften: {} },
     roh: {},
@@ -203,8 +207,8 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
   // Link "Im Browser öffnen" (neuer Tab, ohne Rückbezug auf die App).
   k.browserLink = () => h("a", { href: k.browserUrl(), target: "_blank", rel: "noopener", klasse: "anm-browserlink", "data-aktion": "im-browser-oeffnen" }, k.t("app.browser"));
 
-  // Deutsche Angaben aus der Konfiguration (Namen der Beitragsgruppen und der
-  // Karnevalsgruppen, Übungszeiten): in Sprachen von rechts nach links in Isolaten.
+  // Deutsche Angaben aus der Konfiguration (Namen der Beitragsgruppen, Mannschaften):
+  // in Sprachen von rechts nach links in Isolaten.
   k.datentext = (text) => alsErsatz(text);
 
   // Aufzählung mit dem Trenner der Sprache (liste.trenner: Deutsch ", ", Arabisch "، ").

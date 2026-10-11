@@ -80,6 +80,11 @@ für den Verein, Teil C vertraulich). Es wird nichts gesendet und nichts gespeic
 erklärt das Konzept und listet die offenen Entscheidungen (O-Nummern) für Vorstand, Kasse und Passstelle.
 Beide Seiten sind `noindex` und nicht Teil des appack-Pakets.
 
+Livegang (vorbereitet, aus): `ANMELDUNG_LIVE_SCHALTER` in `src/vorlagen/hilfen.mjs` nimmt den Assistenten als
+`web/anmeldung.html` (31 Dateien, flach) ins appack-Paket und zeigt in „Mitglied werden“ den Knopf
+„Schritt für Schritt anmelden“; `ANMELDUNG_SPRACHEN_LIVE` legt die Sprachen fest (vorerst Deutsch und Englisch).
+Für einen einzelnen Bau: `ANMELDUNG_LIVE=1`. Paket-Test: `npm run test:anmeldung-paket`.
+
 - Regelwerk: `data/anmeldung.json` (Fälle, Unterlagen, Fristen, offene Punkte), `assets/js/anmeldung/regeln.js`
 - PDF: `assets/js/anmeldung/pdf.js`, Vordrucke in `assets/pdf/anmeldung/`, Zuordnung `data/anmeldung-formulare.json`
   (erzeugt mit `tools/anmeldung-test/formulare-erzeugen.mjs`)

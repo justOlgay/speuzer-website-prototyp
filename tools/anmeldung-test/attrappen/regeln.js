@@ -79,7 +79,8 @@ function unterlagenFuer(a, f) {
   if (f.wechselDe && a.abmeldung && a.abmeldung.status === "einschreiben") eintrag("U17", "pflicht", "familie", "anmeldung", "foto_oder_datei", "abmeldung", true);
   if (f.spielt) eintrag("U16", "pflicht", "familie", "vor_erstem_spiel", "foto_oder_datei", null, false);
   if (f.minder && a.gesundheitsbogen === true) eintrag("U28", "freiwillig", "familie", "anmeldung", "formular_im_pdf", "notfall", false);
-  if (a.abteilung === "karneval" && f.minder && a.karneval && a.karneval.abendOhneEltern === "ja") eintrag("U30", "verein", "familie", "anmeldung", "unterschrift", "karneval_auftritte", false);
+  // Heimweg nach dem Training (U41): Minderjährige, die trainieren oder tanzen (M1, 11.10.2026)
+  if (f.minder && (f.fussball || f.karneval)) eintrag("U41", "verein", "familie", "anmeldung", "formular_im_pdf", "heimweg", false);
   return u;
 }
 
@@ -99,10 +100,10 @@ export function schritte(a, konfig, heute) {
   if (f.minder && f.fussball && (f.nichtDeutsch || a.auslandGewohnt === "ja")) liste.push("wohnen");
   if (f.minder) liste.push("sorge");
   if (besonderesNoetig(f)) liste.push("besonderes");
-  if (f.karneval) liste.push("karneval");
   liste.push("kontakt", "beitrag");
   if (f.minder) liste.push("leistungen");
   liste.push("zahlung", "einwilligungen");
+  if (f.minder && (f.fussball || f.karneval)) liste.push("heimweg");
   if (f.minder) liste.push("notfall");
   if (f.spielt) liste.push("spielerfoto");
   if (unterlagenFuer(a, f).some((u) => u.nachweis)) liste.push("nachweise");
@@ -156,6 +157,7 @@ export function auswerten(a, konfig, heute) {
     if (f.minder) unterschriften.push({ formular: "hfv_antrag", stelleKey: "seite2.spieler", wer: "spieler" });
   }
   if (formulare.includes("vollmacht")) unterschriften.push({ formular: "vollmacht", stelleKey: "unterschrift", wer: "sorgeberechtigte" });
+  if (formulare.includes("heimweg")) unterschriften.push({ formular: "heimweg", stelleKey: "unterschrift", wer: "sorgeberechtigte" });
   const hinweise = [];
   if (f.wechselDe) {
     hinweise.push({ art: "warnung", key: "abmeldung_mail", werte: {}, schritt: "abmeldung" });
@@ -187,8 +189,7 @@ export function auswerten(a, konfig, heute) {
       ? { pflichtspieleAb: addTage(heute, 90), freundschaftsspieleAb: addTage(heute, 1), regel: "R5", unsicher: true, key: "wartefrist" }
       : { pflichtspieleAb: null, freundschaftsspieleAb: null, regel: "R1", unsicher: false, key: "keine_frist" },
     weiterleitung: namen.length || !f.fussball ? [] : [{ an: "jugendleitung", key: "keine_mannschaft" }],
-    beitrag: { gruppe, gruppen: [gruppe], jahr: PREISE[gruppe][0], monat: PREISE[gruppe][1], aufnahmegebuehr: 20, zuschlagOhneSepa: 3, hinweisKey: null, vorschlag: gruppe, gewaehlt: false, werte: {} },
-    karneval: { gruppenVorschlag: f.karneval ? ["Freaky Fruities"] : [], gruppe: null, passt: null, bestaetigt: false },
+    beitrag: { gruppe, gruppen: [gruppe], jahr: PREISE[gruppe][0], monat: PREISE[gruppe][1], aufnahmegebuehr: 20, hinweisKey: null, vorschlag: gruppe, gewaehlt: false, werte: {} },
     besonderesOptionen: besonderesNoetig(f) ? ["maedchenJungenteam", "frauHerren", "herrenAushilfe"].filter((o) => (o === "maedchenJungenteam" ? f.frau && ["C", "B"].includes(f.klasse) : o === "herrenAushilfe" ? f.minder === true && f.klasse === "A" : f.frau && f.minder === false)) : [],
     fehlend,
   };

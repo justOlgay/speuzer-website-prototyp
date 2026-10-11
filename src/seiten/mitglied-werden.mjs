@@ -14,7 +14,7 @@
 // /mannschaften/ und /kontakt/) entfällt hier.
 
 import { downloadZeile } from "../vorlagen/bausteine.mjs";
-import { PROBETRAINING_MAILTO, APP_MODUS_SKRIPT, AUFNAHMEANTRAG_MAILTO, AUFNAHMEANTRAG_VERSAND } from "../vorlagen/hilfen.mjs";
+import { PROBETRAINING_MAILTO, APP_MODUS_SKRIPT, AUFNAHMEANTRAG_MAILTO, AUFNAHMEANTRAG_VERSAND, ANMELDUNG_LIVE } from "../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/mitglied-werden/" (Tiefe 1), daher immer
 // "../" (siehe pfadZurWurzel() in tools/build.mjs).
@@ -212,6 +212,10 @@ function beitraegeAbschnitt(daten) {
 // Jugendleitung genügt" und widersprach sich direkt mit dem Herren-Link
 // darunter; Wortlaut jetzt an Entscheidung D (w10-gemeinsam.md) angeglichen
 // ("Jahrgang, Vorerfahrung"), wie auf den Mannschaftsseiten.
+// Livegang des Anmelde-Assistenten (M6, Schalter ANMELDUNG_LIVE in hilfen.mjs): Ist er an, steht in Schritt 2
+// (Web und App) zuerst der Hauptknopf "Schritt für Schritt anmelden" (Seite anmeldung.html; in der App schreibt
+// APP_MODUS_SKRIPT den Link wie bei den anderen Workspace-Seiten auf ?app=1 um). Die bisherigen Wege bleiben darunter
+// als Nebenwege (Web: Online-Antrag und PDF; App: App-Formular und PDF). Ist er aus, bleibt der Schritt wie vorher.
 function ablaufAbschnitt(daten) {
   const beitraege = daten.beitraege ?? {};
   const karneval = daten.karneval ?? {};
@@ -221,6 +225,21 @@ function ablaufAbschnitt(daten) {
   const herrenLink = herrenHref
     ? `<p class="meta"><a href="${escapeHtml(herrenHref)}">Für die Herren: E-Mail an das Trainerteam der Herren ›</a></p>`
     : "";
+  const eintritt = beitraege.eintritt ? `<p class="meta">${escapeHtml(mitGeschuetzterOrdnungszahl(beitraege.eintritt))}</p>` : "";
+  // Mit Assistent (ANMELDUNG_LIVE): Hauptknopf zuerst, die bisherigen Wege als Nebenwege (kleine Zeile, zweitrangiger Knopf).
+  const assistent = ANMELDUNG_LIVE
+    ? `<p>Am einfachsten: Der Assistent fragt Schritt für Schritt, was für die Anmeldung nötig ist. Am Ende erstellt er alle Unterlagen als PDF-Datei.</p>
+          <p class="knopfzeile">
+            <a class="knopf" href="${PFAD}anmeldung/">Schritt für Schritt anmelden</a>
+          </p>
+          `
+    : "";
+  const webWeg = `online ausfüllen und am Bildschirm unterschreiben – daraus entsteht das fertige PDF${AUFNAHMEANTRAG_VERSAND.art === "endpunkt" ? ", das Sie direkt an die Geschäftsstelle senden" : " für die E-Mail an die Geschäftsstelle"}.`;
+  const webAntrag = ANMELDUNG_LIVE ? `<p class="meta">Oder nur den Aufnahmeantrag: ${webWeg}</p>` : `<p>Aufnahmeantrag ${webWeg}</p>`;
+  const appAntrag = ANMELDUNG_LIVE
+    ? `<p class="meta">Oder nur den Aufnahmeantrag: online im Formular der App oder als PDF.</p>`
+    : `<p>Aufnahmeantrag ausfüllen – online oder als PDF.</p>`;
+  const antragKnopf = ANMELDUNG_LIVE ? "knopf knopf--sekundaer" : "knopf";
 
   return `<section class="abschnitt--hell abschnitt">
   <div class="container fluss">
@@ -229,6 +248,7 @@ function ablaufAbschnitt(daten) {
       <li>
         <div class="schritt__inhalt">
           <p>Probetraining vereinbaren (nur Fußball): E-Mail an die Jugendleitung mit Jahrgang und Vorerfahrung.</p>
+          <p class="meta">Beim Probetraining ist man noch nicht über den Verein versichert.</p>
           <p class="knopfzeile">
             <a class="knopf" href="${escapeHtml(PROBETRAINING_MAILTO)}">E-Mail an die Jugendleitung</a>
           </p>
@@ -238,23 +258,25 @@ function ablaufAbschnitt(daten) {
       </li>
       <li>
         <div class="schritt__inhalt" data-nur-web>
-          <p>Aufnahmeantrag online ausfüllen und am Bildschirm unterschreiben – daraus entsteht das fertige PDF${AUFNAHMEANTRAG_VERSAND.art === "endpunkt" ? ", das Sie direkt an die Geschäftsstelle senden" : " für die E-Mail an die Geschäftsstelle"}.</p>
+          ${assistent}${webAntrag}
           <p class="knopfzeile">
-            <a class="knopf" href="${PFAD}aufnahmeantrag/">Online ausfüllen</a>
+            <a class="${antragKnopf}" href="${PFAD}aufnahmeantrag/">Online ausfüllen</a>
             ${downloadKnopf(aufnahmeantrag, "PDF zum Ausdrucken")}
           </p>
           <p class="meta">Lieber auf Papier? PDF ausdrucken, ausfüllen, unterschreiben und im Vereinsheim abgeben oder <a href="${escapeHtml(AUFNAHMEANTRAG_MAILTO)}">per E-Mail an die Geschäftsstelle senden</a>.</p>
+          ${eintritt}
         </div>
         <div class="schritt__inhalt" data-nur-app hidden>
-          <p>Aufnahmeantrag ausfüllen – online oder als PDF.</p>
+          ${assistent}${appAntrag}
           <p class="knopfzeile">
-            <a class="knopf" href="${escapeHtml(APPACK_FORMULAR_URL)}" target="_blank" rel="noopener">Aufnahmeantrag online ausfüllen</a>
+            <a class="${antragKnopf}" href="${escapeHtml(APPACK_FORMULAR_URL)}" target="_blank" rel="noopener">Aufnahmeantrag online ausfüllen</a>
             ${downloadKnopf(aufnahmeantrag, "Aufnahmeantrag (PDF)")}
           </p>
+          ${eintritt}
         </div>
       </li>
       <li><div class="schritt__inhalt"><p>Unterlagen abgeben: im Vereinsheim oder beim Trainerteam. Was dazugehört, steht unten.</p></div></li>
-      <li><div class="schritt__inhalt"><p>Spielerpass – nur Fußball: Der Verein beantragt die Spielerlaubnis beim HFV. ${escapeHtml(mitGeschuetzterOrdnungszahl(beitraege.eintritt ?? ""))}</p></div></li>
+      <li><div class="schritt__inhalt"><p>Spielerpass – nur Fußball: Der Verein beantragt die Spielerlaubnis beim HFV.</p></div></li>
     </ol>
   </div>
 </section>`;

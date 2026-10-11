@@ -16,6 +16,12 @@
   Geladen wird nur per GET von der eigenen Seite (relative Pfade); es geht
   nichts hinaus. Ohne Skript-Bündel im Browser bricht alles mit einer klaren
   Fehlerart ab (LadeFehler.art), die der Assistent in Text umsetzt.
+
+  Live-Fassung (Livegang, M6): Das appack-Paket legt alle Dateien flach in einen Ordner und kennt nur Textdateien.
+  Dort trägt tools/appack-paket.mjs in konfig.quellen ein: pdfLib und fontkit (die Skripte des Online-Aufnahmeantrags
+  im selben Ordner), schriftModul (Modul mit der Schrift als Base64-Text) und vorlagenModule (Schlüssel -> Modul mit
+  der Vorlage als Base64-Text). Die Prüfung gegen Größe und SHA-256 gilt unverändert für die entschlüsselten Bytes.
+  Mit konfig.live = true entfällt der Entwurfsvermerk im PDF. Ohne diese Angaben gilt alles wie oben beschrieben.
 */
 
 export class LadeFehler extends Error {
@@ -69,13 +75,36 @@ async function holeBytes(relativ, art) {
   return new Uint8Array(await antwort.arrayBuffer());
 }
 
+// Live-Fassung: Datei als Modul mit Base64-Text ("export default <Text>"), erst bei Bedarf geladen. Zeilenumbrüche im Text
+// stören nicht (atob überspringt Leerraum).
+async function holeModulBytes(relativ, art) {
+  let text;
+  try {
+    text = (await import(new URL(relativ, import.meta.url).href)).default;
+  } catch (e) {
+    throw new LadeFehler(art, relativ + ": " + e.message);
+  }
+  if (typeof text !== "string") throw new LadeFehler(art, relativ + ": kein Text");
+  try {
+    const roh = window.atob(text);
+    const bytes = new Uint8Array(roh.length);
+    for (let i = 0; i < roh.length; i++) bytes[i] = roh.charCodeAt(i);
+    return bytes;
+  } catch (e) {
+    throw new LadeFehler(art, relativ + ": " + e.message);
+  }
+}
+
 function hex(puffer) {
   return Array.prototype.map.call(new Uint8Array(puffer), (b) => (b < 16 ? "0" : "") + b.toString(16)).join("");
 }
 
 let schriftCache = null;
-async function ladeSchrift() {
-  if (!schriftCache) schriftCache = holeBytes(SCHRIFT, "bibliothek").catch((e) => { schriftCache = null; throw e; });
+async function ladeSchrift(quellen) {
+  if (!schriftCache) {
+    const laden = quellen && quellen.schriftModul ? holeModulBytes(quellen.schriftModul, "bibliothek") : holeBytes(SCHRIFT, "bibliothek");
+    schriftCache = laden.catch((e) => { schriftCache = null; throw e; });
+  }
   return schriftCache;
 }
 
@@ -84,7 +113,8 @@ async function ladeVorlage(schluessel, konfig) {
   if (vorlagenCache.has(schluessel)) return vorlagenCache.get(schluessel);
   const eintrag = konfig.formulare && konfig.formulare.formulare && konfig.formulare.formulare[schluessel];
   if (!eintrag || !eintrag.datei) throw new LadeFehler("vorlage-fehlt", schluessel);
-  const bytes = await holeBytes(WURZEL + eintrag.datei, "vorlage-netz");
+  const modul = konfig.quellen && konfig.quellen.vorlagenModule && konfig.quellen.vorlagenModule[schluessel];
+  const bytes = modul ? await holeModulBytes(modul, "vorlage-netz") : await holeBytes(WURZEL + eintrag.datei, "vorlage-netz");
   if (eintrag.bytes && bytes.byteLength !== eintrag.bytes) throw new LadeFehler("vorlage-geaendert", schluessel + ": " + bytes.byteLength + " Byte");
   if (eintrag.sha256 && window.crypto && window.crypto.subtle) {
     const summe = hex(await window.crypto.subtle.digest("SHA-256", bytes));
@@ -125,10 +155,11 @@ export async function erstelleAnmeldungPdf({ konfig, a, e, bilder, heute }) {
     throw new LadeFehler("modul", fehler && fehler.message);
   }
   const schluessel = pdf.benoetigteVorlagen(e, a);
+  const quellen = konfig.quellen || {};
   const [PDFLib, fontkit, schrift, ...geladen] = await Promise.all([
-    ladeSkript(PDF_LIB, "PDFLib"),
-    ladeSkript(FONTKIT, "fontkit"),
-    ladeSchrift(),
+    ladeSkript(quellen.pdfLib || PDF_LIB, "PDFLib"),
+    ladeSkript(quellen.fontkit || FONTKIT, "fontkit"),
+    ladeSchrift(quellen),
     ...schluessel.map((s) => ladeVorlage(s, konfig)),
   ]);
   const vorlagen = {};
@@ -136,7 +167,8 @@ export async function erstelleAnmeldungPdf({ konfig, a, e, bilder, heute }) {
     vorlagen[s] = geladen[i];
   });
   try {
-    return await pdf.erzeugePdf({ PDFLib, fontkit, schrift, vorlagen, konfig, a, e, bilder: bilderFuerPdf(a, bilder), heute });
+    // Live-Fassung (konfig.live): kein Entwurfsvermerk im PDF.
+    return await pdf.erzeugePdf({ PDFLib, fontkit, schrift, vorlagen, konfig, a, e, bilder: bilderFuerPdf(a, bilder), heute, entwurf: konfig.live !== true });
   } catch (fehler) {
     console.error("Anmeldung: PDF-Erzeugung fehlgeschlagen", fehler);
     throw new LadeFehler("pdf", fehler && fehler.message);

@@ -116,6 +116,7 @@ export const BEISPIELE = [
           kiVorname: "", kiNachname: "", kiAnschriftGleich: true,
         },
         einwilligungen: { fotos: "ja", medien: ["intern", "web"], hfvName: true, hfvFoto: true, fahrten: true, messenger: true },
+        heimweg: "abholen",
         notfall: { name: "Erika Beispiel", telefon: "0176 04069087", beziehung: "Oma" },
         gesundheitsbogen: false,
         spielerfoto: { weg: "verein" },
@@ -168,6 +169,7 @@ export const BEISPIELE = [
         leistungen: "nein",
         zahlung: { art: "rechnung", kontoinhaber: null, iban: "", bic: "", bank: "", kiVorname: "", kiNachname: "", kiAnschriftGleich: true },
         einwilligungen: { fotos: "nein", medien: [], hfvName: false, hfvFoto: false, fahrten: true, messenger: false },
+        heimweg: "allein",
         notfall: { name: "Sabine Beispiel", telefon: "0176 04069099", beziehung: "Tante" },
         gesundheitsbogen: false,
         spielerfoto: { weg: "verein" },
@@ -215,6 +217,7 @@ export const BEISPIELE = [
           kiVorname: "", kiNachname: "", kiAnschriftGleich: true,
         },
         einwilligungen: { fotos: "ja", medien: ["intern"], hfvName: false, hfvFoto: true, fahrten: true, messenger: true },
+        heimweg: "allein",
         notfall: { name: "Elif Beispiel", telefon: "0176 04069033", beziehung: "Tante" },
         gesundheitsbogen: false,
         spielerfoto: { weg: "verein" },
@@ -225,11 +228,10 @@ export const BEISPIELE = [
   },
   {
     id: "karneval-kind",
-    titel: "Karneval-Kind (Abendauftritte)",
-    beschreibung: "Ein Mädchen möchte in der Karnevalabteilung tanzen, auch abends bei Auftritten.",
-    antworten(heute, konfig) {
+    titel: "Karneval-Kind",
+    beschreibung: "Ein Mädchen möchte in der Karnevalabteilung tanzen. Nach dem Training wird es abgeholt.",
+    antworten(heute) {
       const s = spieljahrStart(heute);
-      const gruppen = (konfig && konfig.karnevalGruppen) || [];
       return {
         wer: "kind",
         vorname: "Sophie",
@@ -243,16 +245,6 @@ export const BEISPIELE = [
         staaten: ["DE"],
         sorge: "beide",
         sorgeberechtigte: eltern(),
-        karneval: {
-          gruppe: (gruppen.find((g) => g.name === "Freaky Fruities") || gruppen[0] || { name: "weiss_nicht" }).name,
-          tanztWoanders: "nein",
-          turnier: "ja",
-          abendOhneEltern: "ja",
-          // Freiwillige Angaben zu den Abendauftritten (nur bei "ja" oben).
-          abholung: "Lena Mustermann",
-          alleinNachHause: "ja",
-          alleinAb: "21:30",
-        },
         anschrift: { ...ANSCHRIFT },
         email: "lena.mustermann@example.org",
         mobil: "0176 04069042",
@@ -264,6 +256,7 @@ export const BEISPIELE = [
           kiVorname: "", kiNachname: "", kiAnschriftGleich: true,
         },
         einwilligungen: { fotos: "ja", medien: ["intern", "web", "presse"], fahrten: true, messenger: true },
+        heimweg: "abholen",
         notfall: { name: "Erika Beispiel", telefon: "0176 04069087", beziehung: "Oma" },
         gesundheitsbogen: false,
         unterschriftWeg: "bildschirm",

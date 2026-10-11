@@ -32,10 +32,9 @@ const HINWEIS_ORT = {
   sorge_allein_nachweis: "sorge/recht", vormund_hinweis: "sorge/recht", pflege_hinweis: "sorge/recht",
   maedchen_jungenteam: "besonderes", herren_aushilfe: "besonderes", frau_herren: "besonderes", sonderspielrecht: "besonderes",
   keine_frauenmannschaft: "besonderes", vertrauensperson: "geburt/geschlecht",
-  karneval_gruppe_vorschlag: "karneval/gruppe", karneval_kein_attest: "karneval/gruppe", karneval_tanzt_woanders: "karneval/woanders",
-  karneval_abend: "karneval/abend",
+  karneval_kein_attest: "abteilung",
   bildung_teilhabe: "leistungen", beitragserlass: "leistungen",
-  zuschlag_ohne_sepa: "zahlung/art", kontoinhaber_andere: "zahlung/inhaber", iban_ausland_pruefen: "zahlung/iban",
+  kontoinhaber_andere: "zahlung/inhaber", iban_ausland_pruefen: "zahlung/iban",
   spielerfoto_hinweis: "spielerfoto", attest_kosten: "nachweise", unterlagen_kein_whatsapp: "nachweise",
   medikamente_absprache: "notfall/gesundheit",
 };
@@ -221,16 +220,6 @@ function pruefBereiche(k) {
   if (gilt("abmeldung") && a.alterVerein && a.alterVerein.mitgliedschaft) {
     z(Z("alteMitgliedschaft"), W("mitgliedschaft." + a.alterVerein.mitgliedschaft), "abmeldung", "mitgliedschaft");
   }
-  if (gilt("karneval") && a.karneval) {
-    z(Z("karneval"), a.karneval.gruppe === "weiss_nicht" ? k.t("allgemein.weissNicht") : D(a.karneval.gruppe), "karneval", "gruppe");
-    if (k.minderjaehrig()) z(Z("abendauftritte"), jaNein(k, a.karneval.abendOhneEltern), "karneval", "abend");
-    // Freiwillige Angaben zu den Abendauftritten: nur, was die Familie beantwortet hat.
-    if (k.minderjaehrig() && a.karneval.abendOhneEltern === "ja") {
-      z(Z("abholung"), D(a.karneval.abholung), "karneval", "abholung");
-      const allein = a.karneval.alleinNachHause;
-      z(Z("alleinNachHause"), allein === "ja" ? (a.karneval.alleinAb ? W("alleinAb", { zeit: a.karneval.alleinAb }) : W("ja")) : allein === "nein" ? W("nein") : "", "karneval", "allein");
-    }
-  }
   if (gilt("pass")) {
     const staaten = k.liste((a.staaten || []).map((c) => landName(c, k.sprache)));
     z(Z("staaten"), staaten || (a.deutsch ? jaNein(k, a.deutsch) : ""), "pass", "staaten");
@@ -271,6 +260,8 @@ function pruefBereiche(k) {
       z(Z("messenger"), jaNein(k, ein.messenger === true), "einwilligungen", "fahrten");
     }
   }
+  // Heimweg nach dem Training (Aufsichtspflicht): Minderjährige, die trainieren oder tanzen. Fehlt die Antwort, entfällt die Zeile.
+  if (gilt("heimweg")) z(Z("heimweg"), a.heimweg === "allein" || a.heimweg === "abholen" ? W("heimweg." + a.heimweg) : "", "heimweg");
 
   if (gilt("notfall") && a.notfall) {
     z = bereich("notfall");

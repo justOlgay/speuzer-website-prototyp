@@ -1,5 +1,5 @@
 /*
-  Regelwerk des Anmelde-Assistenten FFV Sportfreunde 04 (Stand 2026-10-08, Saison 2026/27)
+  Regelwerk des Anmelde-Assistenten FFV Sportfreunde 04 (Stand 2026-10-11, Saison 2026/27)
 
   Reine Funktionen ohne Browser- und Zeitzugriff: Das Heute-Datum kommt immer als
   Parameter "JJJJ-MM-TT" hinein, die Konfiguration (data/anmeldung.json und weitere
@@ -8,8 +8,9 @@
   Ausgabe:
     schritte(a, konfig, heute)   Liste der nötigen Seiten (SCHNITTSTELLEN Abschnitt 4)
     auswerten(a, konfig, heute)  Ergebnis e (SCHNITTSTELLEN Abschnitt 5) mit Fällen F01-F18,
-                                 Unterlagen U01-U40, Unterschriften, Hinweisen, Fristen,
-                                 Weiterleitung, Beitrag und Fehlend-Liste
+                                 Unterlagen U01-U29 und U33-U41 (U30 bis U32 sind mit dem Karneval-Schritt
+                                 entfallen, Entscheidung der 1. Vorsitzenden vom 11.10.2026), Unterschriften,
+                                 Hinweisen, Fristen, Weiterleitung, Beitrag und Fehlend-Liste
     alterAm, altersklasse, istMinderjaehrig  kleine Hilfen
 
   Grundsätze:
@@ -30,7 +31,7 @@
   Datenschutz: Das Modul liest nur die übergebenen Antworten. Es speichert und sendet nichts.
 */
 
-export const VERSION = "2026-10-08.1";
+export const VERSION = "2026-10-11.1";
 
 // ---------------------------------------------------------------------------
 // Schlüssel-Register: alle Schlüssel, die auswerten() zurückgeben kann. Zu jedem
@@ -43,28 +44,26 @@ export const SCHLUESSEL = {
     "regelwerk_saison", "abmeldung_formlos", "abmeldung_nach_letztem_spiel", "abmeldung_vor_letztem_spiel",
     "nie_zwei_vereine", "kuendigung_extra", "vollmacht_eingabe_zeitnah", "wiederholter_wechsel", "antrag_zu_spaet",
     "ohne_zusage_spielen", "f17_wahrscheinlich_nicht", "aushilfe_nur_ausnahme", "getrennt_zustimmung",
-    "karneval_tanzt_woanders", "beitrag_gruppe_pruefen",
+    "beitrag_gruppe_pruefen",
     // Fristen
     "antrag_bis",
     // Infos
-    "frist_annahme_heute", "probetraining_versicherung", "kuendigung_jahresende", "ohne_spielrecht_kein_spiel", "mitgliedschaft_zuerst",
+    "frist_annahme_heute", "probetraining_versicherung", "mitgliedschaft_beginn", "kuendigung_jahresende", "ohne_spielrecht_kein_spiel", "mitgliedschaft_zuerst",
     "spielerfoto_hinweis", "attest_kosten", "unterlagen_kein_whatsapp", "juni_wechselzeit", "vollmacht_ohne_kurze_frist",
     "wechsel_lv_anfrage", "entschaedigung_hinweis", "nachtraegliche_freigabe", "sperre_laeuft", "sonderwege_jugend",
     "e_aelter_juni", "international_dauer", "international_unter10", "zuzug_pruefen", "maedchen_jungenteam",
     "herren_aushilfe", "herren_ohne_antrag", "frau_herren", "keine_frauenmannschaft", "vertrauensperson",
     "sonderspielrecht", "getrennt_einverstanden", "sorge_allein_nachweis",
     "vormund_hinweis", "pflege_hinweis", "f17_moeglich_5_jahre", "austausch_ein_jahr",
-    "karneval_gruppe_vorschlag", "karneval_kein_attest", "karneval_abend", "passiv_hinweis", "senator_vorstand",
+    "karneval_kein_attest", "passiv_hinweis", "senator_vorstand", "beitrag_doppel",
     "kontoinhaber_andere", "bildung_teilhabe", "beitragserlass", "medikamente_absprache", "passiv_alter_verein",
     // Offene Punkte
-    "mitgliedschaft_beginn", "regelwerk_fifa_2027", "regelwerk_saison_2027", "attest_aktuell", "wechselgebuehr",
+    "regelwerk_fifa_2027", "regelwerk_saison_2027", "attest_aktuell", "wechselgebuehr",
     "abmeldung_unklar", "freigabe_unklar", "sperre_unklar", "d_jahrgang_wartefrist_offen", "vollmacht_anderer_verband",
     "grenze_10_offen", "ausweis_deutsch_original", "meldebescheinigung_elternteil", "laenderformulare_offen",
     "ausland_erwachsen_wechselperiode", "doppelstaatler", "staatsangehoerigkeit_unklar", "spielerpass_unklar",
     "sportarzt_offen", "frau_herren_offen", "spieler_unterschrift_kind", "unterlagen_liste_offen",
-    "wohnen_nicht_gemeinsam", "karneval_turnier_offen", "karneval_gruppe_alter_pruefen", "beitrag_familie_offen",
-    "zuschlag_ohne_sepa", "iban_ausland_pruefen", "aufnahmegebuehr_offen", "beitrag_doppel", "kostueme_offen",
-    "mitgliedschaft_alter_verein_unklar",
+    "wohnen_nicht_gemeinsam", "beitrag_familie_offen", "iban_ausland_pruefen", "mitgliedschaft_alter_verein_unklar",
   ],
   frist: [
     "frist_kein_spiel", "frist_offen", "frist_neu", "frist_neu_unklar", "frist_neu_pruefung", "frist_international",
@@ -78,7 +77,7 @@ export const SCHLUESSEL = {
     "getrennte_eltern", "wohnen_nicht_gemeinsam", "spielerpass_unklar", "international_klaeren", "unter10_pruefung",
     "staatsangehoerigkeit_unklar", "abmeldung_unklar", "laenderformulare", "vollmacht_anderer_verband",
     "wiederholter_wechsel", "doppelstaatler", "offene_fragen_verband", "beitrag_doppel", "beitrag_familie", "senator",
-    "beitragserlass", "gruppe_einteilung", "turnier", "kostueme", "herren_wechsel", "frau_herren",
+    "beitragserlass", "herren_wechsel", "frau_herren",
   ],
   mannschaft: [
     "mannschaft_unbekannt", "keine_mannschaft", "mannschaft_gefunden", "mannschaft_mehrere", "mannschaft_2020_f2",
@@ -608,7 +607,6 @@ function bestimmeBeitrag(p) {
   const gewaehltGueltig = hatText(gewaehlt) && G[gewaehlt] ? gewaehlt : null;
   const ergebnis = {
     gruppe: null, jahr: null, monat: null, aufnahmegebuehr: info.aufnahmegebuehr === undefined ? null : info.aufnahmegebuehr,
-    zuschlagOhneSepa: p.zahlungArt === "rechnung" && info.zuschlagOhneSepa !== undefined ? info.zuschlagOhneSepa : null,
     hinweisKey: "beitrag_offen", vorschlag: null, gewaehlt: false, gruppen: [], felder: [], werte: {},
   };
   if (!p.abt) return ergebnis;
@@ -648,30 +646,12 @@ function bestimmeBeitrag(p) {
     jahr: ergebnis.jahr === null ? "" : ergebnis.jahr,
     monat: ergebnis.monat === null ? "" : ergebnis.monat,
     aufnahmegebuehr: ergebnis.aufnahmegebuehr === null ? "" : ergebnis.aufnahmegebuehr,
-    zuschlag: ergebnis.zuschlagOhneSepa === null ? "" : ergebnis.zuschlagOhneSepa,
   };
   return ergebnis;
 }
 
-// ---------------------------------------------------------------------------
-// Karneval: Gruppenvorschlag nach Alter (Altersangaben nur aus Sekundärquelle, bestaetigt false)
-// ---------------------------------------------------------------------------
-
-function bestimmeKarneval(p) {
-  const leer = { gruppenVorschlag: [], gruppe: null, passt: null, bestaetigt: false };
-  if (!p.karneval) return leer;
-  const gruppen = liste(p.cfg.karnevalGruppen);
-  const vorschlag = p.alter === null ? [] : gruppen.filter((g) =>
-    p.alter >= g.altersVon && (g.altersBis === null || g.altersBis === undefined || p.alter <= g.altersBis)).map((g) => g.name);
-  const gewaehlt = text(objekt(p.a.karneval).gruppe);
-  const gruppe = gewaehlt && gewaehlt !== "weiss_nicht" ? gewaehlt : null;
-  let passt = null;
-  if (gruppe && p.alter !== null) {
-    const g = gruppen.find((x) => x.name === gruppe);
-    passt = g ? vorschlag.indexOf(gruppe) >= 0 : null;
-  }
-  return { gruppenVorschlag: vorschlag, gruppe: gruppe, passt: passt, bestaetigt: false };
-}
+// Karneval: keine Vorauswahl der Gruppe (Entscheidung der 1. Vorsitzenden vom 11.10.2026): Die Trainer ordnen die
+// Person einer Gruppe zu. Das Regelwerk kennt deshalb weder Gruppen noch Turniere, Auftritte oder Kostüme.
 
 // ---------------------------------------------------------------------------
 // Frist (Wartefristen R1 bis R9 und R13 bis R14) - Schätzung, der Verein prüft genau
@@ -879,7 +859,7 @@ function herrenRegelDatum(p, abm, freigabe) {
 }
 
 // ---------------------------------------------------------------------------
-// Unterlagen U01 bis U40
+// Unterlagen U01 bis U29 und U33 bis U41 (U30 bis U32 gibt es nicht mehr, siehe Karneval unten)
 // ---------------------------------------------------------------------------
 
 function eintrag(p, id, o) {
@@ -913,7 +893,9 @@ function bestimmeUnterlagen(p, gruppenKeys, fr) {
   add("U04", { grund: "fotos" });
   if (p.zahlungArt === "sepa") add("U05", { grund: "lastschrift" });
   add("U06", { grund: "datenschutz" }); // DSGVO Art. 13
-  add("U35", { art: p.fussball ? "verein" : "offen", grund: "aufnahmegebuehr", werte: { betrag: (p.cfg.beitragInfo || {}).aufnahmegebuehr } });
+  // U35: Aufnahmegebühr für alle neuen Mitglieder (Fußball, Karneval, passiv), mit dem ersten Beitrag eingezogen
+  // (Beitragsübersicht FFV, am 2026-10-11 geprüft; Satzung § 16)
+  add("U35", { grund: "aufnahmegebuehr", werte: { betrag: (p.cfg.beitragInfo || {}).aufnahmegebuehr } });
   if (p.senator) add("U34", { grund: "senator" });
 
   // ---- Fußball mit Spielrecht ----
@@ -1030,16 +1012,16 @@ function bestimmeUnterlagen(p, gruppenKeys, fr) {
     add("U28", { grund: "notfallbogen" });
     const einw = objekt(p.a.einwilligungen);
     if (!(einw.fahrten === false && einw.messenger === false)) add("U29", { grund: "fahrten_messenger" });
+    // U41 Heimweg nach dem Training: Wie kommt das Kind nach Hause (allein oder abgeholt)? Aufsichtspflicht, BGB § 832;
+    // Entscheidung der 1. Vorsitzenden vom 11.10.2026. Gilt für jedes minderjährige Mitglied, das trainiert oder tanzt
+    // (Fußball, Karneval oder beides), nie für Passive und nie für Erwachsene.
+    add("U41", { grund: "heimweg" });
   }
 
   // ---- Karneval ----
-  if (p.karneval) {
-    // Keine HFV-Unterlagen, kein Attest (Recherche Abschnitt 6: weder BDK noch RKK noch Großer Rat verlangen es).
-    const k = objekt(p.a.karneval);
-    if (minor && k.abendOhneEltern === "ja") add("U30", { grund: "abendauftritt" });
-    add("U31", { grund: "kostueme" });
-    if (k.turnier === "ja" || k.turnier === "weiss_nicht") add("U32", { grund: "turnier" });
-  }
+  // Keine HFV-Unterlagen, kein Attest (Recherche Abschnitt 6: weder BDK noch RKK noch Großer Rat verlangen es). Auftritte,
+  // Kostüme und Turniere gehören nicht zur Anmeldung (Entscheidung der 1. Vorsitzenden vom 11.10.2026): Die frühere
+  // Erlaubnis für Auftritte am Abend (U30), die Kostümvereinbarung (U31) und die Turnierpapiere (U32) entfallen.
 
   // ---- Beitrag ----
   if (minor && p.a.leistungen === "ja") add("U33", { grund: "leistungen", werte: { betrag: (p.cfg.beitragInfo || {}).teilhabePauschaleMonat } });
@@ -1053,7 +1035,7 @@ function bestimmeUnterlagen(p, gruppenKeys, fr) {
 // ---------------------------------------------------------------------------
 
 const FORMULAR_REIHENFOLGE = ["aufnahmeantrag", "familienliste", "datenschutz", "hfv_antrag", "vollmacht", "abmeldung",
-  "einverstaendnis_senioren", "einverstaendnis_maedchen", "einverstaendnis_fahrten", "karneval_auftritte", "attest", "notfall"];
+  "einverstaendnis_senioren", "einverstaendnis_maedchen", "einverstaendnis_fahrten", "heimweg", "attest", "notfall"];
 
 // Formulare im PDF: alle Formulare der Unterlagen, die sicher oder als Vereinsvorgabe gelten (nicht "offen").
 function bestimmeFormulare(unterlagen) {
@@ -1110,7 +1092,7 @@ function bestimmeUnterschriften(p, formulare) {
       case "einverstaendnis_senioren": st(f, "unterschrift", r.einer); break;
       case "einverstaendnis_maedchen": st(f, "unterschrift", r.einer); break;
       case "einverstaendnis_fahrten": st(f, "unterschrift", r.einer); break;
-      case "karneval_auftritte": st(f, "unterschrift", r.einer); break;
+      case "heimweg": st(f, "unterschrift", r.einer); break;
       case "attest":
         st(f, "arzt", "arzt");
         st(f, "einwilligung", minor ? r.einer : "mitglied");
@@ -1164,7 +1146,7 @@ function sammleHinweise(p, e) {
 
   // --- Für alle ---
   if (p.aktiv) h("info", "probetraining_versicherung"); // ARAG-Merkblatt A.II.2.1, Stand 2026-01-01: Nichtmitglieder nicht versichert
-  h("offen", "mitgliedschaft_beginn"); // R15: Satzung § 6 (Tag der Anmeldung) gegen Website und App (1. des Folgemonats)
+  h("info", "mitgliedschaft_beginn"); // R15: Satzung § 6, Tag der Anmeldung (Entscheidung der 1. Vorsitzenden vom 11.10.2026)
   h("info", "kuendigung_jahresende"); // Aufnahmeantrag FFV Seite 1, Satzung § 8: Austritt nur zum 31. Dezember per Einschreiben
   if (p.passiv) h("info", "passiv_hinweis");
   if (p.senator) { h("info", "senator_vorstand"); w("geschaeftsstelle", "senator"); }
@@ -1278,8 +1260,9 @@ function sammleHinweise(p, e) {
     if (p.sorge === "allein") h("info", "sorge_allein_nachweis");
     if (p.sorge === "vormund") h("info", "vormund_hinweis");
     if (p.sorge === "pflege") h("info", "pflege_hinweis");
-    // Kein Hinweis, dass Jugendliche bei den Fotos mit unterschreiben: Der Vorstand hat noch nicht entschieden, ob ab 14 oder
-    // ab 16 (O65). Bis dahin unterschreiben bei der Foto-Einwilligung nur die Sorgeberechtigten (aufnahmeantrag, s3.unterschrift).
+    // Foto-Einwilligung (O65, Entscheidung der 1. Vorsitzenden vom 11.10.2026): Es unterschreiben nur die Eltern, auch bei
+    // Jugendlichen (aufnahmeantrag, s3.unterschrift). Deshalb gibt es keinen Hinweis, dass Jugendliche mit unterschreiben,
+    // und kein Text sagt, der Verein kläre das noch.
     if (p.spielen) h("offen", "spieler_unterschrift_kind");
     if (p.f14) w("jugendleitung", "sonderfall_kind");
     if (p.wohnen === "nicht_gemeinsam") { h("offen", "wohnen_nicht_gemeinsam"); w("jugendleitung", "wohnen_nicht_gemeinsam"); }
@@ -1292,18 +1275,8 @@ function sammleHinweise(p, e) {
   }
 
   // --- Karneval ---
-  if (p.karneval) {
-    const k = objekt(p.a.karneval);
-    h("info", "karneval_kein_attest");
-    if (e.karneval.gruppenVorschlag.length) h("info", "karneval_gruppe_vorschlag", { gruppen: e.karneval.gruppenVorschlag.join(", ") });
-    if (e.karneval.passt === false) h("offen", "karneval_gruppe_alter_pruefen", { gruppe: e.karneval.gruppe });
-    if (k.abendOhneEltern === "ja" && minor) h("info", "karneval_abend");
-    if (k.tanztWoanders === "ja") h("warnung", "karneval_tanzt_woanders");
-    if (k.turnier === "ja" || k.turnier === "weiss_nicht") { h("offen", "karneval_turnier_offen"); w("karneval", "turnier"); }
-    h("offen", "kostueme_offen");
-    w("karneval", "kostueme");
-    w("karneval", "gruppe_einteilung");
-  }
+  // Schlank (Entscheidung der 1. Vorsitzenden vom 11.10.2026): kein Hinweis zu Gruppen, Turnieren, Auftritten oder Kostümen.
+  if (p.karneval) h("info", "karneval_kein_attest");
 
   // --- Beitrag und Zahlung ---
   const b = e.beitrag;
@@ -1312,12 +1285,11 @@ function sammleHinweise(p, e) {
     if (ok === false) h("warnung", "beitrag_gruppe_pruefen", { gruppe: p.cfg.beitragsgruppen[g].bezeichnung });
   });
   if (p.familie.length > 0 || b.gruppen.some((g) => g.indexOf("familie") >= 0)) { h("offen", "beitrag_familie_offen"); w("geschaeftsstelle", "beitrag_familie"); }
-  if (b.doppel) { h("offen", "beitrag_doppel"); w("geschaeftsstelle", "beitrag_doppel"); }
-  if (p.zahlungArt === "rechnung" && b.zuschlagOhneSepa !== null) h("offen", "zuschlag_ohne_sepa", { betrag: b.zuschlagOhneSepa });
+  // Fußball und Karneval zugleich: Die Beitragsübersicht kennt einen eigenen Beitrag, den die Familie erfragt (11.10.2026)
+  if (b.doppel) { h("info", "beitrag_doppel"); w("geschaeftsstelle", "beitrag_doppel"); }
   const zahl = objekt(p.a.zahlung);
   if (p.zahlungArt === "sepa" && hatText(zahl.iban) && text(zahl.iban).replace(/\s/g, "").slice(0, 2).toUpperCase() !== "DE") h("offen", "iban_ausland_pruefen");
   if (p.zahlungArt === "sepa" && zahl.kontoinhaber === "andere") h("info", "kontoinhaber_andere");
-  if (hat("U35") && art("U35") === "offen") h("offen", "aufnahmegebuehr_offen");
   if (minor && p.a.leistungen === "ja") { h("info", "bildung_teilhabe", { betrag: (p.cfg.beitragInfo || {}).teilhabePauschaleMonat }); h("info", "beitragserlass"); w("geschaeftsstelle", "beitragserlass"); }
 
   // --- Gesundheit ---
@@ -1377,6 +1349,10 @@ export function optionenBesonderes(a, konfig, heute) {
 //  - "pass" (deutscher Pass, Staatsangehörigkeiten) nur bei Fußball mit Spielen: Nur der HFV-Antrag braucht sie
 //    (Datensparsamkeit, DSGVO Art. 5 Abs. 1 lit. c). Karneval und Passive brauchen sie nicht.
 //  - "notfall" nur für Minderjährige, die trainieren (nicht für passive Mitglieder).
+//  - "heimweg" (Aufsichtspflicht, BGB § 832) für dieselben Minderjährigen: Fußball, Karneval oder beides, nie Passive, nie
+//    Erwachsene. Eigener Schritt im Abschnitt "unterlagen" gleich nach "einwilligungen", denn er gehört wie "notfall" zur
+//    selben Bedingung (minderjährig und aktiv) und hat eine eigene Unterlage (U41) mit eigenem Blatt im PDF.
+//  - Der Schritt "karneval" gibt es nicht mehr (keine Gruppenwahl, keine Turniere, keine Auftritte; Entscheidung vom 11.10.2026).
 export function schritte(a, konfig, heute) {
   const p = leiteAb(a, konfig, heute);
   const s = ["start", "wer", "name", "geburt", "abteilung"];
@@ -1392,11 +1368,10 @@ export function schritte(a, konfig, heute) {
   if (p.spielen && p.minor === true && (p.nichtdeutsch || p.deutschUnklar || p.auslandGewohnt)) s.push("wohnen");
   if (p.minor === true) s.push("sorge");
   if (besonderesOptionen(p).length) s.push("besonderes");
-  if (p.karneval) s.push("karneval");
   s.push("kontakt", "beitrag");
   if (p.minor === true) s.push("leistungen");
   s.push("zahlung", "einwilligungen");
-  if (p.minor === true && p.aktiv) s.push("notfall");
+  if (p.minor === true && p.aktiv) s.push("heimweg", "notfall");
   if (p.spielen) s.push("spielerfoto");
   if (brauchtNachweise(p)) s.push("nachweise");
   s.push("unterschriften", "pruefen", "fertig");
@@ -1452,7 +1427,6 @@ export function auswerten(a, konfig, heute) {
     },
     weiterleitung: [],
     beitrag: beitrag,
-    karneval: bestimmeKarneval(p),
     besonderesOptionen: besonderesOptionen(p),
     fehlend: bestimmeFehlend(p, unterlagen),
   };

@@ -1,11 +1,13 @@
 /*
-  Seiten des Assistenten zu Fußball und Karneval: abteilung, mannschaft,
-  spielen, spielerpass, alter_verein, abmeldung, besonderes, karneval
+  Seiten des Assistenten zu Fußball und Abteilung: abteilung, mannschaft,
+  spielen, spielerpass, alter_verein, abmeldung, besonderes
   (SCHNITTSTELLEN Abschnitt 4). Aufbau der Seiten: siehe seiten-person.js.
+  Den Schritt "karneval" gibt es nicht mehr: keine Gruppenwahl, keine Fragen zu
+  Turnieren und Auftritten (Entscheidung der 1. Vorsitzenden vom 11.10.2026).
 */
 
 import { h, absaetze, textfeld, kartenAuswahl, kaestchen, datumFelder, pruefeDatumsfeld, landAuswahl, hinweisKasten, lateinFehler } from "./bausteine.js";
-import { sauber, normalisiereUhrzeit } from "./hilfen.js";
+import { sauber } from "./hilfen.js";
 
 function leer(x) {
   return x === null || x === undefined || x === "";
@@ -373,124 +375,5 @@ export const besonderes = {
   pruefe: () => [],
   beimVerlassen(k) {
     for (const s of ["maedchenJungenteam", "herrenAushilfe", "sonderspielrecht", "frauHerren"]) k.a.besonderes[s] = k.a.besonderes[s] === true;
-  },
-};
-
-// ---------- karneval ----------
-
-// Antworten zum Karneval mit allen Feldern (SCHNITTSTELLEN Abschnitt 3). Die
-// drei letzten sind freiwillig und gelten nur für Minderjährige, die abends
-// ohne Eltern auftreten dürfen (abendOhneEltern = "ja"). Antwortet die Familie
-// bei "allein nach Hause" mit "Ja", ist die Uhrzeit (alleinAb) Pflicht.
-function karnevalDaten(k) {
-  const leerDaten = { gruppe: null, tanztWoanders: null, turnier: null, abendOhneEltern: null, abholung: "", alleinNachHause: null, alleinAb: "" };
-  if (!k.a.karneval || typeof k.a.karneval !== "object") k.a.karneval = { ...leerDaten };
-  for (const [feld, wert] of Object.entries(leerDaten)) if (!(feld in k.a.karneval)) k.a.karneval[feld] = wert;
-  return k.a.karneval;
-}
-
-// Übungszeit einer Gruppe aus data/karneval.json ("Mittwoch 19:00–21:00 Uhr, Turnhalle Fridtjof-Nansen-Schule"): Wochentag und
-// "Uhr" kommen aus den Texten der gewählten Sprache (allgemein.wochentag.*, karneval.gruppe.uebungszeit), der Ort bleibt
-// die deutsche Angabe des Vereins. Zeit und Ort stehen in Sprachen von rechts nach links in Isolaten (k.datentext).
-// Passt eine Angabe nicht in dieses Muster, steht sie unverändert da.
-const WOCHENTAG_SCHLUESSEL = { Montag: "montag", Dienstag: "dienstag", Mittwoch: "mittwoch", Donnerstag: "donnerstag", Freitag: "freitag", Samstag: "samstag", Sonntag: "sonntag" };
-const UEBUNGSZEIT_MUSTER = /^\s*(Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag)\s+(\d{1,2}:\d{2}(?:\s*[\u2013-]\s*\d{1,2}:\d{2})?)\s+Uhr\s*(?:,\s*(.+?))?\s*$/;
-
-function uebungszeitText(k, roh) {
-  const m = UEBUNGSZEIT_MUSTER.exec(String(roh || ""));
-  if (!m) return k.datentext(roh);
-  const werte = { tag: k.t("allgemein.wochentag." + WOCHENTAG_SCHLUESSEL[m[1]]), zeit: k.datentext(m[2]), ort: m[3] ? k.datentext(m[3]) : "" };
-  return k.t(m[3] ? "karneval.gruppe.uebungszeit" : "karneval.gruppe.uebungszeitOhneOrt", werte);
-}
-
-export const karneval = {
-  id: "karneval",
-  teile(k) {
-    const t = ["gruppe", "woanders", "turnier"];
-    if (k.minderjaehrig()) {
-      t.push("abend");
-      // Zwei freiwillige Fragen, je eine Seite, nur nach "Ja" bei den Abendauftritten.
-      if (karnevalDaten(k).abendOhneEltern === "ja") t.push("abholung", "allein");
-    }
-    return t;
-  },
-  render(k, teil) {
-    const kv = karnevalDaten(k);
-    if (teil === "gruppe") {
-      const e = k.ergebnis() || {};
-      const vorschlag = e.karneval && Array.isArray(e.karneval.gruppenVorschlag) ? e.karneval.gruppenVorschlag : [];
-      const gruppen = (k.konfig.karnevalGruppen || []).map((g) => ({
-        wert: g.name,
-        label: k.datentext(g.name),
-        hinweis: [g.uebungszeit ? k.t("karneval.gruppe.uebung", { zeit: uebungszeitText(k, g.uebungszeit) }) : "", vorschlag.includes(g.name) ? k.t("karneval.gruppe.passt") : ""].filter(Boolean).join(" · ") || null,
-      }));
-      gruppen.push({ wert: "weiss_nicht", label: k.t("karneval.gruppe.weissNicht"), hinweis: k.t("karneval.gruppe.weissNichtHinweis") });
-      return { titel: k.t("karneval.gruppe.titel"), inhalt: [kartenAuswahl(k, { pfad: "karneval.gruppe", optionen: gruppen })] };
-    }
-    if (teil === "woanders") return { titel: k.t("karneval.woanders.titel"), inhalt: [kartenAuswahl(k, { pfad: "karneval.tanztWoanders", optionen: JANEIN(k) })] };
-    if (teil === "turnier") {
-      return {
-        titel: k.t("karneval.turnier.titel"),
-        inhalt: [h("p", { klasse: "anm-hinweis" }, k.t("karneval.turnier.hinweis")), kartenAuswahl(k, { pfad: "karneval.turnier", optionen: JANEINWEISS(k) })],
-      };
-    }
-    if (teil === "abholung") {
-      return {
-        titel: k.t("karneval.abholung.titel"),
-        inhalt: [
-          ...absaetze(k.t("karneval.abholung.hinweis"), "anm-hinweis"),
-          textfeld(k, { pfad: "karneval.abholung", label: k.t("karneval.abholung.name"), hinweis: k.t("karneval.abholung.nameHinweis"), maxlength: 80, pflicht: false }),
-        ],
-      };
-    }
-    if (teil === "allein") {
-      const ab = h("div", { klasse: "anm-block" },
-        textfeld(k, {
-          pfad: "karneval.alleinAb",
-          label: k.t("karneval.allein.ab"),
-          hinweis: k.t("karneval.allein.abHinweis"),
-          inputmode: "numeric",
-          maxlength: 10,
-          ltr: true,
-          beimVerlassen: (v) => normalisiereUhrzeit(v) || sauber(v),
-        }));
-      k.bedingt(ab, () => kv.alleinNachHause === "ja");
-      return {
-        titel: k.t("karneval.allein.titel"),
-        inhalt: [
-          ...absaetze(k.t("karneval.allein.hinweis"), "anm-hinweis"),
-          kartenAuswahl(k, { pfad: "karneval.alleinNachHause", freiwillig: true, optionen: JANEIN(k) }),
-          ab,
-        ],
-      };
-    }
-    return {
-      titel: k.t("karneval.abend.titel"),
-      inhalt: [...absaetze(k.t("karneval.abend.hinweis"), "anm-hinweis"), kartenAuswahl(k, { pfad: "karneval.abendOhneEltern", optionen: JANEIN(k) })],
-    };
-  },
-  pruefe(k, teil) {
-    const kv = karnevalDaten(k);
-    if (teil === "gruppe") return fehlerWenn(leer(kv.gruppe), "karneval.gruppe", k.t("fehler.wahl"));
-    if (teil === "woanders") return fehlerWenn(leer(kv.tanztWoanders), "karneval.tanztWoanders", k.t("fehler.wahl"));
-    if (teil === "turnier") return fehlerWenn(leer(kv.turnier), "karneval.turnier", k.t("fehler.wahl"));
-    // Freiwillig: leer ist erlaubt; was dasteht, muss aber passen.
-    if (teil === "abholung") return lateinFehler(k, kv.abholung, "karneval.abholung");
-    // Die Frage ist freiwillig: "Nein" und keine Antwort gehen. Bei "Ja" gehört die Uhrzeit dazu (Pflicht):
-    // Ohne gültige Uhrzeit stünde auf der Erlaubnis im PDF nur "–", und die Erlaubnis wäre unvollständig.
-    // Dieselbe Meldung für leer und für ungültig.
-    if (teil === "allein") return kv.alleinNachHause === "ja" && !normalisiereUhrzeit(kv.alleinAb) ? [{ feld: "karneval.alleinAb", meldung: k.t("fehler.uhrzeit") }] : [];
-    return fehlerWenn(leer(kv.abendOhneEltern), "karneval.abendOhneEltern", k.t("fehler.wahl"));
-  },
-  beimVerlassen(k, teil) {
-    const kv = karnevalDaten(k);
-    if (teil === "abend" && kv.abendOhneEltern !== "ja") {
-      // Ohne Abendauftritte entfallen die Fragen zu Abholung und Heimweg.
-      kv.abholung = "";
-      kv.alleinNachHause = null;
-      kv.alleinAb = "";
-    }
-    if (teil === "abholung") kv.abholung = sauber(kv.abholung);
-    if (teil === "allein") kv.alleinAb = kv.alleinNachHause === "ja" ? normalisiereUhrzeit(kv.alleinAb) || "" : "";
   },
 };

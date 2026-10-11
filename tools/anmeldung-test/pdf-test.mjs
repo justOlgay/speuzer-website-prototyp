@@ -13,7 +13,7 @@
 //  - Sonderfälle: Sonderzeichen und arabische Schrift im Namen, fehlende Angaben, zu lange Werte, andere Sprache
 //  - Runde 2: jede eigene Seite mit Unterschriftsbereich trägt Bild oder Markierung, ein Rückfall (Stelle fehlt in den Regeln)
 //    kommt nie vor und wird bei Absicht gemeldet; einheitliche Namen der eigenen Seiten (SCHNITTSTELLEN Abschnitt 9);
-//    mehrere mögliche Mannschaften; Name der zweiten Person mit Sorgerecht; Karneval-Abholung; Notfallbogen in drei
+//    mehrere mögliche Mannschaften; Name der zweiten Person mit Sorgerecht; Notfallbogen in drei
 //    Fassungen mit Absprache zur Medikamentengabe; unter einer Bildschirm-Unterschrift steht kein leeres Feld
 //    (Szenarien: mit und ohne Angaben, Bildschirm und Papier; Nachweise wie in der Oberfläche: „habe“ nur mit Datei)
 //  - Runde 3: Erlaubnis für das Attest je nach Art von U10 („pflicht“ oder „offen“); Information zum Datenschutz (Nr. 2, 4, 5 und 8,
@@ -25,8 +25,13 @@
 //    verlangt das Attest“ (Satzsuche); Attest-Vorlage bei „offen“ in allen Profilen (Attest „habe“, aber ohne Datei)
 //  - Paket N-A2 (07.10.2026): Teil A ohne Widerspruch (Begriffe „Verband“ und „Spielrecht“ beim ersten Vorkommen erklärt, Papiere zum Klären
 //    mit Namen, eigener Schritt und Tabellenzeile für die Abmeldung beim alten Verein, ein Satz zum Ausdrucken, Teil C ohne Umschlag,
-//    Passwesen und Spielausschuss erklärt); Sätze der eigenen Seiten, die die Familie unterschreibt (Mädchen, Fahrten, Auftritte am Abend,
+//    Passwesen und Spielausschuss erklärt); Sätze der eigenen Seiten, die die Familie unterschreibt (Mädchen, Fahrten, Heimweg,
 //    Erlaubnis für das Attest, Notfallbogen): höchstens 12 Wörter je Satz, Paragraphen nur in der Zeile „Rechtsgrundlage“ (und im Untertitel)
+//  - M1 (11.10.2026): Blatt „Heimweg nach dem Training“ (U41) bei Minderjährigen, die trainieren oder tanzen: beide Sätze, der gewählte angekreuzt
+//    (Rendering), Unterschrift am Bildschirm nur unter einer Antwort, Laufzettel „Kopie an das Trainerteam“, nie bei Passiven und Erwachsenen;
+//    Karneval ohne Blatt zu Auftritten, ohne Gruppenname (stattdessen ein Satz), ohne Zuschlag im Laufzettel
+//  - M1, Runde 2 (11.10.2026): Blatt „Fahrten und Messenger“: nur Karneval ohne Fußball sagt „Veranstaltungen des Vereins“ (Überschrift und Satz,
+//    kein „Turnier“, keine Spiele), Fußball und „beides“ behalten „Spielen und Veranstaltungen“ (Sonderfall 13, dazu die Prüfung je Profil)
 // Aufruf-Optionen: --profil=a,b (nur diese Profile)  --ohne-sonderfaelle  --szenarien (Szenarien auch bei --profil)
 // Werkzeuge: pdf-lib und fontkit aus node_modules, dazu poppler (pdftotext, pdfinfo, pdfimages, pdftoppm).
 // Testbilder: tools/anmeldung-test/testbilder/ (künstliche Muster, keine echten Dokumente; fehlende Dateien
@@ -48,7 +53,7 @@ const WURZEL = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", 
 const TESTBILDER = path.join(WURZEL, "tools", "anmeldung-test", "testbilder");
 const AUSGABE = path.join(WURZEL, "tools", "cache", "anmeldung-test", "pdf");
 const RENDER = path.join(AUSGABE, "bilder");
-const RENDER_PROFILE = ["kind-neu-deutsch-f", "vollmacht-und-kuendigung", "kind-neu-nichtdeutsch-12", "karneval-kind-abend"];
+const RENDER_PROFILE = ["kind-neu-deutsch-f", "vollmacht-und-kuendigung", "kind-neu-nichtdeutsch-12", "karneval-kind"];
 const ARGUMENTE = process.argv.slice(2);
 const NUR_PROFILE = (ARGUMENTE.find((x) => x.startsWith("--profil=")) || "").replace("--profil=", "").split(",").filter(Boolean);
 const OHNE_SONDERFAELLE = ARGUMENTE.includes("--ohne-sonderfaelle");
@@ -447,6 +452,8 @@ function bildFuerWer(b, wer) {
 // Fehlt auf dem Vordruck eine Angabe, die erst nach der Unterschrift von Hand dazukäme, wird die Stelle zur Stift-Stelle
 // (unabhängig von pdf.js aus den Antworten gerechnet)
 function erklaerungFehltErw(b, s) {
+  // Heimweg: Die Unterschrift am Bildschirm steht nur unter einer Antwort
+  if (s.formular === "heimweg") return !["allein", "abholen"].includes(b.a.heimweg);
   if (s.formular !== "aufnahmeantrag") return false;
   const a = b.a;
   const ew = a.einwilligungen || {};
@@ -611,7 +618,7 @@ const EIGENER_TITEL = {
   datenschutz: () => deRegeln.formulare.datenschutz,
   einverstaendnis_maedchen: () => deRegeln.formulare.einverstaendnis_maedchen,
   einverstaendnis_fahrten: () => deRegeln.formulare.einverstaendnis_fahrten,
-  karneval_auftritte: () => deRegeln.formulare.karneval_auftritte,
+  heimweg: () => deRegeln.formulare.heimweg,
   notfall: () => deRegeln.formulare.notfall,
   attest_einwilligung: attestErlaubnisTitel,
   attest_vorlage: () => ATTEST_VORLAGE_TITEL,
@@ -629,7 +636,7 @@ const FORM_MARKER = {
   einverstaendnis_senioren: /Vorgangsdokument für die schriftliche Einverständniserklärung/,
   einverstaendnis_maedchen: eigenerMarker("einverstaendnis_maedchen"),
   einverstaendnis_fahrten: eigenerMarker("einverstaendnis_fahrten"),
-  karneval_auftritte: eigenerMarker("karneval_auftritte"),
+  heimweg: eigenerMarker("heimweg"),
   notfall: eigenerMarker("notfall"),
 };
 const WASSERZEICHEN = (heuteDe) => "KOPIE – nur für die Spielberechtigung beim HFV – FFV Sportfreunde 04 – " + heuteDe;
@@ -713,7 +720,7 @@ const EIGENE_MIT_STELLE = [
   ["datenschutz", "datenschutz", "kenntnisnahme"],
   ["einverstaendnis_maedchen", "einverstaendnis_maedchen", "unterschrift"],
   ["einverstaendnis_fahrten", "einverstaendnis_fahrten", "unterschrift"],
-  ["karneval_auftritte", "karneval_auftritte", "unterschrift"],
+  ["heimweg", "heimweg", "unterschrift"],
   ["attest_einwilligung", "attest", "einwilligung"],
   ["notfall", "notfall", "unterschrift"],
 ];
@@ -721,6 +728,10 @@ const TEXT_FAHRTEN = {
   fahrten: { ja: "Ja, mein Kind darf zu Spielen und Veranstaltungen in Fahrgemeinschaften mitfahren.", nein: "Nein, mein Kind fährt nicht in Fahrgemeinschaften mit.", ohne: "Sie haben dazu nichts angegeben. Ihr Kind fährt dann nicht in Fahrgemeinschaften mit." },
   messenger: { ja: "Ja, meine Telefonnummer darf in die Messenger-Gruppe der Mannschaft. Alle Mitglieder der Gruppe können sie sehen.", nein: "Nein, ich möchte nicht in die Messenger-Gruppe.", ohne: "Sie haben dazu nichts angegeben. Ihre Telefonnummer kommt dann nicht in die Messenger-Gruppe." },
 };
+// Fahrten: Wer nur im Karneval ist, liest keine Spiele (M1, Runde 2, 11.10.2026); Fußball und „beides“ behalten den bisherigen Satz.
+const FAHRTEN_KARNEVAL = { ueberschrift: "Fahrten zu Veranstaltungen des Vereins", ja: "Ja, mein Kind darf zu Veranstaltungen des Vereins in Fahrgemeinschaften mitfahren." };
+const FAHRTEN_SONST = { ueberschrift: "Fahrten zu Spielen und Veranstaltungen", ja: TEXT_FAHRTEN.fahrten.ja };
+const FAHRTEN_SATZ = (a) => (a.abteilung === "karneval" ? FAHRTEN_KARNEVAL : FAHRTEN_SONST);
 const TEXT_KEINE_GESUNDHEIT = "Sie haben keine Angaben zur Gesundheit gemacht. Soll der Trainer etwas wissen? Sprechen Sie ihn an.";
 const GESUNDHEIT_FELDER = [["allergien", "Allergien"], ["erkrankungen", "Erkrankungen"], ["medikamente", "Medikamente"], ["sonstiges", "Sonstiges"]];
 
@@ -729,14 +740,31 @@ function mannschaftErwartet(b) {
   const namen = ((b.e.mannschaft || {}).namen || []).filter(Boolean);
   if (namen.length > 1) return namen.slice(0, -1).join(", ") + " oder " + namen[namen.length - 1] + " (teilt die Jugendleitung ein)";
   if (namen.length) return namen[0];
-  const g = (b.a.karneval || {}).gruppe;
-  return g && g !== "weiss_nicht" ? g : "";
+  return "";
 }
 
-// Uhrzeit wie im PDF: „HH:MM“ (auch „9:30“), sonst leer
-function zeitErwartet(x) {
-  const m = /^\s*(\d{1,2}):(\d{2})\s*$/.exec(String(x || ""));
-  return m && Number(m[1]) <= 23 && Number(m[2]) <= 59 ? String(Number(m[1])).padStart(2, "0") + ":" + m[2] : "";
+// Karneval: keine Vorauswahl der Gruppe. Im PDF steht statt eines Gruppennamens ein Satz (Laufzettel und Einverständnis für Fahrten).
+function gruppeErwartet(b) {
+  if (!["karneval", "beides"].includes(b.a.abteilung)) return "";
+  return b.e.minderjaehrig ? "Die Trainer ordnen das Kind einer Gruppe zu." : "Die Trainer ordnen die Person einer Gruppe zu.";
+}
+
+// Heimweg nach dem Training (U41): beide Sätze stehen auf dem Blatt, der gewählte ist angekreuzt
+const HEIMWEG_SATZ = {
+  allein: "Mein Kind darf nach dem Training allein nach Hause gehen.",
+  abholen: "Mein Kind wird nach dem Training abgeholt. Es wartet am Trainingsort.",
+};
+
+// Kästchen auf dem Blatt zum Heimweg: angekreuzt oder leer, durch Rendern bestimmt (zwei Zeilen, oben „allein“, darunter „abholen“).
+// Das Kästchen (9 pt) steht links neben dem Satz; angekreuzt hat es zwei Diagonalen und damit dunkle Pixel in der Mitte.
+function heimwegKreuze(pfad, seite) {
+  const w = woerterSeite(pfad, seite).filter((x) => x.t === "Mein" && x.x0 > 58 && x.x0 < 68).sort((p, q) => q.y1 - p.y1);
+  if (w.length !== 2) return null;
+  const bild = renderGrau(pfad, seite, 200);
+  return w.map((x) => {
+    const mitte = (x.y0 + x.y1) / 2;
+    return { dunkel: dunkelAnteil(bild, [45, mitte - 4.5, 9, 9], 0.22), x0: x.x0 };
+  });
 }
 
 function pruefeEigeneSeiten(c) {
@@ -806,12 +834,28 @@ function pruefeEigeneSeiten(c) {
   // --- Punkt 2: mehrere mögliche Mannschaften ---
   const mannschaft = mannschaftErwartet(b);
   const namenAnzahl = ((e.mannschaft || {}).namen || []).length;
-  for (const schluessel of ["einverstaendnis_maedchen", "einverstaendnis_fahrten", "notfall"]) {
+  for (const schluessel of ["einverstaendnis_maedchen", "einverstaendnis_fahrten", "heimweg", "notfall"]) {
     const seiten = seitenVon(schluessel);
     if (!seiten.length) continue;
     const t = texte[seiten[0].nr - 1];
     if (mannschaft) ok(t.includes("Mannschaft: " + mannschaft), () => "Seite " + seiten[0].nr + " (" + schluessel + "): „Mannschaft: " + mannschaft + "“ fehlt");
     else ok(!t.includes("Mannschaft:"), "Seite " + seiten[0].nr + " (" + schluessel + "): keine Mannschaft bekannt, also keine Zeile");
+  }
+  // Karneval: kein Gruppenname mehr, sondern ein Satz (Laufzettel und Einverständnis für Fahrten); sonst keine Zeile „Gruppe“
+  {
+    const gruppe = gruppeErwartet(b);
+    const SATZ = /Die Trainer ordnen (das Kind|die Person) einer Gruppe zu\./;
+    const fahrtenSeiten = seitenVon("einverstaendnis_fahrten");
+    if (fahrtenSeiten.length) {
+      const t = texte[fahrtenSeiten[0].nr - 1];
+      if (gruppe) ok(t.includes("Gruppe: " + gruppe), () => "Fahrten: „Gruppe: " + gruppe + "“ fehlt");
+      else ok(!SATZ.test(t) && !/\bGruppe:/.test(t.replace(/Messenger-Gruppe/g, "")), "Fahrten: ohne Karneval keine Zeile „Gruppe“");
+    }
+    if (gruppe) ok(lz.includes("Gruppe: " + gruppe), () => "Laufzettel: „Gruppe: " + gruppe + "“ fehlt");
+    else ok(!SATZ.test(lz), "Laufzettel: ohne Karneval kein Satz zur Gruppe");
+    ok(!/Freaky Fruities|Little Fruities|Flying Fruities|Pfläumchen|Dreamboys/.test(texte.join(" ")), "kein Gruppenname der Karnevalabteilung im PDF");
+    ok(!/Zuschlag/.test(lz), "Laufzettel: kein Zuschlag ohne Lastschrift");
+    ok(!/Auftritt|Abendauftritt|Kostüm|Turnier|tanzt woanders/.test(eigeneTexte), "eigene Seiten: nichts zu Auftritten, Kostümen oder Turnieren");
   }
   if (namenAnzahl > 1) {
     ok(lz.includes(mannschaft), () => "Laufzettel nennt „" + mannschaft + "“");
@@ -835,29 +879,45 @@ function pruefeEigeneSeiten(c) {
     } else ok(links === "", () => "Aufnahmeantrag Seite 2: ohne zweite Person mit Sorgerecht (oder ohne zweite Linie) steht links neben der Linie nichts, gelesen „" + links + "“");
   }
 
-  // --- Punkt 4: Erlaubnis für Auftritte am Abend ---
-  const ka = seitenVon("karneval_auftritte");
-  if (ka.length) {
-    const seite = ka[0].nr;
-    const digital = stelleVon("karneval_auftritte", "unterschrift").art === "bild";
-    const k = a.karneval || {};
-    const zeit = zeitErwartet(k.alleinAb);
-    const allein = k.alleinNachHause === "ja" && zeit ? "Mein Kind darf die Veranstaltung um " + zeit + " Uhr allein verlassen." : k.alleinNachHause === "nein" ? "Mein Kind darf die Veranstaltung nicht allein verlassen." : "";
-    const ohne = digital ? "–" : "";
-    const tel = a.mobil || a.telefon || "";
-    const wertVon = (name) => (eingabe(seite, name) || {}).wert;
-    gleich(wertVon("abholung"), k.abholung || ohne, "Karneval: Feld „Mein Kind wird abgeholt von“");
-    gleich(wertVon("alleinNachHause"), allein || ohne, "Karneval: Feld „Allein nach Hause“");
-    gleich(wertVon("telefon"), tel || ohne, "Karneval: Feld „Telefonnummer“");
-    if (k.abholung) ok(texte[seite - 1].includes(norm(k.abholung)), "Karneval: die Abholung steht im Text");
-    if (allein) ok(texte[seite - 1].includes(allein), () => "Karneval: Satz „" + allein + "“ fehlt");
-    else ok(!/Mein Kind darf die Veranstaltung (um \d\d:\d\d Uhr|nicht) allein verlassen\./.test(texte[seite - 1]), "Karneval: ohne Antwort steht kein Satz zum Heimweg");
-    const striche = einzelStriche(woerterSeite(pfad, seite)).length;
-    const erwStriche = digital ? [k.abholung, allein, tel].filter((v) => !v).length : 0;
-    ok(striche === erwStriche, () => "Karneval: " + striche + " Striche „–“ im PDF, erwartet " + erwStriche + (digital ? " (Bildschirm-Unterschrift, unbeantwortete Felder)" : " (Unterschrift mit Stift: Felder bleiben zum Ausfüllen leer)"));
-    if (!digital && !allein) ok(texte[seite - 1].includes("um Uhr allein verlassen"), "Karneval: auf dem Papierweg bleibt die Beschriftung „um ___ Uhr allein verlassen“ zum Ausfüllen");
-    if (digital || allein) ok(texte[seite - 1].includes("Allein nach Hause"), "Karneval: Beschriftung „Allein nach Hause“");
+  // --- Punkt 4: Heimweg nach dem Training (U41, Aufsichtspflicht) ---
+  const he = seitenVon("heimweg");
+  const heimwegSoll = e.formulare.includes("heimweg");
+  ok(he.length === (heimwegSoll ? 1 : 0), () => "Heimweg: " + he.length + " Seiten, erwartet " + (heimwegSoll ? 1 : 0) + " (Formular heimweg in e.formulare: " + heimwegSoll + ")");
+  ok(!S.some((s) => /karneval_auftritte/.test(String(s.schluessel))) && !texte.some((t) => /Erlaubnis für Auftritte am Abend|Erziehungsbeauftragung/.test(t)), "kein Blatt zu Auftritten am Abend mehr");
+  if (he.length) {
+    const seite = he[0].nr;
+    const t = texte[seite - 1];
+    const digital = stelleVon("heimweg", "unterschrift").art === "bild";
+    const antwort = ["allein", "abholen"].includes(a.heimweg) ? a.heimweg : "";
+    ok(S[seite - 1].teil === "B", "Heimweg: das Blatt gehört zu Teil B (Für den Verein)");
+    ok(t.includes("Erklärung zur Aufsichtspflicht") && t.includes("Name:") && t.includes("Geburtsdatum:") && t.includes("Abteilung:") && t.includes(norm(a.vorname + " " + a.nachname)), "Heimweg: Name, Geburtsdatum und Abteilung des Kindes stehen im Kasten");
+    ok(t.includes("Abteilung: " + ({ fussball: "Fußball", karneval: "Karneval", beides: "Fußball und Karneval" }[a.abteilung] || "?")), "Heimweg: Abteilung " + a.abteilung);
+    ok(t.includes(HEIMWEG_SATZ.allein) && t.includes(norm(HEIMWEG_SATZ.abholen)), "Heimweg: beide Sätze stehen auf dem Blatt");
+    ok(t.includes("Ich kann diese Erklärung jederzeit ändern. Dann sage ich dem Trainer Bescheid."), "Heimweg: Satz zum Ändern");
+    ok(/Rechtsgrundlage: Aufsichtspflicht \(§ 832 BGB\)\./.test(t), "Heimweg: Zeile „Rechtsgrundlage: Aufsichtspflicht (§ 832 BGB).“");
+    const kreuze = heimwegKreuze(pfad, seite);
+    if (ok(!!kreuze, "Heimweg: zwei Kästchen vor den beiden Sätzen gefunden")) {
+      const angekreuzt = kreuze.map((k) => k.dunkel > 0.1);
+      gleich(angekreuzt, [antwort === "allein", antwort === "abholen"], "Heimweg: angekreuzt ist nur die gewählte Antwort (" + (antwort || "keine Antwort") + ")");
+    }
+    const kennungen = bericht.texte.filter((x) => x.seite === seite && x.art === "kaestchen").map((x) => x.kennung + ":" + x.text);
+    gleich(kennungen, [(antwort === "allein" ? "angekreuzt" : "leer") + ":" + HEIMWEG_SATZ.allein, (antwort === "abholen" ? "angekreuzt" : "leer") + ":" + HEIMWEG_SATZ.abholen], "Heimweg: der Bericht nennt Kästchen und Zustand");
+    // Unterschrift am Bildschirm nur unter einer Antwort, sonst Stift-Stelle mit Grund auf dem Laufzettel
+    if (a.unterschriftWeg === "bildschirm" && bildFuerWer(b, "sorgeberechtigte") && !antwort) {
+      ok(!digital, "Heimweg: ohne Antwort wird die Stelle zur Stift-Stelle, auch am Bildschirm");
+      ok(bericht.hinweise.some((h) => /Heimweg nach dem Training: Der Heimweg ist nicht angegeben\. Die Unterschrift steht deshalb als Stift-Markierung im Formular\./.test(h)), "Heimweg: ohne Antwort nennt der Laufzettel den Grund bei der Stift-Stelle");
+    }
+    if (a.unterschriftWeg !== "bildschirm" && !antwort) ok(bericht.hinweise.some((h) => /Heimweg nach dem Training: Der Heimweg ist nicht angegeben\. Die Familie kreuzt ihn auf dem Blatt an\./.test(h)), "Heimweg: ohne Antwort auf dem Papierweg nennt der Laufzettel den Fall");
+    if (antwort) ok(!bericht.hinweise.some((h) => /Heimweg/.test(h)), "Heimweg: mit Antwort kein Hinweis auf dem Laufzettel");
+    ok(!/Uhr\b/.test(t.replace(/Uhrzeit/g, "")), "Heimweg: keine Uhrzeit auf dem Blatt");
+    // „Gilt für“ in Teil A („Wo unterschreiben Sie?“): eine Zeile für das Blatt, am Bildschirm oder mit Stift
+    const taText = ohneRahmen(S.map((x, i) => ({ x: x, t: texte[i] })).filter((x) => x.x.art === "teil-a").map((x) => x.t).join(" "));
+    ok(new RegExp("\\b" + seite + " " + esc("Heimweg nach dem Training") + " Eine Person mit Sorgerecht " + (digital ? "Am Bildschirm erledigt" : "Mit Stift")).test(taText), () => "Teil A, „Wo unterschreiben Sie?“: Zeile für das Blatt Heimweg auf Seite " + seite + " (" + (digital ? "am Bildschirm" : "mit Stift") + ")");
   }
+  // Laufzettel: das Blatt zum Heimweg geht als Kopie an das Trainerteam; ohne Blatt steht nichts dazu da
+  if (heimwegSoll) ok(lz.includes("Heimweg nach dem Training: Kopie an das Trainerteam."), "Laufzettel: „Heimweg nach dem Training: Kopie an das Trainerteam.“");
+  else ok(!/Kopie an das Trainerteam/.test(lz) && !/Heimweg/.test(lz), "Laufzettel: ohne Heimweg-Blatt keine Zeile dazu");
+  ok(!e.unterlagen.some((u) => u.id === "U41") === !heimwegSoll, "Heimweg: U41 und Blatt gehören zusammen");
 
   // --- Fahrten und Messenger ---
   const fa = seitenVon("einverstaendnis_fahrten");
@@ -865,8 +925,14 @@ function pruefeEigeneSeiten(c) {
     const seite = fa[0].nr;
     const digital = stelleVon("einverstaendnis_fahrten", "unterschrift").art === "bild";
     const ew = a.einwilligungen || {};
+    // Überschrift und Satz zur Fahrt: nur Karneval ohne Spiele, sonst der bisherige Text (M1, Runde 2)
+    const satz = FAHRTEN_SATZ(a);
+    const anderer = satz === FAHRTEN_KARNEVAL ? FAHRTEN_SONST : FAHRTEN_KARNEVAL;
+    ok(texte[seite - 1].includes(satz.ueberschrift) && !texte[seite - 1].includes(anderer.ueberschrift), () => "Fahrten: Überschrift „" + satz.ueberschrift + "“ (Abteilung " + a.abteilung + ")");
+    ok(!/Turnier/.test(texte[seite - 1]), "Fahrten: das Blatt nennt keine Turniere");
+    if (a.abteilung === "karneval") ok(!/Spiel/.test(texte[seite - 1]), "Fahrten bei Karneval ohne Fußball: das Blatt nennt keine Spiele");
     for (const name of ["fahrten", "messenger"]) {
-      const T = TEXT_FAHRTEN[name];
+      const T = name === "fahrten" ? { ...TEXT_FAHRTEN.fahrten, ja: satz.ja } : TEXT_FAHRTEN[name];
       const beantwortet = typeof ew[name] === "boolean";
       const t = texte[seite - 1];
       if (!beantwortet && digital) ok(t.includes(T.ohne) && !t.includes(T.ja.slice(0, 25)) && !t.includes(T.nein.slice(0, 25)), () => "Fahrten/" + name + ": ohne Antwort und mit Bildschirm-Unterschrift steht ein Satz statt der Kästchen");
@@ -947,7 +1013,6 @@ function pruefeEigeneSeiten(c) {
   const hat = (formular, name) => bericht.eingaben.some((x) => x.formular === formular && x.name === name);
   const erwartet = [];
   if (fa.length) erwartet.push(["einverstaendnis_fahrten", "fahrten"], ["einverstaendnis_fahrten", "messenger"]);
-  if (ka.length) ["telefon", "abholung", "alleinNachHause"].forEach((n) => erwartet.push(["karneval_auftritte", n]));
   if (nf.length) {
     ["kontakte", "medikament", "wannWieViel", "werGibtEs", "abgesprochenAm", "abgesprochenMit"].forEach((n) => erwartet.push(["notfall", n]));
     if (!(stelleVon("notfall", "unterschrift").art === "bild" && a.gesundheitsbogen !== true)) GESUNDHEIT_FELDER.forEach(([n]) => erwartet.push(["notfall", n]));
@@ -1168,7 +1233,7 @@ const HFV_BLAETTER = ["hfv_antrag", "vollmacht", "einverstaendnis_senioren"]; //
 // Papiere, die der Verband verlangen kann (Teil A nennt sie unter „Vielleicht braucht der Verband noch:“)
 const VERBAND_PAPIERE = ["U07", "U08", "U09", "U10", "U11", "U12", "U13", "U14", "U17", "U18", "U20", "U21", "U22", "U23", "U26", "U27", "U36", "U37", "U38", "U39", "U40"];
 // Seiten, die die Familie unterschreibt (ohne die Information zum Datenschutz, siehe O45)
-const FAMILIEN_SEITEN = ["einverstaendnis_maedchen", "einverstaendnis_fahrten", "karneval_auftritte", "attest_einwilligung", "notfall"];
+const FAMILIEN_SEITEN = ["einverstaendnis_maedchen", "einverstaendnis_fahrten", "heimweg", "attest_einwilligung", "notfall"];
 
 // Sätze eines Textes: Trennung an . ! ? und :, Abkürzungen („Art.“, „Abs.“, „Nr.“, „lit.“, „e. V.“) trennen nicht
 function saetzeNA2(roh) {
@@ -1385,7 +1450,7 @@ async function pruefePdf(b, g, opt) {
     const ausserhalb = S.some((s, i) => s.schluessel !== f && ["vorlage", "eigen", "nachweis", "foto"].includes(s.art) && marker.test(texte[i]));
     ok(!ausserhalb, "Formular " + f + " kommt auf einer fremden Seite vor");
   }
-  for (const f of ["aufnahmeantrag", "datenschutz", "hfv_antrag", "vollmacht", "abmeldung", "einverstaendnis_senioren", "einverstaendnis_maedchen", "einverstaendnis_fahrten", "karneval_auftritte", "notfall"]) {
+  for (const f of ["aufnahmeantrag", "datenschutz", "hfv_antrag", "vollmacht", "abmeldung", "einverstaendnis_senioren", "einverstaendnis_maedchen", "einverstaendnis_fahrten", "heimweg", "notfall"]) {
     if (!formulare.includes(f)) ok(bereich(f).length === 0, "Formular " + f + " gehört nicht zu diesem Fall, steht aber im PDF");
   }
   const attestPflicht = e.formulare.includes("attest") || Boolean(b.bilder.nachweise.U10);
@@ -1555,7 +1620,7 @@ async function pruefePdf(b, g, opt) {
       if (!woerter[nr]) woerter[nr] = woerterSeite(pfad, nr);
       ok(norm(textImRechteck(woerter[nr], [hf.x - 1, hf.y - 3, hf.breite + 2, 13], 0)) === ortDatum, () => "Ort und Datum „" + ortDatum + "“ fehlen neben der Unterschrift " + u.stelleKey + " (Seite " + nr + "), gelesen „" + textImRechteck(woerter[nr], [hf.x - 1, hf.y - 3, hf.breite + 2, 13], 0) + "“");
     }
-    if (art === "bild" && ["datenschutz", "einverstaendnis_fahrten", "einverstaendnis_maedchen", "karneval_auftritte", "notfall", "attest"].includes(u.formular)) ok(texte[z.seite - 1].includes(ortDatum), "Ort und Datum fehlen bei " + u.formular + " auf Seite " + z.seite);
+    if (art === "bild" && ["datenschutz", "einverstaendnis_fahrten", "einverstaendnis_maedchen", "heimweg", "notfall", "attest"].includes(u.formular)) ok(texte[z.seite - 1].includes(ortDatum), "Ort und Datum fehlen bei " + u.formular + " auf Seite " + z.seite);
     if (["hfv_antrag", "vollmacht", "abmeldung", "einverstaendnis_senioren"].includes(u.formular)) ok(art === "stift", "HFV-Vordruck " + u.formular + "." + u.stelleKey + " wird nie am Bildschirm unterschrieben");
     if (u.wer === "arzt" || u.wer === "verein") ok(art === "stift", u.wer + " unterschreibt nie am Bildschirm");
   }
@@ -2121,45 +2186,86 @@ async function sonderfaelle() {
     ok(!textSeiten(g0.pfad).join("\n").includes("Mannschaft:"), "ohne Mannschaft gibt es keine Zeile „Mannschaft“");
   }
 
-  // 12. Karneval: Uhrzeit für den Heimweg (Punkt 4)
-  kontext = "Karneval-Uhrzeit";
+  // 12. Heimweg nach dem Training (M1, 11.10.2026): beide Antworten, ohne Antwort am Bildschirm und auf Papier, nie bei Passiven und Erwachsenen
+  kontext = "Heimweg";
   {
-    const probe = async (alleinAb, erwartet, name) => {
-      const b = bereite("karneval-kind-abend", "bild", 0, (a) => {
-        a.karneval.abholung = "Oma Erika Beispiel";
-        a.karneval.alleinNachHause = "ja";
-        a.karneval.alleinAb = alleinAb;
+    const probe = async (profilId, variante, antwort, name) => {
+      const b = bereite(profilId, variante, 0, (a) => {
+        if (antwort === undefined) delete a.heimweg;
+        else a.heimweg = antwort;
       });
-      const g = await baue(b, "karneval-uhrzeit-" + name + ".pdf");
-      const ein = g.bericht.eingaben.find((x) => x.name === "alleinNachHause");
-      gleich(ein && ein.wert, erwartet, "Karneval: alleinAb „" + alleinAb + "“");
-      const kaNr = g.bericht.seiten.findIndex((s) => s.schluessel === "karneval_auftritte") + 1;
-      const t = textSeiten(g.pfad)[kaNr - 1];
-      if (erwartet === "–") ok(g.bericht.hinweise.some((h) => /Abholung oder Heimweg sind nicht angegeben/.test(h)), "Karneval: fehlende Uhrzeit steht als Hinweis auf dem Laufzettel");
-      else ok(t.includes(erwartet) && !g.bericht.hinweise.some((h) => /Abholung oder Heimweg/.test(h)), "Karneval: Satz mit Uhrzeit steht im PDF");
+      const g = await baue(b, "heimweg-" + name + ".pdf");
+      const nr = g.bericht.seiten.findIndex((x) => x.schluessel === "heimweg" && x.art === "eigen") + 1;
+      return { b: b, g: g, nr: nr, st: g.bericht.stellen.find((x) => x.formular === "heimweg" && x.stelleKey === "unterschrift") };
     };
-    await probe("21:30", "Mein Kind darf die Veranstaltung um 21:30 Uhr allein verlassen.", "2130");
-    await probe("9:05", "Mein Kind darf die Veranstaltung um 09:05 Uhr allein verlassen.", "905");
-    await probe("", "–", "leer");
-    await probe("25:99", "–", "ungueltig");
-    await probe("abends", "–", "text");
+    const allein = await probe("karneval-kind", "bild", "allein", "allein");
+    ok(allein.nr > 0, "Heimweg allein: Blatt vorhanden");
+    gleich(heimwegKreuze(allein.g.pfad, allein.nr).map((k) => k.dunkel > 0.1), [true, false], "Heimweg „allein“: nur der erste Satz ist angekreuzt");
+    ok(allein.st.art === "bild", "Heimweg mit Antwort: Unterschrift am Bildschirm");
+    const abholen = await probe("karneval-kind", "bild", "abholen", "abholen");
+    gleich(heimwegKreuze(abholen.g.pfad, abholen.nr).map((k) => k.dunkel > 0.1), [false, true], "Heimweg „abholen“: nur der zweite Satz ist angekreuzt");
+    const ohne = await probe("kind-neu-deutsch-f", "bild", undefined, "ohne-bildschirm");
+    gleich(heimwegKreuze(ohne.g.pfad, ohne.nr).map((k) => k.dunkel > 0.1), [false, false], "Heimweg ohne Antwort: beide Kästchen leer");
+    ok(ohne.st.art === "stift" && ohne.g.bericht.warnungen.length === 0, "Heimweg ohne Antwort am Bildschirm: Stift-Stelle, keine Warnung");
+    ok(ohne.g.bericht.hinweise.some((h) => /Heimweg nach dem Training: Der Heimweg ist nicht angegeben\. Die Unterschrift steht deshalb als Stift-Markierung im Formular\./.test(h)), "Heimweg ohne Antwort am Bildschirm: der Laufzettel nennt den Grund");
+    const papier = await probe("kind-neu-deutsch-f", "papier", undefined, "ohne-papier");
+    gleich(heimwegKreuze(papier.g.pfad, papier.nr).map((k) => k.dunkel > 0.1), [false, false], "Heimweg ohne Antwort auf Papier: beide Kästchen leer");
+    ok(papier.st.art === "stift" && papier.g.bericht.hinweise.filter((h) => /Heimweg/.test(h)).length === 1, "Heimweg ohne Antwort auf Papier: eine Meldung auf dem Laufzettel");
+    const ungueltig = await probe("kind-neu-deutsch-f", "bild", "egal", "ungueltig");
+    ok(ungueltig.st.art === "stift", "Heimweg mit ungültiger Antwort zählt als keine Antwort");
+    // Passive Kinder und Erwachsene bekommen kein Blatt, auch wenn alte Antworten noch einen Heimweg enthalten
+    for (const [profilId, was] of [["passiv-kind", "Kind als passives Mitglied"], ["passiv-foerderer", "Erwachsener als passives Mitglied"], ["herren-neu-deutsch", "Erwachsener bei den Herren"], ["senator-karneval", "Erwachsener im Karneval"]]) {
+      const x = await probe(profilId, "bild", "allein", "kein-" + profilId);
+      ok(x.nr === 0 && !x.g.bericht.stellen.some((st) => st.formular === "heimweg"), "Heimweg: " + was + " bekommt kein Blatt");
+      ok(!textSeiten(x.g.pfad).join(" ").includes("Heimweg"), "Heimweg: " + was + ": das Wort steht nirgends im PDF");
+    }
+    // Karneval-Kind ohne Antworten zu Gruppe und Auftritten (alte Felder werden nicht gelesen)
+    const alt = await probe("karneval-kind", "bild", "abholen", "alte-karneval-antworten");
+    const bAlt = bereite("karneval-kind", "bild", 0, (a) => {
+      a.karneval = { gruppe: "Freaky Fruities", tanztWoanders: "ja", turnier: "ja", abendOhneEltern: "ja", abholung: "Oma Erika Beispiel", alleinNachHause: "ja", alleinAb: "21:30" };
+    });
+    const gAlt = await baue(bAlt, "karneval-alte-antworten.pdf");
+    const tAlt = textSeiten(gAlt.pfad).join(" ");
+    ok(!/Freaky Fruities|Oma Erika Beispiel|21:30|Auftritt|Turnier/.test(tAlt), "alte Karneval-Antworten (Gruppe, Abholung, Uhrzeit) erscheinen nicht im PDF");
+    ok(alt.nr > 0, "Heimweg: das Karneval-Kind hat sein Blatt");
   }
 
-  // 13. Karneval: eine sehr lange Angabe zur Abholung wird gekürzt und auf dem Laufzettel gemeldet
-  kontext = "Karneval-Abholung";
+  // 13. Satz zur Fahrt je Abteilung (M1, Runde 2, 11.10.2026): Karneval ohne Fußball nennt keine Spiele und Turniere,
+  //     Fußball und „beides“ behalten den bisherigen Satz. Die Oberfläche folgt derselben Regel (e2e: pruefeFahrtenSatz).
+  kontext = "Fahrten je Abteilung";
   {
-    const lang = "Oma Erika Beispiel, Opa Hans Beispiel, Tante Petra Beispiel, Onkel Karl Beispiel, Nachbarin Frau Muster und Herr Muster ".repeat(3);
-    const b = bereite("karneval-kind-abend", "bild", 0, (a) => {
-      a.karneval.abholung = lang;
-      a.karneval.alleinNachHause = "nein";
+    const probe = async (profilId, abteilung, name) => {
+      const b = bereite(profilId, "bild", 0, (a) => {
+        if (abteilung) {
+          a.abteilung = abteilung;
+          a.beitrag = Object.assign({}, a.beitrag, { doppel: abteilung === "beides" });
+        }
+        a.einwilligungen = Object.assign({}, a.einwilligungen, { fahrten: true, messenger: true });
+      });
+      const g = await baue(b, "fahrten-" + name + ".pdf");
+      const nr = g.bericht.seiten.findIndex((x) => x.schluessel === "einverstaendnis_fahrten" && x.art === "eigen") + 1;
+      const alle = textSeiten(g.pfad);
+      return { b: b, g: g, nr: nr, t: nr ? alle[nr - 1] : "", alles: alle.join(" ") };
+    };
+    const karneval = await probe("karneval-kind", null, "karneval");
+    ok(karneval.b.a.abteilung === "karneval" && karneval.b.e.minderjaehrig === true && karneval.nr > 0, "Fahrten Karneval-Kind: Blatt vorhanden");
+    ok(karneval.t.includes("Fahrten zu Veranstaltungen des Vereins") && karneval.t.includes("Ja, mein Kind darf zu Veranstaltungen des Vereins in Fahrgemeinschaften mitfahren."), "Fahrten Karneval-Kind: Überschrift und Satz „… zu Veranstaltungen des Vereins …“");
+    ok(!/Turnier/.test(karneval.t) && !/Spiel/.test(karneval.t) && !karneval.t.includes("Spielen und Veranstaltungen"), "Fahrten Karneval-Kind: kein „Turnier“ und keine Spiele auf dem Blatt");
+    ok(!/Turnier/.test(karneval.alles), "Fahrten Karneval-Kind: im ganzen PDF kein „Turnier“");
+    const fussball = await probe("kind-neu-deutsch-f", null, "fussball");
+    ok(fussball.b.a.abteilung === "fussball" && fussball.nr > 0, "Fahrten Fußball-Kind: Blatt vorhanden");
+    ok(fussball.t.includes("Fahrten zu Spielen und Veranstaltungen") && fussball.t.includes("Ja, mein Kind darf zu Spielen und Veranstaltungen in Fahrgemeinschaften mitfahren.") && !fussball.t.includes("Veranstaltungen des Vereins"), "Fahrten Fußball-Kind: der bisherige Satz „… zu Spielen und Veranstaltungen …“");
+    const beides = await probe("kind-neu-deutsch-f", "beides", "beides");
+    ok(beides.b.a.abteilung === "beides" && beides.nr > 0, "Fahrten Kind in Fußball und Karneval: Blatt vorhanden");
+    ok(beides.t.includes("Fahrten zu Spielen und Veranstaltungen") && beides.t.includes("Ja, mein Kind darf zu Spielen und Veranstaltungen in Fahrgemeinschaften mitfahren.") && !beides.t.includes("Veranstaltungen des Vereins"), "Fahrten Kind in Fußball und Karneval: der bisherige Satz wie bei Fußball");
+    // Ohne Antwort am Bildschirm: der Ersatzsatz und die Überschrift bleiben die der Abteilung
+    const ohneAntwort = bereite("karneval-kind", "bild", 0, (a) => {
+      a.einwilligungen = Object.assign({}, a.einwilligungen, { fahrten: undefined, messenger: false });
     });
-    const g = await baue(b, "karneval-lange-abholung.pdf");
-    const kaNr = g.bericht.seiten.findIndex((s) => s.schluessel === "karneval_auftritte") + 1;
-    const t = textSeiten(g.pfad)[kaNr - 1];
-    ok(t.includes("…") && t.includes("Oma Erika Beispiel"), "Karneval: die lange Abholung steht gekürzt mit „…“ im Feld");
-    ok(g.bericht.hinweise.some((h) => /Feld „Mein Kind wird abgeholt von \(Name\)“ wurde gekürzt/.test(h)), "Karneval: die Kürzung steht auf dem Laufzettel");
-    const w = woerterSeite(g.pfad, kaNr);
-    ok(w.every((x) => x.x1 <= 596 - 40), "Karneval: nichts ragt über den rechten Rand hinaus");
+    const gOhne = await baue(ohneAntwort, "fahrten-karneval-ohne-antwort.pdf");
+    const nrOhne = gOhne.bericht.seiten.findIndex((x) => x.schluessel === "einverstaendnis_fahrten" && x.art === "eigen") + 1;
+    const tOhne = nrOhne ? textSeiten(gOhne.pfad)[nrOhne - 1] : "";
+    ok(nrOhne > 0 && tOhne.includes("Fahrten zu Veranstaltungen des Vereins") && tOhne.includes("Sie haben dazu nichts angegeben. Ihr Kind fährt dann nicht in Fahrgemeinschaften mit.") && !/Turnier|Spiel/.test(tOhne), "Fahrten Karneval-Kind ohne Antwort: Überschrift ohne Spiele und der Satz statt der Kästchen");
   }
 
   // 14. Laufzettel: der Block „Bearbeitung durch den Verein“ wird nie vom Seitenumbruch zerrissen, auch wenn der Laufzettel
@@ -2168,8 +2274,11 @@ async function sonderfaelle() {
   {
     let zweiSeitigMitBlockAmEnde = 0;
     let dreiSeitig = 0;
+    // Variante „papier“ (ohne Nachweis-Seiten im Inhaltsverzeichnis): Seit dem Blatt zum Heimweg und der Zeile zur Kopie an das
+    // Trainerteam ist der Laufzettel der Variante „bild“ schon ohne weitere Personen dreiseitig; die Seitengrenze zwischen zwei und
+    // drei Seiten liegt hier bei sechs bis acht weiteren Personen.
     for (let n = 0; n <= 12; n++) {
-      const b = bereite("vollmacht-und-kuendigung", "bild", 0, (a) => {
+      const b = bereite("vollmacht-und-kuendigung", "papier", 0, (a) => {
         for (let i = 0; i < n; i++) a.sorgeberechtigte.push({ rolle: "andere", vorname: "Weitere" + i, nachname: "Mustermann", telefon: "0176 040690" + (10 + i), email: "" });
       });
       const g = await baue(b, "laufzettel-umbruch-" + n + ".pdf");
@@ -2213,8 +2322,8 @@ async function sonderfaelle() {
 // ---------------------------------------------------------------------------------------------
 // Antworten mit und ohne Angaben der Familie, am Bildschirm und auf Papier (Punkte 4 bis 6)
 // ---------------------------------------------------------------------------------------------
-// Profile, die Karneval, Fahrten, Notfallbogen, Foto-Einwilligung, Lastschrift und Familienliste abdecken
-const SZENARIO_PROFILE = ["karneval-kind-abend", "kind-neu-deutsch-f", "familie-drei-mitglieder", "maedchen-c-jugend-jungenteam", "a-jugend-aushilfe-herren", "getrennt-lebende-eltern", "herren-neu-deutsch"];
+// Profile, die Karneval, Heimweg, Fahrten, Notfallbogen, Foto-Einwilligung, Lastschrift und Familienliste abdecken
+const SZENARIO_PROFILE = ["karneval-kind", "kind-neu-deutsch-f", "familie-drei-mitglieder", "maedchen-c-jugend-jungenteam", "a-jugend-aushilfe-herren", "getrennt-lebende-eltern", "herren-neu-deutsch"];
 
 function szenarioAendern(szenario, lauf) {
   return (a) => {
@@ -2224,7 +2333,7 @@ function szenarioAendern(szenario, lauf) {
       a.einwilligungen.messenger = lauf % 2 === 1;
       a.einwilligungen.fotos = "ja";
       a.einwilligungen.medien = ["intern", "presse"];
-      if (a.karneval) Object.assign(a.karneval, lauf % 2 === 0 ? { abholung: "Oma Erika Beispiel", alleinNachHause: "ja", alleinAb: "21:30" } : { abholung: "Onkel Jonas Beispiel", alleinNachHause: "nein" });
+      a.heimweg = lauf % 2 === 0 ? "allein" : "abholen";
       a.gesundheitsbogen = true;
       a.gesundheit = { allergien: "Nüsse", erkrankungen: "Asthma", medikamente: "", sonstiges: "" };
     } else {
@@ -2232,11 +2341,7 @@ function szenarioAendern(szenario, lauf) {
       delete a.einwilligungen.messenger;
       delete a.einwilligungen.fotos;
       delete a.einwilligungen.medien;
-      if (a.karneval) {
-        delete a.karneval.abholung;
-        delete a.karneval.alleinNachHause;
-        delete a.karneval.alleinAb;
-      }
+      delete a.heimweg;
       a.gesundheitsbogen = false;
       delete a.gesundheit;
       a.notfall = null;
@@ -2270,24 +2375,21 @@ async function szenarien() {
           continue;
         }
         await pruefePdf(b, g, { tief: variante === "bild", bilder: true, nachweise: variante === "bild" });
-        // Renderings des Karneval-Profils in allen vier Fassungen zur Sichtprüfung (Karneval- und Notfall-Seiten)
-        if (id === "karneval-kind-abend") ok(sh("pdftoppm", ["-png", "-r", "70", g.pfad, path.join(RENDER, "szenario-" + id + "-" + szenario + "-" + variante)]).status === 0, "Rendering des Szenarios fehlgeschlagen");
+        // Renderings des Karneval-Profils in allen vier Fassungen zur Sichtprüfung (Heimweg- und Notfall-Seiten)
+        if (id === "karneval-kind") ok(sh("pdftoppm", ["-png", "-r", "70", g.pfad, path.join(RENDER, "szenario-" + id + "-" + szenario + "-" + variante)]).status === 0, "Rendering des Szenarios fehlgeschlagen");
         const S = g.bericht.seiten;
         const digital = (formular, key) => (g.bericht.stellen.find((st) => st.formular === formular && st.stelleKey === key) || {}).art === "bild";
         const eing = (formular, name) => g.bericht.eingaben.find((x) => x.formular === formular && x.name === name);
         const hat = (schluessel) => S.some((s) => s.schluessel === schluessel && s.art === "eigen");
         // Erwartung je Fassung: am Bildschirm sind alle Angaben gefüllt („–“ statt leerer Felder), auf Papier bleiben unbeantwortete Felder frei
-        if (hat("karneval_auftritte")) {
-          const dig = digital("karneval_auftritte", "unterschrift");
-          gleich(dig, variante === "bild", "Karneval: Unterschrift " + (dig ? "am Bildschirm" : "mit Stift") + " passend zur Variante");
-          if (szenario === "mit") {
-            ok(!eing("karneval_auftritte", "abholung").leer && !eing("karneval_auftritte", "alleinNachHause").leer, "Karneval mit Antworten: beide Felder gefüllt");
-            const k = b.a.karneval;
-            ok(eing("karneval_auftritte", "abholung").wert === k.abholung, "Karneval mit Antworten: Abholung im Feld");
-            ok(eing("karneval_auftritte", "alleinNachHause").wert === (k.alleinNachHause === "ja" ? "Mein Kind darf die Veranstaltung um 21:30 Uhr allein verlassen." : "Mein Kind darf die Veranstaltung nicht allein verlassen."), "Karneval mit Antworten: Satz zum Heimweg im Feld");
-          } else {
-            ok(eing("karneval_auftritte", "abholung").leer === !dig && eing("karneval_auftritte", "alleinNachHause").leer === !dig, "Karneval ohne Antworten: " + (dig ? "„–“ in beiden Feldern" : "beide Felder bleiben zum Ausfüllen frei"));
-          }
+        if (hat("heimweg")) {
+          const dig = digital("heimweg", "unterschrift");
+          const antwort = szenario === "mit" ? b.a.heimweg : "";
+          // Am Bildschirm steht die Unterschrift nur unter einer Antwort; ohne Antwort wird die Stelle zur Stift-Stelle
+          gleich(dig, variante === "bild" && szenario === "mit", "Heimweg " + szenario + " Antworten (" + (variante === "bild" ? "Bildschirm" : "Papier") + "): Unterschrift " + (dig ? "am Bildschirm" : "mit Stift"));
+          const nrH = S.findIndex((s) => s.schluessel === "heimweg" && s.art === "eigen") + 1;
+          const kreuze = heimwegKreuze(g.pfad, nrH);
+          if (kreuze) gleich(kreuze.map((k) => k.dunkel > 0.1), [antwort === "allein", antwort === "abholen"], "Heimweg " + szenario + " Antworten: angekreuzt ist " + (antwort || "nichts"));
         }
         if (hat("notfall")) {
           const dig = digital("notfall", "unterschrift");
@@ -2317,7 +2419,7 @@ async function szenarien() {
           const s3 = g.bericht.stellen.find((st) => st.formular === "aufnahmeantrag" && st.stelleKey === "s3.unterschrift");
           if (s3) ok(s3.art === "bild", "Aufnahmeantrag mit beantworteter " + deRegeln.unterlagen.U04.name + ": Seite 3 am Bildschirm");
         }
-        const seitenMit = ["karneval_auftritte", "einverstaendnis_fahrten", "notfall"].filter((k) => S.some((s) => s.schluessel === k && s.art === "eigen")).map((k) => ({ karneval_auftritte: "Karneval", einverstaendnis_fahrten: "Fahrten", notfall: "Notfall" })[k]).join("+");
+        const seitenMit = ["heimweg", "einverstaendnis_fahrten", "notfall"].filter((k) => S.some((s) => s.schluessel === k && s.art === "eigen")).map((k) => ({ heimweg: "Heimweg", einverstaendnis_fahrten: "Fahrten", notfall: "Notfall" })[k]).join("+");
         zeilen.push(id.padEnd(32) + (szenario + " Antworten, " + (variante === "bild" ? "Bildschirm" : "Papier")).padEnd(30) + (g.r.seiten + " S").padEnd(7) + ("Stifte " + g.bericht.stellen.filter((st) => st.art === "stift").length + "/Bilder " + g.bericht.stellen.filter((st) => st.art === "bild").length).padEnd(20) + (seitenMit || "-").padEnd(28) + String(anzahl - vor).padStart(5) + " Prüfungen  " + (fehler.length - vorFehler ? fehler.length - vorFehler + " FEHLER" : "ok"));
       }
     }
@@ -2353,7 +2455,7 @@ async function rueckfaelle() {
   await pruefe("datenschutz-kind", bereite("kind-neu-deutsch-f", "bild", 0), "datenschutz", "kenntnisnahme", "sorgeberechtigte", "datenschutz");
   await pruefe("notfall-kind", bereite("kind-neu-deutsch-f", "papier", 0), "notfall", "unterschrift", "sorgeberechtigte", "notfall");
   await pruefe("fahrten-kind", bereite("kind-neu-deutsch-f", "bild", 0), "einverstaendnis_fahrten", "unterschrift", "sorgeberechtigte", "einverstaendnis_fahrten");
-  await pruefe("karneval-kind", bereite("karneval-kind-abend", "bild", 0), "karneval_auftritte", "unterschrift", "sorgeberechtigte", "karneval_auftritte");
+  await pruefe("heimweg-kind", bereite("karneval-kind", "bild", 0), "heimweg", "unterschrift", "sorgeberechtigte", "heimweg");
   await pruefe("maedchen-kind", bereite("maedchen-c-jugend-jungenteam", "bild", 0), "einverstaendnis_maedchen", "unterschrift", "sorgeberechtigte", "einverstaendnis_maedchen");
   // Erwachsene: das Mitglied unterschreibt
   await pruefe("attest-erwachsen", bereite("herren-neu-deutsch", "bild", 0), "attest", "einwilligung", "mitglied", "attest_einwilligung");

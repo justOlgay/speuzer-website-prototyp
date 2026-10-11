@@ -16,9 +16,18 @@
 // src/vorlagen/begleit.html, siehe tools/build.mjs). Fehlen data/anmeldung.json
 // oder data/anmeldung-formulare.json noch, baut die Seite trotzdem – dann
 // stehen leere Objekte in der Konfiguration.
+//
+// Livegang (M6, 11.10.2026): Dasselbe Modul erzeugt mit seiteLive() auch die Live-Fassung als Workspace-Seite
+// (docs/ws/anmeldung.html, im appack-Paket web/anmeldung.html). tools/build.mjs nimmt sie nur auf, wenn der Schalter
+// ANMELDUNG_LIVE (src/vorlagen/hilfen.mjs) an ist. Die Live-Fassung hat dieselbe Seitenerzeugung (Sprachwahl, Hinweis
+// für die App, Assistent, Konfiguration), aber kein Entwurfs-Band, keinen Werkzeugkasten für die Vorführung, keinen
+// Knopf „Vorführung“, kein noindex und kein Konzept-Link; die Konfiguration trägt live = true (kein Entwurfsvermerk im
+// PDF), die Liste der Sprachen (ANMELDUNG_SPRACHEN_LIVE) und kein Regelwerk-Kapitel „offenePunkte“ (interne Fragen an
+// den Vorstand, zur Laufzeit nicht gebraucht). Die Begleitseite bleibt Zeichen für Zeichen wie vorher.
 
 import de from "../../assets/js/anmeldung/texte/de-oberflaeche.js";
 import { BEISPIELE } from "../../assets/js/anmeldung/beispiele.js";
+import { ANMELDUNG_SPRACHEN_LIVE } from "../vorlagen/hilfen.mjs";
 
 // Diese Seite liegt immer unter "/anmeldung/" (Tiefe 1), daher "../".
 const PFAD = "../";
@@ -73,14 +82,18 @@ function satzungUrl(daten) {
   return url;
 }
 
-// Konfiguration für den Assistenten (SCHNITTSTELLEN Abschnitt 2). Die
-// Karnevalgruppen enthalten nur Name und Übungszeit, keine Personennamen aus
-// data/karneval.json (dort stehen die Trainerinnen und Trainer).
-function baueKonfig(daten) {
+// Konfiguration für den Assistenten (SCHNITTSTELLEN Abschnitt 2). Karnevalgruppen
+// gehören nicht mehr dazu: Der Assistent lässt keine Gruppe wählen (Entscheidung
+// der 1. Vorsitzenden vom 11.10.2026), die Trainer ordnen die Kinder zu.
+//
+// live = true (Live-Fassung, seiteLive): ohne das Kapitel "offenePunkte" des Regelwerks (interne Fragen an den Vorstand, kein
+// Teil der Laufzeit), dafür live = true (der Assistent lässt den Entwurfsvermerk im PDF weg) und die Sprachen der Live-Seite.
+function baueKonfig(daten, live = false) {
   const verein = daten.verein ?? {};
   const sportstaette = verein.sportstaette ?? null;
-  return {
-    anmeldung: daten.anmeldung ?? {},
+  const regelwerk = daten.anmeldung ?? {};
+  const konfig = {
+    anmeldung: live ? ohneOffenePunkte(regelwerk) : regelwerk,
     formulare: bereinigeFormulare(daten["anmeldung-formulare"]),
     aufnahmeantragFelder: daten["aufnahmeantrag-felder"] ?? {},
     beitraege: daten.beitraege ?? {},
@@ -96,24 +109,33 @@ function baueKonfig(daten) {
         ? { strasse: sportstaette.strasse, plz: sportstaette.plz, ort: sportstaette.ort }
         : null,
     },
-    karnevalGruppen: (daten.karneval?.gruppen ?? []).map((g) => ({
-      name: g.name,
-      uebungszeit: g.uebungszeit ?? "",
-    })),
     // Stand der Regeldaten; ohne data/anmeldung.json der Tag des Baus (nur das
     // Datum, damit die Seite bei mehreren Bauten am selben Tag gleich bleibt).
     stand: daten.anmeldung?.stand ?? String(daten.stand ?? "").slice(0, 10),
   };
+  if (live) {
+    konfig.live = true;
+    konfig.sprachen = [...ANMELDUNG_SPRACHEN_LIVE];
+  }
+  return konfig;
+}
+
+// Regelwerk ohne die internen Fragen an den Vorstand (data/anmeldung.json › offenePunkte). Der Assistent liest sie nicht.
+function ohneOffenePunkte(regelwerk) {
+  const { offenePunkte, ...rest } = regelwerk;
+  return rest;
 }
 
 // ---------- Abschnitte ----------
 
 // Sprachwahl ganz oben (Nachbesserung sprache-1): Familien mit wenig Deutsch sollen im ersten Bildschirm sehen, dass es
-// Übersetzungen gibt. Die vier Sprachen stehen in ihrer eigenen Schrift. Die Leiste steht schon beim ersten Zeichnen da
+// Übersetzungen gibt. Die Sprachen stehen in ihrer eigenen Schrift. Die Leiste steht schon beim ersten Zeichnen da
 // (kein Sprung, wenn das Skript lädt), assistent.js verdrahtet die Knöpfe und blendet sie nach dem Startschritt aus
 // (Klasse anm-ohne-sprachleiste am <main>, anmeldung.css). Ohne Skript blendet das <noscript>-Stylesheet sie aus.
-function sprachleiste() {
+// codes: nur diese Sprachen (Live-Seite: ANMELDUNG_SPRACHEN_LIVE); ohne Angabe alle vier (Begleitseite).
+function sprachleiste(codes = null) {
   const knoepfe = de.sprachen
+    .filter((s) => !codes || codes.includes(s.code))
     .map(
       (s) =>
         `<li><button type="button" class="anm-sprachleiste__knopf" data-sprache="${escapeHtml(s.code)}" lang="${escapeHtml(s.code)}" dir="${s.dir === "rtl" ? "rtl" : "ltr"}" aria-pressed="${s.code === "de" ? "true" : "false"}">${escapeHtml(s.name)}</button></li>`
@@ -136,14 +158,18 @@ function appHinweis() {
     </div>`;
 }
 
-function seitenkopfAbschnitt() {
+// live = true: ohne den Knopf "Vorführung" (es gibt keinen Werkzeugkasten), nur mit den Sprachen der Live-Seite.
+function seitenkopfAbschnitt(live = false) {
+  const vorfuehrKnopf = live
+    ? ""
+    : `
+      <button type="button" class="knopf knopf--sekundaer anm-vorfuehrknopf" data-anm-vorfuehrung aria-expanded="false" aria-controls="anm-werkzeugkasten">${escapeHtml(de.demo.vorfuehrung)}</button>`;
   return `<section class="abschnitt seitenkopf">
   <div class="container">
-    ${sprachleiste()}
+    ${sprachleiste(live ? ANMELDUNG_SPRACHEN_LIVE : null)}
     ${appHinweis()}
     <div class="anm-titelzeile">
-      <h1 data-anm-t="seite.h1">${escapeHtml(de.seite.h1)}</h1>
-      <button type="button" class="knopf knopf--sekundaer anm-vorfuehrknopf" data-anm-vorfuehrung aria-expanded="false" aria-controls="anm-werkzeugkasten">${escapeHtml(de.demo.vorfuehrung)}</button>
+      <h1 data-anm-t="seite.h1">${escapeHtml(de.seite.h1)}</h1>${vorfuehrKnopf}
     </div>
     <p class="seitenkopf__lead" data-anm-t="seite.lead">${escapeHtml(de.seite.lead)}</p>
   </div>
@@ -205,6 +231,25 @@ const APP_MODUS_KOPF = `<script>
 })();
 </script>`;
 
+// App-Modus der Live-Seite: Die Vereins-App öffnet sie mit ?app=1. Das Skript setzt vor dem ersten Zeichnen die Klasse
+// app-modus am <html> (anmeldung.css zeigt dann den Hinweis „Im Browser öffnen“) und lässt in der App Links nach außen
+// (Satzung, „Im Browser öffnen“) über ext:// öffnen, wie APP_MODUS_SKRIPT (src/vorlagen/hilfen.mjs) es auf den anderen
+// Seiten tut. Die Links des Assistenten entstehen erst nach dem Laden, deshalb schreibt ein Klick sie um (Capture-Phase,
+// also vor der Standardaktion des Links). APP_MODUS_SKRIPT selbst ist hier nicht eingebunden: Es schriebe den Link
+// „Im Browser öffnen“ beim Start auf ?app=1 um und der Link bliebe in der App. Außerhalb der App passiert nichts.
+const APP_MODUS_KOPF_LIVE = `<script>
+(function () {
+  if (!/(^|[?&])app=1(&|$)/.test(location.search)) return;
+  document.documentElement.classList.add("app-modus");
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+    if (!a || !/^https?:/i.test(a.href)) return;
+    a.setAttribute("href", "ext://" + a.href);
+    a.removeAttribute("target");
+  }, true);
+})();
+</script>`;
+
 function assistentAbschnitt() {
   return `<section class="abschnitt anm-assistent-abschnitt" aria-labelledby="anm-assistent-titel">
   <div class="container">
@@ -240,6 +285,43 @@ export function seite(daten) {
       APP_MODUS_KOPF,
       `<noscript><style>.anm-sprachleiste, .anm-apphinweis { display: none !important; }</style></noscript>`,
       `<script type="module" src="${PFAD}assets/js/anmeldung/assistent.js"></script>`,
+    ].join("\n"),
+    inhalt,
+  };
+}
+
+// ---------- Live-Fassung (Workspace-Seite, nur mit ANMELDUNG_LIVE) ----------
+
+// Titel und Beschreibung der Live-Seite stehen hier und nicht in de-oberflaeche.js: Die Texte dort (seite.titel,
+// seite.beschreibung) gehören zur Begleitseite.
+const LIVE_TITEL = "Anmeldung";
+const LIVE_BESCHREIBUNG =
+  "Beim FFV Sportfreunde 04 anmelden: Sie werden Schritt für Schritt durch die Anmeldung geführt und bekommen am Ende eine PDF-Datei mit allen Unterlagen.";
+
+// Workspace-Seite docs/ws/anmeldung.html (tools/build.mjs, wenn ANMELDUNG_LIVE an ist; Name aus url "/anmeldung/").
+// Der Rahmen kommt von workspace.html (wie bei den übrigen Seiten des Pakets, ohne Kopfleiste und Begleitfuß). Die Pfade
+// in kopfZusatz gelten schon für docs/ws/ ("../assets/…"): build.mjs schreibt nur den Inhalt um, nicht den Kopf. Das
+// Paket (tools/appack-paket.mjs) setzt Stylesheet und Skript auf die Dateien im Ordner web/ und trägt die Quellen von
+// Schrift und Vordrucken in die Konfiguration ein; docs/ws/anmeldung.html selbst lädt auch auf GitHub Pages (dort gelten
+// die Pfade der Begleitseite, denn die Konfiguration hat keine "quellen").
+export function seiteLive(daten) {
+  const konfig = baueKonfig(daten, true);
+  const inhalt = [
+    seitenkopfAbschnitt(true),
+    assistentAbschnitt(),
+    `<script type="application/json" id="anmeldung-konfig">${jsonImSkript(konfig)}</script>`,
+  ].join("\n");
+
+  return {
+    url: "/anmeldung/",
+    title: LIVE_TITEL,
+    description: LIVE_BESCHREIBUNG,
+    // Führendes "\n": workspace.html setzt "{{kopfZusatz}}" ans Ende der Stylesheet-Zeile.
+    kopfZusatz: "\n" + [
+      `<link rel="stylesheet" href="../assets/css/anmeldung.css">`,
+      APP_MODUS_KOPF_LIVE,
+      `<noscript><style>.anm-sprachleiste, .anm-apphinweis { display: none !important; }</style></noscript>`,
+      `<script type="module" src="../assets/js/anmeldung/assistent.js"></script>`,
     ].join("\n"),
     inhalt,
   };

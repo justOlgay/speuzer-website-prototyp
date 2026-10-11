@@ -1,7 +1,7 @@
 /*
   Texte der Oberfläche des Anmelde-Assistenten - Arabisch (العربية, Hocharabisch, einfach).
   Übersetzungshilfe: Verbindlich ist der deutsche Text (de-oberflaeche.js), das PDF bleibt deutsch.
-  Stand 08.10.2026. Dieselbe Schlüsselstruktur wie de-oberflaeche.js, aber ohne "sprachen" und
+  Stand 11.10.2026. Dieselbe Schlüsselstruktur wie de-oberflaeche.js, aber ohne "sprachen" und
   ohne "demo" (die Vorführung bleibt deutsch). Fehlt hier ein Eintrag, gilt der deutsche.
   Prüfung: node tools/anmeldung-test/uebersetzung-pruefen.mjs
 
@@ -93,6 +93,7 @@
   Erlaubnis für Fotos = إذن لاستخدام الصور
   Erlaubnis für die Lastschrift = إذن الخصم المباشر
   Satzung = النظام الأساسي
+  Heimweg = العودة إلى البيت
 */
 
 // Deutsche Namen und Rufnummern im arabischen Text: Isolat für die Schreibrichtung von links nach rechts.
@@ -145,15 +146,6 @@ export default {
     datei: "ملف",
     keineAngabe: "غير محدد",
     jahre: "سنة",
-    wochentag: {
-      montag: "الاثنين",
-      dienstag: "الثلاثاء",
-      mittwoch: "الأربعاء",
-      donnerstag: "الخميس",
-      freitag: "الجمعة",
-      samstag: "السبت",
-      sonntag: "الأحد",
-    },
   },
 
   kopf: {
@@ -252,7 +244,6 @@ export default {
     lateinischText: "يرجى الكتابة بأحرف لاتينية.",
     lateinischNummer: "يرجى كتابة الرقم بالأرقام من 0 إلى 9.",
     satzung: `يرجى قراءة النظام الأساسي (${D("Satzung")}) ووضع علامة في المربع.`,
-    uhrzeit: "يرجى كتابة الوقت هكذا: 21:30.",
     datumLeer: "يرجى إدخال التاريخ.",
     datumUnvollstaendig: "يرجى إدخال اليوم والشهر والسنة.",
     datumUnvollstaendigMonat: "يرجى إدخال الشهر والسنة.",
@@ -600,42 +591,6 @@ export default {
     frauHerrenHinweis: "يتطلب ذلك طلبًا إلى الاتحاد.",
   },
 
-  karneval: {
-    gruppe: {
-      titel: { kind: "في أي مجموعة يرغب الطفل {name} في الرقص؟", selbst: "في أي مجموعة تريد أن ترقص؟" },
-      weissNicht: "لا أعرف",
-      weissNichtHinweis: "سيخبرك النادي.",
-      uebung: "وقت التمرين: {zeit}",
-      // Wochentag und "Uhr" folgen der Sprache; der Ort steht, wie im Verein üblich, auf Deutsch (siehe seiten-fussball.js).
-      uebungszeit: "{tag} الساعة {zeit}، {ort}",
-      uebungszeitOhneOrt: "{tag} الساعة {zeit}",
-      passt: "يناسب العمر",
-    },
-    woanders: {
-      titel: { kind: "هل يرقص الطفل {name} في نادٍ آخر أيضًا؟", selbst: "هل ترقص في نادٍ آخر أيضًا؟" },
-    },
-    turnier: {
-      titel: { kind: "هل يشارك الطفل {name} في البطولات؟", selbst: "هل تريد المشاركة في البطولات؟" },
-      hinweis: "في البطولات تتنافس المجموعات في الرقص.",
-    },
-    abend: {
-      titel: { kind: "هل يجوز أن يقدّم الطفل {name} عروضًا مسائية بدون الوالدين؟", selbst: "هل يجوز أن تقدّم عروضًا مسائية؟" },
-      hinweis: "في المساء تُقام عروض في الحفلات والعروض الكرنفالية.\nتوجد استمارة إضافية للعروض المسائية.",
-    },
-    abholung: {
-      titel: { kind: "من سيصطحب طفلك؟", selbst: "من سيصطحبك؟" },
-      hinweis: "هذا السؤال اختياري.\nعندها يعرف النادي بعد العرض من سيتولى الاصطحاب.",
-      name: "اسم الشخص الذي سيتولى الاصطحاب",
-      nameHinweis: "إذا كان هناك عدة أشخاص فاكتب جميع الأسماء.",
-    },
-    allein: {
-      titel: { kind: "هل يجوز لطفلك العودة إلى البيت دون مرافق؟", selbst: "هل يجوز لك العودة إلى البيت وحدك؟" },
-      hinweis: "هذا السؤال اختياري.\nتظهر الإجابة لاحقًا في «إذن للعروض المسائية».",
-      ab: "ابتداءً من أي ساعة؟",
-      abHinweis: "اكتب الوقت هكذا: 21:30.",
-    },
-  },
-
   kontakt: {
     anschrift: {
       titel: { kind: "ما عنوان سكن {name}؟", selbst: "أين تسكن؟" },
@@ -664,7 +619,7 @@ export default {
       andere: "يمكنك اختيار فئة أخرى.",
       legende: "فئة الرسوم",
       proJahr: "{jahr} يورو في السنة",
-      doppel: "أنت في كرة القدم والكرنفال.\nقد تسري رسوم خاصة على ذلك.\nسيخبرك النادي.",
+      doppel: "هل أنت في كرة القدم والكرنفال؟\nاسأل عن رسوم عضوية خاصة.",
       vorgeschlagen: "اقتراح",
     },
     familie: {
@@ -704,7 +659,6 @@ export default {
       sepaHinweis: "يسحب النادي رسوم العضوية مرة واحدة في السنة.",
       rechnung: "فاتورة",
       rechnungHinweis: "تحوّل رسوم العضوية بنفسك.",
-      zuschlag: "قد تُضاف رسوم إضافية قدرها {zuschlag} يورو في السنة.",
     },
     inhaber: {
       titel: "لمن يعود الحساب؟",
@@ -753,10 +707,22 @@ export default {
       titel: "الرحلات والرسائل",
       hinweis: "الاثنان اختياريان. ويمكنك تغيير ذلك لاحقًا.",
       fahrten: "يجوز للطفل {name} السفر إلى المباريات والبطولات.",
+      fahrtenKarneval: "يجوز للطفل {name} السفر إلى فعاليات النادي.",
       fahrtenHinweis: "مثلًا في سيارات أولياء أمور آخرين.",
       messenger: "يجوز للطفل {name} الانضمام إلى مجموعة المراسلة الخاصة بالفريق.",
       messengerHinweis: "تُنشر هناك المواعيد والاتفاقات.",
     },
+  },
+
+  // Aufsichtspflicht: Minderjährige, die trainieren oder tanzen (Schritt "heimweg").
+  heimweg: {
+    titel: "هل يجوز لطفلك العودة إلى البيت دون مرافق بعد التدريب؟",
+    hinweis: "أثناء التدريب يرعى النادي طفلك.\nأخبرنا: كيف يعود طفلك إلى البيت بعد ذلك؟",
+    allein: "العودة إلى البيت دون مرافق",
+    alleinHinweis: "يجوز لطفلي العودة إلى البيت دون مرافق بعد التدريب.",
+    abholen: "يأتي شخص لاصطحاب الطفل",
+    abholenHinweis: "ينتظر طفلي حتى يصطحبه أحد.",
+    aendern: "يمكنك تغيير ذلك في أي وقت. وعندها أخبر المدرب.",
   },
 
   notfall: {
@@ -907,10 +873,6 @@ export default {
       alterVerein: "النادي السابق",
       alteMitgliedschaft: "العضوية في النادي القديم",
       abmeldung: "إلغاء التسجيل",
-      karneval: "مجموعة الكرنفال",
-      abendauftritte: "العروض المسائية",
-      abholung: "من سيصطحب",
-      alleinNachHause: "العودة إلى البيت دون مرافق",
       staaten: "الجنسية",
       ausland: "آخر إقامة في الخارج",
       wohnen: "مكان الإقامة",
@@ -928,6 +890,7 @@ export default {
       hfv: `الاتحاد الهيسي لكرة القدم (${D("HFV")})`,
       fahrten: "الرحلات",
       messenger: "مجموعة المراسلة",
+      heimweg: "العودة إلى البيت",
       notfall: "جهة الاتصال في الطوارئ",
       gesundheitsbogen: "الاستمارة الصحية",
       spielerfoto: "صورة اللاعب",
@@ -942,7 +905,7 @@ export default {
       nein: "لا",
       weissNicht: "لا أعرف",
       satzungVonHand: "لا – ستضع العلامة بخط اليد",
-      alleinAb: "نعم، اعتبارًا من الساعة {zeit}",
+      heimweg: { allein: "العودة إلى البيت دون مرافق", abholen: "يأتي شخص لاصطحاب الطفل" },
       geschlecht: { m: "ذكر", w: "أنثى", d: `متنوع (${D("divers")})`, ohne_angabe: "غير محدد" },
       abteilung: { fussball: "كرة القدم", karneval: "الكرنفال", beides: "كرة القدم والكرنفال", passiv: "الدعم فقط" },
       abmeldung: {

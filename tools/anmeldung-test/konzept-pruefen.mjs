@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Prüft die gebaute Konzeptseite docs/anmeldung-konzept/index.html gegen das Regelwerk
-// (Arbeitspaket AP-6, Runde 3). Ohne Browser, ohne Abhängigkeiten: liest das HTML der Seite,
+// (Arbeitspaket AP-6, Runde 3; Stand der Punkte am 11.10.2026, Paket M2). Ohne Browser, ohne Abhängigkeiten: liest das HTML der Seite,
 // data/anmeldung.json (offenePunkte, faelle, version) und die Namen der Papiere aus den
 // deutschen Texten des Prototyps.
 //
@@ -10,26 +10,29 @@
 //
 // Was geprüft wird
 //   1  Rahmen        noindex, genau eine h1, interne Sprungmarken haben ein Ziel
-//   2  Offene Punkte alle P1-Punkte des Regelwerks stehen sichtbar (nicht im Aufklapper) mit ihrer
-//                    Nummer auf der Seite; keine Nummer ist unbekannt; jede Nummer hat genau eine Zeile
-//                    (Anker #o26); die Priorität an der Zeile stimmt mit dem Regelwerk; der Text der
-//                    Zeile passt zur Frage im Regelwerk; es gibt keine Zeile ohne O-Nummer und kein
-//                    Kennzeichen „neu“ mehr (Hinweis); O67 (Rechtsgrundlage der Notfallkontakte) und
-//                    O68 (Bildschirm-Unterschrift der Vereinsunterlagen) stehen sichtbar mit ihrem Inhalt da;
-//                    Punkte mit Status „entschieden“ (O26, Jugendleitung 08.10.2026) tragen das Kennzeichen
-//                    „Entschieden“ und den Wortlaut der Entscheidung, haben kein P-Kennzeichen mehr und zählen
-//                    nicht als offene P1-Frage; O68 steht weiter offen mit dem Stand der Jugendleitung
+//   2  Stand der Punkte  Fünf Stände im Regelwerk: entschieden, geregelt, entfaellt, vorgemerkt („Später“) und offen.
+//                    Nur „offen“ ist eine offene Frage. Pflicht im Regelwerk: „entscheidung“ bei entschieden, geregelt,
+//                    entfaellt und vorgemerkt, „stand“ bei offen (nie beides). Jeder Punkt hat genau eine Zeile (Anker #o26);
+//                    offene und entschiedene Zeilen stehen sichtbar, die übrigen dürfen im Aufklapper stehen. Jede Zeile trägt
+//                    genau ein Kennzeichen (P1 bis P3 nur bei offenen Punkten, sonst Entschieden, Geregelt, Entfällt, Später),
+//                    den passenden data-status und data-prio und den Text aus dem Regelwerk. Keine Zeile ohne Kennzeichen.
+//                    Der Kasten „Stand“ ganz oben nennt Datum, Gesamtzahl und die Zahl je Stand wie das Regelwerk. Die Legende
+//                    erklärt alle Kennzeichen. Der Text der Zeile passt zur Frage im Regelwerk; O67 und O68 stehen sichtbar
+//                    mit ihrem Inhalt da. Die Seite nennt Version und Zahl der Punkte.
 //   3  Namen         die Namen der Papiere und die Teile A, B und C stehen so auf der Seite, wie sie im
-//                    Prototyp heißen (assets/js/anmeldung/texte); die alten Namen kommen nicht vor;
-//                    im Fließtext steht „Spielrecht“
-//   4  Endstand      die Punkte a bis h aus dem Auftrag stehen in den Abschnitten „Assistent“, „PDF“ und
-//                    „Unterschrift“
+//                    Prototyp heißen (assets/js/anmeldung/texte); die alten Namen kommen nicht vor (im Wortlaut aus
+//                    dem Regelwerk – stand, entscheidung – nur als Hinweis); im Fließtext steht „Spielrecht“
+//   4  Endstand      die Punkte a bis j aus dem Auftrag stehen in den Abschnitten „Assistent“, „PDF“ und
+//                    „Unterschrift“ (Heimweg nach dem Training und der Hinweis zum Probetraining statt der Auftritte am Abend)
 //   5  Personendaten keine Telefonnummern, E-Mail-Adressen, IBAN, Geburtsdaten (Muster wie tools/pii-check.py),
 //                    keine Anrede mit Nachnamen; Regista-Regel: „Regista“ wird nicht genannt, und Namen aus
 //                    der Umgebungsvariable KONZEPT_VERBOTENE_NAMEN (Namensteile, durch Komma getrennt; sie
 //                    stehen nicht im Repo) kommen nicht vor
 //   6  Stil          nur Vereinsblau (keine eigenen Farbwerte im Stilblock der Seite); mittlere Satzlänge
 //                    im Fließtext höchstens 16 Wörter
+//   7  Karneval      kein Karneval-Text beschreibt Gruppenwahl, Turniere, Auftritte, Kostüme oder den Fastnachtszug als Teil
+//                    der Anmeldung; keine Verweise auf die entfernten Unterlagen U30 bis U32; Heimweg nach dem Training
+//                    und der Hinweis zum Probetraining stehen im Ablauf
 //
 // Die Prüfung nimmt das gebaute HTML, nicht den Quelltext: Was hier durchgeht, steht so auf der Seite.
 
@@ -81,6 +84,13 @@ function lies(pfad, was) {
 const html = lies(SEITE, "Seite");
 const regelwerk = JSON.parse(lies(REGELWERK, "Regelwerk"));
 const punkte = regelwerk.offenePunkte || [];
+
+// Fünf Stände: entschieden, geregelt, entfaellt, vorgemerkt (auf der Seite „Später“) und offen. Nur „offen“ ist eine offene Frage
+// und trägt P1, P2 oder P3; alle anderen tragen ihr Kennzeichen und zeigen den Text aus „entscheidung“.
+const STAENDE = ["entschieden", "geregelt", "entfaellt", "vorgemerkt", "offen"];
+const KENNZEICHEN = { entschieden: "Entschieden", geregelt: "Geregelt", entfaellt: "Entfällt", vorgemerkt: "Später" };
+const SICHTBAR_PFLICHT = ["offen", "entschieden"]; // alle anderen dürfen im Aufklapper stehen
+const zahl = Object.fromEntries(STAENDE.map((s) => [s, punkte.filter((p) => p.status === s).length]));
 
 // Namen der Papiere und Teile aus den Texten des Prototyps (eine Quelle für Oberfläche, PDF und diese Seite)
 let deRegeln = null;
@@ -196,7 +206,7 @@ const alleTexte = normal(
 );
 
 console.log(`Konzeptseite prüfen: ${path.relative(ROOT, SEITE)}`);
-console.log(`Regelwerk: ${path.relative(ROOT, REGELWERK)} (Version ${regelwerk.version}, ${punkte.length} Punkte, davon ${punkte.filter((x) => x.status === "entschieden").length} entschieden)`);
+console.log(`Regelwerk: ${path.relative(ROOT, REGELWERK)} (Version ${regelwerk.version}, ${punkte.length} Punkte: ${STAENDE.map((s) => `${zahl[s]} ${s}`).join(", ")})`);
 
 // ---------- 1. Rahmen ----------
 
@@ -218,11 +228,29 @@ gruppe("1  Rahmen");
   pruefe("keine Anker-Kennung kommt doppelt vor", doppelt.length === 0, [...new Set(doppelt)]);
 }
 
-// ---------- 2. Offene Punkte ----------
+// ---------- 2. Stand der Punkte ----------
 
-gruppe("2  Offene Punkte gegen data/anmeldung.json");
+gruppe("2  Stand der Punkte gegen data/anmeldung.json");
 {
   const bekannt = new Map(punkte.map((p) => [p.id, p]));
+  const textFeld = (p) => (p.status === "offen" ? "stand" : "entscheidung");
+
+  // 2.1 Das Regelwerk selbst: gültiger Stand; „entscheidung“ bei erledigten, „stand“ bei offenen Punkten, nie beides
+  const datenFehler = [];
+  for (const p of punkte) {
+    if (!STAENDE.includes(p.status)) {
+      datenFehler.push(`${p.id}: unbekannter Stand „${p.status}“`);
+      continue;
+    }
+    const noetig = textFeld(p);
+    const anderes = noetig === "stand" ? "entscheidung" : "stand";
+    if (typeof p[noetig] !== "string" || !p[noetig].trim()) datenFehler.push(`${p.id} (${p.status}): Feld „${noetig}“ fehlt`);
+    if (anderes in p) datenFehler.push(`${p.id} (${p.status}): Feld „${anderes}“ darf nicht stehen`);
+    if (!/^P[123]$/.test(p.prioritaet || "")) datenFehler.push(`${p.id}: Priorität P1 bis P3 fehlt`);
+  }
+  pruefe("Regelwerk: jeder Punkt hat einen gültigen Stand; „entscheidung“ bei entschieden, geregelt, entfällt und später, „stand“ bei offen (nie beides)", datenFehler.length === 0, datenFehler);
+
+  // 2.2 Nummern und Zeilen
   const imText = [...seiteText.matchAll(/\bO\d{2}\b/g)].map((m) => m[0]);
   const unbekannt = [...new Set(imText.filter((o) => !bekannt.has(o)))];
   pruefe("keine O-Nummer auf der Seite ist unbekannt", unbekannt.length === 0, unbekannt.map((o) => `${o} steht nicht im Regelwerk`));
@@ -230,40 +258,55 @@ gruppe("2  Offene Punkte gegen data/anmeldung.json");
   const zeilen = alle(baum, (k) => /^o\d\d$/.test(k.attrs.id || ""));
   const nachId = new Map();
   for (const z of zeilen) nachId.set(z.attrs.id, [...(nachId.get(z.attrs.id) || []), z]);
+  const zeileVon = (p) => (nachId.get(p.id.toLowerCase()) || [])[0];
+  const imAufklapper = (z) => hatVorfahr(z, (e) => e.tag === "details");
 
-  // Status „entschieden“ (O26): Der Punkt zählt nicht mehr als offene P1-Frage, seine Zeile zeigt die Entscheidung.
-  const entschieden = punkte.filter((p) => p.status === "entschieden");
-  const p1 = punkte.filter((p) => p.prioritaet === "P1");
-  const p1Offen = p1.filter((p) => p.status !== "entschieden");
-  const p1FehltImText = p1.filter((p) => !imText.includes(p.id)).map((p) => p.id);
-  pruefe(`alle ${p1.length} P1-Punkte (${p1Offen.length} offen, ${p1.length - p1Offen.length} entschieden) stehen mit ihrer O-Nummer auf der Seite`, p1FehltImText.length === 0, p1FehltImText.map((o) => `${o} fehlt`));
-
-  const p1Versteckt = [];
-  const p1OhneZeile = [];
-  for (const p of p1) {
-    const z = nachId.get(p.id.toLowerCase());
-    if (!z || z.length === 0) p1OhneZeile.push(p.id);
-    else if (hatVorfahr(z[0], (e) => e.tag === "details")) p1Versteckt.push(p.id);
-  }
-  pruefe("jeder P1-Punkt hat eine Zeile mit Anker", p1OhneZeile.length === 0, p1OhneZeile.map((o) => `${o}: keine Zeile mit id="${o.toLowerCase()}"`));
-  pruefe("kein P1-Punkt steht im Aufklapper", p1Versteckt.length === 0, p1Versteckt.map((o) => `${o} steht in einem <details>`));
-
+  const ohneZeile = punkte.filter((p) => !zeileVon(p)).map((p) => `${p.id} (${p.status}): keine Zeile mit id="${p.id.toLowerCase()}"`);
+  pruefe(`jeder der ${punkte.length} Punkte hat eine Zeile mit Anker`, ohneZeile.length === 0, ohneZeile);
   const doppelteZeilen = [...nachId.entries()].filter(([, z]) => z.length > 1).map(([id]) => id.toUpperCase());
   pruefe("jede Nummer hat höchstens eine Zeile", doppelteZeilen.length === 0, doppelteZeilen.map((o) => `${o} hat mehrere Zeilen`));
 
-  const fehlenAnderer = punkte.filter((p) => p.prioritaet !== "P1" && !nachId.has(p.id.toLowerCase())).map((p) => `${p.id} (${p.prioritaet})`);
-  hinweis(`alle ${punkte.length - p1.length} Punkte mit P2 oder P3 haben ebenfalls eine Zeile`, fehlenAnderer.length === 0, fehlenAnderer.map((o) => `${o} fehlt`));
+  // 2.3 Offene und entschiedene Punkte stehen sichtbar; erledigte dürfen im Aufklapper stehen
+  const versteckt = punkte.filter((p) => SICHTBAR_PFLICHT.includes(p.status) && zeileVon(p) && imAufklapper(zeileVon(p))).map((p) => `${p.id} (${p.status}) steht in einem <details>`);
+  const sichtbarN = punkte.filter((p) => SICHTBAR_PFLICHT.includes(p.status)).length;
+  pruefe(`alle offenen (${zahl.offen}) und entschiedenen (${zahl.entschieden}) Punkte stehen sichtbar, nicht im Aufklapper (${sichtbarN} Zeilen)`, versteckt.length === 0, versteckt);
+  const offeneP1 = punkte.filter((p) => p.status === "offen" && p.prioritaet === "P1").length;
+  console.log(`  Zählung    ${punkte.length} Punkte: ${STAENDE.map((s) => `${zahl[s]} ${s}`).join(", ")} (davon offen mit P1: ${offeneP1})`);
+  console.log(`  Zeilen     ${punkte.filter((p) => zeileVon(p) && !imAufklapper(zeileVon(p))).length} sichtbar, ${punkte.filter((p) => zeileVon(p) && imAufklapper(zeileVon(p))).length} im Aufklapper`);
 
+  // 2.4 Kennzeichen, Stand und Text je Zeile
+  const kennzeichenFehler = [];
+  const stand = [];
+  const textFehler = [];
   const prioFalsch = [];
   for (const p of punkte) {
-    const z = nachId.get(p.id.toLowerCase());
-    if (z && z[0].attrs["data-prio"] !== p.prioritaet) prioFalsch.push(`${p.id}: Seite ${z[0].attrs["data-prio"] || "ohne"}, Regelwerk ${p.prioritaet}`);
+    const z = zeileVon(p);
+    if (!z) continue;
+    const ersteZelle = alle(z, (k) => k.tag === "td")[0];
+    const marken = ersteZelle ? alle(ersteZelle, (k) => (k.attrs.class || "").split(/\s+/).includes("tag")).map((k) => textVon(k)) : [];
+    const soll = p.status === "offen" ? p.prioritaet : KENNZEICHEN[p.status];
+    if (marken.length !== 1) kennzeichenFehler.push(`${p.id}: ${marken.length} Kennzeichen (${marken.join(", ") || "keins"}), erwartet genau eins: ${soll}`);
+    else if (marken[0] !== soll) kennzeichenFehler.push(`${p.id}: Kennzeichen „${marken[0]}“, erwartet „${soll}“ (Stand im Regelwerk: ${p.status})`);
+    if (z.attrs["data-status"] !== p.status) stand.push(`${p.id}: Seite ${z.attrs["data-status"] || "ohne"}, Regelwerk ${p.status}`);
+    if (z.attrs["data-prio"] !== p.prioritaet) prioFalsch.push(`${p.id}: Seite ${z.attrs["data-prio"] || "ohne"}, Regelwerk ${p.prioritaet}`);
+    const antwort = alle(z, (k) => k.tag === "p" && (k.attrs.class || "").split(/\s+/).includes("konzept-antwort"))[0];
+    if (!antwort || textVon(antwort) !== normal(String(p[textFeld(p)] ?? ""))) {
+      textFehler.push(`${p.id} (${p.status}): der Wortlaut aus „${textFeld(p)}“ steht nicht in der Zeile (${antwort ? "abweichend: " + textVon(antwort).slice(0, 60) : "kein Absatz mit dem Text"})`);
+    }
   }
-  pruefe("die Priorität an jeder Zeile stimmt mit dem Regelwerk überein", prioFalsch.length === 0, prioFalsch);
+  pruefe("jede Zeile trägt genau ein Kennzeichen, das zum Stand passt: P1 bis P3 nur bei offenen Punkten, sonst Entschieden, Geregelt, Entfällt oder Später", kennzeichenFehler.length === 0, kennzeichenFehler);
+  pruefe("der Stand (data-status) an jeder Zeile stimmt mit dem Regelwerk überein", stand.length === 0, stand);
+  pruefe("die Priorität (data-prio) an jeder Zeile stimmt mit dem Regelwerk überein", prioFalsch.length === 0, prioFalsch);
+  pruefe("jede Zeile zeigt den Text aus dem Regelwerk: „entscheidung“ bei entschieden, geregelt, entfällt und später, „stand“ bei offen", textFehler.length === 0, textFehler);
+  const nachStand = STAENDE.map((s) => [s, zeilen.filter((z) => z.attrs["data-status"] === s).map((z) => z.attrs.id.toUpperCase()).sort()]);
+  const sollStand = STAENDE.map((s) => [s, punkte.filter((p) => p.status === s).map((p) => p.id).sort()]);
+  pruefe("die Seite führt unter jedem Stand genau die Punkte, die das Regelwerk dort führt",
+    JSON.stringify(nachStand) === JSON.stringify(sollStand),
+    STAENDE.filter((s, i) => JSON.stringify(nachStand[i][1]) !== JSON.stringify(sollStand[i][1])).map((s) => `${s}: Seite ${nachStand[STAENDE.indexOf(s)][1].length}, Regelwerk ${sollStand[STAENDE.indexOf(s)][1].length}`));
 
   const ohneMarke = punkte
-    .filter((p) => nachId.has(p.id.toLowerCase()))
-    .filter((p) => !new RegExp("\\b" + p.id + "\\b").test(textVon(nachId.get(p.id.toLowerCase())[0])))
+    .filter((p) => zeileVon(p))
+    .filter((p) => !new RegExp("\\b" + p.id + "\\b").test(textVon(zeileVon(p))))
     .map((p) => p.id);
   pruefe("jede Zeile nennt ihre Nummer im Text (kleine Marke)", ohneMarke.length === 0, ohneMarke.map((o) => `${o}: Nummer steht nicht in der Zeile`));
 
@@ -272,10 +315,10 @@ gruppe("2  Offene Punkte gegen data/anmeldung.json");
   const zuWenig = [];
   const grenzfall = [];
   for (const p of punkte) {
-    const z = nachId.get(p.id.toLowerCase());
+    const z = zeileVon(p);
     if (!z) continue;
     const frage = stamm(p.frage);
-    const seite = stamm(textVon(z[0]));
+    const seite = stamm(textVon(z));
     if (!frage.size) continue;
     const anteil = [...frage].filter((w) => seite.has(w)).length / frage.size;
     if (anteil < 0.2) zuWenig.push(`${p.id}: nur ${Math.round(anteil * 100)} % der Wörter aus der Frage im Regelwerk stehen in der Zeile`);
@@ -284,18 +327,20 @@ gruppe("2  Offene Punkte gegen data/anmeldung.json");
   pruefe("der Text jeder Zeile passt zur Frage im Regelwerk (keine falsch zugeordnete Nummer)", zuWenig.length === 0, zuWenig);
   hinweis("kein Grenzfall bei der Übereinstimmung von Zeile und Frage (unter 35 %)", grenzfall.length === 0, grenzfall);
 
-  // Jede Zeile stammt aus dem Regelwerk: keine Zeile ohne O-Nummer, kein Kennzeichen „neu“ mehr
+  // Jede Zeile der Listen stammt aus dem Regelwerk: keine Zeile ohne O-Nummer und ohne Kennzeichen, kein Kennzeichen „neu“
   const tabellenZeilen = alle(baum, (k) => k.tag === "tr" && hatVorfahr(k, (e) => (e.attrs.class || "").includes("konzept-tabelle--prio")) && hatVorfahr(k, (e) => e.tag === "tbody"));
   const ohneKennung = tabellenZeilen.filter((z) => !/^o\d\d$/.test(z.attrs.id || ""));
-  pruefe("jede Zeile der Entscheidungslisten hat eine O-Nummer aus dem Regelwerk", ohneKennung.length === 0,
-    ohneKennung.map((z) => textVon(z).slice(0, 80)));
+  pruefe("jede Zeile der Listen hat eine O-Nummer aus dem Regelwerk", ohneKennung.length === 0, ohneKennung.map((z) => textVon(z).slice(0, 80)));
+  const ohneTag = tabellenZeilen.filter((z) => !alle(z, (k) => (k.attrs.class || "").split(/\s+/).includes("tag")).length);
+  pruefe(`keine Zeile ohne Kennzeichen (${tabellenZeilen.length} Zeilen in den Listen)`, ohneTag.length === 0, ohneTag.map((z) => textVon(z).slice(0, 80)));
+  pruefe(`die Listen führen alle ${punkte.length} Punkte (${tabellenZeilen.length} Zeilen)`, tabellenZeilen.length === punkte.length, [`Zeilen in den Listen: ${tabellenZeilen.length}, Punkte im Regelwerk: ${punkte.length}`]);
   const neuMarken = alle(baum, (k) => k.attrs["data-neu"] !== undefined ||
     ((k.attrs.class || "").split(/\s+/).includes("tag") && textVon(k).toLowerCase() === "neu"));
   const neuText = [...seiteText.matchAll(/(?:Punkt|Zeilen?) (?:ohne Nummer|mit dem Kennzeichen)[^.]*\./g)].map((m) => m[0]);
   hinweis("keine Zeile und kein Text mit dem Kennzeichen „neu“ (Punkte ohne O-Nummer gibt es nicht mehr)", neuMarken.length === 0 && neuText.length === 0,
     [...neuMarken.map((k) => `Kennzeichen „neu“: ${textVon(k.tag === "tr" ? k : k.eltern || k).slice(0, 80)}`), ...neuText.map((t) => `Text: ${t}`)]);
 
-  // O67 und O68 (30.09.2026 ins Regelwerk aufgenommen) stehen sichtbar mit ihrem Inhalt auf der Seite
+  // O67 und O68 stehen sichtbar mit ihrem Inhalt auf der Seite (beide bleiben offen)
   const sichtbarMit = (oid, muster) => {
     const z = (nachId.get(oid.toLowerCase()) || [])[0];
     if (!z) return false;
@@ -304,40 +349,73 @@ gruppe("2  Offene Punkte gegen data/anmeldung.json");
   };
   pruefe("O67: Rechtsgrundlage der Notfallkontakte (Art. 6 Abs. 1 lit. b oder f) steht sichtbar auf der Seite",
     sichtbarMit("O67", [/Notfallkontakte/, /Art\. 6/, /lit\. b/, /lit\. f/]));
-  pruefe("O68: Bildschirm-Unterschrift der Vereinsunterlagen (§ 127 BGB) steht sichtbar auf der Seite, mit dem Stand der Jugendleitung (befürwortet, Beschluss des Vorstands steht aus)",
-    sichtbarMit("O68", [/Bildschirm/, /§ 127 BGB/, /Stift/, /Jugendleitung befürwortet \(08\.10\.2026\)/, /Beschluss des Vorstands steht aus/]));
+  pruefe("O68: Bildschirm-Unterschrift der Vereinsunterlagen (§ 127 BGB) steht sichtbar auf der Seite, mit dem Stand (Jugendleitung befürwortet, Antwort der 1. Vorsitzenden steht aus)",
+    sichtbarMit("O68", [/Bildschirm/, /§ 127 BGB/, /Stift/, /Jugendleitung befürwortet \(08\.10\.2026\)/, /Antwort steht aus/]));
 
-  // Entschiedene Punkte: sichtbar, Kennzeichen „Entschieden“ statt P-Kennzeichen, Wortlaut der Entscheidung aus dem Regelwerk
-  const entschiedenFehler = [];
-  for (const p of entschieden) {
-    const z = (nachId.get(p.id.toLowerCase()) || [])[0];
-    if (!z) {
-      entschiedenFehler.push(`${p.id}: keine Zeile mit Anker`);
-      continue;
+  // 2.5 Kasten „Stand“ ganz oben: Datum, Gesamtzahl und Zahl je Stand kommen aus den Daten
+  const kasten = alle(baum, (k) => k.attrs.id === "stand")[0];
+  const kastenText = kasten ? textVon(kasten) : "";
+  const kastenFehler = [];
+  if (!kasten) kastenFehler.push('kein Kasten mit id="stand" auf der Seite');
+  else {
+    if (!/Stand \d{2}\.\d{2}\.\d{4}/.test(kastenText)) kastenFehler.push("kein Datum („Stand TT.MM.JJJJ“) im Kasten");
+    const gesamt = /Von (\d+) Punkten sind/.exec(kastenText);
+    if (!gesamt || Number(gesamt[1]) !== punkte.length) kastenFehler.push(`Gesamtzahl: Seite ${gesamt ? gesamt[1] : "keine Angabe"}, Regelwerk ${punkte.length}`);
+    let summe = 0;
+    for (const s of STAENDE) {
+      const li = alle(kasten, (k) => k.tag === "li" && k.attrs["data-status"] === s)[0];
+      const n = li ? Number((/(\d+)\s*$/.exec(textVon(li)) || [])[1]) : NaN;
+      if (Number.isNaN(n)) kastenFehler.push(`${s}: keine Zahl im Kasten`);
+      else {
+        summe += n;
+        if (n !== zahl[s]) kastenFehler.push(`${s}: Seite ${n}, Regelwerk ${zahl[s]}`);
+      }
+      const marke = li ? alle(li, (k) => (k.attrs.class || "").split(/\s+/).includes("tag")).map((k) => textVon(k).toLowerCase())[0] : "";
+      const sollMarke = s === "offen" ? "offen" : KENNZEICHEN[s].toLowerCase();
+      if (li && marke !== sollMarke) kastenFehler.push(`${s}: Kennzeichen „${marke}“ statt „${sollMarke}“`);
     }
-    const marken = alle(z, (k) => (k.attrs.class || "").split(/\s+/).includes("tag")).map((k) => textVon(k));
-    if (hatVorfahr(z, (e) => e.tag === "details")) entschiedenFehler.push(`${p.id}: steht im Aufklapper`);
-    if (!marken.some((m) => m.toLowerCase() === "entschieden")) entschiedenFehler.push(`${p.id}: das Kennzeichen „Entschieden“ fehlt (gefunden: ${marken.join(", ") || "keins"})`);
-    if (marken.some((m) => /^P[123]$/.test(m))) entschiedenFehler.push(`${p.id}: trägt noch ein P-Kennzeichen und zählt damit als offene Frage`);
-    if (!p.entscheidung || !textVon(z).includes(normal(p.entscheidung))) entschiedenFehler.push(`${p.id}: der Wortlaut der Entscheidung aus dem Regelwerk steht nicht in der Zeile`);
+    if (summe !== punkte.length) kastenFehler.push(`die Zahlen im Kasten ergeben ${summe}, das Regelwerk hat ${punkte.length} Punkte`);
+    if (!/Die Antworten der 1\. Vorsitzenden sind eingearbeitet/.test(kastenText)) kastenFehler.push("der Satz „Die Antworten der 1. Vorsitzenden sind eingearbeitet.“ fehlt");
+    if (!/Offen sind nur noch die Fragen im Excel an die 1\. Vorsitzende/.test(kastenText)) kastenFehler.push("der Satz „Offen sind nur noch die Fragen im Excel an die 1. Vorsitzende.“ fehlt");
   }
-  pruefe(`jeder entschiedene Punkt (${entschieden.map((p) => p.id).join(", ") || "keiner"}) steht sichtbar mit dem Kennzeichen „Entschieden“ und dem Wortlaut der Entscheidung, ohne P-Kennzeichen`, entschiedenFehler.length === 0, entschiedenFehler);
-  const aufSeiteEntschieden = zeilen.filter((z) => z.attrs["data-status"] === "entschieden").map((z) => z.attrs.id.toUpperCase()).sort();
-  pruefe("die Seite kennzeichnet genau die Punkte als entschieden, die im Regelwerk entschieden sind (O68 und die anderen bleiben offen)",
-    JSON.stringify(aufSeiteEntschieden) === JSON.stringify(entschieden.map((p) => p.id).sort()),
-    [`Seite: ${aufSeiteEntschieden.join(", ") || "keiner"}`, `Regelwerk: ${entschieden.map((p) => p.id).join(", ") || "keiner"}`]);
-  const kopfMarken = alle(baum, (k) => (k.attrs.class || "").split(/\s+/).includes("tag")).map((k) => textVon(k).toLowerCase());
-  pruefe("die Legende „So lesen Sie die Kennzeichen“ erklärt das Kennzeichen „Entschieden“", entschieden.length === 0 || (kopfMarken.includes("entschieden") && /Der Punkt ist entschieden/.test(seiteText)));
+  pruefe("Kasten „Stand“: Datum, Gesamtzahl und Zahl je Stand stimmen mit dem Regelwerk überein; er nennt die Antworten der 1. Vorsitzenden und die offenen Fragen im Excel", kastenFehler.length === 0, kastenFehler);
+  pruefe("der Kasten „Stand“ steht ganz oben im Seitenkopf, vor dem Inhaltsverzeichnis", !!kasten && hatVorfahr(kasten, (e) => (e.attrs.class || "").split(/\s+/).includes("seitenkopf")));
+
+  // 2.6 Legende: alle Kennzeichen sind erklärt
+  const legende = alle(baum, (k) => (k.attrs.class || "").split(/\s+/).includes("konzept-box") && /^So lesen Sie die Kennzeichen/.test(textVon(k)))[0];
+  const legendeText = legende ? textVon(legende) : "";
+  const legendeMarken = legende ? alle(legende, (k) => (k.attrs.class || "").split(/\s+/).includes("tag")).map((k) => textVon(k).toLowerCase()) : [];
+  const legendeFehler = [];
+  for (const [marke, muster] of [
+    ["pflicht", /Verband, FIFA oder Gesetz schreiben es vor/],
+    ["verein", /Regel oder Praxis des Vereins/],
+    ["offen", /Nicht belegt oder unsicher/],
+    ["entschieden", /Der Punkt ist entschieden\. Die Zeile nennt die Entscheidung und zählt nicht mehr als offene Frage/],
+    ["geregelt", /So machen wir es/],
+    ["entfällt", /Der Punkt gehört nicht zur Anmeldung/],
+    ["später", /Für den Start nicht nötig/],
+    ["p1", /P1 muss vor dem Livegang geklärt sein/],
+    ["p2", /Dringlichkeit eines offenen Punkts/],
+    ["p3", /Dringlichkeit eines offenen Punkts/],
+  ]) {
+    if (!legendeMarken.includes(marke)) legendeFehler.push(`Kennzeichen „${marke}“ fehlt in der Legende`);
+    if (!muster.test(legendeText)) legendeFehler.push(`Erklärung zu „${marke}“ fehlt: ${muster}`);
+  }
+  pruefe("die Legende „So lesen Sie die Kennzeichen“ erklärt alle Kennzeichen: Pflicht, Verein, offen, Entschieden, Geregelt, Entfällt, Später und P1 bis P3", !!legende && legendeFehler.length === 0, legende ? legendeFehler : ["Legende nicht gefunden"]);
   pruefe("keine Empfehlung „beide Eltern unterschreiben“ mehr (O26 ist entschieden: ein Elternteil reicht)", !/Wir empfehlen beide|empfiehlt beide|Empfehlung:\s*Beide Eltern|Seine Unterschrift ist freiwillig/.test(seiteText));
 
-  // Stand des Regelwerks
+  // 2.7 Stand des Regelwerks im Seitenkopf
   const version = /Regelwerk Version (\d{4}-\d{2}-\d{2}(?:\.\d+)?)/.exec(seiteText);
   hinweis(`die Seite nennt die Version des Regelwerks (${regelwerk.version})`, !!version && version[1] === regelwerk.version,
     [`Seite: ${version ? version[1] : "keine Angabe"}, Regelwerk: ${regelwerk.version}`]);
-  const anzahl = /mit (\d+) offenen Punkten(?:, davon (\d+) entschieden)?/.exec(seiteText);
-  hinweis(`die Seite nennt die Zahl der Punkte (${punkte.length}) und wie viele davon entschieden sind (${entschieden.length})`,
-    !!anzahl && Number(anzahl[1]) === punkte.length && Number(anzahl[2] || 0) === entschieden.length,
-    [`Seite: ${anzahl ? anzahl[1] + ", davon entschieden: " + (anzahl[2] || "keine Angabe") : "keine Angabe"}, Regelwerk: ${punkte.length}, davon entschieden: ${entschieden.length}`]);
+  const anzahl = /mit (\d+) Punkten, davon (\d+) offen/.exec(seiteText);
+  pruefe(`die Seite nennt die Zahl der Punkte (${punkte.length}) und wie viele davon offen sind (${zahl.offen})`,
+    !!anzahl && Number(anzahl[1]) === punkte.length && Number(anzahl[2]) === zahl.offen,
+    [`Seite: ${anzahl ? anzahl[1] + ", davon offen: " + anzahl[2] : "keine Angabe"}, Regelwerk: ${punkte.length}, davon offen: ${zahl.offen}`]);
+  const abgleich = /Abgeglichen mit dem Prototyp am (\d{2}\.\d{2}\.\d{4})/.exec(seiteText);
+  const datumRegelwerk = /^(\d{4})-(\d{2})-(\d{2})$/.exec(regelwerk.stand || "");
+  hinweis("das Abgleich-Datum der Seite ist der Stand des Regelwerks", !!abgleich && !!datumRegelwerk && abgleich[1] === `${datumRegelwerk[3]}.${datumRegelwerk[2]}.${datumRegelwerk[1]}`,
+    [`Seite: ${abgleich ? abgleich[1] : "keine Angabe"}, Regelwerk: ${regelwerk.stand}`]);
 
   // Fälle heißen wie im Regelwerk
   const faelle = Object.entries(regelwerk.faelle || {});
@@ -378,8 +456,14 @@ gruppe("3  Namen der Papiere (Abschnitt 9) und Begriffe");
     ["Datenschutzinformation", "Information zum Datenschutz"],
     ["SEPA-Lastschriftmandat", "Erlaubnis für die Lastschrift"],
   ];
-  const gefunden = alt.filter(([a]) => alleTexte.includes(a)).map(([a, neu]) => `„${a}“ steht auf der Seite, richtig ist „${neu}“`);
-  pruefe("die alten Namen kommen nicht vor", gefunden.length === 0, gefunden);
+  // Der Wortlaut aus den Daten (stand, entscheidung) kommt aus dem Regelwerk. Alte Namen darin sind nur ein Hinweis;
+  // alles andere auf der Seite muss die neuen Namen nutzen.
+  const datenTexte = punkte.flatMap((p) => [p.stand, p.entscheidung]).filter(Boolean).map(normal);
+  const ohneDatenTexte = datenTexte.reduce((text, wortlaut) => text.split(wortlaut).join(" "), alleTexte);
+  const gefunden = alt.filter(([a]) => ohneDatenTexte.includes(a)).map(([a, neu]) => `„${a}“ steht auf der Seite, richtig ist „${neu}“`);
+  pruefe("die alten Namen kommen nicht vor (ausgenommen der Wortlaut aus dem Regelwerk, siehe Hinweis)", gefunden.length === 0, gefunden);
+  const inDaten = punkte.flatMap((p) => alt.filter(([a]) => normal(p.stand || p.entscheidung || "").includes(a)).map(([a, neu]) => `${p.id}: der Text im Regelwerk nennt „${a}“, richtig wäre „${neu}“`));
+  hinweis("auch im Wortlaut aus dem Regelwerk (stand, entscheidung) steht kein alter Name", inDaten.length === 0, inDaten);
 
   // „Antrag auf Spielerlaubnis“ ist ein Name; er darf gebeugt stehen („des Antrags auf Spielerlaubnis“)
   const ohneAntrag = alleTexte.replace(/Antrags? auf Spielerlaubnis/g, "");
@@ -411,16 +495,21 @@ gruppe("4  Endstand in den Abschnitten „Assistent“, „PDF“ und „Untersc
     [/leeren Erklärungsfelder/, /Stift-Stelle/, /Bildschirm-Unterschrift/]);
   kriterium("c  Notfall- und Gesundheitsbogen: Art. 9 mit Angaben, nur Notfallkontakte ohne Angaben, Absprache immer getrennt mit Stift", P,
     [/Notfall- und Gesundheitsbogen/, /Art\. 9/, /nur die Notfallkontakte/, /Medikamentengabe/, /getrennt mit Stift/]);
-  kriterium("d  Attest beim Vereinswechsel: offen (O04, O05); Erlaubnis für das Attest kommt mit ins PDF", P,
-    [/Vereinswechsel ist offen/, /O04/, /O05/, /Erlaubnis für das Attest/]);
-  kriterium("e  Karneval: Erlaubnis für Auftritte am Abend mit Abholung und „allein nach Hause ab … Uhr“; ohne Antwort „–“", P,
-    [/Erlaubnis für Auftritte am Abend/, /abholt/, /allein nach Hause ab … Uhr/, /„–“/]);
+  kriterium("d  Attest beim Vereinswechsel: der Assistent folgt dem Vordruck des HFV (O04, O05); Erlaubnis für das Attest kommt mit ins PDF", P,
+    [/Beim Vereinswechsel folgt der Assistent dem Vordruck des HFV/, /O04/, /O05/, /Erlaubnis für das Attest/]);
+  kriterium("e  Heimweg nach dem Training (Aufsichtspflicht): Eltern kreuzen an, ob das Kind allein nach Hause darf oder abgeholt wird; Kopie an das Trainerteam; ohne Antwort wird die Stelle zur Stift-Stelle", P,
+    [/Heimweg nach dem Training/, /allein nach Hause/, /abgeholt/, /Aufsichtspflicht/, /Kopie an das Trainerteam/, /Stift-Stelle/]);
+  pruefe("e2 die Erlaubnis für Auftritte am Abend gibt es im PDF nicht mehr (Karneval ohne Auftritte)", P.length > 0 && !/Erlaubnis für Auftritte am Abend/.test(P), ["Abschnitt „Was im PDF steht“ nennt noch die Erlaubnis für Auftritte am Abend"]);
   kriterium("f  Eingaben nur in lateinischer Schrift; Deutsch verbindlich, Englisch, Türkisch, Arabisch als Übersetzungshilfe, PDF bleibt deutsch", A,
     [/lateinischen Buchstaben/, /so wie im Pass/, /Deutsch/, /Englisch/, /Türkisch/, /Arabisch/, /Übersetzungshilfe/, /PDF bleibt deutsch/]);
   kriterium("g  Knopf „Vorführung“ mit Beispielen und Sicht des Vereins, gedacht für die Vorführung", A,
     [/Vorführung/, /Beispiele/, /Sicht des Vereins/, /für die Vorführung gedacht/]);
   kriterium("h  Datenschutz: nichts gesendet oder gespeichert; erfundene Beispieldaten; Telefonnummern der Bundesnetzagentur für Medien", A,
     [/Nichts wird gesendet oder gespeichert/, /erfundene Daten/, /Bundesnetzagentur für Medien/]);
+  kriterium("i  Ablauf: Heimweg nach dem Training (allein oder abgeholt) im Schritt „Unterlagen“; Probetraining ohne Versicherung im Schritt „Fertig“", A,
+    [/Heimweg nach dem Training/, /allein oder abgeholt/, /Beim Probetraining sind Nichtmitglieder nicht über den Verein versichert/]);
+  kriterium("j  Ablauf: bei Karneval keine Gruppenwahl, die Trainer ordnen die Kinder einer Gruppe zu", A,
+    [/Bei Karneval entfallen diese Fragen/, /Eine Gruppenwahl gibt es nicht/, /Die Trainer ordnen die Kinder einer Gruppe zu/]);
 }
 
 // ---------- 5. Personendaten ----------
@@ -478,6 +567,43 @@ gruppe("6  Stil");
   pruefe(`mittlere Satzlänge im Fließtext höchstens 16 Wörter (gemessen: ${mittel.toFixed(2).replace(".", ",")} bei ${alleSaetze.length} Sätzen)`, mittel <= 16);
   const lang = alleSaetze.filter((s) => woerter(s) > 30).map((s) => `${woerter(s)} Wörter: ${s.slice(0, 90)} …`);
   hinweis("kein Satz im Fließtext hat mehr als 30 Wörter", lang.length === 0, lang);
+}
+
+// ---------- 7. Karneval, Heimweg und Probetraining ----------
+
+gruppe("7  Karneval ohne Gruppenwahl, Turniere und Auftritte; Heimweg und Probetraining");
+{
+  const K = abschnittText("karneval");
+  const alt = [
+    [/\bU3[012]\b/, "Verweis auf die entfernten Unterlagen U30 bis U32"],
+    [/karnevalGruppen/, "Zugriff auf karnevalGruppen (in den Daten entfernt)"],
+    [/Nimmt eine Gruppe an Turnieren teil/, "Turniere als Teil des Falls „Nur Karneval“"],
+    [/Leihvereinbarung/, "Leihvereinbarung für das Kostüm als Unterlage"],
+    [/Bei Karneval fragt er nach Gruppe/, "Gruppenwahl, Turniere und Abendauftritte als Fragen des Assistenten"],
+    [/Beim Karneval eilt es/, "eilige Termine im Karneval (Meldeschluss des Fastnachtszugs ist vorbei und nicht Sache der Anmeldung)"],
+    [/Meldeschluss für den Großen Frankfurter Fastnachtszug/, "Tabelle der eiligen Termine im Karneval"],
+    [/laufen zwei Anmeldewege parallel/, "zwei Anmeldewege als dringende Frage der Anmeldung"],
+  ];
+  const gefunden = alt.filter(([muster]) => muster.test(seiteText)).map(([, grund]) => grund);
+  pruefe("kein Text beschreibt Gruppenwahl, Turniere, Auftritte, Kostüme oder den Fastnachtszug als Teil der Anmeldung; keine Verweise auf U30 bis U32", gefunden.length === 0, gefunden);
+  const noetig = (name, muster) => pruefe(name, K.length > 0 && muster.every((m) => m.test(K)), K.length ? muster.filter((m) => !m.test(K)).map((m) => "fehlt: " + m) : ["Abschnitt nicht gefunden"]);
+  noetig("der Abschnitt „Karneval“ sagt: gehört nicht zur Anmeldung, die Abteilung klärt es selbst, keine Gruppenwahl, Trainer ordnen zu", [
+    /Karneval gehört nicht zur Anmeldung/, /klärt ihre Fragen selbst/, /Keine Gruppenwahl/, /Die Trainer ordnen die Kinder einer Gruppe zu/,
+  ]);
+  noetig("der Abschnitt „Karneval“ nennt, was der Assistent bei Karneval tut: Aufnahmeantrag, Heimweg nach dem Training, Notfall und Fahrten", [
+    /Aufnahmeantrag/, /Heimweg nach dem Training/, /Notfall- und Gesundheitsbogen/, /Fahrten und Messenger-Gruppe/,
+  ]);
+  noetig("der Abschnitt „Karneval“ nennt Turniere, Auftritte am Abend, Kostüme und Fastnachtszug als nicht im Assistenten", [
+    /Nicht im Assistenten: Turniere, Auftritte am Abend, Kostüme und der Fastnachtszug/,
+  ]);
+  const karnevalPunkte = punkte.filter((p) => p.an === "karnevalabteilung");
+  const karnevalZeilen = karnevalPunkte.map((p) => alle(baum, (k) => k.attrs.id === p.id.toLowerCase())[0]);
+  const imKarneval = karnevalZeilen.map((z, i) => z && hatVorfahr(z, (e) => e.tag === "section" && e.attrs.id === "karneval") ? null : karnevalPunkte[i].id).filter(Boolean);
+  pruefe(`die ${karnevalPunkte.length} Punkte der Karnevalabteilung (${karnevalPunkte.map((p) => p.id).join(", ")}) haben ihre Zeile im Abschnitt „Karneval“`, imKarneval.length === 0, imKarneval.map((o) => `${o}: Zeile steht nicht im Abschnitt „Karneval“`));
+  const probe = abschnittText("entscheiden");
+  pruefe("Probetraining: der Abschnitt „Entscheidungen“ nennt die Entscheidung (keine Versicherung für Nichtmitglieder, Hinweis in Assistent, Website und App, Beginn am Tag der Anmeldung)",
+    /Versicherung beim Probetraining: entschieden am 11\.10\.2026/.test(probe) && /Der Verein schließt sie nicht ab/.test(probe) && /Assistent, Website und App weisen stattdessen darauf hin/.test(probe) && /Die Mitgliedschaft beginnt am Tag der Anmeldung/.test(probe),
+    ["Der Kasten zur Versicherung beim Probetraining nennt die Entscheidung vom 11.10.2026 nicht vollständig"]);
 }
 
 // ---------- Ergebnis ----------

@@ -1,7 +1,7 @@
 /*
   Texte des Regelwerks - Arabisch (العربية), Gegenstück zu regeln.js.
   Übersetzungshilfe: Verbindlich ist der deutsche Text (de-regeln.js).
-  Stand 08.10.2026. Dieselbe Schlüsselstruktur wie de-regeln.js; Platzhalter in geschweiften
+  Stand 11.10.2026. Dieselbe Schlüsselstruktur wie de-regeln.js; Platzhalter in geschweiften
   Klammern (zum Beispiel {datum}) bleiben unverändert. Stil, Begriffe und Schreibrichtung: siehe
   den Kopf von ar-oberflaeche.js (Begriffsliste, Isolate für deutsche Namen).
 
@@ -220,27 +220,6 @@ export default {
       wie: "تضع علامة على ما تسمح به. ثم توقّع.",
       wo: "هذه الورقة تخص قسم النادي.",
     },
-    U30: {
-      name: "إذن للعروض المسائية",
-      kurz: "تسمح بأن يقدّم طفلك عروضًا في المساء بدون الوالدين.",
-      warum: "بهذا يستطيع مدرب أن يرعى طفلك.",
-      wie: "تكتب رقم هاتفك وتوقّع.",
-      wo: "هذه الورقة تخص قسم النادي.",
-    },
-    U31: {
-      name: "اتفاق بشأن الأزياء",
-      kurz: "لا يزال النادي يوضح كيف ستُدار الأزياء.",
-      warum: "الأمر يتعلق بالتكاليف وبمن تعود إليه ملكية الأزياء.",
-      wie: "سيخبرك المدربون في الوقت المناسب.",
-      wo: "لا يجب عليك فعل شيء الآن.",
-    },
-    U32: {
-      name: "مستندات لبطولات الرقص",
-      kurz: `في البطولات قد يحتاج طفلك إلى بطاقة هوية (${D("Ausweis")}).`,
-      warum: "في البطولة يتحقق المنظمون من بطاقة الهوية.",
-      wie: "سيخبرك المدربون. وتفيد بطاقة هوية عليها صورة.",
-      wo: "لا يجب عليك فعل شيء الآن.",
-    },
     U33: {
       name: `شهادة للتعليم والمشاركة (${D("Bildung und Teilhabe")})`,
       kurz: "هذه ورقة من النادي عن رسوم العضوية.",
@@ -259,7 +238,7 @@ export default {
       name: `رسوم القبول (${D("Aufnahmegebühr")})`,
       kurz: "يدفع الأعضاء الجدد {betrag} يورو مرة واحدة.",
       warum: `هكذا هو مكتوب في طلب الانضمام (${D("Aufnahmeantrag")}).`,
-      wie: "سيخبرك النادي كيف تدفع.",
+      wie: "يسحبها النادي مع أول دفعة من رسوم العضوية.",
       wo: "لا يجب أن ترفع شيئًا لذلك.",
     },
     U36: {
@@ -297,6 +276,14 @@ export default {
       wie: "يقدّم النادي الطلب مع الشخص الموثوق لدى الاتحاد.",
       wo: "يتواصل معك الشخص الموثوق. وعند الأطفال يوافق الوالدان.",
     },
+    // U30 bis U32 gibt es nicht mehr (Entscheidung vom 11.10.2026).
+    U41: {
+      name: "العودة إلى البيت بعد التدريب",
+      kurz: "تخبرنا كيف يعود طفلك إلى البيت بعد التدريب.",
+      warum: "عندها يعرف النادي هل يجوز لطفلك العودة دون مرافق.",
+      wie: "تختار إجابة في المساعد. ثم توقّع.",
+      wo: "هذه الورقة تخص قسم النادي. ويحصل المدربون على نسخة.",
+    },
   },
 
   hinweise: {
@@ -314,7 +301,6 @@ export default {
     f17_wahrscheinlich_nicht: "بدون 5 سنوات من الإقامة لن يُسمح للطفل باللعب على الأرجح. عندها لا يمكن اللعب إلا عند بلوغ 18 عامًا. والمباريات الودية غير مسموحة أيضًا.",
     aushilfe_nur_ausnahme: `لا يُسمح للشاب في هذه الفئة العمرية باللعب عند الحاجة في فريق ${D("Herren")} إلا نادرًا. وتتحقق إدارة الشباب من ذلك.`,
     getrennt_zustimmung: `يرجى سؤال الطرف الآخر من الوالدين. يجب أن يوافق على التسجيل. والأفضل أن يوقّع هو أيضًا على طلب الانضمام (${D("Aufnahmeantrag")}).`,
-    karneval_tanzt_woanders: "تشارك الراقصات والراقصون في البطولات باسم نادٍ واحد فقط.",
     beitrag_gruppe_pruefen: `فئة الرسوم: ${D("{gruppe}")}. قد لا تناسب هذه الفئة العمر. ويتحقق النادي من ذلك.`,
 
     // Fristen
@@ -322,7 +308,8 @@ export default {
 
     // Infos
     frist_annahme_heute: "نحسب كأن إلغاء التسجيل يُعتمد في {abmeldung}. وإذا ألغيت التسجيل لاحقًا، تطول فترة الانتظار.",
-    probetraining_versicherung: "من ليس عضوًا بعد لا يملك تأمينًا خاصًا أثناء التدريب. والأفضل أن تسجّل قبل أول تدريب.",
+    probetraining_versicherung: "أثناء التدريب التجريبي لا يشمل تأمين النادي من ليس عضوًا. والأفضل أن تسجّل قبل أول تدريب.",
+    mitgliedschaft_beginn: "تبدأ العضوية في يوم التسجيل.",
     kuendigung_jahresende: `في نادينا لا يمكنك إنهاء العضوية إلا في نهاية العام. أرسل إشعار إنهاء العضوية برسالة مسجلة (${D("Einschreiben")}).`,
     ohne_spielrecht_kein_spiel: "بدون إذن اللعب لا يجوز للطفل المشاركة في المباريات. ولا حتى في المباريات الودية. أما التدريب فمسموح.",
     mitgliedschaft_zuerst: "أولًا تصبح عضوًا. ثم يقدّم النادي الطلب إلى الاتحاد.",
@@ -353,11 +340,10 @@ export default {
     pflege_hinweis: "توقّع الأسرة الحاضنة عن الطفل في الحياة اليومية. أحضر الإثبات.",
     f17_moeglich_5_jahre: "يعيش الطفل هنا منذ 5 سنوات. عندها يمكن للاتحاد أن ينظر في استثناء. وتحتاج إلى إثبات الإقامة.",
     austausch_ein_jahr: "في التبادل المدرسي يسري إذن اللعب سنة واحدة على الأكثر. ولا يُسمح بتغيير آخر للنادي.",
-    karneval_gruppe_vorschlag: `بحسب العمر تناسب هذه المجموعة: ${D("{gruppen}")}. ويقرر المدربون في النهاية.`,
     karneval_kein_attest: `لا تحتاج في الكرنفال إلى شهادة طبية (${D("Attest")}). ولا تحتاج أيضًا إلى أي مستندات من الاتحاد الهيسي لكرة القدم (${D("Hessischer Fußball-Verband, HFV")}).`,
-    karneval_abend: "يقدّم الطفل عروضًا في المساء بدون الوالدين. ويحتاج النادي إلى إذنك لذلك.",
     passiv_hinweis: "أنت عضو داعم. لا تلعب ولا تتدرب. أنت تدعم النادي.",
     senator_vorstand: "يقرر مجلس الإدارة هل تصبح سيناتورًا.",
+    beitrag_doppel: "هل أنت في كرة القدم والكرنفال؟ اسأل عن رسوم عضوية خاصة.",
     kontoinhaber_andere: `الحساب يعود لشخص آخر. يوقّع هذا الشخص إذن الخصم المباشر (${D("Lastschrift")}).`,
     bildung_teilhabe: `تحصل العائلات قليلة الدخل على مساعدة في رسوم العضوية. وهي تصل إلى {betrag} يورو في الشهر. اسأل في مركز العمل (${D("Jobcenter")}) أو في مكتب الشؤون الاجتماعية (${D("Sozialamt")}).`,
     beitragserlass: "هل دخلك قليل؟ تحدّث إلينا. يستطيع مجلس الإدارة إعفاءك من رسوم العضوية كليًا أو جزئيًا.",
@@ -365,7 +351,6 @@ export default {
     passiv_alter_verein: "تبقى عضوًا داعمًا في النادي القديم. أخبر النادي القديم بذلك أيضًا.",
 
     // Offene Punkte
-    mitgliedschaft_beginn: "لا يزال النادي يوضح متى تبدأ عضويتك. والأفضل أن تسجّل مبكرًا.",
     regelwerk_fifa_2027: "اعتبارًا من {datum} تسري قواعد دولية جديدة للانتقالات. ويتحقق النادي مما يتغير.",
     regelwerk_saison_2027: `اعتبارًا من {datum} تتغير القواعد الخاصة بفئة ${D("E-Jugend")}. ويتحقق النادي مما يتغير.`,
     attest_aktuell: `يجب أن تكون الشهادة الطبية (${D("Attest")}) حديثة. وسيوضح النادي أقصى مدة يجوز أن تمر عليها.`,
@@ -388,14 +373,8 @@ export default {
     spieler_unterschrift_kind: "هل يجب أن يوقّع الطفل الصغير بنفسه؟ يسأل النادي الاتحاد.",
     unterlagen_liste_offen: "لا يزال غير واضح أي أوراق يريدها الاتحاد بالضبط. ويسأل النادي ويخبرك.",
     wohnen_nicht_gemeinsam: "الطفل والوالدان لا يسكنون معًا. ستتواصل معك إدارة الشباب.",
-    karneval_turnier_offen: "لم يتضح بعد هل تشارك المجموعة في بطولات الرقص. وقد تلزم بطاقة هوية عليها صورة.",
-    karneval_gruppe_alter_pruefen: `المجموعة: ${D("{gruppe}")}. قد لا تناسب هذه المجموعة العمر. ويتحقق المدربون من ذلك.`,
     beitrag_familie_offen: "يوضح النادي من يُحتسب من العائلة. اذكر كل أفراد العائلة بأسمائهم.",
-    zuschlag_ohne_sepa: `بدون الخصم المباشر (${D("Lastschrift")}) قد يكلف ذلك {betrag} يورو أكثر في السنة. ويوضح مجلس الإدارة ذلك.`,
     iban_ausland_pruefen: "رقم حسابك ليس من ألمانيا. ويتحقق النادي هل يستطيع سحب الرسوم.",
-    aufnahmegebuehr_offen: "يوضح النادي هل تسري رسوم القبول عليك.",
-    beitrag_doppel: "أنت في قسمين. يخبرك مكتب النادي برسوم العضوية.",
-    kostueme_offen: "لا يزال النادي يوضح كم تكلف الأزياء ولمن تعود ملكيتها.",
     mitgliedschaft_alter_verein_unklar: "لم يتضح هل تبقى عضوًا في النادي القديم. وضّح ذلك مع النادي القديم.",
   },
 
@@ -443,9 +422,6 @@ export default {
     beitrag_familie: "يتحقق مكتب النادي من يُحتسب من العائلة.",
     senator: "يحيل مكتب النادي طلبك إلى مجلس الإدارة.",
     beitragserlass: "يتحدث مكتب النادي معك عن المساعدة في رسوم العضوية.",
-    gruppe_einteilung: "يوزّعك قسم الكرنفال على مجموعة.",
-    turnier: "يخبرك قسم الكرنفال بالمستندات اللازمة للبطولات.",
-    kostueme: "يخبرك قسم الكرنفال كيف تعمل الأزياء.",
     herren_wechsel: `تراجع لجنة المباريات الخاصة بفريق ${D("Herren")} انتقالك والمهل.`,
     frau_herren: `تقدّم لجنة المباريات الخاصة بفريق ${D("Herren")} الطلب لصالح النساء في الفريق.`,
   },
@@ -493,7 +469,7 @@ export default {
     beitrag_familie: "تبلغ رسوم عضوية العائلة {jahr} يورو في السنة. أي {monat} يورو في الشهر. ويشمل ذلك كل أفراد العائلة.",
     beitrag_azubi: "لمن يتدرب مهنيًا وللطلاب تبلغ رسوم العضوية {jahr} يورو في السنة. ويلزم إثبات.",
     beitrag_senator: "يدفع السيناتورات {jahr} يورو في السنة. ويقرر مجلس الإدارة قبول العضوية.",
-    beitrag_doppel: "أنت في القسمين. يخبرك مكتب النادي برسوم العضوية.",
+    beitrag_doppel: "هل أنت في كرة القدم والكرنفال؟ اسأل عن رسوم عضوية خاصة.",
     // Namen der Beitragsgruppen (Schlüssel wie in de-regeln.js): Übersetzung mit der Abteilung (ohne Doppelpunkt, der Text steht auch hinter "Wir schlagen vor:"), dahinter der deutsche Name ohne Abteilung in Klammern.
     // karneval_azubi: Der deutsche Name steht ohne "mit Nachweis" in der Klammer; der lange Name passt bei 390 px nicht in eine Zeile
     // (die Klammer bricht sonst um und steht verdreht), "mit Nachweis" steht im arabischen Teil.
@@ -523,7 +499,7 @@ export default {
     einverstaendnis_senioren: `موافقة على اللعب في فريق ${D("Herren")}`,
     einverstaendnis_maedchen: "موافقة على لعب الفتيات في فرق الفتيان",
     einverstaendnis_fahrten: "موافقة على الرحلات ومجموعة المراسلة",
-    karneval_auftritte: "إذن للعروض المسائية",
+    heimweg: "العودة إلى البيت بعد التدريب",
     attest: `شهادة طبية (${D("Attest")}) من الطبيب`,
     notfall: `استمارة الطوارئ والصحة (${D("Notfall- und Gesundheitsbogen")})`,
   },
@@ -545,7 +521,7 @@ export default {
     "einverstaendnis_senioren.unterschrift": `موافقة على اللعب في فريق ${D("Herren")}`,
     "einverstaendnis_maedchen.unterschrift": "موافقة على لعب الفتيات في فرق الفتيان",
     "einverstaendnis_fahrten.unterschrift": "موافقة على الرحلات ومجموعة المراسلة",
-    "karneval_auftritte.unterschrift": "إذن للعروض المسائية",
+    "heimweg.unterschrift": "العودة إلى البيت بعد التدريب",
     "attest.arzt": `شهادة طبية (${D("Attest")}) من الطبيب`,
     "attest.einwilligung": `إذن للشهادة الطبية (${D("Attest")})`,
     "notfall.unterschrift": `استمارة الطوارئ والصحة (${D("Notfall- und Gesundheitsbogen")})`,

@@ -97,23 +97,28 @@ function testeDatum() {
 
 // ---------- 2. Datendatei ----------
 
-const U_IDS = Array.from({ length: 40 }, (_, i) => "U" + String(i + 1).padStart(2, "0"));
+// U30 bis U32 (Erlaubnis für Auftritte am Abend, Kostümvereinbarung, Turnierpapiere) sind mit dem Karneval-Schritt entfallen
+// (Entscheidung der 1. Vorsitzenden vom 11.10.2026); U41 (Heimweg nach dem Training) ist neu.
+const U_ENTFALLEN = ["U30", "U31", "U32"];
+const U_IDS = Array.from({ length: 41 }, (_, i) => "U" + String(i + 1).padStart(2, "0")).filter((id) => !U_ENTFALLEN.includes(id));
 const F_IDS = Array.from({ length: 18 }, (_, i) => "F" + String(i + 1).padStart(2, "0"));
 const R_IDS = Array.from({ length: 15 }, (_, i) => "R" + (i + 1));
 const ART = ["pflicht", "verein", "freiwillig", "nur_wenn", "offen"];
 const WER_U = ["familie", "arzt", "verein", "alter_verein"];
 const WANN = ["anmeldung", "vor_erstem_spiel", "vor_erstem_training", "spaeter"];
 const FORM = ["formular_im_pdf", "foto_oder_datei", "original_mitbringen", "unterschrift", "nichts"];
-const FORMULARE = ["aufnahmeantrag", "hfv_antrag", "vollmacht", "abmeldung", "einverstaendnis_senioren", "attest", "datenschutz", "notfall", "einverstaendnis_fahrten", "einverstaendnis_maedchen", "karneval_auftritte", "familienliste"];
+const FORMULARE = ["aufnahmeantrag", "hfv_antrag", "vollmacht", "abmeldung", "einverstaendnis_senioren", "attest", "datenschutz", "notfall", "einverstaendnis_fahrten", "einverstaendnis_maedchen", "heimweg", "familienliste"];
 const WER_S = ["mitglied", "sorgeberechtigte", "sorgeberechtigte_beide", "kontoinhaber", "arzt", "verein", "spieler"];
 
 function testeDaten() {
-  ["stand", "saison", "quellenStand", "altersklassen", "mannschaften", "karnevalGruppen", "beitragsgruppen", "unterlagen", "faelle", "fristen", "kontakte", "offenePunkte"]
+  ["stand", "saison", "quellenStand", "altersklassen", "mannschaften", "beitragsgruppen", "unterlagen", "faelle", "fristen", "kontakte", "offenePunkte"]
     .forEach((k) => wahr("Daten: Schlüssel " + k, cfg[k] !== undefined && cfg[k] !== null));
+  // Keine Vorauswahl der Gruppe im Karneval: Die Gruppen stehen nicht mehr im Regelwerk (Entscheidung vom 11.10.2026)
+  wahr("Daten: keine karnevalGruppen mehr", cfg.karnevalGruppen === undefined);
   // Die Version des Regelwerks steht im Modul und in der Datendatei und muss übereinstimmen (der Laufzettel druckt sie)
   gleich("Daten: Version in regeln.js und data/anmeldung.json gleich", cfg.version, R.VERSION);
   wahr("Daten: Version hat die Form JJJJ-MM-TT.N", /^\d{4}-\d{2}-\d{2}\.\d+$/.test(R.VERSION));
-  gleich("Daten: Unterlagen U01 bis U40 vollständig", Object.keys(cfg.unterlagen).sort(), U_IDS.slice().sort());
+  gleich("Daten: Unterlagen U01 bis U29 und U33 bis U41 vollständig (ohne U30 bis U32)", Object.keys(cfg.unterlagen).sort(), U_IDS.slice().sort());
   gleich("Daten: Fälle F01 bis F18 vollständig", Object.keys(cfg.faelle).sort(), F_IDS.slice().sort());
   U_IDS.forEach((id) => {
     const u = cfg.unterlagen[id];
@@ -127,15 +132,13 @@ function testeDaten() {
   gleich("Quellen: Fristkonstanten ohne quelle", ["spieljahr", "alter", "vollmacht", "wiederholterWechsel", "gebuehren", "aufbewahrungJahre", "spielerfotoErneuernJahre", "stichprobenOnlineWechsel"].filter((k) => !cfg.fristen[k].quelle), []);
   gleich("Quellen: Wartefrist-Bausteine ohne quelle", Object.keys(cfg.fristen.jugend).filter((k) => !cfg.fristen.jugend[k].quelle), []);
   gleich("Quellen: Wechselperioden ohne quelle", ["wechselperiodeI", "wechselperiodeII"].filter((k) => !cfg.fristen.senioren[k].quelle), []);
-  gleich("Quellen: Karnevalgruppen ohne quelle", cfg.karnevalGruppen.filter((g) => !g.quelle).length, 0);
   gleich("Quellen: Beitragsgruppen ohne quelle", Object.values(cfg.beitragsgruppen).filter((g) => !g.quelle).length, 0);
   gleich("Quellen: offene Punkte ohne quelle", cfg.offenePunkte.filter((o) => !o.quelle).length, 0);
   wahr("Quellen: quellenStand nennt Dokument und Stand", cfg.quellenStand.length >= 20 && cfg.quellenStand.every((q) => q.quelle && q.stand));
   wahr("Quellen: Jugendordnung Stand 2026-07-01", cfg.quellenStand.some((q) => /Jugendordnung/.test(q.quelle) && q.stand === "2026-07-01"));
   wahr("Quellen: Spielordnung Stand 2026-07-06", cfg.quellenStand.some((q) => /Spielordnung/.test(q.quelle) && q.stand === "2026-07-06"));
-  // Karnevalgruppen: Alter nur aus Sekundärquelle, deshalb nicht bestätigt
-  gleich("Karneval: Gruppen wie karneval.json", cfg.karnevalGruppen.map((g) => g.name).sort(), JSON.parse(lies("data/karneval.json")).gruppen.map((g) => g.name).sort());
-  wahr("Karneval: bestaetigt false", cfg.karnevalGruppen.every((g) => g.bestaetigt === false));
+  // Quellen der entfallenen Karneval-Unterlagen und -Gruppen stehen nicht mehr in der Liste
+  wahr("Quellen: keine Quelle der entfallenen Turnier- und Gruppenregeln", !cfg.quellenStand.some((q) => /Tanzturnierordnung|RKK-Richtlinien|Die Schnauzer|Übungszeiten laut Abteilung/.test(q.quelle)));
   // Mannschaften stimmen mit teams.json überein (kein Auseinanderlaufen)
   const teams = JSON.parse(lies("data/teams.json"));
   gleich("Mannschaften: gleiche Anzahl wie teams.json", cfg.mannschaften.length, teams.length);
@@ -158,7 +161,9 @@ function testeDaten() {
     wahr("Beitragsgruppe " + key + ": Feld " + g.aufnahmeantragFeld + " im Aufnahmeantrag", !!felder[g.aufnahmeantragFeld]);
   });
   gleich("Beitrag: Aufnahmegebühr wie beitraege.json", cfg.beitragInfo.aufnahmegebuehr, beitraege.aufnahmegebuehr);
-  gleich("Beitrag: Zuschlag wie beitraege.json", cfg.beitragInfo.zuschlagOhneSepa, beitraege.zuschlag_ohne_sepa);
+  // Beitragsübersicht (am 11.10.2026 geprüft): kein Zuschlag ohne Lastschrift (er stand nur im Info-Blatt von 2014)
+  wahr("Beitrag: kein Zuschlag ohne Lastschrift mehr in den Regeldaten", !("zuschlagOhneSepa" in cfg.beitragInfo) && !("zuschlagOhneSepaBemerkung" in cfg.beitragInfo));
+  gleich("Beitrag: Beginn der Mitgliedschaft", cfg.beitragInfo.mitgliedschaftBeginn, "Tag der Anmeldung (Satzung § 6)");
   // Kontakte: nur Vereinsadressen
   const verein = JSON.parse(lies("data/verein.json"));
   gleich("Kontakte: Geschäftsstelle", cfg.kontakte.geschaeftsstelle.mail, verein.mail);
@@ -178,14 +183,15 @@ function testeDaten() {
   gleich("Fristen: Entschädigung Herren ab Kreisliga", cfg.fristen.entschaedigung.herrenWechselperiodeI.abKreisliga, 250);
   gleich("Fristen: Entschädigung Mittelwert aus Verbandsliga", cfg.fristen.entschaedigung.herrenWechselperiodeI.mittelwertAusVerbandsliga, (1500 + 250) / 2);
   // Offene Punkte: Themen der Recherche sind aufgeführt
-  const alleIds = new Set([].concat(U_IDS, F_IDS, R_IDS));
+  // Offene Punkte dürfen die entfallenen Unterlagen U30 bis U32 weiter nennen (entschiedene Punkte behalten ihren Verweis)
+  const alleIds = new Set([].concat(U_IDS, U_ENTFALLEN, F_IDS, R_IDS));
   cfg.offenePunkte.forEach((o) => {
     wahr("Offener Punkt " + o.id + ": Aufbau", !!o.frage && !!o.an && !!o.prioritaet && Array.isArray(o.betrifft));
     wahr("Offener Punkt " + o.id + ": betrifft nur bekannte Kennungen", o.betrifft.every((b) => alleIds.has(b)));
   });
   gleich("Offene Punkte: eindeutige Kennungen", new Set(cfg.offenePunkte.map((o) => o.id)).size, cfg.offenePunkte.length);
   const betroffen = new Set(); cfg.offenePunkte.forEach((o) => o.betrifft.forEach((b) => betroffen.add(b)));
-  ["U07", "U09", "U10", "U12", "U13", "U16", "U18", "U23", "U25", "U26", "U27", "U31", "U32", "U34", "U35", "U38", "U39", "F04", "F07", "F08", "F14", "F15", "F16", "F17", "F18", "R2", "R4", "R5", "R13", "R15"]
+  ["U07", "U09", "U10", "U12", "U13", "U16", "U18", "U23", "U25", "U26", "U27", "U34", "U35", "U38", "U39", "F04", "F07", "F08", "F14", "F15", "F16", "F17", "F18", "R2", "R4", "R5", "R13", "R15"]
     .forEach((id) => wahr("Offene Punkte betreffen " + id, betroffen.has(id)));
   ["Passstelle", "Vorstand"].forEach((wort) => wahr("Offene Punkte: Fragen an " + wort, cfg.offenePunkte.some((o) => (wort === "Passstelle" ? o.an === "hfv_passstelle" : o.an === "vorstand"))));
   wahr("Offene Punkte: Frage nach jüngerem D-Jahrgang", cfg.offenePunkte.some((o) => /D-Jahrgang/.test(o.frage)));
@@ -195,28 +201,28 @@ function testeDaten() {
   wahr("Offene Punkte: Frage nach Arzt oder Sportarzt", cfg.offenePunkte.some((o) => /Sportarzt/.test(o.frage)));
   wahr("Offene Punkte: Frage nach Beginn der Mitgliedschaft", cfg.offenePunkte.some((o) => /Beginn der Mitgliedschaft/.test(o.frage)));
   wahr("Offene Punkte: Frage nach Probemitgliedschaft", cfg.offenePunkte.some((o) => /Probemitgliedschaft/.test(o.frage)));
-  // Runde 2 (Prüfung Orchestrator, 29.09.2026): zwei neue offene Punkte an den Vorstand
+  // Runde 2 (Prüfung Orchestrator, 29.09.2026): zwei neue offene Punkte an den Vorstand; seit dem 11.10.2026 sind beide entschieden
   const o65 = cfg.offenePunkte.find((o) => o.id === "O65");
   const o66 = cfg.offenePunkte.find((o) => o.id === "O66");
-  wahr("Offener Punkt O65: Foto-Einwilligung bei Jugendlichen (an vorstand, P2, betrifft U04)",
-    !!o65 && o65.an === "vorstand" && o65.prioritaet === "P2" && o65.betrifft.join(",") === "U04" && o65.status === "offen" && /Foto-Einwilligung bei Jugendlichen/.test(o65.frage) && /ab 14 oder ab 16/.test(o65.frage) && /Einsichtsfähigkeit/.test(o65.frage));
+  wahr("Offener Punkt O65: Foto-Einwilligung bei Jugendlichen (an vorstand, P2, betrifft U04, entschieden)",
+    !!o65 && o65.an === "vorstand" && o65.prioritaet === "P2" && o65.betrifft.join(",") === "U04" && o65.status === "entschieden" && /Foto-Einwilligung bei Jugendlichen/.test(o65.frage) && /ab 14 oder ab 16/.test(o65.frage) && /Einsichtsfähigkeit/.test(o65.frage));
   wahr("Offener Punkt O65: Quelle nennt die Prüfung des Orchestrators", !!o65 && /Prüfung Orchestrator, 29\.09\.2026/.test(o65.quelle));
-  wahr("Offener Punkt O65: Satz zum entfernten Hinweis", !!o65 && /Der Assistent lässt bisher nur die Eltern unterschreiben\. Der Hinweis dazu ist bis zur Entscheidung entfernt\.$/.test(o65.frage));
-  wahr("Offener Punkt O66: Adresse der Satzung im Aufnahmeantrag (an vorstand, P1, betrifft U01)",
-    !!o66 && o66.an === "vorstand" && o66.prioritaet === "P1" && o66.betrifft.join(",") === "U01" && o66.status === "offen" && /www\.sportfreunde04\.de\/satzung\.pdf/.test(o66.frage) && /Fehler 401/.test(o66.frage));
+  wahr("Offener Punkt O65: entschieden, Frage ohne veralteten Satz (11.10.2026)", !!o65 && o65.status === "entschieden" && !/bis zur Entscheidung/.test(o65.frage));
+  wahr("Offener Punkt O66: Adresse der Satzung im Aufnahmeantrag (an vorstand, P1, betrifft U01, entschieden)",
+    !!o66 && o66.an === "vorstand" && o66.prioritaet === "P1" && o66.betrifft.join(",") === "U01" && o66.status === "entschieden" && /www\.sportfreunde04\.de\/satzung\.pdf/.test(o66.frage) && /Fehler 401/.test(o66.frage));
   wahr("Offener Punkt O66: Quelle nennt die Prüfung des Orchestrators", !!o66 && /Prüfung Orchestrator, 29\.09\.2026/.test(o66.quelle));
   // Runde 4 (Prüfung Orchestrator, 30.09.2026): fünf weitere offene Punkte, die auch die Konzeptseite (AP-6) führt
   const punkt = (id) => cfg.offenePunkte.find((o) => o.id === id);
   [
-    ["O67", "datenschutz", "P1", "U28,U06", /Art\. 6 Abs\. 1 lit\. b DSGVO/, /oder lit\. f/],
-    ["O68", "vorstand", "P1", "U01,U04,U05,U06,U29", /am Bildschirm unterschrieben/, /§ 127 BGB/],
-    ["O69", "jugendleitung", "P2", "U18", /Vollmacht für die Abmeldung/, /in DFBnet ein/],
-    ["O70", "jugendleitung", "P2", "U07", /Kreisjugendwart \(HFV-Jugendordnung § 7 Nr\. 2\)/, /Wer meldet, bis wann\?$/],
-    ["O71", "vorstand", "P2", "", /Wer pflegt Fristen, Beträge und Gebühren/, /Beitragsordnung oder Verbandsordnungen ändern\?$/],
-  ].forEach(([id, an, prio, betrifft, muster1, muster2]) => {
+    ["O67", "datenschutz", "P1", "U28,U06", /Art\. 6 Abs\. 1 lit\. b DSGVO/, /oder lit\. f/, "offen"],
+    ["O68", "vorstand", "P1", "U01,U04,U05,U06,U29", /am Bildschirm unterschrieben/, /§ 127 BGB/, "offen"],
+    ["O69", "jugendleitung", "P2", "U18", /Vollmacht für die Abmeldung/, /in DFBnet ein/, "offen"],
+    ["O70", "jugendleitung", "P2", "U07", /Kreisjugendwart \(HFV-Jugendordnung § 7 Nr\. 2\)/, /Wer meldet, bis wann\?$/, "vorgemerkt"],
+    ["O71", "vorstand", "P2", "", /Wer pflegt Fristen, Beträge und Gebühren/, /Beitragsordnung oder Verbandsordnungen ändern\?$/, "geregelt"],
+  ].forEach(([id, an, prio, betrifft, muster1, muster2, status]) => {
     const o = punkt(id);
-    wahr("Offener Punkt " + id + ": an " + an + ", " + prio + ", betrifft " + (betrifft || "keine Unterlage") + ", status offen",
-      !!o && o.an === an && o.prioritaet === prio && Array.isArray(o.betrifft) && o.betrifft.join(",") === betrifft && o.status === "offen");
+    wahr("Offener Punkt " + id + ": an " + an + ", " + prio + ", betrifft " + (betrifft || "keine Unterlage") + ", status " + status,
+      !!o && o.an === an && o.prioritaet === prio && Array.isArray(o.betrifft) && o.betrifft.join(",") === betrifft && o.status === status);
     wahr("Offener Punkt " + id + ": Frage", !!o && muster1.test(o.frage) && muster2.test(o.frage));
     wahr("Offener Punkt " + id + ": Quelle nennt die Prüfung des Orchestrators vom 30.09.2026", !!o && /^Prüfung Orchestrator, 30\.09\.2026/.test(o.quelle));
   });
@@ -233,7 +239,7 @@ function testeDaten() {
     wahr("Offener Punkt " + id + ": Frage", !!o && muster1.test(o.frage) && muster2.test(o.frage));
     wahr("Offener Punkt " + id + ": Quelle nennt die Prüfung des Orchestrators vom 07.10.2026", !!o && /^Prüfung Orchestrator, 07\.10\.2026$/.test(o.quelle));
   });
-  // 08.10.2026 (Entscheidung der Jugendleitung): O26 ist entschieden, O68 bleibt offen und trägt den Stand; O65 bleibt offen
+  // 08.10.2026 (Entscheidung der Jugendleitung): O26 ist entschieden
   const o26b = punkt("O26");
   const o68b = punkt("O68");
   wahr("Offener Punkt O26: Status entschieden (an vorstand, P1, betrifft U01 und U04)",
@@ -241,16 +247,61 @@ function testeDaten() {
   gleich("Offener Punkt O26: Entscheidung", o26b.entscheidung,
     "Ein Elternteil reicht (Jugendleitung, 08.10.2026). Ausnahme: getrennt lebende Eltern ohne Einverständnis – dann unterschreibt der andere Elternteil mit Stift.");
   wahr("Offener Punkt O26: die Frage nennt keine Empfehlung „beide“ mehr", !/empfiehlt/.test(o26b.frage) && /Einer oder beide/.test(o26b.frage));
-  wahr("Offener Punkt O68: Status bleibt offen, mit Stand der Jugendleitung",
-    !!o68b && o68b.status === "offen" && o68b.stand === "Jugendleitung befürwortet (08.10.2026); Beschluss des Vorstands steht aus.");
-  wahr("Offener Punkt O65: bleibt offen, ohne Entscheidung", punkt("O65").status === "offen" && !("entscheidung" in punkt("O65")));
-  const STATUS_PUNKT = ["offen", "weitgehend_geklaert", "entschieden"];
-  wahr("Offene Punkte: Status nur offen, weitgehend_geklaert oder entschieden", cfg.offenePunkte.every((o) => STATUS_PUNKT.includes(o.status)),
-    cfg.offenePunkte.filter((o) => !STATUS_PUNKT.includes(o.status)).map((o) => o.id).join(","));
-  gleich("Offene Punkte: nur entschiedene Punkte tragen eine Entscheidung", cfg.offenePunkte.filter((o) => "entscheidung" in o).map((o) => o.id + ":" + o.status), ["O26:entschieden"]);
-  gleich("Offene Punkte: ein entschiedener Punkt ist genau O26", cfg.offenePunkte.filter((o) => o.status === "entschieden").map((o) => o.id), ["O26"]);
-  gleich("Daten: Stand und Version 08.10.2026", [cfg.stand, cfg.version], ["2026-10-08", "2026-10-08.1"]);
+  // 11.10.2026 (Antworten der 1. Vorsitzenden, Paket M2): fünf Stände. Nur „offen“ ist eine offene Frage und trägt „stand“;
+  // die übrigen vier tragen „entscheidung“. Neu gegenüber dem 08.10.: geregelt („so machen wir es“), entfaellt, vorgemerkt („später“).
+  wahr("Offener Punkt O68: bleibt offen, mit Stand der Jugendleitung und der Rückfrage zu „mit Stift“",
+    !!o68b && o68b.status === "offen" && !("entscheidung" in o68b) &&
+      o68b.stand === "Jugendleitung befürwortet (08.10.2026). Rückfrage der 1. Vorsitzenden zu „mit Stift“ beantwortet; Antwort steht aus (Excel Nr. 1).");
+  const STATUS_PUNKT = ["offen", "entschieden", "geregelt", "entfaellt", "vorgemerkt"];
+  wahr("Offene Punkte: Status nur offen, entschieden, geregelt, entfaellt oder vorgemerkt (weitgehend_geklaert gibt es nicht mehr)", cfg.offenePunkte.every((o) => STATUS_PUNKT.includes(o.status)),
+    cfg.offenePunkte.filter((o) => !STATUS_PUNKT.includes(o.status)).map((o) => o.id + ":" + o.status).join(","));
+  const STAND_11_10 = {
+    entschieden: ["O26", "O27", "O30", "O31", "O65", "O66"],
+    geregelt: ["O02", "O03", "O04", "O05", "O06", "O07", "O08", "O09", "O10", "O12", "O13", "O14", "O15", "O16",
+      "O17", "O18", "O19", "O20", "O21", "O22", "O23", "O32", "O33", "O34", "O37", "O38", "O39", "O40",
+      "O41", "O42", "O43", "O44", "O50", "O52", "O54", "O60", "O61", "O62", "O63", "O64", "O71"],
+    entfaellt: ["O28", "O29", "O35", "O36", "O49", "O51", "O55", "O56", "O57"],
+    vorgemerkt: ["O46", "O47", "O48", "O53", "O58", "O59", "O70"],
+    offen: ["O01", "O11", "O24", "O25", "O45", "O67", "O68", "O69", "O72", "O73"],
+  };
+  Object.keys(STAND_11_10).forEach((status) =>
+    gleich("Offene Punkte: Stand " + status + " (" + STAND_11_10[status].length + ")", cfg.offenePunkte.filter((o) => o.status === status).map((o) => o.id), STAND_11_10[status]));
+  gleich("Offene Punkte: Zahl je Stand (6 entschieden, 41 geregelt, 9 entfällt, 7 später, 10 offen; zusammen 73)",
+    Object.keys(STAND_11_10).map((status) => cfg.offenePunkte.filter((o) => o.status === status).length), [6, 41, 9, 7, 10]);
+  wahr("Offene Punkte: nur offene Punkte tragen „stand“ (nie leer), alle übrigen „entscheidung“ (nie leer), nie beides",
+    cfg.offenePunkte.every((o) => o.status === "offen"
+      ? typeof o.stand === "string" && o.stand.trim().length > 0 && !("entscheidung" in o)
+      : typeof o.entscheidung === "string" && o.entscheidung.trim().length > 0 && !("stand" in o)),
+    cfg.offenePunkte.filter((o) => !(o.status === "offen" ? o.stand && !("entscheidung" in o) : o.entscheidung && !("stand" in o))).map((o) => o.id).join(","));
+  // Entscheidungen der 1. Vorsitzenden vom 11.10.2026: der Wortlaut steht fest und wird so auf der Konzeptseite gezeigt (Paket M2)
+  [
+    ["O27", "Keine Versicherung für Nichtmitglieder (zu teuer). Assistent, Website und App weisen darauf hin: Beim Probetraining ist man nicht über den Verein versichert (1. Vorsitzende, 11.10.2026)."],
+    ["O30", "Wie in der Satzung: Die Mitgliedschaft beginnt am Tag der Anmeldung. Website, App und Formulare sind angepasst (1. Vorsitzende, 11.10.2026)."],
+    ["O31", "Keine Probemitgliedschaft. Hinweis auf den fehlenden Versicherungsschutz beim Probetraining (siehe O27) (1. Vorsitzende, 11.10.2026)."],
+    ["O65", "Nur die Eltern unterschreiben, Jugendliche nicht zusätzlich (1. Vorsitzende, 11.10.2026)."],
+    ["O66", "Neu mit der Website verknüpfen (1. Vorsitzende, 11.10.2026). Umsetzung als Weiterleitung bei IONOS, sobald der Zugang da ist. Bis dahin nennt der Assistent die Download-Adresse."],
+  ].forEach(([id, text]) => gleich("Offener Punkt " + id + ": Entscheidung vom 11.10.2026", punkt(id).entscheidung, text));
+  wahr("Offene Punkte: „geregelt“ und „vorgemerkt“ nennen den Wortlaut der 1. Vorsitzenden (Beispiele O02, O08, O13, O48, O58)",
+    /^Der Assistent folgt den Vordrucken des HFV\. Sonderfälle klärt das Passwesen im Einzelfall \(1\. Vorsitzende, 11\.10\.2026\)\.$/.test(punkt("O02").entscheidung) &&
+      /^Der Assistent bleibt bei seiner Rechnung\. Das Passwesen prüft im Einzelfall \(1\. Vorsitzende, 11\.10\.2026\)\.$/.test(punkt("O08").entscheidung) &&
+      punkt("O13").entscheidung === "Nicht nötig für den Start. Der Assistent nennt keine Bearbeitungszeiten." &&
+      punkt("O48").entscheidung === "Satzungslink siehe O66. Die alten Info-Blätter später ersetzen." &&
+      punkt("O58").entscheidung === "Zum 1. Januar 2027 prüfen.");
+  gleich("Daten: Stand und Version 11.10.2026", [cfg.stand, cfg.version], ["2026-10-11", "2026-10-11.1"]);
   gleich("Offene Punkte: Kennungen O01 bis O73 lückenlos und in Reihenfolge", cfg.offenePunkte.map((o) => o.id), Array.from({ length: 73 }, (_, i) => "O" + String(i + 1).padStart(2, "0")));
+  // Entscheidungen der 1. Vorsitzenden vom 11.10.2026: Heimweg (U41), Beginn der Mitgliedschaft (R15), Aufnahmegebühr (U35)
+  const u41 = cfg.unterlagen.U41;
+  wahr("Daten U41: Heimweg nach dem Training (verein, familie, anmeldung, formular_im_pdf, Formular heimweg, kein Nachweis)",
+    !!u41 && u41.titel === "Heimweg nach dem Training" && u41.art === "verein" && u41.wer === "familie" && u41.wann === "anmeldung" && u41.form === "formular_im_pdf" && u41.formular === "heimweg" && u41.nachweis === false);
+  gleich("Daten U41: Bedingung", u41.bedingung, "Minderjährige, die Fußball spielen oder im Karneval tanzen.");
+  wahr("Daten U41: Quelle nennt die Aufsichtspflicht (§ 832 BGB)", /BGB § 832/.test(u41.quelle));
+  const r15 = cfg.fristen.regeln.R15;
+  wahr("Daten R15: Beginn der Mitgliedschaft ist entschieden (Tag der Anmeldung, keine Probemitgliedschaft, offen false)",
+    r15.offen === false && /beginnt am Tag der Anmeldung \(Satzung § 6\)/.test(r15.text) && /Beim Probetraining sind Nichtmitglieder nicht über den Verein versichert/.test(r15.text));
+  wahr("Daten U35: Aufnahmegebühr gilt für alle neuen Mitglieder und steht nicht auf „offen“",
+    cfg.unterlagen.U35.art === "verein" && /Fußball, Karneval, passiv/.test(cfg.unterlagen.U35.bedingung) && !/offen/i.test(cfg.unterlagen.U35.bedingung));
+  wahr("Daten: Unterschriftsstelle heimweg.unterschrift statt karneval_auftritte",
+    Array.isArray(cfg.unterschriftStellen.heimweg) && cfg.unterschriftStellen.heimweg.some((x) => x.stelleKey === "unterschrift") && cfg.unterschriftStellen.karneval_auftritte === undefined);
   // Unterschriftsstellen: der Aufnahmeantrag nutzt die vermessenen Schlüssel
   ["s2.unterschrift", "s3.unterschrift", "s4.unterschrift"].forEach((k) => wahr("Unterschriftsstelle " + k, cfg.unterschriftStellen.aufnahmeantrag.some((s) => s.stelleKey === k) && !!felder[k]));
   wahr("Unterschriftsstelle s2.unterschrift_sorgeberechtigte (zusätzliche Zeile)", cfg.unterschriftStellen.aufnahmeantrag.some((s) => s.stelleKey === "s2.unterschrift_sorgeberechtigte"));
@@ -488,25 +539,55 @@ function testeFaelleUndRegeln() {
     gleich("R14 " + id + ": keine Zusage", [e.frist.regel, e.frist.pflichtspieleAb, e.frist.freundschaftsspieleAb, e.frist.unsicher], ["R14", null, null, true]);
     enthaelt("R14 " + id + ": Warnung", e.hinweise.filter((h) => h.art === "warnung").map((h) => h.key), "ohne_zusage_spielen");
   });
-  // R15: Beginn der Mitgliedschaft ist offen
+  // R15: Beginn der Mitgliedschaft wie in der Satzung (§ 6): am Tag der Anmeldung (Entscheidung der 1. Vorsitzenden vom 11.10.2026)
   const e15 = R.auswerten(BAUSTEINE.kind({}), konfig, HEUTE_STANDARD);
   const h15 = e15.hinweise.find((h) => h.key === "mitgliedschaft_beginn");
-  wahr("R15: Hinweis art offen", !!h15 && h15.art === "offen");
-  // Probetraining und Versicherung
+  wahr("R15: Hinweis art info (nicht mehr offen)", !!h15 && h15.art === "info");
+  gleich("R15: Text des Hinweises", texte.hinweise.mitgliedschaft_beginn, "Die Mitgliedschaft beginnt am Tag der Anmeldung.");
+  ["passiv", "karneval"].forEach((abt) => {
+    const h = R.auswerten(BAUSTEINE.erwachsen({ abteilung: abt, spielen: null, spielerpass: null }), konfig, HEUTE_STANDARD).hinweise.find((x) => x.key === "mitgliedschaft_beginn");
+    wahr("R15: Hinweis auch bei " + abt, !!h && h.art === "info");
+  });
+  // Probetraining: Nichtmitglieder sind nicht über den Verein versichert (O27 und O31)
   enthaelt("Probetraining-Hinweis bei aktiven Mitgliedern", e15.hinweise.map((h) => h.key), "probetraining_versicherung");
+  gleich("Probetraining: Text des Hinweises", texte.hinweise.probetraining_versicherung, "Beim Probetraining sind Nichtmitglieder nicht über den Verein versichert. Melden Sie sich am besten vor dem ersten Training an.");
+  enthaeltNicht("Probetraining: kein Hinweis bei passiven Mitgliedern", R.auswerten(BAUSTEINE.erwachsen({ abteilung: "passiv", spielen: null, spielerpass: null }), konfig, HEUTE_STANDARD).hinweise.map((h) => h.key), "probetraining_versicherung");
+  // Aufnahmegebühr: für alle neuen Mitglieder (Fußball, Karneval, passiv), ohne „offen“; kein Zuschlag ohne Lastschrift
+  ["fussball", "karneval", "beides", "passiv"].forEach((abt) => {
+    const ee = R.auswerten(BAUSTEINE.erwachsen({ abteilung: abt, spielen: abt === "fussball" || abt === "beides" ? true : null, spielerpass: abt === "fussball" || abt === "beides" ? "nein" : null, zahlung: { art: "rechnung", kontoinhaber: null, iban: "" } }), konfig, HEUTE_STANDARD);
+    const u35 = ee.unterlagen.find((u) => u.id === "U35");
+    wahr("Aufnahmegebühr " + abt + ": U35 art verein mit Betrag 20", !!u35 && u35.art === "verein" && u35.werte.betrag === 20);
+    enthaeltNicht("Aufnahmegebühr " + abt + ": kein Hinweis „offen“ zur Aufnahmegebühr", ee.hinweise.map((h) => h.key), "aufnahmegebuehr_offen");
+    enthaeltNicht("Zuschlag " + abt + ": kein Hinweis zum Zuschlag ohne Lastschrift (Rechnung)", ee.hinweise.map((h) => h.key), "zuschlag_ohne_sepa");
+    wahr("Zuschlag " + abt + ": das Beitragsergebnis kennt keinen Zuschlag mehr", !("zuschlagOhneSepa" in ee.beitrag) && !("zuschlag" in ee.beitrag.werte));
+  });
+  // Doppelmitgliedschaft: „Fragen Sie nach einem eigenen Beitrag.“ (Hinweis info, Text des Beitrags, Weiterleitung an die Geschäftsstelle)
+  const dm = R.auswerten(BAUSTEINE.erwachsen({ abteilung: "beides" }), konfig, HEUTE_STANDARD);
+  wahr("Doppelmitgliedschaft: Hinweis beitrag_doppel ist info", dm.hinweise.some((h) => h.key === "beitrag_doppel" && h.art === "info"));
+  gleich("Doppelmitgliedschaft: Satz im Beitragstext", texte.beitrag.beitrag_doppel, "Sind Sie in Fußball und Karneval? Fragen Sie nach einem eigenen Beitrag.");
   // Unterlagen: Wasserzeichen-Logik gehört zu AP-3; hier: Ausweise Deutscher werden nicht verlangt
   const deutsch = R.auswerten(BAUSTEINE.kind({ geburtsdatum: "2013-01-01" }), konfig, HEUTE_STANDARD);
   wahr("Deutsche Kinder: keine Ausweiskopie", !deutsch.unterlagen.some((u) => u.id === "U12"));
-  // Gruppenvorschlag im Karneval nach Alter (Sekundärquelle, nicht bestätigt)
-  const gruppeFuer = (geb) => R.auswerten(BAUSTEINE.kind({ geburtsdatum: geb, abteilung: "karneval", spielen: null, spielerpass: null, karneval: { gruppe: null, tanztWoanders: "nein", turnier: "nein", abendOhneEltern: "nein" } }), konfig, HEUTE_STANDARD).karneval.gruppenVorschlag;
-  gleich("Karneval: 5 Jahre", gruppeFuer("2021-05-05"), ["Little Fruities"]);
-  gleich("Karneval: 9 Jahre", gruppeFuer("2017-05-05"), ["Freaky Fruities"]);
-  gleich("Karneval: 16 Jahre - beide Gruppen möglich", gruppeFuer("2010-05-05"), ["Freaky Fruities", "Flying Fruities"]);
-  gleich("Karneval: 20 Jahre", gruppeFuer("2006-05-05"), ["Flying Fruities", "Pfläumchen", "Dreamboys"]);
-  gleich("Karneval: 3 Jahre - keine Gruppe", gruppeFuer("2023-05-05"), []);
+  // Karneval schlank (Entscheidung der 1. Vorsitzenden vom 11.10.2026): keine Gruppe, kein Gruppenvorschlag, nichts zu Turnieren,
+  // Auftritten, Abendauftritten oder „tanzt woanders“. Auch dann nicht, wenn alte Antworten solche Felder noch enthalten.
+  const KARNEVAL_ALT = { karneval: { gruppe: "Freaky Fruities", tanztWoanders: "ja", turnier: "ja", abendOhneEltern: "ja", abholung: "Oma", alleinNachHause: "ja", alleinAb: "21:30" } };
+  [{}, KARNEVAL_ALT].forEach((alt, i) => {
+    const ek = R.auswerten(BAUSTEINE.kind(Object.assign({ abteilung: "karneval", spielen: null, spielerpass: null, geburtsdatum: "2017-05-05" }, alt)), konfig, HEUTE_STANDARD);
+    const was = i ? "mit alten Karneval-Antworten" : "ohne Karneval-Antworten";
+    wahr("Karneval " + was + ": das Ergebnis kennt keine Gruppe und keinen Gruppenvorschlag", ek.karneval === undefined);
+    wahr("Karneval " + was + ": keine Unterlage U30, U31 oder U32", !ek.unterlagen.some((u) => U_ENTFALLEN.includes(u.id)));
+    wahr("Karneval " + was + ": kein Formular karneval_auftritte", !ek.formulare.includes("karneval_auftritte") && !ek.unterschriften.some((u) => u.formular === "karneval_auftritte"));
+    const verboten = ["karneval_tanzt_woanders", "karneval_gruppe_vorschlag", "karneval_abend", "karneval_turnier_offen", "karneval_gruppe_alter_pruefen", "kostueme_offen"];
+    wahr("Karneval " + was + ": keine Hinweise zu Gruppen, Turnieren, Auftritten und Kostümen", !ek.hinweise.some((h) => verboten.includes(h.key)), ek.hinweise.map((h) => h.key).join(","));
+    wahr("Karneval " + was + ": keine Weiterleitung zu Gruppe, Turnier und Kostümen", !ek.weiterleitung.some((w) => ["gruppe_einteilung", "turnier", "kostueme"].includes(w.key)), JSON.stringify(ek.weiterleitung));
+    wahr("Karneval " + was + ": der Schritt karneval kommt nicht vor", !R.schritte(BAUSTEINE.kind(Object.assign({ abteilung: "karneval", spielen: null, spielerpass: null }, alt)), konfig, HEUTE_STANDARD).includes("karneval"));
+  });
+  wahr("Schlüsselregister: keine Schlüssel zu Gruppen, Turnieren, Auftritten, Kostümen, Zuschlag und Aufnahmegebühr „offen“",
+    !R.SCHLUESSEL.hinweise.some((k) => /karneval_(tanzt|gruppe|abend|turnier)|kostueme|zuschlag|aufnahmegebuehr_offen/.test(k)) && !R.SCHLUESSEL.weiterleitung.some((k) => ["gruppe_einteilung", "turnier", "kostueme"].includes(k)));
   // Karneval: keine HFV-Unterlagen und kein Attest
   const karneval = R.auswerten(BAUSTEINE.kind({ abteilung: "karneval", spielen: null, spielerpass: null, geburtsdatum: "2016-05-05" }), konfig, HEUTE_STANDARD);
   wahr("Karneval: kein Attest, keine HFV-Unterlagen", !karneval.unterlagen.some((u) => /^U(0[7-9]|1\d|2[0-7])$/.test(u.id) && u.id !== "U19" || ["U36", "U37", "U38", "U39", "U40"].includes(u.id)));
+  gleich("Karneval-Kind: die Unterlagen sind genau diese (mit Heimweg, ohne U30 bis U32)", karneval.unterlagen.map((u) => u.id), ["U01", "U04", "U05", "U06", "U28", "U29", "U35", "U41"]);
   // Beitrag: Doppelmitgliedschaft nennt zwei Gruppen
   const doppel = R.auswerten(BAUSTEINE.erwachsen({ abteilung: "beides" }), konfig, HEUTE_STANDARD);
   gleich("Doppelmitgliedschaft: zwei Gruppen", doppel.beitrag.gruppen, ["fussball_erwachsene", "karneval_erwachsene"]);
@@ -667,10 +748,10 @@ function testeAttestBeiWechsel() {
   });
 }
 
-// ---------- 5b. Foto-Einwilligung Jugendlicher (O65 offen) ----------
-// Der Vorstand hat noch nicht entschieden, ob ab 14 oder ab 16 Jahren auch die Jugendlichen bei den Fotos mit
-// unterschreiben (O65). Bis dahin gibt es den Hinweis "jugendlicher_unterschreibt_mit" nicht mehr, und bei der
-// Foto-Einwilligung (aufnahmeantrag, s3.unterschrift) unterschreiben nur die Sorgeberechtigten.
+// ---------- 5b. Foto-Einwilligung Jugendlicher (O65: nur die Eltern unterschreiben) ----------
+// Entscheidung der 1. Vorsitzenden vom 11.10.2026: Bei der Foto-Einwilligung unterschreiben nur die Eltern, auch bei Jugendlichen.
+// Den Hinweis "jugendlicher_unterschreibt_mit" gibt es nicht, und bei der Foto-Einwilligung (aufnahmeantrag, s3.unterschrift)
+// unterschreiben nur die Sorgeberechtigten. Kein Text sagt, der Verein kläre das noch (testeFotoTexte).
 
 function testeFotoEinwilligungJugendlicher() {
   const HINWEIS = "jugendlicher_unterschreibt_mit";
@@ -684,10 +765,24 @@ function testeFotoEinwilligungJugendlicher() {
   });
 }
 
+// Kein Text zur Foto-Einwilligung sagt, der Verein kläre noch, ob Jugendliche mit unterschreiben (Entscheidung O65 vom 11.10.2026)
+async function testeFotoTexte(texte) {
+  if (!texte) return;
+  const oberflaeche = (await import("../../assets/js/anmeldung/texte/de-oberflaeche.js")).default;
+  const sammle = (wert, pfad, aus) => {
+    if (typeof wert === "string") aus.push([pfad, wert]);
+    else if (wert && typeof wert === "object") Object.keys(wert).forEach((k) => sammle(wert[k], pfad + "." + k, aus));
+    return aus;
+  };
+  const fotoTexte = [].concat(sammle(texte.unterlagen.U04, "de-regeln unterlagen.U04", []), sammle(oberflaeche.einwilligungen.fotos, "de-oberflaeche einwilligungen.fotos", []));
+  wahr("O65: Texte zur Foto-Einwilligung gefunden (" + fotoTexte.length + ")", fotoTexte.length >= 12);
+  fotoTexte.forEach(([pfad, t]) => wahr("O65 " + pfad + ": kein Text sagt, der Verein kläre das noch, und keine Altersgrenze 14 oder 16", !/klär|noch offen|noch nicht entschieden|Vorstand|ab 14|ab 16|Einsichtsf/i.test(t), t));
+}
+
 // ---------- 6. Schritte ----------
 
-const KANON = ["start", "wer", "name", "geburt", "abteilung", "mannschaft", "spielen", "spielerpass", "alter_verein", "abmeldung", "pass", "ausland", "wohnen", "sorge", "besonderes", "karneval",
-  "kontakt", "beitrag", "leistungen", "zahlung", "einwilligungen", "notfall", "spielerfoto", "nachweise", "unterschriften", "pruefen", "fertig"];
+const KANON = ["start", "wer", "name", "geburt", "abteilung", "mannschaft", "spielen", "spielerpass", "alter_verein", "abmeldung", "pass", "ausland", "wohnen", "sorge", "besonderes",
+  "kontakt", "beitrag", "leistungen", "zahlung", "einwilligungen", "heimweg", "notfall", "spielerfoto", "nachweise", "unterschriften", "pruefen", "fertig"];
 
 function pruefeSchrittForm(name, s) {
   wahr(name + ": beginnt mit start, wer, name, geburt, abteilung", s.slice(0, 5).join(",") === "start,wer,name,geburt,abteilung");
@@ -698,10 +793,27 @@ function pruefeSchrittForm(name, s) {
 function testeSchritte() {
   gleich("Schritte ohne Antworten", R.schritte({}, konfig, HEUTE_STANDARD), ["start", "wer", "name", "geburt", "abteilung", "kontakt", "beitrag", "zahlung", "einwilligungen", "unterschriften", "pruefen", "fertig"]);
   const karneval = R.schritte(BAUSTEINE.kind({ abteilung: "karneval", spielen: null }), konfig, HEUTE_STANDARD);
-  gleich("Schritte Karneval-Kind", karneval, ["start", "wer", "name", "geburt", "abteilung", "sorge", "karneval", "kontakt", "beitrag", "leistungen", "zahlung", "einwilligungen", "notfall", "unterschriften", "pruefen", "fertig"]);
+  gleich("Schritte Karneval-Kind: ohne Schritt karneval, mit heimweg zwischen einwilligungen und notfall", karneval, ["start", "wer", "name", "geburt", "abteilung", "sorge", "kontakt", "beitrag", "leistungen", "zahlung", "einwilligungen", "heimweg", "notfall", "unterschriften", "pruefen", "fertig"]);
   const passivKind = R.schritte(BAUSTEINE.kind({ abteilung: "passiv", spielen: null, geburtsdatum: "2010-05-05" }), konfig, HEUTE_STANDARD);
   enthaeltNicht("Passives Kind braucht keinen Notfallbogen", passivKind, "notfall");
+  enthaeltNicht("Passives Kind braucht keinen Heimweg", passivKind, "heimweg");
   enthaelt("Passives Kind braucht Sorgerecht", passivKind, "sorge");
+  // Heimweg (Aufsichtspflicht, Entscheidung der 1. Vorsitzenden vom 11.10.2026): genau bei minderjährig und aktiv (Fußball, Karneval, beides)
+  const heimwegAb = (zusatz, bau) => R.schritte((bau || BAUSTEINE.kind)(zusatz), konfig, HEUTE_STANDARD).includes("heimweg");
+  [["fussball", true], ["karneval", true], ["beides", true], ["passiv", false]].forEach(([abt, soll]) => {
+    const z = { abteilung: abt, spielen: abt === "fussball" || abt === "beides" ? true : null, spielerpass: abt === "fussball" || abt === "beides" ? "nein" : null };
+    gleich("Heimweg: Kind in " + abt + (soll ? " hat den Schritt" : " hat ihn nicht"), heimwegAb(z), soll);
+    gleich("Heimweg: Erwachsene in " + abt + " haben den Schritt nie", heimwegAb(z, BAUSTEINE.erwachsen), false);
+  });
+  gleich("Heimweg: Kind nur zum Training hat den Schritt", heimwegAb({ spielen: false, spielerpass: null }), true);
+  gleich("Heimweg: 17-Jährige in der A-Jugend haben den Schritt", heimwegAb({ geburtsdatum: "2009-05-05" }), true);
+  gleich("Heimweg: 18-Jährige in der A-Jugend haben den Schritt nicht", heimwegAb({ geburtsdatum: "2008-01-05", sorge: null, sorgeberechtigte: [] }), false);
+  gleich("Heimweg: ohne Geburtsdatum noch nicht entscheidbar", heimwegAb({ geburtsdatum: null }), false);
+  gleich("Heimweg: ohne Abteilung noch nicht entscheidbar", heimwegAb({ abteilung: null }), false);
+  const reihenfolge = R.schritte(BAUSTEINE.kind({}), konfig, HEUTE_STANDARD);
+  wahr("Heimweg: gleich nach einwilligungen und vor notfall", reihenfolge.indexOf("heimweg") === reihenfolge.indexOf("einwilligungen") + 1 && reihenfolge.indexOf("notfall") === reihenfolge.indexOf("heimweg") + 1);
+  [{ abteilung: "karneval", spielen: null, spielerpass: null }, {}, { abteilung: "beides" }, { abteilung: "passiv", spielen: null, spielerpass: null }].forEach((z) =>
+    enthaeltNicht("Der Schritt karneval gibt es nicht mehr (" + (z.abteilung || "fussball") + ")", R.schritte(BAUSTEINE.kind(z), konfig, HEUTE_STANDARD), "karneval"));
   const nurAbteilung = R.schritte({ abteilung: "fussball", geburtsdatum: "2014-05-10" }, konfig, HEUTE_STANDARD);
   gleich("Fußball ohne Antwort zu Spielen: mannschaft und spielen, sonst nichts", nurAbteilung.filter((s) => ["mannschaft", "spielen", "spielerpass", "pass", "ausland", "spielerfoto"].includes(s)), ["mannschaft", "spielen"]);
   const nurTraining = R.schritte(BAUSTEINE.kind({ spielen: false }), konfig, HEUTE_STANDARD);
@@ -813,7 +925,7 @@ const NAMEN_FORMULARE = {
   einverstaendnis_senioren: "Einverständnis für Spiele bei den Herren",
   einverstaendnis_maedchen: "Einverständnis für Mädchen bei den Jungen",
   einverstaendnis_fahrten: "Einverständnis für Fahrten und Messenger-Gruppe",
-  karneval_auftritte: "Erlaubnis für Auftritte am Abend",
+  heimweg: "Heimweg nach dem Training",
   attest: "Attest vom Arzt",
   notfall: "Notfall- und Gesundheitsbogen",
 };
@@ -823,7 +935,7 @@ const NAMEN_UNTERLAGEN = {
   U10: "Attest vom Arzt", U11: "Erlaubnis für das Attest", U17: "Abmeldung beim alten Verein", U18: "Vollmacht für die Abmeldung",
   U19: "Kündigung beim alten Verein oder passiv bleiben", U23: "Einverständnis für Spiele bei den Herren",
   U24: "Einverständnis für Mädchen bei den Jungen", U28: "Notfall- und Gesundheitsbogen",
-  U29: "Einverständnis für Fahrten und Messenger-Gruppe", U30: "Erlaubnis für Auftritte am Abend",
+  U29: "Einverständnis für Fahrten und Messenger-Gruppe", U41: "Heimweg nach dem Training",
 };
 
 function alleTextwerte(wert, pfad, aus) {
@@ -841,7 +953,7 @@ function testeNamen(texte) {
   // Unterlage und Formular tragen denselben Namen, wenn die Unterlage das ganze Blatt ist
   [["U01", "aufnahmeantrag"], ["U02", "familienliste"], ["U06", "datenschutz"], ["U07", "hfv_antrag"], ["U10", "attest"], ["U17", "abmeldung"],
     ["U18", "vollmacht"], ["U23", "einverstaendnis_senioren"], ["U24", "einverstaendnis_maedchen"], ["U28", "notfall"],
-    ["U29", "einverstaendnis_fahrten"], ["U30", "karneval_auftritte"], ["U04", "foto_einwilligung"], ["U05", "sepa"]]
+    ["U29", "einverstaendnis_fahrten"], ["U41", "heimweg"], ["U04", "foto_einwilligung"], ["U05", "sepa"]]
     .forEach(([u, f]) => gleich("Namen: " + u + " heißt wie " + f, texte.unterlagen[u].name, texte.formulare[f]));
   // Beschriftungen der Unterschriften beginnen mit demselben Namen
   const stelleZuFormular = {
@@ -850,7 +962,7 @@ function testeNamen(texte) {
     "hfv_antrag.spieler": "hfv_antrag", "hfv_antrag.erziehungsberechtigte": "hfv_antrag", "hfv_antrag.verein": "hfv_antrag",
     "vollmacht.unterschrift": "vollmacht", "abmeldung.unterschrift": "abmeldung", "abmeldung.unterschrift_vertreter": "abmeldung",
     "einverstaendnis_senioren.unterschrift": "einverstaendnis_senioren", "einverstaendnis_maedchen.unterschrift": "einverstaendnis_maedchen",
-    "einverstaendnis_fahrten.unterschrift": "einverstaendnis_fahrten", "karneval_auftritte.unterschrift": "karneval_auftritte",
+    "einverstaendnis_fahrten.unterschrift": "einverstaendnis_fahrten", "heimweg.unterschrift": "heimweg",
     "attest.arzt": "attest", "notfall.unterschrift": "notfall",
   };
   Object.entries(stelleZuFormular).forEach(([stelle, f]) => wahr("Namen: Beschriftung " + stelle + " beginnt mit '" + texte.formulare[f] + "'",
@@ -923,7 +1035,9 @@ function zufallsAntworten(r, heute) {
     wohnen: auswahl(r, ["gemeinsam", "nicht_gemeinsam", "verwandte", "ohne_eltern", null]), ohneElternGrund: auswahl(r, ["gefluechtet", "austausch", "verwandte", "pflege", null]),
     sorge: auswahl(r, ["beide", "beide", "getrennt_bei_mir", "allein", "vormund", "pflege", null]), andererElternteilEinverstanden: auswahl(r, [true, false, null]),
     besonderes: { maedchenJungenteam: r() < 0.3, herrenAushilfe: r() < 0.3, sonderspielrecht: r() < 0.2, frauHerren: r() < 0.3 },
-    karneval: { gruppe: auswahl(r, ["Freaky Fruities", "Dreamboys", "weiss_nicht", null]), tanztWoanders: auswahl(r, ["ja", "nein", null]), turnier: auswahl(r, ["ja", "nein", "weiss_nicht", null]), abendOhneEltern: auswahl(r, ["ja", "nein", null]) },
+    // Alte Karneval-Antworten gibt es nicht mehr; kommen sie trotzdem vor, darf das Regelwerk sie nicht auswerten
+    karneval: auswahl(r, [undefined, undefined, { gruppe: "Dreamboys", tanztWoanders: "ja", turnier: "ja", abendOhneEltern: "ja", abholung: "Oma", alleinNachHause: "ja", alleinAb: "21:30" }]),
+    heimweg: auswahl(r, ["allein", "abholen", null, "egal"]),
     beitrag: { gruppe: auswahl(r, [null, null, "fussball_jugend", "fussball_passiv", "karneval_azubi", "karneval_senator", "karneval_kinder", "karneval_rentner", "gibt_es_nicht"]),
       familie: auswahl(r, [[], [], [{ vorname: "A", nachname: "B", geburtsdatum: "2018-01-01" }]]), senator: r() < 0.15, doppel: r() < 0.15 },
     leistungen: auswahl(r, ["ja", "nein", null]),
@@ -989,9 +1103,18 @@ function pruefeZufall(fall, texte, nr) {
   // Erwachsene: keine Sorgeberechtigten; Minderjährige: keine Mitglieds-Unterschrift und keine Erwachsenen-Unterlagen
   if (e.minderjaehrig === false) {
     lokal(!e.unterschriften.some((u) => u.wer.indexOf("sorge") === 0 || u.wer === "spieler"), "Sorgeberechtigte bei Erwachsenen");
-    lokal(!ids.some((u) => ["U28", "U29", "U33", "U30", "U24", "U23", "U25"].includes(u)), "Kinder-Unterlage bei Erwachsenen: " + ids.join(","));
+    lokal(!ids.some((u) => ["U28", "U29", "U33", "U41", "U24", "U23", "U25"].includes(u)), "Kinder-Unterlage bei Erwachsenen: " + ids.join(","));
     lokal(!e.faelle.some((f) => ["F13", "F14", "F15", "F16", "F17", "F18", "F03", "F04", "F05", "F06", "F07"].includes(f)), "Kinderfall bei Erwachsenen");
   }
+  // Heimweg (Aufsichtspflicht, Entscheidung der 1. Vorsitzenden vom 11.10.2026): genau bei minderjährig und aktiv (Fußball, Karneval,
+  // beides), nie bei Passiven und nie bei Erwachsenen. Schritt, Unterlage U41, Formular und Unterschrift gehören zusammen.
+  const heimwegSoll = e.minderjaehrig === true && ["fussball", "karneval", "beides"].includes(a.abteilung);
+  lokal(ids.includes("U41") === heimwegSoll, "U41 passt nicht zu minderjährig und aktiv (Soll " + heimwegSoll + ")");
+  lokal(s.includes("heimweg") === heimwegSoll, "Schritt heimweg passt nicht zu minderjährig und aktiv (Soll " + heimwegSoll + ")");
+  lokal(e.formulare.includes("heimweg") === heimwegSoll, "Formular heimweg passt nicht zu minderjährig und aktiv (Soll " + heimwegSoll + ")");
+  lokal(e.unterschriften.filter((u) => u.formular === "heimweg").map((u) => u.stelleKey + ":" + u.wer).join() === (heimwegSoll ? "unterschrift:sorgeberechtigte" : ""), "Unterschrift des Heimwegs: " + JSON.stringify(e.unterschriften.filter((u) => u.formular === "heimweg")));
+  lokal(!ids.some((u) => U_ENTFALLEN.includes(u)) && !e.formulare.includes("karneval_auftritte") && !("karneval" in e), "Reste des Karneval-Schritts im Ergebnis (U30 bis U32, karneval_auftritte, e.karneval)");
+  lokal(!s.includes("karneval"), "Schritt karneval kommt noch vor");
   // O26 (Jugendleitung, 08.10.2026): Ein Elternteil reicht. Den zweiten Elternteil gibt es nur bei getrennt lebenden Eltern ohne Einverständnis.
   lokal(e.unterschriften.some((u) => u.wer === "sorgeberechtigte_beide") === (e.minderjaehrig === true && a.sorge === "getrennt_bei_mir" && a.andererElternteilEinverstanden !== true),
     "zweiter Elternteil nur bei getrennt lebenden Eltern ohne Einverständnis");
@@ -1127,6 +1250,7 @@ await testeZufall(texte);
 testeFaelleUndRegeln();
 testeAttestBeiWechsel();
 testeFotoEinwilligungJugendlicher();
+await testeFotoTexte(texte);
 testeAbdeckung();
 testeQuelltext();
 

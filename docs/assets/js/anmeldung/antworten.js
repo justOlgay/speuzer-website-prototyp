@@ -44,7 +44,6 @@ export function neueAntworten(sprache) {
     andererElternteilEinverstanden: false,
     sorgeberechtigte: [],
     besonderes: { maedchenJungenteam: false, herrenAushilfe: false, sonderspielrecht: false, frauHerren: false },
-    karneval: { gruppe: null, tanztWoanders: null, turnier: null, abendOhneEltern: null, abholung: "", alleinNachHause: null, alleinAb: "" },
     anschrift: { strasse: "", plz: "", ort: "" },
     email: "",
     telefon: "",
@@ -65,6 +64,7 @@ export function neueAntworten(sprache) {
       bank: "",
     },
     einwilligungen: { fotos: null, medien: [], hfvName: false, hfvFoto: false, fahrten: false, messenger: false },
+    heimweg: null, // "allein" | "abholen" (nur Minderjährige, die trainieren oder tanzen)
     notfall: { name: "", telefon: "", beziehung: "" },
     gesundheitsbogen: null,
     gesundheit: { allergien: "", erkrankungen: "", medikamente: "", sonstiges: "" },

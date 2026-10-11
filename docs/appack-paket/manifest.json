@@ -87,13 +87,13 @@
     },
     {
       "datei": "web/mannschaften.html",
-      "bytes": 21180,
-      "sha256": "15afb91b7f83cc3ddf595105166f6efd56edf90b314d1b3fd9a5a6b6503ede19"
+      "bytes": 21271,
+      "sha256": "0f862e934041f7a50e3b5e2c4633225ecb8f29b92e9a1d4bb77bef343c1b849c"
     },
     {
       "datei": "web/mitglied-werden.html",
-      "bytes": 15254,
-      "sha256": "00fd90bcc05448bbee6f382a44360f82102d8ac45a9265222d9cde9ec19ba652"
+      "bytes": 15444,
+      "sha256": "af0002dbc11c5fa7f2abd737e1a7368cc5c17a1f0446cfe16a00de98eec22ad7"
     },
     {
       "datei": "web/shop.html",

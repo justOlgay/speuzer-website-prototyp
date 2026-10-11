@@ -210,12 +210,11 @@ const PFADE = new Set([
   ...["schema", "sprache", "wer", "vorname", "nachname", "geburtsdatum", "geburtsort", "geburtsland", "geschlecht", "spielrechtFuer", "geborenInDe", "jahreInDe",
     "abteilung", "spielen", "spielerpass", "letztesSpiel", "letztesPflichtspiel", "sperre", "sperreBis", "freigabe", "wechselLetzte6Monate", "deutsch", "staaten",
     "auslandGewohnt", "auslandLand", "auslandStadt", "wohnen", "wohnenSeit", "ohneElternGrund", "sorge", "andererElternteilEinverstanden", "sorgeberechtigte",
-    "email", "telefon", "mobil", "leistungen", "gesundheitsbogen", "nachweise", "unterschriftWeg", "hfvUnterschrift",
+    "email", "telefon", "mobil", "leistungen", "heimweg", "gesundheitsbogen", "nachweise", "unterschriftWeg", "hfvUnterschrift",
     "alterVerein.region", "alterVerein.name", "alterVerein.ort", "alterVerein.land", "alterVerein.verband",
     "alterVerein.mitgliedschaft", "alterVerein.empfaenger", "alterVerein.strasse", "alterVerein.plzOrt",
     "abmeldung.status", "abmeldung.datum", "abmeldung.weg",
     "besonderes.maedchenJungenteam", "besonderes.herrenAushilfe", "besonderes.sonderspielrecht", "besonderes.frauHerren",
-    "karneval.gruppe", "karneval.tanztWoanders", "karneval.turnier", "karneval.abendOhneEltern",
     "anschrift.strasse", "anschrift.plz", "anschrift.ort",
     "beitrag.gruppe", "beitrag.familie", "beitrag.senator", "beitrag.doppel",
     "zahlung.art", "zahlung.kontoinhaber", "zahlung.kiVorname", "zahlung.kiNachname", "zahlung.kiAnschriftGleich", "zahlung.kiStrasse", "zahlung.kiPlz", "zahlung.kiOrt",
@@ -228,13 +227,13 @@ const PFADE = new Set([
   ...["version", "alter", "minderjaehrig", "jahrgang", "altersklasse", "faelle", "status", "international", "unterlagen", "formulare", "unterschriften", "hinweise",
     "weiterleitung", "fehlend", "mannschaft.vorhanden", "mannschaft.namen", "mannschaft.hinweisKey",
     "frist.pflichtspieleAb", "frist.freundschaftsspieleAb", "frist.regel", "frist.unsicher", "frist.key",
-    "beitrag.gruppe", "beitrag.jahr", "beitrag.monat", "beitrag.aufnahmegebuehr", "beitrag.zuschlagOhneSepa", "beitrag.hinweisKey"].map((p) => "e." + p),
+    "beitrag.gruppe", "beitrag.jahr", "beitrag.monat", "beitrag.aufnahmegebuehr", "beitrag.hinweisKey"].map((p) => "e." + p),
   // konfig (Abschnitt 2)
-  ...["anmeldung", "formulare", "aufnahmeantragFelder", "beitraege", "karnevalGruppen", "stand",
+  ...["anmeldung", "formulare", "aufnahmeantragFelder", "beitraege", "stand",
     "verein.name", "verein.name_register", "verein.mail", "verein.tel_geschaeftsstelle", "verein.vereinsnummer", "verein.vereinsnummerHfv", "verein.anschrift"].map((p) => "konfig." + p),
 ]);
 const FORMULAR_SCHLUESSEL = ["aufnahmeantrag", "hfv_antrag", "vollmacht", "abmeldung", "einverstaendnis_senioren", "attest", "datenschutz", "notfall",
-  "einverstaendnis_fahrten", "einverstaendnis_maedchen", "karneval_auftritte", "familienliste"];
+  "einverstaendnis_fahrten", "einverstaendnis_maedchen", "heimweg", "familienliste"];
 const ENUMS = {
   "a.wer": ["kind", "selbst"],
   "a.geschlecht": ["m", "w", "d", "ohne_angabe"],

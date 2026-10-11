@@ -8,10 +8,10 @@
   - Wer den Verband meint: der Hessische Fußball-Verband. Im Text steht kurz "der Verband".
   - Platzhalter stehen in geschweiften Klammern, zum Beispiel {datum}. Die Werte liefert auswerten():
       unterlagen[].werte   {betrag}, {jahre}
-      hinweise[].werte     {datum}, {betrag}, {tage}, {gruppe}, {gruppen}, {saison}
+      hinweise[].werte     {datum}, {betrag}, {tage}, {gruppe}, {saison}
       frist.werte          {pflichtspiele}, {freundschaftsspiele}, {abmeldung}, {antragBis}, {monate}, {alternativ}
       mannschaft.werte     {mannschaft}, {mannschaften}, {klasse}, {jahrgang}
-      beitrag.werte        {jahr}, {monat}, {aufnahmegebuehr}, {zuschlag}
+      beitrag.werte        {jahr}, {monat}, {aufnahmegebuehr}
   - Quellen und Paragraphen stehen nicht hier, sondern in data/anmeldung.json (Vereinssicht, Laufzettel, Konzept).
 
   Aufbau wie SCHNITTSTELLEN Abschnitt 5 (unterlagen, hinweise, faelle, weiterleitung, frist, mannschaft, beitrag).
@@ -229,27 +229,6 @@ export default {
       wie: "Sie kreuzen an, was Sie erlauben. Dann unterschreiben Sie.",
       wo: "Das Blatt gehört zum Teil für den Verein.",
     },
-    U30: {
-      name: "Erlaubnis für Auftritte am Abend",
-      kurz: "Sie erlauben, dass Ihr Kind abends ohne Eltern auftritt.",
-      warum: "So darf eine Trainerin oder ein Trainer auf Ihr Kind aufpassen.",
-      wie: "Sie schreiben Ihre Telefonnummer dazu und unterschreiben.",
-      wo: "Das Blatt gehört zum Teil für den Verein.",
-    },
-    U31: {
-      name: "Vereinbarung für Kostüme",
-      kurz: "Der Verein klärt noch, wie das mit den Kostümen geht.",
-      warum: "Es geht um Kosten und darum, wem die Kostüme gehören.",
-      wie: "Die Trainerinnen sagen Ihnen rechtzeitig Bescheid.",
-      wo: "Sie müssen jetzt nichts tun.",
-    },
-    U32: {
-      name: "Papiere für Tanzturniere",
-      kurz: "Bei Turnieren braucht Ihr Kind vielleicht einen Ausweis.",
-      warum: "Beim Turnier prüfen die Veranstalter den Ausweis.",
-      wie: "Die Trainerinnen sagen Ihnen Bescheid. Ein Ausweis mit Foto hilft.",
-      wo: "Sie müssen jetzt nichts tun.",
-    },
     U33: {
       name: "Bescheinigung für Bildung und Teilhabe",
       kurz: "Das ist ein Papier vom Verein über den Beitrag.",
@@ -268,7 +247,7 @@ export default {
       name: "Aufnahmegebühr",
       kurz: "Neue Mitglieder zahlen einmal {betrag} Euro.",
       warum: "So steht es im Aufnahmeantrag.",
-      wie: "Der Verein sagt Ihnen, wie Sie zahlen.",
+      wie: "Der Verein zieht sie mit dem ersten Beitrag ein.",
       wo: "Sie müssen dazu nichts hochladen.",
     },
     U36: {
@@ -306,6 +285,14 @@ export default {
       wie: "Der Verein stellt den Antrag zusammen mit der Vertrauensperson vom Verband.",
       wo: "Die Vertrauensperson meldet sich bei Ihnen. Bei Kindern stimmen die Eltern zu.",
     },
+    // U30 bis U32 gibt es nicht mehr (Karneval ohne Gruppenwahl, Auftritte und Turniere; Entscheidung vom 11.10.2026).
+    U41: {
+      name: "Heimweg nach dem Training",
+      kurz: "Sie sagen, wie Ihr Kind nach dem Training nach Hause kommt.",
+      warum: "Der Verein weiß dann, ob Ihr Kind allein gehen darf.",
+      wie: "Sie wählen im Assistenten eine Antwort. Dann unterschreiben Sie.",
+      wo: "Das Blatt gehört zum Teil für den Verein. Die Trainer bekommen eine Kopie.",
+    },
   },
 
   hinweise: {
@@ -323,7 +310,6 @@ export default {
     f17_wahrscheinlich_nicht: "Ohne 5 Jahre Aufenthalt darf das Kind wahrscheinlich nicht spielen. Spielen ist dann erst mit 18 möglich. Auch Freundschaftsspiele sind dann nicht erlaubt.",
     aushilfe_nur_ausnahme: "Bei diesem Jahrgang darf der Jugendliche nur selten bei den Herren aushelfen. Die Jugendleitung prüft das.",
     getrennt_zustimmung: "Bitte fragen Sie den anderen Elternteil. Er muss mit der Anmeldung einverstanden sein. Am besten unterschreibt er den Aufnahmeantrag mit.",
-    karneval_tanzt_woanders: "Tänzerinnen und Tänzer starten bei Turnieren nur für einen Verein.",
     beitrag_gruppe_pruefen: "Die Beitragsgruppe {gruppe} passt vielleicht nicht zum Alter. Der Verein prüft das.",
 
     // Fristen
@@ -331,7 +317,8 @@ export default {
 
     // Infos
     frist_annahme_heute: "Wir rechnen so, als ob die Abmeldung am {abmeldung} zählt. Melden Sie später ab, wird die Wartezeit länger.",
-    probetraining_versicherung: "Wer noch nicht Mitglied ist, hat beim Training keinen eigenen Versicherungsschutz. Melden Sie sich am besten vor dem ersten Training an.",
+    probetraining_versicherung: "Beim Probetraining sind Nichtmitglieder nicht über den Verein versichert. Melden Sie sich am besten vor dem ersten Training an.",
+    mitgliedschaft_beginn: "Die Mitgliedschaft beginnt am Tag der Anmeldung.",
     kuendigung_jahresende: "In unserem Verein können Sie nur zum Jahresende kündigen. Schicken Sie die Kündigung als Einschreiben.",
     ohne_spielrecht_kein_spiel: "Ohne Spielrecht darf ein Kind nicht bei Spielen mitmachen. Auch nicht bei Freundschaftsspielen. Training ist erlaubt.",
     mitgliedschaft_zuerst: "Zuerst werden Sie Mitglied. Dann stellt der Verein den Antrag beim Verband.",
@@ -362,11 +349,10 @@ export default {
     pflege_hinweis: "Die Pflegeperson unterschreibt im Alltag für das Kind. Bringen Sie den Nachweis mit.",
     f17_moeglich_5_jahre: "Das Kind lebt seit 5 Jahren hier. Dann kann der Verband eine Ausnahme prüfen. Sie brauchen den Nachweis über den Wohnsitz.",
     austausch_ein_jahr: "Beim Schüleraustausch gilt das Spielrecht höchstens 1 Jahr. Ein weiterer Wechsel ist nicht erlaubt.",
-    karneval_gruppe_vorschlag: "Nach dem Alter passt diese Gruppe: {gruppen}. Die Trainerinnen entscheiden am Ende.",
     karneval_kein_attest: "Für Karneval brauchen Sie kein Attest. Sie brauchen auch keine Papiere vom Hessischen Fußball-Verband.",
-    karneval_abend: "Das Kind tritt abends ohne Eltern auf. Dafür braucht der Verein Ihre Erlaubnis.",
     passiv_hinweis: "Sie sind passives Mitglied. Sie spielen und trainieren nicht mit. Sie unterstützen den Verein.",
     senator_vorstand: "Der Vorstand entscheidet, ob Sie Senator werden.",
+    beitrag_doppel: "Sind Sie in Fußball und Karneval? Fragen Sie nach einem eigenen Beitrag.",
     kontoinhaber_andere: "Das Konto gehört einer anderen Person. Diese Person unterschreibt die Erlaubnis für die Lastschrift.",
     bildung_teilhabe: "Familien mit wenig Geld bekommen Hilfe für den Beitrag. Es sind bis zu {betrag} Euro im Monat. Fragen Sie beim Jobcenter oder Sozialamt.",
     beitragserlass: "Sie haben wenig Geld? Sprechen Sie mit uns. Der Vorstand kann den Beitrag ganz oder teilweise erlassen.",
@@ -374,7 +360,6 @@ export default {
     passiv_alter_verein: "Sie bleiben im alten Verein passives Mitglied. Auch das erklären Sie dem alten Verein.",
 
     // Offene Punkte
-    mitgliedschaft_beginn: "Der Verein klärt noch, ab wann Ihre Mitgliedschaft gilt. Melden Sie sich am besten früh an.",
     regelwerk_fifa_2027: "Ab {datum} gibt es neue internationale Regeln für Wechsel. Der Verein prüft, was sich ändert.",
     regelwerk_saison_2027: "Ab {datum} ändern sich die Regeln für die E-Jugend. Der Verein prüft, was sich ändert.",
     attest_aktuell: "Das Attest muss neu sein. Wie alt es höchstens sein darf, klärt der Verein.",
@@ -397,14 +382,8 @@ export default {
     spieler_unterschrift_kind: "Muss ein kleines Kind selbst unterschreiben? Der Verein fragt beim Verband nach.",
     unterlagen_liste_offen: "Welche Papiere der Verband genau will, ist noch offen. Der Verein fragt nach und sagt Ihnen Bescheid.",
     wohnen_nicht_gemeinsam: "Kind und Eltern wohnen nicht zusammen. Die Jugendleitung meldet sich bei Ihnen.",
-    karneval_turnier_offen: "Ob die Gruppe bei Turnieren tanzt, ist noch offen. Ein Ausweis mit Foto kann nötig sein.",
-    karneval_gruppe_alter_pruefen: "Die Gruppe {gruppe} passt vielleicht nicht zum Alter. Die Trainerinnen prüfen das.",
     beitrag_familie_offen: "Wer zur Familie zählt, klärt der Verein. Nennen Sie alle Familienmitglieder mit Namen.",
-    zuschlag_ohne_sepa: "Ohne Lastschrift kostet es vielleicht {betrag} Euro mehr im Jahr. Der Vorstand klärt das.",
     iban_ausland_pruefen: "Ihre Kontonummer ist nicht aus Deutschland. Der Verein prüft, ob er abbuchen kann.",
-    aufnahmegebuehr_offen: "Ob die Aufnahmegebühr für Sie gilt, klärt der Verein.",
-    beitrag_doppel: "Sie sind in zwei Abteilungen. Den Beitrag nennt Ihnen die Geschäftsstelle.",
-    kostueme_offen: "Der Verein klärt noch, was Kostüme kosten und wem sie gehören.",
     mitgliedschaft_alter_verein_unklar: "Ob Sie im alten Verein Mitglied bleiben, ist offen. Klären Sie das mit dem alten Verein.",
   },
 
@@ -452,9 +431,6 @@ export default {
     beitrag_familie: "Die Geschäftsstelle prüft, wer zur Familie zählt.",
     senator: "Die Geschäftsstelle gibt Ihren Antrag an den Vorstand.",
     beitragserlass: "Die Geschäftsstelle spricht mit Ihnen über Hilfe beim Beitrag.",
-    gruppe_einteilung: "Die Karnevalabteilung teilt Sie in eine Gruppe ein.",
-    turnier: "Die Karnevalabteilung sagt Ihnen, welche Papiere für Turniere nötig sind.",
-    kostueme: "Die Karnevalabteilung sagt Ihnen, wie das mit den Kostümen geht.",
     herren_wechsel: "Der Spielausschuss der Herren prüft Ihren Wechsel und die Fristen.",
     frau_herren: "Der Spielausschuss der Herren stellt den Antrag für Frauen bei den Herren.",
   },
@@ -502,7 +478,7 @@ export default {
     beitrag_familie: "Der Familienbeitrag beträgt {jahr} Euro im Jahr. Das sind {monat} Euro im Monat. Alle Familienmitglieder sind dabei.",
     beitrag_azubi: "Für Auszubildende und Studierende beträgt der Beitrag {jahr} Euro im Jahr. Sie brauchen einen Nachweis.",
     beitrag_senator: "Senatoren zahlen {jahr} Euro im Jahr. Der Vorstand entscheidet über die Aufnahme.",
-    beitrag_doppel: "Sie sind in beiden Abteilungen. Den Beitrag nennt Ihnen die Geschäftsstelle.",
+    beitrag_doppel: "Sind Sie in Fußball und Karneval? Fragen Sie nach einem eigenen Beitrag.",
     // Namen der Beitragsgruppen (Schlüssel wie in data/anmeldung.json › beitragsgruppen). Auf Deutsch wortgleich mit
     // › bezeichnung; die Oberfläche nutzt diese Texte und fällt auf die Daten zurück, wenn ein Schlüssel fehlt.
     gruppen: {
@@ -534,7 +510,7 @@ export default {
     einverstaendnis_senioren: "Einverständnis für Spiele bei den Herren",
     einverstaendnis_maedchen: "Einverständnis für Mädchen bei den Jungen",
     einverstaendnis_fahrten: "Einverständnis für Fahrten und Messenger-Gruppe",
-    karneval_auftritte: "Erlaubnis für Auftritte am Abend",
+    heimweg: "Heimweg nach dem Training",
     attest: "Attest vom Arzt",
     notfall: "Notfall- und Gesundheitsbogen",
   },
@@ -556,7 +532,7 @@ export default {
     "einverstaendnis_senioren.unterschrift": "Einverständnis für Spiele bei den Herren",
     "einverstaendnis_maedchen.unterschrift": "Einverständnis für Mädchen bei den Jungen",
     "einverstaendnis_fahrten.unterschrift": "Einverständnis für Fahrten und Messenger-Gruppe",
-    "karneval_auftritte.unterschrift": "Erlaubnis für Auftritte am Abend",
+    "heimweg.unterschrift": "Heimweg nach dem Training",
     "attest.arzt": "Attest vom Arzt",
     "attest.einwilligung": "Erlaubnis für das Attest",
     "notfall.unterschrift": "Notfall- und Gesundheitsbogen",

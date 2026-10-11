@@ -1,7 +1,7 @@
 /*
   Texte der Oberfläche des Anmelde-Assistenten - Englisch (British English).
   Übersetzungshilfe: Verbindlich ist der deutsche Text (de-oberflaeche.js), das PDF bleibt deutsch.
-  Stand 08.10.2026. Dieselbe Schlüsselstruktur wie de-oberflaeche.js, aber ohne "sprachen" und
+  Stand 11.10.2026. Dieselbe Schlüsselstruktur wie de-oberflaeche.js, aber ohne "sprachen" und
   ohne "demo" (die Vorführung bleibt deutsch). Fehlt hier ein Eintrag, gilt der deutsche.
   Prüfung: node tools/anmeldung-test/uebersetzung-pruefen.mjs
 
@@ -88,6 +88,7 @@
   Erlaubnis für Fotos = permission for photos
   Erlaubnis für die Lastschrift = permission for direct debit
   Satzung = statutes (the rules of the club)
+  Heimweg = way home
 */
 
 export default {
@@ -134,15 +135,6 @@ export default {
     datei: "File",
     keineAngabe: "not specified",
     jahre: "years",
-    wochentag: {
-      montag: "Monday",
-      dienstag: "Tuesday",
-      mittwoch: "Wednesday",
-      donnerstag: "Thursday",
-      freitag: "Friday",
-      samstag: "Saturday",
-      sonntag: "Sunday",
-    },
   },
 
   kopf: {
@@ -241,7 +233,6 @@ export default {
     lateinischText: "Please write in Latin letters.",
     lateinischNummer: "Please write the number with the digits 0 to 9.",
     satzung: "Please read the statutes (Satzung) and tick the box.",
-    uhrzeit: "Please write the time like this: 21:30.",
     datumLeer: "Please enter the date.",
     datumUnvollstaendig: "Please enter the day, month and year.",
     datumUnvollstaendigMonat: "Please enter the month and year.",
@@ -589,42 +580,6 @@ export default {
     frauHerrenHinweis: "This needs an application to the association.",
   },
 
-  karneval: {
-    gruppe: {
-      titel: { kind: "Which group should {name} dance in?", selbst: "Which group would you like to dance in?" },
-      weissNicht: "I do not know",
-      weissNichtHinweis: "The club will tell you.",
-      uebung: "Practice time: {zeit}",
-      // Wochentag und "Uhr" folgen der Sprache; der Ort steht, wie im Verein üblich, auf Deutsch (siehe seiten-fussball.js).
-      uebungszeit: "{tag} {zeit}, {ort}",
-      uebungszeitOhneOrt: "{tag} {zeit}",
-      passt: "Fits the age",
-    },
-    woanders: {
-      titel: { kind: "Does {name} already dance in another club?", selbst: "Do you already dance in another club?" },
-    },
-    turnier: {
-      titel: { kind: "Should {name} take part in tournaments?", selbst: "Would you like to take part in tournaments?" },
-      hinweis: "At tournaments the groups dance against each other.",
-    },
-    abend: {
-      titel: { kind: "May {name} perform in the evening without parents?", selbst: "May you perform in the evening?" },
-      hinweis: "In the evening there are performances at parties and carnival shows.\nFor evening performances there is an extra form.",
-    },
-    abholung: {
-      titel: { kind: "Who will pick up your child?", selbst: "Who will pick you up?" },
-      hinweis: "This question is voluntary.\nThen the club knows who will pick up after the performance.",
-      name: "Name of the person who picks up",
-      nameHinweis: "If several people pick up, write all the names.",
-    },
-    allein: {
-      titel: { kind: "May your child go home alone?", selbst: "May you go home alone?" },
-      hinweis: "This question is voluntary.\nThe answer appears later on the permission for evening performances.",
-      ab: "From what time?",
-      abHinweis: "Write the time like this: 21:30.",
-    },
-  },
-
   kontakt: {
     anschrift: {
       titel: { kind: "Where does {name} live?", selbst: "Where do you live?" },
@@ -653,7 +608,7 @@ export default {
       andere: "You can choose a different group.",
       legende: "Fee group",
       proJahr: "{jahr} euros a year",
-      doppel: "You are in football and carnival.\nA separate fee may apply.\nThe club will tell you.",
+      doppel: "Are you in football and carnival?\nAsk about a separate membership fee.",
       vorgeschlagen: "Suggestion",
     },
     familie: {
@@ -693,7 +648,6 @@ export default {
       sepaHinweis: "The club collects the membership fee once a year.",
       rechnung: "Invoice",
       rechnungHinweis: "You transfer the membership fee yourself.",
-      zuschlag: "A surcharge of {zuschlag} euros a year may apply.",
     },
     inhaber: {
       titel: "Who owns the account?",
@@ -742,10 +696,22 @@ export default {
       titel: "Trips and messages",
       hinweis: "Both are voluntary. You can change this later.",
       fahrten: "{name} may travel to matches and tournaments.",
+      fahrtenKarneval: "{name} may travel to club events.",
       fahrtenHinweis: "For example in the cars of other parents.",
       messenger: "{name} may join the messenger group of the team.",
       messengerHinweis: "Dates and arrangements are posted there.",
     },
+  },
+
+  // Aufsichtspflicht: Minderjährige, die trainieren oder tanzen (Schritt "heimweg").
+  heimweg: {
+    titel: "May your child go home alone after training?",
+    hinweis: "During training, the club looks after your child.\nTell us: how does your child get home afterwards?",
+    allein: "Going home alone",
+    alleinHinweis: "My child may go home alone after training.",
+    abholen: "Being picked up",
+    abholenHinweis: "My child waits until someone picks them up.",
+    aendern: "You can change this at any time. Then tell the coach.",
   },
 
   notfall: {
@@ -896,10 +862,6 @@ export default {
       alterVerein: "Previous club",
       alteMitgliedschaft: "Membership in the old club",
       abmeldung: "Deregistration",
-      karneval: "Carnival group",
-      abendauftritte: "Evening performances",
-      abholung: "Who picks up",
-      alleinNachHause: "Going home alone",
       staaten: "Nationality",
       ausland: "Last lived abroad",
       wohnen: "Place of residence",
@@ -917,6 +879,7 @@ export default {
       hfv: "Hessian Football Association (HFV)",
       fahrten: "Trips",
       messenger: "Messenger group",
+      heimweg: "Way home",
       notfall: "Emergency contact",
       gesundheitsbogen: "Health form",
       spielerfoto: "Player photo",
@@ -931,7 +894,7 @@ export default {
       nein: "No",
       weissNicht: "Do not know",
       satzungVonHand: "No – you mark it by hand",
-      alleinAb: "Yes, from {zeit}",
+      heimweg: { allein: "Going home alone", abholen: "Being picked up" },
       geschlecht: { m: "Male", w: "Female", d: "Diverse", ohne_angabe: "Not specified" },
       abteilung: { fussball: "Football", karneval: "Carnival", beides: "Football and carnival", passiv: "Support only" },
       abmeldung: {

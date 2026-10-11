@@ -7,8 +7,9 @@
     Teil A "Für Sie"                         Anleitung in Einfacher Sprache, Unterschriften-Übersicht,
                                              Liste "Das fehlt noch", Wartezeit, Hinweise, Kontakte
     Teil B "Für den Verein"                  Laufzettel, Aufnahmeantrag (4 Seiten), Datenschutzinformation,
-                                             HFV-Antrag, Vollmacht/Abmeldung, Einverständnisse,
-                                             Spielerfoto, Kopien der Nachweise mit Wasserzeichen
+                                             HFV-Antrag, Vollmacht/Abmeldung, Einverständnisse und
+                                             Erklärungen (Fahrten, Heimweg), Spielerfoto, Kopien der
+                                             Nachweise mit Wasserzeichen
     Teil C "Vertraulich – getrennt abgeben"  Trennblatt, Attest (Vorlage oder Kopie), Einwilligung
                                              zum Attest, Notfall- und Gesundheitsbogen
 
@@ -24,7 +25,8 @@
     begriffsErklaerer()       Erklärer für "Verband" und "Spielrecht" beim ersten Vorkommen (Teil A; für den Test)
 
   opts = { PDFLib, fontkit, schrift, vorlagen, konfig, a, e, bilder, heute,
-           entwurf?: false   Fußzeile "Entwurf – vom Vorstand zu prüfen" abschalten (Standard: an)
+           entwurf?: false   Fußzeile "Entwurf – vom Vorstand zu prüfen" und den Satz dazu im Laufzettel ("… sind Entwürfe …") abschalten
+                             (Standard: an; die Live-Fassung des Assistenten gibt false, siehe pdf-lader.js)
            bericht?: {}      wird mit dem Aufbau gefüllt (Seitenarten, Stellen, Felder, Angaben der Familie, Warnungen) – für Tests }
 
   Grundsätze:
@@ -36,7 +38,8 @@
     und tragen die Markierung "Hier mit Stift unterschreiben" (PLAN Annahme A1).
   - Eine Bildschirm-Unterschrift steht nur unter Angaben, die schon dastehen (Runde 2): auf eigenen Seiten steht „–“
     oder ein Satz statt eines leeren Feldes; fehlt auf dem Vordruck des Aufnahmeantrags eine Erklärung (Foto, IBAN,
-    Familienmitglieder), wird die Stelle zur Stift-Stelle. Auf dem Papierweg bleiben unbeantwortete Felder frei.
+    Familienmitglieder) oder auf dem Blatt zum Heimweg die Antwort, wird die Stelle zur Stift-Stelle. Auf dem
+    Papierweg bleiben unbeantwortete Felder frei.
     Die Absprache zur Medikamentengabe hat immer eigene Stift-Zeilen.
   - Keine Unterschriftsstelle wird stumm ausgelassen: kennen die Regeln eine Stelle einer eigenen Seite nicht,
     steht dort eine Stift-Markierung für die Rolle „einer“ des Regelwerks, und der Fall steht in bericht.warnungen.
@@ -755,7 +758,8 @@ class Schreiber {
   }
 
   // Für Tests (opts.bericht): gedruckter Text mit Seite, Art (absatz, liste, kaestchen, ueberschrift) und Kennung
-  // ("untertitel", "rechtsgrundlage" oder nichts). Die Läufe stehen mit Leerzeichen zusammen, wie auf dem Blatt.
+  // ("untertitel", "rechtsgrundlage", bei Kästchen "angekreuzt" oder "leer", sonst nichts). Die Läufe stehen mit
+  // Leerzeichen zusammen, wie auf dem Blatt.
   merkeText(inhalt, art, kennung) {
     if (this.trocken || !this.K.bericht || !this.page) return;
     const laeufe = typeof inhalt === "string" ? [{ t: inhalt }] : inhalt;
@@ -1010,7 +1014,7 @@ class Schreiber {
       this.y -= zh;
     });
     this.y -= opt.nach === undefined ? 3 : opt.nach;
-    this.merkeText(inhalt, "kaestchen");
+    this.merkeText(inhalt, "kaestchen", gesetzt === true ? "angekreuzt" : "leer");
   }
 
   // Zeile mit Schreiblinien: felder = [{ label, wert, w, name, wer, ausnahme }] (w als Anteil). Ein Wert steht über der
@@ -1228,8 +1232,11 @@ function familienMitglieder(K) {
 
 // Eine Bildschirm-Unterschrift steht nur unter beantworteten Erklärungen. Fehlt auf dem Vordruck eine Angabe, die
 // erst nach der Unterschrift von Hand dazukäme, gilt die Stelle als Stift-Stelle. Leer, wenn alles beantwortet ist.
-// Die eigenen Seiten des Vereins lösen das anders: dort steht „–“ statt eines leeren Feldes.
+// Die eigenen Seiten des Vereins lösen das anders: dort steht „–“ oder ein Satz statt eines leeren Feldes (Ausnahme: das
+// Blatt zum Heimweg, siehe unten: ohne Antwort wird die Stelle zur Stift-Stelle).
 function erklaerungFehlt(K, formular, stelleKey) {
+  // Heimweg: Die Unterschrift am Bildschirm steht nur unter einer Antwort (sonst blieben beide Kästchen leer).
+  if (formular === "heimweg") return heimwegAntwort(K) ? "" : "Der Heimweg ist nicht angegeben.";
   if (formular !== "aufnahmeantrag") return "";
   const a = K.a;
   if (stelleKey === "s3.unterschrift") {
@@ -1823,8 +1830,15 @@ function mannschaftText(K) {
   const namen = liste(m.namen).map(text).filter(Boolean);
   if (namen.length > 1) return namen.slice(0, -1).join(", ") + " oder " + namen[namen.length - 1] + " (teilt die Jugendleitung ein)";
   if (namen.length) return namen[0];
-  const g = text(objekt(K.a.karneval).gruppe);
-  return g && g !== "weiss_nicht" ? g : "";
+  return "";
+}
+
+// Karneval: keine Vorauswahl der Gruppe (Entscheidung der 1. Vorsitzenden vom 11.10.2026). Statt eines Gruppennamens steht
+// ein Satz; bei Fußball ohne Karneval entfällt die Angabe.
+function gruppeText(K) {
+  const abteilung = text(K.a.abteilung);
+  if (abteilung !== "karneval" && abteilung !== "beides") return "";
+  return K.minderjaehrig ? "Die Trainer ordnen das Kind einer Gruppe zu." : "Die Trainer ordnen die Person einer Gruppe zu.";
 }
 
 // Titelblock einer Seite: Überschrift, Untertitel und Angaben zur Person
@@ -1999,7 +2013,7 @@ function seiteFahrten(K, S) {
   const ew = objekt(K.a.einwilligungen);
   // Unter einer Bildschirm-Unterschrift bleibt kein Kästchen offen: ohne Antwort steht ein Satz statt der Kästchen
   const amBildschirm = seiteAmBildschirm(K, "einverstaendnis_fahrten", "unterschrift");
-  titelBlock(K, S, eintragName("einverstaendnis_fahrten"), "Schutzkonzept des Vereins (Stand Mai 2025)", [["Mannschaft", mannschaftText(K)]]);
+  titelBlock(K, S, eintragName("einverstaendnis_fahrten"), "Schutzkonzept des Vereins (Stand Mai 2025)", [["Mannschaft", mannschaftText(K)], ["Gruppe", gruppeText(K)]]);
   const g = { size: 10, nach: 5 };
   const frage = (name, antwort, ja, nein, ohneAntwort) => {
     const beantwortet = typeof antwort === "boolean";
@@ -2011,12 +2025,17 @@ function seiteFahrten(K, S) {
     }
     S.eingabe({ name: name, leer: !beantwortet && !amBildschirm });
   };
-  S.ueberschrift("Fahrten zu Spielen und Veranstaltungen", 2);
+  // Nur Karneval (ohne Fußball): keine Spiele im Satz zur Fahrt (Entscheidung der 1. Vorsitzenden vom 11.10.2026). Die Oberfläche
+  // (seiten-verein.js, einwilligungen) folgt derselben Regel. Fußball und "beides" behalten den bisherigen Satz.
+  const nurKarneval = text(K.a.abteilung) === "karneval";
+  S.ueberschrift(nurKarneval ? "Fahrten zu Veranstaltungen des Vereins" : "Fahrten zu Spielen und Veranstaltungen", 2);
   S.absatz("Das steht im Schutzkonzept des Vereins. Trainer, Betreuer und andere Erwachsene dürfen Kinder im privaten Auto fahren. Dann müssen mindestens zwei Kinder mitfahren. Die Fahrt läuft über vereinbarte Treffpunkte. Ausnahmen gibt es nur mit Ihrer dokumentierten Zustimmung.", g);
   frage(
     "fahrten",
     ew.fahrten,
-    "Ja, mein Kind darf zu Spielen und Veranstaltungen in Fahrgemeinschaften mitfahren.",
+    nurKarneval
+      ? "Ja, mein Kind darf zu Veranstaltungen des Vereins in Fahrgemeinschaften mitfahren."
+      : "Ja, mein Kind darf zu Spielen und Veranstaltungen in Fahrgemeinschaften mitfahren.",
     "Nein, mein Kind fährt nicht in Fahrgemeinschaften mit.",
     "Sie haben dazu nichts angegeben. Ihr Kind fährt dann nicht in Fahrgemeinschaften mit."
   );
@@ -2039,60 +2058,40 @@ function seiteFahrten(K, S) {
   rechtsgrundlage(S, "Präventions- und Schutzkonzept des Vereins, Nr. 6.4, 6.6 und 6.11; Art. 6 Abs. 1 lit. a DSGVO (Einwilligung).");
 }
 
-// --- Karneval: Erlaubnis für Auftritte am Abend (Erziehungsbeauftragung, JuSchG §§ 1, 2, 5) ---------------------
+// --- Heimweg nach dem Training (Aufsichtspflicht, BGB § 832) ------------------------------------------------------
+// Eigenes Blatt des Vereins für Minderjährige, die trainieren oder tanzen (Unterlage U41; Entscheidung der 1. Vorsitzenden vom
+// 11.10.2026). Beide Sätze stehen da, der gewählte ist angekreuzt. Die Unterschrift gilt am Bildschirm nur unter einer Antwort:
+// Fehlt sie, wird die Stelle zur Stift-Stelle (erklaerungFehlt), und die Familie kreuzt von Hand an.
+// Texte in Einfacher Sprache (höchstens 12 Wörter je Satz); der Paragraph steht nur in der Zeile "Rechtsgrundlage".
 
-// Uhrzeit „HH:MM“ (auch „9:30“); leer, wenn es keine gültige Uhrzeit ist
-function zeitText(x) {
-  const m = /^\s*(\d{1,2}):(\d{2})\s*$/.exec(text(x));
-  if (!m) return "";
-  const h = Number(m[1]);
-  return h <= 23 && Number(m[2]) <= 59 ? String(h).padStart(2, "0") + ":" + m[2] : "";
+const HEIMWEG_SAETZE = {
+  allein: "Mein Kind darf nach dem Training allein nach Hause gehen.",
+  abholen: "Mein Kind wird nach dem Training abgeholt. Es wartet am Trainingsort.",
+};
+
+// "allein", "abholen" oder "" (keine gültige Antwort)
+function heimwegAntwort(K) {
+  return K.a.heimweg === "allein" || K.a.heimweg === "abholen" ? K.a.heimweg : "";
 }
 
-function seiteKarnevalAuftritte(K, S) {
-  const k = objekt(K.a.karneval);
-  const gruppe = text(k.gruppe) && k.gruppe !== "weiss_nicht" ? k.gruppe : "";
-  // Eine Bildschirm-Unterschrift gilt nur für Angaben, die schon dastehen: ohne Antwort steht „–“, auf dem Papierweg
-  // bleibt das Feld zum Ausfüllen frei. Die Abholung und der Heimweg stehen als Sätze, die die Familie im Assistenten gewählt hat.
-  const amBildschirm = seiteAmBildschirm(K, "karneval_auftritte", "unterschrift");
-  const KEINE = "–";
-  const zeit = zeitText(k.alleinAb);
-  let allein = "";
-  if (k.alleinNachHause === "ja" && zeit) allein = "Mein Kind darf die Veranstaltung um " + zeit + " Uhr allein verlassen.";
-  else if (k.alleinNachHause === "nein") allein = "Mein Kind darf die Veranstaltung nicht allein verlassen.";
-  if (!hatText(k.abholung) || !allein) K.hinweiseIntern.push(eintragName("karneval_auftritte") + ": Abholung oder Heimweg sind nicht angegeben – vor dem ersten Abendauftritt klären.");
-  // Texte in Einfacher Sprache (höchstens 12 Wörter je Satz); die Paragraphen stehen nur in der Zeile "Rechtsgrundlage".
-  titelBlock(K, S, eintragName("karneval_auftritte"), "Erziehungsbeauftragung nach dem Jugendschutzgesetz", [
-    ["Abteilung", "Karneval"],
-    ["Gruppe", gruppe],
+function seiteHeimweg(K, S) {
+  const antwort = heimwegAntwort(K);
+  // Am Bildschirm nennt der Laufzettel den Grund schon bei der Stift-Stelle (zeichneStelle); auf dem Papierweg steht es hier.
+  if (!antwort && K.a.unterschriftWeg !== "bildschirm") K.hinweiseIntern.push(eintragName("heimweg") + ": Der Heimweg ist nicht angegeben. Die Familie kreuzt ihn auf dem Blatt an.");
+  titelBlock(K, S, eintragName("heimweg"), "Erklärung zur Aufsichtspflicht", [
+    ["Abteilung", ABTEILUNG_TEXT[text(K.a.abteilung)] || ""],
+    ["Mannschaft", mannschaftText(K)],
   ]);
   const g = { size: 10, nach: 6 };
-  S.absatz("Auftritte und Veranstaltungen der Karnevalskampagne finden oft am Abend statt. Unter 16 Jahren darf man bei öffentlichen Tanzveranstaltungen nur mit Begleitung bleiben. Das ist eine Person mit Sorgerecht oder eine Person mit Erziehungsauftrag. Für Auftritte der Brauchtumspflege oder der künstlerischen Betätigung gelten Ausnahmen. Kinder dürfen bis 22 Uhr auch ohne Begleitung bleiben. Jugendliche unter 16 Jahren dürfen bis 24 Uhr auch ohne Begleitung bleiben.", g);
-  S.absatz([{ t: "Ich beauftrage die Trainerinnen und Betreuer der Karnevalabteilung. Die Abteilung gehört zum " + vereinsNameAmSatzende(K) + " Sie begleiten mein Kind" }, { t: K.person.name, fett: true, nutzer: true }, { t: "bei den Auftritten. Das gilt für die Kampagne " + text(K.cfg.saison) + ". Für diese Zeit übernehmen sie die Erziehungsaufgaben. Sie sind dann erziehungsbeauftragte Personen." }], g);
-  S.ueberschrift("Erreichbarkeit und Abholung", 3);
-  S.absatz("Im Notfall und für die Abholung bin ich unter dieser Nummer erreichbar:", { size: 10, nach: 2 });
-  const ohneAntwort = amBildschirm ? KEINE : "";
-  S.feldZeile(
-    [
-      { name: "telefon", label: "Telefonnummer der Person mit Sorgerecht", wert: text(K.a.mobil) || text(K.a.telefon) || ohneAntwort, w: 1.4 },
-      { name: "abholung", label: "Mein Kind wird abgeholt von (Name)", wert: text(k.abholung) || ohneAntwort, w: 1.6 },
-    ],
-    { hoehe: 24 }
-  );
-  S.feldZeile([{ name: "alleinNachHause", label: (allein || amBildschirm) ? "Allein nach Hause" : "Mein Kind darf die Veranstaltung um ___ Uhr allein verlassen", wert: allein || ohneAntwort, w: 1 }], { hoehe: 22 });
-  S.ueberschrift("Das sollten Sie wissen", 3);
-  S.liste(
-    [
-      "Ihr Kind trägt einen Ausweis bei sich. Auf Verlangen muss es sein Alter nachweisen.",
-      "Die Erlaubnis gilt für die Kampagne " + text(K.cfg.saison) + ". Sie können sie jederzeit widerrufen.",
-      "Die Karnevalabteilung sagt Ihnen rechtzeitig, wann und wo die Auftritte sind.",
-    ],
-    { size: 10, nach: 3 }
-  );
-  S.abstand(6);
+  S.absatz("Während des Trainings passt der Verein auf mein Kind auf. Ich sage dem Verein, wie mein Kind danach nach Hause kommt.", g);
+  S.ueberschrift("So kommt mein Kind nach Hause", 3);
+  S.kaestchenZeile(antwort === "allein", HEIMWEG_SAETZE.allein, { nach: 5 });
+  S.kaestchenZeile(antwort === "abholen", HEIMWEG_SAETZE.abholen, { nach: 5 });
+  S.abstand(4);
+  S.absatz("Ich kann diese Erklärung jederzeit ändern. Dann sage ich dem Trainer Bescheid.", { size: 10, nach: 8 });
   S.platz(84 + 16); // Unterschrift und Zeile "Rechtsgrundlage" bleiben zusammen
-  unterschriftFuer(K, S, "karneval_auftritte", "unterschrift");
-  rechtsgrundlage(S, "Jugendschutzgesetz (JuSchG): § 1 Abs. 1 Nr. 4 (Erziehungsbeauftragung), § 2 (Ausweis), § 5 (Ausnahmen für Auftritte).");
+  unterschriftFuer(K, S, "heimweg", "unterschrift");
+  rechtsgrundlage(S, "Aufsichtspflicht (§ 832 BGB).");
 }
 
 // --- Teil C: Trennblatt, Attest, Einwilligung zum Attest, Notfallbogen -----------------------------------------
@@ -2632,6 +2631,7 @@ function seiteLaufzettel(K, S, plan) {
       ["Geburtsdatum", geburtsText(K) + (alterText ? " (" + alterText + ")" : "")],
       ["Abteilung", ABTEILUNG_TEXT[a.abteilung] || ""],
       ["Altersklasse", [klasse, mannschaftText(K)].filter(Boolean).join(" · ")],
+      ["Gruppe", gruppeText(K)],
       ["Art", statusText],
       ["International", e.international ? "ja (Freigabe über den DFB)" : "nein"],
       ["Erstellt am", K.heuteDe],
@@ -2734,7 +2734,7 @@ function seiteLaufzettel(K, S, plan) {
     const ki = { mitglied: "Mitglied selbst", sorgeberechtigt: "Person mit Sorgerecht", andere: "andere Person: " + [text(z.kiVorname), text(z.kiNachname)].filter(Boolean).join(" ") }[z.kontoinhaber] || "";
     S.absatz([{ t: "Zahlung:", fett: true }, { t: "SEPA-Lastschrift" + (ki ? ", Konto von: " + ki : "") + ", IBAN " + ibanMaskiert(z.iban) + " (volle IBAN nur auf Seite " + plan.mandatSeite + ")", nutzer: true }], g);
   } else if (z.art === "rechnung") {
-    S.absatz([{ t: "Zahlung:", fett: true }, { t: "Rechnung" + (b.zuschlagOhneSepa != null ? " (Zuschlag ohne Lastschrift möglich: " + b.zuschlagOhneSepa + " Euro, Vorstand klärt)" : "") }], g);
+    S.absatz([{ t: "Zahlung:", fett: true }, { t: "Rechnung" }], g);
   } else {
     S.absatz([{ t: "Zahlung:", fett: true }, { t: "nicht angegeben" }], g);
   }
@@ -2745,10 +2745,12 @@ function seiteLaufzettel(K, S, plan) {
     S.ueberschrift("Hinweise und offene Punkte", 3);
     S.liste(hw.map((h) => [{ t: HINWEIS_ART[h.art] + ":", fett: true }, { t: hinweisText(h) }]), { size: 8.5, nach: 1.5 });
   }
-  const wl = liste(et.weiterleitung);
-  if (wl.length) {
+  const weiter = liste(et.weiterleitung).map((w) => [{ t: (STELLE_KLARTEXT[w.an] || w.an) + ":", fett: true }, { t: deRegeln.weiterleitung[w.key] || "" }]);
+  // Das Blatt zum Heimweg gibt der Verein als Kopie an das Trainerteam weiter (Entscheidung der 1. Vorsitzenden vom 11.10.2026)
+  if (plan.formulare.heimweg) weiter.push([{ t: eintragName("heimweg") + ":", fett: true }, { t: "Kopie an das Trainerteam." }]);
+  if (weiter.length) {
     S.ueberschrift("Weiterleitung", 3);
-    S.liste(wl.map((w) => [{ t: (STELLE_KLARTEXT[w.an] || w.an) + ":", fett: true }, { t: deRegeln.weiterleitung[w.key] || "" }]), { size: 8.5, nach: 1.5 });
+    S.liste(weiter, { size: 8.5, nach: 1.5 });
   }
 
   // Für den Verein zu klären
@@ -2760,7 +2762,7 @@ function seiteLaufzettel(K, S, plan) {
   const digital = alleStellen(K).some((u) => stelleArt(K, u.formular, u.wer, u.stelleKey) === "bild");
   if (digital) pruef.push("Unterschriften am Bildschirm gezeichnet (einfache elektronische Signatur) auf Vereinsunterlagen. Der Vorstand bestätigt, dass die Satzung (Schriftform, § 127 BGB) das zulässt.");
   if (a.satzung !== true) pruef.push("Aufnahmeantrag Seite 1: Das Kästchen „Satzung zur Kenntnis genommen“ ist offen. Die Familie kreuzt es von Hand an.");
-  if (plan.formulare.datenschutz) pruef.push("Die " + eintragName("datenschutz") + ", alle Einverständnisse und Erlaubnisse sowie der " + eintragName("notfall") + " sind Entwürfe. Der Vorstand gibt die Texte frei (Fußzeile „Entwurf“).");
+  if (plan.formulare.datenschutz && K.entwurf) pruef.push("Die " + eintragName("datenschutz") + ", alle Einverständnisse und Erlaubnisse sowie der " + eintragName("notfall") + " sind Entwürfe. Der Vorstand gibt die Texte frei (Fußzeile „Entwurf“).");
   if (pruef.length) {
     S.ueberschrift("Für den Verein zu klären", 3);
     S.liste(pruef.map((t) => [{ t: "klären:", fett: true }, { t: t }]), { size: 8.5, nach: 1.5 });
@@ -3026,7 +3028,7 @@ function eigeneSeiten(key) {
     case "datenschutz": return { bauen: seiteDatenschutz, titel: eintragName(key) };
     case "einverstaendnis_maedchen": return { bauen: seiteMaedchen, titel: eintragName(key) };
     case "einverstaendnis_fahrten": return { bauen: seiteFahrten, titel: eintragName(key) };
-    case "karneval_auftritte": return { bauen: seiteKarnevalAuftritte, titel: eintragName(key) };
+    case "heimweg": return { bauen: seiteHeimweg, titel: eintragName(key) };
     default: return null;
   }
 }

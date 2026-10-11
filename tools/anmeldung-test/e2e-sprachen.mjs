@@ -24,12 +24,14 @@
 //   - Nachrunde (30.09.): Satzung-Block auf der Unterschriftenseite (übersetzt, "(Satzung)" in
 //     Klammern, Kästchen wird vor dem Unterschreiben angekreuzt); die "Gilt für"-Liste trennt die
 //     Namen mit dem Trenner der Sprache (Arabisch: arabisches Komma, sonst Komma und Leerzeichen);
-//     Karneval-Fragen zu Abholung und Heimweg (Beispiel "Karneval Kind"); die Teile der Datei tragen
+//     die Pflichtfrage zum Heimweg nach dem Training (M1, 11.10.2026; Beispiele "Kind neu" und "Karneval Kind"; solange
+//     eine Sprache den Schlüssel heimweg.titel noch nicht kennt, zeigt die Seite den deutschen Rückfall und der Lauf meldet das nur
+//     als Hinweis – die Übersetzung liefert Paket M3); die Teile der Datei tragen
 //     die übersetzten Titel (fertig.teilTitel); alle sechs Meldungen zu "lateinische Buchstaben"
 //     (Name, Ort, Verein, Anschrift, Nummer, Text) mit Text in anderer Schrift im Feld; der Kasten für
 //     getrennt lebende Eltern auf "sorge" und "unterschriften"
 //   - Bildschirmfotos von start, name, nachweise, unterschriften (auch der Ausschnitt mit Satzung und
-//     "Gilt für"), fertig (und Hilfe, Fehlermeldung, Karneval-Fragen, getrennte Eltern, lateinische
+//     "Gilt für"), fertig (und Hilfe, Fehlermeldung, Heimweg, getrennte Eltern, lateinische
 //     Buchstaben) nach tools/cache/anmeldung-test/sprachen/
 //
 // Aufruf: node tools/anmeldung-test/e2e-sprachen.mjs [--sprache=ar] [--ein-beispiel] [--mangeltest]
@@ -392,12 +394,13 @@ async function durchlauf(browser, server, sprache, beispiel, muster, txt) {
       }
       await unterschreiben(page);
     }
-    // Karneval: die beiden freiwilligen Fragen zum Abholen und zum Heimweg (nur nach "Ja" bei den Abendauftritten)
-    if (s.teil === "abholung" || s.teil === "allein") {
-      const erwartet = dict.karneval[s.teil].titel.kind;
+    // Heimweg nach dem Training (M1): die Pflichtfrage trägt den übersetzten Titel; fehlt die Übersetzung noch, ist es nur ein Hinweis
+    if (s.schritt === "heimweg") {
+      const uebersetzt = dict.heimweg && dict.heimweg.titel;
       const titel = ohneSteuer(await page.$eval("#anm-titel", (e) => e.textContent));
-      ok(kennung + ": Karneval-Frage '" + s.teil + "' mit übersetztem Titel", titel === ohneSteuer(erwartet), titel);
-      await foto(page, code, beispiel.id, "karneval-" + s.teil);
+      if (uebersetzt) ok(kennung + ": Heimweg-Frage mit übersetztem Titel", titel === ohneSteuer(uebersetzt), titel);
+      else info(kennung + ": Heimweg-Frage noch ohne Übersetzung (deutscher Rückfall, Paket M3): " + titel);
+      await foto(page, code, beispiel.id, "heimweg");
     }
     const r = await klickeWeiter(page, s);
     if (r.fehler.length) {
@@ -648,7 +651,7 @@ async function seitenPruefungText(page, text, muster) {
 // Entfernt im Schnappschuss von docs/ (nur dort, nie in assets/) einige Schlüssel aus den
 // englischen Dateien, damit der Durchlauf den Rückfall auf Deutsch bemerken muss.
 const MANGEL = {
-  oberflaeche: ["wer.titel", "abmeldung.status.hinweis", "fertig.abgeben", "unterschriften.stiftTitel", "unterschriften.satzung.titel", "fertig.teilTitel.A", "karneval.abholung.hinweis"],
+  oberflaeche: ["wer.titel", "abmeldung.status.hinweis", "fertig.abgeben", "unterschriften.stiftTitel", "unterschriften.satzung.titel", "fertig.teilTitel.A", "notfall.kontakt.hinweis"],
   regeln: ["unterlagen.U09.warum", "hinweise.abmeldung_formlos"],
 };
 async function erzeugeMangel() {

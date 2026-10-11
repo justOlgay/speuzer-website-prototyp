@@ -1,7 +1,7 @@
 /*
   Texte des Regelwerks - Englisch (British English), Gegenstück zu regeln.js.
   Übersetzungshilfe: Verbindlich ist der deutsche Text (de-regeln.js).
-  Stand 08.10.2026. Dieselbe Schlüsselstruktur wie de-regeln.js; Platzhalter in geschweiften
+  Stand 11.10.2026. Dieselbe Schlüsselstruktur wie de-regeln.js; Platzhalter in geschweiften
   Klammern (zum Beispiel {datum}) bleiben unverändert. Stil und Begriffe: siehe die Begriffsliste
   oben in en-oberflaeche.js.
 
@@ -217,27 +217,6 @@ export default {
       wie: "You tick what you allow. Then you sign.",
       wo: "This sheet belongs to the part for the club.",
     },
-    U30: {
-      name: "Permission for evening performances",
-      kurz: "You allow your child to perform in the evening without parents.",
-      warum: "This way a coach can look after your child.",
-      wie: "You add your phone number and sign.",
-      wo: "This sheet belongs to the part for the club.",
-    },
-    U31: {
-      name: "Agreement for costumes",
-      kurz: "The club is still working out how the costumes are handled.",
-      warum: "It is about costs and about who owns the costumes.",
-      wie: "The coaches will tell you in good time.",
-      wo: "You do not have to do anything now.",
-    },
-    U32: {
-      name: "Papers for dance tournaments",
-      kurz: "At tournaments your child may need an ID (Ausweis).",
-      warum: "At the tournament the organisers check the ID.",
-      wie: "The coaches will tell you. An ID with a photo helps.",
-      wo: "You do not have to do anything now.",
-    },
     U33: {
       name: "Certificate for Education and Participation (Bildung und Teilhabe)",
       kurz: "This is a paper from the club about the fee.",
@@ -256,7 +235,7 @@ export default {
       name: "Joining fee (Aufnahmegebühr)",
       kurz: "New members pay {betrag} euros once.",
       warum: "This is how it is written in the membership application (Aufnahmeantrag).",
-      wie: "The club tells you how to pay.",
+      wie: "The club collects it with the first membership fee.",
       wo: "You do not have to upload anything for this.",
     },
     U36: {
@@ -294,6 +273,14 @@ export default {
       wie: "The club makes the application together with the person of trust of the association.",
       wo: "The person of trust will get in touch with you. For children, the parents agree.",
     },
+    // U30 bis U32 gibt es nicht mehr (Entscheidung vom 11.10.2026).
+    U41: {
+      name: "Way home after training",
+      kurz: "You say how your child gets home after training.",
+      warum: "Then the club knows whether your child may go home alone.",
+      wie: "You choose an answer in the assistant. Then you sign.",
+      wo: "This sheet belongs to the part for the club. The coaches get a copy.",
+    },
   },
 
   hinweise: {
@@ -311,7 +298,6 @@ export default {
     f17_wahrscheinlich_nicht: "Without 5 years of residence the child is probably not allowed to play. Then playing is only possible from the age of 18. Friendly matches are not allowed either.",
     aushilfe_nur_ausnahme: "For this birth year the young person is only rarely allowed to help out in the men’s team (Herren). The youth department checks this.",
     getrennt_zustimmung: "Please ask the other parent. He or she must agree to the registration. Best of all, he or she also signs the membership application (Aufnahmeantrag).",
-    karneval_tanzt_woanders: "Dancers start at tournaments for one club only.",
     beitrag_gruppe_pruefen: "The fee group {gruppe} may not fit the age. The club checks this.",
 
     // Fristen
@@ -319,7 +305,8 @@ export default {
 
     // Infos
     frist_annahme_heute: "We calculate as if the deregistration counts on {abmeldung}. If you deregister later, the waiting period gets longer.",
-    probetraining_versicherung: "Anyone who is not a member yet has no insurance of their own at training. It is best to register before the first training.",
+    probetraining_versicherung: "At trial training, people who are not members are not insured through the club. It is best to register before the first training.",
+    mitgliedschaft_beginn: "The membership starts on the day you register.",
     kuendigung_jahresende: "In our club you can only cancel your membership at the end of the year. Send the cancellation as a registered letter (Einschreiben).",
     ohne_spielrecht_kein_spiel: "Without permission to play a child may not take part in matches. Not even in friendly matches. Training is allowed.",
     mitgliedschaft_zuerst: "First you become a member. Then the club makes the application to the association.",
@@ -350,11 +337,10 @@ export default {
     pflege_hinweis: "The foster carer signs for the child in daily life. Bring the proof.",
     f17_moeglich_5_jahre: "The child has lived here for 5 years. Then the association can check an exception. You need the proof of residence.",
     austausch_ein_jahr: "For a school exchange the permission to play lasts 1 year at most. Another change is not allowed.",
-    karneval_gruppe_vorschlag: "By age this group fits: {gruppen}. The coaches decide in the end.",
     karneval_kein_attest: "For carnival you do not need a medical certificate (Attest). You do not need any papers from the Hessian Football Association (Hessischer Fußball-Verband, HFV) either.",
-    karneval_abend: "The child performs in the evening without parents. The club needs your permission for this.",
     passiv_hinweis: "You are a passive member. You do not play or train. You support the club.",
     senator_vorstand: "The board decides whether you become a senator.",
+    beitrag_doppel: "Are you in football and carnival? Ask about a separate membership fee.",
     kontoinhaber_andere: "The account belongs to another person. This person signs the permission for the direct debit (Lastschrift).",
     bildung_teilhabe: "Families with little money get help with the fee. It is up to {betrag} euros a month. Ask at the job centre (Jobcenter) or the social welfare office (Sozialamt).",
     beitragserlass: "Do you have little money? Talk to us. The board can waive the fee completely or in part.",
@@ -362,7 +348,6 @@ export default {
     passiv_alter_verein: "You stay a passive member at the old club. Tell the old club about this as well.",
 
     // Offene Punkte
-    mitgliedschaft_beginn: "The club is still clarifying from when your membership counts. It is best to register early.",
     regelwerk_fifa_2027: "From {datum} there are new international rules for changes. The club checks what changes.",
     regelwerk_saison_2027: "From {datum} the rules for the E-Jugend change. The club checks what changes.",
     attest_aktuell: "The medical certificate (Attest) must be recent. The club will clarify how old it may be at most.",
@@ -385,14 +370,8 @@ export default {
     spieler_unterschrift_kind: "Must a small child sign by themselves? The club asks the association.",
     unterlagen_liste_offen: "Which papers the association wants exactly is still open. The club asks and lets you know.",
     wohnen_nicht_gemeinsam: "Child and parents do not live together. The youth department will contact you.",
-    karneval_turnier_offen: "Whether the group dances at tournaments is still open. An ID with a photo may be needed.",
-    karneval_gruppe_alter_pruefen: "The group {gruppe} may not fit the age. The coaches check this.",
     beitrag_familie_offen: "The club clarifies who counts as family. List all family members by name.",
-    zuschlag_ohne_sepa: "Without direct debit (Lastschrift) it may cost {betrag} euros more per year. The board clarifies this.",
     iban_ausland_pruefen: "Your account number is not from Germany. The club checks whether it can collect the fee.",
-    aufnahmegebuehr_offen: "The club clarifies whether the joining fee applies to you.",
-    beitrag_doppel: "You are in two departments. The club office tells you the fee.",
-    kostueme_offen: "The club is still clarifying what costumes cost and who owns them.",
     mitgliedschaft_alter_verein_unklar: "It is open whether you stay a member of the old club. Clarify this with the old club.",
   },
 
@@ -440,9 +419,6 @@ export default {
     beitrag_familie: "The club office checks who counts as family.",
     senator: "The club office passes your application to the board.",
     beitragserlass: "The club office talks with you about help with the fee.",
-    gruppe_einteilung: "The carnival department puts you into a group.",
-    turnier: "The carnival department tells you which papers are needed for tournaments.",
-    kostueme: "The carnival department tells you how the costumes work.",
     herren_wechsel: "The match committee of the men’s team (Herren) checks your change and the deadlines.",
     frau_herren: "The match committee of the men’s team (Herren) makes the application for women in the men’s team.",
   },
@@ -490,7 +466,7 @@ export default {
     beitrag_familie: "The family fee is {jahr} euros a year. That is {monat} euros a month. All family members are included.",
     beitrag_azubi: "For trainees and students the fee is {jahr} euros a year. You need proof.",
     beitrag_senator: "Senators pay {jahr} euros a year. The board decides on the admission.",
-    beitrag_doppel: "You are in both departments. The club office tells you the fee.",
+    beitrag_doppel: "Are you in football and carnival? Ask about a separate membership fee.",
     // Namen der Beitragsgruppen (Schlüssel wie in de-regeln.js): Übersetzung mit der Abteilung (ohne Doppelpunkt, der Text steht auch hinter "Wir schlagen vor:"), dahinter der deutsche Name ohne Abteilung in Klammern.
     gruppen: {
       fussball_jugend: "Children and young people in football, including A-Jugend (Kinder und Jugendliche)",
@@ -518,7 +494,7 @@ export default {
     einverstaendnis_senioren: "Consent for matches in the men’s team (Herren)",
     einverstaendnis_maedchen: "Consent for girls in boys’ teams",
     einverstaendnis_fahrten: "Consent for trips and messenger group",
-    karneval_auftritte: "Permission for evening performances",
+    heimweg: "Way home after training",
     attest: "Medical certificate (Attest) from the doctor",
     notfall: "Emergency and health form (Notfall- und Gesundheitsbogen)",
   },
@@ -540,7 +516,7 @@ export default {
     "einverstaendnis_senioren.unterschrift": "Consent for matches in the men’s team (Herren)",
     "einverstaendnis_maedchen.unterschrift": "Consent for girls in boys’ teams",
     "einverstaendnis_fahrten.unterschrift": "Consent for trips and messenger group",
-    "karneval_auftritte.unterschrift": "Permission for evening performances",
+    "heimweg.unterschrift": "Way home after training",
     "attest.arzt": "Medical certificate (Attest) from the doctor",
     "attest.einwilligung": "Permission for the medical certificate (Attest)",
     "notfall.unterschrift": "Emergency and health form (Notfall- und Gesundheitsbogen)",

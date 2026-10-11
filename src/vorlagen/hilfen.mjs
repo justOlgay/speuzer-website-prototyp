@@ -62,6 +62,37 @@ export const AUFNAHMEANTRAG_VERSAND = TEST_ANNAHME_URL
   ? { art: "endpunkt", url: TEST_ANNAHME_URL }
   : { art: "manuell", url: ANNAHME_URL };
 
+// ---------- Anmelde-Assistent als Live-Seite (Livegang, M6, 11.10.2026) ----------
+
+// Der Anmelde-Assistent (src/begleit/anmeldung.mjs, assets/js/anmeldung/) läuft heute nur als Begleitseite auf GitHub
+// Pages (/anmeldung/). Mit ANMELDUNG_LIVE = true entsteht zusätzlich die Live-Seite web/anmeldung.html:
+//   - tools/build.mjs baut sie als Workspace-Seite (docs/ws/anmeldung.html) ohne Begleitrahmen, Entwurfsband, Werkzeuge
+//     für die Vorführung und noindex, ohne Entwurfsvermerk im PDF und nur mit den Sprachen aus ANMELDUNG_SPRACHEN_LIVE,
+//   - tools/appack-paket.mjs legt sie samt allen Dateien des Assistenten in das appack-Paket (web/anmeldung.html,
+//     web/anmeldung-*.js, web/anmeldung.css; Schrift und HFV-Vordrucke als Base64-Module),
+//   - „Mitglied werden“ (Web und App) zeigt in Schritt 2 den Hauptknopf „Schritt für Schritt anmelden“; Online-Antrag
+//     und PDF bleiben als Nebenwege.
+// Solange der Schalter AUS ist (Standard), sind docs/ws/* und dist/appack-paket/* Byte für Byte wie vor dem Livegang.
+// Umstellen erst nach dem Ja von Olgay und der Freigabe durch den Vorstand; der Ablauf steht in
+// tools/cache/orchestrierung-anmeldung/m6-upload-liste.md. Für einen Test-Bau setzt die Umgebungsvariable
+// ANMELDUNG_LIVE=1 (an) bzw. ANMELDUNG_LIVE=0 (aus) den Wert nur für diesen Bau – danach wieder ohne sie bauen.
+const ANMELDUNG_LIVE_SCHALTER = false;
+const ANMELDUNG_LIVE_TEST = globalThis.process?.env?.ANMELDUNG_LIVE;
+export const ANMELDUNG_LIVE =
+  ANMELDUNG_LIVE_TEST === "1" ? true : ANMELDUNG_LIVE_TEST === "0" ? false : ANMELDUNG_LIVE_SCHALTER;
+
+// Sprachen der Live-Seite (Sprachwahl oben und im Kopf des Assistenten). Türkisch ("tr") und Arabisch ("ar") kommen erst
+// nach der Durchsicht durch Muttersprachler dazu; "de" steht immer vorn. Für einen Test-Bau setzt
+// ANMELDUNG_SPRACHEN_LIVE=de,en,tr,ar die Liste nur für diesen Bau.
+const ANMELDUNG_SPRACHEN_ALLE = ["de", "en", "tr", "ar"];
+const ANMELDUNG_SPRACHEN_TEST = (globalThis.process?.env?.ANMELDUNG_SPRACHEN_LIVE ?? "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter((s) => ANMELDUNG_SPRACHEN_ALLE.includes(s));
+export const ANMELDUNG_SPRACHEN_LIVE = ANMELDUNG_SPRACHEN_TEST.length
+  ? ANMELDUNG_SPRACHEN_ALLE.filter((s) => s === "de" || ANMELDUNG_SPRACHEN_TEST.includes(s))
+  : ["de", "en"];
+
 export const BESCHEINIGUNG_MAILTO =
   "mailto:geschaeftsstelle@sportfreunde04.de?subject=Anforderung%20Mitgliedsbescheinigung&body=Hallo%2C%0A%0Abitte%20schicken%20Sie%20mir%20eine%20Mitgliedsbescheinigung.%0A%0AF%C3%BCr%20%28mich%20selbst%20/%20mein%20Kind%29%3A%20%0AName%20und%20Vorname%20des%20Mitglieds%3A%20%0AGeburtsdatum%20des%20Mitglieds%3A%20%0AAnschrift%3A%20%0AMitgliedsnummer%20%28falls%20bekannt%29%3A%20%0ATelefon%20f%C3%BCr%20R%C3%BCckfragen%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe";
 

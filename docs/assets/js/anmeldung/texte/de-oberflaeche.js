@@ -1,6 +1,6 @@
 /*
   Texte der Oberfläche des Anmelde-Assistenten – Deutsch in Einfacher Sprache
-  (Stand 29.09.2026). Der Assistent liest diese Datei immer als Rückfallebene:
+  (Stand 11.10.2026). Der Assistent liest diese Datei immer als Rückfallebene:
   Fehlt in einer anderen Sprache ein Eintrag, gilt der deutsche.
 
   Regeln für alle Sätze (für Familien mit wenig Deutsch):
@@ -98,15 +98,6 @@ export default {
     datei: "Datei",
     keineAngabe: "keine Angabe",
     jahre: "Jahre",
-    wochentag: {
-      montag: "Montag",
-      dienstag: "Dienstag",
-      mittwoch: "Mittwoch",
-      donnerstag: "Donnerstag",
-      freitag: "Freitag",
-      samstag: "Samstag",
-      sonntag: "Sonntag",
-    },
   },
 
   kopf: {
@@ -208,7 +199,6 @@ export default {
     lateinischText: "Bitte schreiben Sie mit lateinischen Buchstaben.",
     lateinischNummer: "Bitte schreiben Sie die Nummer mit den Ziffern 0 bis 9.",
     satzung: "Bitte lesen Sie die Satzung und setzen Sie den Haken.",
-    uhrzeit: "Bitte schreiben Sie die Uhrzeit so: 21:30.",
     datumLeer: "Bitte tragen Sie das Datum ein.",
     datumUnvollstaendig: "Bitte tragen Sie Tag, Monat und Jahr ein.",
     datumUnvollstaendigMonat: "Bitte tragen Sie Monat und Jahr ein.",
@@ -558,43 +548,6 @@ export default {
     frauHerrenHinweis: "Dafür braucht es einen Antrag beim Fußball-Verband.",
   },
 
-  karneval: {
-    gruppe: {
-      titel: { kind: "In welche Gruppe möchte {name} tanzen?", selbst: "In welcher Gruppe möchten Sie tanzen?" },
-      weissNicht: "Das weiß ich nicht",
-      weissNichtHinweis: "Der Verein sagt es Ihnen.",
-      uebung: "Übungszeit: {zeit}",
-      // Wochentag und "Uhr" folgen der Sprache; der Ort steht, wie im Verein üblich, auf Deutsch (siehe seiten-fussball.js).
-      uebungszeit: "{tag} {zeit} Uhr, {ort}",
-      uebungszeitOhneOrt: "{tag} {zeit} Uhr",
-      passt: "Passt zum Alter",
-    },
-    woanders: {
-      titel: { kind: "Tanzt {name} schon in einem anderen Verein?", selbst: "Tanzen Sie schon in einem anderen Verein?" },
-    },
-    turnier: {
-      titel: { kind: "Soll {name} an Turnieren teilnehmen?", selbst: "Möchten Sie an Turnieren teilnehmen?" },
-      hinweis: "Bei Turnieren tanzen die Gruppen gegeneinander.",
-    },
-    abend: {
-      titel: { kind: "Darf {name} abends ohne Eltern auftreten?", selbst: "Dürfen Sie abends auftreten?" },
-      hinweis: "Abends gibt es Auftritte bei Festen und Sitzungen.\nFür Abendauftritte gibt es ein extra Blatt.",
-    },
-    // Zwei freiwillige Fragen, nur nach "Ja" bei den Abendauftritten.
-    abholung: {
-      titel: { kind: "Wer holt Ihr Kind ab?", selbst: "Wer holt Sie ab?" },
-      hinweis: "Diese Frage ist freiwillig.\nDann weiß der Verein nach dem Auftritt, wer abholt.",
-      name: "Name der Person, die abholt",
-      nameHinweis: "Bei mehreren Personen schreiben Sie alle Namen.",
-    },
-    allein: {
-      titel: { kind: "Darf Ihr Kind allein nach Hause gehen?", selbst: "Dürfen Sie allein nach Hause gehen?" },
-      hinweis: "Diese Frage ist freiwillig.\nDie Antwort steht später auf der Erlaubnis für Auftritte am Abend.",
-      ab: "Ab wie viel Uhr?",
-      abHinweis: "Schreiben Sie die Uhrzeit so: 21:30.",
-    },
-  },
-
   kontakt: {
     anschrift: {
       titel: { kind: "Wo wohnt {name}?", selbst: "Wo wohnen Sie?" },
@@ -623,7 +576,7 @@ export default {
       andere: "Sie können eine andere Gruppe wählen.",
       legende: "Beitragsgruppe",
       proJahr: "{jahr} Euro im Jahr",
-      doppel: "Sie sind in Fußball und Karneval.\nDafür kann ein eigener Beitrag gelten.\nDer Verein sagt Ihnen Bescheid.",
+      doppel: "Sind Sie in Fußball und Karneval?\nFragen Sie nach einem eigenen Beitrag.",
       vorgeschlagen: "Vorschlag",
     },
     familie: {
@@ -663,7 +616,6 @@ export default {
       sepaHinweis: "Der Verein bucht den Beitrag einmal im Jahr ab.",
       rechnung: "Rechnung",
       rechnungHinweis: "Sie überweisen den Beitrag selbst.",
-      zuschlag: "Dafür kann ein Zuschlag von {zuschlag} Euro im Jahr anfallen.",
     },
     inhaber: {
       titel: "Wem gehört das Konto?",
@@ -712,10 +664,23 @@ export default {
       titel: "Fahrten und Nachrichten",
       hinweis: "Beides ist freiwillig. Sie können das später ändern.",
       fahrten: "{name} darf zu Spielen und Turnieren mitfahren.",
+      // Nur Karneval (ohne Fußball): keine Spiele und Turniere (Entscheidung der 1. Vorsitzenden vom 11.10.2026)
+      fahrtenKarneval: "{name} darf zu Veranstaltungen des Vereins mitfahren.",
       fahrtenHinweis: "Zum Beispiel in Autos anderer Eltern.",
       messenger: "{name} darf in die Messenger-Gruppe der Mannschaft.",
       messengerHinweis: "Dort stehen Termine und Absprachen.",
     },
+  },
+
+  // Aufsichtspflicht (Entscheidung der 1. Vorsitzenden vom 11.10.2026): Minderjährige, die trainieren oder tanzen.
+  heimweg: {
+    titel: "Darf Ihr Kind nach dem Training allein nach Hause?",
+    hinweis: "Während des Trainings passt der Verein auf Ihr Kind auf.\nSagen Sie uns: Wie kommt Ihr Kind danach nach Hause?",
+    allein: "Allein nach Hause",
+    alleinHinweis: "Mein Kind darf nach dem Training allein nach Hause gehen.",
+    abholen: "Wird abgeholt",
+    abholenHinweis: "Mein Kind wartet, bis es abgeholt wird.",
+    aendern: "Sie können das jederzeit ändern. Sagen Sie es dann dem Trainer.",
   },
 
   notfall: {
@@ -868,10 +833,6 @@ export default {
       alterVerein: "Bisheriger Verein",
       alteMitgliedschaft: "Mitgliedschaft im alten Verein",
       abmeldung: "Abmeldung",
-      karneval: "Karneval-Gruppe",
-      abendauftritte: "Abendauftritte",
-      abholung: "Wer holt ab",
-      alleinNachHause: "Allein nach Hause",
       staaten: "Staatsangehörigkeit",
       ausland: "Zuletzt im Ausland",
       wohnen: "Wohnort",
@@ -889,6 +850,7 @@ export default {
       hfv: "Fußball-Verband",
       fahrten: "Fahrten",
       messenger: "Messenger-Gruppe",
+      heimweg: "Heimweg",
       notfall: "Notfallkontakt",
       gesundheitsbogen: "Gesundheitsbogen",
       spielerfoto: "Spielerfoto",
@@ -903,7 +865,7 @@ export default {
       nein: "Nein",
       weissNicht: "Weiß nicht",
       satzungVonHand: "Nein – Sie kreuzen es von Hand an",
-      alleinAb: "Ja, ab {zeit} Uhr",
+      heimweg: { allein: "Allein nach Hause", abholen: "Wird abgeholt" },
       geschlecht: { m: "Männlich", w: "Weiblich", d: "Divers", ohne_angabe: "Keine Angabe" },
       abteilung: { fussball: "Fußball", karneval: "Karneval", beides: "Fußball und Karneval", passiv: "Nur unterstützen" },
       abmeldung: {

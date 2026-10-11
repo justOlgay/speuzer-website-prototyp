@@ -1,31 +1,39 @@
-// Anmeldung neu gedacht /anmeldung-konzept/ (AP-6, 29.09.2026; Runde 3 am 30.09.2026) –
+// Anmeldung neu gedacht /anmeldung-konzept/ (AP-6, 29.09.2026; Runde 3 am 30.09.2026; Stand der Punkte am 11.10.2026) –
 // Begleitseite für die 1. Vorsitzende und den Vorstand. Erklärt in etwa 10 Minuten,
 // warum der Aufnahmeantrag nicht reicht, was der Anmelde-Assistent (Prototyp unter
 // /anmeldung/) macht, was im PDF steht, welche Fälle es gibt, was an den bisherigen
-// Unterlagen falsch oder veraltet ist, was der Verein entscheiden und beim HFV klären
-// muss, was bei Karneval offen ist und wie die Einführung in Schritten aussieht.
+// Unterlagen falsch oder veraltet ist, was der Verein entschieden hat und was noch offen ist,
+// was beim Karneval nicht zur Anmeldung gehört und wie die Einführung in Schritten aussieht.
 //
 // Inhaltliche Grundlage (Stand der Recherche 29.09.2026): die Recherche-Synthese und
 // die Vollständigkeitsprüfung; wo die Prüfung korrigiert, gilt die Prüfung. Was dort
-// als „offen“ oder „unsicher“ steht, steht auch hier als offen.
+// als „offen“ oder „unsicher“ steht, steht auch hier so, soweit es nicht inzwischen
+// entschieden oder geregelt ist (Stand 11.10.2026, siehe unten).
 //
 // Runde 3 (30.09.2026): Abgleich mit dem fertigen Prototyp.
 //   - Abschnitte 3 bis 5 (Assistent, PDF, Unterschrift) beschreiben den Endstand:
 //     Teile A/B/C, einheitliche Namen der Papiere („Spielrecht“ im Fließtext),
 //     Satzungs-Haken, zweiter Elternteil, keine leeren Erklärungsfelder unter einer
 //     Bildschirm-Unterschrift, Notfall- und Gesundheitsbogen (mit und ohne Angaben zur
-//     Gesundheit, Absprache zur Medikamentengabe), Attest beim Vereinswechsel, Erlaubnis für Auftritte am Abend, lateinische Schrift,
-//     Vorführung, Datenschutz.
-//   - Die Listen in den Abschnitten 10 bis 12 spiegeln data/anmeldung.json ›
-//     offenePunkte (Version 2026-10-08.1, O01 bis O73): jeder Punkt genau eine Zeile
-//     mit der kleinen Nummer (Anker #o01 …). P1 steht immer sichtbar, P2 und P3 dürfen
-//     in einem Aufklapper stehen. Ein Punkt mit Status „entschieden“ (O26, Jugendleitung
-//     08.10.2026) trägt das Kennzeichen „Entschieden“ und nennt die Entscheidung; er zählt
-//     nicht mehr als offene Frage. Die Prioritäten unten (PRIO) sind ein Abzug aus der
-//     Datei; tools/anmeldung-test/konzept-pruefen.mjs vergleicht die gebaute Seite mit
-//     der Datei und schlägt an, wenn beide auseinanderlaufen.
-//   - Die Seite selbst liest nichts aus data/*.json: Regeln, Zahlen und offene Punkte
-//     sind ein Datumsstand, kein Live-Wert.
+//     Gesundheit, Absprache zur Medikamentengabe), Attest beim Vereinswechsel,
+//     lateinische Schrift, Vorführung, Datenschutz.
+//
+// Stand 11.10.2026 (Paket M2): Die Antworten der 1. Vorsitzenden sind eingearbeitet.
+//   - Die Listen in den Abschnitten 10 bis 12 spiegeln data/anmeldung.json › offenePunkte
+//     (Version 2026-10-11.1, O01 bis O73): jeder Punkt genau eine Zeile mit Kennzeichen und kleiner
+//     Nummer (Anker #o01 …). Ein Punkt hat einen von fünf Ständen: entschieden, geregelt, entfällt,
+//     später (Status „vorgemerkt“) oder offen. Nur „offen“ zählt als offene Frage und trägt P1, P2 oder P3.
+//   - Die Seite liest die Punkte beim Bau (seite(daten), daten.anmeldung.offenePunkte). Stand, Priorität,
+//     der Text zum Stand („entscheidung“ bei erledigten, „stand“ bei offenen Punkten) und die Zahlen im
+//     Kasten „Stand“ kommen aus der Datei, nicht aus dieser Datei hier. Hier stehen nur die kurzen Fragen
+//     je Zeile und der Hintergrund der offenen Punkte. Fehlt eine Zeile oder eine Angabe, bricht der Bau ab.
+//   - Offene und entschiedene Zeilen stehen sichtbar, geregelte, entfallene und später geprüfte
+//     in einem Aufklapper unter jeder Liste (<details>, in der Druckansicht offen).
+//   - tools/anmeldung-test/konzept-pruefen.mjs vergleicht die gebaute Seite mit der Datei und schlägt an,
+//     wenn beide auseinanderlaufen.
+//   - Karneval gehört nicht zur Anmeldung (Entscheidung vom 11.10.2026): keine Gruppenwahl, keine Turniere,
+//     keine Auftritte. Neu im Assistenten: das Blatt „Heimweg nach dem Training“. Beim Probetraining sind
+//     Nichtmitglieder nicht über den Verein versichert; der Assistent weist darauf hin.
 //
 // Liegt wie /vorher-nachher/ und /app/ außerhalb der Hülle (docs/index.html) und
 // außerhalb der Workspace-Seiten (docs/ws/) – eigene Vorlage src/vorlagen/begleit.html,
@@ -34,43 +42,88 @@
 //
 // Kleine Auszeichnungssprache in den Texten (siehe md()):
 //   **fett**   [Text](#anker)   {pflicht} {verein} {offen}   {p1} {p2} {p3}   {br}
-//   {entschieden}   {a:id} = Verweis „Abschnitt N“   {o:O26} = kleine Nummer eines offenen Punkts
+//   {entschieden} {geregelt} {entfaellt} {spaeter}   {a:id} = Verweis „Abschnitt N“   {o:O26} = kleine Nummer eines Punkts
 
 // Diese Seite liegt immer unter "/anmeldung-konzept/" (Tiefe 1), daher "../".
 const PFAD = "../";
 const STAND_RECHERCHE = "29.09.2026";
-const STAND_ABGLEICH = "08.10.2026";
-const REGELWERK_VERSION = "2026-10-08.1";
+const STAND_ABGLEICH = "11.10.2026";
+const REGELWERK_VERSION = "2026-10-11.1";
 const PROTOTYP = `${PFAD}anmeldung/`;
 
-// Prioritäten der offenen Punkte (Abzug aus data/anmeldung.json › offenePunkte, Version 2026-10-08.1, O01 bis O73).
-const PRIO = {
-  O01: "P1", O02: "P1", O03: "P1", O04: "P1", O05: "P1", O06: "P1", O07: "P2", O08: "P1",
-  O09: "P1", O10: "P1", O11: "P1", O12: "P1", O13: "P1", O14: "P1", O15: "P1", O16: "P1",
-  O17: "P1", O18: "P1", O19: "P2", O20: "P1", O21: "P2", O22: "P2", O23: "P2", O24: "P1",
-  O25: "P1", O26: "P1", O27: "P1", O28: "P1", O29: "P1", O30: "P1", O31: "P1", O32: "P2",
-  O33: "P2", O34: "P2", O35: "P2", O36: "P2", O37: "P2", O38: "P2", O39: "P2", O40: "P2",
-  O41: "P2", O42: "P2", O43: "P2", O44: "P2", O45: "P2", O46: "P2", O47: "P2", O48: "P2",
-  O49: "P3", O50: "P3", O51: "P3", O52: "P3", O53: "P3", O54: "P2", O55: "P2", O56: "P3",
-  O57: "P3", O58: "P2", O59: "P2", O60: "P2", O61: "P2", O62: "P1", O63: "P3", O64: "P3",
-  O65: "P2", O66: "P1", O67: "P1", O68: "P1", O69: "P2", O70: "P2", O71: "P2",
-  O72: "P1", O73: "P1",
-};
-const ANZAHL_PUNKTE = Object.keys(PRIO).length;
+// ---------- Stand der Punkte (data/anmeldung.json › offenePunkte, beim Bau gesetzt) ----------
 
-// Entschiedene Punkte (data/anmeldung.json › offenePunkte, Status „entschieden“): Sie zählen nicht mehr als offene Frage.
-// Die Zeile trägt das Kennzeichen „Entschieden“ statt der Priorität und nennt die Entscheidung; der Text steht wörtlich in
-// der Datei (Feld „entscheidung“), tools/anmeldung-test/konzept-pruefen.mjs vergleicht ihn.
-const ENTSCHIEDEN = {
-  O26: "Ein Elternteil reicht (Jugendleitung, 08.10.2026). Ausnahme: getrennt lebende Eltern ohne Einverständnis – dann unterschreibt der andere Elternteil mit Stift.",
+// Die fünf Stände eines Punkts, in der Reihenfolge, in der die Seite sie zählt und zeigt.
+// kennzeichen: Schlüssel in KENNZEICHEN (offene Punkte tragen stattdessen P1, P2 oder P3).
+// kurz: das Wort in „6 entschieden, 9 entfallen“.
+const STATUS = {
+  entschieden: { kennzeichen: "entschieden", kurz: "entschieden" },
+  geregelt: { kennzeichen: "geregelt", kurz: "geregelt" },
+  entfaellt: { kennzeichen: "entfaellt", kurz: "entfallen" },
+  vorgemerkt: { kennzeichen: "spaeter", kurz: "später" },
+  offen: { kennzeichen: "offen", kurz: "offen" },
 };
-const ANZAHL_ENTSCHIEDEN = Object.keys(ENTSCHIEDEN).length;
+const STATUS_REIHE = Object.keys(STATUS);
 
-// Die Zeilen der Karnevalabteilung stehen im Abschnitt „Karneval“ und sind dort sichtbar;
-// alle übrigen Punkte mit P2 oder P3 stehen in Aufklappern. Verweise (Links) auf eine Nummer
+let PUNKTE = new Map(); // O-Nummer -> Punkt aus der Datei
+const GEZEICHNET = new Set(); // Nummern, für die schon eine Zeile gebaut wurde (jede genau einmal)
+
+// Nimmt die Punkte aus der Datei an und prüft sie so, wie es konzept-pruefen.mjs auch tut: gültiger Stand,
+// „entscheidung“ bei erledigten Punkten, „stand“ bei offenen Punkten, nie beides.
+function setzePunkte(liste) {
+  if (!Array.isArray(liste) || liste.length === 0) {
+    throw new Error("anmeldung-konzept: data/anmeldung.json › offenePunkte fehlt oder ist leer");
+  }
+  const neu = new Map();
+  for (const x of liste) {
+    if (!/^O\d{2}$/.test(x?.id ?? "")) throw new Error(`anmeldung-konzept: ungültige Nummer „${x?.id}“ in offenePunkte`);
+    if (neu.has(x.id)) throw new Error(`anmeldung-konzept: ${x.id} steht doppelt in offenePunkte`);
+    if (!STATUS[x.status]) throw new Error(`anmeldung-konzept: ${x.id} hat den unbekannten Status „${x.status}“`);
+    if (!/^P[123]$/.test(x.prioritaet ?? "")) throw new Error(`anmeldung-konzept: ${x.id} hat keine Priorität P1 bis P3`);
+    const feld = x.status === "offen" ? "stand" : "entscheidung";
+    const anderes = x.status === "offen" ? "entscheidung" : "stand";
+    if (typeof x[feld] !== "string" || !x[feld].trim()) {
+      throw new Error(`anmeldung-konzept: ${x.id} (${x.status}) braucht das Feld „${feld}“`);
+    }
+    if (anderes in x) throw new Error(`anmeldung-konzept: ${x.id} (${x.status}) darf das Feld „${anderes}“ nicht haben`);
+    neu.set(x.id, x);
+  }
+  PUNKTE = neu;
+  GEZEICHNET.clear();
+}
+
+function punkt(oid) {
+  const x = PUNKTE.get(oid);
+  if (!x) throw new Error(`anmeldung-konzept: unbekannter offener Punkt "${oid}"`);
+  return x;
+}
+
+// Zahl der Punkte je Stand, zum Beispiel { entschieden: 6, geregelt: 41, entfaellt: 9, vorgemerkt: 7, offen: 10 }.
+function zaehle(oids) {
+  const z = Object.fromEntries(STATUS_REIHE.map((s) => [s, 0]));
+  for (const oid of oids) z[punkt(oid).status] += 1;
+  return z;
+}
+const zaehleAlle = () => zaehle([...PUNKTE.keys()]);
+
+// „24 geregelt“ oder „6 entschieden, 9 entfallen und 10 offen“ (nur Stände, die vorkommen).
+function aufschluesselung(z) {
+  const teile = STATUS_REIHE.filter((s) => z[s] > 0).map((s) => `${z[s]} ${STATUS[s].kurz}`);
+  return teile.length > 1 ? `${teile.slice(0, -1).join(", ")} und ${teile.at(-1)}` : teile.join("");
+}
+
+// Ein Satz zur Zahl der Punkte: „Alle 3 Punkte der Abteilung sind entfallen.“ oder „Von 26 Fragen sind 24 geregelt und 2 offen.“
+// nom: das Wort im Nominativ (Alle 3 …), dat: im Dativ (Von 3 …).
+function zaehlSatz(oids, nom, dat = nom) {
+  const z = zaehle(oids);
+  const arten = STATUS_REIHE.filter((s) => z[s] > 0);
+  if (arten.length === 1) return `Alle ${oids.length} ${nom} sind ${STATUS[arten[0]].kurz}.`;
+  return `Von ${oids.length} ${dat} sind ${aufschluesselung(z)}.`;
+}
+
+// Sichtbar (nicht im Aufklapper) stehen offene und entschiedene Punkte. Verweise (Links) auf eine Nummer
 // gibt es nur, wenn die Zeile sichtbar ist. Ein Link auf eine eingeklappte Zeile führt ins Leere.
-const IM_KARNEVAL = new Set(["O55", "O56", "O57"]);
-const istSichtbar = (oid) => PRIO[oid] === "P1" || IM_KARNEVAL.has(oid);
+const istSichtbar = (oid) => ["offen", "entschieden"].includes(punkt(oid).status);
 
 // ---------- Text-Helfer ----------
 
@@ -84,8 +137,10 @@ function escapeHtml(text) {
 
 // Geschützte Leerzeichen zwischen Zahl und Einheit sowie nach §, Art., Nr. usw.,
 // damit die Zeile nie zwischen „43,8“ und „%“ oder „§“ und „9“ umbricht.
+// Auch „1. Vorsitzende“ bleibt zusammen (die Zeile soll nicht nach „1.“ umbrechen).
 function typo(text) {
   return String(text)
+    .replace(/\b(\d{1,2})\. (?=Vorsitzende)/g, "$1.\u00a0")
     .replace(/§ (?=\d)/g, "§ ")
     .replace(/\b(Art\.|Nr\.|Abs\.|Anhang|Folie|Folien|Seite|Zeile) (?=\d)/g, "$1 ")
     .replace(/(\d) (%|€)/g, "$1 $2")
@@ -107,11 +162,14 @@ const KENNZEICHEN = {
   p2: '<span class="tag">P2</span>',
   p3: '<span class="tag tag--auswaerts">P3</span>',
   entschieden: '<span class="tag tag--heim">Entschieden</span>',
+  geregelt: '<span class="tag tag--geregelt">Geregelt</span>',
+  entfaellt: '<span class="tag tag--entfaellt">Entfällt</span>',
+  spaeter: '<span class="tag tag--spaeter">Später</span>',
 };
 
-// Kleine Nummer eines offenen Punkts. Als Link nur, wenn die Zeile sichtbar ist.
+// Kleine Nummer eines Punkts. Als Link nur, wenn die Zeile sichtbar ist.
 function onrMarke(oid, mitLinks) {
-  if (!PRIO[oid]) throw new Error(`anmeldung-konzept: unbekannter offener Punkt "${oid}"`);
+  punkt(oid); // wirft bei einer unbekannten Nummer
   return mitLinks && istSichtbar(oid)
     ? `<a class="konzept-onr" href="#${oid.toLowerCase()}">${oid}</a>`
     : `<span class="konzept-onr">${oid}</span>`;
@@ -129,7 +187,7 @@ function md(text, mitLinks = true) {
   });
   t = t.replace(/\{o:(O\d{2})\}/g, (_m, oid) => onrMarke(oid, mitLinks));
   t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
-  t = t.replace(/\{(pflicht|verein|offen|p1|p2|p3|entschieden)\}/g, (_m, k) => KENNZEICHEN[k]);
+  t = t.replace(/\{(pflicht|verein|offen|p1|p2|p3|entschieden|geregelt|entfaellt|spaeter)\}/g, (_m, k) => KENNZEICHEN[k]);
   t = t.replaceAll("{br}", "<br>");
   return t;
 }
@@ -146,15 +204,15 @@ function liste(punkte, { geordnet = false, klasse = "" } = {}) {
   </${tag}>`;
 }
 
-// art: "" (weiß), "info" (blau) oder "offen" (Klärungsbedarf). inhalt: fertiges HTML.
-function kasten(art, inhalt) {
+// art: "" (weiß), "info" (blau) oder "offen" (Klärungsbedarf). inhalt: fertiges HTML. id: Anker des Kastens (optional).
+function kasten(art, inhalt, id = "") {
   const zusatz = art ? ` hinweis--${art}` : "";
-  return `<div class="hinweis${zusatz} inhalt fluss konzept-box">
+  return `<div${id ? ` id="${id}"` : ""} class="hinweis${zusatz} inhalt fluss konzept-box">
     ${inhalt}
   </div>`;
 }
 
-// Aufklapper für Punkte mit P2 oder P3. Er ist ein normales <details>: ohne Skript,
+// Aufklapper für geregelte, entfallene und später geprüfte Punkte. Er ist ein normales <details>: ohne Skript,
 // mit der Tastatur bedienbar, in der Druckansicht offen (siehe STIL).
 function aufklapper(titel, inhalt) {
   return `<details class="konzept-mehr">
@@ -163,17 +221,11 @@ function aufklapper(titel, inhalt) {
   </details>`;
 }
 
-// „P2“, „P3“ oder „P2 und P3“ – je nachdem, was in der Liste vorkommt.
-function prioText(oids) {
-  const arten = [...new Set(oids.map((o) => PRIO[o]))].sort();
-  return arten.join(" und ");
-}
-
 // Tabelle im horizontal scrollbaren Rahmen (.tabelle-wrap). Zellen sind Texte
 // mit Auszeichnung (md) oder { html } (fertiges, sicheres HTML). breit: mehr Mindestbreite
 // bei vielen Spalten oder Text.
 // Eine Zeile ist eine Liste von Zellen oder ein Objekt { id, prio, zellen }.
-// Zeilen mit id bekommen den Anker (#o26), data-prio und, wenn der Punkt entschieden ist, data-status="entschieden".
+// Zeilen mit id bekommen den Anker (#o26), data-prio und data-status (Stand des Punkts).
 function tabelle({ beschriftung, spalten, zeilen, breit = false, ersteSpalte = "" }) {
   const kopf = spalten.map((s) => `<th scope="col">${escapeHtml(s)}</th>`).join("");
   const koerper = zeilen
@@ -199,45 +251,79 @@ function tabelle({ beschriftung, spalten, zeilen, breit = false, ersteSpalte = "
     </div>`;
 }
 
-// Zweite Zelle einer Entscheidungszeile: die Entscheidung fett, das Warum darunter. So passt die
-// Liste auch auf dem Handy in die Breite, ohne seitliches Wischen.
-function frageUndWarum(entscheidung, warum) {
-  return { html: `<p class="konzept-frage">${md(entscheidung, false)}</p><p class="konzept-warum">${md(warum, false)}</p>` };
-}
-
-// Zeile einer Entscheidungstabelle für einen offenen Punkt: Priorität und kleine Nummer
-// in der ersten Zelle, dann die Entscheidung mit dem Warum. Ein entschiedener Punkt zeigt
-// statt der Priorität das Kennzeichen „Entschieden“ und seine Entscheidung (ENTSCHIEDEN) vor dem Warum;
-// die Priorität bleibt als data-prio an der Zeile (sie steht so im Regelwerk).
-function punktZeile(oid, entscheidung, warum) {
-  if (!PRIO[oid]) throw new Error(`anmeldung-konzept: unbekannter offener Punkt "${oid}"`);
-  const fertig = ENTSCHIEDEN[oid];
+// Zeile einer Liste für einen Punkt aus data/anmeldung.json. Erste Zelle: das Kennzeichen (P1 bis P3 bei einem offenen
+// Punkt, sonst Entschieden, Geregelt, Entfällt oder Später) und die kleine Nummer. Zweite Zelle: die kurze Frage, darunter
+// der Text aus der Datei – „entscheidung“ bei erledigten Punkten, „stand“ bei offenen –, bei offenen Punkten zuletzt der
+// Hintergrund (warum). Alte Hintergründe erledigter Punkte stehen nicht mehr da: Sie widersprächen oft dem neuen Stand.
+// Die Zeile steht sichtbar, wenn der Punkt offen oder entschieden ist, sonst im Aufklapper (sichtbar, siehe entscheidungsListe).
+// Die Priorität bleibt als data-prio an der Zeile (sie steht so im Regelwerk), der Stand als data-status.
+function punktZeile(oid, frage, warum = "") {
+  const x = punkt(oid);
+  if (GEZEICHNET.has(oid)) throw new Error(`anmeldung-konzept: die Zeile für ${oid} kommt doppelt vor`);
+  GEZEICHNET.add(oid);
+  const offen = x.status === "offen";
+  const kennzeichen = offen ? x.prioritaet.toLowerCase() : STATUS[x.status].kennzeichen;
+  const antwort = offen ? x.stand : x.entscheidung;
   return {
+    oid,
     id: oid.toLowerCase(),
-    prio: PRIO[oid],
-    ...(fertig ? { status: "entschieden" } : {}),
+    prio: x.prioritaet,
+    status: x.status,
+    sichtbar: istSichtbar(oid),
     zellen: [
-      `{${fertig ? "entschieden" : PRIO[oid].toLowerCase()}}{br}{o:${oid}}`,
-      frageUndWarum(entscheidung, fertig ? `**${fertig}** ${warum}` : warum),
+      `{${kennzeichen}}{br}{o:${oid}}`,
+      {
+        html: `<p class="konzept-frage">${md(frage, false)}</p><p class="konzept-antwort">${md(antwort, false)}</p>${
+          offen && warum ? `<p class="konzept-warum">${md(warum, false)}</p>` : ""
+        }`,
+      },
     ],
   };
 }
 
-// Liste mit kleiner Nummer vor jedem Text. punkte: [[oids, text], …]; oids ist eine Nummer oder eine
-// Liste. Die erste Nummer in `eigene` (Menge) trägt den Anker der Zeile, alle anderen sind Verweise.
-function nummernListe(punkte, { eigene = null } = {}) {
+const SPALTEN_PUNKT = ["Stand · Nr.", "Punkt und Stand"];
+
+// Eine Liste: Offene und entschiedene Punkte stehen sichtbar in einer Tabelle, die übrigen (geregelt, entfällt,
+// später) darunter in einem Aufklapper; beide nach Stand und Nummer geordnet.
+// punkte: [[Nummer, kurze Frage, Hintergrund (nur bei offenen Punkten)], …].
+function entscheidungsListe({ name, punkte, titelWeitere }) {
   const zeilen = punkte
-    .map(([oids, text]) => {
-      const liste2 = Array.isArray(oids) ? oids : [oids];
-      const anker = eigene ? liste2.find((o) => eigene.has(o)) : liste2[0];
-      const marken = liste2.map((o) => (o === anker ? `<span class="konzept-onr">${o}</span>` : onrMarke(o, true))).join(" ");
-      const attr = anker ? ` id="${anker.toLowerCase()}" data-prio="${PRIO[anker]}"` : "";
-      return `<li${attr}><span class="konzept-oliste__nr">${marken}</span> <span class="konzept-oliste__text">${md(text)}</span></li>`;
-    })
-    .join("\n    ");
-  return `<ul class="konzept-oliste">
-    ${zeilen}
-  </ul>`;
+    .map(([oid, frage, warum]) => punktZeile(oid, frage, warum))
+    // erst nach Stand in der Reihenfolge von STATUS (entschieden vor offen), dann nach Nummer
+    .sort((a, b) => STATUS_REIHE.indexOf(a.status) - STATUS_REIHE.indexOf(b.status) || a.oid.localeCompare(b.oid));
+  const sichtbar = zeilen.filter((z) => z.sichtbar);
+  const weitere = zeilen.filter((z) => !z.sichtbar);
+  const teile = [];
+  if (sichtbar.length) {
+    teile.push(
+      tabelle({
+        beschriftung: `Punkte: ${name}, offen oder entschieden`,
+        spalten: SPALTEN_PUNKT,
+        ersteSpalte: "prio",
+        zeilen: sichtbar,
+      })
+    );
+  } else {
+    teile.push(p("Kein Punkt dieser Liste ist offen."));
+  }
+  if (weitere.length) {
+    const z = zaehle(weitere.map((x) => x.oid));
+    const arten = STATUS_REIHE.filter((s) => z[s] > 0);
+    // Nur ein Stand in der Gruppe: „24 geregelt“, sonst „12 (4 geregelt, 6 entfallen und 2 später)“
+    const zahlen = arten.length === 1 ? `${weitere.length} ${STATUS[arten[0]].kurz}` : `${weitere.length} (${aufschluesselung(z)})`;
+    teile.push(
+      aufklapper(
+        `${titelWeitere}: ${zahlen}`,
+        tabelle({
+          beschriftung: `Punkte: ${name}, geregelt, entfallen oder später`,
+          spalten: SPALTEN_PUNKT,
+          ersteSpalte: "prio",
+          zeilen: weitere,
+        })
+      )
+    );
+  }
+  return teile.join("\n    ");
 }
 
 // ---------- Gliederung ----------
@@ -252,8 +338,8 @@ const ABSCHNITTE = [
   { id: "gelernt", titel: "Was wir an unserer bisherigen Liste gelernt haben" },
   { id: "wartefristen", titel: "Wartefristen in Kürze" },
   { id: "datenschutz", titel: "Datenschutz und Aufbewahrung" },
-  { id: "entscheiden", titel: "Was der Verein entscheiden muss" },
-  { id: "hfv-fragen", titel: "Was wir beim HFV (Passstelle) fragen sollten" },
+  { id: "entscheiden", titel: "Entscheidungen und offene Punkte" },
+  { id: "hfv-fragen", titel: "Fragen zum HFV (Passwesen)" },
   { id: "karneval", titel: "Karneval – KA Schnauzer" },
   { id: "einfuehrung", titel: "Einführung in Schritten" },
   { id: "quellen", titel: "Quellen mit Stand" },
@@ -282,9 +368,9 @@ function abschnitt(id, inhalt) {
 
 // ---------- Fragen an den HFV (zuerst, weil andere Abschnitte darauf verweisen) ----------
 
-// Alle offenen Punkte, die die Passstelle beantworten muss (an: "hfv_passstelle" in
-// data/anmeldung.json, Version 2026-10-08.1), in der Reihenfolge der Nummern. Der Wortlaut
-// folgt der Datei; O07 gilt als weitgehend geklärt.
+// Alle Punkte, die die Passstelle betreffen (an: "hfv_passstelle" in data/anmeldung.json, Version 2026-10-11.1),
+// in der Reihenfolge der Nummern. Der Wortlaut der Frage folgt der Datei; Stand und Text dazu kommen aus der Datei
+// (punktZeile). Seit dem 11.10.2026 gilt: Der Assistent folgt den Vordrucken des HFV, das Passwesen klärt Sonderfälle.
 const HFV_PUNKTE = [
   ["O01", "Reicht ein Scan oder eine digitale Unterschrift, oder muss das Papier-Original mit Stift vorliegen? Darf der Verein rein digital archivieren?"],
   ["O02", "Sind die Zusatzerklärung „To Player's Parents“ und die Länderformulare (USA, Mexiko, Argentinien, Brasilien, Balkan) noch nötig?"],
@@ -292,7 +378,7 @@ const HFV_PUNKTE = [
   ["O04", "Sind beim Wechsel innerhalb Hessens Meldebescheinigung und Attest für Nichtdeutsche von 10 bis 17 Jahren wirklich nötig? Das Formular sagt ja, die Präsentation 2026 nennt sie nicht."],
   ["O05", "Braucht es beim Wechsel deutscher Minderjähriger Geburtsurkunde und Attest? Der Wortlaut von JO § 9 Nr. 1 und das Formular widersprechen sich."],
   ["O06", "Attest: Wie alt darf es höchstens sein? Welchen Inhalt muss es haben? Welche Rechtsgrundlage gilt für die Verarbeitung (Art. 9 DSGVO)? Werden Atteste aus dem Ausland angenommen?"],
-  ["O07", "**Weitgehend geklärt.** Die Vollmacht für die Abmeldung ist außerhalb des Junis nutzbar, mit den normalen Wartefristen. Folie 4 der Präsentation 2026 ist mehrdeutig. Bitte kurz bestätigen lassen."],
+  ["O07", "Die Vollmacht für die Abmeldung ist außerhalb des Junis nutzbar, mit den normalen Wartefristen. Folie 4 der Präsentation 2026 ist mehrdeutig."],
   ["O08", "Welche Wartefrist gilt für den jüngeren D-Jahrgang: 6 Monate (HFV-JO) oder höchstens 3 Monate (DFB-JO § 3 Nr. 3 b)?"],
   ["O09", "Doppelstaatler mit deutschem Pass: Welche Staatsangehörigkeit wird im Verbandssystem eingetragen? Müssen ausländische Urkunden übersetzt werden?"],
   ["O10", "Deutscher Ausweis bei einem internationalen Wechsel oder bei Rückkehrern: Darf der Verein die Kopie hochladen, obwohl § 20 PAuswG die Weitergabe verbietet? Reicht die Bestätigung, dass der Verein das Original gesehen hat?"],
@@ -313,12 +399,30 @@ const HFV_PUNKTE = [
   ["O61", "Wegfall der Wartefrist nach mehr als 6 Monaten ohne Pflichtspiel: Der Assistent rechnet nur, wenn der Zeitraum am Tag des Antrags schon vorbei ist. Darf der Verein den Antrag später stellen, um die Wartefrist zu vermeiden?"],
   ["O62", "Deutsche Rückkehrer ab 10 Jahren: Gilt „zuletzt Wohnsitz im Ausland“ auch, wenn das Kind seit vielen Jahren wieder in Deutschland lebt? Der Assistent löst das internationale Verfahren aus, sobald „im Ausland gewohnt“ mit Ja beantwortet wird."],
 ];
-const HFV_P1 = HFV_PUNKTE.filter(([o]) => PRIO[o] === "P1");
-const HFV_WEITERE = HFV_PUNKTE.filter(([o]) => PRIO[o] !== "P1");
-
 // ---------- Kopf ----------
 
+// Kasten „Stand 11.10.2026“ ganz oben: die Zahlen je Stand kommen aus den Daten (zaehleAlle), nicht aus dem Text.
+function standKasten() {
+  const z = zaehleAlle();
+  const zeilen = STATUS_REIHE.map(
+    (s) => `<li data-status="${s}">${KENNZEICHEN[STATUS[s].kennzeichen]} <strong>${z[s]}</strong></li>`
+  ).join("\n      ");
+  return kasten(
+    "info",
+    `<p><strong>Stand ${STAND_ABGLEICH}</strong></p>
+    ${p("Die Antworten der 1. Vorsitzenden sind eingearbeitet.")}
+    <p>Von ${PUNKTE.size} Punkten sind:</p>
+    <ul class="konzept-zahlen" role="list" aria-label="Zahl der Punkte je Stand">
+      ${zeilen}
+    </ul>
+    ${p("Offen sind nur noch die Fragen im Excel an die 1. Vorsitzende.")}
+    ${p("Die Zeilen stehen in {a:entscheiden}, {a:hfv-fragen} und {a:karneval}. Offene und entschiedene Punkte stehen sichtbar. Alle anderen stehen darunter im Aufklapper.")}`,
+    "stand"
+  );
+}
+
 function kopfAbschnitt() {
+  const z = zaehleAlle();
   return `<section class="abschnitt seitenkopf konzept">
   <div class="container fluss">
     <p class="seitenkopf__kicker"><span class="tag tag--warn">Entwurf zur Abstimmung im Vorstand</span></p>
@@ -327,8 +431,9 @@ function kopfAbschnitt() {
       "Heute meldet eine Familie ihr Kind mit dem Aufnahmeantrag an. Der Antrag fragt nur einen Teil dessen ab, was Verband und Verein wissen müssen. Ein Anmelde-Assistent stellt Schritt für Schritt nur die Fragen, die im jeweiligen Fall nötig sind. Am Ende steht ein vollständiges PDF für die Familie und den Verein."
     )}</p>
     <p class="knopfzeile"><a class="knopf" href="${PROTOTYP}">Prototyp ansehen</a></p>
+    ${standKasten()}
     <p class="meta">${md(
-      `Stand der Recherche: ${STAND_RECHERCHE}. Abgeglichen mit dem Prototyp am ${STAND_ABGLEICH} (Regelwerk Version ${REGELWERK_VERSION} mit ${ANZAHL_PUNKTE} offenen Punkten, davon ${ANZAHL_ENTSCHIEDEN} entschieden). Grundlage sind die Ordnungen des Hessischen Fußball-Verbands (HFV) für die Saison 2026/27, die Vereinsunterlagen und weitere Quellen ({a:quellen}). Der Prototyp ist ein Entwurf zum Anschauen. Er sendet und speichert nichts. Die Seite ersetzt keine Rechtsberatung.`
+      `Stand der Recherche: ${STAND_RECHERCHE}. Abgeglichen mit dem Prototyp am ${STAND_ABGLEICH} (Regelwerk Version ${REGELWERK_VERSION} mit ${PUNKTE.size} Punkten, davon ${z.offen} offen). Grundlage sind die Ordnungen des Hessischen Fußball-Verbands (HFV) für die Saison 2026/27, die Vereinsunterlagen und weitere Quellen ({a:quellen}). Der Prototyp ist ein Entwurf zum Anschauen. Er sendet und speichert nichts. Die Seite ersetzt keine Rechtsberatung.`
     )}</p>
     ${kasten(
       "",
@@ -336,9 +441,12 @@ function kopfAbschnitt() {
     ${p("{pflicht} Verband, FIFA oder Gesetz schreiben es vor.")}
     ${p("{verein} Regel oder Praxis des Vereins.")}
     ${p("{offen} Nicht belegt oder unsicher. Wir müssen nachfragen.")}
-    ${p("{p1} {p2} {p3} Dringlichkeit eines offenen Punkts. P1 muss vor dem Livegang geklärt sein.")}
     ${p("{entschieden} Der Punkt ist entschieden. Die Zeile nennt die Entscheidung und zählt nicht mehr als offene Frage.")}
-    <p><span class="konzept-onr">O26</span> Nummer des offenen Punkts im Regelwerk des Prototyps. Damit können wir im Gespräch auf eine Zeile verweisen.</p>
+    ${p("{geregelt} So machen wir es. Die Regel steht fest. Einzelfälle klärt der Verein.")}
+    ${p("{entfaellt} Der Punkt gehört nicht zur Anmeldung. Er entfällt.")}
+    ${p("{spaeter} Für den Start nicht nötig. Wir prüfen den Punkt später.")}
+    ${p("{p1} {p2} {p3} Dringlichkeit eines offenen Punkts. P1 muss vor dem Livegang geklärt sein.")}
+    <p><span class="konzept-onr">O26</span> Nummer des Punkts im Regelwerk des Prototyps. Damit können wir im Gespräch auf eine Zeile verweisen.</p>
     <p class="meta">${md(
       "Kürzel: JO = Jugendordnung des HFV. SpO = Spielordnung des HFV. DFB = Deutscher Fußball-Bund. DFBnet = Online-System des DFB, in dem Vereine Anträge einreichen. LSB = Landessportbund Hessen."
     )}</p>`
@@ -362,13 +470,16 @@ function inhaltsverzeichnis() {
 }
 
 function kurzAbschnitt() {
+  const z = zaehleAlle();
+  const hfv = HFV_PUNKTE.map(([oid]) => oid);
   const inhalt = `${liste([
     "**Das Problem.** Der Aufnahmeantrag fragt vieles nicht ab, was der HFV für das Spielrecht braucht. Fehlende Angaben und Unterlagen müssen einzeln nachgefordert werden. Dazu sind Vereinsunterlagen von 2014 und 2021 veraltet. {a:warum}",
     "**Die Lösung.** Ein Assistent im Browser fragt Schritt für Schritt in Einfacher Sprache. Er bietet Übersetzungshilfe auf Englisch, Türkisch und Arabisch. Am Ende erzeugt er ein PDF mit allen Unterlagen. Ein Prototyp zum Ausprobieren liegt vor. {a:assistent}, {a:pdf}",
     "**Die Unterschrift.** Vereinsunterlagen unterschreibt die Familie am Bildschirm, nachdem sie die Satzung gelesen hat. Die Vordrucke des HFV unterschreibt sie mit Stift, denn der Verband verlangt die eigenhändige Unterschrift. Es reicht ein Elternteil. Die Jugendleitung hat das am 08.10.2026 entschieden ({o:O26}). {a:unterschrift}",
-    "**Der Vorstand entscheidet zuerst:** Wie sichern wir den Unfallschutz beim Probetraining ({o:O27})? Wann beginnt die Mitgliedschaft ({o:O30})? Wo liegen die Originale ({o:O24})? Dazu kommt der Beschluss zur Bildschirm-Unterschrift der Vereinsunterlagen ({o:O68}). Die Jugendleitung befürwortet sie. Offen ist auch die Rechtsgrundlage für die Notfallkontakte ({o:O67}). {a:entscheiden}",
-    `**Beim HFV zu klären:** ${HFV_PUNKTE.length} Fragen an die Passstelle, ${HFV_P1.length} davon mit P1. Die P1-Fragen sollten vor dem Livegang beantwortet sein. {a:hfv-fragen}`,
-    "**Beim Karneval eilt es.** Der Meldeschluss für den Fastnachtszug 2027 ist der 30.09.2026 ({o:O29}). Dazu laufen zwei Anmeldewege parallel ({o:O28}). {a:karneval}",
+    "**Entschieden am 11.10.2026.** Die 1. Vorsitzende hat die Fragen beantwortet. Nichtmitglieder sind beim Probetraining nicht über den Verein versichert ({o:O27}). Die Mitgliedschaft beginnt am Tag der Anmeldung ({o:O30}). Es gibt keine Probemitgliedschaft ({o:O31}). {a:entscheiden}",
+    `**Noch offen: ${z.offen} Punkte.** Sie stehen im Excel an die 1. Vorsitzende. Zum Beispiel: Wo liegen die Originale ({o:O24})? Dürfen Vereinsunterlagen am Bildschirm unterschrieben werden ({o:O68})? Welche Rechtsgrundlage gilt für die Notfallkontakte ({o:O67})?`,
+    `**Beim HFV.** Der Assistent folgt den Vordrucken des HFV. Sonderfälle klärt das Passwesen im Einzelfall. Von ${hfv.length} Fragen sind ${zaehle(hfv).offen} offen. {a:hfv-fragen}`,
+    "**Karneval.** Karneval gehört nicht zur Anmeldung im Assistenten. Die Karnevalabteilung klärt ihre Fragen selbst ({o:O28}). {a:karneval}",
   ])}
     ${kasten(
       "info",
@@ -421,7 +532,7 @@ const SCHRITTE = [
   ],
   [
     "Fußball oder Karneval",
-    "Fußball, Karneval, beides oder nur Förderer. Bei Fußball fragt er nach Mannschaft, Spielen, Spielerpass und Wechsel, Pass und Wohnort, Sorgerecht und Besonderem. Die Antworten entscheiden, welche Unterlagen der Verband verlangt. Bei Karneval fragt er nach Gruppe, Turnieren und Abendauftritten.",
+    "Fußball, Karneval, beides oder nur Förderer. Bei Fußball fragt er nach Mannschaft, Spielen, Spielerpass und Wechsel, Pass und Wohnort, Sorgerecht und Besonderem. Die Antworten entscheiden, welche Unterlagen der Verband verlangt. Bei Karneval entfallen diese Fragen. Eine Gruppenwahl gibt es nicht. Die Trainer ordnen die Kinder einer Gruppe zu.",
   ],
   [
     "Kontakt",
@@ -433,7 +544,7 @@ const SCHRITTE = [
   ],
   [
     "Unterlagen",
-    "Die Familie entscheidet über die Erlaubnis für Fotos, die Erlaubnis für Name und Foto im Internet, Fahrten und Messenger-Gruppe. Bei Kindern nennt sie einen Notfallkontakt und wählt, ob sie einen Gesundheitsbogen ausfüllt. Eine Liste zeigt „Habe ich“ und „Fehlt noch“. Die Familie fotografiert jeden Nachweis mit dem Handy oder wählt eine Datei. Auch das Spielerfoto entsteht hier.",
+    "Die Familie entscheidet über die Erlaubnis für Fotos, die Erlaubnis für Name und Foto im Internet, Fahrten und Messenger-Gruppe. Bei Kindern klärt sie den Heimweg nach dem Training: allein oder abgeholt. Dann nennt sie einen Notfallkontakt und wählt, ob sie einen Gesundheitsbogen ausfüllt. Eine Liste zeigt „Habe ich“ und „Fehlt noch“. Die Familie fotografiert jeden Nachweis mit dem Handy oder wählt eine Datei. Auch das Spielerfoto entsteht hier.",
   ],
   [
     "Unterschrift",
@@ -441,7 +552,7 @@ const SCHRITTE = [
   ],
   [
     "Fertig",
-    "Die Familie prüft alle Angaben und ändert, was nicht stimmt. Dann baut der Assistent das PDF ({a:pdf}). Es zeigt auch, was noch fehlt und wie es weitergeht.",
+    "Die Familie prüft alle Angaben und ändert, was nicht stimmt. Dann baut der Assistent das PDF ({a:pdf}). Es zeigt auch, was noch fehlt und wie es weitergeht. Dort steht auch: Beim Probetraining sind Nichtmitglieder nicht über den Verein versichert.",
   ],
 ];
 
@@ -466,7 +577,7 @@ function assistentAbschnitt() {
       "**Sprachwahl.** Der deutsche Text ist verbindlich. Englisch, Türkisch und Arabisch sind eine Übersetzungshilfe. Arabisch läuft von rechts nach links. Das PDF bleibt deutsch. Muttersprachler sollen die Übersetzungen vor dem Livegang prüfen.",
       "**Nur lateinische Schrift.** Namen und alle Felder, die ins PDF gehen, schreibt die Familie mit lateinischen Buchstaben, so wie im Pass. Nummern schreibt sie mit den Ziffern 0 bis 9. Die Schrift im PDF kennt keine anderen Zeichen. Bei anderen Zeichen bittet der Assistent, die Angabe zu ändern.",
       "**Sprachen des Vereins.** Der Verein wählt die Sprachen aus. Als erste Stufe schlagen wir vor: Deutsch, Englisch, Türkisch, Arabisch, Ukrainisch, Rumänisch, Bulgarisch, Dari/Farsi und Kroatisch/Serbisch/Bosnisch. Zu prüfen sind Albanisch, Spanisch, Italienisch und Tigrinya. Die Rangfolge legen wir nach einer kurzen Abfrage bei den Trainern oder im Mitgliederbestand fest.",
-      "**Hilfe-Knopf.** Auf jeder Seite steht an derselben Stelle ein Hilfe-Knopf mit den Kontaktdaten des Vereins. Ansprechpersonen, Sprachen und Sprechzeiten im Vereinsheim müssen wir noch festlegen, und die Ansprechpersonen müssen zustimmen. {o:O52} {offen}",
+      "**Hilfe-Knopf.** Auf jeder Seite steht an derselben Stelle ein Hilfe-Knopf mit den Kontaktdaten des Vereins. Die Geschäftsstelle hilft per Telefon und E-Mail. Feste Sprechzeiten gibt es nicht. {o:O52}",
       "**Ehrliche Grenzen.** Wo eine Regel nicht sicher ist, sagt der Assistent das: „Vielleicht nötig – der Verein sagt Ihnen Bescheid.“ Auf dem Laufzettel steht der Punkt dann als „klären“. Fristen schätzt der Assistent nur ({a:wartefristen}).",
       "**Nichts wird gesendet oder gespeichert.** Alle Angaben und Fotos bleiben im Browser. Fotos werden dort neu kodiert, das entfernt Standort- und Kameradaten. Ein Knopf löscht alle Angaben. Ob ein Zwischenstand gespeichert werden soll, entscheidet der Verein später. Die Beispiele im Prototyp nutzen nur erfundene Daten. Ihre Telefonnummern stammen aus der Liste der Bundesnetzagentur für Medien.",
       "**Website und App aus einem Guss.** Der Assistent ist in Website und Vereins-App dieselbe Seite. In der App fällt nur der Begleitrahmen weg. Offen ist die Übergabe der Datei in der App ({o:O72}). Dafür ist der automatische Versand über die eigene Annahme vorgesehen, mit Schutz für die Gesundheitsdaten ({o:O73}).",
@@ -493,7 +604,7 @@ function pdfAbschnitt() {
         [
           "**Teil B – Für den Verein**",
           "Wird im Verein abgegeben.",
-          "Laufzettel als Deckblatt. Aufnahmeantrag mit Erlaubnis für Fotos und Erlaubnis für die Lastschrift. Liste der Familienmitglieder. Information zum Datenschutz. Antrag auf Spielerlaubnis, ausgefüllt. Vollmacht für die Abmeldung oder Abmeldung beim alten Verein. Weitere Einverständnisse und Erlaubnisse: Einverständnis für Spiele bei den Herren, Einverständnis für Mädchen bei den Jungen, Einverständnis für Fahrten und Messenger-Gruppe, Erlaubnis für Auftritte am Abend. Seite mit dem Spielerfoto. Kopien der Nachweise mit Wasserzeichen.",
+          "Laufzettel als Deckblatt. Aufnahmeantrag mit Erlaubnis für Fotos und Erlaubnis für die Lastschrift. Liste der Familienmitglieder. Information zum Datenschutz. Antrag auf Spielerlaubnis, ausgefüllt. Vollmacht für die Abmeldung oder Abmeldung beim alten Verein. Weitere Einverständnisse und Erlaubnisse: Einverständnis für Spiele bei den Herren, Einverständnis für Mädchen bei den Jungen, Einverständnis für Fahrten und Messenger-Gruppe, Heimweg nach dem Training. Seite mit dem Spielerfoto. Kopien der Nachweise mit Wasserzeichen.",
         ],
         [
           "**Teil C – Vertraulich, getrennt abgeben**",
@@ -505,9 +616,9 @@ function pdfAbschnitt() {
     ${liste([
       "**Laufzettel.** Das Deckblatt für den Verein fasst den Fall zusammen. Es nennt Alter, Altersklasse, vorhandene und fehlende Unterlagen und die geschätzte Wartefrist. Dazu stehen dort alle Punkte, die der Verein klären muss. Auch das, was der Vorstand noch bestätigen muss: zum Beispiel die Bildschirm-Unterschrift und die Freigabe der Entwurfsblätter. Teil A für die Familie enthält keine Paragrafen. Die Quellen zeigt der Prototyp in der Sicht des Vereins.",
       "**Antrag auf Spielerlaubnis.** Das ist das offizielle, ausfüllbare PDF des Verbands. Der Assistent befüllt es. Die Felder des Vereins und die Bearbeitungsvermerke bleiben leer. Die Stellen für die Unterschrift sind blau markiert. Auf Seite 3 steht die freiwillige Erlaubnis für Name und Foto im Internet.",
-      "**Attest vom Arzt.** Bei der Erstanmeldung Minderjähriger verlangt der Verband ein Attest (JO § 9 Nr. 1). Beim Vereinswechsel ist offen, ob er es verlangt ({o:O04}, {o:O05}). Hat die Familie ein Attest, kommt die Erlaubnis für das Attest mit ins PDF. Ist das Attest Pflicht und fehlt es, liegt die Vorlage für die Ärztin oder den Arzt bei. Auf dem Attest steht nur „keine Bedenken“. Diagnosen gehören nicht ins PDF.",
+      "**Attest vom Arzt.** Bei der Erstanmeldung Minderjähriger verlangt der Verband ein Attest (JO § 9 Nr. 1). Beim Vereinswechsel folgt der Assistent dem Vordruck des HFV ({o:O04}, {o:O05}). Hat die Familie ein Attest, kommt die Erlaubnis für das Attest mit ins PDF. Ist das Attest Pflicht und fehlt es, liegt die Vorlage für die Ärztin oder den Arzt bei. Auf dem Attest steht nur „keine Bedenken“. Diagnosen gehören nicht ins PDF.",
       "**Notfall- und Gesundheitsbogen.** Er ist freiwillig und nur für Kinder. Die Familie nennt zuerst einen Notfallkontakt und wählt dann, ob sie einen Gesundheitsbogen ausfüllt. Mit Angaben zur Gesundheit gilt die ausdrückliche Einwilligung nach Art. 9 DSGVO. Ohne Angaben zeigt der Bogen nur die Notfallkontakte. Die Rechtsgrundlage dafür klärt der Vorstand ({o:O67}). Die Absprache zur Medikamentengabe unterschreiben eine Person mit Sorgerecht und der Trainer immer getrennt mit Stift.",
-      "**Erlaubnis für Auftritte am Abend.** Sie gehört zum Karneval. Die Eltern erlauben Auftritte am Abend. Sie geben an, wer das Kind abholt und ab wann es allein nach Hause darf („allein nach Hause ab … Uhr“). Beide Fragen sind freiwillig. Wer beim Heimweg „Ja“ wählt, nennt auch die Uhrzeit. Wer nicht antwortet, sieht auf dem Blatt „–“. So ergänzt später niemand etwas von Hand.",
+      "**Heimweg nach dem Training.** Dieses Blatt gehört zu Teil B, wenn Minderjährige Fußball spielen oder tanzen. Die Eltern kreuzen an: allein nach Hause oder abgeholt. Das klärt die Aufsichtspflicht. Der Verein gibt eine Kopie an das Trainerteam. Ohne Antwort wird die Stelle zur Stift-Stelle.",
       "**Wasserzeichen.** Jede Kopie eines Nachweises trägt den Vermerk „KOPIE“ mit dem Zweck, dem Namen des Vereins und dem Datum. So lässt sich die Kopie nicht anders verwenden.",
       "**Spielerfoto.** Es steht auf einer eigenen Seite. Zusätzlich gibt es das Foto als JPG-Datei für den Upload in DFBnet.",
     ])}
@@ -528,7 +639,7 @@ function unterschriftAbschnitt() {
         [
           "**Vereinsunterlagen:** Aufnahmeantrag mit Erlaubnis für Fotos und Erlaubnis für die Lastschrift, Information zum Datenschutz (Kenntnisnahme), Einverständnisse und Erlaubnisse des Vereins",
           "Am Bildschirm, mit Finger oder Maus.",
-          "Die Form bestimmt der Verein selbst. Die Satzung verlangt Schriftform. Nach § 127 BGB kann dafür auch eine elektronische Übermittlung reichen. Der Online-Aufnahmeantrag arbeitet schon so. Die Jugendleitung befürwortet es (08.10.2026). Der Beschluss des Vorstands steht aus ({o:O68}). {offen}",
+          "Die Form bestimmt der Verein selbst. Die Satzung verlangt Schriftform. Nach § 127 BGB kann dafür auch eine elektronische Übermittlung reichen. Der Online-Aufnahmeantrag arbeitet schon so. Die Jugendleitung befürwortet es (08.10.2026). Die Antwort der 1. Vorsitzenden steht aus ({o:O68}). {offen}",
         ],
         [
           "**Vordrucke des HFV:** Antrag auf Spielerlaubnis, Vollmacht für die Abmeldung, Abmeldung beim alten Verein, Einverständnis für Spiele bei den Herren",
@@ -562,7 +673,7 @@ function unterschriftAbschnitt() {
       "**Entscheidung der Jugendleitung (08.10.2026):** Ein Elternteil reicht. Bei „alleiniges Sorgerecht“, Vormund und Pflegeperson unterschreibt eine Person. {o:O26}",
       "Bei getrennt lebenden Eltern entscheidet der Elternteil, bei dem das Kind lebt, Alltagsfragen allein (§ 1687 BGB). Ob der Vereinsbeitritt dazu zählt, sagt das Gesetz nicht. {offen} Der Assistent fragt deshalb, ob der andere Elternteil einverstanden ist. Ohne Einverständnis unterschreibt der andere Elternteil zusätzlich mit Stift.",
       "Bei Vormund, Pflegefamilie oder Heim klärt die Jugendleitung persönlich ({a:faelle}).",
-      "Die Erlaubnis für Fotos unterschreiben bisher nur die Eltern. Ob Jugendliche ab 14 oder ab 16 Jahren zusätzlich selbst unterschreiben, entscheidet der Vorstand ({o:O65}).",
+      "Die Erlaubnis für Fotos unterschreiben nur die Eltern. Jugendliche unterschreiben nicht zusätzlich. Das hat die 1. Vorsitzende am 11.10.2026 entschieden ({o:O65}).",
     ])}`;
   return abschnitt("unterschrift", inhalt);
 }
@@ -575,48 +686,48 @@ function unterschriftAbschnitt() {
 const FAELLE = [
   [
     "**F01** Nur Karneval",
-    "Aufnahmeantrag mit Erlaubnis für die Lastschrift und Erlaubnis für Fotos. Je nach Fall: Liste der Familienmitglieder, Nachweis für Azubis oder Studierende, Erlaubnis für Auftritte am Abend (die Eltern übertragen die Aufsicht an eine erwachsene Person), Leihvereinbarung für das Kostüm.",
-    "Kein Antrag auf Spielerlaubnis und kein Attest. Nimmt eine Gruppe an Turnieren teil, kommen Tanzausweis und Zustimmung zu Aufnahmen dazu ({o:O56}). {offen}",
+    "Aufnahmeantrag mit Erlaubnis für die Lastschrift und Erlaubnis für Fotos. Je nach Fall: Liste der Familienmitglieder, Nachweis für Azubis oder Studierende. Bei Minderjährigen: Heimweg nach dem Training.",
+    "Kein Antrag auf Spielerlaubnis und kein Attest. Gruppenwahl, Turniere, Auftritte und Kostüme gehören nicht zur Anmeldung. Die Abteilung klärt sie selbst ({o:O56}).",
   ],
   [
     "**F02** Passive Mitgliedschaft, Förderer oder Senator",
     "Aufnahmeantrag mit Erlaubnis für die Lastschrift. Senator nur als Antrag.",
-    "Der Vorstand entscheidet über Senatoren. Die Satzung kennt sie nicht ({o:O34}). {offen}",
+    "Die Satzung kennt keine Senatoren. Der Vorstand entscheidet über die Aufnahme. Der Beitrag steht in der Beitragsübersicht: 144 € im Jahr ({o:O34}).",
   ],
   [
     "**F03** Kind neu im Fußball, deutsch",
     "Antrag auf Spielerlaubnis, Geburtsurkunde, Attest vom Arzt, digitales Spielerfoto.",
-    "Keine Wartefrist. Im Kreis Frankfurt brauchen auch G- und F-Kinder ein Spielrecht, wenn sie an Spielen, Turnieren oder Festivals teilnehmen. Auch Doppelstaatler mit deutschem Pass gehören hierher. Welche Staatsangehörigkeit im Verbandssystem steht, ist zu klären ({o:O09}). {offen}",
+    "Keine Wartefrist. Im Kreis Frankfurt brauchen auch G- und F-Kinder ein Spielrecht, wenn sie an Spielen, Turnieren oder Festivals teilnehmen. Auch Doppelstaatler mit deutschem Pass gehören hierher. Dafür folgt der Assistent dem Vordruck des HFV. Sonderfälle klärt das Passwesen im Einzelfall ({o:O09}).",
   ],
   [
     "**F04** Kind neu im Fußball, nichtdeutsch, unter 10 Jahren",
-    "Wie F03. Ob Ausweis und Meldebescheinigung (Bescheinigung des Bürgeramts über den Wohnsitz) nötig sind, ist unklar ({o:O03}). {offen}",
-    "Ein Freigabeschein ist nicht nötig. Der Verband prüft vor der Registrierung, ob eine FIFA-Ausnahme oder die 5-Jahres-Regel greift (Art. 19 Abs. 6). Welche Nachweise er dafür will, ist noch zu klären ({o:O17}). {offen}",
+    "Wie F03. Für Ausweis und Meldebescheinigung (Bescheinigung des Bürgeramts über den Wohnsitz) folgt der Assistent dem Vordruck des HFV ({o:O03}).",
+    "Ein Freigabeschein ist nicht nötig. Der Verband prüft vor der Registrierung, ob eine FIFA-Ausnahme oder die 5-Jahres-Regel greift (Art. 19 Abs. 6). Dafür folgt der Assistent dem Vordruck des HFV. Sonderfälle klärt das Passwesen im Einzelfall ({o:O17}).",
   ],
   [
     "**F05** Kind neu im Fußball, nichtdeutsch (oder Rückkehrer) ab 10 Jahren",
     "Wie F03. Dazu Ausweiskopie und Meldebescheinigung (gemeinsamer Wohnsitz mit den Eltern in Deutschland).",
-    "Der DFB gibt frei. Das Spielrecht kommt erst danach, das dauert länger. Ob ein Elternteil für die Meldebescheinigung reicht, ist noch zu klären ({o:O14}). {offen} Das Verfahren gilt ab 10 Jahren auch für Kinder mit deutschem Pass, die zuletzt im Ausland wohnten. Ob das auch gilt, wenn sie seit vielen Jahren wieder in Deutschland leben, ist offen ({o:O62}). {offen}",
+    "Der DFB gibt frei. Das Spielrecht kommt erst danach, das dauert länger. Bei der Meldebescheinigung mit nur einem Elternteil folgt der Assistent dem Vordruck des HFV ({o:O14}). Das Verfahren gilt ab 10 Jahren auch für Kinder mit deutschem Pass, die zuletzt im Ausland wohnten. Leben sie seit vielen Jahren wieder in Deutschland, klärt das Passwesen den Einzelfall ({o:O62}).",
   ],
   [
     "**F06** Wechsel innerhalb des HFV, Kind deutsch",
     "Antrag auf Spielerlaubnis, Abmeldung beim alten Verein (Einschreiben) oder Vollmacht für die Abmeldung, Foto. Dazu die Kündigung beim alten Verein.",
-    "Freigabe (Zustimmung des alten Vereins) und Wartefrist nach JO §§ 35 und 38 ({a:wartefristen}). Ob Geburtsurkunde und Attest nötig sind, ist noch zu klären ({o:O05}). {offen}",
+    "Freigabe (Zustimmung des alten Vereins) und Wartefrist nach JO §§ 35 und 38 ({a:wartefristen}). Für Geburtsurkunde und Attest folgt der Assistent dem Vordruck des HFV ({o:O05}).",
   ],
   [
     "**F07** Wechsel innerhalb des HFV, Kind nichtdeutsch",
     "Wie F06. Dazu Ausweiskopie. Bei 10 bis 17 Jahren auch Meldebescheinigung und Attest.",
-    "Beim Wechsel innerhalb Hessens sind Meldebescheinigung und Attest unklar: Das Formular sagt ja, die Präsentation 2026 nennt sie nicht ({o:O04}). {offen}",
+    "Beim Wechsel innerhalb Hessens sagt das Formular ja, die Präsentation 2026 nennt Meldebescheinigung und Attest nicht. Der Assistent folgt dem Formular ({o:O04}).",
   ],
   [
     "**F08** Wechsel aus einem anderen Landesverband",
     "Wie F06. Standard ist das Einschreiben.",
-    "Der HFV fragt beim Verband des alten Vereins an. Nach 20 Tagen ohne Antwort gilt die Abmeldung als ordnungsgemäß (JO § 43, Jugend). Bei den Herren nennt der HFV 30 Tage, der DFB 20 Tage ({o:O22}). {offen} Ob die Vollmacht für die Abmeldung hier geht, ist nicht belegt ({o:O18}). {offen}",
+    "Der HFV fragt beim Verband des alten Vereins an. Nach 20 Tagen ohne Antwort gilt die Abmeldung als ordnungsgemäß (JO § 43, Jugend). Bei den Herren nennt der HFV 30 Tage, der DFB 20 Tage. Der Assistent bleibt bei seiner Rechnung. Das Passwesen prüft im Einzelfall ({o:O22}). Ob die Vollmacht für die Abmeldung hier geht, ist nicht belegt. Das Passwesen klärt es im Einzelfall ({o:O18}).",
   ],
   [
     "**F09** Wechsel aus dem Ausland, Verein bekannt",
     "Ausweis und Angaben zum Auslandsverein (Name, Ort, Land, Status, letztes Spiel). Bei Junioren auch Geburtsurkunde, Attest und Meldebescheinigung.",
-    "Im Ausland ist keine Abmeldung nötig (SpO § 99 Nr. 1). Ab 10 Jahren gibt der DFB frei (Freigabeschein, international „ITC“). Unter 10 ist kein Freigabeschein nötig. Ob der Verein die Kopie eines deutschen Ausweises hochladen darf, ist zu klären ({o:O10}). {offen}",
+    "Im Ausland ist keine Abmeldung nötig (SpO § 99 Nr. 1). Ab 10 Jahren gibt der DFB frei (Freigabeschein, international „ITC“). Unter 10 ist kein Freigabeschein nötig. Ob der Verein die Kopie eines deutschen Ausweises hochladen darf, klärt das Passwesen im Einzelfall ({o:O10}).",
   ],
   [
     "**F10** Herren neu, deutsch",
@@ -636,27 +747,27 @@ const FAELLE = [
   [
     "**F13** A-Jugend unter 18 hilft bei den Herren aus",
     "Einverständnis für Spiele bei den Herren (HFV-Vordruck vom 10.06.2025) und Attest.",
-    "Grundsätzlich nur der ältere A-Jahrgang (2008), der Jahrgang 2009 nur in Ausnahmefällen. Ein Arzt ist Pflicht. Ob ein Sportarzt nötig ist, ist noch zu klären ({o:O20}). {offen}",
+    "Grundsätzlich nur der ältere A-Jahrgang (2008), der Jahrgang 2009 nur in Ausnahmefällen. Ein Arzt ist Pflicht. Ob ein Sportarzt nötig ist, klärt das Passwesen im Einzelfall ({o:O20}).",
   ],
   [
     "**F14** Sonderfall bei Sorgerecht oder Aufenthalt",
     "Nachweis der Vormundschaft (Bestellungsurkunde oder schriftliche Übertragung). Bei Geflüchteten Nachweis des Schutzstatus.",
-    "Die Jugendleitung klärt persönlich. Die Anmeldung wird nicht blockiert. Die genaue HFV-Liste ist noch zu klären ({o:O12}). {offen}",
+    "Die Jugendleitung klärt persönlich. Die Anmeldung wird nicht blockiert. Die genaue HFV-Liste klärt das Passwesen im Einzelfall ({o:O12}).",
   ],
   [
     "**F15** Geflüchtetes Kind ohne Eltern in Deutschland",
     "Nachweis von Schutzstatus oder Aufenthalt, Bestellung des Vormunds, Einwilligung des Vormunds.",
-    "FIFA-Ausnahme d (Art. 19 Abs. 2 d). Welche Nachweise der HFV genau will, ist noch zu klären ({o:O12}, {o:O15}). {offen} Der Assistent macht keine Zusage zu Spielen.",
+    "FIFA-Ausnahme d (Art. 19 Abs. 2 d). Welche Nachweise der HFV genau will, klärt das Passwesen im Einzelfall ({o:O12}, {o:O15}). Der Assistent macht keine Zusage zu Spielen.",
   ],
   [
     "**F16** Austauschschüler ohne Eltern",
     "Unterlagen zum Austauschprogramm mit Dauer, Einwilligung der Gasteltern und der Eltern, Bestätigung der Rückkehr.",
-    "FIFA-Ausnahme e. Das Spielrecht gilt höchstens 1 Jahr, ein weiterer Wechsel ist nicht erlaubt. Nur bei einem reinen Amateurverein. Die genaue HFV-Liste ist noch zu klären ({o:O12}, {o:O15}). {offen}",
+    "FIFA-Ausnahme e. Das Spielrecht gilt höchstens 1 Jahr, ein weiterer Wechsel ist nicht erlaubt. Nur bei einem reinen Amateurverein. Die genaue HFV-Liste klärt das Passwesen im Einzelfall ({o:O12}, {o:O15}).",
   ],
   [
     "**F17** Kind bei Verwandten oder in Pflegefamilie ohne Schutzstatus",
     "Nachweis, dass das Kind seit 5 Jahren ununterbrochen in Deutschland wohnt (Wohnsitznachweis, nicht älter als 3 Monate) und noch nie registriert war.",
-    "Nur unter dieser Bedingung möglich. Sonst gilt: Training ja, Spiele wahrscheinlich erst mit 18. Auch Freundschaftsspiele gehen nicht. Der Umzug der Eltern (Ausnahme a) zählt nicht für Verwandte. Die genaue HFV-Liste ist noch zu klären ({o:O12}, {o:O15}). {offen}",
+    "Nur unter dieser Bedingung möglich. Sonst gilt: Training ja, Spiele wahrscheinlich erst mit 18. Auch Freundschaftsspiele gehen nicht. Der Umzug der Eltern (Ausnahme a) zählt nicht für Verwandte. Die genaue HFV-Liste klärt das Passwesen im Einzelfall ({o:O12}, {o:O15}).",
   ],
   [
     "**F18** EU-Jugendliche mit 16 oder 17 Jahren ohne Eltern",
@@ -690,20 +801,20 @@ function faelleAbschnitt() {
     ${liste([
       "**Mädchen im Jungenteam der B- oder C-Jugend:** Die Eltern geben das Einverständnis für Mädchen bei den Jungen (JO § 14 Nr. 6).",
       "**Juniorinnen unter 18:** Für jedes Spielrecht braucht es ein ärztliches Attest (SpO § 110).",
-      "**Frauen ab 18 bei den Herren:** Sonderspielrecht auf Antrag (SpO § 109a, Pilotprojekt bis 30.06.2028). Der FFV hat keine Frauenmannschaft. Der Ablauf ist zu klären ({o:O21}).",
+      "**Frauen ab 18 bei den Herren:** Sonderspielrecht auf Antrag (SpO § 109a, Pilotprojekt bis 30.06.2028). Der FFV hat keine Frauenmannschaft. Den Ablauf klärt das Passwesen im Einzelfall ({o:O21}).",
       "**Geschlecht „divers“ oder „ohne Angabe“:** Die Person wählt Frauen- oder Herrenteam (SpO § 91 Nr. 8 und 9). Die Jugendleitung und die Vertrauensperson des HFV begleiten den Antrag.",
       "**Behinderung:** Sonderspielrecht in einer jüngeren Altersklasse mit fachärztlichem Gutachten (JO § 11 Nr. 5). Die HFV-Gebühr beträgt 25 €.",
       "**Wechsel in den letzten 6 Monaten oder laufende Sperre:** Die Wartefrist verschiebt sich ({a:wartefristen}).",
     ])}
     <h3>Altersklassen 2026/27</h3>
-    ${p("Der Assistent rechnet den Jahrgang in die Altersklasse um (Kreisjugendausschuss Frankfurt). Für Altersgrenzen wie „unter 18“ oder „ab 10 Jahren“ zählt der Tag der Anmeldung. Ob der Verband denselben Tag nimmt, ist offen ({o:O23}). {offen}")}
+    ${p("Der Assistent rechnet den Jahrgang in die Altersklasse um (Kreisjugendausschuss Frankfurt). Für Altersgrenzen wie „unter 18“ oder „ab 10 Jahren“ zählt der Tag der Anmeldung. Ob der Verband denselben Tag nimmt, prüft das Passwesen im Einzelfall ({o:O23}).")}
     ${tabelle({
       beschriftung: "Altersklassen und Jahrgänge 2026/27",
       spalten: ["Altersklasse", "G", "F", "E", "D", "C", "B", "A"],
       zeilen: [["**Jahrgänge**", "2020 und jünger", "2018, 2019", "2016, 2017", "2014, 2015", "2012, 2013", "2010, 2011", "2008, 2009"]],
     })}
     ${p(
-      "Für die Jahrgänge 2010 bis 2013 hat der Verein 2026/27 keine Mannschaft. Der Assistent verweist diese Familien an die Jugendleitung. Was er ihnen genau sagt, ist noch zu klären ({o:O54}). {offen}"
+      "Für die Jahrgänge 2010 bis 2013 hat der Verein 2026/27 keine Mannschaft. Der Assistent verweist diese Familien an die Jugendleitung. Einzelfälle klärt der Verein mit der Familie ({o:O54})."
     )}`;
   return abschnitt("faelle", inhalt);
 }
@@ -714,7 +825,7 @@ function faelleAbschnitt() {
 const GELERNT = [
   [
     "Geburtsurkunde brauchen nur ausländische Kinder.",
-    "**Falsch.** Bei der Erstanmeldung ist sie Pflicht für alle Minderjährigen (JO § 9 Nr. 1). Sie belegt aber nicht die Staatsangehörigkeit. Beim Wechsel deutscher Kinder ist es noch zu klären ({o:O05}). {offen}",
+    "**Falsch.** Bei der Erstanmeldung ist sie Pflicht für alle Minderjährigen (JO § 9 Nr. 1). Sie belegt aber nicht die Staatsangehörigkeit. Beim Wechsel deutscher Kinder folgt der Assistent dem Vordruck des HFV ({o:O05}).",
   ],
   [
     "Das Attest verlangen wir als Verein.",
@@ -722,11 +833,11 @@ const GELERNT = [
   ],
   [
     "Meldebescheinigung und Pass für Nichtdeutsche jeden Alters bei der Erstanmeldung.",
-    "**Der HFV verlangt sie nur von 10 bis 17 Jahren.** Die Meldebescheinigung muss den gemeinsamen Wohnsitz von Kind und Eltern zeigen. Für Kinder unter 10 ist beides noch zu klären ({o:O03}, {o:O17}). Beim Wechsel braucht der HFV den Ausweis von allen Nichtdeutschen, egal wie alt. {offen}",
+    "**Der HFV verlangt sie nur von 10 bis 17 Jahren.** Die Meldebescheinigung muss den gemeinsamen Wohnsitz von Kind und Eltern zeigen. Für Kinder unter 10 folgt der Assistent dem Vordruck des HFV ({o:O03}, {o:O17}). Beim Wechsel braucht der HFV den Ausweis von allen Nichtdeutschen, egal wie alt.",
   ],
   [
     "Eine Ausweiskopie gehört zur Anmeldung.",
-    "**Nicht von deutschen Kindern.** Kopien deutscher Ausweise dürfen nicht weitergegeben werden (§ 20 PAuswG, § 18 PassG). Bei internationalen Wechseln ist die Frage noch zu klären ({o:O10}). {offen}",
+    "**Nicht von deutschen Kindern.** Kopien deutscher Ausweise dürfen nicht weitergegeben werden (§ 20 PAuswG, § 18 PassG). Bei internationalen Wechseln klärt das Passwesen die Frage im Einzelfall ({o:O10}).",
   ],
   [
     "Ein Passbild auf Papier für den Spielerpass.",
@@ -734,7 +845,7 @@ const GELERNT = [
   ],
   [
     "Zum Wechsel gehört die Vollmacht für die Abmeldung.",
-    "**Eine von mehreren Varianten.** Die Vollmacht für die Abmeldung ist ein HFV-Vordruck für DFBnet Pass Online. Die andere Variante ist die Abmeldung beim alten Verein per Einschreiben: Der Einlieferungsbeleg genügt, ein Einwurf-Einschreiben zählt nicht. Der alte Verein kann auch selbst in DFBnet abmelden. Nach SpO § 92 Nr. 2 ist die Vollmacht das ganze Jahr nutzbar. Außerhalb des Junis gelten die normalen Wartefristen. Die Passstelle schreibt: Nutzung „nur bis zum 30. Juni mit verkürzter Wartefrist“. Das ist mehrdeutig, wir lassen es bestätigen ({o:O07}). Der Abmeldetag ist der Tag der Eingabe im System. Jeder Tag Verzögerung verlängert die Wartefrist.",
+    "**Eine von mehreren Varianten.** Die Vollmacht für die Abmeldung ist ein HFV-Vordruck für DFBnet Pass Online. Die andere Variante ist die Abmeldung beim alten Verein per Einschreiben: Der Einlieferungsbeleg genügt, ein Einwurf-Einschreiben zählt nicht. Der alte Verein kann auch selbst in DFBnet abmelden. Nach SpO § 92 Nr. 2 ist die Vollmacht das ganze Jahr nutzbar. Außerhalb des Junis gelten die normalen Wartefristen. Die Passstelle schreibt: Nutzung „nur bis zum 30. Juni mit verkürzter Wartefrist“. Das ist mehrdeutig. Das Passwesen prüft es im Einzelfall ({o:O07}). Der Abmeldetag ist der Tag der Eingabe im System. Jeder Tag Verzögerung verlängert die Wartefrist.",
   ],
   [
     "Nicht auf der Liste: die Kündigung beim alten Verein.",
@@ -742,11 +853,11 @@ const GELERNT = [
   ],
   [
     "Die Zusatzerklärung für Spieler von 12 bis 18 Jahren.",
-    "**Überholt.** Der HFV nennt sie nicht mehr, und die Altersgrenze liegt heute bei 10. Sie ist ein Vordruck von 2014. Auf dem Antrag auf Spielerlaubnis steht: „weitere Dokumente sind ab sofort nicht einzureichen“. Ob die Passstelle sie doch anfordert, ist noch zu klären ({o:O02}). {offen}",
+    "**Überholt.** Der HFV nennt sie nicht mehr, und die Altersgrenze liegt heute bei 10. Sie ist ein Vordruck von 2014. Auf dem Antrag auf Spielerlaubnis steht: „weitere Dokumente sind ab sofort nicht einzureichen“. Fordert die Passstelle sie doch an, klärt das Passwesen den Einzelfall ({o:O02}).",
   ],
   [
     "Zusatzformulare für Spieler aus USA, Mexiko, Argentinien und Brasilien.",
-    "**Unklar.** Sie stehen nicht auf der HFV-Formularseite. Wenn überhaupt, betreffen sie internationale Wechsel. Wir verlangen sie nur, wenn die Passstelle sie anfordert ({o:O02}). Die Anmeldung wird nicht blockiert. {offen}",
+    "**Unklar.** Sie stehen nicht auf der HFV-Formularseite. Wenn überhaupt, betreffen sie internationale Wechsel. Wir verlangen sie nur, wenn die Passstelle sie anfordert ({o:O02}). Die Anmeldung wird nicht blockiert.",
   ],
   [
     "Der Pass mit Freigabe und Stempel.",
@@ -762,7 +873,7 @@ const GELERNT = [
   ],
   [
     "Die Erlaubnis für die Lastschrift (SEPA) gehört immer dazu.",
-    "**Vereinssache, keine Pflicht des Verbands.** Ohne Erlaubnis für die Lastschrift bekommt die Familie eine Rechnung. Der Zuschlag von 3 € ohne Lastschrift steht im Info-Blatt von 2014, nicht im Aufnahmeantrag 9/2026. Der Verein muss ihn bestätigen ({o:O38}). {offen}",
+    "**Vereinssache, keine Pflicht des Verbands.** Ohne Erlaubnis für die Lastschrift bekommt die Familie eine Rechnung. Der Zuschlag von 3 € ohne Lastschrift steht im Info-Blatt von 2014. Im Aufnahmeantrag 9/2026 und in der Beitragsübersicht steht er nicht. Der Assistent nennt ihn nicht mehr ({o:O38}).",
   ],
 ];
 
@@ -775,7 +886,7 @@ const FEHLTE_GANZ = [
   "Die Versicherungslücke beim Probetraining ({a:entscheiden}).",
   "Sonderfälle: Vormund, Pflegefamilie, Geflüchtete ohne Eltern, Mädchen im Jungenteam der B- oder C-Jugend, Sonderspielrecht bei Behinderung.",
   "Beitragsfälle: Liste der Familienmitglieder, Nachweis für Azubis und Studierende (nur Karneval), Beleg für Bildung und Teilhabe, Beitragserlass nach Satzung § 16.",
-  "Ein eigener Zweig für die Karnevalabteilung ({a:karneval}).",
+  "Ein eigener Weg für die Karnevalabteilung, ohne HFV-Unterlagen ({a:karneval}).",
 ];
 
 function gelerntAbschnitt() {
@@ -816,7 +927,7 @@ const WARTEFRISTEN = [
   [
     "**D- bis A-Jugend** (jüngerer A-Jahrgang), Wechsel",
     "Im Juni: mit Freigabe (Zustimmung des alten Vereins) oder Entschädigung ab 1. Juli, ohne beides ab 1. November. Außerhalb des Junis: mit Freigabe 3 Monate, ohne Freigabe 6 Monate ab dem Tag nach der Abmeldung.",
-    "Liegt das letzte Pflichtspiel mehr als 6 Monate zurück, entfällt die Wartefrist (JO § 47 Nr. 1). Außerhalb des Junis ersetzt eine Entschädigung die Freigabe nicht. Die Entschädigung zahlt der neue Verein. Für uns (Herren in der Kreisliga A) sind es 200 € für A und B, 100 € für C und D, dazu 25 € je angefangenem Spieljahr, höchstens 6. Für den jüngeren D-Jahrgang erlaubt der DFB höchstens 3 Monate, der HFV sieht 6 vor ({o:O08}). {offen}",
+    "Liegt das letzte Pflichtspiel mehr als 6 Monate zurück, entfällt die Wartefrist (JO § 47 Nr. 1). Außerhalb des Junis ersetzt eine Entschädigung die Freigabe nicht. Die Entschädigung zahlt der neue Verein. Für uns (Herren in der Kreisliga A) sind es 200 € für A und B, 100 € für C und D, dazu 25 € je angefangenem Spieljahr, höchstens 6. Für den jüngeren D-Jahrgang erlaubt der DFB höchstens 3 Monate, der HFV sieht 6 vor. Der Assistent bleibt bei seiner Rechnung. Das Passwesen prüft im Einzelfall ({o:O08}).",
   ],
   [
     "**Freundschaftsspiele** in der Jugend",
@@ -836,7 +947,7 @@ const WARTEFRISTEN = [
   [
     "**Internationale Fälle** (Nichtdeutsche ab 10, Rückkehrer ab 10, Auslandsverein bekannt)",
     "Spielrecht erst nach der Rückmeldung über den DFB. Der ausländische Verband hat 72 Stunden Zeit für den Freigabeschein. Dazu kommt die Bearbeitung bei HFV und DFB.",
-    "Der HFV nennt keine Bearbeitungsdauer ({o:O13}). Ältere Angaben von 30 oder 7 Tagen sind überholt. Ab 01.01.2027 gilt ein neues FIFA-Transferreglement. Die Fristen müssen wir dann neu prüfen ({o:O58}). {offen}",
+    "Der HFV nennt keine Bearbeitungsdauer. Der Assistent nennt auch keine ({o:O13}). Ältere Angaben von 30 oder 7 Tagen sind überholt. Ab 01.01.2027 gilt ein neues FIFA-Transferreglement. Die Fristen prüfen wir dann neu ({o:O58}).",
   ],
   [
     "**Mehrfach-Wechsel und Sperre**",
@@ -854,7 +965,7 @@ function wartefristenAbschnitt() {
       `${p("**Der Assistent schätzt, der Verein prüft.** Die Schätzung ersetzt keine Auskunft des HFV.")}
     ${p("Sie rechnet ab dem Tag nach der Abmeldung. Bei unklaren Regeln kennzeichnet der Assistent die Schätzung als unsicher.")}
     ${p("Am Monatsende weicht die Passstelle um einen Tag ab: Sie rechnet Abmeldedatum plus Monate plus 1 Tag. Der Assistent nimmt den späteren Tag ({o:O60}).")}
-    ${p("Die Wartefrist entfällt nach mehr als 6 Monaten ohne Pflichtspiel. Der Assistent rechnet damit nur, wenn dieser Zeitraum am Tag des Antrags schon vorbei ist. Ob der Verein den Antrag später stellen darf, um die Wartefrist zu vermeiden, ist offen ({o:O61}).")}`
+    ${p("Die Wartefrist entfällt nach mehr als 6 Monaten ohne Pflichtspiel. Der Assistent rechnet damit nur, wenn dieser Zeitraum am Tag des Antrags schon vorbei ist. Ob der Verein den Antrag später stellen darf, um die Wartefrist zu vermeiden, prüft das Passwesen im Einzelfall ({o:O61}).")}`
     )}
     ${tabelle({
       beschriftung: "Wartefristen nach Altersgruppe",
@@ -891,11 +1002,11 @@ function datenschutzAbschnitt() {
     ${liste([
       "**Originale bleiben 2 Jahre.** Der Verein bewahrt das Original des Antrags auf Spielerlaubnis und alle Unterlagen mindestens 2 Jahre ab Antrag auf (SpO § 92). Der HFV kann sie verlangen. Dann müssen sie binnen 14 Tagen im Original vorliegen. In einem Pilotprojekt prüft der HFV vom 01.07. bis Ende 2026 Online-Vereinswechsel stichprobenartig.",
       "**Danach löschen.** Nach der Frist werden Unterlagen vernichtet, auch Ausweiskopien (Art. 5 Abs. 1 lit. e DSGVO). Ob ein rein digitales Archiv reicht, ist noch zu klären ({o:O01}). Hamburg erlaubt es. {offen}",
-      "**Keine Ausweiskopien deutscher Kinder.** Wo eine Kopie nötig ist, schwärzen wir Zugangsnummer (CAN) und Seriennummer und weisen darauf hin. Es gibt keine automatische Texterkennung und keine strukturierte Speicherung von Ausweisdaten. Was man auf ausländischen Pässen schwärzen darf, ist noch zu klären ({o:O10}). {offen}",
+      "**Keine Ausweiskopien deutscher Kinder.** Wo eine Kopie nötig ist, schwärzen wir Zugangsnummer (CAN) und Seriennummer und weisen darauf hin. Es gibt keine automatische Texterkennung und keine strukturierte Speicherung von Ausweisdaten. Was man auf ausländischen Pässen schwärzen darf, klärt das Passwesen im Einzelfall ({o:O10}).",
       "**Wasserzeichen.** Kopien tragen den Vermerk „KOPIE“ mit dem Zweck, dem Namen des Vereins und dem Datum.",
-      "**Attest getrennt.** Im Attest steht nur „keine Bedenken“. Es ist ein Gesundheitsdatum (Art. 9 DSGVO). Welche Rechtsgrundlage der HFV annimmt, ist noch zu klären ({o:O06}). Deshalb holen wir mit der Erlaubnis für das Attest eine ausdrückliche Einwilligung ein. Verlangt der Verband das Attest nicht, vernichtet der Verein es sofort. {offen}",
+      "**Attest getrennt.** Im Attest steht nur „keine Bedenken“. Es ist ein Gesundheitsdatum (Art. 9 DSGVO). Welche Rechtsgrundlage der HFV annimmt, klärt das Passwesen im Einzelfall ({o:O06}). Deshalb holen wir mit der Erlaubnis für das Attest eine ausdrückliche Einwilligung ein. Verlangt der Verband das Attest nicht, vernichtet der Verein es sofort.",
       "**Notfall- und Gesundheitsbogen freiwillig.** Er liegt in Teil C, getrennt von den übrigen Unterlagen, und nur Trainer und Betreuer der Mannschaft sehen ihn. Mit Angaben zur Gesundheit gilt die ausdrückliche Einwilligung (Art. 9 Abs. 2 lit. a DSGVO). Ohne Angaben stehen nur die Notfallkontakte darauf. Die Rechtsgrundlage dafür klärt der Vorstand ({o:O67}). Die Absprache zur Medikamentengabe unterschreiben Eltern und Trainer getrennt mit Stift. Beim Austritt oder auf Widerruf wird alles gelöscht.",
-      "**Information zum Datenschutz.** Eine eigene Seite im PDF informiert nach Art. 13 DSGVO. Sie verweist auf die Information zum Datenschutz des HFV (Stand 20.01.2026). Ob die Unterschrift zur Kenntnisnahme nötig ist, ist offen ({o:O63}). {offen}",
+      "**Information zum Datenschutz.** Eine eigene Seite im PDF informiert nach Art. 13 DSGVO. Sie verweist auf die Information zum Datenschutz des HFV (Stand 20.01.2026). Der Assistent sieht eine Unterschrift zur Kenntnisnahme vor. Nach Art. 13 DSGVO genügt die Information ({o:O63}).",
       "**Rechtsgrundlagen.** Stammdaten und Foto für den Spielerpass sind ohne Einwilligung zulässig (Art. 6 Abs. 1 lit. b DSGVO). Eine Veröffentlichung braucht die Einwilligung. Ab 16 Jahren darf der Verband Name und Spielberichtsdaten aus berechtigtem Interesse veröffentlichen. Darauf und auf das Widerspruchsrecht weisen wir hin.",
       "**DFBnet.** Das Häkchen „Adressweitergabe“ setzen wir nicht. Es ist eine Einwilligung zu Werbung.",
     ])}
@@ -914,383 +1025,166 @@ function datenschutzAbschnitt() {
     <h3>Was der Verein festlegen muss</h3>
     ${liste([
       "Ein Löschkonzept für die Mitgliederdaten. Als Beispiel nennt der Landesdatenschutzbeauftragte Baden-Württemberg: 2 Jahre nach Ende der Mitgliedschaft, Beitragsdaten 10 Jahre. DFBnet löscht die Daten beim Verband frühestens 5 Jahre nach der letzten Saison.",
-      "Ein Verarbeitungsverzeichnis. Wegen der Gesundheitsdaten greift die Ausnahme für kleine Stellen nicht ({o:O46}).",
+      "Ein Verarbeitungsverzeichnis. Wegen der Gesundheitsdaten greift die Ausnahme für kleine Stellen nicht. Für den Start ist es nicht nötig. Wir prüfen es später ({o:O46}).",
       "Die Prüfung, ob ein Datenschutzbeauftragter nötig ist: ab 20 Personen, die in der Regel ständig automatisiert mit Daten umgehen (§ 38 BDSG). Trainer mit Listen oder Messenger-Gruppen zählen mit.",
       "Satzung § 23 überarbeiten. Sie verweist noch auf das BDSG.",
-      "Die Information zum Datenschutz in Einfacher Sprache schreiben und übersetzen ({o:O45}).",
+      "Die Information zum Datenschutz in Einfacher Sprache schreiben und übersetzen. Die 1. Vorsitzende liest die neuen Texte einmal und gibt sie frei ({o:O45}).",
     ])}`;
   return abschnitt("datenschutz", inhalt);
 }
 
-// ---------- 10. Entscheidungen ----------
+// ---------- 10. Entscheidungen und offene Punkte ----------
 
-// Jede Zeile ist ein offener Punkt aus data/anmeldung.json › offenePunkte (Version 2026-10-08.1)
-// und trägt seine kleine Nummer. Die Listen sind nach dem Empfänger geordnet (an: vorstand,
-// kassierer, datenschutz, versicherung, kreis_frankfurt, grosser_rat_bdk, jugendleitung, regelwerk);
-// das Passwesen sammelt die Punkte zum Betrieb von DFBnet (O24 und O25 an den Vorstand, O69 und O70
-// an die Jugendleitung). Punkte der Karnevalabteilung (O55 bis O57) stehen im Abschnitt „Karneval“,
-// die des HFV in „Fragen an den HFV“. P1 steht immer sichtbar, P2 und P3 im Aufklapper unter der Liste.
+// Jede Zeile ist ein Punkt aus data/anmeldung.json › offenePunkte (Version 2026-10-11.1). Hier steht nur die kurze Frage
+// (bei offenen Punkten dazu der Hintergrund). Stand, Priorität und der Text zum Stand kommen aus der Datei (punktZeile).
+// Die Listen sind nach dem Empfänger geordnet (an: vorstand, kassierer, datenschutz, versicherung, kreis_frankfurt,
+// grosser_rat_bdk, jugendleitung, regelwerk); das Passwesen sammelt die Punkte zum Betrieb von DFBnet (O24 und O25 an den
+// Vorstand, O69 und O70 an die Jugendleitung). Die Punkte der Karnevalabteilung (O55 bis O57) stehen im Abschnitt „Karneval“,
+// die des HFV in „Fragen zum HFV“. Offene und entschiedene Zeilen stehen sichtbar, die übrigen im Aufklapper unter der Liste.
 
-const SPALTEN_ENTSCHEIDUNG = ["Prio · Nr.", "Entscheidung"];
-
-// ----- Vorstand: P1 -----
-const VORSTAND_SICHTBAR = [
-  punktZeile(
-    "O26",
-    "Unterschreibt ein Elternteil, oder müssen beide Eltern unterschreiben?",
-    "Für den HFV genügt ein Elternteil. Nach Zivilrecht vertreten beide Eltern gemeinsam (§ 1629 BGB). Deshalb braucht es bei getrennt lebenden Eltern ohne Einverständnis den zweiten Elternteil ({a:unterschrift})."
-  ),
-  punktZeile(
-    "O27",
-    "Wie sichern wir den Unfallschutz beim Probetraining? Schließen wir eine Nichtmitgliederversicherung ab, oder legen wir die Anmeldung vor das erste Training?",
-    "Nichtmitglieder haben keinen persönlichen Unfallschutz. Die Website erlaubt heute ein- bis zweimal Probetraining ohne Anmeldung (siehe Kasten)."
-  ),
-  punktZeile(
-    "O28",
-    "Schalten wir das Online-Formular des FCV ab oder leiten wir es um? Wie kommt Karneval in die Satzung?",
-    "Zwei Anmeldewege mit unterschiedlichen Regeln laufen parallel, und die Satzung nennt Karneval nicht ({a:karneval})."
-  ),
-  punktZeile(
-    "O29",
-    "Melden wir uns zum Fastnachtszug 2027 an?",
-    "Meldeschluss beim Großen Rat ist der 30.09.2026. Teilnehmen dürfen nur Mitgliedsvereine."
-  ),
-  punktZeile(
-    "O30",
-    "Beginnt die Mitgliedschaft am Tag der Anmeldung? Wie berechnen wir den Beitrag im ersten Jahr?",
-    "Die Satzung (§ 6) sagt ja. App und Website sagen „zum 1. des nächsten Monats“. Bis dahin ist das Kind kein Mitglied und nicht versichert. Der Aufnahmeantrag nennt bei Eintritt im Jahr nur „das restliche Kalenderjahr“, aber keinen Rechenweg."
-  ),
-  punktZeile(
-    "O31",
-    "Verzichten wir auf beitragsfreie oder befristete Probemitgliedschaften?",
-    "Mitgliedschaften, die schon beim Eintritt auf weniger als 12 Monate angelegt sind, sind nicht versichert. Das gilt auch für eine Mitgliedschaft nur für die Karnevalskampagne."
-  ),
-  punktZeile(
-    "O66",
-    "Reparieren wir die Weiterleitung der Satzungsadresse im Aufnahmeantrag, oder ändern wir die Adresse im Vordruck?",
-    "Die Adresse im Aufnahmeantrag führt ins Leere (Fehler 401, geprüft am 29.09.2026). Die Satzung liegt unter der Download-Adresse der Website. Der Assistent verlinkt dorthin ({a:unterschrift})."
-  ),
-  punktZeile(
+// ----- Vorstand -----
+const VORSTAND = [
+  ["O26", "Unterschreibt ein Elternteil, oder müssen beide Eltern unterschreiben?"],
+  ["O27", "Wie sichern wir den Unfallschutz beim Probetraining? Schließen wir eine Nichtmitgliederversicherung ab, oder legen wir die Anmeldung vor das erste Training?"],
+  ["O28", "Schalten wir das Online-Formular des Frankfurter Carneval Vereins (FCV) ab oder leiten wir es um? Wie hängen FCV und die FFV-Abteilung zusammen? Kommt Karneval in die Satzung?"],
+  ["O29", "Melden wir uns zum Fastnachtszug 2027 an?"],
+  ["O30", "Beginnt die Mitgliedschaft am Tag der Anmeldung? Wie berechnen wir den Beitrag im ersten Jahr?"],
+  ["O31", "Verzichten wir auf beitragsfreie oder befristete Probemitgliedschaften?"],
+  ["O66", "Reparieren wir die Weiterleitung der Satzungsadresse im Aufnahmeantrag, oder ändern wir die Adresse im Vordruck?"],
+  [
     "O68",
     "Dürfen Vereinsunterlagen am Bildschirm unterschrieben werden?",
-    "Das wäre eine einfache elektronische Unterschrift. Die Form bestimmt der Verein selbst: Die Satzung verlangt Schriftform, nach § 127 BGB kann eine elektronische Übermittlung reichen. HFV-Vordrucke bleiben Stift. Der Laufzettel im PDF bittet den Vorstand, das zu bestätigen ({a:unterschrift}). Stand: Jugendleitung befürwortet (08.10.2026); Beschluss des Vorstands steht aus."
-  ),
-  punktZeile(
+    "Das wäre eine einfache elektronische Unterschrift. Die Form bestimmt der Verein selbst: Die Satzung verlangt Schriftform, nach § 127 BGB kann eine elektronische Übermittlung reichen. HFV-Vordrucke bleiben Stift. Der Laufzettel im PDF bittet den Vorstand, das zu bestätigen ({a:unterschrift}).",
+  ],
+  [
     "O72",
     "Wie übergibt die Familie das PDF in der Vereins-App?",
-    "In der App-Webansicht klappt Speichern oder Teilen der Datei vielleicht nicht. Für Website und App gleich wäre der automatische Versand an den Verein über die eigene Annahme (IONOS), wie beim Online-Aufnahmeantrag. Bis dahin weist der Assistent in der App auf „Im Browser öffnen“ hin."
-  ),
+    "In der App-Webansicht klappt Speichern oder Teilen der Datei vielleicht nicht. Für Website und App gleich wäre der automatische Versand an den Verein über die eigene Annahme (IONOS), wie beim Online-Aufnahmeantrag. Bis dahin weist der Assistent in der App auf „Im Browser öffnen“ hin.",
+  ],
+  ["O32", "Geben wir die HFV-Gebühr an die Familien weiter?"],
+  ["O33", "Geben wir die Bescheinigung für Bildung und Teilhabe standardmäßig mit?"],
+  ["O34", "Senatorenmitgliedschaft: Welchen Status und welches Stimmrecht haben Senatoren?"],
+  ["O35", "Kostüme im Karneval: Wem gehören sie, was kosten sie, gibt es eine Kaution? Was zahlen Familien noch dazu?"],
+  ["O36", "Aufsicht bei Abendauftritten, Umkleide und Kostümwechsel: Ergänzen wir das Schutzkonzept für den Karneval?"],
+  ["O52", "Legen wir Ansprechpersonen, Sprachen und Sprechzeiten im Vereinsheim für den Hilfe-Knopf fest?"],
+  ["O53", "Testen wir den Assistenten mit 3 bis 5 Eltern, die wenig Deutsch sprechen?"],
+  ["O65", "Erlaubnis für Fotos bei Jugendlichen: Unterschreiben ab 14 oder ab 16 Jahren auch die Jugendlichen selbst?"],
+  ["O71", "Wer pflegt Fristen, Beträge und Gebühren im Regelwerk des Assistenten, wenn sich Beitragsordnung oder Verbandsordnungen ändern?"],
 ];
 
-// ----- Vorstand: P2 und P3 -----
-const VORSTAND_WEITERE = [
-  punktZeile(
-    "O32",
-    "Geben wir die HFV-Gebühr an die Familien weiter?",
-    "Die Erstausstellung ist gebührenfrei. Ein Wechsel kostet 10 € für Junioren und 25 € für Herren. Die Gebühr zahlt der Verein."
-  ),
-  punktZeile(
-    "O33",
-    "Geben wir die Bescheinigung für Bildung und Teilhabe standardmäßig mit?",
-    "Bei Grundsicherungsgeld gibt es für Kinder unter 18 pauschal 15 € im Monat für Sport und Verein (§ 28 Abs. 7 SGB II). Bei Wohngeld und Kinderzuschlag gilt dasselbe mit eigenem Antrag (§ 6b BKGG). Das deckt den Kinderbeitrag von 9 € voll. Wie der im Voraus fällige Jahresbeitrag bezahlt wird, ist noch zu klären. {offen}"
-  ),
-  punktZeile(
-    "O34",
-    "Senatorenmitgliedschaft: Welchen Status und welches Stimmrecht haben Senatoren?",
-    "Der Vorstand entscheidet über die Aufnahme als Senator. Die Satzung kennt keine Senatoren. Der Beitrag beträgt 144 € im Jahr."
-  ),
-  punktZeile(
-    "O35",
-    "Kostüme im Karneval: Wem gehören sie, was kosten sie, gibt es eine Kaution? Was zahlen Familien noch dazu?",
-    "Nebenkosten und Pflichtteile der Garde-Uniform sind offen. Eine Leihvereinbarung ist sinnvoll."
-  ),
-  punktZeile(
-    "O36",
-    "Aufsicht bei Abendauftritten, Umkleide und Kostümwechsel: Ergänzen wir das Schutzkonzept für den Karneval? Gilt die Erlaubnis für Auftritte am Abend je Kampagne oder einmalig?",
-    "Das Schutzkonzept hat für den Karneval noch keine Regeln. Der Assistent formuliert die Erlaubnis bisher für eine Kampagne."
-  ),
-  punktZeile(
-    "O52",
-    "Legen wir Ansprechpersonen, Sprachen und Sprechzeiten im Vereinsheim für den Hilfe-Knopf fest?",
-    "Die Ansprechpersonen müssen zustimmen. Sprachmittlung über das AmkA ist gegen Entgelt möglich."
-  ),
-  punktZeile(
-    "O53",
-    "Testen wir den Assistenten mit 3 bis 5 Eltern, die wenig Deutsch sprechen?",
-    "Ergebnis: verbesserte Texte und die Sprachauswahl ({a:einfuehrung})."
-  ),
-  punktZeile(
-    "O65",
-    "Erlaubnis für Fotos bei Jugendlichen: Unterschreiben ab 14 oder ab 16 Jahren auch die Jugendlichen selbst?",
-    "Es geht um die Einsichtsfähigkeit. Der Assistent lässt bisher nur die Eltern unterschreiben. Der Hinweis dazu ist bis zur Entscheidung entfernt."
-  ),
-  punktZeile(
-    "O71",
-    "Wer pflegt Fristen, Beträge und Gebühren im Regelwerk des Assistenten, wenn sich Beitragsordnung oder Verbandsordnungen ändern?",
-    "Sie ändern sich: Ab 01.01.2027 gilt ein neues FIFA-Transferreglement ({o:O58}). Ab 2027/28 spielt die E-Jugend nur noch 6 gegen 6 in Meldeligen ({o:O59})."
-  ),
-];
-
-// ----- Passwesen (DFBnet und Pass Online): P1 -----
-const PASSWESEN_SICHTBAR = [
-  punktZeile(
+// ----- Passwesen (DFBnet und Pass Online) -----
+const PASSWESEN = [
+  [
     "O24",
     "Wer hat die DFBnet-Kennung für Pass Online? Wo liegen die Originale 2 Jahre lang, und wer löscht sie danach?",
-    "Über DFBnet reicht der Verein den Antrag auf Spielerlaubnis online ein und lädt das Spielerfoto hoch. Der HFV kann Unterlagen stichprobenartig verlangen. Sie müssen dann binnen 14 Tagen im Original vorliegen."
-  ),
-  punktZeile(
+    "Über DFBnet reicht der Verein den Antrag auf Spielerlaubnis online ein und lädt das Spielerfoto hoch. Der HFV kann Unterlagen stichprobenartig verlangen. Sie müssen dann binnen 14 Tagen im Original vorliegen.",
+  ],
+  [
     "O25",
     "Wie kommen die Unterlagen zum Verein, und wer prüft sie auf Vollständigkeit?",
-    "Vorschlag: Die Familie gibt die Originale im Verein ab, nicht per WhatsApp. Der Antrag kann erst mit vollständigem, von Hand unterschriebenem Original an den HFV gehen."
-  ),
-];
-
-// ----- Passwesen: P2 (an: jugendleitung) -----
-const PASSWESEN_WEITERE = [
-  punktZeile(
+    "Der Antrag kann erst mit vollständigem, von Hand unterschriebenem Original an den HFV gehen.",
+  ],
+  [
     "O69",
     "Wer im Verein gibt eine Vollmacht für die Abmeldung am selben oder nächsten Tag in DFBnet ein?",
-    "Bei der Vollmacht zählt der Tag der Eingabe als Abmeldetag. Jeder Tag Verzögerung verlängert die Wartefrist. Der Assistent bietet sie nur an, wenn die Eingabe am selben oder nächsten Tag klappt."
-  ),
-  punktZeile(
-    "O70",
-    "Wer meldet die Jugendspieler namentlich beim Kreisjugendwart, und bis wann?",
-    "Das schreibt JO § 7 Nr. 2 vor, und zwar vor dem ersten Pflichtspieltag."
-  ),
+    "Bei der Vollmacht zählt der Tag der Eingabe als Abmeldetag. Jeder Tag Verzögerung verlängert die Wartefrist. Der Assistent bietet sie nur an, wenn die Eingabe am selben oder nächsten Tag klappt.",
+  ],
+  ["O70", "Wer meldet die Jugendspieler namentlich beim Kreisjugendwart, und bis wann?"],
 ];
 
-// ----- Geschäftsstelle und Kasse (an: kassierer): alle P2 -----
-const KASSE_WEITERE = [
-  punktZeile(
-    "O37",
-    "Wird die Aufnahmegebühr von 20 € bar oder per Einzug bezahlt? Gilt sie auch im Karneval und für passive Mitglieder?",
-    "Der Antrag 2026 zieht sie mit dem ersten Beitrag ein, die Liste von 2021 nennt bar. Die Satzung (§ 16) nennt sie auch für Karneval."
-  ),
-  punktZeile(
-    "O38",
-    "Gilt der Zuschlag von 3 € ohne Lastschrift noch?",
-    "Er steht im Info-Blatt von 2014, nicht im Aufnahmeantrag 9/2026."
-  ),
-  punktZeile(
-    "O39",
-    "Bekommt jede Erlaubnis für die Lastschrift eine eigene Mandatsreferenz? Nehmen wir IBANs aus allen SEPA-Ländern an?",
-    "Heute haben alle Mitglieder dieselbe Referenz „Beitrag Sportfreunde 04“, und „DE“ ist im IBAN-Feld vorgedruckt. Ob zum Beispiel türkische IBANs SEPA-fähig sind, ist unbelegt. Die Länderliste des European Payments Council ist zu prüfen. Ausweg: Rechnung oder Überweisung. {offen}"
-  ),
-  punktZeile(
-    "O40",
-    "Wer gehört zur Familie? Welcher Beitrag gilt bei Doppelmitgliedschaft in Fußball und Karneval? Wie lange gilt der Nachweis für Azubis und Studierende?",
-    "Der Antrag sagt nur, ein „gesonderter Beitrag“ sei zu erfragen."
-  ),
-  punktZeile(
-    "O41",
-    "Zählt bei der Kündigung bis 31.12. die Absendung oder der Eingang?",
-    "Der Austritt geht nur zum Jahresende per Einschreiben. Beim Wechsel darf der alte Verein bis zum Ende seiner Kündigungsfrist Beitrag verlangen, also kann doppelt Beitrag anfallen."
-  ),
-  punktZeile(
-    "O42",
-    "Behalten wir das Attest bei Erwachsenen als Vereinsregel? Schaffen wir das Papier-Passbild ab? Wer macht das Spielerfoto, und wer lädt es hoch?",
-    "Der HFV verlangt das Attest nur bei Minderjährigen. Er braucht ein digitales Spielerfoto, kein Papierbild. Das Foto muss vor dem Anstoß des ersten Spiels in DFBnet liegen. Im Kreis Frankfurt gilt es 2 Jahre."
-  ),
-  punktZeile(
-    "O43",
-    "Formulieren wir den Hinweis zu den 20 € neu?",
-    "Die 20 € sind keine HFV-Gebühr, sondern die Aufnahmegebühr des Vereins. Der bisherige Hinweis „20 € für den HFV“ stimmt nicht."
-  ),
-  punktZeile(
-    "O44",
-    "Welche Altersgrenzen gelten für die Jugendbeiträge?",
-    "Die Satzung nennt das vollendete 18. Lebensjahr. Im Fußball zählt die A-Jugend einschließlich 18-Jähriger, im Karneval gilt „bis 17“."
-  ),
+// ----- Geschäftsstelle und Kasse -----
+const KASSE = [
+  ["O37", "Wird die Aufnahmegebühr von 20 € bar oder per Einzug bezahlt? Gilt sie auch im Karneval und für passive Mitglieder?"],
+  ["O38", "Gilt der Zuschlag von 3 € ohne Lastschrift noch?"],
+  ["O39", "Bekommt jede Erlaubnis für die Lastschrift eine eigene Mandatsreferenz? Nehmen wir IBANs aus allen SEPA-Ländern an?"],
+  ["O40", "Wer gehört zur Familie? Welcher Beitrag gilt bei Doppelmitgliedschaft in Fußball und Karneval? Wie lange gilt der Nachweis für Azubis und Studierende?"],
+  ["O41", "Zählt bei der Kündigung bis 31.12. die Absendung oder der Eingang?"],
+  ["O42", "Behalten wir das Attest bei Erwachsenen als Vereinsregel? Schaffen wir das Papier-Passbild ab? Wer macht das Spielerfoto, und wer lädt es hoch?"],
+  ["O43", "Formulieren wir den Hinweis zu den 20 € neu?"],
+  ["O44", "Welche Altersgrenzen gelten für die Jugendbeiträge: das vollendete 18. Lebensjahr (Satzung), die A-Jugend einschließlich 18-Jähriger (Fußball) oder bis 17 (Karneval)?"],
 ];
 
-// ----- Datenschutz und Vereinsunterlagen (an: datenschutz): P1 -----
-const DATENSCHUTZ_SICHTBAR = [
-  punktZeile(
+// ----- Datenschutz und Vereinsunterlagen -----
+const DATENSCHUTZ = [
+  [
     "O67",
     "Welche Rechtsgrundlage gilt für die Notfallkontakte ohne Angaben zur Gesundheit: Art. 6 Abs. 1 lit. b oder lit. f DSGVO?",
-    "Art. 9 DSGVO (ausdrückliche Einwilligung) passt nur zur Fassung mit Angaben zur Gesundheit. Für die Fassung „nur Notfallkontakte“ braucht die Information zum Datenschutz eine eigene Rechtsgrundlage. Der Entwurf im PDF nennt beide: lit. b für Mitgliedschaft und Fürsorge im Training, lit. f (berechtigtes Interesse) für weitere Kontaktpersonen. Der Vorstand bestätigt die Wahl."
-  ),
-  punktZeile(
+    "Art. 9 DSGVO (ausdrückliche Einwilligung) passt nur zur Fassung mit Angaben zur Gesundheit. Für die Fassung „nur Notfallkontakte“ braucht die Information zum Datenschutz eine eigene Rechtsgrundlage. Der Entwurf im PDF nennt beide: lit. b für Mitgliedschaft und Fürsorge im Training, lit. f (berechtigtes Interesse) für weitere Kontaktpersonen. Der Vorstand bestätigt die Wahl.",
+  ],
+  [
     "O73",
     "Dürfen Gesundheitsdaten aus Teil C sowie Ausweis- und Passkopien per E-Mail an den Verein gehen?",
-    "Beim automatischen Versand kämen sie mit. Möglich ist: nur verschlüsselt, oder Teil C und die Kopien getrennt auf Papier. Gesundheitsdaten brauchen besonderen Schutz (Art. 9 DSGVO)."
-  ),
-];
-
-// ----- Datenschutz und Vereinsunterlagen: P2 und P3 -----
-const DATENSCHUTZ_WEITERE = [
-  punktZeile(
+    "Beim automatischen Versand kämen sie mit. Möglich ist: nur verschlüsselt, oder Teil C und die Kopien getrennt auf Papier. Gesundheitsdaten brauchen besonderen Schutz (Art. 9 DSGVO).",
+  ],
+  [
     "O45",
     "Schreiben wir die Information zum Datenschutz in Einfacher Sprache, lassen sie übersetzen und vom Vorstand freigeben?",
-    "Im PDF tragen die Information zum Datenschutz, alle Einverständnisse und Erlaubnisse die Fußzeile „Entwurf – vom Vorstand zu prüfen“."
-  ),
-  punktZeile(
-    "O46",
-    "Legen wir ein Verarbeitungsverzeichnis an, prüfen den Datenschutzbeauftragten und passen Satzung § 23 an?",
-    "Wegen der Gesundheitsdaten ist ein Verzeichnis nötig. Satzung § 23 verweist noch auf das BDSG ({a:datenschutz})."
-  ),
-  punktZeile(
-    "O47",
-    "Stellen wir das Schutzkonzept fertig?",
-    "Es hat noch Platzhalter „XXX“, fehlende Anlagen und private Kontaktadressen. Für den Karneval fehlen Regeln."
-  ),
-  punktZeile(
-    "O48",
-    "Ersetzen wir Info-Blatt, Unterlagenliste, Zusatzerklärung und den toten Satzungslink?",
-    "Sie stammen von 2014 und 2021. Im Info-Blatt muss „ALG II“ ersetzt werden: Laut Bundesagentur für Arbeit heißt das Bürgergeld seit 01.07.2026 Grundsicherungsgeld."
-  ),
-  punktZeile(
-    "O63",
-    "Ist die Unterschrift zur Kenntnisnahme der Information zum Datenschutz nötig?",
-    "Nach Art. 13 DSGVO genügt die Information. Der Assistent sieht eine Unterschrift zur Kenntnisnahme vor."
-  ),
+    "Im PDF tragen die Information zum Datenschutz, alle Einverständnisse und Erlaubnisse die Fußzeile „Entwurf – vom Vorstand zu prüfen“.",
+  ],
+  ["O46", "Legen wir ein Verarbeitungsverzeichnis an, prüfen den Datenschutzbeauftragten und passen Satzung § 23 an?"],
+  ["O47", "Stellen wir das Schutzkonzept fertig? Platzhalter „XXX“, fehlende Anlagen und private Kontaktadressen sind zu ersetzen."],
+  ["O48", "Ersetzen wir Info-Blatt, Unterlagenliste, Zusatzerklärung und den toten Satzungslink?"],
+  ["O63", "Ist die Unterschrift zur Kenntnisnahme der Information zum Datenschutz nötig?"],
 ];
 
 // ----- Weitere Stellen (an: versicherung, kreis_frankfurt, grosser_rat_bdk, jugendleitung, regelwerk) -----
-const STELLEN_WEITERE = [
-  punktZeile(
-    "O49",
-    "**ARAG-Versicherungsbüro und LSB:** Sind Karneval, Nichtmitglieder und neue Mitglieder vom ersten Tag an versichert? Ist die Karnevalabteilung beim LSB angemeldet?",
-    "Der Schutz gilt nur, wenn die Abteilung beim LSB angemeldet ist und die Karnevalsmitglieder in der Bestandsmeldung stehen ({a:karneval})."
-  ),
-  punktZeile(
-    "O50",
-    "**Kreis Frankfurt:** Wie wird der Jahrgang 2020 zugeordnet, und wie wirkt die Funino-Regel in der F-Jugend?",
-    "Der Verein führt den Jahrgang 2020 in der F2, der Kreis in der G-Jugend."
-  ),
-  punktZeile(
-    "O51",
-    "**Großer Rat und BDK:** Mitgliedschaft der Abteilung und Turnierfragen.",
-    "Davon hängen Tanzausweis und Zustimmung zu Aufnahmen bei Turnieren ab ({a:karneval})."
-  ),
-  punktZeile(
-    "O54",
-    "**Jugendleitung:** Was sagt der Assistent Familien mit Kindern der Jahrgänge 2010 bis 2013?",
-    "Für sie gibt es 2026/27 keine B- oder C-Jugend. Mädchen können bis zur C-Jugend ein Jahr älter sein und in Jungenteams spielen."
-  ),
-  punktZeile(
-    "O58",
-    "**Regelwerk:** Neues FIFA-Transferreglement ab 01.01.2027: Regeln für internationale Wechsel neu prüfen.",
-    "Eine Kanzleimeldung nennt einen Freigabeschein in 5 Tagen. Das ist nicht an der FIFA-Quelle geprüft."
-  ),
-  punktZeile(
-    "O59",
-    "**Regelwerk:** Ab 2027/28 spielt die E-Jugend nur noch 6 gegen 6 in Meldeligen: Wartefrist-Regeln für die E-Jugend neu prüfen.",
-    "Die heutigen Regeln gelten für 2026/27, wenn die E-Jugend Punktspiele spielt."
-  ),
-  punktZeile(
-    "O64",
-    "**Gesundheitsamt Frankfurt:** Gibt es ein kostenloses Attest für Kinder mit Frankfurt-Pass oder Grundsicherungsgeld?",
-    "Die Seite war nicht prüfbar. Der Assistent nennt das deshalb nicht."
-  ),
+const STELLEN = [
+  ["O49", "**ARAG-Versicherungsbüro und LSB:** Sind Karneval, Nichtmitglieder und neue Mitglieder vom ersten Tag an versichert? Ist die Karnevalabteilung beim LSB angemeldet?"],
+  ["O50", "**Kreis Frankfurt:** Wie wird der Jahrgang 2020 zugeordnet, und wie wirkt die Funino-Regel in der F-Jugend?"],
+  ["O51", "**Großer Rat und BDK:** Mitgliedschaft der Abteilung und Turnierfragen."],
+  ["O54", "**Jugendleitung:** Was sagt der Assistent Familien mit Kindern der Jahrgänge 2010 bis 2013?"],
+  ["O58", "**Regelwerk:** Neues FIFA-Transferreglement ab 01.01.2027: Regeln für internationale Wechsel neu prüfen."],
+  ["O59", "**Regelwerk:** Ab 2027/28 spielt die E-Jugend nur noch 6 gegen 6 in Meldeligen: Wartefrist-Regeln für die E-Jugend neu prüfen."],
+  ["O64", "**Gesundheitsamt Frankfurt:** Gibt es ein kostenloses Attest für Kinder mit Frankfurt-Pass oder Grundsicherungsgeld?"],
 ];
-
-// Eine Liste der Entscheidungen: P1 sichtbar in einer Tabelle, der Rest im Aufklapper darunter.
-function entscheidungsListe({ name, sichtbar, weitere, titelWeitere }) {
-  const teile = [];
-  if (sichtbar.length) {
-    teile.push(
-      tabelle({
-        beschriftung: `Entscheidungen: ${name}, mit P1`,
-        spalten: SPALTEN_ENTSCHEIDUNG,
-        ersteSpalte: "prio",
-        zeilen: sichtbar,
-      })
-    );
-  } else {
-    teile.push(p("Kein Punkt dieser Liste hat P1."));
-  }
-  if (weitere.length) {
-    const arten = [...new Set(weitere.map((z) => z.prio))].sort().join(" und ");
-    teile.push(
-      aufklapper(
-        `${titelWeitere}: ${weitere.length} (${arten})`,
-        tabelle({
-          beschriftung: `Entscheidungen: ${name}, weitere Punkte`,
-          spalten: SPALTEN_ENTSCHEIDUNG,
-          ersteSpalte: "prio",
-          zeilen: weitere,
-        })
-      )
-    );
-  }
-  return teile.join("\n    ");
-}
 
 function entscheidenAbschnitt() {
   const inhalt = `${p(
-    "Die Listen sind nach Dringlichkeit geordnet. P1 muss vor dem Livegang geklärt sein und steht immer sichtbar. P2 und P3 eilen weniger und stehen unter jeder Liste in einem Aufklapper. Ein entschiedener Punkt trägt das Kennzeichen „Entschieden“ und nennt die Entscheidung. Jede Zeile trägt ihre Nummer aus dem Regelwerk des Prototyps, zum Beispiel O26."
+    "Die Listen sind nach Empfängern geordnet. Offene und entschiedene Punkte stehen sichtbar. Geregelte, entfallene und später geprüfte Punkte stehen darunter in einem Aufklapper. Jede Zeile trägt Kennzeichen und Nummer, zum Beispiel O26. Bei erledigten Punkten steht die Entscheidung da. Bei offenen steht der Stand."
   )}
     ${kasten(
-      "offen",
-      `${p("**Versicherung beim Probetraining – der Befund in Kürze.**")}
+      "info",
+      `${p("**Versicherung beim Probetraining: entschieden am 11.10.2026.**")}
     ${p(
-      "Wer nur zum Probetraining kommt und kein Mitglied ist, hat über die Sportversicherung des LSB keinen persönlichen Unfall- und Haftpflichtschutz (ARAG-Merkblatt, Stand 01.01.2026). Die Haftpflicht des Vereins greift dagegen: Angebote für Nichtmitglieder gehören zur Mitgliederwerbung."
+      "Wer nur zum Probetraining kommt und kein Mitglied ist, hat über die Sportversicherung des LSB keinen persönlichen Unfall- und Haftpflichtschutz (ARAG-Merkblatt, Stand 01.01.2026). Die Haftpflicht des Vereins greift dagegen. Angebote für Nichtmitglieder gehören zur Mitgliederwerbung."
     )}
     ${p(
-      "Es gibt zwei Fallen. Erstens: Eine beitragsfreie oder befristete Probemitgliedschaft schließt die Lücke nicht. Zweitens: Beginnt die Mitgliedschaft erst am 1. des Folgemonats, ist ein angemeldetes Kind bis dahin nicht versichert."
+      "Eine Versicherung für Nichtmitglieder ist zu teuer. Der Verein schließt sie nicht ab ({o:O27}). Assistent, Website und App weisen stattdessen darauf hin. Beim Probetraining ist man nicht über den Verein versichert."
     )}
     ${p(
-      "Zwei Wege sind möglich: Der Verein schließt über das Versicherungsbüro des LSB eine Zusatzversicherung für Nichtmitglieder ab. Oder er legt die Anmeldung vor das erste Training."
-    )}
-    ${p("Dazu gehören die Punkte {o:O27}, {o:O30}, {o:O31} und {o:O49}.")}`
+      "Die Mitgliedschaft beginnt am Tag der Anmeldung ({o:O30}). Es gibt keine Probemitgliedschaft ({o:O31}). Wer sich vor dem ersten Training anmeldet, ist ab diesem Tag Mitglied."
+    )}`
     )}
     <h3>Vorstand</h3>
-    ${entscheidungsListe({
-      name: "Vorstand",
-      sichtbar: VORSTAND_SICHTBAR,
-      weitere: VORSTAND_WEITERE,
-      titelWeitere: "Weitere Punkte des Vorstands",
-    })}
+    ${entscheidungsListe({ name: "Vorstand", punkte: VORSTAND, titelWeitere: "Weitere Punkte des Vorstands" })}
     <h3>Passwesen (DFBnet und Pass Online)</h3>
-    ${entscheidungsListe({
-      name: "Passwesen",
-      sichtbar: PASSWESEN_SICHTBAR,
-      weitere: PASSWESEN_WEITERE,
-      titelWeitere: "Weitere Punkte des Passwesens",
-    })}
+    ${entscheidungsListe({ name: "Passwesen", punkte: PASSWESEN, titelWeitere: "Weitere Punkte des Passwesens" })}
     <h3>Geschäftsstelle und Kasse</h3>
-    ${entscheidungsListe({
-      name: "Geschäftsstelle und Kasse",
-      sichtbar: [],
-      weitere: KASSE_WEITERE,
-      titelWeitere: "Punkte für Geschäftsstelle und Kasse",
-    })}
+    ${entscheidungsListe({ name: "Geschäftsstelle und Kasse", punkte: KASSE, titelWeitere: "Punkte für Geschäftsstelle und Kasse" })}
     <h3>Datenschutz und Vereinsunterlagen</h3>
-    ${entscheidungsListe({
-      name: "Datenschutz und Vereinsunterlagen",
-      sichtbar: DATENSCHUTZ_SICHTBAR,
-      weitere: DATENSCHUTZ_WEITERE,
-      titelWeitere: "Punkte zu Datenschutz und Vereinsunterlagen",
-    })}
+    ${entscheidungsListe({ name: "Datenschutz und Vereinsunterlagen", punkte: DATENSCHUTZ, titelWeitere: "Weitere Punkte zu Datenschutz und Vereinsunterlagen" })}
     <h3>Weitere Stellen</h3>
-    ${entscheidungsListe({
-      name: "Weitere Stellen",
-      sichtbar: [],
-      weitere: STELLEN_WEITERE,
-      titelWeitere: "Punkte für weitere Stellen",
-    })}
+    ${entscheidungsListe({ name: "Weitere Stellen", punkte: STELLEN, titelWeitere: "Punkte für weitere Stellen" })}
     <p class="meta">${md(
-      "Die Punkte der Karnevalabteilung (O55 bis O57) stehen in {a:karneval}, die Fragen an den HFV in {a:hfv-fragen}."
+      "Die Punkte der Karnevalabteilung (O55 bis O57) stehen in {a:karneval}, die Fragen zum HFV in {a:hfv-fragen}."
     )}</p>`;
   return abschnitt("entscheiden", inhalt);
 }
 
-// ---------- 11. Fragen an den HFV ----------
+// ---------- 11. Fragen zum HFV ----------
 
 function hfvFragenAbschnitt() {
+  const oids = HFV_PUNKTE.map(([oid]) => oid);
+  const z = zaehle(oids);
   const inhalt = `${p(
-    "Die Fragen gehen schriftlich über das E-Postfach des Vereins in DFBnet an die Passstelle. Die Familie schreibt nie selbst an den HFV. Die Status-Hotline der Passstelle endet am 30.09.2026."
+    "Die 1. Vorsitzende hat am 11.10.2026 entschieden. Der Assistent folgt den Vordrucken des HFV. Sonderfälle klärt das Passwesen im Einzelfall."
   )}
     ${p(
-      "Bis die Antworten da sind, zeigt der Assistent die betroffenen Punkte als offen. Die P1-Fragen sollten vor dem Livegang beantwortet sein. Jede Frage trägt ihre Nummer aus dem Regelwerk."
+      `${zaehlSatz(oids, "Fragen")} ${
+        z.offen ? "Die offenen Fragen gehen an das Passwesen. " : ""
+      }Die Familie schreibt nie selbst an den HFV. Die Status-Hotline der Passstelle endete am 30.09.2026.`
     )}
-    <h3>P1: vor dem Livegang klären (${HFV_P1.length})</h3>
-    ${nummernListe(HFV_P1)}
-    ${aufklapper(
-      `Weitere Fragen: ${HFV_WEITERE.length} (${prioText(HFV_WEITERE.map(([o]) => o))})`,
-      nummernListe(HFV_WEITERE)
-    )}`;
+    ${entscheidungsListe({ name: "Fragen zum HFV", punkte: HFV_PUNKTE, titelWeitere: "Weitere Fragen" })}`;
   return abschnitt("hfv-fragen", inhalt);
 }
 
@@ -1307,16 +1201,27 @@ const KARNEVAL_BELEGT = [
   ],
   [
     "**HFV-Unterlagen und Attest**",
-    "Nicht nötig. Weder BDK (Bund Deutscher Karneval) noch RKK noch der Große Rat verlangen ein Attest. Bei Turnieren gibt es einen Turnierarzt. Ein freiwilliger Notfall- und Gesundheitsbogen ist trotzdem sinnvoll.",
+    "Nicht nötig. Weder BDK (Bund Deutscher Karneval) noch RKK noch der Große Rat verlangen ein Attest. Ein freiwilliger Notfall- und Gesundheitsbogen ist trotzdem sinnvoll.",
   ],
   [
     "**Versicherung**",
-    "Mitglieder sind beim satzungsgemäßen Vereinsbetrieb versichert. Voraussetzung: Die Abteilung ist beim LSB angemeldet, und die Karnevalsmitglieder stehen in der Bestandsmeldung. Wer nur schnuppert, ist nicht versichert. Eine Mitgliedschaft „nur für die Kampagne“ wäre es auch nicht.",
+    "Mitglieder sind beim satzungsgemäßen Vereinsbetrieb versichert. Voraussetzung: Die Abteilung ist beim LSB angemeldet, und die Karnevalsmitglieder stehen in der Bestandsmeldung. Das klärt die Abteilung ({o:O49}). Wer nur schnuppert, ist nicht versichert ({o:O27}). Eine Probemitgliedschaft gibt es nicht ({o:O31}).",
   ],
   [
-    "**Jugendschutz**",
-    "Bei Brauchtumsveranstaltungen dürfen Kinder bis 22 Uhr, Jugendliche unter 16 bis 24 Uhr auch ohne Begleitung bleiben (§ 5 JuSchG). Sinnvoll: die Erlaubnis für Auftritte am Abend. Darin übertragen die Eltern die Aufsicht an eine erwachsene Person (Erziehungsbeauftragung). Jugendliche sollten einen Ausweis dabeihaben (§ 2 JuSchG). Das Jugendarbeitsschutzgesetz greift nur bei Auftritten gegen Gage. Dann braucht es eine Bewilligung beim Regierungspräsidium Darmstadt.",
+    "**Schutzkonzept**",
+    "Es gilt für alle Trainer und Betreuer (erweitertes Führungszeugnis).",
   ],
+];
+
+// Die Punkte der Karnevalabteilung (an: karnevalabteilung). Die übrigen Punkte zum Karneval haben ihre Zeile in Abschnitt 10.
+const KARNEVAL_PUNKTE = [
+  ["O55", "Gruppen und Altersgrenzen der Karnevalabteilung bestätigen. Die Angaben stammen von der Internetseite des FCV (Stand 2024)."],
+  ["O56", "Welche Turniere tanzen die Gruppen, und in welchen Verbänden (BDK, IGMK)? Ist die Gruppe „Freaky Fruities“ bis 16 oder bis 15 Jahre?"],
+  ["O57", "Probetraining und Schnuppern im Karneval regeln. Die Website widerspricht sich hier."],
+];
+
+// Hintergrund aus der Recherche: gehört nicht zur Anmeldung, steht deshalb im Aufklapper.
+const KARNEVAL_HINTERGRUND = [
   [
     "**Turniere**",
     "Großer Rat (Turnierordnung 06/2026): nur Mitgliedsvereine. Junioren 12 bis 15 Jahre, Hauptklasse ab 16, es zählt das Alter am Turniertag. Mindestens 4 Tänzer. Jede Tänzerin startet nur für einen Verein. Bei der Passkontrolle braucht jedes Kind einen Personal-, Kinder-, Schüler- oder Tanzausweis. BDK: nur mit Mitgliedschaft über die IGMK, mit Tanzturnierausweis und schriftlicher Zustimmung zu Aufnahmen. RKK: Tanzausweis für 5 € plus Versand, mit Passfoto.",
@@ -1326,58 +1231,23 @@ const KARNEVAL_BELEGT = [
     "Nur Mitgliedsvereine des Großen Rats dürfen teilnehmen. Mit der Teilnahme willigt man in Bild- und Tonaufnahmen ein (Zugordnung Nr. 9.3). Das gehört in die Elterninformation. Bei Kindergruppen müssen genug erwachsene Aufsichtspersonen mitgehen.",
   ],
   [
-    "**Schutzkonzept**",
-    "Es gilt für alle Trainer und Betreuer (erweitertes Führungszeugnis).",
-  ],
-];
-
-// Die offenen Punkte zum Karneval. O55, O56 und O57 (an: karnevalabteilung) haben hier ihre Zeile mit Anker;
-// alle anderen Nummern verweisen auf die Zeile in Abschnitt 10 (Vorstand, Kasse, weitere Stellen).
-const KARNEVAL_OFFEN = [
-  [["O28"], "Wie hängen der FCV und die FFV-Abteilung rechtlich zusammen? Was passiert mit den FCV-Mitgliedern? Kommt Karneval in die Satzung?"],
-  [["O49"], "Ist die Abteilung beim LSB gemeldet? Den Versicherungsschutz für Sitzungen, Auswärtsauftritte und den Zug beim ARAG-Versicherungsbüro bestätigen lassen."],
-  [["O57"], "Probetraining und Schnuppern regeln. Die Website widerspricht sich hier: Eine Seite sagt „Probetraining (nur Fußball)“, eine andere verweist zum Schnuppern an die Abteilung."],
-  [["O55"], "Gruppen und Altersgrenzen: Laut FCV-Seite (Stand 2024) sind Little Fruities ab 4, Freaky Fruities 8 bis 16, Flying Fruities ab 16, Dreamboys und Pfläumchen ab 18. Aktuell gibt es fünf Gruppen. Der Verein muss die Grenzen bestätigen."],
-  [["O35"], "Kostüme: Wem gehören sie, was kosten sie, gibt es eine Kaution? Dazu Nebenkosten und Pflichtteile der Garde-Uniform. Eine Leihvereinbarung ist sinnvoll."],
-  [["O56", "O51"], "Welche Turniere und Mitgliedschaften (BDK, IGMK)? Davon hängen Tanzausweis, Passfoto und Turnier-Einwilligung ab. Ist die Gruppe „Freaky Fruities“ bis 16 oder bis 15 Jahre?"],
-  [["O36"], "Aufsicht bei Abendauftritten, Umkleide und Kostümwechsel: Das Schutzkonzept braucht dafür Regeln für den Karneval."],
-  [["O34"], "Senatorenmitgliedschaft: Status und Stimmrecht. Die FFV-Satzung kennt keine Senatoren."],
-  [["O37", "O40"], "Gilt die Aufnahmegebühr von 20 € auch für Karneval? Und wie gelten der Beitrag bei Doppelmitgliedschaft, der Familienbeitrag über beide Abteilungen und der Nachweis für Azubis und Studierende?"],
-];
-
-const KARNEVAL_TERMINE = [
-  [
-    "**30.09.2026**",
-    "Meldeschluss für den Großen Frankfurter Fastnachtszug 2027 beim Großen Rat. Teilnehmen dürfen nur Mitgliedsvereine ({o:O29}).",
-  ],
-  [
-    "**31.10.2026**",
-    "Meldeschluss beim Großen Rat für das Kindertanzfest (20.02.2027, nur bis 12 Jahre) und das Tanzfestival (21.02.2027).",
+    "**Jugendschutz bei Auftritten**",
+    "Bei Brauchtumsveranstaltungen dürfen Kinder bis 22 Uhr, Jugendliche unter 16 bis 24 Uhr auch ohne Begleitung bleiben (§ 5 JuSchG). Jugendliche sollten einen Ausweis dabeihaben (§ 2 JuSchG). Das Jugendarbeitsschutzgesetz greift nur bei Auftritten gegen Gage. Dann braucht es eine Bewilligung beim Regierungspräsidium Darmstadt.",
   ],
 ];
 
 function karnevalAbschnitt() {
-  const inhalt = `${p(
-    "KA Schnauzer steht für die Karnevalabteilung „Die Schnauzer“ des Vereins. Für sie gibt es keine HFV-Unterlagen. Dafür sind mehrere Punkte offen."
-  )}
-    <h3>Eilige Termine</h3>
+  const hintergrund = `${p("Diese Angaben stammen aus der Recherche. Sie gehören nicht zur Anmeldung. Die Karnevalabteilung kann sie nutzen.")}
     ${tabelle({
-      beschriftung: "Eilige Termine im Karneval",
-      spalten: ["Datum", "Was"],
-      ersteSpalte: "datum",
-      zeilen: KARNEVAL_TERMINE,
-    })}
-    <h3>Was belegt ist</h3>
-    ${tabelle({
-      beschriftung: "Karneval: was belegt ist",
+      beschriftung: "Karneval: Hintergrund zu Turnieren, Fastnachtszug und Jugendschutz",
       spalten: ["Thema", "Stand"],
       breit: true,
       ersteSpalte: "label",
-      zeilen: KARNEVAL_BELEGT,
+      zeilen: KARNEVAL_HINTERGRUND,
     })}
     <h3>Zwei Anmeldewege stehen parallel online</h3>
     ${kasten(
-      "offen",
+      "",
       `${p(
         "Neben der FFV-Abteilung gibt es den Verein „Frankfurter Carneval Verein ‚Die Schnauzer‘ e.V.“ (FCV). Er ist nach eigener Angabe im Vereinsregister eingetragen (Amtsgericht Frankfurt, VR 8286). Den Registerstand haben wir nicht geprüft. Der FCV hat eine eigene Satzung (21. Oktober 2018) und ein aktives Online-Formular mit anderen Regeln."
       )}
@@ -1388,21 +1258,44 @@ function karnevalAbschnitt() {
       "Der Große Rat führt in seiner aktuellen Vereinsliste unter Nr. 52 die FFV-Abteilung. 2025 stand diese Nummer noch beim FCV. Das spricht für einen Übergang. Belegt ist er nicht. Der Große Rat nennt außerdem die FCV-Website als Adresse der Abteilung."
     )}
     ${p(
-      "**Folge:** Das FCV-Formular abschalten oder auf den Assistenten umleiten ({o:O28}). Eigene Ableitung, nicht belegt: Bisherige FCV-Mitglieder brauchen einen Aufnahmeantrag des FFV und eine neue Erlaubnis für die Lastschrift, weil ein anderer Gläubiger abbucht. {offen}"
+      "Was mit dem FCV-Formular und den FCV-Mitgliedern geschieht, klärt die Karnevalabteilung ({o:O28}). Das ist unsere Ableitung und nicht belegt: Bisherige FCV-Mitglieder brauchen einen Aufnahmeantrag des FFV. Sie brauchen auch eine neue Erlaubnis für die Lastschrift, weil ein anderer Gläubiger abbucht. {offen}"
     )}`
     )}
     <h3>Karneval steht nicht ausdrücklich in der Satzung</h3>
     ${kasten(
-      "offen",
+      "",
       `${p(
         "Die FFV-Satzung (15. März 2024) nennt Sport sowie Kunst und Kultur. Karneval ist ein eigener gemeinnütziger Zweck (§ 52 Abs. 2 Nr. 23 AO). Die Satzung des Großen Rats (§ 3 Nr. 2a, 8. Oktober 2018) verlangt, dass der Mitgliedsverein das Brauchtum in seiner Satzung verankert."
       )}
     ${p(
-      "Das berührt die Mitgliedschaft im Großen Rat, den Versicherungsschutz und die Gemeinnützigkeit. Ob es eine neuere Satzung gibt, ist zu klären ({o:O28}). {offen}"
+      "Das berührt die Mitgliedschaft im Großen Rat, den Versicherungsschutz und die Gemeinnützigkeit. Ob es eine neuere Satzung gibt, klärt die Karnevalabteilung ({o:O28})."
     )}`
+    )}`;
+  const inhalt = `${p(
+    "KA Schnauzer steht für die Karnevalabteilung „Die Schnauzer“ des Vereins. Karneval gehört nicht zur Anmeldung im Assistenten. Die Karnevalabteilung klärt ihre Fragen selbst. Das hat die 1. Vorsitzende am 11.10.2026 entschieden ({o:O28}, {o:O29})."
+  )}
+    <h3>Was der Assistent bei Karneval tut</h3>
+    ${liste([
+      "**Aufnahmeantrag.** Der Assistent fragt nach Person, Kontakt, Beitrag und Zahlung, wie im Fußball. Es gibt kein HFV-Formular und kein Attest.",
+      "**Keine Gruppenwahl.** Die Trainer ordnen die Kinder einer Gruppe zu ({o:O55}).",
+      "**Heimweg nach dem Training.** Bei Minderjährigen sagen die Eltern, ob das Kind allein nach Hause darf. Das Blatt gilt für Fußball und Karneval.",
+      "**Notfall und Fahrten.** Der Notfall- und Gesundheitsbogen ist freiwillig. Das Einverständnis für Fahrten und Messenger-Gruppe gibt es auch im Karneval.",
+      "**Nicht im Assistenten:** Turniere, Auftritte am Abend, Kostüme und der Fastnachtszug. Der Assistent fragt dazu nichts ({o:O29}, {o:O35}, {o:O36}, {o:O56}).",
+    ])}
+    <h3>Was belegt ist</h3>
+    ${tabelle({
+      beschriftung: "Karneval: was belegt ist",
+      spalten: ["Thema", "Stand"],
+      breit: true,
+      ersteSpalte: "label",
+      zeilen: KARNEVAL_BELEGT,
+    })}
+    <h3>Punkte der Karnevalabteilung</h3>
+    ${p(
+      `${zaehlSatz(KARNEVAL_PUNKTE.map(([oid]) => oid), "Punkte der Abteilung", "Punkten der Abteilung")} Weitere Punkte zum Karneval ({o:O28}, {o:O29}, {o:O35}, {o:O36}, {o:O49}, {o:O51}) stehen in {a:entscheiden}.`
     )}
-    <h3>Was offen ist</h3>
-    ${nummernListe(KARNEVAL_OFFEN, { eigene: IM_KARNEVAL })}`;
+    ${entscheidungsListe({ name: "Karnevalabteilung", punkte: KARNEVAL_PUNKTE, titelWeitere: "Punkte der Karnevalabteilung" })}
+    ${aufklapper("Hintergrund für die Karnevalabteilung (gehört nicht zur Anmeldung)", hintergrund)}`;
   return abschnitt("karneval", inhalt);
 }
 
@@ -1415,11 +1308,11 @@ const EINFUEHRUNG = [
   ],
   [
     "Fragen und Entscheidungen klären",
-    "Die Fragen an die Passstelle ({a:hfv-fragen}) gehen über das E-Postfach des Vereins raus. Der Vorstand entscheidet die P1-Punkte ({a:entscheiden}).",
+    "Die 1. Vorsitzende hat am 11.10.2026 geantwortet. Offen sind nur noch die Fragen im Excel an sie ({a:entscheiden}). Die offenen Fragen zum HFV gehen an das Passwesen ({a:hfv-fragen}).",
   ],
   [
     "Texte prüfen und testen",
-    "Muttersprachler lesen Texte und Übersetzungen gegen. 3 bis 5 Eltern, die wenig Deutsch sprechen, testen den Assistenten ({o:O53}). Ergebnis: verbesserte Texte und die Sprachauswahl.",
+    "Muttersprachler lesen Texte und Übersetzungen gegen. 3 bis 5 Eltern, die wenig Deutsch sprechen, testen den Assistenten ({o:O53}). Das geschieht vor oder kurz nach dem Start. Ergebnis: verbesserte Texte und die Sprachauswahl.",
   ],
   [
     "Einbau auf Website und in der App",
@@ -1427,7 +1320,7 @@ const EINFUEHRUNG = [
   ],
   [
     "Vereinsunterlagen aktualisieren",
-    "Info-Blatt, Unterlagenliste und Zusatzerklärung werden ersetzt ({o:O48}). Die Satzungsadresse im Aufnahmeantrag wird repariert oder geändert ({o:O66}). Im Info-Blatt steht statt „ALG II“ das Grundsicherungsgeld.",
+    "Die alten Info-Blätter ersetzen wir später ({o:O48}). Die Satzungsadresse im Aufnahmeantrag wird neu mit der Website verknüpft ({o:O66}). Im Info-Blatt steht statt „ALG II“ das Grundsicherungsgeld.",
   ],
 ];
 
@@ -1520,7 +1413,7 @@ const QUELLEN = [
       "Info-Blatt, 8. Januar 2014; Unterlagenliste, 14. Juni 2021; Zusatzerklärung, 8. Januar 2014",
       "Schutzkonzept, Stand Mai 2025",
       "Vereinsdaten (Mannschaften, Unterlagen, Karneval), Stand 22. bis 28. September 2026",
-      `Regelwerk des Anmelde-Assistenten (Prototyp), Version ${REGELWERK_VERSION}, mit den offenen Punkten O01 bis O${String(ANZAHL_PUNKTE).padStart(2, "0")}`,
+      `Regelwerk des Anmelde-Assistenten (Prototyp), Version ${REGELWERK_VERSION}, mit den Punkten O01 bis O{letzte}`,
     ],
   ],
   [
@@ -1547,7 +1440,10 @@ const QUELLEN = [
 function quellenAbschnitt() {
   const gruppen = QUELLEN.map(
     ([titel, eintraege]) => `<h3>${escapeHtml(titel)}</h3>
-    ${liste(eintraege, { klasse: "konzept-quellen" })}`
+    ${liste(
+      eintraege.map((e) => e.replace("O{letzte}", `O${String(PUNKTE.size).padStart(2, "0")}`)),
+      { klasse: "konzept-quellen" }
+    )}`
   ).join("\n    ");
   const inhalt = `${p(
     "Alle Quellen sind mit ihrem Stand genannt. Quellen anderer Landesverbände gelten in Hessen nicht. Sie zeigen nur, wie andere es machen."
@@ -1582,6 +1478,8 @@ const STIL = `<style>
 .konzept-tabelle--prio table { min-width: 0; }
 .konzept-tabelle--prio td:first-child { width: 4.75rem; }
 .konzept-frage { margin: 0; font-weight: 600; }
+/* Silbentrennung nur bei langen Wörtern (zum Beispiel „Nichtmitgliederversicherung“ auf dem Handy) */
+.konzept-frage, .konzept-antwort, .konzept-warum { hyphens: auto; hyphenate-limit-chars: 12 4 4; }
 .konzept-warum { margin: var(--sp-1) 0 0; color: var(--ink-2); }
 .konzept-tabelle--datum td:first-child { width: 7rem; white-space: nowrap; }
 .konzept-toc { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: 0 var(--sp-5); }
@@ -1606,21 +1504,16 @@ const STIL = `<style>
 .konzept a.konzept-onr { text-decoration: none; }
 .konzept a.konzept-onr:hover { background: var(--blau-100); }
 .konzept-tabelle td:first-child .konzept-onr { margin-top: var(--sp-1); }
-/* Listen mit Nummer vor jedem Text (Fragen an den HFV, offene Punkte im Karneval) */
-.konzept .konzept-oliste { list-style: none; margin: 0; padding: 0; max-width: calc(var(--measure) + 5rem); }
-.konzept .konzept-oliste > li {
-  display: grid;
-  grid-template-columns: 3.4rem minmax(0, 1fr);
-  gap: var(--sp-2);
-  align-items: start;
-  padding-block: var(--sp-2);
-  border-top: 1px solid var(--line);
-  max-width: none;
-}
-.konzept .konzept-oliste > li:first-child { border-top: 0; }
-.konzept .konzept-oliste__nr { display: flex; flex-wrap: wrap; gap: var(--sp-1); align-content: flex-start; padding-top: 2px; }
-.konzept .konzept-oliste__text { max-width: var(--measure); }
-/* Aufklapper für P2 und P3 */
+/* Text zum Stand einer Zeile (aus den Daten); die Kennzeichen für Geregelt, Entfällt und Später nutzen nur Farbmarken der Website */
+.konzept-antwort { margin: var(--sp-1) 0 0; }
+.konzept .tag--geregelt { padding: 2px 7px; border: 1px solid var(--blau-700); background: var(--surface); color: var(--blau-900); }
+.konzept .tag--entfaellt { padding: 2px 7px; border: 1px solid var(--line); background: transparent; color: var(--ink-3); }
+.konzept .tag--spaeter { padding: 2px 7px; border: 1px dashed var(--blau-700); background: var(--surface); color: var(--blau-700); }
+/* Zahlen je Stand im Kasten ganz oben */
+.konzept .konzept-zahlen { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-5); max-width: none; }
+.konzept .konzept-zahlen > li { display: inline-flex; align-items: center; gap: var(--sp-2); margin: 0; padding: 0; max-width: none; }
+.konzept .konzept-zahlen strong { font-size: var(--fs-lg); line-height: 1; }
+/* Aufklapper für geregelte, entfallene und später geprüfte Punkte */
 .konzept-mehr > summary {
   display: flex;
   align-items: center;
@@ -1654,7 +1547,14 @@ const STIL = `<style>
 
 // ---------- Seite ----------
 
-export function seite() {
+// daten: alle Dateien aus data/*.json (tools/build.mjs). Gebraucht wird daten.anmeldung.offenePunkte.
+export function seite(daten) {
+  setzePunkte(daten?.anmeldung?.offenePunkte);
+  if (daten.anmeldung.version !== REGELWERK_VERSION) {
+    console.warn(
+      `  Warnung: anmeldung-konzept nennt die Regelwerk-Version ${REGELWERK_VERSION}, data/anmeldung.json hat ${daten.anmeldung.version}`
+    );
+  }
   const inhalt = [
     STIL,
     kopfAbschnitt(),
@@ -1674,11 +1574,17 @@ export function seite() {
     quellenAbschnitt(),
   ].join("\n");
 
+  // Jeder Punkt der Datei hat genau eine Zeile auf der Seite (punktZeile prüft „doppelt“, hier „fehlt“).
+  const ohneZeile = [...PUNKTE.keys()].filter((oid) => !GEZEICHNET.has(oid));
+  if (ohneZeile.length) {
+    throw new Error(`anmeldung-konzept: Diese Punkte aus data/anmeldung.json haben keine Zeile auf der Seite: ${ohneZeile.join(", ")}`);
+  }
+
   return {
     url: "/anmeldung-konzept/",
     title: "Anmeldung neu gedacht",
     description:
-      "Entwurf für den Vorstand: Ein Anmelde-Assistent statt Formular. Ablauf, PDF, Fälle, Entscheidungen, Fragen an den HFV, Karneval und Einführungsplan.",
+      "Entwurf für den Vorstand: Ein Anmelde-Assistent statt Formular. Ablauf, PDF, Fälle, Entscheidungen und offene Punkte, Fragen zum HFV, Karneval und Einführungsplan.",
     // Interne Vorlage für den Vorstand: nicht in Suchmaschinen (noindex). Die
     // Sitemap-Aufnahme bleibt unverändert. Führendes "\n": begleit.html setzt
     // "{{kopfZusatz}}" ans Ende der Stylesheet-Zeile (gleiche Schreibweise wie

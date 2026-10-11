@@ -6,7 +6,7 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync, statSy
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
-import { datumLang } from "../src/vorlagen/hilfen.mjs";
+import { datumLang, ANMELDUNG_LIVE } from "../src/vorlagen/hilfen.mjs";
 import { bildschirme } from "../src/appkonzept/bildschirme.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -67,6 +67,13 @@ async function sammleSeiten(daten) {
     } else {
       console.warn(`  Warnung: ${path.relative(ROOT, modulPfad)} exportiert weder seite() noch seiten()`);
     }
+  }
+  // Livegang des Anmelde-Assistenten (M6): mit ANMELDUNG_LIVE (src/vorlagen/hilfen.mjs) kommt die Live-Fassung als
+  // Workspace-Seite docs/ws/anmeldung.html dazu (src/begleit/anmeldung.mjs › seiteLive). Die Begleitseite /anmeldung/
+  // (docs/anmeldung/index.html) entsteht davon unabhängig weiter unten. Ohne den Schalter ändert sich nichts.
+  if (ANMELDUNG_LIVE) {
+    const modul = await import(pathToFileURL(path.join(SRC, "begleit", "anmeldung.mjs")).href);
+    alleSeiten.push(modul.seiteLive(daten));
   }
   return alleSeiten;
 }

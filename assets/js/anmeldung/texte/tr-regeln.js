@@ -1,7 +1,7 @@
 /*
   Texte des Regelwerks - Türkisch (Türkçe), Gegenstück zu regeln.js.
   Übersetzungshilfe: Verbindlich ist der deutsche Text (de-regeln.js).
-  Stand 08.10.2026. Dieselbe Schlüsselstruktur wie de-regeln.js; Platzhalter in geschweiften
+  Stand 11.10.2026. Dieselbe Schlüsselstruktur wie de-regeln.js; Platzhalter in geschweiften
   Klammern (zum Beispiel {datum}) bleiben unverändert und bekommen keine türkische Endung
   ("{datum} tarihine kadar", "{pflichtspiele} tarihinden itibaren"). Stil und Begriffe: siehe die
   Begriffsliste oben in tr-oberflaeche.js.
@@ -218,27 +218,6 @@ export default {
       wie: "İzin verdiklerinizi işaretlersiniz. Sonra imzalarsınız.",
       wo: "Bu sayfa kulüp bölümüne aittir.",
     },
-    U30: {
-      name: "Akşam gösterileri için izin",
-      kurz: "Çocuğunuzun akşamları ebeveynler olmadan sahne almasına izin verirsiniz.",
-      warum: "Böylece bir antrenör çocuğunuza göz kulak olabilir.",
-      wie: "Telefon numaranızı yazar ve imzalarsınız.",
-      wo: "Bu sayfa kulüp bölümüne aittir.",
-    },
-    U31: {
-      name: "Kostümler için anlaşma",
-      kurz: "Kulüp kostümlerin nasıl ele alınacağını hâlâ netleştiriyor.",
-      warum: "Konu, maliyetler ve kostümlerin kime ait olduğu.",
-      wie: "Antrenörler size zamanında haber verir.",
-      wo: "Şimdi bir şey yapmanıza gerek yok.",
-    },
-    U32: {
-      name: "Dans turnuvaları için evrak",
-      kurz: "Turnuvalarda çocuğunuzun belki bir kimlik belgesine (Ausweis) ihtiyacı olur.",
-      warum: "Turnuvada organizatörler kimliği kontrol eder.",
-      wie: "Antrenörler size haber verir. Fotoğraflı bir kimlik işe yarar.",
-      wo: "Şimdi bir şey yapmanıza gerek yok.",
-    },
     U33: {
       name: "Eğitim ve Katılım (Bildung und Teilhabe) için belge",
       kurz: "Bu, kulüpten aidatla ilgili bir kâğıttır.",
@@ -257,7 +236,7 @@ export default {
       name: "Kayıt ücreti (Aufnahmegebühr)",
       kurz: "Yeni üyeler bir kez {betrag} Euro öder.",
       warum: "Bu, üyelik başvurusunda (Aufnahmeantrag) böyle yazar.",
-      wie: "Kulüp size nasıl ödeyeceğinizi söyler.",
+      wie: "Kulüp bunu ilk aidatla birlikte tahsil eder.",
       wo: "Bunun için bir şey yüklemenize gerek yok.",
     },
     U36: {
@@ -295,6 +274,14 @@ export default {
       wie: "Başvuruyu kulüp, federasyonun güvenilir irtibat kişisiyle birlikte hazırlar.",
       wo: "Güvenilir irtibat kişisi sizinle iletişime geçer. Çocuklarda ebeveynler onay verir.",
     },
+    // U30 bis U32 gibt es nicht mehr (Entscheidung vom 11.10.2026).
+    U41: {
+      name: "Antrenmandan sonra eve dönüş",
+      kurz: "Çocuğunuzun antrenmandan sonra eve nasıl döneceğini söylersiniz.",
+      warum: "Böylece kulüp, çocuğunuzun tek başına gidip gidemeyeceğini bilir.",
+      wie: "Asistanda bir yanıt seçersiniz. Sonra imzalarsınız.",
+      wo: "Bu sayfa kulüp bölümüne aittir. Antrenörler bir kopya alır.",
+    },
   },
 
   hinweise: {
@@ -312,7 +299,6 @@ export default {
     f17_wahrscheinlich_nicht: "5 yıllık ikamet olmadan çocuğun büyük olasılıkla oynamasına izin verilmez. O zaman oynamak ancak 18 yaşında mümkündür. Hazırlık maçlarına da izin verilmez.",
     aushilfe_nur_ausnahme: "Bu doğum yılında genç, gerektiğinde Herren (yetişkin erkek takımı) takımında ancak nadiren oynayabilir. Gençlik birimi bunu kontrol eder.",
     getrennt_zustimmung: "Lütfen diğer ebeveyne sorun. Kayda razı olması gerekir. En iyisi, üyelik başvurusunu (Aufnahmeantrag) o da imzalasın.",
-    karneval_tanzt_woanders: "Dansçılar turnuvalarda yalnızca bir kulüp adına yarışır.",
     beitrag_gruppe_pruefen: "Aidat grubu: {gruppe}. Bu grup yaşa uygun olmayabilir. Kulüp bunu kontrol eder.",
 
     // Fristen
@@ -320,7 +306,8 @@ export default {
 
     // Infos
     frist_annahme_heute: "Şöyle hesaplıyoruz: Kayıt silme, {abmeldung} tarihinde geçerli olur. Daha geç sildirirseniz bekleme süresi uzar.",
-    probetraining_versicherung: "Henüz üye olmayanların antrenmanda kendi sigortası yoktur. En iyisi ilk antrenmandan önce kayıt olmaktır.",
+    probetraining_versicherung: "Deneme antrenmanında üye olmayanlar kulüp üzerinden sigortalı değildir. En iyisi ilk antrenmandan önce kayıt olmaktır.",
+    mitgliedschaft_beginn: "Üyelik, kayıt olduğunuz gün başlar.",
     kuendigung_jahresende: "Kulübümüzde ancak yıl sonunda üyelikten çıkabilirsiniz. Üyelikten çıkma bildirimini taahhütlü mektupla (Einschreiben) gönderin.",
     ohne_spielrecht_kein_spiel: "Oynama izni olmadan çocuk maçlara katılamaz. Hazırlık maçlarına da katılamaz. Antrenman serbesttir.",
     mitgliedschaft_zuerst: "Önce üye olursunuz. Sonra kulüp federasyona başvuruyu yapar.",
@@ -351,11 +338,10 @@ export default {
     pflege_hinweis: "Koruyucu aile günlük hayatta çocuk adına imzalar. Belgeyi getirin.",
     f17_moeglich_5_jahre: "Çocuk 5 yıldır burada yaşıyor. O zaman federasyon bir istisnayı inceleyebilir. İkamet belgesi gerekir.",
     austausch_ein_jahr: "Okul değişim programında oynama izni en fazla 1 yıl geçerlidir. Bir kulüp değişikliği daha yapılamaz.",
-    karneval_gruppe_vorschlag: "Yaşa göre şu grup uyuyor: {gruppen}. Son kararı antrenörler verir.",
     karneval_kein_attest: "Karnaval için sağlık raporu (Attest) gerekmez. Hessen Futbol Federasyonu’ndan (Hessischer Fußball-Verband, HFV) da hiçbir evrak gerekmez.",
-    karneval_abend: "Çocuk akşamları ebeveynler olmadan sahne alır. Kulübün bunun için izninize ihtiyacı var.",
     passiv_hinweis: "Pasif üyesiniz. Oynamıyor ve antrenman yapmıyorsunuz. Kulübü destekliyorsunuz.",
     senator_vorstand: "Senatör olup olmayacağınıza yönetim kurulu karar verir.",
+    beitrag_doppel: "Hem futbolda hem karnavalda mısınız? Ayrı bir aidat hakkında bilgi isteyin.",
     kontoinhaber_andere: "Hesap başka bir kişiye ait. Bu kişi otomatik çekim (Lastschrift) iznini imzalar.",
     bildung_teilhabe: "Az parası olan aileler aidat için yardım alır. Ayda {betrag} Euro’ya kadar. İş merkezine (Jobcenter) ya da sosyal yardım dairesine (Sozialamt) sorun.",
     beitragserlass: "Paranız az mı? Bizimle konuşun. Yönetim kurulu aidattan tamamen ya da kısmen muaf tutabilir.",
@@ -363,7 +349,6 @@ export default {
     passiv_alter_verein: "Eski kulüpte pasif üye olarak kalırsınız. Bunu eski kulübe de bildirin.",
 
     // Offene Punkte
-    mitgliedschaft_beginn: "Üyeliğinizin ne zaman başladığını kulüp henüz netleştiriyor. En iyisi erken kayıt olmaktır.",
     regelwerk_fifa_2027: "{datum} tarihinden itibaren kulüp değişiklikleri için yeni uluslararası kurallar geçerli olur. Kulüp nelerin değiştiğini kontrol eder.",
     regelwerk_saison_2027: "{datum} tarihinden itibaren E-Jugend için kurallar değişir. Kulüp nelerin değiştiğini kontrol eder.",
     attest_aktuell: "Sağlık raporu (Attest) güncel olmalıdır. En fazla ne kadar eski olabileceğini kulüp netleştirir.",
@@ -386,14 +371,8 @@ export default {
     spieler_unterschrift_kind: "Küçük bir çocuk kendi imzasını atmak zorunda mı? Kulüp federasyona sorar.",
     unterlagen_liste_offen: "Federasyonun tam olarak hangi evrakı istediği henüz belli değil. Kulüp sorar ve size haber verir.",
     wohnen_nicht_gemeinsam: "Çocuk ve ebeveynler birlikte yaşamıyor. Gençlik birimi sizinle iletişime geçecek.",
-    karneval_turnier_offen: "Grubun turnuvalarda dans edip etmeyeceği henüz belli değil. Fotoğraflı bir kimlik gerekebilir.",
-    karneval_gruppe_alter_pruefen: "Grup: {gruppe}. Bu grup yaşa uygun olmayabilir. Antrenörler bunu kontrol eder.",
     beitrag_familie_offen: "Kimin aileden sayılacağını kulüp netleştirir. Tüm aile üyelerini adlarıyla yazın.",
-    zuschlag_ohne_sepa: "Otomatik çekim (Lastschrift) olmazsa yılda belki {betrag} Euro daha fazla tutar. Bunu yönetim kurulu netleştirir.",
     iban_ausland_pruefen: "Hesap numaranız Almanya’dan değil. Kulüp aidatı çekip çekemeyeceğini kontrol eder.",
-    aufnahmegebuehr_offen: "Kayıt ücretinin sizin için geçerli olup olmadığını kulüp netleştirir.",
-    beitrag_doppel: "İki bölümdesiniz. Aidatı size kulüp ofisi söyler.",
-    kostueme_offen: "Kostümlerin ne kadar tutacağını ve kime ait olacağını kulüp hâlâ netleştiriyor.",
     mitgliedschaft_alter_verein_unklar: "Eski kulübün üyesi olarak kalıp kalmayacağınız belli değil. Bunu eski kulüple netleştirin.",
   },
 
@@ -441,9 +420,6 @@ export default {
     beitrag_familie: "Kulüp ofisi kimin aileden sayılacağını kontrol eder.",
     senator: "Kulüp ofisi başvurunuzu yönetim kuruluna iletir.",
     beitragserlass: "Kulüp ofisi sizinle aidat için yardım hakkında konuşur.",
-    gruppe_einteilung: "Karnaval bölümü sizi bir gruba yerleştirir.",
-    turnier: "Karnaval bölümü turnuvalar için hangi evrakın gerektiğini size söyler.",
-    kostueme: "Karnaval bölümü kostümlerin nasıl işlediğini size söyler.",
     herren_wechsel: "Herren (yetişkin erkek takımı) maç komitesi geçişinizi ve süreleri kontrol eder.",
     frau_herren: "Herren (yetişkin erkek takımı) maç komitesi, kadınların Herren takımında oynaması için başvuruyu yapar.",
   },
@@ -491,7 +467,7 @@ export default {
     beitrag_familie: "Aile aidatı yılda {jahr} Euro. Bu, ayda {monat} Euro eder. Tüm aile üyeleri dahildir.",
     beitrag_azubi: "Çıraklar ve öğrenciler için aidat yılda {jahr} Euro. Bir belge gerekir.",
     beitrag_senator: "Senatörler yılda {jahr} Euro öder. Kabul kararını yönetim kurulu verir.",
-    beitrag_doppel: "İki bölümdesiniz. Aidatı size kulüp ofisi söyler.",
+    beitrag_doppel: "Hem futbolda hem karnavalda mısınız? Ayrı bir aidat hakkında bilgi isteyin.",
     // Namen der Beitragsgruppen (Schlüssel wie in de-regeln.js): Übersetzung mit der Abteilung (ohne Doppelpunkt, der Text steht auch hinter "Wir schlagen vor:"), dahinter der deutsche Name ohne Abteilung in Klammern.
     gruppen: {
       fussball_jugend: "Futbolda çocuklar ve gençler, A-Jugend dahil (Kinder und Jugendliche)",
@@ -519,7 +495,7 @@ export default {
     einverstaendnis_senioren: "Herren takımındaki maçlar için onay",
     einverstaendnis_maedchen: "Erkek takımlarındaki kız çocukları için onay",
     einverstaendnis_fahrten: "Geziler ve mesajlaşma grubu için onay",
-    karneval_auftritte: "Akşam gösterileri için izin",
+    heimweg: "Antrenmandan sonra eve dönüş",
     attest: "Doktordan sağlık raporu (Attest)",
     notfall: "Acil durum ve sağlık formu (Notfall- und Gesundheitsbogen)",
   },
@@ -541,7 +517,7 @@ export default {
     "einverstaendnis_senioren.unterschrift": "Herren takımındaki maçlar için onay",
     "einverstaendnis_maedchen.unterschrift": "Erkek takımlarındaki kız çocukları için onay",
     "einverstaendnis_fahrten.unterschrift": "Geziler ve mesajlaşma grubu için onay",
-    "karneval_auftritte.unterschrift": "Akşam gösterileri için izin",
+    "heimweg.unterschrift": "Antrenmandan sonra eve dönüş",
     "attest.arzt": "Doktordan sağlık raporu (Attest)",
     "attest.einwilligung": "Sağlık raporu (Attest) için izin",
     "notfall.unterschrift": "Acil durum ve sağlık formu (Notfall- und Gesundheitsbogen)",

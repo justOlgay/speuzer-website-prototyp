@@ -13,7 +13,7 @@
 //   faelle (enthalten), keineFaelle, status, international, altersklasse, mannschaft { vorhanden, namen, hinweisKey },
 //   unterlagen { U09: "pflicht" | ... }, keineUnterlagen [ids], nachweis [ids], formulare (enthalten), keineFormulare,
 //   frist { regel, pflichtspieleAb, freundschaftsspieleAb, unsicher, key, basisRegel },
-//   hinweise [keys], keineHinweise [keys], weiterleitung ["an:key"], beitrag { gruppe, jahr, monat, zuschlagOhneSepa, hinweisKey },
+//   hinweise [keys], keineHinweise [keys], weiterleitung ["an:key"], beitrag { gruppe, jahr, monat, hinweisKey },
 //   unterschriften [ { formular, stelleKey, wer } ], schritteMit [ids], schritteOhne [ids], fehlend [ids].
 
 import { readFileSync, existsSync } from "node:fs";
@@ -29,7 +29,6 @@ function lies(relativ) {
 export function ladeKonfig() {
   const anmeldung = lies("data/anmeldung.json");
   const verein = lies("data/verein.json");
-  const karneval = lies("data/karneval.json");
   const konfig = {
     anmeldung: anmeldung,
     aufnahmeantragFelder: lies("data/aufnahmeantrag-felder.json"),
@@ -50,8 +49,7 @@ export function ladeKonfig() {
         postfachOrt: verein.post.ort,
       },
     },
-    // Nur Name und Übungszeit: keine Trainerinnen und Trainer (Personennamen)
-    karnevalGruppen: karneval.gruppen.map((g) => ({ name: g.name, uebungszeit: g.uebungszeit })),
+    // Keine Karnevalgruppen mehr: Der Assistent lässt keine Gruppe wählen (Entscheidung der 1. Vorsitzenden vom 11.10.2026).
     stand: anmeldung.stand,
   };
   const formulare = path.join(WURZEL, "data", "anmeldung-formulare.json");
@@ -98,6 +96,7 @@ function kind(zusatz) {
     leistungen: "nein",
     zahlung: { art: "sepa", kontoinhaber: "sorgeberechtigt", iban: IBAN_MUSTER, bic: "", bank: "", kiVorname: "", kiNachname: "", kiAnschriftGleich: true },
     einwilligungen: { fotos: "ja", medien: ["intern", "web"], hfvName: true, hfvFoto: true, fahrten: true, messenger: true },
+    heimweg: "abholen",
     notfall: { name: "Erika Beispiel", telefon: tel("0176", "04069087"), beziehung: "Oma" },
     gesundheitsbogen: false, spielerfoto: { weg: "foto" }, nachweise: {},
     unterschriftWeg: "bildschirm", hfvUnterschrift: "training",
@@ -143,23 +142,22 @@ function wechselD(zusatz) {
 // ---------- Profile ----------
 
 export const PROFILE = [
-  profilEintrag("karneval-kind-abend", "Karneval-Kind mit Abendauftritten", "Mädchen, 10 Jahre, tanzt in der Karnevalabteilung, auch abends ohne Eltern, mit Turnier.", HEUTE,
-    kind({ vorname: "Sophie", geburtsdatum: "2016-03-22", abteilung: "karneval", spielen: null, spielerpass: null,
-      karneval: { gruppe: "Freaky Fruities", tanztWoanders: "nein", turnier: "ja", abendOhneEltern: "ja" } }),
+  profilEintrag("karneval-kind", "Karneval-Kind", "Mädchen, 10 Jahre, tanzt in der Karnevalabteilung. Keine Gruppenwahl, keine Fragen zu Turnieren und Auftritten; der Heimweg nach dem Training ist beantwortet.", HEUTE,
+    kind({ vorname: "Sophie", geburtsdatum: "2016-03-22", abteilung: "karneval", spielen: null, spielerpass: null, heimweg: "allein" }),
     {
       faelle: ["F01"], keineFaelle: ["F03"], status: null, international: false, altersklasse: "E",
       mannschaft: { vorhanden: false, namen: [] },
-      unterlagen: { U01: "pflicht", U04: "freiwillig", U05: "verein", U06: "pflicht", U28: "freiwillig", U29: "verein", U30: "verein", U31: "offen", U32: "offen", U35: "offen" },
-      keineUnterlagen: ["U07", "U09", "U10", "U11", "U12", "U13", "U15", "U16", "U19"],
-      formulare: ["aufnahmeantrag", "datenschutz", "einverstaendnis_fahrten", "karneval_auftritte", "notfall"], keineFormulare: ["hfv_antrag", "attest", "vollmacht", "abmeldung"],
+      unterlagen: { U01: "pflicht", U04: "freiwillig", U05: "verein", U06: "pflicht", U28: "freiwillig", U29: "verein", U35: "verein", U41: "verein" },
+      keineUnterlagen: ["U07", "U09", "U10", "U11", "U12", "U13", "U15", "U16", "U19", "U30", "U31", "U32"],
+      formulare: ["aufnahmeantrag", "datenschutz", "einverstaendnis_fahrten", "heimweg", "notfall"], keineFormulare: ["hfv_antrag", "attest", "vollmacht", "abmeldung", "karneval_auftritte"],
       frist: { key: "frist_kein_spiel", regel: null, pflichtspieleAb: null },
-      hinweise: ["karneval_kein_attest", "karneval_abend", "karneval_turnier_offen", "karneval_gruppe_vorschlag", "kostueme_offen", "probetraining_versicherung"],
-      keineHinweise: ["attest_aktuell", "spielerfoto_hinweis"],
-      weiterleitung: ["karneval:gruppe_einteilung", "karneval:turnier", "karneval:kostueme"],
+      hinweise: ["karneval_kein_attest", "probetraining_versicherung", "mitgliedschaft_beginn"],
+      keineHinweise: ["attest_aktuell", "spielerfoto_hinweis", "karneval_abend", "karneval_turnier_offen", "karneval_gruppe_vorschlag", "karneval_tanzt_woanders", "karneval_gruppe_alter_pruefen", "kostueme_offen", "aufnahmegebuehr_offen"],
+      weiterleitung: [],
       beitrag: { gruppe: "karneval_kinder", jahr: 108, monat: 9, hinweisKey: "beitrag_standard" },
-      unterschriften: [{ formular: "karneval_auftritte", stelleKey: "unterschrift", wer: "sorgeberechtigte" }, { formular: "aufnahmeantrag", stelleKey: "s2.unterschrift", wer: "sorgeberechtigte" }],
-      keineUnterschriften: [{ formular: "aufnahmeantrag", stelleKey: "s2.unterschrift_sorgeberechtigte" }],
-      schritteMit: ["karneval", "sorge", "leistungen", "notfall", "unterschriften"], schritteOhne: ["mannschaft", "spielen", "spielerpass", "pass", "ausland", "wohnen", "spielerfoto", "abmeldung"],
+      unterschriften: [{ formular: "heimweg", stelleKey: "unterschrift", wer: "sorgeberechtigte" }, { formular: "aufnahmeantrag", stelleKey: "s2.unterschrift", wer: "sorgeberechtigte" }],
+      keineUnterschriften: [{ formular: "aufnahmeantrag", stelleKey: "s2.unterschrift_sorgeberechtigte" }, { formular: "karneval_auftritte", stelleKey: "unterschrift" }],
+      schritteMit: ["heimweg", "sorge", "leistungen", "notfall", "unterschriften"], schritteOhne: ["karneval", "mannschaft", "spielen", "spielerpass", "pass", "ausland", "wohnen", "spielerfoto", "abmeldung"],
     }),
 
   profilEintrag("passiv-foerderer", "Passives Mitglied (Förderer)", "Erwachsener, 45 Jahre, möchte den Verein nur unterstützen, zahlt auf Rechnung.", HEUTE,
@@ -167,12 +165,23 @@ export const PROFILE = [
       zahlung: { art: "rechnung", kontoinhaber: null, iban: "" } }),
     {
       faelle: ["F02"], status: null, altersklasse: "Herren",
-      unterlagen: { U01: "pflicht", U04: "freiwillig", U06: "pflicht", U35: "offen" }, keineUnterlagen: ["U05", "U07", "U28", "U29", "U10"],
-      formulare: ["aufnahmeantrag", "datenschutz"], keineFormulare: ["hfv_antrag", "notfall", "attest"],
-      hinweise: ["passiv_hinweis", "zuschlag_ohne_sepa", "aufnahmegebuehr_offen"], keineHinweise: ["probetraining_versicherung"],
-      beitrag: { gruppe: "fussball_passiv", jahr: 84, monat: 7, zuschlagOhneSepa: 3, hinweisKey: "beitrag_standard" },
+      unterlagen: { U01: "pflicht", U04: "freiwillig", U06: "pflicht", U35: "verein" }, keineUnterlagen: ["U05", "U07", "U28", "U29", "U10", "U41"],
+      formulare: ["aufnahmeantrag", "datenschutz"], keineFormulare: ["hfv_antrag", "notfall", "attest", "heimweg"],
+      hinweise: ["passiv_hinweis", "mitgliedschaft_beginn"], keineHinweise: ["probetraining_versicherung", "zuschlag_ohne_sepa", "aufnahmegebuehr_offen"],
+      beitrag: { gruppe: "fussball_passiv", jahr: 84, monat: 7, hinweisKey: "beitrag_standard" },
       unterschriften: [{ formular: "aufnahmeantrag", stelleKey: "s2.unterschrift", wer: "mitglied" }],
-      schritteOhne: ["sorge", "leistungen", "notfall", "mannschaft", "pass"],
+      schritteOhne: ["sorge", "leistungen", "notfall", "heimweg", "mannschaft", "pass"],
+    }),
+
+  // Minderjährige, die nur unterstützen (passiv): kein Heimweg, kein Notfallbogen, keine Fahrten (Aufsichtspflicht gilt nur beim Training)
+  profilEintrag("passiv-kind", "Kind als passives Mitglied", "Junge, 9 Jahre, wird passives Mitglied (Förderer): Er trainiert nicht und tanzt nicht.", HEUTE,
+    kind({ vorname: "Emil", geburtsdatum: "2017-05-05", geschlecht: "m", abteilung: "passiv", spielen: null, spielerpass: null, deutsch: null, staaten: [], auslandGewohnt: null, heimweg: null }),
+    {
+      faelle: ["F02"], status: null,
+      unterlagen: { U01: "pflicht", U06: "pflicht", U35: "verein" }, keineUnterlagen: ["U07", "U28", "U29", "U41"],
+      formulare: ["aufnahmeantrag", "datenschutz"], keineFormulare: ["hfv_antrag", "notfall", "attest", "einverstaendnis_fahrten", "heimweg"],
+      keineUnterschriften: [{ formular: "heimweg", stelleKey: "unterschrift" }],
+      schritteMit: ["sorge", "einwilligungen"], schritteOhne: ["heimweg", "notfall", "karneval", "mannschaft", "spielen", "spielerfoto"],
     }),
 
   profilEintrag("kind-neu-deutsch-f", "Kind neu im Fußball (F-Jugend, deutsch)", "Mädchen, 8 Jahre, deutsch, war noch nie in einem Verein.", HEUTE,
@@ -180,9 +189,9 @@ export const PROFILE = [
     {
       faelle: ["F03"], keineFaelle: ["F04", "F05", "F14"], status: "neu", international: false, altersklasse: "F",
       mannschaft: { vorhanden: true, namen: ["F1-Jugend"], hinweisKey: "mannschaft_gefunden" },
-      unterlagen: { U01: "pflicht", U07: "pflicht", U08: "freiwillig", U09: "pflicht", U10: "pflicht", U11: "verein", U15: "pflicht", U16: "pflicht" },
+      unterlagen: { U01: "pflicht", U07: "pflicht", U08: "freiwillig", U09: "pflicht", U10: "pflicht", U11: "verein", U15: "pflicht", U16: "pflicht", U35: "verein", U41: "verein" },
       keineUnterlagen: ["U12", "U13", "U17", "U18", "U19", "U26"], nachweis: ["U09", "U10"],
-      formulare: ["aufnahmeantrag", "datenschutz", "hfv_antrag", "attest", "einverstaendnis_fahrten", "notfall"], keineFormulare: ["abmeldung", "vollmacht"],
+      formulare: ["aufnahmeantrag", "datenschutz", "hfv_antrag", "attest", "einverstaendnis_fahrten", "heimweg", "notfall"], keineFormulare: ["abmeldung", "vollmacht"],
       frist: { regel: "R1", pflichtspieleAb: HEUTE, freundschaftsspieleAb: HEUTE, unsicher: false, key: "frist_neu" },
       hinweise: ["ohne_spielrecht_kein_spiel", "mitgliedschaft_zuerst", "attest_aktuell", "spielerfoto_hinweis", "mitgliedschaft_beginn", "maedchen_jungenteam"],
       weiterleitung: [],
@@ -194,11 +203,12 @@ export const PROFILE = [
         { formular: "hfv_antrag", stelleKey: "spieler", wer: "spieler" },
         { formular: "hfv_antrag", stelleKey: "erziehungsberechtigte", wer: "sorgeberechtigte" },
         { formular: "hfv_antrag", stelleKey: "einwilligung_a", wer: "sorgeberechtigte" },
+        { formular: "heimweg", stelleKey: "unterschrift", wer: "sorgeberechtigte" },
         { formular: "attest", stelleKey: "arzt", wer: "arzt" },
       ],
       // O26 (Jugendleitung, 08.10.2026): Ein Elternteil reicht, auch wenn beide Eltern das Sorgerecht haben
       keineUnterschriften: [{ formular: "aufnahmeantrag", stelleKey: "s2.unterschrift_sorgeberechtigte" }],
-      schritteMit: ["mannschaft", "spielen", "spielerpass", "pass", "ausland", "sorge", "leistungen", "zahlung", "notfall", "spielerfoto", "nachweise", "pruefen", "fertig"],
+      schritteMit: ["mannschaft", "spielen", "spielerpass", "pass", "ausland", "sorge", "leistungen", "zahlung", "einwilligungen", "heimweg", "notfall", "spielerfoto", "nachweise", "pruefen", "fertig"],
       schritteOhne: ["alter_verein", "abmeldung", "wohnen", "karneval", "besonderes"],
       fehlend: ["U09", "U10"],
     }),
@@ -293,11 +303,11 @@ export const PROFILE = [
     {
       faelle: ["F10"], keineFaelle: ["F11", "F12"], status: "neu", international: false, altersklasse: "Herren",
       mannschaft: { vorhanden: true, namen: ["1. Herrenmannschaft"], hinweisKey: "mannschaft_herren" },
-      unterlagen: { U07: "pflicht", U10: "verein", U11: "verein", U16: "pflicht", U15: "pflicht" }, keineUnterlagen: ["U09", "U12", "U13", "U28", "U29"],
-      formulare: ["hfv_antrag", "attest"], frist: { regel: "R1", pflichtspieleAb: HEUTE, key: "frist_neu" },
+      unterlagen: { U07: "pflicht", U10: "verein", U11: "verein", U16: "pflicht", U15: "pflicht", U35: "verein" }, keineUnterlagen: ["U09", "U12", "U13", "U28", "U29", "U41"],
+      formulare: ["hfv_antrag", "attest"], keineFormulare: ["heimweg"], frist: { regel: "R1", pflichtspieleAb: HEUTE, key: "frist_neu" },
       beitrag: { gruppe: "fussball_erwachsene", jahr: 120, monat: 10 },
       unterschriften: [{ formular: "hfv_antrag", stelleKey: "spieler", wer: "mitglied" }, { formular: "attest", stelleKey: "einwilligung", wer: "mitglied" }],
-      schritteOhne: ["sorge", "leistungen", "notfall", "wohnen", "besonderes"], schritteMit: ["spielerfoto"],
+      schritteOhne: ["sorge", "leistungen", "heimweg", "notfall", "wohnen", "besonderes"], schritteMit: ["spielerfoto"],
     }),
 
   profilEintrag("herren-neu-nichtdeutsch", "Herren neu, ohne deutschen Pass, aus dem Ausland", "Erwachsener, 24 Jahre, ghanaischer Pass, Verein im Ausland unbekannt.", HEUTE,
@@ -505,11 +515,11 @@ export const PROFILE = [
       unterschriften: [{ formular: "aufnahmeantrag", stelleKey: "s4.unterschrift", wer: "kontoinhaber" }],
     }),
 
-  profilEintrag("rechnung-statt-lastschrift", "Rechnung statt Lastschrift", "Junge, 9 Jahre, zahlt auf Rechnung: Zuschlag offen, kein SEPA-Mandat.", HEUTE,
+  profilEintrag("rechnung-statt-lastschrift", "Rechnung statt Lastschrift", "Junge, 9 Jahre, zahlt auf Rechnung: kein SEPA-Mandat, kein Zuschlag (die Beitragsübersicht nennt keinen).", HEUTE,
     kind({ vorname: "Max", geburtsdatum: "2017-05-05", geschlecht: "m", zahlung: { art: "rechnung", kontoinhaber: null, iban: "" } }),
     {
-      faelle: ["F03"], keineUnterlagen: ["U05"], beitrag: { gruppe: "fussball_jugend", jahr: 108, zuschlagOhneSepa: 3 }, hinweise: ["zuschlag_ohne_sepa"],
-      keineHinweise: ["kontoinhaber_andere", "iban_ausland_pruefen"],
+      faelle: ["F03"], keineUnterlagen: ["U05"], beitrag: { gruppe: "fussball_jugend", jahr: 108 },
+      keineHinweise: ["kontoinhaber_andere", "iban_ausland_pruefen", "zuschlag_ohne_sepa"],
     }),
 
   profilEintrag("konto-im-ausland", "Lastschrift mit Konto im Ausland", "Junge, 9 Jahre, das Konto liegt in der Türkei: Der Verein prüft, ob abgebucht werden kann.", HEUTE,
@@ -608,25 +618,25 @@ export const PROFILE = [
 
   profilEintrag("senator-karneval", "Senatorenmitgliedschaft im Karneval", "Erwachsener, 55 Jahre, möchte Senator werden. Der Vorstand entscheidet.", HEUTE,
     erwachsen({ vorname: "Georg", geburtsdatum: "1971-04-04", abteilung: "karneval", spielen: null, spielerpass: null, deutsch: null, staaten: [], auslandGewohnt: null,
-      karneval: { gruppe: null, tanztWoanders: "nein", turnier: "nein", abendOhneEltern: "nein" }, beitrag: { gruppe: null, familie: [], senator: true, doppel: false } }),
+      beitrag: { gruppe: null, familie: [], senator: true, doppel: false } }),
     {
       faelle: ["F01"], unterlagen: { U34: "verein" }, beitrag: { gruppe: "karneval_senator", jahr: 144, monat: null, hinweisKey: "beitrag_senator" },
-      hinweise: ["senator_vorstand"], weiterleitung: ["geschaeftsstelle:senator"], keineUnterlagen: ["U30"],
+      hinweise: ["senator_vorstand"], weiterleitung: ["geschaeftsstelle:senator"], keineUnterlagen: ["U41"], schritteOhne: ["karneval", "heimweg"],
     }),
 
   profilEintrag("azubi-karneval", "Auszubildende im Karneval", "Erwachsene, 20 Jahre, Beitragsgruppe Auszubildende: Nachweis nötig.", HEUTE,
     erwachsen({ vorname: "Nadine", geburtsdatum: "2006-10-10", geschlecht: "w", abteilung: "karneval", spielen: null, spielerpass: null, deutsch: null, staaten: [], auslandGewohnt: null,
-      karneval: { gruppe: "Flying Fruities", tanztWoanders: "nein", turnier: "nein", abendOhneEltern: "nein" }, beitrag: { gruppe: "karneval_azubi", familie: [], senator: false, doppel: false } }),
+      beitrag: { gruppe: "karneval_azubi", familie: [], senator: false, doppel: false } }),
     {
       faelle: ["F01"], unterlagen: { U03: "verein" }, nachweis: ["U03"], beitrag: { gruppe: "karneval_azubi", jahr: 108, hinweisKey: "beitrag_azubi" }, fehlend: ["U03"],
-      hinweise: ["karneval_gruppe_vorschlag"],
+      hinweise: ["karneval_kein_attest"], keineUnterlagen: ["U41"],
     }),
 
   profilEintrag("doppelmitgliedschaft", "Fußball und Karneval", "Erwachsener, 35 Jahre, in beiden Abteilungen: Der Verein nennt den Beitrag.", HEUTE,
-    erwachsen({ vorname: "Sven", geburtsdatum: "1991-07-07", abteilung: "beides", karneval: { gruppe: "Dreamboys", tanztWoanders: "nein", turnier: "nein", abendOhneEltern: "nein" } }),
+    erwachsen({ vorname: "Sven", geburtsdatum: "1991-07-07", abteilung: "beides" }),
     {
       faelle: ["F10"], keineFaelle: ["F01"], beitrag: { gruppe: "fussball_erwachsene", jahr: null, monat: null, hinweisKey: "beitrag_doppel" }, hinweise: ["beitrag_doppel", "karneval_kein_attest"],
-      weiterleitung: ["geschaeftsstelle:beitrag_doppel", "karneval:gruppe_einteilung"], schritteMit: ["karneval", "spielerpass", "mannschaft"],
+      weiterleitung: ["geschaeftsstelle:beitrag_doppel"], schritteMit: ["spielerpass", "mannschaft"], schritteOhne: ["karneval", "heimweg"],
     }),
 
   profilEintrag("kind-nur-training", "Kind nur zum Training", "Junge, 7 Jahre: soll nicht bei Spielen mitmachen, deshalb kein Antrag beim Verband.", HEUTE,
