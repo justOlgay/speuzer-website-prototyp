@@ -1,7 +1,7 @@
 /*
   Texte der Oberfläche des Anmelde-Assistenten - Englisch (British English).
   Übersetzungshilfe: Verbindlich ist der deutsche Text (de-oberflaeche.js), das PDF bleibt deutsch.
-  Stand 11.10.2026. Dieselbe Schlüsselstruktur wie de-oberflaeche.js, aber ohne "sprachen" und
+  Stand 12.10.2026. Dieselbe Schlüsselstruktur wie de-oberflaeche.js, aber ohne "sprachen" und
   ohne "demo" (die Vorführung bleibt deutsch). Fehlt hier ein Eintrag, gilt der deutsche.
   Prüfung: node tools/anmeldung-test/uebersetzung-pruefen.mjs
 
@@ -244,7 +244,6 @@ export default {
     geschlecht: "Please choose the gender.",
     spielrechtFuer: "Please choose the teams.",
     abteilung: "Please choose a department.",
-    spielen: "Please choose an answer.",
     spielerpass: "Please choose an answer.",
     region: "Please choose where the club is.",
     vereinsname: "Please enter the name of the club.",
@@ -391,19 +390,12 @@ export default {
     unbekannt: "We cannot work out the team yet.",
   },
 
-  spielen: {
-    titel: { kind: "Should your child take part in matches?", selbst: "Would you like to take part in matches?" },
-    erklaerung: "Anyone who wants to play needs permission to play (Spielrecht) from the Hessian Football Association (Hessischer Fußball-Verband, HFV).\nThe club applies for this for you.\nThis sometimes takes a few weeks.",
-    ja: { kind: "Yes, in matches and football festivals (Spielfeste)", selbst: "Yes, in matches" },
-    jaHinweis: "The club applies for the permission to play (Spielrecht).",
-    nein: "No, training only",
-    neinHinweis: "You can still change this later.",
-  },
-
   spielerpass: {
     titel: { kind: "Has your child ever had a player pass (Spielerpass)?", selbst: "Have you ever had a player pass (Spielerpass)?" },
     hinweis: { kind: "Even if the child only trained. Also abroad.", selbst: "Even if you only trained. Also abroad." },
     erklaerung: "A player pass (Spielerpass) is the ID card for matches in a club.",
+    // Neu am 12.10.2026 (Entscheidung der 1. Vorsitzenden): Der Verein beantragt das Spielrecht immer; die frühere Frage zu den Spielen entfällt.
+    spielrecht: "Anyone who plays football needs permission to play (Spielrecht) from the Hessian Football Association (Hessischer Fußball-Verband, HFV).\nThe club applies for this for you.\nThis sometimes takes a few weeks.",
     weissNichtHinweis: "The club checks this for you.",
   },
 
@@ -866,9 +858,6 @@ export default {
       geschlecht: "Gender",
       abteilung: "Department",
       mannschaft: "Team",
-      spielen: "Matches",
-      spielenJa: "Yes, with permission to play (Spielrecht)",
-      spielenNein: "Training only",
       alterVerein: "Previous club",
       alteMitgliedschaft: "Membership in the old club",
       abmeldung: "Deregistration",

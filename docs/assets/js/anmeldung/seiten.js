@@ -1,6 +1,6 @@
 /*
   Alle Seiten des Assistenten nach Schritt-Kennung (SCHNITTSTELLEN Abschnitt 4,
-  27 Schritte) und die Zuordnung der Schritte zu den sieben Abschnitten, die
+  26 Schritte) und die Zuordnung der Schritte zu den sieben Abschnitten, die
   oben auf der Seite stehen.
 
   REIHENFOLGE ist die feste Ordnung der Kennungen. Welche Schritte für eine
@@ -11,19 +11,19 @@
 */
 
 import { start, wer, name, geburt, pass, ausland, wohnen, sorge } from "./seiten-person.js";
-import { abteilung, mannschaft, spielen, spielerpass, alter_verein, abmeldung, besonderes } from "./seiten-fussball.js";
+import { abteilung, mannschaft, spielerpass, alter_verein, abmeldung, besonderes } from "./seiten-fussball.js";
 import { kontakt, beitrag, leistungen, zahlung, einwilligungen, heimweg, notfall } from "./seiten-verein.js";
 import { spielerfoto, nachweise, unterschriften } from "./seiten-unterlagen.js";
 import { pruefen, fertig } from "./seiten-ende.js";
 
 export const SEITEN = {
-  start, wer, name, geburt, abteilung, mannschaft, spielen, spielerpass, alter_verein, abmeldung, pass, ausland,
+  start, wer, name, geburt, abteilung, mannschaft, spielerpass, alter_verein, abmeldung, pass, ausland,
   wohnen, sorge, besonderes, kontakt, beitrag, leistungen, zahlung, einwilligungen, heimweg, notfall, spielerfoto,
   nachweise, unterschriften, pruefen, fertig,
 };
 
 export const REIHENFOLGE = [
-  "start", "wer", "name", "geburt", "abteilung", "mannschaft", "spielen", "spielerpass", "alter_verein", "abmeldung",
+  "start", "wer", "name", "geburt", "abteilung", "mannschaft", "spielerpass", "alter_verein", "abmeldung",
   "pass", "ausland", "wohnen", "sorge", "besonderes", "kontakt", "beitrag", "leistungen", "zahlung",
   "einwilligungen", "heimweg", "notfall", "spielerfoto", "nachweise", "unterschriften", "pruefen", "fertig",
 ];
@@ -33,7 +33,7 @@ export const ABSCHNITTE = ["person", "fussballKarneval", "kontakt", "beitrag", "
 
 export const ABSCHNITT_VON = {
   start: "person", wer: "person", name: "person", geburt: "person",
-  abteilung: "fussballKarneval", mannschaft: "fussballKarneval", spielen: "fussballKarneval", spielerpass: "fussballKarneval",
+  abteilung: "fussballKarneval", mannschaft: "fussballKarneval", spielerpass: "fussballKarneval",
   alter_verein: "fussballKarneval", abmeldung: "fussballKarneval", pass: "fussballKarneval", ausland: "fussballKarneval",
   wohnen: "fussballKarneval", sorge: "fussballKarneval", besonderes: "fussballKarneval",
   kontakt: "kontakt",

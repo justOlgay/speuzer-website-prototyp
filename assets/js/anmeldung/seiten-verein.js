@@ -411,14 +411,16 @@ function holeEinwilligungen(k) {
   return k.a.einwilligungen;
 }
 
-function fussballerMitSpiel(k) {
-  return ["fussball", "beides"].includes(k.a.abteilung) && k.a.spielen === true;
+// Jedes aktive Fußballmitglied hat ein Spielrecht (Entscheidung der 1. Vorsitzenden vom 12.10.2026): Die Erlaubnis für Name
+// und Foto im Internet (HFV a und b) gehört deshalb zu jeder Anmeldung für Fußball.
+function fussballer(k) {
+  return ["fussball", "beides"].includes(k.a.abteilung);
 }
 
 export const einwilligungen = {
   id: "einwilligungen",
   teile(k) {
-    return ["fotos", ...(fussballerMitSpiel(k) ? ["hfv"] : []), ...(k.minderjaehrig() ? ["fahrten"] : [])];
+    return ["fotos", ...(fussballer(k) ? ["hfv"] : []), ...(k.minderjaehrig() ? ["fahrten"] : [])];
   },
   render(k, teil) {
     const ein = holeEinwilligungen(k);

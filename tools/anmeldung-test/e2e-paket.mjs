@@ -17,7 +17,7 @@
 //   Seitenzahl > 0, keine Anfrage mit Status ab 400, keine Fehler und keine fehlenden Texte in der Konsole, Dateiname nach
 //   dem Muster, Name im PDF-Text, kein "Entwurf"/"Prototyp"/"Vorführung" im PDF-Text (poppler: pdfinfo, pdftotext).
 //   Dazu einmal mit ?app=1 (Klasse app-modus, Hinweis "Im Browser öffnen", Link nach außen als ext://).
-//   Die Seite selbst: nur Deutsch und Englisch in der Sprachwahl, kein Entwurfs-Band, kein Werkzeugkasten, kein noindex,
+//   Die Seite selbst: nur die Live-Sprachen in der Sprachwahl (seit 12.10.2026 Deutsch, Englisch, Türkisch, Arabisch), kein Entwurfs-Band, kein Werkzeugkasten, kein noindex,
 //   kein Rahmen der Begleitseite, kein Knopf "Vorführung", Titel ohne "Entwurf"; axe-core ohne Verstöße "critical" und
 //   "serious" auf der Startseite, einer Frage und der Fertig-Seite.
 //   "Mitglied werden": Hauptknopf "Schritt für Schritt anmelden" (Web und App), Nebenwege bleiben, der Link führt auf die Seite.
@@ -25,14 +25,16 @@
 //   den Abschnitt „So schicken Sie die Datei an den Verein“ mit der Adresse aus der Konfiguration des Pakets und einem mailto:-Link (Betreff „Anmeldung Vorname Nachname“,
 //   deutscher Text, kodiert); mit ?app=1 bleibt der Link auch nach einem Klick ein mailto:-Link (die Umschreibung auf ext:// gilt nur für Adressen mit http/https); Teil A
 //   der Datei nennt den Schritt „Schicken Sie die Datei per E-Mail an die Geschäftsstelle: <Adresse>“.
+//   M14 (12.10.2026): Für Fußball beantragt der Verein immer das Spielrecht. In jedem Lauf: kein Schritt „spielen“; Fußball (Kind neu, Wechsel Hessen, Herren) geht von der
+//   Mannschaft gleich zum Spielerpass, Karneval Kind kennt weder Mannschaft noch Spielerpass; die Seite „spielerpass“ trägt die Erklärung zum Spielrecht (Deutsch und Englisch).
 //   Module: Die Module im Paket (ohne Kommentare, umbenannt) liefern dieselben Ergebnisse wie die Quellen
 //   (Regelwerk für fünf Beispiele, PDF Byte für Byte, Schrift und Vordrucke aus den Base64-Modulen, Texte).
 // Bildschirmfotos (390 px) nach tools/cache/orchestrierung-anmeldung/pruefung/m6/.
 //
-// Aufruf: node tools/anmeldung-test/e2e-paket.mjs [--paket=<Ordner>] [--schnell] [--ohne-module] [--sprachen=de,en] [--cdn]
+// Aufruf: node tools/anmeldung-test/e2e-paket.mjs [--paket=<Ordner>] [--schnell] [--ohne-module] [--sprachen=de,en,tr,ar] [--cdn]
 //   --schnell: nur "Kind neu" (de) und der Lauf mit ?app=1.
-//   --sprachen: Sprachen, die das Paket anbieten soll (Standard de,en); für ein Paket mit weiteren Sprachen (Bau mit
-//   ANMELDUNG_SPRACHEN_LIVE=de,en,tr,ar) prüft der Test zusätzlich, dass sich jede davon wählen lässt.
+//   --sprachen: Sprachen, die das Paket anbieten soll (Standard de,en,tr,ar wie ANMELDUNG_SPRACHEN_LIVE seit 12.10.2026, M12; vorher de,en); für ein Paket mit
+//   mehr oder weniger Sprachen (Bau mit ANMELDUNG_SPRACHEN_LIVE=de,en) prüft der Test zusätzlich, dass sich jede weitere davon wählen lässt.
 //   --cdn: statt des lokalen Servers die Seiten auf https://cdn.appack.de/sportfreunde04/workspace/web/ prüfen (nach dem
 //   Einspielen in das CMS; nur Lesezugriffe, die Eingaben bleiben im Browser). --paket bleibt der Ordner mit dem
 //   Soll-Stand (Module und Konfiguration werden damit verglichen).
@@ -56,7 +58,7 @@ const argWert = (name) => (process.argv.find((a) => a.startsWith("--" + name + "
 const PAKET = path.resolve(argWert("paket") || process.env.PAKET_WEB_DIR || path.join(ROOT, "dist", "appack-paket", "web"));
 const SCHNELL = process.argv.includes("--schnell");
 const CDN = process.argv.includes("--cdn");
-const ERWARTETE_SPRACHEN = (argWert("sprachen") || "de,en").split(",");
+const ERWARTETE_SPRACHEN = (argWert("sprachen") || "de,en,tr,ar").split(",");
 const OHNE_MODULE = process.argv.includes("--ohne-module");
 const FOTOS = path.join(ROOT, "tools", "cache", "orchestrierung-anmeldung", "pruefung", "m6", process.argv.includes("--cdn") ? "cdn" : ".");
 const AUSGABE = path.join(ROOT, "tools", "cache", "anmeldung-test", "e2e-paket");
@@ -583,12 +585,14 @@ async function pruefeAblauf(srv, browser, beispiele, konfig, dateien, ablauf, sp
     await page.waitForFunction(() => document.getElementById("anmeldung").getAttribute("data-sprache") === "en", { timeout: 8000 });
   }
   let fotoFrage = false;
+  let spielrechtHinweis = null; // M14: die Absätze der Seite „spielerpass“ (Erklärung zum Spielrecht)
   // Die Hinweiskästen "Für den Verein" (Vereinssicht der Begleitseite) bleiben im DOM, dürfen aber auf keiner Seite sichtbar sein.
   const vereinsKaesten = { gesamt: 0, sichtbar: [] };
   const foto = async (p, s) => {
     const k = await p.evaluate(() => ({ gesamt: document.querySelectorAll(".anm-vereinshinweis").length, sichtbar: Array.from(document.querySelectorAll(".anm-vereinshinweis")).filter((e) => e.checkVisibility()).length }));
     vereinsKaesten.gesamt += k.gesamt;
     if (k.sichtbar) vereinsKaesten.sichtbar.push(s.schritt + "/" + s.teil);
+    if (s.schritt === "spielerpass" && spielrechtHinweis === null) spielrechtHinweis = await p.$$eval("#anmeldung p.anm-hinweis", (l) => l.map((x) => x.textContent.trim()));
     if (ablauf.id !== "kind-neu" || sprache !== "de" || optionen.app) return;
     if (s.schritt === "name" && !fotoFrage) {
       fotoFrage = true;
@@ -603,6 +607,21 @@ async function pruefeAblauf(srv, browser, beispiele, konfig, dateien, ablauf, sp
     seitenFehler(page, name);
     await page.close();
     return;
+  }
+  {
+    // M14 (12.10.2026): Im Paket gibt es keinen Schritt „spielen“ mehr. Fußball: Mannschaft, dann gleich der Spielerpass; Karneval: weder Mannschaft noch Spielerpass.
+    const reihe = Array.from(new Set(r.besucht.map((x) => x.split("/")[0])));
+    const fussball = ablauf.id !== "karneval-kind";
+    ok(name + ": kein Schritt „spielen“; " + (fussball ? "Mannschaft und Spielerpass folgen unmittelbar aufeinander" : "weder Mannschaft noch Spielerpass"),
+      !reihe.includes("spielen") && (fussball ? reihe.indexOf("mannschaft") >= 0 && reihe.indexOf("spielerpass") === reihe.indexOf("mannschaft") + 1 : !reihe.includes("mannschaft") && !reihe.includes("spielerpass")), reihe.join(" › "));
+  }
+  {
+    const SPIELRECHT = sprache === "en"
+      ? ["Anyone who plays football needs permission to play (Spielrecht) from the Hessian Football Association (Hessischer Fußball-Verband, HFV).", "The club applies for this for you.", "This sometimes takes a few weeks."]
+      : ["Wer Fußball spielt, braucht ein Spielrecht vom Fußball-Verband.", "Das beantragt der Verein für Sie.", "Das dauert manchmal einige Wochen."];
+    const fussball = ablauf.id !== "karneval-kind";
+    ok(name + ": " + (fussball ? "die Seite „spielerpass“ trägt die Erklärung zum Spielrecht (3 Absätze, " + sprache + ")" : "Karneval: keine Seite „spielerpass“"),
+      fussball ? !!spielrechtHinweis && SPIELRECHT.every((t) => spielrechtHinweis.includes(t)) : spielrechtHinweis === null, (spielrechtHinweis || []).join(" | "));
   }
   ok(name + ": Hinweiskästen „Für den Verein“ auf keiner Seite sichtbar", vereinsKaesten.sichtbar.length === 0, vereinsKaesten.sichtbar.slice(0, 3).join(", ") || vereinsKaesten.gesamt + " im DOM, alle ausgeblendet");
   const ergebnis = await dateiPruefen(browser, page, name, profil);

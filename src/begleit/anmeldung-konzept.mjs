@@ -1,4 +1,4 @@
-// Anmeldung neu gedacht /anmeldung-konzept/ (AP-6, 29.09.2026; Runde 3 am 30.09.2026; Stand der Punkte am 11.10.2026) –
+// Anmeldung neu gedacht /anmeldung-konzept/ (AP-6, 29.09.2026; Runde 3 am 30.09.2026; Stand der Punkte am 11.10.2026; Regelwerk am 12.10.2026) –
 // Begleitseite für die 1. Vorsitzende und den Vorstand. Erklärt in etwa 10 Minuten,
 // warum der Aufnahmeantrag nicht reicht, was der Anmelde-Assistent (Prototyp unter
 // /anmeldung/) macht, was im PDF steht, welche Fälle es gibt, was an den bisherigen
@@ -20,7 +20,7 @@
 //
 // Stand 11.10.2026 (Paket M2): Die Antworten der 1. Vorsitzenden sind eingearbeitet.
 //   - Die Listen in den Abschnitten 10 bis 12 spiegeln data/anmeldung.json › offenePunkte
-//     (Version 2026-10-11.2, O01 bis O73): jeder Punkt genau eine Zeile mit Kennzeichen und kleiner
+//     (Version 2026-10-12.1, O01 bis O73): jeder Punkt genau eine Zeile mit Kennzeichen und kleiner
 //     Nummer (Anker #o01 …). Ein Punkt hat einen von fünf Ständen: entschieden, geregelt, entfällt,
 //     später (Status „vorgemerkt“) oder offen. Nur „offen“ zählt als offene Frage und trägt P1, P2 oder P3.
 //   - Die Seite liest die Punkte beim Bau (seite(daten), daten.anmeldung.offenePunkte). Stand, Priorität,
@@ -40,6 +40,9 @@
 //   - Paket M11 (12.10.2026, Antworten der 1. Vorsitzenden vom 11.10.2026 und Entscheidung zu den Spielerpässen): O24, O25, O72 und O73 sind entschieden, O11 und O69
 //     geregelt; offen bleiben O45 und O67. Die Familie schickt die ganze Datei per E-Mail an die Geschäftsstelle, auch Teil C („Teil C –
 //     Vertraulich“); der Verein bewahrt ihn getrennt auf. Kein Server-Versand zum Start. Die Abschnitte 3, 4, 5, 9 und 13 sagen das so.
+//   - Paket M14 (12.10.2026, Entscheidung der 1. Vorsitzenden): Für Fußball beantragt der Verein immer das Spielrecht. Die Frage „Soll Ihr Kind
+//     bei Spielen mitmachen?“ und mit ihr der Schritt „spielen“ entfallen (26 statt 27 Schritte); die Erklärung zum Spielrecht steht kurz beim
+//     Spielerpass. Regelwerk Version 2026-10-12.1, Stand 12.10.2026. Die Abschnitte 1 („Kurz gesagt“), 3 (Assistent) und 4 (Fälle) sagen das so.
 //
 // Liegt wie /vorher-nachher/ und /app/ außerhalb der Hülle (docs/index.html) und
 // außerhalb der Workspace-Seiten (docs/ws/) – eigene Vorlage src/vorlagen/begleit.html,
@@ -53,8 +56,8 @@
 // Diese Seite liegt immer unter "/anmeldung-konzept/" (Tiefe 1), daher "../".
 const PFAD = "../";
 const STAND_RECHERCHE = "29.09.2026";
-const STAND_ABGLEICH = "11.10.2026";
-const REGELWERK_VERSION = "2026-10-11.2";
+const STAND_ABGLEICH = "12.10.2026";
+const REGELWERK_VERSION = "2026-10-12.1";
 const PROTOTYP = `${PFAD}anmeldung/`;
 
 // ---------- Stand der Punkte (data/anmeldung.json › offenePunkte, beim Bau gesetzt) ----------
@@ -374,7 +377,7 @@ function abschnitt(id, inhalt) {
 
 // ---------- Fragen an den HFV (zuerst, weil andere Abschnitte darauf verweisen) ----------
 
-// Alle Punkte, die die Passstelle betreffen (an: "hfv_passstelle" in data/anmeldung.json, Version 2026-10-11.2),
+// Alle Punkte, die die Passstelle betreffen (an: "hfv_passstelle" in data/anmeldung.json, Version 2026-10-12.1),
 // in der Reihenfolge der Nummern. Der Wortlaut der Frage folgt der Datei; Stand und Text dazu kommen aus der Datei
 // (punktZeile). Seit dem 11.10.2026 gilt: Der Assistent folgt den Vordrucken des HFV, das Passwesen klärt Sonderfälle.
 const HFV_PUNKTE = [
@@ -407,7 +410,7 @@ const HFV_PUNKTE = [
 ];
 // ---------- Kopf ----------
 
-// Kasten „Stand 11.10.2026“ ganz oben: die Zahlen je Stand kommen aus den Daten (zaehleAlle), nicht aus dem Text.
+// Kasten „Stand 12.10.2026“ ganz oben: die Zahlen je Stand kommen aus den Daten (zaehleAlle), nicht aus dem Text.
 function standKasten() {
   const z = zaehleAlle();
   const zeilen = STATUS_REIHE.map(
@@ -482,6 +485,7 @@ function kurzAbschnitt() {
     "**Das Problem.** Der Aufnahmeantrag fragt vieles nicht ab, was der HFV für das Spielrecht braucht. Fehlende Angaben und Unterlagen müssen einzeln nachgefordert werden. Dazu sind Vereinsunterlagen von 2014 und 2021 veraltet. {a:warum}",
     "**Die Lösung.** Ein Assistent im Browser fragt Schritt für Schritt in Einfacher Sprache. Er bietet Übersetzungshilfe auf Englisch, Türkisch und Arabisch. Am Ende erzeugt er ein PDF mit allen Unterlagen. Ein Prototyp zum Ausprobieren liegt vor. {a:assistent}, {a:pdf}",
     "**Die Unterschrift.** Die Familie unterschreibt alles am Bildschirm, nachdem sie die Satzung gelesen hat. Das gilt auch für die Blätter des Verbands. Das hat die Jugendleitung am 11.10.2026 entschieden ({o:O68}). Widerspricht der Verband, stellen wir diese Blätter wieder auf Stift um. Es reicht ein Elternteil ({o:O26}). Das Kind und der andere Elternteil bei getrennt lebenden Eltern haben ein freiwilliges Feld. {a:unterschrift}",
+    "**Das Spielrecht.** Für Fußball beantragt der Verein immer das Spielrecht. Die Frage „Soll Ihr Kind bei Spielen mitmachen?“ gibt es nicht mehr. Das hat die 1. Vorsitzende am 12.10.2026 entschieden. Die Erklärung steht kurz beim Spielerpass. {a:assistent}",
     "**Entschieden am 11.10.2026.** Die 1. Vorsitzende hat die Fragen beantwortet. Nichtmitglieder sind beim Probetraining nicht über den Verein versichert ({o:O27}). Die Mitgliedschaft beginnt am Tag der Anmeldung ({o:O30}). Es gibt keine Probemitgliedschaft ({o:O31}). {a:entscheiden}",
     `**Noch offen: ${z.offen} ${z.offen === 1 ? "Punkt" : "Punkte"}.** Sie stehen im Excel an die 1. Vorsitzende. Zum Beispiel: Welche Rechtsgrundlage gilt für die Notfallkontakte ({o:O67})? Schreiben wir die Information zum Datenschutz in Einfacher Sprache ({o:O45})?`,
     "**Die Datei geht per E-Mail.** Die Familie schickt die ganze Datei an die Geschäftsstelle, auch Teil C. Das hat die 1. Vorsitzende am 11.10.2026 entschieden ({o:O25}, {o:O73}). Es gibt keinen Versand über einen Server ({o:O72}). {a:datenschutz}",
@@ -539,7 +543,7 @@ const SCHRITTE = [
   ],
   [
     "Fußball oder Karneval",
-    "Fußball, Karneval, beides oder nur Förderer. Bei Fußball fragt er nach Mannschaft, Spielen, Spielerpass und Wechsel, Pass und Wohnort, Sorgerecht und Besonderem. Die Antworten entscheiden, welche Unterlagen der Verband verlangt. Bei Karneval entfallen diese Fragen. Eine Gruppenwahl gibt es nicht. Die Trainer ordnen die Kinder einer Gruppe zu.",
+    "Fußball, Karneval, beides oder nur Förderer. Bei Fußball zeigt er die Mannschaft und fragt nach Spielerpass und Wechsel, Pass und Wohnort, Sorgerecht und Besonderem. Das Spielrecht beantragt der Verein immer. Eine Frage, ob das Kind bei Spielen mitmacht, gibt es nicht. Die Antworten entscheiden, welche Unterlagen der Verband verlangt. Bei Karneval entfallen diese Fragen. Eine Gruppenwahl gibt es nicht. Die Trainer ordnen die Kinder einer Gruppe zu.",
   ],
   [
     "Kontakt",
@@ -706,7 +710,7 @@ const FAELLE = [
   [
     "**F03** Kind neu im Fußball, deutsch",
     "Antrag auf Spielerlaubnis, Geburtsurkunde, Attest vom Arzt, digitales Spielerfoto.",
-    "Keine Wartefrist. Im Kreis Frankfurt brauchen auch G- und F-Kinder ein Spielrecht, wenn sie an Spielen, Turnieren oder Festivals teilnehmen. Auch Doppelstaatler mit deutschem Pass gehören hierher. Dafür folgt der Assistent dem Vordruck des HFV. Sonderfälle klärt das Passwesen im Einzelfall ({o:O09}).",
+    "Keine Wartefrist. Im Kreis Frankfurt brauchen auch G- und F-Kinder ein Spielrecht, wenn sie an Spielen, Turnieren oder Festivals teilnehmen. Der Verein beantragt es für jedes Fußballkind. Auch Doppelstaatler mit deutschem Pass gehören hierher. Dafür folgt der Assistent dem Vordruck des HFV. Sonderfälle klärt das Passwesen im Einzelfall ({o:O09}).",
   ],
   [
     "**F04** Kind neu im Fußball, nichtdeutsch, unter 10 Jahren",
@@ -926,7 +930,7 @@ const WARTEFRISTEN = [
   [
     "**G- und F-Jugend**, Wechsel",
     "Keine Freigabe und keine Wartefrist (JO §§ 35 und 38 Nr. 4).",
-    "Im Kreis Frankfurt brauchen auch G- und F-Kinder ein Spielrecht, wenn sie an Spielen, Turnieren oder Festivals teilnehmen.",
+    "Im Kreis Frankfurt brauchen auch G- und F-Kinder ein Spielrecht, wenn sie an Spielen, Turnieren oder Festivals teilnehmen. Der Verein beantragt es für jedes Fußballkind.",
   ],
   [
     "**E-Jugend**, Wechsel",
@@ -1047,7 +1051,7 @@ function datenschutzAbschnitt() {
 
 // ---------- 10. Entscheidungen und offene Punkte ----------
 
-// Jede Zeile ist ein Punkt aus data/anmeldung.json › offenePunkte (Version 2026-10-11.2). Hier steht nur die kurze Frage
+// Jede Zeile ist ein Punkt aus data/anmeldung.json › offenePunkte (Version 2026-10-12.1). Hier steht nur die kurze Frage
 // (bei offenen Punkten dazu der Hintergrund). Stand, Priorität und der Text zum Stand kommen aus der Datei (punktZeile).
 // Die Listen sind nach dem Empfänger geordnet (an: vorstand, kassierer, datenschutz, versicherung, kreis_frankfurt,
 // grosser_rat_bdk, jugendleitung, regelwerk); das Passwesen sammelt die Punkte zum Betrieb von DFBnet (O24 und O25 an den

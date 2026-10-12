@@ -117,6 +117,34 @@ export function pruefeAbgabeWortlaut(woerterbuch, ausnahmen = {}) {
   return { verstoesse, ungenutzt: Object.keys(ausnahmen).filter((p) => !genutzt.has(p)) };
 }
 
+// ---------- Spielrecht immer (M14, 12.10.2026) ----------
+// Für Fußball beantragt der Verein immer das Spielrecht (Entscheidung der 1. Vorsitzenden vom 12.10.2026). Die Frage „Soll Ihr Kind bei Spielen
+// mitmachen?“ mit der zweiten Antwort (Training ohne Spiele) gibt es nicht mehr. Kein Wörterbuch (Deutsch, Englisch, Türkisch, Arabisch) darf sie noch anbieten:
+// weder den Block `spielen`, die Fehlermeldung `fehler.spielen` und die Zeilen `pruefen.zeilen.spielen*` noch einen Text, der Training ohne Spiele anbietet.
+// Die Muster stehen als Zeichenketten, damit die alten Sätze selbst nicht im Quelltext der Prüfung stehen.
+export const ALTE_OPTION_MUSTER = {
+  de: [new RegExp("nur\\s+(beim\\s+|zum\\s+|im\\s+)?Training\\b|nur\\s+trainieren|Bei Spielen mitmachen", "i"), "Training ohne Spiele"],
+  en: [new RegExp("training\\s+only|only\\s+(for|at)\\s+training", "i"), "Training ohne Spiele"],
+  tr: [new RegExp("^(Hay\\u0131r,\\s+)?sadece\\s+antrenman$", "i"), "Training ohne Spiele"],
+  ar: [new RegExp("\\u0627\\u0644\\u062a\\u062f\\u0631\\u064a\\u0628 \\u0641\\u0642\\u0637"), "Training ohne Spiele"],
+};
+
+// Prüft ein Wörterbuch einer Sprache. Rückgabe: Liste der Verstöße { pfad, art, text }.
+export function pruefeKeineNurTrainingOption(woerterbuch, sprache) {
+  const verstoesse = [];
+  const hat = (pfad) => pfad.split(".").reduce((x, k) => (x && typeof x === "object" && k in x ? x[k] : undefined), woerterbuch) !== undefined;
+  if (hat("spielen")) verstoesse.push({ pfad: "spielen", art: "Block der früheren Frage zu den Spielen", text: "" });
+  if (hat("fehler.spielen")) verstoesse.push({ pfad: "fehler.spielen", art: "Fehlermeldung der früheren Frage zu den Spielen", text: "" });
+  for (const k of Object.keys((woerterbuch.pruefen || {}).zeilen || {})) {
+    if (/^spielen/.test(k)) verstoesse.push({ pfad: "pruefen.zeilen." + k, art: "Zeile der Prüfseite zur früheren Frage zu den Spielen", text: "" });
+  }
+  const [muster, name] = ALTE_OPTION_MUSTER[sprache];
+  for (const { pfad, text } of alleTexte(woerterbuch)) if (muster.test(text)) verstoesse.push({ pfad, art: "Text bietet die frühere Antwort an (" + name + ")", text });
+  // Die Erklärung zum Spielrecht steht kurz beim Spielerpass (dort statt der früheren Frage).
+  if (typeof (woerterbuch.spielerpass || {}).spielrecht !== "string" || !woerterbuch.spielerpass.spielrecht.trim()) verstoesse.push({ pfad: "spielerpass.spielrecht", art: "Erklärung zum Spielrecht fehlt", text: "" });
+  return verstoesse;
+}
+
 // Textschlüssel, die im Quelltext als Zeichenkette in t("…"), tl("…"), hatT("…")
 // stehen (ohne Verkettung). Verkettete Schlüssel prüft der E2E-Test zur Laufzeit
 // (Warnung "Text fehlt").
@@ -154,11 +182,18 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const r = pruefeEinfacheSprache(w);
   const f = fehlendeSchluessel(w);
   const a = pruefeAbgabeWortlaut(w, ABGABE_AUSNAHMEN_OBERFLAECHE);
+  // M14: Die frühere Antwort (Training ohne Spiele) gibt es in keiner Sprache mehr (de, en, tr, ar).
+  const nurTraining = [];
+  for (const sprache of Object.keys(ALTE_OPTION_MUSTER)) {
+    const wb = sprache === "de" ? w : (await import(pathToFileURL(path.join(JS, "texte", sprache + "-oberflaeche.js")).href)).default;
+    for (const v of pruefeKeineNurTrainingOption(wb, sprache)) nurTraining.push({ ...v, pfad: sprache + ":" + v.pfad });
+  }
   console.log("Sätze geprüft: " + r.anzahlSaetze + ", längster Satz: " + r.laengster.woerter + " Wörter (" + r.laengster.pfad + ")");
   for (const v of r.verstoesse) console.log("VERSTOSS " + v.pfad + " – " + v.art + ": " + v.text);
   for (const x of f) console.log("FEHLT " + x.schluessel + " (aufgerufen in " + x.datei + ")");
   for (const v of a.verstoesse) console.log("VERSTOSS " + v.pfad + " – " + v.art + ": " + v.text);
   for (const p of a.ungenutzt) console.log("VERSTOSS " + p + " – Ausnahme zur Abgabe trifft keinen Text mehr (aus ABGABE_AUSNAHMEN_OBERFLAECHE streichen)");
-  if (r.verstoesse.length || f.length || a.verstoesse.length || a.ungenutzt.length) process.exit(1);
+  for (const v of nurTraining) console.log("VERSTOSS " + v.pfad + " – " + v.art + (v.text ? ": " + v.text : ""));
+  if (r.verstoesse.length || f.length || a.verstoesse.length || a.ungenutzt.length || nurTraining.length) process.exit(1);
   console.log("Einfache Sprache: in Ordnung. Textschlüssel: vollständig. Abgabe: kein alter Satz zu „getrennt abgeben“, „nicht per normaler E-Mail“, „im Verein abgeben“ oder „mitbringen“ (" + Object.keys(ABGABE_AUSNAHMEN_OBERFLAECHE).length + " Ausnahmen).");
 }

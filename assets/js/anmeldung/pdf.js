@@ -1934,6 +1934,13 @@ function gruppeText(K) {
   return K.minderjaehrig ? "Die Trainer ordnen das Kind einer Gruppe zu." : "Die Trainer ordnen die Person einer Gruppe zu.";
 }
 
+// Fußball oder „beides“: Für diese Mitglieder beantragt der Verein immer das Spielrecht (Entscheidung der 1. Vorsitzenden vom
+// 12.10.2026). Die frühere Antwort zu den Spielen (a.spielen) gibt es nicht mehr und wird nicht gelesen; ein altes „nein“ gilt wie „ja“.
+function mitSpielrecht(K) {
+  const abteilung = text(K.a.abteilung);
+  return abteilung === "fussball" || abteilung === "beides";
+}
+
 // Nur Karneval (ohne Fußball): Dort gibt es Gruppen, keine Mannschaften (M11, 12.10.2026; wie in der Oberfläche, seiten-verein.js).
 // „Messenger-Gruppe der Gruppe“, „Trainer und Betreuer der Gruppe“. Fußball und „beides“ sagen weiter „Mannschaft“.
 function teamWort(K) {
@@ -2588,7 +2595,7 @@ function seiteTeilA(K, S, plan) {
   const abgabe = druck.alles ? T.abgebenAusgedruckt : T.abgeben;
   schritte.push(E(ersetzePlatzhalter(mailAdresse ? abgabe : abgabe.replace(/:\s*\{adresse\}/, ""), { adresse: mailAdresse })));
   if (hatC) schritte.push(E(T.abgebenC));
-  schritte.push(E(K.a.spielen === true && e.status ? T.verband : T.verein));
+  schritte.push(E(mitSpielrecht(K) && e.status ? T.verband : T.verein));
   schritte.push(E(T.nichtWhatsapp));
   S.liste(schritte, { size: 10.5, marker: "nummer", nach: 4 });
 
@@ -2632,7 +2639,7 @@ function seiteTeilA(K, S, plan) {
   if (klaeren.length) S.absatz(E(T.fehltVielleicht), { size: 10, farbe: FARBE.tinte2, nach: 4 });
 
   // --- Wann darf gespielt werden? ---
-  if (K.a.spielen === true && e.status) {
+  if (mitSpielrecht(K) && e.status) {
     S.ueberschrift(T.wartezeitTitel, 2);
     const fr = et.frist;
     const satz = ersetzePlatzhalter(deRegeln.frist[fr.key], fr.werte);
@@ -2771,7 +2778,7 @@ function seiteLaufzettel(K, S, plan) {
   }
 
   // Frist
-  if (a.spielen === true && e.status) {
+  if (mitSpielrecht(K) && e.status) {
     S.ueberschrift("Wartefrist (Schätzung, der Verein prüft genau)", 3);
     const fr = e.frist;
     const regel = fr.regel ? objekt(objekt(K.cfg.fristen).regeln)[fr.regel] : null;
@@ -2804,7 +2811,7 @@ function seiteLaufzettel(K, S, plan) {
   );
 
   // Angaben für das Verbandssystem (DFBnet)
-  if (a.spielen === true) {
+  if (mitSpielrecht(K)) {
     S.ueberschrift("Angaben für DFBnet (fehlen im HFV-Formular)", 3, 90);
     const av = objekt(a.alterVerein);
     const staaten = staatenListe(a).map(landName).join(", ");

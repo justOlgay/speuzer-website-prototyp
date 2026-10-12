@@ -1,9 +1,12 @@
 /*
   Seiten des Assistenten zu Fußball und Abteilung: abteilung, mannschaft,
-  spielen, spielerpass, alter_verein, abmeldung, besonderes
+  spielerpass, alter_verein, abmeldung, besonderes
   (SCHNITTSTELLEN Abschnitt 4). Aufbau der Seiten: siehe seiten-person.js.
   Den Schritt "karneval" gibt es nicht mehr: keine Gruppenwahl, keine Fragen zu
   Turnieren und Auftritten (Entscheidung der 1. Vorsitzenden vom 11.10.2026).
+  Den Schritt "spielen" (die Frage nach den Spielen) gibt es nicht mehr: Der Verein
+  beantragt für jedes aktive Fußballmitglied das Spielrecht (Entscheidung der
+  1. Vorsitzenden vom 12.10.2026). Die Erklärung dazu steht kurz auf der Seite "spielerpass".
 */
 
 import { h, absaetze, textfeld, kartenAuswahl, kaestchen, datumFelder, pruefeDatumsfeld, landAuswahl, hinweisKasten, lateinFehler } from "./bausteine.js";
@@ -81,29 +84,6 @@ export const mannschaft = {
   pruefe: () => [],
 };
 
-// ---------- spielen ----------
-
-export const spielen = {
-  id: "spielen",
-  teile: () => ["haupt"],
-  render(k) {
-    return {
-      titel: k.t("spielen.titel"),
-      inhalt: [
-        ...absaetze(k.t("spielen.erklaerung"), "anm-hinweis"),
-        kartenAuswahl(k, {
-          pfad: "spielen",
-          optionen: [
-            { wert: true, label: k.t("spielen.ja"), hinweis: k.t("spielen.jaHinweis") },
-            { wert: false, label: k.t("spielen.nein"), hinweis: k.t("spielen.neinHinweis") },
-          ],
-        }),
-      ],
-    };
-  },
-  pruefe: (k) => fehlerWenn(typeof k.a.spielen !== "boolean", "spielen", k.t("fehler.spielen")),
-};
-
 // ---------- spielerpass ----------
 
 export const spielerpass = {
@@ -115,6 +95,8 @@ export const spielerpass = {
       inhalt: [
         h("p", { klasse: "anm-hinweis" }, k.t("spielerpass.hinweis")),
         h("p", { klasse: "anm-hinweis" }, k.t("spielerpass.erklaerung")),
+        // Das Spielrecht beantragt der Verein immer (12.10.2026): ein kurzer Hinweis statt der früheren Frage zu den Spielen.
+        ...absaetze(k.t("spielerpass.spielrecht"), "anm-hinweis"),
         kartenAuswahl(k, {
           pfad: "spielerpass",
           optionen: [

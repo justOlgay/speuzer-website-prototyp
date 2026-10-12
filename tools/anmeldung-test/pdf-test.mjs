@@ -46,6 +46,9 @@
 //    nennt unter „So geht es weiter“ den Satz „Schicken Sie die Datei per E-Mail an die Geschäftsstelle: <Adresse>“ genau einmal (Adresse aus der
 //    Konfiguration; auf dem Papierweg „selbst drucken“ dazu der Satz zum ausgedruckten Teil B), die alten Sätze zur Abgabe im Verein sind weg;
 //    mit anderer Adresse in der Konfiguration ändert sich der Satz, ohne Adresse entfällt „: <Adresse>“ (mailAdresseTests).
+//  - M14 (12.10.2026): Für Fußball beantragt der Verein immer das Spielrecht (Entscheidung der 1. Vorsitzenden). Die Antworten kennen kein Feld „spielen“
+//    mehr; jedes Fußballprofil hat Laufzettel mit Wartefrist und DFBnet-Angaben, Teil A mit Wartezeit und Antrag auf Spielerlaubnis. Eine alte Antwort
+//    spielen = false wird nicht gelesen (Profil kind-alte-antwort-nein; Sonderfall 15: dasselbe PDF Byte für Byte wie ohne das Feld).
 // Aufruf-Optionen: --profil=a,b (nur diese Profile)  --ohne-sonderfaelle  --szenarien (Szenarien auch bei --profil)  --ohne-stift (ohne den Lauf mit dem Schalter „stift“)
 //   --nur-schalter (nur die Läufe zum Schalter unterschriftHfv, ohne Profile, Sonderfälle und Rückfälle)
 // Werkzeuge: pdf-lib und fontkit aus node_modules, dazu poppler (pdftotext, pdfinfo, pdfimages, pdftoppm).
@@ -1585,6 +1588,8 @@ async function pruefePdf(b, g, opt) {
   ok(gesamt.includes(konfig.verein.name_register) || gesamt.includes("Sportfreunde"), "Vereinsname steht im Text");
   const lz = S.map((s, i) => ({ s: s, t: texte[i] })).filter((x) => x.s.art === "laufzettel").map((x) => x.t).join(" ");
   ok(lz.length > 200, "Laufzettel ist vorhanden");
+  // M14 (12.10.2026): Jedes Fußballmitglied (Fußball oder beides) beantragt das Spielrecht; die frühere Antwort a.spielen wird nicht gelesen.
+  const mitSpielrecht = a.abteilung === "fussball" || a.abteilung === "beides";
 
   // --- Laufzettel ---
   e.faelle.forEach((f) => ok(lz.includes(f + " – "), "Laufzettel nennt Fall " + f));
@@ -1601,7 +1606,7 @@ async function pruefePdf(b, g, opt) {
   }
   ok(lz.includes(e.international ? "ja (Freigabe über den DFB)" : "International: nein"), "Laufzettel zeigt, ob das internationale Verfahren nötig ist");
   ok(lz.includes(deRegeln.status[e.status] || "kein Spielrecht beantragt"), "Laufzettel nennt die Art der Anmeldung");
-  if (a.spielen === true && e.status) {
+  if (mitSpielrecht && e.status) {
     ok(lz.includes("Regel: " + e.frist.regel), "Laufzettel nennt die Regel der Frist (" + e.frist.regel + ")");
     if (e.frist.unsicher) ok(lz.includes("unsicher"), "Laufzettel zeigt eine unsichere Frist");
     if (e.frist.pflichtspieleAb) ok(lz.includes(datumDe(e.frist.pflichtspieleAb)), "Laufzettel nennt den Tag, ab dem Pflichtspiele möglich sind");
@@ -1615,8 +1620,8 @@ async function pruefePdf(b, g, opt) {
     ok(teileText.every((x) => !x.t.replace(/\s/g, "").includes(iban)), "die volle IBAN steht nur im SEPA-Mandat des Aufnahmeantrags");
   }
   liste(e.weiterleitung).forEach((w) => ok(lz.includes(norm(deRegeln.weiterleitung[w.key]).slice(0, 30)), "Laufzettel nennt die Weiterleitung " + w.an + ":" + w.key));
-  if (a.geburtsort) ok(lz.includes(a.geburtsort) || a.spielen !== true, "Laufzettel nennt den Geburtsort für DFBnet");
-  if (a.spielen === true) {
+  if (a.geburtsort) ok(lz.includes(a.geburtsort) || !mitSpielrecht, "Laufzettel nennt den Geburtsort für DFBnet");
+  if (mitSpielrecht) {
     ok(lz.includes("Angaben für DFBnet"), "Laufzettel enthält die DFBnet-Zusatzangaben");
     staatenErwartet(a).forEach((s) => ok(lz.includes(s), "Laufzettel nennt die Staatsangehörigkeit " + s));
     if (a.auslandGewohnt === "ja" && a.auslandLand) ok(lz.includes(landName(a.auslandLand)), "Laufzettel nennt das Land des letzten Wohnorts im Ausland");
@@ -1632,7 +1637,7 @@ async function pruefePdf(b, g, opt) {
   const ta = S.map((s, i) => ({ s: s, t: texte[i] })).filter((x) => x.s.art === "teil-a").map((x) => x.t).join(" ");
   ["Ihre Anmeldung", "So geht es weiter", "Wo unterschreiben Sie?", "Das fehlt noch", "So erreichen Sie uns"].forEach((w) => ok(ta.includes(w), "Teil A hat den Abschnitt „" + w + "“"));
   ok(ta.includes("069 736868") && ta.includes("geschaeftsstelle@sportfreunde04.de"), "Teil A nennt die Kontakte des Vereins");
-  if (a.spielen === true && e.status) {
+  if (mitSpielrecht && e.status) {
     ok(ta.includes("Wann darf gespielt werden?") && ta.includes("Der Verein prüft das genau"), "Teil A nennt die geschätzte Wartezeit mit dem Hinweis „Der Verein prüft das genau“");
     ok(ta.includes(norm(TEXTE_TEIL_A[e.frist.unsicher ? "wartezeitUnsicher" : "wartezeitSchaetzung"])), "Teil A trennt sichere und unsichere Fristen");
   }
@@ -2518,6 +2523,34 @@ async function sonderfaelle() {
       if (lz.length >= 3) dreiSeitig += 1;
     }
     ok(zweiSeitigMitBlockAmEnde > 0 && dreiSeitig > 0, "die Reihe überschreitet die Seitengrenze des Laufzettels (zwei Seiten: " + zweiSeitigMitBlockAmEnde + ", drei Seiten: " + dreiSeitig + ")");
+  }
+
+  // 15. Für Fußball beantragt der Verein immer das Spielrecht (M14, 12.10.2026): Das frühere Feld spielen wird nicht gelesen. Eine alte Antwort „nein“
+  //     (a.spielen = false, früher: Training ohne Spiele) ergibt dasselbe PDF wie ohne das Feld, Byte für Byte: mit Antrag auf Spielerlaubnis, Wartezeit und DFBnet-Angaben.
+  kontext = "Spielrecht immer";
+  {
+    const ohneFeld = bereite("kind-neu-deutsch-f", "bild", 0, (a) => { delete a.spielen; });
+    const altNein = bereite("kind-neu-deutsch-f", "bild", 0, (a) => { a.spielen = false; });
+    const altJa = bereite("kind-neu-deutsch-f", "bild", 0, (a) => { a.spielen = true; });
+    const g0 = await baue(ohneFeld, "spielrecht-ohne-feld.pdf");
+    const gNein = await baue(altNein, "spielrecht-alt-nein.pdf");
+    const gJa = await baue(altJa, "spielrecht-alt-ja.pdf");
+    ok(Buffer.compare(Buffer.from(gNein.r.bytes), Buffer.from(g0.r.bytes)) === 0, "alte Antwort „nein“: dasselbe PDF wie ohne das Feld spielen (Byte für Byte)");
+    ok(Buffer.compare(Buffer.from(gJa.r.bytes), Buffer.from(g0.r.bytes)) === 0, "alte Antwort „ja“: dasselbe PDF wie ohne das Feld spielen (Byte für Byte)");
+    const t0 = textSeiten(g0.pfad).join("\n");
+    ok(ohneFeld.a.spielen === undefined && ohneFeld.e.status === "neu" && ohneFeld.e.formulare.includes("hfv_antrag"), "Kind ohne das Feld spielen: Status „neu“ und Antrag auf Spielerlaubnis in den Formularen");
+    ok(g0.bericht.seiten.some((x) => x.schluessel === "hfv_antrag"), "Kind ohne das Feld spielen: der Antrag auf Spielerlaubnis steht im PDF");
+    ok(t0.includes("Wartefrist (Schätzung, der Verein prüft genau)") && t0.includes("Angaben für DFBnet") && t0.includes("Wann darf gespielt werden?"), "Kind ohne das Feld spielen: Laufzettel mit Wartefrist und DFBnet-Angaben, Teil A mit „Wann darf gespielt werden?“");
+    // Der Begriff „Verband“ wird beim ersten Vorkommen erklärt („beim Hessischen Fußball-Verband (kurz: der Verband)“); deshalb nur der Satzanfang.
+    ok(t0.includes("Danach stellt der Verein den Antrag beim") && !t0.includes(norm(TEXTE_TEIL_A.verein)), "Kind ohne das Feld spielen: Teil A sagt „Danach stellt der Verein den Antrag beim Verband.“ (nicht „Danach prüft der Verein Ihre Anmeldung.“)");
+    // Karneval und passive Mitglieder bleiben ohne Spielrecht (auch mit einem alten Feld spielen = true)
+    for (const [id, abt] of [["karneval-kind", "karneval"], ["passiv-foerderer", "passiv"]]) {
+      const b = bereite(id, "bild", 0, (a) => { a.spielen = true; });
+      const g = await baue(b, "spielrecht-" + abt + ".pdf");
+      const t = textSeiten(g.pfad).join("\n");
+      ok(!g.bericht.seiten.some((x) => x.schluessel === "hfv_antrag") && !t.includes("Wartefrist (Schätzung") && !t.includes("Angaben für DFBnet") && !t.includes("Wann darf gespielt werden?"), abt + " mit einem alten Feld spielen = true: kein Antrag auf Spielerlaubnis, keine Wartefrist, keine DFBnet-Angaben");
+      ok(t.includes("kein Spielrecht beantragt"), abt + ": der Laufzettel sagt „kein Spielrecht beantragt“");
+    }
   }
 
   // 10. Fehler bei Vorlagen: klare Meldung statt falscher Felder

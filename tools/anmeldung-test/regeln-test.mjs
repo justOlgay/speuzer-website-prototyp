@@ -5,7 +5,7 @@
 //  - die Datendatei data/anmeldung.json (Vollständigkeit, Quellen, Übereinstimmung mit teams.json und beitraege.json)
 //  - jedes Profil aus profile.mjs gegen seine erwarteten Kernergebnisse
 //  - Wartefristen mit Rechenbeispielen, alle Fälle F01-F18 und alle Regeln R1-R9, R13-R15
-//  - die Reihenfolge der Schritte
+//  - die Reihenfolge der Schritte (seit 12.10.2026 ohne den Schritt „spielen“: Der Verein beantragt für Fußball immer das Spielrecht, Paket M14)
 //  - die Texte (Vollständigkeit, Einfache Sprache, Platzhalter)
 //  - der Schalter unterschriftHfv (Jugendleitung, 11.10.2026): Daten, Hilfsfunktion, Rollen in beiden Modi gleich
 //  - Eigenschaften über tausende zufällige Antworten (Zufallsprüfung mit festem Startwert)
@@ -312,7 +312,7 @@ function testeDaten() {
       punkt("O13").entscheidung === "Nicht nötig für den Start. Der Assistent nennt keine Bearbeitungszeiten." &&
       punkt("O48").entscheidung === "Satzungslink siehe O66. Die alten Info-Blätter später ersetzen." &&
       punkt("O58").entscheidung === "Zum 1. Januar 2027 prüfen.");
-  gleich("Daten: Stand und Version 11.10.2026 (Version .2 seit dem Schalter unterschriftHfv, Paket M9)", [cfg.stand, cfg.version], ["2026-10-11", "2026-10-11.2"]);
+  gleich("Daten: Stand und Version 12.10.2026 (Version .1 seit dem Wegfall der Frage zu den Spielen, Paket M14; davor 2026-10-11.2 mit dem Schalter unterschriftHfv, Paket M9)", [cfg.stand, cfg.version], ["2026-10-12", "2026-10-12.1"]);
   gleich("Offene Punkte: Kennungen O01 bis O73 lückenlos und in Reihenfolge", cfg.offenePunkte.map((o) => o.id), Array.from({ length: 73 }, (_, i) => "O" + String(i + 1).padStart(2, "0")));
   // Entscheidungen der 1. Vorsitzenden vom 11.10.2026: Heimweg (U41), Beginn der Mitgliedschaft (R15), Aufnahmegebühr (U35)
   const u41 = cfg.unterlagen.U41;
@@ -575,16 +575,16 @@ function testeFaelleUndRegeln() {
   wahr("R15: Hinweis art info (nicht mehr offen)", !!h15 && h15.art === "info");
   gleich("R15: Text des Hinweises", texte.hinweise.mitgliedschaft_beginn, "Die Mitgliedschaft beginnt am Tag der Anmeldung.");
   ["passiv", "karneval"].forEach((abt) => {
-    const h = R.auswerten(BAUSTEINE.erwachsen({ abteilung: abt, spielen: null, spielerpass: null }), konfig, HEUTE_STANDARD).hinweise.find((x) => x.key === "mitgliedschaft_beginn");
+    const h = R.auswerten(BAUSTEINE.erwachsen({ abteilung: abt, spielerpass: null }), konfig, HEUTE_STANDARD).hinweise.find((x) => x.key === "mitgliedschaft_beginn");
     wahr("R15: Hinweis auch bei " + abt, !!h && h.art === "info");
   });
   // Probetraining: Nichtmitglieder sind nicht über den Verein versichert (O27 und O31)
   enthaelt("Probetraining-Hinweis bei aktiven Mitgliedern", e15.hinweise.map((h) => h.key), "probetraining_versicherung");
   gleich("Probetraining: Text des Hinweises", texte.hinweise.probetraining_versicherung, "Beim Probetraining sind Nichtmitglieder nicht über den Verein versichert. Melden Sie sich am besten vor dem ersten Training an.");
-  enthaeltNicht("Probetraining: kein Hinweis bei passiven Mitgliedern", R.auswerten(BAUSTEINE.erwachsen({ abteilung: "passiv", spielen: null, spielerpass: null }), konfig, HEUTE_STANDARD).hinweise.map((h) => h.key), "probetraining_versicherung");
+  enthaeltNicht("Probetraining: kein Hinweis bei passiven Mitgliedern", R.auswerten(BAUSTEINE.erwachsen({ abteilung: "passiv", spielerpass: null }), konfig, HEUTE_STANDARD).hinweise.map((h) => h.key), "probetraining_versicherung");
   // Aufnahmegebühr: für alle neuen Mitglieder (Fußball, Karneval, passiv), ohne „offen“; kein Zuschlag ohne Lastschrift
   ["fussball", "karneval", "beides", "passiv"].forEach((abt) => {
-    const ee = R.auswerten(BAUSTEINE.erwachsen({ abteilung: abt, spielen: abt === "fussball" || abt === "beides" ? true : null, spielerpass: abt === "fussball" || abt === "beides" ? "nein" : null, zahlung: { art: "rechnung", kontoinhaber: null, iban: "" } }), konfig, HEUTE_STANDARD);
+    const ee = R.auswerten(BAUSTEINE.erwachsen({ abteilung: abt, spielerpass: abt === "fussball" || abt === "beides" ? "nein" : null, zahlung: { art: "rechnung", kontoinhaber: null, iban: "" } }), konfig, HEUTE_STANDARD);
     const u35 = ee.unterlagen.find((u) => u.id === "U35");
     wahr("Aufnahmegebühr " + abt + ": U35 art verein mit Betrag 20", !!u35 && u35.art === "verein" && u35.werte.betrag === 20);
     enthaeltNicht("Aufnahmegebühr " + abt + ": kein Hinweis „offen“ zur Aufnahmegebühr", ee.hinweise.map((h) => h.key), "aufnahmegebuehr_offen");
@@ -602,7 +602,7 @@ function testeFaelleUndRegeln() {
   // Auftritten, Abendauftritten oder „tanzt woanders“. Auch dann nicht, wenn alte Antworten solche Felder noch enthalten.
   const KARNEVAL_ALT = { karneval: { gruppe: "Freaky Fruities", tanztWoanders: "ja", turnier: "ja", abendOhneEltern: "ja", abholung: "Oma", alleinNachHause: "ja", alleinAb: "21:30" } };
   [{}, KARNEVAL_ALT].forEach((alt, i) => {
-    const ek = R.auswerten(BAUSTEINE.kind(Object.assign({ abteilung: "karneval", spielen: null, spielerpass: null, geburtsdatum: "2017-05-05" }, alt)), konfig, HEUTE_STANDARD);
+    const ek = R.auswerten(BAUSTEINE.kind(Object.assign({ abteilung: "karneval", spielerpass: null, geburtsdatum: "2017-05-05" }, alt)), konfig, HEUTE_STANDARD);
     const was = i ? "mit alten Karneval-Antworten" : "ohne Karneval-Antworten";
     wahr("Karneval " + was + ": das Ergebnis kennt keine Gruppe und keinen Gruppenvorschlag", ek.karneval === undefined);
     wahr("Karneval " + was + ": keine Unterlage U30, U31 oder U32", !ek.unterlagen.some((u) => U_ENTFALLEN.includes(u.id)));
@@ -610,12 +610,12 @@ function testeFaelleUndRegeln() {
     const verboten = ["karneval_tanzt_woanders", "karneval_gruppe_vorschlag", "karneval_abend", "karneval_turnier_offen", "karneval_gruppe_alter_pruefen", "kostueme_offen"];
     wahr("Karneval " + was + ": keine Hinweise zu Gruppen, Turnieren, Auftritten und Kostümen", !ek.hinweise.some((h) => verboten.includes(h.key)), ek.hinweise.map((h) => h.key).join(","));
     wahr("Karneval " + was + ": keine Weiterleitung zu Gruppe, Turnier und Kostümen", !ek.weiterleitung.some((w) => ["gruppe_einteilung", "turnier", "kostueme"].includes(w.key)), JSON.stringify(ek.weiterleitung));
-    wahr("Karneval " + was + ": der Schritt karneval kommt nicht vor", !R.schritte(BAUSTEINE.kind(Object.assign({ abteilung: "karneval", spielen: null, spielerpass: null }, alt)), konfig, HEUTE_STANDARD).includes("karneval"));
+    wahr("Karneval " + was + ": der Schritt karneval kommt nicht vor", !R.schritte(BAUSTEINE.kind(Object.assign({ abteilung: "karneval", spielerpass: null }, alt)), konfig, HEUTE_STANDARD).includes("karneval"));
   });
   wahr("Schlüsselregister: keine Schlüssel zu Gruppen, Turnieren, Auftritten, Kostümen, Zuschlag und Aufnahmegebühr „offen“",
     !R.SCHLUESSEL.hinweise.some((k) => /karneval_(tanzt|gruppe|abend|turnier)|kostueme|zuschlag|aufnahmegebuehr_offen/.test(k)) && !R.SCHLUESSEL.weiterleitung.some((k) => ["gruppe_einteilung", "turnier", "kostueme"].includes(k)));
   // Karneval: keine HFV-Unterlagen und kein Attest
-  const karneval = R.auswerten(BAUSTEINE.kind({ abteilung: "karneval", spielen: null, spielerpass: null, geburtsdatum: "2016-05-05" }), konfig, HEUTE_STANDARD);
+  const karneval = R.auswerten(BAUSTEINE.kind({ abteilung: "karneval", spielerpass: null, geburtsdatum: "2016-05-05" }), konfig, HEUTE_STANDARD);
   wahr("Karneval: kein Attest, keine HFV-Unterlagen", !karneval.unterlagen.some((u) => /^U(0[7-9]|1\d|2[0-7])$/.test(u.id) && u.id !== "U19" || ["U36", "U37", "U38", "U39", "U40"].includes(u.id)));
   gleich("Karneval-Kind: die Unterlagen sind genau diese (mit Heimweg, ohne U30 bis U32)", karneval.unterlagen.map((u) => u.id), ["U01", "U04", "U05", "U06", "U28", "U29", "U35", "U41"]);
   // Beitrag: Doppelmitgliedschaft nennt zwei Gruppen
@@ -686,9 +686,9 @@ function testeFaelleUndRegeln() {
   gleich("Leere Antworten: Alter unbekannt", [leer.alter, leer.minderjaehrig, leer.altersklasse, leer.status], [null, null, null, null]);
   gleich("Leere Antworten: keine Fälle", leer.faelle, []);
   gleich("Leere Antworten: Frist offen", leer.frist.key, "frist_kein_spiel");
-  // Fußball ohne Angabe zum Spielen: kein HFV-Zweig
-  const ohneSpielen = R.auswerten(BAUSTEINE.kind({ spielen: null }), konfig, HEUTE_STANDARD);
-  wahr("Spielen unbeantwortet: keine Verbandsunterlagen", !ohneSpielen.unterlagen.some((u) => u.id === "U07" || u.id === "U09"));
+  // Fußball gilt immer mit Spielrecht (M14, 12.10.2026): Die Verbandsunterlagen kommen auch, wenn die Antworten kein Feld „spielen“ kennen.
+  const ohneSpielen = R.auswerten(BAUSTEINE.kind({}), konfig, HEUTE_STANDARD);
+  wahr("Fußball ohne Feld „spielen“: die Verbandsunterlagen U07 und U09 sind da", ohneSpielen.unterlagen.some((u) => u.id === "U07") && ohneSpielen.unterlagen.some((u) => u.id === "U09"));
   // Nichtdeutsch ab 10: internationales Verfahren auch bei Erwachsenen (DFB: ab 10 Jahren, ohne Obergrenze)
   const erwInternational = R.auswerten(BAUSTEINE.erwachsen({ deutsch: "nein", staaten: ["GH"] }), konfig, HEUTE_STANDARD);
   gleich("Erwachsene ohne deutschen Pass: international", erwInternational.international, true);
@@ -811,7 +811,7 @@ async function testeFotoTexte(texte) {
 
 // ---------- 6. Schritte ----------
 
-const KANON = ["start", "wer", "name", "geburt", "abteilung", "mannschaft", "spielen", "spielerpass", "alter_verein", "abmeldung", "pass", "ausland", "wohnen", "sorge", "besonderes",
+const KANON = ["start", "wer", "name", "geburt", "abteilung", "mannschaft", "spielerpass", "alter_verein", "abmeldung", "pass", "ausland", "wohnen", "sorge", "besonderes",
   "kontakt", "beitrag", "leistungen", "zahlung", "einwilligungen", "heimweg", "notfall", "spielerfoto", "nachweise", "unterschriften", "pruefen", "fertig"];
 
 function pruefeSchrittForm(name, s) {
@@ -822,32 +822,34 @@ function pruefeSchrittForm(name, s) {
 
 function testeSchritte() {
   gleich("Schritte ohne Antworten", R.schritte({}, konfig, HEUTE_STANDARD), ["start", "wer", "name", "geburt", "abteilung", "kontakt", "beitrag", "zahlung", "einwilligungen", "unterschriften", "pruefen", "fertig"]);
-  const karneval = R.schritte(BAUSTEINE.kind({ abteilung: "karneval", spielen: null }), konfig, HEUTE_STANDARD);
+  const karneval = R.schritte(BAUSTEINE.kind({ abteilung: "karneval" }), konfig, HEUTE_STANDARD);
   gleich("Schritte Karneval-Kind: ohne Schritt karneval, mit heimweg zwischen einwilligungen und notfall", karneval, ["start", "wer", "name", "geburt", "abteilung", "sorge", "kontakt", "beitrag", "leistungen", "zahlung", "einwilligungen", "heimweg", "notfall", "unterschriften", "pruefen", "fertig"]);
-  const passivKind = R.schritte(BAUSTEINE.kind({ abteilung: "passiv", spielen: null, geburtsdatum: "2010-05-05" }), konfig, HEUTE_STANDARD);
+  const passivKind = R.schritte(BAUSTEINE.kind({ abteilung: "passiv", geburtsdatum: "2010-05-05" }), konfig, HEUTE_STANDARD);
   enthaeltNicht("Passives Kind braucht keinen Notfallbogen", passivKind, "notfall");
   enthaeltNicht("Passives Kind braucht keinen Heimweg", passivKind, "heimweg");
   enthaelt("Passives Kind braucht Sorgerecht", passivKind, "sorge");
   // Heimweg (Aufsichtspflicht, Entscheidung der 1. Vorsitzenden vom 11.10.2026): genau bei minderjährig und aktiv (Fußball, Karneval, beides)
   const heimwegAb = (zusatz, bau) => R.schritte((bau || BAUSTEINE.kind)(zusatz), konfig, HEUTE_STANDARD).includes("heimweg");
   [["fussball", true], ["karneval", true], ["beides", true], ["passiv", false]].forEach(([abt, soll]) => {
-    const z = { abteilung: abt, spielen: abt === "fussball" || abt === "beides" ? true : null, spielerpass: abt === "fussball" || abt === "beides" ? "nein" : null };
+    const z = { abteilung: abt, spielerpass: abt === "fussball" || abt === "beides" ? "nein" : null };
     gleich("Heimweg: Kind in " + abt + (soll ? " hat den Schritt" : " hat ihn nicht"), heimwegAb(z), soll);
     gleich("Heimweg: Erwachsene in " + abt + " haben den Schritt nie", heimwegAb(z, BAUSTEINE.erwachsen), false);
   });
-  gleich("Heimweg: Kind nur zum Training hat den Schritt", heimwegAb({ spielen: false, spielerpass: null }), true);
+  gleich("Heimweg: Kind mit alter Antwort „nein“ zum Spielen hat den Schritt wie jedes Fußballkind", heimwegAb({ spielen: false }), true);
   gleich("Heimweg: 17-Jährige in der A-Jugend haben den Schritt", heimwegAb({ geburtsdatum: "2009-05-05" }), true);
   gleich("Heimweg: 18-Jährige in der A-Jugend haben den Schritt nicht", heimwegAb({ geburtsdatum: "2008-01-05", sorge: null, sorgeberechtigte: [] }), false);
   gleich("Heimweg: ohne Geburtsdatum noch nicht entscheidbar", heimwegAb({ geburtsdatum: null }), false);
   gleich("Heimweg: ohne Abteilung noch nicht entscheidbar", heimwegAb({ abteilung: null }), false);
   const reihenfolge = R.schritte(BAUSTEINE.kind({}), konfig, HEUTE_STANDARD);
   wahr("Heimweg: gleich nach einwilligungen und vor notfall", reihenfolge.indexOf("heimweg") === reihenfolge.indexOf("einwilligungen") + 1 && reihenfolge.indexOf("notfall") === reihenfolge.indexOf("heimweg") + 1);
-  [{ abteilung: "karneval", spielen: null, spielerpass: null }, {}, { abteilung: "beides" }, { abteilung: "passiv", spielen: null, spielerpass: null }].forEach((z) =>
+  [{ abteilung: "karneval", spielerpass: null }, {}, { abteilung: "beides" }, { abteilung: "passiv", spielerpass: null }].forEach((z) =>
     enthaeltNicht("Der Schritt karneval gibt es nicht mehr (" + (z.abteilung || "fussball") + ")", R.schritte(BAUSTEINE.kind(z), konfig, HEUTE_STANDARD), "karneval"));
+  // M14 (12.10.2026): Für Fußball beantragt der Verein immer das Spielrecht. Der Spielerpass folgt unmittelbar auf die Mannschaft; es gibt keinen HFV-freien Zweig mehr.
   const nurAbteilung = R.schritte({ abteilung: "fussball", geburtsdatum: "2014-05-10" }, konfig, HEUTE_STANDARD);
-  gleich("Fußball ohne Antwort zu Spielen: mannschaft und spielen, sonst nichts", nurAbteilung.filter((s) => ["mannschaft", "spielen", "spielerpass", "pass", "ausland", "spielerfoto"].includes(s)), ["mannschaft", "spielen"]);
-  const nurTraining = R.schritte(BAUSTEINE.kind({ spielen: false }), konfig, HEUTE_STANDARD);
-  gleich("Nur Training: kein HFV-Zweig", nurTraining.filter((s) => ["spielerpass", "alter_verein", "abmeldung", "pass", "ausland", "wohnen", "spielerfoto", "nachweise"].includes(s)), []);
+  gleich("Fußball mit Abteilung und Geburtsdatum: mannschaft, spielerpass, pass, ausland, spielerfoto – ohne weitere Antworten", nurAbteilung.filter((s) => ["mannschaft", "spielen", "spielerpass", "pass", "ausland", "spielerfoto"].includes(s)), ["mannschaft", "spielerpass", "pass", "ausland", "spielerfoto"]);
+  const altNein = R.schritte(BAUSTEINE.kind({ spielen: false }), konfig, HEUTE_STANDARD);
+  gleich("Alte Antwort „nein“: dieselben Schritte wie ohne die Antwort (der HFV-Zweig bleibt)", altNein, R.schritte(BAUSTEINE.kind({}), konfig, HEUTE_STANDARD));
+  gleich("Alte Antwort „nein“: spielerpass und spielerfoto sind da", altNein.filter((s) => ["spielerpass", "spielerfoto"].includes(s)), ["spielerpass", "spielerfoto"]);
   enthaeltNicht("Spielerpass nein: kein alter_verein", R.schritte(BAUSTEINE.kind({}), konfig, HEUTE_STANDARD), "alter_verein");
   enthaelt("Spielerpass ja: alter_verein", R.schritte(BAUSTEINE.kind({ spielerpass: "ja" }), konfig, HEUTE_STANDARD), "alter_verein");
   enthaeltNicht("Spielerpass ja ohne Region: noch keine Abmeldung", R.schritte(BAUSTEINE.kind({ spielerpass: "ja", alterVerein: { region: null } }), konfig, HEUTE_STANDARD), "abmeldung");
@@ -864,8 +866,74 @@ function testeSchritte() {
   enthaeltNicht("Mädchen 2016: kein besonderes", R.schritte(BAUSTEINE.kind({ geburtsdatum: "2016-05-05", geschlecht: "w" }), konfig, HEUTE_STANDARD), "besonderes");
   enthaeltNicht("Junge 2011: kein besonderes", R.schritte(BAUSTEINE.kind({ geburtsdatum: "2011-05-05", geschlecht: "m" }), konfig, HEUTE_STANDARD), "besonderes");
   enthaelt("Nachweise: bei Erstanmeldung Minderjähriger", R.schritte(BAUSTEINE.kind({}), konfig, HEUTE_STANDARD), "nachweise");
-  enthaeltNicht("Nachweise: nicht, wenn nichts nachzuweisen ist", R.schritte(BAUSTEINE.erwachsen({ abteilung: "passiv", spielen: null, spielerpass: null }), konfig, HEUTE_STANDARD), "nachweise");
+  enthaeltNicht("Nachweise: nicht, wenn nichts nachzuweisen ist", R.schritte(BAUSTEINE.erwachsen({ abteilung: "passiv", spielerpass: null }), konfig, HEUTE_STANDARD), "nachweise");
   PROFILE.forEach((pr) => pruefeSchrittForm("Schritte " + pr.id, R.schritte(tiefKopie(pr.a), konfig, pr.heute)));
+}
+
+// ---------- 12.10.2026 (Entscheidung der 1. Vorsitzenden, Paket M14): Für Fußball beantragt der Verein immer das Spielrecht ----------
+
+// Die Frage „Soll Ihr Kind bei Spielen mitmachen?“ und der Schritt „spielen“ entfallen. Jedes aktive Fußballmitglied (Fußball oder beides) wird behandelt
+// wie früher bei „Ja“. Eine gespeicherte alte Antwort (a.spielen) wird nicht gelesen: Ein altes „nein“ gilt wie „ja“.
+async function testeSpielrechtImmer(texte) {
+  const fussball = (a) => a.abteilung === "fussball" || a.abteilung === "beides";
+  // 1. Kein Schritt „spielen“, weder im Regelwerk noch in den festen Listen
+  PROFILE.forEach((pr) => enthaeltNicht("M14 Profil " + pr.id + ": kein Schritt spielen", R.schritte(tiefKopie(pr.a), konfig, pr.heute), "spielen"));
+  gleich("M14: die Liste der Schritte (KANON) hat 26 Schritte und kein spielen", [KANON.length, KANON.includes("spielen")], [26, false]);
+  // 2. Jedes Fußballprofil hat Spielrecht und Antrag; Karneval und Passive haben beides nicht
+  const fussballProfile = PROFILE.filter((pr) => fussball(pr.a));
+  wahr("M14: Es gibt mindestens 30 Profile mit Fußball (" + fussballProfile.length + ")", fussballProfile.length >= 30);
+  fussballProfile.forEach((pr) => {
+    const e = R.auswerten(tiefKopie(pr.a), konfig, pr.heute);
+    const s = R.schritte(tiefKopie(pr.a), konfig, pr.heute);
+    const u07 = e.unterlagen.find((u) => u.id === "U07");
+    wahr("M14 Profil " + pr.id + ": Antrag auf Spielerlaubnis (U07 Pflicht, Formular hfv_antrag mit Unterschrift), Spielerpass-Schritt und Spielerfoto",
+      !!u07 && u07.art === "pflicht" && e.formulare.includes("hfv_antrag") && e.unterschriften.some((u) => u.formular === "hfv_antrag") && s.includes("spielerpass") && s.includes("spielerfoto"));
+    wahr("M14 Profil " + pr.id + ": Art des Spielrechts bestimmt (e.status ist nicht leer)", e.status !== null);
+    enthaelt("M14 Profil " + pr.id + ": Hinweis „Zuerst werden Sie Mitglied“ (mitgliedschaft_zuerst) gehört zum Spielrecht", e.hinweise.map((h) => h.key), "mitgliedschaft_zuerst");
+  });
+  PROFILE.filter((pr) => !fussball(pr.a)).forEach((pr) => {
+    const e = R.auswerten(tiefKopie(pr.a), konfig, pr.heute);
+    wahr("M14 Profil " + pr.id + " (ohne Fußball): kein Antrag auf Spielerlaubnis, kein Spielrecht", !e.unterlagen.some((u) => u.id === "U07") && !e.formulare.includes("hfv_antrag") && e.status === null);
+  });
+  // 3. Alte Antworten: das frühere Feld spielen ändert nichts (false, true, null, Text, Zahl, leer)
+  const abweichend = [];
+  PROFILE.forEach((pr) => {
+    const basis = tiefKopie(pr.a);
+    delete basis.spielen;
+    const sollE = JSON.stringify(R.auswerten(tiefKopie(basis), konfig, pr.heute));
+    const sollS = JSON.stringify(R.schritte(tiefKopie(basis), konfig, pr.heute));
+    [false, true, null, "nein", "ja", 0, ""].forEach((v) => {
+      const a = Object.assign(tiefKopie(basis), { spielen: v });
+      if (JSON.stringify(R.auswerten(a, konfig, pr.heute)) !== sollE || JSON.stringify(R.schritte(a, konfig, pr.heute)) !== sollS) abweichend.push(pr.id + " spielen=" + JSON.stringify(v));
+    });
+  });
+  wahr("M14: ein altes Feld spielen (false, true, null, „nein“, „ja“, 0, leer) ändert weder auswerten() noch schritte() (alle " + PROFILE.length + " Profile)", abweichend.length === 0, abweichend.slice(0, 5).join(", "));
+  const altNein = R.auswerten(profil("kind-alte-antwort-nein").a, konfig, HEUTE_STANDARD);
+  const kindNeu = R.auswerten(BAUSTEINE.kind({ vorname: "Finn", geburtsdatum: "2019-11-11", geschlecht: "m" }), konfig, HEUTE_STANDARD);
+  gleich("M14: das Profil mit der alten Antwort „nein“ liefert genau das Ergebnis eines Kindes ohne diese Antwort", altNein, kindNeu);
+  // 4. Daten: U07 gilt für jedes aktive Fußballmitglied, ohne die frühere Ausnahme
+  const u07 = cfg.unterlagen.U07;
+  wahr("M14 Daten U07: Bedingung nennt jedes aktive Fußballmitglied und die Entscheidung vom 12.10.2026, ohne Ausnahme für Kinder, die nur trainieren",
+    /Jedes aktive Fußballmitglied/.test(u07.bedingung) && /beantragt das Spielrecht immer/.test(u07.bedingung) && /12\.10\.2026/.test(u07.bedingung) && !/erst später|nur\s+Training|Teilnahme an Spielen/.test(u07.bedingung), u07.bedingung);
+  // 5. Texte: kein Text bietet mehr an, nur zu trainieren (die Prüfung der Wörterbücher in allen Sprachen steht in sprache-check.mjs)
+  const alleTexte = [];
+  const sammle = (wert, pfad) => {
+    if (typeof wert === "string") alleTexte.push([pfad, wert]);
+    else if (wert && typeof wert === "object") Object.keys(wert).forEach((k) => sammle(wert[k], pfad + "." + k));
+  };
+  sammle(texte, "de-regeln");
+  const oberflaeche = (await import(pathToFileURL(path.join(WURZEL, "assets/js/anmeldung/texte/de-oberflaeche.js")).href)).default;
+  sammle(oberflaeche, "de-oberflaeche");
+  const NUR_TRAINING = /nur\s+(beim\s+|zum\s+|im\s+)?Training\b|nur\s+trainieren/i;
+  const treffer = alleTexte.filter(([, t]) => NUR_TRAINING.test(t)).map(([pfad, t]) => pfad + ": " + t);
+  wahr("M14: kein deutscher Text bietet an, nur zu trainieren (" + alleTexte.length + " Texte geprüft)", treffer.length === 0, treffer.slice(0, 3).join(" | "));
+  wahr("M14: die Oberfläche hat keinen Block spielen, keine Fehlermeldung fehler.spielen und keine Prüfzeilen spielen, spielenJa, spielenNein",
+    !("spielen" in oberflaeche) && !("spielen" in oberflaeche.fehler) && !Object.keys(oberflaeche.pruefen.zeilen).some((k) => /^spielen/.test(k)));
+  // 6. Die Erklärung zum Spielrecht ist nicht verloren: kurz bei der Frage zum Spielerpass, in Einfacher Sprache
+  const sr = oberflaeche.spielerpass.spielrecht;
+  gleich("M14: Erklärung zum Spielrecht beim Spielerpass (drei kurze Sätze)", sr, "Wer Fußball spielt, braucht ein Spielrecht vom Fußball-Verband.\nDas beantragt der Verein für Sie.\nDas dauert manchmal einige Wochen.");
+  wahr("M14: Erklärung zum Spielrecht: höchstens 12 Wörter je Satz, Sie-Form", sr.split("\n").every((z) => woerter(z) <= 12) && /für Sie\./.test(sr));
+  wahr("M14: das Regelwerk kennt den Hinweis „ohne Spielrecht kein Spiel“ weiter (Information für Minderjährige)", R.SCHLUESSEL.hinweise.includes("ohne_spielrecht_kein_spiel") && !!texte.hinweise.ohne_spielrecht_kein_spiel);
 }
 
 // ---------- 7. Texte ----------
@@ -1076,6 +1144,7 @@ function zufallsAntworten(r, heute) {
     geschlecht: auswahl(r, ["m", "w", "d", "ohne_angabe", null]), spielrechtFuer: auswahl(r, ["m", "w", null]),
     geborenInDe: auswahl(r, ["ja", "nein", null]), jahreInDe: auswahl(r, [0, 2, 5, 9, null, "7", ""]),
     abteilung: auswahl(r, ["fussball", "fussball", "fussball", "karneval", "beides", "passiv", null]),
+    // Das frühere Feld spielen wird nicht mehr gelesen (M14, 12.10.2026). Es bleibt als Rauschen in den Zufallsantworten, damit alte Antworten (false, null) mitlaufen.
     spielen: auswahl(r, [true, true, true, false, null]),
     spielerpass: auswahl(r, ["ja", "ja", "nein", "nein", "weiss_nicht", null]),
     alterVerein: { region: auswahl(r, ["hessen", "hessen", "bundesland", "ausland", null]), name: auswahl(r, ["", "SV Beispieldorf"]), ort: "", land: auswahl(r, ["DE", "US", "Serbien", "TR", "FR", ""]), verband: "" },
@@ -1204,7 +1273,17 @@ function pruefeZufall(fall, texte, nr) {
   lokal(okForm, "Schritte ungültig: " + s.join(","));
   lokal(!s.includes("spielerfoto") || e.unterlagen.some((u) => u.id === "U16"), "Schritt spielerfoto ohne U16");
   lokal(s.includes("nachweise") === e.unterlagen.some((u) => u.nachweis), "Schritt nachweise passt nicht zu den Unterlagen");
-  lokal(!s.includes("wohnen") || a.spielen === true, "wohnen ohne Spielen");
+  lokal(!s.includes("wohnen") || a.abteilung === "fussball" || a.abteilung === "beides", "wohnen ohne Fußball");
+  // M14 (12.10.2026): Für Fußball beantragt der Verein immer das Spielrecht. Es gibt den Schritt „spielen“ nicht mehr; jedes Fußballmitglied
+  // (Fußball oder beides) hat den Antrag auf Spielerlaubnis, den Spielerpass-Schritt und das Spielerfoto, alle anderen nicht.
+  const fussballSoll = a.abteilung === "fussball" || a.abteilung === "beides";
+  lokal(!s.includes("spielen"), "der Schritt spielen kommt noch vor");
+  lokal(s.includes("spielerpass") === fussballSoll && s.includes("spielerfoto") === fussballSoll, "spielerpass und spielerfoto passen nicht zu Fußball (Soll " + fussballSoll + ")");
+  lokal(ids.includes("U07") === fussballSoll && e.formulare.includes("hfv_antrag") === fussballSoll, "Antrag auf Spielerlaubnis (U07, hfv_antrag) passt nicht zu Fußball (Soll " + fussballSoll + ")");
+  // Das frühere Feld spielen (true, false, null) wird nicht gelesen: ohne das Feld kommt dasselbe heraus.
+  const ohneFeld = tiefKopie(fall.a);
+  delete ohneFeld.spielen;
+  lokal(JSON.stringify(R.auswerten(ohneFeld, konfig, heute)) === JSON.stringify(e) && JSON.stringify(R.schritte(ohneFeld, konfig, heute)) === JSON.stringify(s), "das frühere Feld spielen ändert das Ergebnis");
   lokal(!s.includes("abmeldung") || e.status === "wechsel_hfv" || e.status === "wechsel_lv", "abmeldung ohne Inlandswechsel");
   // Texte: alle Platzhalter werden durch Werte ersetzt
   if (texte) {
@@ -1337,6 +1416,7 @@ gleich("Profile: eindeutige Kennungen", new Set(PROFILE.map((p) => p.id)).size, 
 testeWartefristen();
 testeSchritte();
 const texte = await testeTexte();
+await testeSpielrechtImmer(texte);
 testeNamen(texte);
 await testeZufall(texte);
 testeFaelleUndRegeln();

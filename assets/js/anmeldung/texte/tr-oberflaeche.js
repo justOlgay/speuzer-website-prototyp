@@ -1,7 +1,7 @@
 /*
   Texte der Oberfläche des Anmelde-Assistenten - Türkisch (Türkçe).
   Übersetzungshilfe: Verbindlich ist der deutsche Text (de-oberflaeche.js), das PDF bleibt deutsch.
-  Stand 11.10.2026. Dieselbe Schlüsselstruktur wie de-oberflaeche.js, aber ohne "sprachen" und
+  Stand 12.10.2026. Dieselbe Schlüsselstruktur wie de-oberflaeche.js, aber ohne "sprachen" und
   ohne "demo" (die Vorführung bleibt deutsch). Fehlt hier ein Eintrag, gilt der deutsche.
   Prüfung: node tools/anmeldung-test/uebersetzung-pruefen.mjs
   Unabhängige Sprachprüfung (M12, 12.10.2026): Befunde und Änderungen in
@@ -259,7 +259,6 @@ export default {
     geschlecht: "Lütfen cinsiyeti seçin.",
     spielrechtFuer: "Lütfen takımları seçin.",
     abteilung: "Lütfen bir bölüm seçin.",
-    spielen: "Lütfen bir cevap seçin.",
     spielerpass: "Lütfen bir cevap seçin.",
     region: "Lütfen kulübün nerede olduğunu seçin.",
     vereinsname: "Lütfen kulübün adını yazın.",
@@ -406,19 +405,12 @@ export default {
     unbekannt: "Takımı henüz belirleyemiyoruz.",
   },
 
-  spielen: {
-    titel: { kind: "Çocuğunuz maçlara katılsın mı?", selbst: "Maçlara katılmak ister misiniz?" },
-    erklaerung: "Maç oynamak isteyen kişinin Hessen Futbol Federasyonu’ndan (Hessischer Fußball-Verband, HFV) oynama izni (Spielrecht) alması gerekir.\nBu izni sizin için kulüp ister.\nBu bazen birkaç hafta sürer.",
-    ja: { kind: "Evet, maçlarda ve futbol şenliklerinde (Spielfeste)", selbst: "Evet, maçlarda" },
-    jaHinweis: "Oynama iznini (Spielrecht) kulüp ister.",
-    nein: "Hayır, sadece antrenman",
-    neinHinweis: "Bunu sonra değiştirebilirsiniz.",
-  },
-
   spielerpass: {
     titel: { kind: "Çocuğunuzun daha önce oyuncu lisansı (Spielerpass) oldu mu?", selbst: "Daha önce oyuncu lisansınız (Spielerpass) oldu mu?" },
     hinweis: { kind: "Sadece antrenman yapmış olsa bile. Almanya dışında olsa bile.", selbst: "Sadece antrenman yapmış olsanız bile. Almanya dışında olsa bile." },
     erklaerung: "Oyuncu lisansı (Spielerpass), bir kulüpte maç oynamak için gereken kimlik kartıdır.",
+    // Neu am 12.10.2026 (Entscheidung der 1. Vorsitzenden): Der Verein beantragt das Spielrecht immer; die frühere Frage zu den Spielen entfällt.
+    spielrecht: "Futbol oynayan kişinin Hessen Futbol Federasyonu’ndan (Hessischer Fußball-Verband, HFV) oynama izni (Spielrecht) alması gerekir.\nBu izni sizin için kulüp ister.\nBu bazen birkaç hafta sürer.",
     weissNichtHinweis: "Kulüp bunu sizin için kontrol eder.",
   },
 
@@ -881,9 +873,6 @@ export default {
       geschlecht: "Cinsiyet",
       abteilung: "Bölüm",
       mannschaft: "Takım",
-      spielen: "Maçlar",
-      spielenJa: "Evet, oynama izniyle (Spielrecht)",
-      spielenNein: "Sadece antrenman",
       alterVerein: "Önceki kulüp",
       alteMitgliedschaft: "Eski kulüpteki üyelik",
       abmeldung: "Kayıt silme",

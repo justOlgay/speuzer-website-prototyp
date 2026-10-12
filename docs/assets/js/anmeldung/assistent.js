@@ -13,7 +13,7 @@
     pdf.js                          PDF-Baustein, Paket AP-3 (geladen von pdf-lader.js)
     texte/<sprache>-oberflaeche.js  Texte der Oberfläche
     texte/<sprache>-regeln.js       Texte des Regelwerks
-    seiten-*.js                     eine Seite je Schritt (27 Schritte, seiten.js)
+    seiten-*.js                     eine Seite je Schritt (26 Schritte, seiten.js)
     bausteine.js, unterschrift.js, bilder.js, hilfen.js, laender.js   Bausteine
 
   Ablauf

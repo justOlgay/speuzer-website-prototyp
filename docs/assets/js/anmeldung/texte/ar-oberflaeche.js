@@ -270,7 +270,6 @@ export default {
     geschlecht: "يرجى اختيار الجنس.",
     spielrechtFuer: "يرجى اختيار الفرق.",
     abteilung: "يرجى اختيار قسم.",
-    spielen: "يرجى اختيار إجابة.",
     spielerpass: "يرجى اختيار إجابة.",
     region: "يرجى اختيار مكان النادي.",
     vereinsname: "يرجى إدخال اسم النادي.",
@@ -417,19 +416,12 @@ export default {
     unbekannt: "لا يمكننا تحديد الفريق بعد.",
   },
 
-  spielen: {
-    titel: { kind: "هل تريد أن يشارك طفلك في المباريات؟", selbst: "هل تريد المشاركة في المباريات؟" },
-    erklaerung: `من يريد اللعب يحتاج إلى إذن اللعب (${D("Spielrecht")}) من اتحاد ولاية هيسن لكرة القدم (${D("Hessischer Fußball-Verband, HFV")}).\nيطلب النادي هذا الإذن من أجلك.\nيستغرق ذلك أحيانًا عدة أسابيع.`,
-    ja: { kind: `نعم، في المباريات والمهرجانات الكروية (${D("Spielfeste")})`, selbst: "نعم، في المباريات" },
-    jaHinweis: `يطلب النادي إذن اللعب (${D("Spielrecht")}).`,
-    nein: "لا، التدريب فقط",
-    neinHinweis: "يمكنك تغيير ذلك لاحقًا.",
-  },
-
   spielerpass: {
     titel: { kind: `هل كانت لدى طفلك بطاقة لاعب (${D("Spielerpass")}) من قبل؟`, selbst: `هل كانت لديك بطاقة لاعب (${D("Spielerpass")}) من قبل؟` },
     hinweis: { kind: "حتى لو اقتصر الأمر على التدريب. وحتى في الخارج.", selbst: "حتى لو كنت تتدرب فقط. وحتى في الخارج." },
     erklaerung: `بطاقة اللاعب (${D("Spielerpass")}) هي بطاقة الهوية الخاصة بالمباريات في النادي.`,
+    // Neu am 12.10.2026 (Entscheidung der 1. Vorsitzenden): Der Verein beantragt das Spielrecht immer; die frühere Frage zu den Spielen entfällt.
+    spielrecht: `من يلعب كرة القدم يحتاج إلى إذن اللعب (${D("Spielrecht")}) من اتحاد ولاية هيسن لكرة القدم (${D("Hessischer Fußball-Verband, HFV")}).\nيطلب النادي هذا الإذن من أجلك.\nيستغرق ذلك أحيانًا عدة أسابيع.`,
     weissNichtHinweis: "يتحقق النادي من ذلك من أجلك.",
   },
 
@@ -892,9 +884,6 @@ export default {
       geschlecht: "الجنس",
       abteilung: "القسم",
       mannschaft: "الفريق",
-      spielen: "المباريات",
-      spielenJa: `نعم، مع إذن اللعب (${D("Spielrecht")})`,
-      spielenNein: "التدريب فقط",
       alterVerein: "النادي السابق",
       alteMitgliedschaft: "العضوية في النادي القديم",
       abmeldung: "إلغاء التسجيل",

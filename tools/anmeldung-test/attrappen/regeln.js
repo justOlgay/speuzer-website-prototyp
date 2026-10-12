@@ -3,7 +3,7 @@
 
   Ersetzt assets/js/anmeldung/regeln.js (Paket AP-1), solange es fehlt. Gleiche
   Schnittstelle (SCHNITTSTELLEN Abschnitte 4 und 5), aber stark vereinfachte
-  Regeln: Sie sollen alle 27 Schritte der Oberfläche zum Laufen bringen, nicht
+  Regeln: Sie sollen alle 26 Schritte der Oberfläche zum Laufen bringen, nicht
   die Regeln des Fußball-Verbands prüfen. Gehört NICHT in die Auslieferung.
 */
 
@@ -53,7 +53,8 @@ function fakten(a, heute) {
   const minder = alter === null ? null : alter < 18;
   const fussball = ["fussball", "beides"].includes(a.abteilung);
   const karneval = ["karneval", "beides"].includes(a.abteilung);
-  const spielt = fussball && a.spielen === true;
+  // Seit 12.10.2026 (M14) beantragt der Verein für Fußball immer das Spielrecht; das frühere Feld a.spielen wird nicht gelesen.
+  const spielt = fussball;
   const klasse = altersklasse(a.geburtsdatum, null, heute);
   const frau = a.geschlecht === "w" || (["d", "ohne_angabe"].includes(a.geschlecht) && a.spielrechtFuer === "w");
   const wechsel = spielt && a.spielerpass === "ja";
@@ -91,8 +92,7 @@ function besonderesNoetig(f) {
 export function schritte(a, konfig, heute) {
   const f = fakten(a, heute);
   const liste = ["start", "wer", "name", "geburt", "abteilung"];
-  if (f.fussball) liste.push("mannschaft", "spielen");
-  if (f.spielt) liste.push("spielerpass");
+  if (f.fussball) liste.push("mannschaft", "spielerpass");
   if (f.wechsel) liste.push("alter_verein");
   if (f.wechselDe) liste.push("abmeldung");
   liste.push("pass");

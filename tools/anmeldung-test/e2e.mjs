@@ -11,7 +11,7 @@
 //
 // Geprüft wird:
 //   - Einfache Sprache in den Texten (kein Satz über 12 Wörter, keine
-//     Abkürzungen), vollständige Textschlüssel, alle 27 Seiten vorhanden
+//     Abkürzungen), vollständige Textschlüssel, alle 26 Seiten vorhanden
 //   - keine Speicherung (localStorage, Cookies …) und keine Anfrage an fremde Hosts
 //   - alle 5 Beispiel-Profile per Knopf laden und bis "fertig" durchklicken,
 //     mobil (390 x 844) und am Rechner (1440 x 900)
@@ -52,6 +52,11 @@
 //     die Datei an den Verein“ auf der Fertig-Seite (Wege am Handy und am Computer, Adresse groß und richtig, Knopf „Adresse kopieren“ mit Zwischenablage und
 //     ohne sie, Link „E-Mail an die Geschäftsstelle öffnen“ mit mailto:, alter Wortlaut weg, Hinweis zu WhatsApp bleibt, axe, Tippflächen) und
 //     „Alles auf Papier, selbst ausdrucken“ (Teil B zusätzlich ausgedruckt abgeben). App-Modus: der Link bleibt mailto:.
+//   - M14 (12.10.2026): Für Fußball beantragt der Verein immer das Spielrecht (Entscheidung der 1. Vorsitzenden). Es gibt die Frage zu den Spielen und den Schritt
+//     „spielen“ nicht mehr (26 Seiten). pruefeSpielrechtImmer (390 x 844): Mannschaft und Spielerpass folgen unmittelbar aufeinander, die Seite „spielerpass“ zeigt die
+//     Erklärung zum Spielrecht kurz (Kind und Erwachsene), der Hinweis „ohne Spielrecht kein Spiel“ steht im Aufklapper derselben Seite, nirgends steht die frühere
+//     Antwort (Training ohne Spiele), die Prüfseite hat keine Zeile „Spiele“, Karneval und Passive haben weder Mannschaft noch Spielerpass; die Beispiel-Läufe prüfen
+//     die besuchten Schritte je Beispiel (Nachweis: schritte-m14-<Beispiel>.json im Ausgabeordner).
 //   - Screenshots je Seite nach tools/cache/anmeldung-test/e2e/
 //
 // Aufruf: node tools/anmeldung-test/e2e.mjs [--ohne-desktop] [--nur-sprache] [--nur=pruefeHeimweg,…]
@@ -80,9 +85,9 @@ const HEUTE = "2026-09-29";
 const OHNE_DESKTOP = process.argv.includes("--ohne-desktop");
 const NUR_SPRACHE = process.argv.includes("--nur-sprache");
 
-// Die 27 Schritte aus SCHNITTSTELLEN Abschnitt 4.
+// Die 26 Schritte aus SCHNITTSTELLEN Abschnitt 4 (seit 12.10.2026 ohne „spielen“: Der Verein beantragt für Fußball immer das Spielrecht).
 const SCHRITTE = [
-  "start", "wer", "name", "geburt", "abteilung", "mannschaft", "spielen", "spielerpass", "alter_verein", "abmeldung",
+  "start", "wer", "name", "geburt", "abteilung", "mannschaft", "spielerpass", "alter_verein", "abmeldung",
   "pass", "ausland", "wohnen", "sorge", "besonderes", "kontakt", "beitrag", "leistungen", "zahlung",
   "einwilligungen", "heimweg", "notfall", "spielerfoto", "nachweise", "unterschriften", "pruefen", "fertig",
 ];
@@ -1446,7 +1451,7 @@ async function pruefeHeimweg(browser, server, dateien, beispiele) {
   const seitenModul = await import(pathToFileURL(path.join(ROOT, "assets", "js", "anmeldung", "seiten.js")).href);
   const reihenfolge = seitenModul.REIHENFOLGE;
   ok("Heimweg: eigener Schritt im Abschnitt 'unterlagen', gleich nach 'einwilligungen' und vor 'notfall'", seitenModul.ABSCHNITT_VON.heimweg === "unterlagen" && reihenfolge.indexOf("heimweg") === reihenfolge.indexOf("einwilligungen") + 1 && reihenfolge.indexOf("notfall") === reihenfolge.indexOf("heimweg") + 1, reihenfolge.join(" › "));
-  ok("Karneval: den Schritt 'karneval' gibt es nicht mehr (keine Seite, kein Abschnitt, keine Reihenfolge)", !("karneval" in seitenModul.SEITEN) && !("karneval" in seitenModul.ABSCHNITT_VON) && !reihenfolge.includes("karneval") && Object.keys(seitenModul.SEITEN).length === 27, Object.keys(seitenModul.SEITEN).length + " Seiten");
+  ok("Karneval: den Schritt 'karneval' gibt es nicht mehr (keine Seite, kein Abschnitt, keine Reihenfolge)", !("karneval" in seitenModul.SEITEN) && !("karneval" in seitenModul.ABSCHNITT_VON) && !reihenfolge.includes("karneval") && Object.keys(seitenModul.SEITEN).length === 26, Object.keys(seitenModul.SEITEN).length + " Seiten");
   ok("Heimweg: die Seite hat genau eine Teilseite und die Pflichtprüfung meldet ohne Antwort 'Bitte wählen Sie eine Antwort.'", JSON.stringify(seitenModul.SEITEN.heimweg.teile({ a: {} })) === JSON.stringify(["haupt"]) && seitenModul.SEITEN.heimweg.pruefe({ a: { heimweg: null }, t: (p) => T(p) }, "haupt").length === 1 && seitenModul.SEITEN.heimweg.pruefe({ a: { heimweg: "allein" }, t: (p) => T(p) }, "haupt").length === 0 && seitenModul.SEITEN.heimweg.pruefe({ a: { heimweg: "abholen" }, t: (p) => T(p) }, "haupt").length === 0 && seitenModul.SEITEN.heimweg.pruefe({ a: { heimweg: "egal" }, t: (p) => T(p) }, "haupt")[0].meldung === "Bitte wählen Sie eine Antwort.", "");
   const SOLL = {
     titel: "Darf Ihr Kind nach dem Training allein nach Hause?",
@@ -2127,7 +2132,7 @@ async function main() {
   const seitenModul = await import(pathToFileURL(path.join(ROOT, "assets", "js", "anmeldung", "seiten.js")).href);
   const schluesselSeiten = Object.keys(seitenModul.SEITEN);
   const fehlendeSeiten = SCHRITTE.filter((id) => !schluesselSeiten.includes(id) || typeof seitenModul.SEITEN[id].render !== "function" || typeof seitenModul.SEITEN[id].pruefe !== "function");
-  ok("Alle 27 Schritte haben eine Seite (render und pruefe)", fehlendeSeiten.length === 0 && schluesselSeiten.length === 27, fehlendeSeiten.join(", ") || schluesselSeiten.length + " Seiten");
+  ok("Alle 26 Schritte haben eine Seite (render und pruefe)", fehlendeSeiten.length === 0 && schluesselSeiten.length === 26, fehlendeSeiten.join(", ") || schluesselSeiten.length + " Seiten");
   const quellen = fs.readdirSync(path.join(ROOT, "assets", "js", "anmeldung")).filter((f) => f.endsWith(".js"));
   const verboten = [];
   const fetchStellen = [];
@@ -2178,6 +2183,14 @@ async function main() {
           const besuchteSchritte = r.besucht.map((x) => x.split("/")[0]);
           const mitHeimweg = ["kind-neu", "wechsel-hessen", "ausland-kind", "karneval-kind"].includes(id);
           ok("Profil " + id + " (" + vp.name + "): Seite 'heimweg' " + (mitHeimweg ? "kommt vor (Minderjährige, die trainieren oder tanzen)" : "kommt nicht vor (Erwachsene)") + ", nie ein Schritt 'karneval'", besuchteSchritte.includes("heimweg") === mitHeimweg && !besuchteSchritte.includes("karneval"), besuchteSchritte.join(" › "));
+          // M14 (12.10.2026): Den Schritt 'spielen' gibt es nicht mehr. Fußball: Mannschaft, dann gleich der Spielerpass; Karneval: weder Mannschaft noch Spielerpass.
+          {
+            const reihe = Array.from(new Set(besuchteSchritte)); // je Schritt einmal (Teilseiten zählen nicht doppelt)
+            const fussball = id !== "karneval-kind";
+            ok("Profil " + id + " (" + vp.name + "): nie ein Schritt 'spielen'; " + (fussball ? "Mannschaft und Spielerpass folgen unmittelbar aufeinander" : "weder Mannschaft noch Spielerpass (Karneval)"),
+              !besuchteSchritte.includes("spielen") && (fussball ? reihe.indexOf("mannschaft") >= 0 && reihe.indexOf("spielerpass") === reihe.indexOf("mannschaft") + 1 : !reihe.includes("mannschaft") && !reihe.includes("spielerpass")), reihe.join(" › "));
+            fs.writeFileSync(path.join(AUSGABE, "schritte-m14-" + id + (vp.mobil ? "" : "-desktop") + ".json"), JSON.stringify({ beispiel: id, bildschirm: vp.name, schritte: reihe, seiten: r.besucht }, null, 2) + "\n");
+          }
           if (daten) {
             const nachweis = await unterschriftenNachweisen(page, ctx, daten);
             const uKeys = daten.attrappe ? Object.keys(daten.attrappe.unterschriften || {}).join(", ") : "";
@@ -2240,7 +2253,7 @@ async function main() {
     // ---- 6. Gesamtauswertung (nur beim vollen Lauf) ----
     if (!NUR.length) {
       const fehlendeAbdeckung = SCHRITTE.filter((id) => !alleSchritte.has(id));
-      ok("Alle 27 Schritte wurden im Browser besucht", fehlendeAbdeckung.length === 0, fehlendeAbdeckung.length ? "fehlen: " + fehlendeAbdeckung.join(", ") : Array.from(alleSchritte).length + " Schritte");
+      ok("Alle 26 Schritte wurden im Browser besucht", fehlendeAbdeckung.length === 0, fehlendeAbdeckung.length ? "fehlen: " + fehlendeAbdeckung.join(", ") : Array.from(alleSchritte).length + " Schritte");
       const fremde = Array.from(protokoll.hosts).filter((h) => !/^127\.0\.0\.1:\d+$/.test(h));
       ok("Keine Anfrage an fremde Hosts", fremde.length === 0, "Hosts: " + Array.from(protokoll.hosts).join(", "));
       ok("Keine fehlenden Texte (Warnung 'Text fehlt') zur Laufzeit", protokoll.textFehlt.size === 0, Array.from(protokoll.textFehlt).slice(0, 5).join(" | "));
@@ -2312,7 +2325,6 @@ function profilGeschwister(beispiele) {
     geburtsland: "DE",
     geschlecht: "m",
     abteilung: "fussball",
-    spielen: true,
     spielerpass: "nein",
     deutsch: "ja",
     staaten: ["DE"],
@@ -2339,7 +2351,6 @@ function profilMaedchenC(beispiele) {
     geburtsland: "UA",
     geschlecht: "w",
     abteilung: "fussball",
-    spielen: true,
     spielerpass: "nein",
     deutsch: "nein",
     staaten: ["UA"],
@@ -2663,6 +2674,97 @@ function jpegMasse(bytes) {
   return null;
 }
 
+// ---------- M14 (12.10.2026): Das Spielrecht beantragt der Verein immer ----------
+
+// Die Frage „Soll Ihr Kind bei Spielen mitmachen?“ und der Schritt „spielen“ entfallen (Entscheidung der 1. Vorsitzenden). Auf der Seite „spielerpass“ steht
+// dafür ein kurzer Hinweis. Der Hinweis „Ohne Spielrecht darf ein Kind nicht bei Spielen mitmachen“ gehört ebenfalls zu dieser Seite (im Aufklapper).
+async function pruefeSpielrechtImmer(browser, server, dateien, beispiele) {
+  console.log("\n=== M14: Das Spielrecht beantragt der Verein immer (kein Schritt 'spielen') ===");
+  const wb = await ladeWoerterbuch();
+  const T = (pfad) => pfad.split(".").reduce((x, sch) => (x === undefined || x === null ? undefined : x[sch]), wb);
+  const seitenModul = await import(pathToFileURL(path.join(ROOT, "assets", "js", "anmeldung", "seiten.js")).href);
+  ok("Spielrecht immer: keine Seite, kein Abschnitt und keine Stelle der Reihenfolge für den Schritt 'spielen'; 26 Seiten",
+    !("spielen" in seitenModul.SEITEN) && !("spielen" in seitenModul.ABSCHNITT_VON) && !seitenModul.REIHENFOLGE.includes("spielen") && Object.keys(seitenModul.SEITEN).length === 26 && seitenModul.REIHENFOLGE.length === 26,
+    Object.keys(seitenModul.SEITEN).length + " Seiten");
+  const SOLL = ["Wer Fußball spielt, braucht ein Spielrecht vom Fußball-Verband.", "Das beantragt der Verein für Sie.", "Das dauert manchmal einige Wochen."];
+  ok("Spielrecht immer: das Wörterbuch hat die Erklärung beim Spielerpass (drei kurze Sätze) und nichts mehr von der früheren Frage",
+    T("spielerpass.spielrecht") === SOLL.join("\n") && T("spielen") === undefined && T("fehler.spielen") === undefined && T("pruefen.zeilen.spielen") === undefined && T("pruefen.zeilen.spielenJa") === undefined && T("pruefen.zeilen.spielenNein") === undefined,
+    String(T("spielerpass.spielrecht")));
+  const ALT = new RegExp("Soll Ihr Kind bei Spielen mitmachen|Möchten Sie bei Spielen mitmachen|nur\\s+(beim\\s+|zum\\s+)?Training\\b", "i");
+
+  // ---- A: Kind neu (390 px): Abteilung › Mannschaft › Spielerpass, die Seite mit dem Hinweis ----
+  {
+    const page = await seiteMitBeispiel(browser, server, MOBIL, "spielrecht-kind", "kind-neu", null);
+    let s = await geheBis(page, "abteilung", "haupt");
+    const besucht = [s.schritt];
+    for (let i = 0; i < 4 && s.schritt !== "spielerpass"; i++) {
+      const r = await klickeWeiter(page, s);
+      if (r.fehler.length || !r.gewechselt) break;
+      s = await stand(page);
+      besucht.push(s.schritt);
+    }
+    ok("Spielrecht immer (Kind): von der Abteilung geht es über die Mannschaft gleich zum Spielerpass (keine Frage zu den Spielen dazwischen)", besucht.join(" › ") === "abteilung › mannschaft › spielerpass", besucht.join(" › "));
+    const inhalt = await page.evaluate(() => {
+      const w = document.getElementById("anmeldung");
+      return {
+        titel: (w.querySelector("#anm-titel") || {}).textContent.trim(),
+        hinweise: Array.from(w.querySelectorAll("p.anm-hinweis")).map((p) => p.textContent.trim()),
+        karten: Array.from(w.querySelectorAll('input[data-pfad="spielerpass"]')).map((i) => i.getAttribute("data-wert")),
+        text: w.innerText,
+        abschnitt: (document.querySelector('.anm-abschnitte__punkt[aria-current="step"]') || { getAttribute: () => null }).getAttribute("data-abschnitt"),
+      };
+    });
+    ok("Spielrecht immer (Kind): die Seite 'spielerpass' zeigt die Frage zum Spielerpass und darunter die drei Sätze zum Spielrecht",
+      inhalt.titel === "Hatte Ihr Kind schon einmal einen Spielerpass?" && SOLL.every((satz) => inhalt.hinweise.includes(satz)) && inhalt.hinweise.indexOf(SOLL[0]) > inhalt.hinweise.indexOf("Ein Spielerpass ist der Ausweis für Spiele in einem Verein."), inhalt.hinweise.join(" | "));
+    ok("Spielrecht immer (Kind): drei Antworten (Ja, Nein, Weiß nicht), Abschnitt 'Fußball oder Karneval' markiert", JSON.stringify(inhalt.karten) === JSON.stringify(["ja", "nein", "weiss_nicht"]) && inhalt.abschnitt === "fussballKarneval", JSON.stringify(inhalt.karten) + " " + inhalt.abschnitt);
+    ok("Spielrecht immer (Kind): auf der Seite steht nichts mehr von der früheren Frage und Antwort", !ALT.test(inhalt.text), ALT.test(inhalt.text) ? inhalt.text.slice(0, 300) : "");
+    const dom = await hinweiseImDom(page);
+    ok("Spielrecht immer (Kind): der Hinweis 'ohne Spielrecht kein Spiel' steht im Aufklapper dieser Seite (Information, nicht offen)", dom.aufklapperSchluessel.includes("ohne_spielrecht_kein_spiel") && !dom.offenSchluessel.includes("ohne_spielrecht_kein_spiel"), JSON.stringify({ offen: dom.offenSchluessel, aufklapper: dom.aufklapperSchluessel }));
+    fs.mkdirSync(path.join(AUSGABE, MOBIL.name), { recursive: true });
+    await page.screenshot({ path: path.join(AUSGABE, MOBIL.name, "spielerpass-spielrecht.png"), fullPage: false });
+    protokoll.screenshots++;
+    await axePruefen(page, "390x844 spielerpass/haupt mit Hinweis zum Spielrecht (M14)");
+    const breit = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, innen: window.innerWidth }));
+    ok("Spielrecht immer (Kind): kein Querscrollen bei 390 px", breit.scroll <= breit.innen, breit.scroll + " gegen " + breit.innen);
+    const klein = await kleineTippflaechen(page);
+    ok("Spielrecht immer (Kind): Tippflächen mindestens 44 px", klein.length === 0, klein.slice(0, 3).join(" | "));
+    // Prüfseite: keine Zeile 'Spiele'
+    const sp = await geheBis(page, "pruefen", "haupt");
+    const zeilen = sp.schritt === "pruefen" ? await pruefZeilen(page) : [];
+    ok("Spielrecht immer (Kind): die Prüfseite hat keine Zeile 'Spiele' und keine Zeile zur früheren Antwort (Training ohne Spiele)", sp.schritt === "pruefen" && zeilen.length > 5 && !zeilen.some((x) => /^Spiele$/.test(x.label) || /^(Ja, mit Spielrecht|Nur\sTraining)$/.test(x.wert)), zeilen.map((x) => x.label).join(", "));
+    await page.close();
+  }
+
+  // ---- B: Erwachsene (Herren): dieselbe Seite mit der Anrede 'Hatten Sie ...' ----
+  {
+    const page = await seiteMitBeispiel(browser, server, MOBIL, "spielrecht-erwachsen", "herren-wechsel", null);
+    const s = await geheBis(page, "spielerpass", "haupt");
+    const hinweise = s.schritt === "spielerpass" ? await page.$$eval("#anmeldung p.anm-hinweis", (l) => l.map((x) => x.textContent.trim())) : [];
+    const titel = s.schritt === "spielerpass" ? await page.$eval("#anm-titel", (e) => e.textContent.trim()) : "";
+    ok("Spielrecht immer (Erwachsene): die Seite 'spielerpass' zeigt dieselben drei Sätze zum Spielrecht", s.schritt === "spielerpass" && titel === "Hatten Sie schon einmal einen Spielerpass?" && SOLL.every((satz) => hinweise.includes(satz)), titel + " | " + hinweise.join(" | "));
+    const dom = await hinweiseImDom(page);
+    ok("Spielrecht immer (Erwachsene): der Hinweis für Kinder 'ohne Spielrecht kein Spiel' fehlt", !dom.offenSchluessel.includes("ohne_spielrecht_kein_spiel") && !dom.aufklapperSchluessel.includes("ohne_spielrecht_kein_spiel"), JSON.stringify({ offen: dom.offenSchluessel, aufklapper: dom.aufklapperSchluessel }));
+    await page.close();
+  }
+
+  // ---- C: Karneval-Kind: kein Spielerpass, keine Mannschaft, nichts zum Spielrecht ----
+  {
+    const page = await seiteMitBeispiel(browser, server, MOBIL, "spielrecht-karneval", "karneval-kind", null);
+    const besucht = [];
+    for (let i = 0; i < 90; i++) {
+      const s = await stand(page);
+      besucht.push(s.schritt);
+      if (s.schritt === "pruefen") break;
+      if (s.schritt === "unterschriften") await unterschreiben(page, { touch: false });
+      const r = await klickeWeiter(page, s);
+      if (r.fehler.length || !r.gewechselt) break;
+    }
+    const reihe = Array.from(new Set(besucht));
+    ok("Spielrecht immer (Karneval-Kind): weder 'spielen' noch 'mannschaft', 'spielerpass', 'pass', 'ausland' oder 'spielerfoto'", !["spielen", "mannschaft", "spielerpass", "pass", "ausland", "spielerfoto"].some((x) => reihe.includes(x)), reihe.join(" › "));
+    await page.close();
+  }
+}
+
 // ---------- Einzelprüfungen ----------
 
 async function einzelpruefungen(browser, server, dateien, beispiele) {
@@ -2685,6 +2787,7 @@ async function einzelpruefungen(browser, server, dateien, beispiele) {
     ["pruefeFreitextLatein", () => pruefeFreitextLatein(browser, server)],
     ["pruefeSonderzeichenPdf", () => pruefeSonderzeichenPdf(browser, server, dateien)],
     ["pruefeHeimweg", () => pruefeHeimweg(browser, server, dateien, beispiele)],
+    ["pruefeSpielrechtImmer", () => pruefeSpielrechtImmer(browser, server, dateien, beispiele)],
     ["pruefeFahrtenSatz", () => pruefeFahrtenSatz(browser, server, beispiele)],
     ["pruefeAttestImPlan", () => pruefeAttestImPlan(browser, server, dateien)],
     ["pruefeSprache", () => pruefeSprache(browser, server)],

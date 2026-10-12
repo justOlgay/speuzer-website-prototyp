@@ -26,7 +26,7 @@ const HINWEIS_ORT = {
   kuendigung_extra: "abmeldung/mitgliedschaft", kuendigung_jahresende: "abmeldung/mitgliedschaft",
   sperre_laeuft: "abmeldung/sperre", sperre_unklar: "abmeldung/sperre", freigabe_unklar: "abmeldung/freigabe",
   wiederholter_wechsel: "abmeldung/wechsel",
-  ohne_spielrecht_kein_spiel: "spielen", spielerpass_unklar: "spielerpass",
+  ohne_spielrecht_kein_spiel: "spielerpass", spielerpass_unklar: "spielerpass",
   wohnen_nicht_gemeinsam: "wohnen/ort", austausch_ein_jahr: "wohnen/grund", f17_wahrscheinlich_nicht: "wohnen/dauer", f17_moeglich_5_jahre: "wohnen/dauer",
   getrennt_einverstanden: "sorge/recht",
   sorge_allein_nachweis: "sorge/recht", vormund_hinweis: "sorge/recht", pflege_hinweis: "sorge/recht",
@@ -208,7 +208,6 @@ function pruefBereiche(k) {
   z = bereich("abteilung");
   z(Z("abteilung"), a.abteilung ? W("abteilung." + a.abteilung) : "", "abteilung");
   if (gilt("mannschaft") && e.mannschaft && e.mannschaft.namen && e.mannschaft.namen.length) z(Z("mannschaft"), LISTE(e.mannschaft.namen.map(D)), null);
-  if (gilt("spielen")) z(Z("spielen"), a.spielen === true ? Z("spielenJa") : a.spielen === false ? Z("spielenNein") : "", "spielen");
   if (gilt("alter_verein") && a.alterVerein) {
     z(Z("alterVerein"), LISTE([D(a.alterVerein.name), D(a.alterVerein.ort), a.alterVerein.region === "ausland" ? landName(a.alterVerein.land, k.sprache) : ""]), "alter_verein");
   }
@@ -253,7 +252,7 @@ function pruefBereiche(k) {
   if (a.einwilligungen) {
     const ein = a.einwilligungen;
     z(Z("fotos"), jaNein(k, ein.fotos), "einwilligungen", "fotos");
-    if (gilt("einwilligungen") && ["fussball", "beides"].includes(a.abteilung) && a.spielen === true) {
+    if (gilt("einwilligungen") && ["fussball", "beides"].includes(a.abteilung)) {
       z(Z("hfv"), [ein.hfvName ? k.t("einwilligungen.hfv.name") : "", ein.hfvFoto ? k.t("einwilligungen.hfv.foto") : ""].filter(Boolean).join(" ") || k.t("pruefen.werte.nein"), "einwilligungen", "hfv");
     }
     if (k.minderjaehrig()) {

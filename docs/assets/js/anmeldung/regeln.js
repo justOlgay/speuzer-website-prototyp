@@ -1,5 +1,5 @@
 /*
-  Regelwerk des Anmelde-Assistenten FFV Sportfreunde 04 (Stand 2026-10-11, Saison 2026/27)
+  Regelwerk des Anmelde-Assistenten FFV Sportfreunde 04 (Stand 2026-10-12, Saison 2026/27)
 
   Reine Funktionen ohne Browser- und Zeitzugriff: Das Heute-Datum kommt immer als
   Parameter "JJJJ-MM-TT" hinein, die Konfiguration (data/anmeldung.json und weitere
@@ -29,11 +29,15 @@
     Ergebnis (zum Beispiel erscheint ein Schritt erst, wenn seine Voraussetzung beantwortet ist).
   - Die Alterszählung nimmt als Stichtag den Tag der Anmeldung (heute). Ob der Verband denselben
     Tag nimmt, ist offen (offenePunkte, Frage an die Passstelle).
+  - Spielrecht (Entscheidung der 1. Vorsitzenden vom 12.10.2026): Für jedes aktive Fußballmitglied (Fußball oder
+    beides) beantragt der Verein immer das Spielrecht. Die frühere Frage „Bei Spielen mitmachen?“ mit den Antworten Ja und Nein
+    (Antwort a.spielen, Schritt "spielen") gibt es nicht mehr; a.spielen wird nicht mehr gelesen, auch nicht aus
+    älteren Antworten (ein altes „nein“ gilt wie „ja“).
 
   Datenschutz: Das Modul liest nur die übergebenen Antworten. Es speichert und sendet nichts.
 */
 
-export const VERSION = "2026-10-11.2";
+export const VERSION = "2026-10-12.1";
 
 // ---------------------------------------------------------------------------
 // Schlüssel-Register: alle Schlüssel, die auswerten() zurückgeben kann. Zu jedem
@@ -368,8 +372,6 @@ function leiteAb(a0, konfig, heute) {
   p.karneval = p.abt === "karneval" || p.abt === "beides";
   p.passiv = p.abt === "passiv";
   p.aktiv = p.fussball || p.karneval;
-  p.spielen = p.fussball && a.spielen === true;
-  p.nurTraining = p.fussball && a.spielen === false;
 
   // Geschlecht. Bei "divers" und "ohne Angabe" wählt die Person, für welche Teams sie spielt (SpO § 91 Nr. 8 und 9).
   p.geschlecht = ["m", "w", "d", "ohne_angabe"].indexOf(a.geschlecht) >= 0 ? a.geschlecht : null;
@@ -410,7 +412,7 @@ function leiteAb(a0, konfig, heute) {
   p.sonderspielrecht = bes.sonderspielrecht === true;
   const aeltererA = (klassenListe(konfig).find((k) => k.klasse === "A") || {}).aeltererJahrgang || null;
   p.aeltererA = aeltererA;
-  p.aushilfe = p.spielen && bes.herrenAushilfe === true && p.minor === true;
+  p.aushilfe = p.fussball && bes.herrenAushilfe === true && p.minor === true;
 
   // Zahlung und Beitrag
   const zahl = objekt(a.zahlung);
@@ -430,7 +432,7 @@ function leiteAb(a0, konfig, heute) {
 
   // Rechtlich besondere Lagen von Kindern ohne Eltern (FIFA Art. 19; F14 bis F18)
   p.sondersorge = p.sorge === "vormund" || p.sorge === "pflege";
-  const fifaBetroffen = p.minor === true && p.spielen && p.deutsch !== true;
+  const fifaBetroffen = p.minor === true && p.fussball && p.deutsch !== true;
   p.f15 = fifaBetroffen && p.ohneEltern && p.grund === "gefluechtet";
   p.f16 = fifaBetroffen && p.ohneEltern && p.grund === "austausch";
   p.f17 = fifaBetroffen && p.ohneEltern && (p.grund === "verwandte" || p.grund === "pflege" || (p.wohnen === "verwandte" && !p.grund));
@@ -453,7 +455,7 @@ function leiteAb(a0, konfig, heute) {
   return p;
 }
 
-// Status beim Spielrecht (nur bei Fußball mit Spielen):
+// Status beim Spielrecht (nur bei Fußball):
 //   neu               noch nie ein Spielerpass (auch nicht im Ausland)
 //   wechsel_hfv       Spielerpass bei einem Verein in Hessen
 //   wechsel_lv        Spielerpass in einem anderen Bundesland
@@ -464,7 +466,7 @@ function leiteAb(a0, konfig, heute) {
 // Quelle: HFV-Passstelle Folie 44 (internationaler Vereinswechsel nur, wenn Angaben zu einem Verein im Ausland
 // bekannt sind, sonst Erstausstellung); HFV-Antrag Seite 1 (Kästchen erstmalig / Vereinswechsel).
 function bestimmeStatus(p) {
-  if (!p.spielen) return null;
+  if (!p.fussball) return null;
   const av = objekt(p.a.alterVerein);
   if (p.spielerpass === "nein") return "neu";
   if (p.spielerpass === "weiss_nicht") return p.auslandGewohnt ? "ausland_unbekannt" : "neu";
@@ -497,7 +499,7 @@ function bestimmeFaelle(p) {
   const f = [];
   if (p.abt === "karneval") f.push("F01");
   if (p.abt === "passiv") f.push("F02");
-  if (p.spielen && p.status && p.minor !== null) {
+  if (p.fussball && p.status && p.minor !== null) {
     if (p.minor) {
       if (p.neu) {
         if (p.nichtdeutsch && p.alter < p.F.alter.international) f.push("F04");
@@ -702,7 +704,7 @@ function fristWerte(p, fr) {
 function berechneFrist(p) {
   const fr = fristGrundgeruest(p);
   const F = p.F;
-  if (!p.spielen) { fr.key = "frist_kein_spiel"; return fristWerte(p, fr); }
+  if (!p.fussball) { fr.key = "frist_kein_spiel"; return fristWerte(p, fr); }
   if (!p.status) { fr.key = "frist_offen"; return fristWerte(p, fr); }
 
   // R14: Kinder ohne Eltern in Deutschland - keine Zusage zu Spielen (RSTP Art. 19; DFB-Übersichten; HFV-Liste offen)
@@ -914,8 +916,8 @@ function bestimmeUnterlagen(p, gruppenKeys, fr) {
   add("U35", { grund: "aufnahmegebuehr", werte: { betrag: (p.cfg.beitragInfo || {}).aufnahmegebuehr } });
   if (p.senator) add("U34", { grund: "senator" });
 
-  // ---- Fußball mit Spielrecht ----
-  if (p.spielen) {
+  // ---- Fußball: Der Verein beantragt immer das Spielrecht (Entscheidung der 1. Vorsitzenden vom 12.10.2026) ----
+  if (p.fussball) {
     add("U07", { grund: "spielrechtsantrag" }); // HFV-Antrag; SpO § 92; JO § 37 Nr. 2
     add("U08", { grund: "hfv_einwilligungen" });
     add("U15", { grund: "dfbnet_angaben" });
@@ -1173,8 +1175,8 @@ function sammleHinweise(p, e) {
   if (p.passiv) h("info", "passiv_hinweis");
   if (p.senator) { h("info", "senator_vorstand"); w("geschaeftsstelle", "senator"); }
 
-  // --- Fußball mit Spielrecht ---
-  if (p.spielen) {
+  // --- Fußball: Der Verein beantragt immer das Spielrecht ---
+  if (p.fussball) {
     if (minor) h("info", "ohne_spielrecht_kein_spiel"); // KJA Frankfurt 2026/27 (Jugend): freie Spieler auch nicht in Freundschaftsspielen
     h("info", "mitgliedschaft_zuerst"); // R10: JO § 9 Nr. 1: Voraussetzung der Spielberechtigung ist die Mitgliedschaft
     if (hat("U16")) h("info", "spielerfoto_hinweis"); // JO § 9 Nr. 2
@@ -1249,7 +1251,7 @@ function sammleHinweise(p, e) {
   }
 
   // --- Mädchen (JO § 14 Nr. 6, SpO § 110) ---
-  if (p.spielen && p.weiblich && minor) {
+  if (p.fussball && p.weiblich && minor) {
     h("info", "maedchen_jungenteam");
   }
   // --- A-Jugend bei den Herren (JO § 29) ---
@@ -1259,16 +1261,16 @@ function sammleHinweise(p, e) {
     w("jugendleitung", "aushilfe");
     if (p.jahrgang !== p.aeltererA) { h("warnung", "aushilfe_nur_ausnahme"); }
   }
-  if (p.spielen && p.klasse === "A" && p.jahrgang === p.aeltererA && p.adult === true) h("info", "herren_ohne_antrag");
+  if (p.fussball && p.klasse === "A" && p.jahrgang === p.aeltererA && p.adult === true) h("info", "herren_ohne_antrag");
   // --- Frauen bei den Herren (SpO § 109a) ---
-  if (p.spielen && p.weiblich && p.adult === true) {
+  if (p.fussball && p.weiblich && p.adult === true) {
     if (p.frauHerren) { h("info", "frau_herren"); h("offen", "frau_herren_offen"); w("spielausschuss", "frau_herren"); }
     else h("info", "keine_frauenmannschaft");
   }
   // --- divers / ohne Angabe (SpO § 91 Nr. 8 bis 10; JO § 37 Nr. 3) ---
-  if (p.spielen && p.divers) { h("info", "vertrauensperson"); w("jugendleitung", "vertrauensperson"); }
+  if (p.fussball && p.divers) { h("info", "vertrauensperson"); w("jugendleitung", "vertrauensperson"); }
   // --- Sonderspielrecht (JO § 11 Nr. 5 und 6) ---
-  if (p.spielen && p.sonderspielrecht) { h("info", "sonderspielrecht"); w("jugendleitung", "sonderspielrecht"); }
+  if (p.fussball && p.sonderspielrecht) { h("info", "sonderspielrecht"); w("jugendleitung", "sonderspielrecht"); }
 
   // --- Mannschaft ---
   if (e.mannschaft.hinweisKey === "keine_mannschaft") w("jugendleitung", "keine_mannschaft");
@@ -1287,7 +1289,7 @@ function sammleHinweise(p, e) {
     // und kein Text sagt, der Verein kläre das noch.
     // O11 ist geregelt (11.10.2026): Ein Elternteil unterschreibt, das Kind freiwillig, das Passwesen entscheidet im Einzelfall. Der Hinweis
     // ist deshalb eine Information (art "info"), keine offene Frage mehr.
-    if (p.spielen) h("info", "spieler_unterschrift_kind");
+    if (p.fussball) h("info", "spieler_unterschrift_kind");
     if (p.f14) w("jugendleitung", "sonderfall_kind");
     if (p.wohnen === "nicht_gemeinsam") { h("offen", "wohnen_nicht_gemeinsam"); w("jugendleitung", "wohnen_nicht_gemeinsam"); }
     if (p.ohneZusage) {
@@ -1332,7 +1334,7 @@ function bestimmeFehlend(p, unterlagen) {
   const nachweise = objekt(p.a.nachweise);
   const f = unterlagen.filter((u) => u.nachweis && ["pflicht", "verein", "nur_wenn"].indexOf(u.art) >= 0 && nachweise[u.id] !== "habe").map((u) => u.id);
   // Das Spielerfoto hat einen eigenen Schritt: fehlt die Angabe, wie es entsteht, fehlt es noch.
-  if (p.spielen && !hatText(objekt(p.a.spielerfoto).weg)) f.push("U16");
+  if (p.fussball && !hatText(objekt(p.a.spielerfoto).weg)) f.push("U16");
   return Array.from(new Set(f)).sort();
 }
 
@@ -1342,7 +1344,7 @@ function bestimmeFehlend(p, unterlagen) {
 
 function besonderesOptionen(p) {
   const o = [];
-  if (!p.spielen) return o;
+  if (!p.fussball) return o;
   const bc = liste(p.cfg.altersklassen.maedchenImJungenteam && p.cfg.altersklassen.maedchenImJungenteam.einverstaendnisKlassen);
   const jahreBC = [];
   klassenListe(p.konfig).filter((k) => bc.indexOf(k.klasse) >= 0).forEach((k) => { if (k.von) jahreBC.push(k.von); if (k.bis) jahreBC.push(k.bis); });
@@ -1370,7 +1372,7 @@ export function optionenBesonderes(a, konfig, heute) {
 
 // Reihenfolge und Bedingungen wie SCHNITTSTELLEN Abschnitt 4. Ein Schritt erscheint erst, wenn seine
 // Voraussetzung beantwortet ist. Entscheidungen von AP-1:
-//  - "pass" (deutscher Pass, Staatsangehörigkeiten) nur bei Fußball mit Spielen: Nur der HFV-Antrag braucht sie
+//  - "pass" (deutscher Pass, Staatsangehörigkeiten) nur bei Fußball: Nur der HFV-Antrag braucht sie
 //    (Datensparsamkeit, DSGVO Art. 5 Abs. 1 lit. c). Karneval und Passive brauchen sie nicht.
 //  - "notfall" nur für Minderjährige, die trainieren (nicht für passive Mitglieder).
 //  - "heimweg" (Aufsichtspflicht, BGB § 832) für dieselben Minderjährigen: Fußball, Karneval oder beides, nie Passive, nie
@@ -1380,23 +1382,24 @@ export function optionenBesonderes(a, konfig, heute) {
 export function schritte(a, konfig, heute) {
   const p = leiteAb(a, konfig, heute);
   const s = ["start", "wer", "name", "geburt", "abteilung"];
-  if (p.fussball) s.push("mannschaft", "spielen");
-  if (p.spielen) s.push("spielerpass");
+  // Fußball: Mannschaft, dann gleich der Spielerpass. Die frühere Frage nach den Spielen gibt es nicht mehr (12.10.2026):
+  // Der Verein beantragt für jedes aktive Fußballmitglied das Spielrecht.
+  if (p.fussball) s.push("mannschaft", "spielerpass");
   const av = objekt(p.a.alterVerein);
-  if (p.spielen && p.spielerpass === "ja") s.push("alter_verein");
-  if (p.spielen && p.spielerpass === "ja" && (av.region === "hessen" || av.region === "bundesland")) s.push("abmeldung");
-  if (p.spielen) s.push("pass", "ausland");
-  // wohnen: minderjährig, Fußball mit Spielen, und (nicht deutsch oder im Ausland gewohnt).
+  if (p.fussball && p.spielerpass === "ja") s.push("alter_verein");
+  if (p.fussball && p.spielerpass === "ja" && (av.region === "hessen" || av.region === "bundesland")) s.push("abmeldung");
+  if (p.fussball) s.push("pass", "ausland");
+  // wohnen: minderjährig, Fußball, und (nicht deutsch oder im Ausland gewohnt).
   // Solange "deutscher Pass" und "im Ausland gewohnt" nicht beantwortet sind, ist der Schritt nicht entscheidbar
   // und erscheint noch nicht.
-  if (p.spielen && p.minor === true && (p.nichtdeutsch || p.deutschUnklar || p.auslandGewohnt)) s.push("wohnen");
+  if (p.fussball && p.minor === true && (p.nichtdeutsch || p.deutschUnklar || p.auslandGewohnt)) s.push("wohnen");
   if (p.minor === true) s.push("sorge");
   if (besonderesOptionen(p).length) s.push("besonderes");
   s.push("kontakt", "beitrag");
   if (p.minor === true) s.push("leistungen");
   s.push("zahlung", "einwilligungen");
   if (p.minor === true && p.aktiv) s.push("heimweg", "notfall");
-  if (p.spielen) s.push("spielerfoto");
+  if (p.fussball) s.push("spielerfoto");
   if (brauchtNachweise(p)) s.push("nachweise");
   s.push("unterschriften", "pruefen", "fertig");
   return s;

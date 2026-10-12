@@ -22,7 +22,6 @@ export function neueAntworten(sprache) {
     geborenInDe: null,
     jahreInDe: null,
     abteilung: null,
-    spielen: null,
     spielerpass: null,
     alterVerein: { region: null, name: "", ort: "", land: null, verband: "", mitgliedschaft: null, empfaenger: "", strasse: "", plzOrt: "" },
     abmeldung: { status: null, datum: null, weg: null },

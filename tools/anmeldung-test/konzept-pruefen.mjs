@@ -24,6 +24,7 @@
 //                    dem Regelwerk – stand, entscheidung – nur als Hinweis); im Fließtext steht „Spielrecht“
 //   4  Endstand      die Punkte a bis j aus dem Auftrag stehen in den Abschnitten „Assistent“, „PDF“ und
 //                    „Unterschrift“ (Heimweg nach dem Training und der Hinweis zum Probetraining statt der Auftritte am Abend)
+//                    sowie (M14, 12.10.2026) Punkt l: Der Verein beantragt für Fußball immer das Spielrecht, die Frage zu den Spielen entfällt
 //   5  Personendaten keine Telefonnummern, E-Mail-Adressen, IBAN, Geburtsdaten (Muster wie tools/pii-check.py),
 //                    keine Anrede mit Nachnamen; Regista-Regel: „Regista“ wird nicht genannt, und Namen aus
 //                    der Umgebungsvariable KONZEPT_VERBOTENE_NAMEN (Namensteile, durch Komma getrennt; sie
@@ -527,6 +528,16 @@ gruppe("4  Endstand in den Abschnitten „Assistent“, „PDF“ und „Untersc
     [/Heimweg nach dem Training/, /allein oder abgeholt/, /Beim Probetraining sind Nichtmitglieder nicht über den Verein versichert/]);
   kriterium("j  Ablauf: bei Karneval keine Gruppenwahl, die Trainer ordnen die Kinder einer Gruppe zu", A,
     [/Bei Karneval entfallen diese Fragen/, /Eine Gruppenwahl gibt es nicht/, /Die Trainer ordnen die Kinder einer Gruppe zu/]);
+  // Paket M14 (12.10.2026): Für Fußball beantragt der Verein immer das Spielrecht (Entscheidung der 1. Vorsitzenden). Die Frage, ob das Kind bei Spielen mitmacht,
+  // und der Schritt „spielen“ entfallen; die Erklärung steht kurz beim Spielerpass.
+  const KURZ = abschnittText("kurz");
+  kriterium("l  Spielrecht: für Fußball beantragt der Verein es immer, die Frage zu den Spielen gibt es nicht mehr, die Erklärung steht beim Spielerpass (Abschnitt „Assistent“)", A,
+    [/Bei Fußball zeigt er die Mannschaft und fragt nach Spielerpass und Wechsel/, /Das Spielrecht beantragt der Verein immer/, /Eine Frage, ob das Kind bei Spielen mitmacht, gibt es nicht/]);
+  kriterium("l  Spielrecht: der Abschnitt „Kurz gesagt“ nennt die Entscheidung der 1. Vorsitzenden vom 12.10.2026", KURZ,
+    [/Das Spielrecht\./, /Für Fußball beantragt der Verein immer das Spielrecht/, /Die Frage „Soll Ihr Kind bei Spielen mitmachen\?“ gibt es nicht mehr/, /1\. Vorsitzende am 12\.10\.2026 entschieden/, /Die Erklärung steht kurz beim Spielerpass/]);
+  pruefe("l  die Seite beschreibt die Frage zu den Spielen und die frühere Antwort (Training ohne Spiele) nirgends mehr als Möglichkeit",
+    !/Mannschaft, Spielen, Spielerpass|nur\s+(beim\s+|zum\s+)?Training\b|Training ohne Spiele|Bei Kindern nur\sTraining/.test(seiteText.replace(/Frage „Soll Ihr Kind bei Spielen mitmachen\?“ (gibt es nicht mehr|entfallen)/g, "")),
+    ["die Seite nennt noch die Frage „Spielen“ oder die frühere Antwort (Training ohne Spiele) als Möglichkeit"]);
   // Paket M11 (12.10.2026): Versand und Übergabe. Die ganze Datei geht per E-Mail an die Geschäftsstelle, auch Teil C (O25, O73); der Verein
   // bewahrt Teil C getrennt auf; kein Server-Versand zum Start (O72); Spielerpässe: Jugend 1. Kassierer, Herren Spielausschuss Senioren (O24).
   const D = abschnittText("datenschutz");

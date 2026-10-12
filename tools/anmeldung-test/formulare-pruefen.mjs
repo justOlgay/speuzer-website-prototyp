@@ -208,7 +208,7 @@ function tintenAnteil(pg, x, y, b, h) {
 const PFADE = new Set([
   // a: Antworten (SCHNITTSTELLEN Abschnitt 3)
   ...["schema", "sprache", "wer", "vorname", "nachname", "geburtsdatum", "geburtsort", "geburtsland", "geschlecht", "spielrechtFuer", "geborenInDe", "jahreInDe",
-    "abteilung", "spielen", "spielerpass", "letztesSpiel", "letztesPflichtspiel", "sperre", "sperreBis", "freigabe", "wechselLetzte6Monate", "deutsch", "staaten",
+    "abteilung", "spielerpass", "letztesSpiel", "letztesPflichtspiel", "sperre", "sperreBis", "freigabe", "wechselLetzte6Monate", "deutsch", "staaten",
     "auslandGewohnt", "auslandLand", "auslandStadt", "wohnen", "wohnenSeit", "ohneElternGrund", "sorge", "andererElternteilEinverstanden", "sorgeberechtigte",
     "email", "telefon", "mobil", "leistungen", "heimweg", "gesundheitsbogen", "nachweise", "unterschriftWeg", "hfvUnterschrift",
     "alterVerein.region", "alterVerein.name", "alterVerein.ort", "alterVerein.land", "alterVerein.verband",

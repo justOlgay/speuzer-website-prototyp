@@ -88,7 +88,7 @@ function kind(zusatz) {
   const grund = {
     schema: 1, sprache: "de", wer: "kind",
     vorname: "Mia", nachname: "Mustermann", geburtsdatum: "2018-04-12", geburtsort: "Frankfurt am Main", geburtsland: "DE", geschlecht: "w",
-    abteilung: "fussball", spielen: true, spielerpass: "nein",
+    abteilung: "fussball", spielerpass: "nein",
     deutsch: "ja", staaten: ["DE"], auslandGewohnt: "nein",
     sorge: "beide", sorgeberechtigte: elternBeide(),
     anschrift: Object.assign({}, ANSCHRIFT), email: mail("lena.mustermann"), mobil: tel("0176", "04069042"), telefon: "",
@@ -109,7 +109,7 @@ function erwachsen(zusatz) {
   const grund = {
     schema: 1, sprache: "de", wer: "selbst",
     vorname: "Tim", nachname: "Mustermann", geburtsdatum: "1997-03-14", geburtsort: "Wiesbaden", geburtsland: "DE", geschlecht: "m",
-    abteilung: "fussball", spielen: true, spielerpass: "nein",
+    abteilung: "fussball", spielerpass: "nein",
     deutsch: "ja", staaten: ["DE"], auslandGewohnt: "nein",
     sorge: null, sorgeberechtigte: [],
     anschrift: Object.assign({}, ANSCHRIFT), email: mail("tim.mustermann"), mobil: tel("0176", "04069075"), telefon: "",
@@ -143,7 +143,7 @@ function wechselD(zusatz) {
 
 export const PROFILE = [
   profilEintrag("karneval-kind", "Karneval-Kind", "Mädchen, 10 Jahre, tanzt in der Karnevalabteilung. Keine Gruppenwahl, keine Fragen zu Turnieren und Auftritten; der Heimweg nach dem Training ist beantwortet.", HEUTE,
-    kind({ vorname: "Sophie", geburtsdatum: "2016-03-22", abteilung: "karneval", spielen: null, spielerpass: null, heimweg: "allein" }),
+    kind({ vorname: "Sophie", geburtsdatum: "2016-03-22", abteilung: "karneval", spielerpass: null, heimweg: "allein" }),
     {
       faelle: ["F01"], keineFaelle: ["F03"], status: null, international: false, altersklasse: "E",
       mannschaft: { vorhanden: false, namen: [] },
@@ -157,11 +157,11 @@ export const PROFILE = [
       beitrag: { gruppe: "karneval_kinder", jahr: 108, monat: 9, hinweisKey: "beitrag_standard" },
       unterschriften: [{ formular: "heimweg", stelleKey: "unterschrift", wer: "sorgeberechtigte" }, { formular: "aufnahmeantrag", stelleKey: "s2.unterschrift", wer: "sorgeberechtigte" }],
       keineUnterschriften: [{ formular: "aufnahmeantrag", stelleKey: "s2.unterschrift_sorgeberechtigte" }, { formular: "karneval_auftritte", stelleKey: "unterschrift" }],
-      schritteMit: ["heimweg", "sorge", "leistungen", "notfall", "unterschriften"], schritteOhne: ["karneval", "mannschaft", "spielen", "spielerpass", "pass", "ausland", "wohnen", "spielerfoto", "abmeldung"],
+      schritteMit: ["heimweg", "sorge", "leistungen", "notfall", "unterschriften"], schritteOhne: ["karneval", "mannschaft", "spielerpass", "pass", "ausland", "wohnen", "spielerfoto", "abmeldung"],
     }),
 
   profilEintrag("passiv-foerderer", "Passives Mitglied (Förderer)", "Erwachsener, 45 Jahre, möchte den Verein nur unterstützen, zahlt auf Rechnung.", HEUTE,
-    erwachsen({ vorname: "Peter", geburtsdatum: "1981-06-15", abteilung: "passiv", spielen: null, spielerpass: null, deutsch: null, staaten: [], auslandGewohnt: null,
+    erwachsen({ vorname: "Peter", geburtsdatum: "1981-06-15", abteilung: "passiv", spielerpass: null, deutsch: null, staaten: [], auslandGewohnt: null,
       zahlung: { art: "rechnung", kontoinhaber: null, iban: "" } }),
     {
       faelle: ["F02"], status: null, altersklasse: "Herren",
@@ -175,13 +175,13 @@ export const PROFILE = [
 
   // Minderjährige, die nur unterstützen (passiv): kein Heimweg, kein Notfallbogen, keine Fahrten (Aufsichtspflicht gilt nur beim Training)
   profilEintrag("passiv-kind", "Kind als passives Mitglied", "Junge, 9 Jahre, wird passives Mitglied (Förderer): Er trainiert nicht und tanzt nicht.", HEUTE,
-    kind({ vorname: "Emil", geburtsdatum: "2017-05-05", geschlecht: "m", abteilung: "passiv", spielen: null, spielerpass: null, deutsch: null, staaten: [], auslandGewohnt: null, heimweg: null }),
+    kind({ vorname: "Emil", geburtsdatum: "2017-05-05", geschlecht: "m", abteilung: "passiv", spielerpass: null, deutsch: null, staaten: [], auslandGewohnt: null, heimweg: null }),
     {
       faelle: ["F02"], status: null,
       unterlagen: { U01: "pflicht", U06: "pflicht", U35: "verein" }, keineUnterlagen: ["U07", "U28", "U29", "U41"],
       formulare: ["aufnahmeantrag", "datenschutz"], keineFormulare: ["hfv_antrag", "notfall", "attest", "einverstaendnis_fahrten", "heimweg"],
       keineUnterschriften: [{ formular: "heimweg", stelleKey: "unterschrift" }],
-      schritteMit: ["sorge", "einwilligungen"], schritteOhne: ["heimweg", "notfall", "karneval", "mannschaft", "spielen", "spielerfoto"],
+      schritteMit: ["sorge", "einwilligungen"], schritteOhne: ["heimweg", "notfall", "karneval", "mannschaft", "spielerfoto"],
     }),
 
   profilEintrag("kind-neu-deutsch-f", "Kind neu im Fußball (F-Jugend, deutsch)", "Mädchen, 8 Jahre, deutsch, war noch nie in einem Verein.", HEUTE,
@@ -208,8 +208,9 @@ export const PROFILE = [
       ],
       // O26 (Jugendleitung, 08.10.2026): Ein Elternteil reicht, auch wenn beide Eltern das Sorgerecht haben
       keineUnterschriften: [{ formular: "aufnahmeantrag", stelleKey: "s2.unterschrift_sorgeberechtigte" }],
-      schritteMit: ["mannschaft", "spielen", "spielerpass", "pass", "ausland", "sorge", "leistungen", "zahlung", "einwilligungen", "heimweg", "notfall", "spielerfoto", "nachweise", "pruefen", "fertig"],
-      schritteOhne: ["alter_verein", "abmeldung", "wohnen", "karneval", "besonderes"],
+      // M14 (12.10.2026): Der Schritt „spielen“ gibt es nicht mehr; Mannschaft und Spielerpass folgen unmittelbar aufeinander.
+      schritteMit: ["mannschaft", "spielerpass", "pass", "ausland", "sorge", "leistungen", "zahlung", "einwilligungen", "heimweg", "notfall", "spielerfoto", "nachweise", "pruefen", "fertig"],
+      schritteOhne: ["spielen", "alter_verein", "abmeldung", "wohnen", "karneval", "besonderes"],
       fehlend: ["U09", "U10"],
     }),
 
@@ -617,7 +618,7 @@ export const PROFILE = [
     }),
 
   profilEintrag("senator-karneval", "Senatorenmitgliedschaft im Karneval", "Erwachsener, 55 Jahre, möchte Senator werden. Der Vorstand entscheidet.", HEUTE,
-    erwachsen({ vorname: "Georg", geburtsdatum: "1971-04-04", abteilung: "karneval", spielen: null, spielerpass: null, deutsch: null, staaten: [], auslandGewohnt: null,
+    erwachsen({ vorname: "Georg", geburtsdatum: "1971-04-04", abteilung: "karneval", spielerpass: null, deutsch: null, staaten: [], auslandGewohnt: null,
       beitrag: { gruppe: null, familie: [], senator: true, doppel: false } }),
     {
       faelle: ["F01"], unterlagen: { U34: "verein" }, beitrag: { gruppe: "karneval_senator", jahr: 144, monat: null, hinweisKey: "beitrag_senator" },
@@ -625,7 +626,7 @@ export const PROFILE = [
     }),
 
   profilEintrag("azubi-karneval", "Auszubildende im Karneval", "Erwachsene, 20 Jahre, Beitragsgruppe Auszubildende: Nachweis nötig.", HEUTE,
-    erwachsen({ vorname: "Nadine", geburtsdatum: "2006-10-10", geschlecht: "w", abteilung: "karneval", spielen: null, spielerpass: null, deutsch: null, staaten: [], auslandGewohnt: null,
+    erwachsen({ vorname: "Nadine", geburtsdatum: "2006-10-10", geschlecht: "w", abteilung: "karneval", spielerpass: null, deutsch: null, staaten: [], auslandGewohnt: null,
       beitrag: { gruppe: "karneval_azubi", familie: [], senator: false, doppel: false } }),
     {
       faelle: ["F01"], unterlagen: { U03: "verein" }, nachweis: ["U03"], beitrag: { gruppe: "karneval_azubi", jahr: 108, hinweisKey: "beitrag_azubi" }, fehlend: ["U03"],
@@ -639,11 +640,17 @@ export const PROFILE = [
       weiterleitung: ["geschaeftsstelle:beitrag_doppel"], schritteMit: ["spielerpass", "mannschaft"], schritteOhne: ["karneval", "heimweg"],
     }),
 
-  profilEintrag("kind-nur-training", "Kind nur zum Training", "Junge, 7 Jahre: soll nicht bei Spielen mitmachen, deshalb kein Antrag beim Verband.", HEUTE,
-    kind({ vorname: "Finn", geburtsdatum: "2019-11-11", geschlecht: "m", spielen: false, spielerpass: null, deutsch: null, staaten: [], auslandGewohnt: null }),
+  // M14 (12.10.2026): Für Fußball beantragt der Verein immer das Spielrecht. Eine alte Antwort „nein“ (a.spielen = false) wird nicht mehr gelesen und gilt wie „ja“:
+  // Dieses Profil trägt sie noch und muss sich genau wie ein Kind ohne diese Antwort verhalten (regeln-test.mjs, pdf-test.mjs).
+  profilEintrag("kind-alte-antwort-nein", "Kind mit alter Antwort „nein“ (zählt wie „ja“)", "Junge, 7 Jahre: Die Antworten tragen noch das frühere Feld spielen = false. Der Verein beantragt trotzdem das Spielrecht.", HEUTE,
+    kind({ vorname: "Finn", geburtsdatum: "2019-11-11", geschlecht: "m", spielen: false }),
     {
-      faelle: [], keineFaelle: ["F03"], status: null, altersklasse: "F", frist: { key: "frist_kein_spiel", pflichtspieleAb: null },
-      keineUnterlagen: ["U07", "U09", "U10", "U16"], keineFormulare: ["hfv_antrag", "attest"], schritteMit: ["mannschaft", "spielen", "sorge", "notfall"], schritteOhne: ["spielerpass", "pass", "ausland", "spielerfoto"],
+      faelle: ["F03"], keineFaelle: ["F01", "F02"], status: "neu", international: false, altersklasse: "F",
+      unterlagen: { U07: "pflicht", U09: "pflicht", U10: "pflicht", U15: "pflicht", U16: "pflicht" },
+      formulare: ["aufnahmeantrag", "hfv_antrag", "attest", "heimweg", "notfall"],
+      frist: { regel: "R1", pflichtspieleAb: HEUTE, freundschaftsspieleAb: HEUTE, unsicher: false, key: "frist_neu" },
+      hinweise: ["ohne_spielrecht_kein_spiel", "mitgliedschaft_zuerst", "spielerfoto_hinweis"],
+      schritteMit: ["mannschaft", "spielerpass", "pass", "ausland", "sorge", "notfall", "spielerfoto", "nachweise"], schritteOhne: ["spielen", "alter_verein", "abmeldung", "wohnen"],
     }),
 
   profilEintrag("abmeldung-nur-per-mail", "Abmeldung nur per Mail oder WhatsApp", "Junge, D-Jugend: Die Familie hat dem alten Verein nur geschrieben. Das zählt nicht als Abmeldung.", HEUTE,

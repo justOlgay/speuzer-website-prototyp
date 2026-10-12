@@ -1,6 +1,6 @@
 {
-  "stand": "2026-10-11",
-  "version": "2026-10-11.2",
+  "stand": "2026-10-12",
+  "version": "2026-10-12.1",
   "hinweis": "Regelwerk des Anmelde-Assistenten. Alle Zahlen und Fristen stehen hier; regeln.js enthält die Logik. Nichts hier enthält Personendaten.",
   "saison": "2026/27",
   "quellenStand": [
@@ -512,7 +512,7 @@
       "form": "formular_im_pdf",
       "formular": "hfv_antrag",
       "nachweis": false,
-      "bedingung": "Fußball mit Teilnahme an Spielen, Turnieren oder Festivals. Bei Kindern nur Training: erst später.",
+      "bedingung": "Jedes aktive Fußballmitglied (Fußball oder Fußball und Karneval). Der Verein beantragt das Spielrecht immer (Entscheidung der 1. Vorsitzenden vom 12.10.2026).",
       "quelle": "HFV-Formular Antrag auf Spielerlaubnis, PDF Stand 2026-06-16; HFV-Spielordnung § 92, Stand 2026-07-06; HFV-Jugendordnung § 37 Nr. 2, Stand 2026-07-01; Kreis Frankfurt: Spieler ohne Spielrecht dürfen auch nicht in Freundschaftsspielen spielen (Durchführungsbestimmungen 2026/27)"
     },
     "U08": {

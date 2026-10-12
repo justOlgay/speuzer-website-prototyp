@@ -38,6 +38,8 @@
 //     der Handy-Browser Dateien teilen (navigator.share): So steht auch der Weg am Handy da.
 //   - M12-ar, Runde 2 (12.10.2026): Prüfseite, Zeile „Geboren“: das Alter steht nach der Vorlage allgemein.alterJahre mit {n} hinter dem Datum, ohne ein an
 //     die Zahl gehängtes Wort (Arabisch: „العمر: 8“); allgemein.jahre gibt es nicht mehr
+//   - M14 (12.10.2026): Der Verein beantragt für Fußball immer das Spielrecht. Die Seite „spielerpass“ zeigt in jeder Sprache die übersetzte Erklärung zum Spielrecht
+//     (drei Absätze, Schlüssel spielerpass.spielrecht); die frühere Frage zu den Spielen (Block spielen) gibt es in keiner Sprache mehr
 //   - Bildschirmfotos von start, name, nachweise, unterschriften (auch der Ausschnitt mit Satzung und
 //     "Gilt für"), fertig (und Hilfe, Fehlermeldung, Heimweg, getrennte Eltern, lateinische
 //     Buchstaben) nach tools/cache/anmeldung-test/sprachen/
@@ -491,6 +493,13 @@ async function durchlauf(browser, server, sprache, beispiel, muster, txt) {
       if (uebersetzt) ok(kennung + ": Heimweg-Frage mit übersetztem Titel", titel === ohneSteuer(uebersetzt), titel);
       else info(kennung + ": Heimweg-Frage noch ohne Übersetzung (deutscher Rückfall, Paket M3): " + titel);
       await foto(page, code, beispiel.id, "heimweg");
+    }
+    // Spielrecht (M14, 12.10.2026): Der Verein beantragt es immer; die Seite „spielerpass“ trägt die übersetzte Erklärung (drei Absätze) statt der früheren Frage zu den Spielen
+    if (s.schritt === "spielerpass") {
+      const vorlage = dict.spielerpass && dict.spielerpass.spielrecht;
+      const absaetze = (await page.$$eval("#anmeldung p.anm-hinweis", (l) => l.map((x) => x.textContent))).map(ohneSteuer);
+      const soll = String(vorlage || "").split("\n").map(ohneSteuer).filter(Boolean); // erst an den Zeilenumbrüchen trennen (ohneSteuer macht aus jedem Umbruch ein Leerzeichen)
+      ok(kennung + ": Spielerpass-Seite mit der übersetzten Erklärung zum Spielrecht (3 Absätze, Schlüssel spielerpass.spielrecht), ohne den Block der früheren Frage", !!vorlage && soll.length === 3 && soll.every((t) => absaetze.includes(t)) && dict.spielen === undefined, absaetze.join(" | "));
     }
     // Fahrten und Nachrichten (M11, 12.10.2026): Karneval ohne Fußball sagt „Messenger-Gruppe der Gruppe“, die übrigen „… der Mannschaft“; beide Sätze stehen in der Sprache
     if (s.schritt === "einwilligungen" && s.teil === "fahrten") {

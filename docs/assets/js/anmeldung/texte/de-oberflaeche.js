@@ -1,6 +1,6 @@
 /*
   Texte der Oberfläche des Anmelde-Assistenten – Deutsch in Einfacher Sprache
-  (Stand 11.10.2026). Der Assistent liest diese Datei immer als Rückfallebene:
+  (Stand 12.10.2026). Der Assistent liest diese Datei immer als Rückfallebene:
   Fehlt in einer anderen Sprache ein Eintrag, gilt der deutsche.
 
   Regeln für alle Sätze (für Familien mit wenig Deutsch):
@@ -210,7 +210,6 @@ export default {
     geschlecht: "Bitte wählen Sie das Geschlecht.",
     spielrechtFuer: "Bitte wählen Sie die Mannschaften.",
     abteilung: "Bitte wählen Sie eine Abteilung.",
-    spielen: "Bitte wählen Sie eine Antwort.",
     spielerpass: "Bitte wählen Sie eine Antwort.",
     region: "Bitte wählen Sie, wo der Verein ist.",
     vereinsname: "Bitte tragen Sie den Namen des Vereins ein.",
@@ -357,19 +356,12 @@ export default {
     unbekannt: "Wir können die Mannschaft noch nicht bestimmen.",
   },
 
-  spielen: {
-    titel: { kind: "Soll Ihr Kind bei Spielen mitmachen?", selbst: "Möchten Sie bei Spielen mitmachen?" },
-    erklaerung: "Wer spielen will, braucht ein Spielrecht vom Fußball-Verband.\nDas beantragt der Verein für Sie.\nDas dauert manchmal einige Wochen.",
-    ja: { kind: "Ja, bei Spielen und Spielfesten", selbst: "Ja, bei Spielen" },
-    jaHinweis: "Der Verein beantragt das Spielrecht.",
-    nein: "Nein, nur beim Training",
-    neinHinweis: "Das können Sie später noch ändern.",
-  },
-
   spielerpass: {
     titel: { kind: "Hatte Ihr Kind schon einmal einen Spielerpass?", selbst: "Hatten Sie schon einmal einen Spielerpass?" },
     hinweis: { kind: "Auch wenn es nur trainiert hat. Auch im Ausland.", selbst: "Auch wenn Sie nur trainiert haben. Auch im Ausland." },
     erklaerung: "Ein Spielerpass ist der Ausweis für Spiele in einem Verein.",
+    // Das Spielrecht beantragt der Verein immer (Entscheidung der 1. Vorsitzenden vom 12.10.2026); früher fragte der Schritt "spielen" danach.
+    spielrecht: "Wer Fußball spielt, braucht ein Spielrecht vom Fußball-Verband.\nDas beantragt der Verein für Sie.\nDas dauert manchmal einige Wochen.",
     weissNichtHinweis: "Der Verein prüft das für Sie.",
   },
 
@@ -842,9 +834,6 @@ export default {
       geschlecht: "Geschlecht",
       abteilung: "Abteilung",
       mannschaft: "Mannschaft",
-      spielen: "Spiele",
-      spielenJa: "Ja, mit Spielrecht",
-      spielenNein: "Nur Training",
       alterVerein: "Bisheriger Verein",
       alteMitgliedschaft: "Mitgliedschaft im alten Verein",
       abmeldung: "Abmeldung",
