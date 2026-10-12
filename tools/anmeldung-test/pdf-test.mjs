@@ -42,6 +42,10 @@
 //    Bild, keine Stift-Markierung, Teil A nennt das Blatt nicht unter „Ausdrucken müssen Sie nur“ (Kind neu ohne Attest-Vorlage: „Sie müssen nichts
 //    ausdrucken.“), der Laufzettel sagt „Das Kind hat den Antrag nicht unterschrieben. Das Passwesen entscheidet, ob das nötig ist.“; die Abmeldung
 //    beim alten Verein und der zweite Elternteil behalten die Stift-Markierung; im Modus „stift“ gibt es den neuen Satz nicht.
+//  - M10 (11.10.2026): Die Familie schickt die Datei per E-Mail an die Geschäftsstelle (Entscheidung der 1. Vorsitzenden, kein Server-Versand): Teil A
+//    nennt unter „So geht es weiter“ den Satz „Schicken Sie die Datei per E-Mail an die Geschäftsstelle: <Adresse>“ genau einmal (Adresse aus der
+//    Konfiguration; auf dem Papierweg „selbst drucken“ dazu der Satz zum ausgedruckten Teil B), die alten Sätze zur Abgabe im Verein sind weg;
+//    mit anderer Adresse in der Konfiguration ändert sich der Satz, ohne Adresse entfällt „: <Adresse>“ (mailAdresseTests).
 // Aufruf-Optionen: --profil=a,b (nur diese Profile)  --ohne-sonderfaelle  --szenarien (Szenarien auch bei --profil)  --ohne-stift (ohne den Lauf mit dem Schalter „stift“)
 //   --nur-schalter (nur die Läufe zum Schalter unterschriftHfv, ohne Profile, Sonderfälle und Rückfälle)
 // Werkzeuge: pdf-lib und fontkit aus node_modules, dazu poppler (pdftotext, pdfinfo, pdfimages, pdftoppm).
@@ -658,7 +662,8 @@ const EIGENER_TITEL = {
   attest_vorlage: () => ATTEST_VORLAGE_TITEL,
 };
 // Teile des PDF (Abschnitt 9)
-const TEIL_NAME = { A: "Teil A – Für Sie", B: "Teil B – Für den Verein", C: "Teil C – Vertraulich, getrennt abgeben" };
+// (M11, 12.10.2026: Teil C heißt „Teil C – Vertraulich“; die ganze Datei geht per E-Mail an die Geschäftsstelle, der Verein bewahrt Teil C getrennt auf)
+const TEIL_NAME = { A: "Teil A – Für Sie", B: "Teil B – Für den Verein", C: "Teil C – Vertraulich" };
 // Eine eigene Seite beginnt nach dem Kopf („… · Teil X“) mit ihrem Titel
 const eigenerMarker = (schluessel) => new RegExp("· Teil [ABC] " + esc(norm(EIGENER_TITEL[schluessel]())) + "( |$)");
 const FORM_MARKER = {
@@ -766,6 +771,8 @@ const TEXT_FAHRTEN = {
 const FAHRTEN_KARNEVAL = { ueberschrift: "Fahrten zu Veranstaltungen des Vereins", ja: "Ja, mein Kind darf zu Veranstaltungen des Vereins in Fahrgemeinschaften mitfahren." };
 const FAHRTEN_SONST = { ueberschrift: "Fahrten zu Spielen und Veranstaltungen", ja: TEXT_FAHRTEN.fahrten.ja };
 const FAHRTEN_SATZ = (a) => (a.abteilung === "karneval" ? FAHRTEN_KARNEVAL : FAHRTEN_SONST);
+// Messenger-Gruppe: Wer nur im Karneval ist, liest „der Gruppe“ statt „der Mannschaft“ (M11, 12.10.2026); Fußball und „beides“ behalten den bisherigen Satz.
+const MESSENGER_JA = (a) => (a.abteilung === "karneval" ? "Ja, meine Telefonnummer darf in die Messenger-Gruppe der Gruppe. Alle Mitglieder der Messenger-Gruppe können sie sehen." : TEXT_FAHRTEN.messenger.ja);
 const TEXT_KEINE_GESUNDHEIT = "Sie haben keine Angaben zur Gesundheit gemacht. Soll der Trainer etwas wissen? Sprechen Sie ihn an.";
 const GESUNDHEIT_FELDER = [["allergien", "Allergien"], ["erkrankungen", "Erkrankungen"], ["medikamente", "Medikamente"], ["sonstiges", "Sonstiges"]];
 
@@ -966,7 +973,7 @@ function pruefeEigeneSeiten(c) {
     ok(!/Turnier/.test(texte[seite - 1]), "Fahrten: das Blatt nennt keine Turniere");
     if (a.abteilung === "karneval") ok(!/Spiel/.test(texte[seite - 1]), "Fahrten bei Karneval ohne Fußball: das Blatt nennt keine Spiele");
     for (const name of ["fahrten", "messenger"]) {
-      const T = name === "fahrten" ? { ...TEXT_FAHRTEN.fahrten, ja: satz.ja } : TEXT_FAHRTEN[name];
+      const T = name === "fahrten" ? { ...TEXT_FAHRTEN.fahrten, ja: satz.ja } : { ...TEXT_FAHRTEN.messenger, ja: MESSENGER_JA(a) };
       const beantwortet = typeof ew[name] === "boolean";
       const t = texte[seite - 1];
       if (!beantwortet && digital) ok(t.includes(T.ohne) && !t.includes(T.ja.slice(0, 25)) && !t.includes(T.nein.slice(0, 25)), () => "Fahrten/" + name + ": ohne Antwort und mit Bildschirm-Unterschrift steht ein Satz statt der Kästchen");
@@ -1071,7 +1078,7 @@ function pruefeEigeneSeiten(c) {
 // ds5 (Information zum Datenschutz Nr. 5, erster Punkt) und ds8 (Nr. 8)
 const FASSUNGEN = ["pflicht", "offen", "verein"];
 const fassungVon = (art) => (art === "offen" || art === "verein" ? art : "pflicht");
-const DS5_ANTRAG = "mindestens zwei Jahre ab Antragstellung, weil der Verband das verlangt (Spielordnung § 92). Danach vernichten wir sie. Auf Anforderung legen wir sie dem Verband binnen 14 Tagen im Original vor.";
+const DS5_ANTRAG = "mindestens zwei Jahre ab Antragstellung, weil der Verband das verlangt (Spielordnung § 92). Danach vernichten wir sie. Auf Anforderung legen wir sie dem Verband binnen 14 Tagen vor.";
 const ATTEST_TEXT = {
   pflicht: {
     pruefung: "Der Verein nimmt die Bescheinigung entgegen. Er prüft damit eine Voraussetzung für das Spielrecht.",
@@ -1157,8 +1164,59 @@ function eigenerText(texte, S) {
   return ohneRahmen(S.map((s, i) => ({ s: s, t: texte[i] })).filter((x) => ["eigen", "teil-a", "laufzettel", "trennblatt"].includes(x.s.art)).map((x) => x.t).join(" "));
 }
 
+// M11 (12.10.2026): Die Familie schickt die ganze Datei per E-Mail an die Geschäftsstelle, auch Teil C; der Verein bewahrt Teil C getrennt auf.
+// Auf den eigenen Seiten steht nichts mehr zu „getrennt abgeben“, „nicht per normaler E-Mail“, „im Verein abgeben oder vorlegen“ und „mitbringen“.
+// Ausnahmen, die bleiben: der Satz zum Papierweg („… Oder geben Sie sie im Verein ab.“, nur bei ganz ausgedruckter Datei), die deutschen Ausweise
+// („Bringen Sie Pass oder Ausweis zum Verein mit.“, „Bringen Sie ihn mit.“; sie darf der Verein nicht weitergeben, er sieht das Original) und die
+// Blätter, die der Verein im Modus „stift“ ausgedruckt zum ersten Training mitbringt („Der Verein bringt sie ausgedruckt mit.“).
+const ALTE_ABGABE = [
+  [/getrennt abgeben|ihn getrennt ab\b|Trennen Sie|abtrennen/, "getrennt abgeben oder abtrennen"],
+  [/nicht per normaler|oder normaler E-Mail|normale[rn]? Mail/, "nicht per (normaler) E-Mail"],
+  [/im Verein ab\b|im Verein abgeb|im Verein abgegeben|im Verein vorlegen/, "im Verein abgeben oder vorlegen"],
+  [/\bBringen Sie\b|\bbringen Sie\b[^.]*\bmit\b|\bmitbringen\b|\bbringen\b[^.]*\bmit\b|\bbringt\b[^.]*\bmit\b/, "mitbringen"],
+  // Runde 2 (12.10.2026): Alles kommt per E-Mail. Auf den eigenen Seiten steht kein „Original“ (Datenschutzinformation, Laufzettel) – außer an den Ausnahmen unten.
+  [/\bOriginal/, "Original (alles kommt per E-Mail)"],
+];
+const PAPIERWEG_SATZ = /Fotografieren oder scannen Sie die unterschriebenen Blätter\. Schicken Sie sie per E-Mail an die Geschäftsstelle(?:: \S+)?\. Oder geben Sie sie im Verein ab\./g;
+const DEUTSCHE_AUSWEISE = /Bringen Sie Pass oder Ausweis zum Verein mit\.|Bringen Sie ihn mit\./g;
+const STIFT_TRAINING = /Der Verein bringt sie ausgedruckt mit\./g; // Modus „stift“, erstes Training: Der Verein bringt die Blätter mit (nicht die Familie)
+// „Original“ bleibt bei einem Original mit Stift (Laufzettel: der Verband verlangt es, dann druckt der Verein das Blatt aus) und bei deutschen Ausweisen
+// (der Verein darf sie nicht weitergeben und sieht das Original: Hinweis, „Wie bekommen Sie es“ bei U12 und Status „Original zeigen“ im Laufzettel).
+const ORIGINAL_AUSNAHMEN = /Verlangt der Verband ein Original mit Stift, das Blatt ausdrucken und unterschreiben lassen\.|Zeigen Sie das Original im Verein\.|Deutsche Ausweise zeigen Sie im Verein im Original\.|Original zeigen/g;
+function alteAbgabe(text) {
+  const t = norm(text).replace(PAPIERWEG_SATZ, " ").replace(DEUTSCHE_AUSWEISE, " ").replace(STIFT_TRAINING, " ").replace(ORIGINAL_AUSNAHMEN, " ");
+  return ALTE_ABGABE.filter(([muster]) => muster.test(t)).map(([muster]) => {
+    const m = t.match(new RegExp(".{0,40}(?:" + muster.source + ").{0,40}"));
+    return (m ? m[0] : "") ;
+  });
+}
+
+let m11GegenprobeGemacht = false;
+function pruefeM11(c) {
+  const { texte, S, a } = c;
+  // Gegenprobe (einmal): Die Suche erkennt die alten Sätze und lässt die Ausnahmen durch, sonst wäre die Prüfung leer oder zu streng
+  if (!m11GegenprobeGemacht) {
+    m11GegenprobeGemacht = true;
+    const alt = "Trennen Sie Teil C von Teil A und Teil B ab. Schicken Sie Teil C nicht per WhatsApp oder normaler E-Mail. Sie geben ihn getrennt ab. Oder Sie geben die Kopie im Verein ab. Bringen Sie das Original oder eine Kopie mit. Datei nicht lesbar, bitte im Verein vorlegen. Auf Anforderung legen wir sie dem Verband binnen 14 Tagen im Original vor.";
+    gleich(alteAbgabe(alt).length, 5, "M11 Gegenprobe: die Suche erkennt „getrennt abgeben/abtrennen“, „normaler E-Mail“, „im Verein abgeben/vorlegen“, „mitbringen“ und „im Original“");
+    const erlaubt = "Fotografieren oder scannen Sie die unterschriebenen Blätter. Schicken Sie sie per E-Mail an die Geschäftsstelle: geschaeftsstelle@beispiel.example.org. Oder geben Sie sie im Verein ab. Sie wissen nicht, ob ein deutscher Pass da ist. Bringen Sie Pass oder Ausweis zum Verein mit. Der Verein schaut in den Pass. Bringen Sie ihn mit. Diese unterschreiben Sie beim ersten Training mit Stift. Der Verein bringt sie ausgedruckt mit. Verlangt der Verband ein Original mit Stift, das Blatt ausdrucken und unterschreiben lassen. Zeigen Sie das Original im Verein. Deutsche Ausweise zeigen Sie im Verein im Original. U12 Kopie eines Lichtbildausweises Original zeigen.";
+    gleich(alteAbgabe(erlaubt).length, 0, "M11 Gegenprobe: der Satz zum Papierweg, die deutschen Ausweise (auch „Original zeigen“), ein Original mit Stift und die vom Verein mitgebrachten Blätter (Modus „stift“) sind erlaubt");
+  }
+  const eigen = eigenerText(texte, S);
+  const treffer = alteAbgabe(eigen);
+  ok(treffer.length === 0, () => "M11: auf den eigenen Seiten steht noch ein alter Satz zur Abgabe: " + JSON.stringify(treffer));
+  // Karneval ohne Fußball: Gruppe statt Mannschaft (Messenger-Gruppe, Trainer und Betreuer in Datenschutzinformation, Trennblatt, Notfallbogen)
+  if (a.abteilung === "karneval") ok(!/Mannschaft/.test(eigen), () => "M11: Karneval-Kind: auf den eigenen Seiten steht „Mannschaft“: " + (eigen.match(/.{0,50}Mannschaft.{0,30}/) || [""])[0]);
+  // Runde 2 (12.10.2026): Information zum Datenschutz, Satz zu Trainern und Betreuern: bei Kindern nur im Karneval „Training und Veranstaltungen“, sonst „Training und Spiele“
+  if (S.some((x) => x.schluessel === "datenschutz" && x.art === "eigen")) {
+    const soll = a.abteilung === "karneval" ? "für Training und Veranstaltungen brauchen." : "für Training und Spiele brauchen.";
+    const nicht = a.abteilung === "karneval" ? "Training und Spiele" : "Training und Veranstaltungen";
+    ok(eigen.includes(soll) && !eigen.includes(nicht), () => "M11 Runde 2: Information zum Datenschutz (Abteilung " + a.abteilung + "): „" + soll + "“ fehlt oder „" + nicht + "“ steht da");
+  }
+}
+
 function pruefeRunde3(c) {
-  const { texte, S, e, pfad } = c;
+  const { texte, S, e, pfad, a } = c;
   const u10 = e.unterlagen.find((u) => u.id === "U10");
   const art = u10 ? u10.art : "";
   const fassung = fassungVon(art);
@@ -1213,7 +1271,9 @@ function pruefeRunde3(c) {
   const ds = dsSeiten;
   if (ds.length) {
     const t = seitenText(ds);
-    Object.entries(DATENSCHUTZ_TEXT).forEach(([schluessel, satz]) => {
+    Object.entries(DATENSCHUTZ_TEXT).forEach(([schluessel, text]) => {
+      // M11: Wer nur im Karneval ist, liest „Trainer und Betreuer der Gruppe“ statt „… der Mannschaft“
+      const satz = schluessel === "weitergabe" && a.abteilung === "karneval" ? text.replace("der Mannschaft.", "der Gruppe.") : text;
       ok(t.includes(satz), () => "Information zum Datenschutz: Text „" + schluessel + "“ fehlt: " + satz);
     });
     // Nr. 8: Fassung passend zur Art von U10
@@ -1345,21 +1405,39 @@ function pruefeNA2(c) {
     if (abmeldung) erwDruck.push({ von: abmeldung.von, bis: abmeldung.bis, name: deRegeln.formulare.abmeldung });
     erwDruck.sort((p, q) => p.von - q.von);
   }
+  // M10 (11.10.2026): Die Familie schickt die Datei per E-Mail an die Geschäftsstelle (Entscheidung der 1. Vorsitzenden). Die Adresse kommt aus der Konfiguration.
+  const abgebenSatz = (vorlage) => norm(vorlage.replace("{adresse}", konfig.verein.mail));
   if (papierWeg && !training) {
     ok(!ta.includes("Ausdrucken müssen Sie nur") && !ta.includes("Sie müssen nichts ausdrucken"), "Teil A: ganze Datei auszudrucken – kein Satz „Ausdrucken müssen Sie nur“ und kein „Sie müssen nichts ausdrucken“");
-    ok(ta.includes(norm(T.abgebenAusgedruckt)) && !ta.includes("auf dem Handy mit"), "Teil A: ganze Datei auszudrucken – Teil B wird ausgedruckt und unterschrieben abgegeben (nicht auf dem Handy)");
+    // M11 (12.10.2026): Alles auf Papier und selbst ausgedruckt: Foto oder Scan der unterschriebenen Blätter per E-Mail oder ausgedruckt im Verein (gleichwertig)
+    ok(ta.includes(abgebenSatz(T.abgebenAusgedruckt)) && !ta.includes("auf dem Handy mit"), "Teil A: ganze Datei auszudrucken – „Fotografieren oder scannen Sie die unterschriebenen Blätter. Schicken Sie sie per E-Mail an die Geschäftsstelle: <Adresse>. Oder geben Sie sie im Verein ab.“");
+    ok(abgebenSatz(T.abgebenAusgedruckt) === norm("Fotografieren oder scannen Sie die unterschriebenen Blätter. Schicken Sie sie per E-Mail an die Geschäftsstelle: " + konfig.verein.mail + ". Oder geben Sie sie im Verein ab."), "Teil A: der Satz zum Papierweg hat den Wortlaut der Entscheidung (Foto oder Scan, E-Mail, oder im Verein)");
   } else if (!erwDruck.length) {
     ok(ta.includes(norm(T.ausdruckenNichts)) && !ta.includes(norm(T.ausdruckenNur)), "Teil A: nichts auszudrucken: „Sie müssen nichts ausdrucken.“");
-    ok(ta.includes(norm(T.abgeben)), "Teil A: Teil B geben Sie auf dem Handy oder ausgedruckt ab");
+    ok(ta.includes(abgebenSatz(T.abgeben)), "Teil A: die Datei geht per E-Mail an die Geschäftsstelle");
   } else {
     ok(ta.includes(norm(T.ausdruckenNur)) && !ta.includes(norm(T.ausdruckenNichts)), "Teil A: „Ausdrucken müssen Sie nur:“ mit den Blättern, kein „Sie müssen nichts ausdrucken“");
     const nachSatz = ta.slice(ta.indexOf(norm(T.ausdruckenNur)));
     erwDruck.forEach((d) => ok(nachSatz.includes(norm(seitenAngabeNA2(d) + ": " + d.name)), () => "Teil A, „Ausdrucken müssen Sie nur:“ nennt „" + seitenAngabeNA2(d) + ": " + d.name + "“ nicht"));
-    const genannt = zaehle(nachSatz.slice(0, nachSatz.indexOf("Geben Sie Teil B")), /Seite \d+(?: bis \d+)?: /g);
+    const genannt = zaehle(nachSatz.slice(0, nachSatz.indexOf("Schicken Sie die Datei per E-Mail")), /Seite \d+(?: bis \d+)?: /g);
     ok(genannt === erwDruck.length, () => "Teil A, „Ausdrucken müssen Sie nur:“ nennt " + genannt + " Blätter, erwartet " + erwDruck.length);
   }
-  // Teil C ohne Umschlag-Pflicht, solange die Übergabe offen ist (O25)
-  ok(!/Umschlag/.test(ta), "Teil A verlangt keinen Umschlag (Übergabe der Unterlagen ist offen, O25)");
+  // M10: Der Schritt zur E-Mail steht genau einmal, in „So geht es weiter“, mit der Adresse aus der Konfiguration. Die alten Sätze zur Abgabe im Verein
+  // sind weg, auch in der Übersicht der Teile (Teil B „geht an den Verein“).
+  // (Papierweg, ganze Datei auszudrucken: „Schicken Sie sie per E-Mail an die Geschäftsstelle: <Adresse>“, M11)
+  const mailSatz = papierWeg && !training ? "Schicken Sie sie per E-Mail an die Geschäftsstelle: " : "Schicken Sie die Datei per E-Mail an die Geschäftsstelle: ";
+  const stelleMail = ta.indexOf(mailSatz);
+  ok(zaehle(ta, new RegExp(esc(mailSatz), "g")) === 1 && ta.includes("Geschäftsstelle: " + konfig.verein.mail), "Teil A: der Schritt „" + mailSatz + "<Adresse>“ steht genau einmal, mit der Adresse aus der Konfiguration");
+  ok(ta.indexOf("So geht es weiter") >= 0 && ta.indexOf("So geht es weiter") < stelleMail && stelleMail < ta.indexOf("Wo unterschreiben Sie?"), "Teil A: der Schritt zur E-Mail steht unter „So geht es weiter“");
+  // M11: Die alten Sätze zur Abgabe im Verein sind weg, auch „Sie geben ihn getrennt ab“ (Übersicht zu Teil C) und „bitte im Verein vorlegen“.
+  // Ausnahme: der Satz zum Papierweg („Oder geben Sie sie im Verein ab.“, nur bei ganz ausgedruckter Datei). Unter „Das fehlt noch“ steht jetzt
+  // „Schicken Sie die Kopie per E-Mail …“ statt „Oder Sie geben die Kopie im Verein ab.“
+  ok(!/Geben Sie Teil B im Verein ab|Bringen Sie die Datei auf dem Handy mit|geben Sie sie ausgedruckt ab|Für den Verein \(Seite [^)]*\): Sie geben ihn im Verein ab|Geben Sie ihn ausgedruckt und unterschrieben ab|Geben Sie Teil B auch ausgedruckt|Sie geben ihn getrennt ab|getrennt abgeben/.test(ta), "Teil A: die alten Sätze zur Abgabe im Verein und zu Teil C sind weg");
+  const alteTeilA = alteAbgabe(ta);
+  ok(alteTeilA.length === 0, () => "Teil A: außer dem Satz zum Papierweg und den deutschen Ausweisen steht nichts mehr zum Abgeben, Mitbringen oder „nicht per normaler E-Mail“: " + JSON.stringify(alteTeilA));
+  ok(ta.includes(norm(T.teilB)), "Teil A: die Übersicht der Teile nennt Teil B mit „" + T.teilB + "“");
+  // Teil C ohne Umschlag-Pflicht (O25 und O73: die ganze Datei geht per E-Mail an die Geschäftsstelle)
+  ok(!/Umschlag/.test(ta), "Teil A verlangt keinen Umschlag (die ganze Datei geht per E-Mail, O25 und O73)");
   // Das Attest-Blatt steht nur dort, wo es die Familie ausdrucken muss: auch der Satz im Schritt zum Arzt bleibt
   if (plan.attestVorlage) ok(ta.includes(ATTEST_VORLAGE_TITEL + " steht auf Seite " + plan.attestVorlage.von), "Teil A nennt die Seite der Attest-Vorlage");
 
@@ -1455,7 +1533,7 @@ async function pruefePdf(b, g, opt) {
   const brauchtC = e.formulare.includes("attest") || e.formulare.includes("notfall") || Boolean(b.bilder.nachweise.U10);
   ok(Boolean(teilC) === brauchtC, "Teil C nur bei Attest, Notfallbogen oder Attest-Kopie: erwartet " + brauchtC + ", vorhanden " + Boolean(teilC));
   if (teilC) {
-    ok(teilC.titel === "Vertraulich – getrennt abgeben", "Titel von Teil C");
+    ok(teilC.titel === "Vertraulich", "Titel von Teil C (M11: „Vertraulich“, nicht mehr „… getrennt abgeben“)");
     ok(/Teil C – Vertraulich/.test(texte[teilC.vonSeite - 1]) && S[teilC.vonSeite - 1].art === "trennblatt", "Teil C beginnt mit dem Trennblatt");
     ok(S.slice(teilC.vonSeite).every((s) => s.art !== "vorlage"), "in Teil C liegen keine Vordrucke des Verbands");
   }
@@ -1515,7 +1593,7 @@ async function pruefePdf(b, g, opt) {
   const statusMuster = /liegt bei \(Seite \d+(–\d+)?\)|fehlt|klären|Verein klärt|Verein erhebt|Verein macht das Foto|Original zeigen|siehe unten|Datei nicht lesbar/;
   ok(statusMuster.test(lz), "Laufzettel nennt Status der Unterlagen");
   ok(lz.includes("Version " + e.version) && lz.includes("Stand " + konfig.anmeldung.stand), "Laufzettel nennt Regelwerk-Version und Stand");
-  ["Eingang am", "geprüft von", "DFBnet-Antrag gestellt am", "Spielberechtigung erteilt am", "Originale abgelegt am", "Löschung am"].forEach((w) => ok(lz.includes(w), "Laufzettel hat das Bearbeitungsfeld „" + w + "“"));
+  ["Eingang am", "geprüft von", "DFBnet-Antrag gestellt am", "Spielberechtigung erteilt am", "Unterlagen abgelegt am", "Löschung am"].forEach((w) => ok(lz.includes(w), "Laufzettel hat das Bearbeitungsfeld „" + w + "“"));
   {
     const lzSeiten = S.map((s, i) => ({ s: s, t: texte[i] })).filter((x) => x.s.art === "laufzettel");
     const seiteMit = (w) => lzSeiten.findIndex((x) => x.t.includes(w));
@@ -1562,7 +1640,7 @@ async function pruefePdf(b, g, opt) {
   if (!e.fehlend.length) ok(ta.includes("Es fehlt nichts"), "Teil A sagt, dass nichts fehlt");
   const seitenAngabe = (t) => (t.vonSeite === t.bisSeite ? "(Seite " + t.vonSeite + ")" : "(Seite " + t.vonSeite + " bis " + t.bisSeite + ")");
   ok(ta.includes(TEIL_NAME.A + " " + seitenAngabe(teile[0])) && ta.includes(TEIL_NAME.B + " " + seitenAngabe(teile[1])) && !/\(Seite (\d+) bis \1\)/.test(ta), "Teil A nennt die Teile mit ihren Namen und Seiten (eine Seite: „Seite N“)");
-  if (teilC) ok(ta.includes(TEIL_NAME.C + " (Seite " + teilC.vonSeite + " bis " + teilC.bisSeite + ")") && ta.includes(norm(TEXTE_TEIL_A.abgebenC)), "Teil A erklärt Teil C (ohne Umschlag-Pflicht, solange die Übergabe offen ist)");
+  if (teilC) ok(ta.includes(TEIL_NAME.C + " (Seite " + teilC.vonSeite + " bis " + teilC.bisSeite + ")") && ta.includes(norm(TEXTE_TEIL_A.teilC)) && ta.includes(norm(TEXTE_TEIL_A.abgebenC)) && TEXTE_TEIL_A.teilC === "Er enthält Angaben zur Gesundheit. Der Verein bewahrt ihn getrennt auf." && TEXTE_TEIL_A.abgebenC === "Teil C bleibt in der Datei. Er geht in derselben E-Mail mit." && zaehle(ta, /Der Verein bewahrt ihn getrennt auf\./g) === 1, "Teil A erklärt Teil C („Der Verein bewahrt ihn getrennt auf.“ genau einmal, in der Übersicht; Schritt: „Teil C bleibt in der Datei. Er geht in derselben E-Mail mit.“, ohne Umschlag; O25 und O73)");
   ok(ta.includes("Schicken Sie die Datei nicht per WhatsApp"), "Teil A warnt vor WhatsApp");
   const stiftFamilie = e.unterschriften.filter((u) => u.wer !== "arzt" && u.wer !== "verein" && erwarteteArt(b, u) === "stift");
   // Die Abmeldung beim alten Verein hat einen eigenen Schritt (sie schickt die Familie selbst); sie zählt nicht zu den Blättern, die der Verein zum ersten Training mitbringt
@@ -1896,10 +1974,11 @@ async function pruefePdf(b, g, opt) {
   pruefeEigeneSeiten({ b: b, g: g, texte: texte, S: S, bericht: bericht, e: e, a: a, pfad: pfad, bilderSeite: bilderSeite, bereich: bereich, teilC: teilC });
   pruefeRunde3({ b: b, texte: texte, S: S, bericht: bericht, e: e, a: a, pfad: pfad });
   pruefeNA2({ b: b, texte: texte, S: S, bericht: bericht, e: e, a: a, pfad: pfad });
+  pruefeM11({ b: b, texte: texte, S: S, bericht: bericht, e: e, a: a, pfad: pfad });
   const fotoSeiten = S.filter((s) => s.art === "foto");
   ok(fotoSeiten.length === (b.bilder.spielerfoto ? 1 : 0), "Spielerfoto-Seite genau dann, wenn ein Foto mitgegeben wurde");
   const ersatz = S.filter((s) => s.art === "nachweis-ersatz");
-  ersatz.forEach((s) => ok(norm(texte[S.indexOf(s)]).includes("Datei konnte nicht übernommen werden – bitte im Verein vorlegen"), "Ersatzseite trägt den Hinweis"));
+  ersatz.forEach((s) => ok(norm(texte[S.indexOf(s)]).includes("Datei konnte nicht übernommen werden – bitte nachreichen") && norm(texte[S.indexOf(s)]).includes("Schicken Sie ein neues Foto oder einen Scan per E-Mail an die Geschäftsstelle."), "Ersatzseite trägt den Hinweis (nachreichen, per E-Mail an die Geschäftsstelle)"));
   return { info: info, texte: texte };
 }
 const liste = (x) => (Array.isArray(x) ? x : []);
@@ -2122,11 +2201,11 @@ async function sonderfaelle() {
     ok(texte[von("U13")[1].nr - 1].includes("Grund: PDF nicht lesbar"), "kaputtes PDF: Ersatzseite mit Grund");
     ok(texte[von("U13")[2].nr - 1].includes("Grund: Bild nicht lesbar"), "kaputtes Bild: Ersatzseite mit Grund");
     ok(texte[von("U13")[3].nr - 1].includes("Grund: Dateityp nicht unterstützt"), "unbekannter Dateityp (GIF): Ersatzseite mit Grund");
-    von("U13").forEach((x) => ok(texte[x.nr - 1].includes("Datei konnte nicht übernommen werden – bitte im Verein vorlegen"), "Ersatzseite " + x.nr + " trägt den Hinweis"));
+    von("U13").forEach((x) => ok(texte[x.nr - 1].includes("Datei konnte nicht übernommen werden – bitte nachreichen"), "Ersatzseite " + x.nr + " trägt den Hinweis"));
     const lz = S.map((s, i) => ({ s: s, t: texte[i] })).filter((x) => x.s.art === "laufzettel").map((x) => x.t).join(" ");
-    ok(/U13 .*Datei nicht lesbar, bitte im Verein vorlegen/.test(lz), "Laufzettel: U13 – Datei nicht lesbar");
+    ok(/U13 .*Datei nicht lesbar, bitte nachreichen/.test(lz), "Laufzettel: U13 – Datei nicht lesbar, bitte nachreichen");
     const teilA = S.map((s, i) => ({ s: s, t: texte[i] })).filter((x) => x.s.art === "teil-a").map((x) => x.t).join(" ");
-    ok(teilA.includes("Meldebescheinigung") && teilA.includes("Die Datei ließ sich nicht übernehmen. Bringen Sie das Original oder eine Kopie mit."), "Teil A: nicht übernommene Datei steht in der Liste „Das fehlt noch“");
+    ok(teilA.includes("Meldebescheinigung") && teilA.includes("Die Datei ließ sich nicht übernehmen. Schicken Sie ein neues Foto oder einen Scan per E-Mail nach."), "Teil A: nicht übernommene Datei steht in der Liste „Das fehlt noch“");
     ok(/U12 .*liegt bei \(Seite \d+–\d+\)/.test(lz), "Laufzettel: U12 liegt bei mit Seitenbereich");
     ok(/U10 .*liegt bei \(Seite \d+\)/.test(lz), "Laufzettel: U10 (Attest-Kopie) liegt bei");
     const gedreht = von("U12")[2];
@@ -2386,6 +2465,27 @@ async function sonderfaelle() {
     const beides = await probe("kind-neu-deutsch-f", "beides", "beides");
     ok(beides.b.a.abteilung === "beides" && beides.nr > 0, "Fahrten Kind in Fußball und Karneval: Blatt vorhanden");
     ok(beides.t.includes("Fahrten zu Spielen und Veranstaltungen") && beides.t.includes("Ja, mein Kind darf zu Spielen und Veranstaltungen in Fahrgemeinschaften mitfahren.") && !beides.t.includes("Veranstaltungen des Vereins"), "Fahrten Kind in Fußball und Karneval: der bisherige Satz wie bei Fußball");
+    // M11 (12.10.2026): Beim Karneval gibt es Gruppen, keine Mannschaften. Nur Karneval sagt „Messenger-Gruppe der Gruppe“ und „Trainer und Betreuer
+    // der Gruppe“ (Messenger-Satz, Datenschutzinformation, Trennblatt, Notfallbogen); Fußball und „beides“ behalten „Mannschaft“. Die Oberfläche folgt
+    // derselben Regel (e2e: pruefeFahrtenSatz).
+    const MESSENGER_KARNEVAL = "Ja, meine Telefonnummer darf in die Messenger-Gruppe der Gruppe. Alle Mitglieder der Messenger-Gruppe können sie sehen.";
+    const MESSENGER_MANNSCHAFT = "Ja, meine Telefonnummer darf in die Messenger-Gruppe der Mannschaft. Alle Mitglieder der Gruppe können sie sehen.";
+    const eigen = (x) => eigenerText(textSeiten(x.g.pfad), x.g.bericht.seiten);
+    const mitNotfall = (x) => x.g.bericht.seiten.some((s) => s.schluessel === "notfall" && s.art === "eigen");
+    const eK = eigen(karneval);
+    ok(karneval.t.includes(MESSENGER_KARNEVAL) && !karneval.t.includes("Mannschaft"), "Karneval-Kind: Messenger-Satz „… der Gruppe. Alle Mitglieder der Messenger-Gruppe …“, auf dem Blatt kein „Mannschaft“");
+    ok(eK.includes("Fahrten und Messenger-Gruppe der Gruppe") && eK.includes("sehen nur die Trainer und Betreuer der Gruppe."), "Karneval-Kind: die Information zum Datenschutz sagt „… Messenger-Gruppe der Gruppe“ und „Trainer und Betreuer der Gruppe“");
+    ok(mitNotfall(karneval) && /Trainerinnen, Trainer und Betreuer der Gruppe (?:nutzen sie nur im Notfall|dürfen diese Angaben nutzen)/.test(eK), "Karneval-Kind: der Notfall- und Gesundheitsbogen nennt die Trainer und Betreuer der Gruppe");
+    ok(/Der Notfall- und Gesundheitsbogen ist nur für die Trainer und Betreuer der Gruppe\./.test(eK), "Karneval-Kind: das Trennblatt von Teil C nennt die Trainer und Betreuer der Gruppe");
+    ok(!/Mannschaft/.test(eK), () => "Karneval-Kind: auf keiner eigenen Seite steht „Mannschaft“: " + (eK.match(/.{0,50}Mannschaft.{0,30}/) || [""])[0]);
+    ok(eK.includes("nur die Angaben, die sie für Training und Veranstaltungen brauchen.") && !eK.includes("Training und Spiele"), "Karneval-Kind: die Information zum Datenschutz sagt „Training und Veranstaltungen“ statt „Training und Spiele“ (Runde 2)");
+    for (const [name, x] of [["Fußball-Kind", fussball], ["Kind in Fußball und Karneval", beides]]) {
+      const eF = eigen(x);
+      ok(x.t.includes(MESSENGER_MANNSCHAFT) && !x.t.includes("Messenger-Gruppe der Gruppe"), name + ": Messenger-Satz wie bisher („… der Mannschaft. Alle Mitglieder der Gruppe …“)");
+      ok(eF.includes("Fahrten und Messenger-Gruppe der Mannschaft") && eF.includes("sehen nur die Trainer und Betreuer der Mannschaft."), name + ": die Information zum Datenschutz sagt weiter „Mannschaft“");
+      ok(eF.includes("nur die Angaben, die sie für Training und Spiele brauchen.") && !eF.includes("Training und Veranstaltungen"), name + ": die Information zum Datenschutz sagt weiter „Training und Spiele“ (Runde 2)");
+      ok(mitNotfall(x) && /Trainerinnen, Trainer und Betreuer der Mannschaft (?:nutzen sie nur im Notfall|dürfen diese Angaben nutzen)/.test(eF) && /Der Notfall- und Gesundheitsbogen ist nur für die Trainer und Betreuer der Mannschaft\./.test(eF) && !/Betreuer der Gruppe/.test(eF), name + ": Notfallbogen und Trennblatt sagen weiter „Mannschaft“");
+    }
     // Ohne Antwort am Bildschirm: der Ersatzsatz und die Überschrift bleiben die der Abteilung
     const ohneAntwort = bereite("karneval-kind", "bild", 0, (a) => {
       a.einwilligungen = Object.assign({}, a.einwilligungen, { fahrten: undefined, messenger: false });
@@ -2555,6 +2655,32 @@ async function szenarien() {
   console.log(zeilen.join("\n"));
 }
 
+// M10 (11.10.2026): Die Adresse im Schritt zur E-Mail kommt aus der Konfiguration (konfig.verein.mail, sonst die Kontakte des Regelwerks). Mit einer
+// anderen Adresse ändert sich der Satz; fehlt sie ganz, entfällt „: <Adresse>“ und der Satz bleibt richtig. Die Konfiguration wird danach zurückgesetzt.
+async function mailAdresseTests() {
+  kontext = "M10: Adresse der Geschäftsstelle";
+  const vorher = { verein: konfig.verein.mail, kontakt: konfig.anmeldung.kontakte.geschaeftsstelle.mail };
+  const teilAText = async (datei) => laufzettelUndTeilA(await baue(bereite("kind-neu-deutsch-f", "bild", 0), datei)).ta;
+  try {
+    // Nur die Adresse in konfig.verein.mail ändert sich: Teil A nennt die neue Adresse
+    konfig.verein.mail = "anmeldung@example.org";
+    const mitAndererAdresse = await teilAText("m10-andere-adresse.pdf");
+    ok(mitAndererAdresse.includes("Schicken Sie die Datei per E-Mail an die Geschäftsstelle: anmeldung@example.org.") && !mitAndererAdresse.includes("Geschäftsstelle: " + vorher.verein), "Teil A nennt die Adresse aus konfig.verein.mail (hier eine andere Adresse)");
+    // Fehlt konfig.verein.mail, gilt die Adresse aus den Kontakten des Regelwerks
+    konfig.verein.mail = "";
+    const ausKontakten = await teilAText("m10-adresse-aus-kontakten.pdf");
+    ok(ausKontakten.includes("Schicken Sie die Datei per E-Mail an die Geschäftsstelle: " + vorher.kontakt + "."), "Teil A nimmt ohne konfig.verein.mail die Adresse aus den Kontakten des Regelwerks");
+    // Fehlt sie auch dort: kein „: <Adresse>“, kein Platzhalter, der Satz bleibt ganz
+    konfig.anmeldung.kontakte.geschaeftsstelle.mail = "";
+    const ohneAdresse = await teilAText("m10-ohne-adresse.pdf");
+    ok(/Schicken Sie die Datei per E-Mail an die Geschäftsstelle\.(?!\S)/.test(ohneAdresse) && !/Geschäftsstelle: \.|\{adresse\}|undefined/.test(ohneAdresse), "Teil A ohne bekannte Adresse: „Schicken Sie die Datei per E-Mail an die Geschäftsstelle.“ (ohne „: <Adresse>“, ohne Platzhalter)");
+  } finally {
+    konfig.verein.mail = vorher.verein;
+    konfig.anmeldung.kontakte.geschaeftsstelle.mail = vorher.kontakt;
+  }
+  kontext = "";
+}
+
 // Rückfall: fehlt einer eigenen Seite die Stelle in den Regeln, steht dort eine Stift-Markierung und der Fall wird gemeldet
 async function rueckfaelle() {
   kontext = "Rückfall";
@@ -2642,7 +2768,7 @@ async function bildschirmModusTests() {
     ok(lz.includes("Alle Unterschriften der Familie sind am Bildschirm geleistet") === mitBild, "Laufzettel: „Alle Unterschriften der Familie sind am Bildschirm geleistet“ nur, wenn es stimmt");
     ok(lz.includes(norm(LAUFZETTEL_KIND_LEER)) === !mitBild, "Laufzettel: „Das Kind hat den Antrag nicht unterschrieben. Das Passwesen entscheidet, ob das nötig ist.“ nur, wenn die Zeile leer blieb");
     ok(mitBild ? ta.includes(norm(T.stiftKeine)) : ta.includes(norm(T.stiftOffen)) && !ta.includes(norm(T.stiftKeine)), "Teil A: " + (mitBild ? "„Sie haben alles am Bildschirm unterschrieben.“" : "„Einige Unterschriften fehlen noch …“ (die Abmeldung)"));
-    const nachSatz = ta.includes(norm(T.ausdruckenNur)) ? ta.slice(ta.indexOf(norm(T.ausdruckenNur)), ta.indexOf("Geben Sie Teil B")) : "";
+    const nachSatz = ta.includes(norm(T.ausdruckenNur)) ? ta.slice(ta.indexOf(norm(T.ausdruckenNur)), ta.indexOf("Schicken Sie die Datei per E-Mail")) : "";
     ok(nachSatz.includes(deRegeln.formulare.abmeldung), "Teil A, „Ausdrucken müssen Sie nur:“ nennt die Abmeldung beim alten Verein (Einschreiben braucht Papier)");
     ok(!nachSatz.includes(deRegeln.formulare.hfv_antrag), "Teil A, „Ausdrucken müssen Sie nur:“ nennt den Antrag auf Spielerlaubnis nie (auch nicht bei leerer Zeile des Kindes)");
     ok(!ta.includes("beim ersten Training") && !ta.includes("Der Verein bringt sie ausgedruckt mit") && !ta.includes("bringt der Verein die Blätter"), "Teil A: kein Satz mehr zum ersten Training und zu Blättern, die der Verein ausgedruckt mitbringt (Modus bildschirm)");
@@ -2674,7 +2800,7 @@ async function bildschirmModusTests() {
       ok(lz.includes(norm(LAUFZETTEL_KIND_LEER)) === !mitBild, "Laufzettel: Satz zum leeren Feld des Kindes nur, wenn es leer blieb");
       ok(lz.includes(norm(mitBild ? LAUFZETTEL_HFV_ALLE : LAUFZETTEL_HFV_KIND)) && LAUFZETTEL_HFV_SAETZE.filter((x) => lz.includes(norm(x))).length === 1, "Laufzettel: Satz zu den Blättern des Verbands (" + (mitBild ? "alle Unterschriften am Bildschirm" : "außer an der Unterschriftszeile des Kindes im Antrag") + ")");
       ok(!g.bericht.hinweise.some((h) => /nicht geleistet/.test(h)) && !lz.includes("Die Unterschrift steht deshalb als Stift-Markierung"), "Hinweise zur Datei: keine Stift-Meldung zu leeren Feldern");
-      const nachSatz = ta.includes(norm(T.ausdruckenNur)) ? ta.slice(ta.indexOf(norm(T.ausdruckenNur)), ta.indexOf("Geben Sie Teil B")) : "";
+      const nachSatz = ta.includes(norm(T.ausdruckenNur)) ? ta.slice(ta.indexOf(norm(T.ausdruckenNur)), ta.indexOf("Schicken Sie die Datei per E-Mail")) : "";
       if (!fall.attestVorlage) {
         ok(ta.includes(norm(T.ausdruckenNichts)) && !ta.includes(norm(T.ausdruckenNur)), "Teil A: „Sie müssen nichts ausdrucken.“ (kein Blatt auszudrucken, keine Attest-Vorlage)");
       } else {
@@ -2907,6 +3033,7 @@ async function haupt() {
     if (!NUR_SCHALTER) {
       await sonderfaelle();
       await rueckfaelle();
+      await mailAdresseTests();
     }
     await schalterLaeufe();
   }

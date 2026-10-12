@@ -17,6 +17,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import * as R from "../../assets/js/anmeldung/regeln.js";
 import { ladeKonfig, PROFILE, BAUSTEINE, HEUTE_STANDARD, profil } from "./profile.mjs";
+import { pruefeAbgabeWortlaut, ABGABE_AUSNAHMEN_REGELN } from "./sprache-check.mjs";
 
 const WURZEL = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const konfig = ladeKonfig();
@@ -217,7 +218,7 @@ function testeDaten() {
   [
     ["O67", "datenschutz", "P1", "U28,U06", /Art\. 6 Abs\. 1 lit\. b DSGVO/, /oder lit\. f/, "offen"],
     ["O68", "vorstand", "P1", "U01,U04,U05,U06,U07,U17,U18,U23,U29", /am Bildschirm unterschrieben/, /§ 127 BGB/, "entschieden"],
-    ["O69", "jugendleitung", "P2", "U18", /Vollmacht für die Abmeldung/, /in DFBnet ein/, "offen"],
+    ["O69", "jugendleitung", "P2", "U18", /Vollmacht für die Abmeldung/, /in DFBnet ein/, "geregelt"], // seit M11 (11.10.2026) geregelt
     ["O70", "jugendleitung", "P2", "U07", /Kreisjugendwart \(HFV-Jugendordnung § 7 Nr\. 2\)/, /Wer meldet, bis wann\?$/, "vorgemerkt"],
     ["O71", "vorstand", "P2", "", /Wer pflegt Fristen, Beträge und Gebühren/, /Beitragsordnung oder Verbandsordnungen ändern\?$/, "geregelt"],
   ].forEach(([id, an, prio, betrifft, muster1, muster2, status]) => {
@@ -229,14 +230,15 @@ function testeDaten() {
   });
   wahr("Offener Punkt O68: Quelle nennt digitaleUnterschrift in data/anmeldung-formulare.json", /data\/anmeldung-formulare\.json \(digitaleUnterschrift\)/.test(punkt("O68").quelle));
   wahr("Offener Punkt O70: Quelle nennt HFV-Jugendordnung § 7 Nr. 2", /HFV-Jugendordnung § 7 Nr\. 2/.test(punkt("O70").quelle));
-  // 07.10.2026 (Prüfung Orchestrator, Paket N-A2): zwei offene Punkte zur Übergabe des PDFs in der App und zum automatischen Versand
+  // 07.10.2026 (Prüfung Orchestrator, Paket N-A2): zwei Punkte zur Übergabe des PDFs in der App und zum automatischen Versand;
+  // seit M11 (11.10.2026, 1. Vorsitzende) beide entschieden: kein Server-Versand, die ganze Datei geht per E-Mail an die Geschäftsstelle
   [
     ["O72", "vorstand", "P1", "", /Wie übergibt die Familie das PDF in der Vereins-App\?/, /weist der Assistent in der App auf „Im Browser öffnen“ hin\.$/],
     ["O73", "datenschutz", "P1", "U10,U11,U12,U28", /Teil C enthält Gesundheitsdaten \(Art\. 9 DSGVO\)/, /nur verschlüsselt oder getrennt auf Papier\?$/],
   ].forEach(([id, an, prio, betrifft, muster1, muster2]) => {
     const o = punkt(id);
-    wahr("Offener Punkt " + id + ": an " + an + ", " + prio + ", betrifft " + (betrifft || "keine Unterlage") + ", status offen",
-      !!o && o.an === an && o.prioritaet === prio && Array.isArray(o.betrifft) && o.betrifft.join(",") === betrifft && o.status === "offen");
+    wahr("Offener Punkt " + id + ": an " + an + ", " + prio + ", betrifft " + (betrifft || "keine Unterlage") + ", status entschieden",
+      !!o && o.an === an && o.prioritaet === prio && Array.isArray(o.betrifft) && o.betrifft.join(",") === betrifft && o.status === "entschieden");
     wahr("Offener Punkt " + id + ": Frage", !!o && muster1.test(o.frage) && muster2.test(o.frage));
     wahr("Offener Punkt " + id + ": Quelle nennt die Prüfung des Orchestrators vom 07.10.2026", !!o && /^Prüfung Orchestrator, 07\.10\.2026$/.test(o.quelle));
   });
@@ -261,19 +263,21 @@ function testeDaten() {
   const STATUS_PUNKT = ["offen", "entschieden", "geregelt", "entfaellt", "vorgemerkt"];
   wahr("Offene Punkte: Status nur offen, entschieden, geregelt, entfaellt oder vorgemerkt (weitgehend_geklaert gibt es nicht mehr)", cfg.offenePunkte.every((o) => STATUS_PUNKT.includes(o.status)),
     cfg.offenePunkte.filter((o) => !STATUS_PUNKT.includes(o.status)).map((o) => o.id + ":" + o.status).join(","));
+  // Stand nach M11 (12.10.2026, Antworten der 1. Vorsitzenden vom 11.10.2026 und Entscheidung zu den Spielerpässen): O24, O25, O72 und O73 sind entschieden,
+  // O11 und O69 geregelt. Offen bleiben nur noch O45 und O67.
   const STAND_11_10 = {
-    entschieden: ["O01", "O26", "O27", "O30", "O31", "O65", "O66", "O68"],
-    geregelt: ["O02", "O03", "O04", "O05", "O06", "O07", "O08", "O09", "O10", "O12", "O13", "O14", "O15", "O16",
+    entschieden: ["O01", "O24", "O25", "O26", "O27", "O30", "O31", "O65", "O66", "O68", "O72", "O73"],
+    geregelt: ["O02", "O03", "O04", "O05", "O06", "O07", "O08", "O09", "O10", "O11", "O12", "O13", "O14", "O15", "O16",
       "O17", "O18", "O19", "O20", "O21", "O22", "O23", "O32", "O33", "O34", "O37", "O38", "O39", "O40",
-      "O41", "O42", "O43", "O44", "O50", "O52", "O54", "O60", "O61", "O62", "O63", "O64", "O71"],
+      "O41", "O42", "O43", "O44", "O50", "O52", "O54", "O60", "O61", "O62", "O63", "O64", "O69", "O71"],
     entfaellt: ["O28", "O29", "O35", "O36", "O49", "O51", "O55", "O56", "O57"],
     vorgemerkt: ["O46", "O47", "O48", "O53", "O58", "O59", "O70"],
-    offen: ["O11", "O24", "O25", "O45", "O67", "O69", "O72", "O73"],
+    offen: ["O45", "O67"],
   };
   Object.keys(STAND_11_10).forEach((status) =>
     gleich("Offene Punkte: Stand " + status + " (" + STAND_11_10[status].length + ")", cfg.offenePunkte.filter((o) => o.status === status).map((o) => o.id), STAND_11_10[status]));
-  gleich("Offene Punkte: Zahl je Stand (8 entschieden, 41 geregelt, 9 entfällt, 7 später, 8 offen; zusammen 73; seit M9 sind O01 und O68 entschieden)",
-    Object.keys(STAND_11_10).map((status) => cfg.offenePunkte.filter((o) => o.status === status).length), [8, 41, 9, 7, 8]);
+  gleich("Offene Punkte: Zahl je Stand (12 entschieden, 43 geregelt, 9 entfällt, 7 später, 2 offen; zusammen 73; seit M11 sind O24, O25, O72 und O73 entschieden, O11 und O69 geregelt)",
+    Object.keys(STAND_11_10).map((status) => cfg.offenePunkte.filter((o) => o.status === status).length), [12, 43, 9, 7, 2]);
   wahr("Offene Punkte: nur offene Punkte tragen „stand“ (nie leer), alle übrigen „entscheidung“ (nie leer), nie beides",
     cfg.offenePunkte.every((o) => o.status === "offen"
       ? typeof o.stand === "string" && o.stand.trim().length > 0 && !("entscheidung" in o)
@@ -287,6 +291,21 @@ function testeDaten() {
     ["O65", "Nur die Eltern unterschreiben, Jugendliche nicht zusätzlich (1. Vorsitzende, 11.10.2026)."],
     ["O66", "Neu mit der Website verknüpfen (1. Vorsitzende, 11.10.2026). Umsetzung als Weiterleitung bei IONOS, sobald der Zugang da ist. Bis dahin nennt der Assistent die Download-Adresse."],
   ].forEach(([id, text]) => gleich("Offener Punkt " + id + ": Entscheidung vom 11.10.2026", punkt(id).entscheidung, text));
+  // Paket M11 (12.10.2026): Spielerpässe, Übergabe der Datei per E-Mail (auch Teil C), kein Server-Versand, Vollmacht, Unterschrift des Kindes.
+  // Der Wortlaut steht fest und wird so auf der Konzeptseite gezeigt; alle sechs tragen „entscheidung“, keiner „stand“.
+  [
+    ["O24", "entschieden", "Spielerpässe: Die Jugend gibt der 1. Kassierer ein, die Herren der Spielausschuss Senioren (11.10.2026)."],
+    ["O25", "entschieden", "Die Familie schickt die Datei per E-Mail an die Geschäftsstelle (1. Vorsitzende, 11.10.2026). Der 1. Kassierer prüft beim Erfassen, ob alles da ist."],
+    ["O72", "entschieden", "Kein Server-Versand zum Start (1. Vorsitzende, 11.10.2026). Die Familie schickt die Datei selbst. In der App hilft „Im Browser öffnen“."],
+    ["O73", "entschieden", "Die ganze Datei geht per E-Mail an die Geschäftsstelle, auch Teil C (1. Vorsitzende, 11.10.2026). Der Verein bewahrt Teil C getrennt auf."],
+    ["O69", "geregelt", "Das Passwesen gibt die Vollmacht in DFBnet ein, am besten am Tag des Eingangs."],
+    ["O11", "geregelt", "Ein Elternteil unterschreibt, das Kind freiwillig. Das Passwesen entscheidet im Einzelfall."],
+  ].forEach(([id, status, text]) => {
+    gleich("Offener Punkt " + id + ": Entscheidung (M11, " + status + ")", punkt(id).entscheidung, text);
+    wahr("Offener Punkt " + id + ": Status " + status + ", ohne „stand“", punkt(id).status === status && !("stand" in punkt(id)));
+  });
+  wahr("Daten: der Hinweis zum Passwesen nennt die Entscheidung zu O24 (kein „noch offen“ mehr)",
+    /1\. Kassierer/.test(cfg.kontakte.passwesen.hinweis) && /Spielausschuss Senioren/.test(cfg.kontakte.passwesen.hinweis) && !/noch offen/.test(cfg.kontakte.passwesen.hinweis));
   wahr("Offene Punkte: „geregelt“ und „vorgemerkt“ nennen den Wortlaut der 1. Vorsitzenden (Beispiele O02, O08, O13, O48, O58)",
     /^Der Assistent folgt den Vordrucken des HFV\. Sonderfälle klärt das Passwesen im Einzelfall \(1\. Vorsitzende, 11\.10\.2026\)\.$/.test(punkt("O02").entscheidung) &&
       /^Der Assistent bleibt bei seiner Rechnung\. Das Passwesen prüft im Einzelfall \(1\. Vorsitzende, 11\.10\.2026\)\.$/.test(punkt("O08").entscheidung) &&
@@ -526,6 +545,11 @@ function testeFaelleUndRegeln() {
   const e10 = R.auswerten(BAUSTEINE.kind({}), konfig, HEUTE_STANDARD);
   ["mitgliedschaft_zuerst", "spielerfoto_hinweis", "attest_aktuell"].forEach((k) => enthaelt("R10: Hinweis " + k, e10.hinweise.map((h) => h.key), k));
   gleich("R10: Spielerfoto vor dem ersten Spiel", e10.unterlagen.find((u) => u.id === "U16").wann, "vor_erstem_spiel");
+  // O11 (geregelt, 11.10.2026; M11 Runde 2): Der Hinweis zur Unterschrift des Kindes ist eine Information, keine offene Frage mehr
+  const kindHinweis = e10.hinweise.find((h) => h.key === "spieler_unterschrift_kind");
+  wahr("O11: ein Kind mit Spielrecht bekommt den Hinweis spieler_unterschrift_kind, Art info (nicht mehr offen)", !!kindHinweis && kindHinweis.art === "info", kindHinweis ? kindHinweis.art : "kein Hinweis");
+  wahr("O11: in keinem Profil steht der Hinweis spieler_unterschrift_kind mit der Art offen", PROFILE.every((p) => R.auswerten(tiefKopie(p.a), konfig, p.heute).hinweise.every((h) => h.key !== "spieler_unterschrift_kind" || h.art === "info")));
+  wahr("O11: Erwachsene und Passive bekommen den Hinweis nicht", ["herren-neu-deutsch", "senator-karneval"].every((id) => { const q = PROFILE.find((x) => x.id === id); return !q || !R.auswerten(tiefKopie(q.a), konfig, q.heute).hinweise.some((h) => h.key === "spieler_unterschrift_kind"); }));
   // R11: Rechenbeispiel der Recherche
   gleich("R11: D-Jugend mit Freigabe ab 30.12.2026", fristD("2026-09-29", "ja").pflichtspieleAb, "2026-12-30");
   gleich("R11: D-Jugend ohne Freigabe ab 30.03.2027", fristD("2026-09-29", "nein").pflichtspieleAb, "2027-03-30");
@@ -910,6 +934,28 @@ async function testeTexte() {
     pruefe("Einfache Sprache " + name + ": keine Abkürzungen", () => assert.ok(!KURZ_ABK.test(t) && !VERBOTENE_KUERZEL.test(t), "Abkürzung in: " + t));
     pruefe("Einfache Sprache " + name + ": Sie-Form (kein 'du' und 'dein')", () => assert.ok(!/\b(du|dein|deine|deinen|dich)\b/i.test(t), "Du-Form in: " + t));
   });
+  // M11 (12.10.2026): Die Familie schickt die ganze Datei per E-Mail an die Geschäftsstelle, auch Teil C (O25, O73). Die Regeltexte sagen nichts mehr
+  // zu „getrennt abgeben“, „nicht per normaler E-Mail“, „im Verein abgeben oder vorlegen“ und „mitbringen“ – außer an den Ausnahmen (deutsche
+  // Ausweise: Der Verein sieht das Original; Pfade und Gründe in sprache-check.mjs › ABGABE_AUSNAHMEN_REGELN).
+  const abgabe = pruefeAbgabeWortlaut(texte, ABGABE_AUSNAHMEN_REGELN);
+  gleich("Texte: kein alter Satz zur Abgabe im Verein, zum Mitbringen oder zu „nicht per normaler E-Mail“ (M11)", abgabe.verstoesse.map((v) => v.pfad + ": " + v.art), []);
+  gleich("Texte: jede Ausnahme zur Abgabe trifft noch einen Text (M11)", abgabe.ungenutzt, []);
+  [
+    ["hinweise.unterlagen_kein_whatsapp", "Schicken Sie Ausweise und Atteste nicht per WhatsApp. Schicken Sie sie nur per E-Mail an die Geschäftsstelle."],
+    ["hinweise.vormund_hinweis", "Der Vormund unterschreibt für das Kind. Schicken Sie den Nachweis über die Vormundschaft mit der Anmeldung."],
+    ["hinweise.pflege_hinweis", "Die Pflegeperson unterschreibt im Alltag für das Kind. Schicken Sie den Nachweis mit der Anmeldung."],
+    ["unterlagen.U01.wo", "Der Antrag steht in der Datei. Sie schicken die Datei per E-Mail an die Geschäftsstelle."],
+    ["unterlagen.U03.wo", "Sie laden das Foto im Assistenten hoch. Oder Sie schicken die Kopie per E-Mail an die Geschäftsstelle."],
+    ["unterlagen.U18.wo", "Das Blatt steht in der Datei. Der Verein meldet am besten am Tag des Eingangs ab."],
+    ["unterlagen.U24.wo", "Das Blatt gehört zum Teil für den Verein."],
+    // Runde 2 (12.10.2026): alles kommt per E-Mail, kein „Original“; O11 ist geregelt, der Hinweis ist eine Information
+    ["unterlagen.U07.wo", "Der Verein schickt den Antrag an den Verband. Die Datei bleibt im Verein."],
+    ["hinweise.spieler_unterschrift_kind", "Ihr Kind kann den Antrag freiwillig mit unterschreiben."],
+  ].forEach(([pfad, soll]) => gleich("Texte " + pfad + ": Wortlaut nach M11", pfad.split(".").reduce((x, k) => (x === undefined ? undefined : x[k]), texte), soll));
+  // Ausnahmen bleiben wie sie waren: deutsche Ausweise zeigt die Familie im Verein im Original
+  gleich("Texte: deutsche Ausweise bleiben beim Original im Verein (hinweise.ausweis_deutsch_original, unterlagen.U12.wie)",
+    [texte.hinweise.ausweis_deutsch_original, texte.unterlagen.U12.wie],
+    ["Der Verein darf deutsche Ausweise nicht weitergeben. Zeigen Sie das Original im Verein. Der Verein klärt den Rest.", "Machen Sie ein Foto von der Vorderseite. Deutsche Ausweise zeigen Sie im Verein im Original."]);
   // Platzhalter: zu jedem Text liefert das Ergebnis alle Werte (in Profilen und Zufallsprüfung geprüft)
   return texte;
 }

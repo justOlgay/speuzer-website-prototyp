@@ -1,0 +1,76 @@
+{
+  "_hinweis": "Wer macht was (Organigramm), Seite src/seiten/verein/organigramm.mjs. Entscheidung vom 11.10.2026: Die Seite zeigt nur Ämter, die es gibt; für alles andere steht die Geschäftsstelle. Namen, Fotos und Funktions-Postfächer stehen NICHT hier, sondern ausschließlich in data/vorstand.json: Jedes Amt hier nennt nur die \"funktion\" (Schreibweise exakt wie in vorstand.json), der Bau holt Personen, Foto und Postfach von dort und bricht mit einer Meldung ab, wenn eine Funktion dort fehlt. Unbesetzte Ämter (name null) zeigt die Seite nicht; ein Bereich ohne Person entfällt ganz. Aufgaben: Auftrag M13 (Vereinsleitung, 11.10.2026: Spielerpässe Jugend und Mitglieder erfassen beim 1. Kassierer, Spielerpässe Senioren beim Spielausschuss Senioren); wo der Auftrag keinen Wortlaut nennt (Karneval, Kinderschutz, Website und App), steht er so oder sinngemäß auf /kontakt/ (Ansprechpartner nach Anliegen). \"aufgaben\" am Bereich gilt für alle Ämter des Bereichs, \"aufgaben\" am Amt nur für dieses Amt. Dieselbe Funktion darf in mehreren Bereichen stehen (2. Jugendleiter: Jugendfußball und Website und App). \"wurzel\": true macht den Bereich zum gefüllten Knoten oben (Vorstand).",
+  "seite": {
+    "titel": "Wer macht was",
+    "lead": "Hier siehst du, wer im Verein wofür zuständig ist. Für alles andere ist die Geschäftsstelle da.",
+    "beschreibung": "Wer macht was im FFV Sportfreunde 04: Vorstand, Kasse, Jugendfußball, Herren, Karneval, Kinderschutz, Website und App – für alles andere die Geschäftsstelle."
+  },
+  "bereiche": [
+    {
+      "id": "vorstand",
+      "titel": "Vorstand",
+      "wurzel": true,
+      "aemter": [
+        { "funktion": "1. Vorsitzende", "aufgaben": "Vereinsführung, Vertretung nach außen" },
+        { "funktion": "2. Vorsitzender", "aufgaben": "Vertretung" }
+      ]
+    },
+    {
+      "id": "kasse",
+      "titel": "Kasse und Mitglieder",
+      "aemter": [
+        { "funktion": "1. Kassierer", "aufgaben": "Beiträge, Mitglieder erfassen, Spielerpässe der Jugend" },
+        { "funktion": "2. Kassierer", "aufgaben": "Beiträge" }
+      ]
+    },
+    {
+      "id": "jugend",
+      "titel": "Jugendfußball",
+      "aufgaben": "Mannschaften, Trainer, Probetraining und Spielbetrieb der Jugend",
+      "aemter": [
+        { "funktion": "1. Jugendleiter" },
+        { "funktion": "2. Jugendleiter" },
+        { "funktion": "Team Jugendleitung" }
+      ]
+    },
+    {
+      "id": "herren",
+      "titel": "Herren",
+      "aufgaben": "Spielbetrieb der Herren",
+      "aemter": [
+        { "funktion": "Sportliche Leitung Senioren" },
+        { "funktion": "Spielausschuss Senioren", "aufgaben": "Spielerpässe der Herren" }
+      ]
+    },
+    {
+      "id": "karneval",
+      "titel": "Karneval – Die Schnauzer",
+      "aufgaben": "Gruppen, Übungszeiten, Auftritte",
+      "aemter": [
+        { "funktion": "Abteilungsleiter Karneval" },
+        { "funktion": "Kassiererin Karneval" },
+        { "funktion": "Schriftführerin Karneval" }
+      ]
+    },
+    {
+      "id": "kinderschutz",
+      "titel": "Kinderschutz",
+      "aufgaben": "Vertraulicher Kontakt zum Kinder- und Jugendschutz",
+      "aemter": [
+        { "funktion": "Kinderschutzbeauftragter" }
+      ]
+    },
+    {
+      "id": "website-app",
+      "titel": "Website und App",
+      "aufgaben": "Rund um die Website und die App des Vereins",
+      "aemter": [
+        { "funktion": "2. Jugendleiter" }
+      ]
+    }
+  ],
+  "geschaeftsstelle": {
+    "titel": "Für alles andere: Geschäftsstelle",
+    "text": "Die Geschäftsstelle ist per E-Mail erreichbar, telefonisch nach Vereinbarung."
+  }
+}

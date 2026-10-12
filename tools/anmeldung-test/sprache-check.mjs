@@ -77,6 +77,46 @@ export function pruefeEinfacheSprache(woerterbuch) {
   return { verstoesse, anzahlSaetze, laengster };
 }
 
+// ---------- Abgabe der Unterlagen (M11, 12.10.2026) ----------
+// Die Familie schickt die ganze Datei per E-Mail an die Geschäftsstelle, auch Teil C; der Verein bewahrt Teil C getrennt auf
+// (Entscheidung der 1. Vorsitzenden vom 11.10.2026, O25 und O73). Kein Text für Familien sagt mehr, etwas sei „getrennt abzugeben“,
+// gehe „nicht per normaler E-Mail“, sei „im Verein abzugeben oder vorzulegen“ oder „mitzubringen“ – außer an den Ausnahmen unten.
+export const ALTE_ABGABE = [
+  [/getrennt abgeben|ihn getrennt ab\b|Trennen Sie|abtrennen/, "getrennt abgeben oder abtrennen"],
+  [/nicht per normaler|oder normaler E-Mail|normale[rn]? Mail/, "nicht per (normaler) E-Mail"],
+  [/im Verein ab\b|im Verein abgeb|im Verein abgegeben|im Verein vorlegen/, "im Verein abgeben oder vorlegen"],
+  [/\bBringen Sie\b|\bbringen Sie\b[^.]*\bmit\b|\bmitbringen\b|\bbringen\b[^.]*\bmit\b|\bbringt\b[^.]*\bmit\b/, "mitbringen"],
+  // Runde 2 (12.10.2026): Alles kommt per E-Mail. Kein Text verspricht ein „Original“ (außer bei deutschen Ausweisen, siehe unten).
+  [/\bOriginal/, "Original (alles kommt per E-Mail)"],
+];
+
+// Ausnahmen mit Grund (Pfad im Wörterbuch → Grund). Sie bleiben mit Absicht und stehen im Bericht zu M11. (Runde 2: „Original“ nur noch bei den
+// deutschen Ausweisen; „Das Original bleibt im Verein“ bei U07 ist „Die Datei bleibt im Verein.“)
+export const ABGABE_AUSNAHMEN_OBERFLAECHE = {
+  "fertig.abgebenAusgedruckt": "Papierweg (alles ausgedruckt und mit Stift unterschrieben): Foto oder Scan per E-Mail, oder die Blätter im Verein abgeben (gleichwertig)",
+  "hilfe.uebersetzen": "eine Person zum Übersetzen mitbringen, kein Papier",
+  "unterschriften.training": "Modus „stift“ (Schalter unterschriftHfv): Der Verein bringt die ausgedruckten Blätter zum ersten Training mit",
+};
+export const ABGABE_AUSNAHMEN_REGELN = {
+  "hinweise.staatsangehoerigkeit_unklar": "deutsche Ausweise darf der Verein nicht weitergeben: Er sieht das Original (PAuswG § 20, PassG § 18)",
+  "weiterleitung.staatsangehoerigkeit_unklar": "wie oben: Der Verein schaut in den Pass",
+  "hinweise.ausweis_deutsch_original": "wie oben: „Zeigen Sie das Original im Verein.“",
+  "unterlagen.U12.wie": "wie oben: „Deutsche Ausweise zeigen Sie im Verein im Original.“",
+};
+
+// Findet die alten Sätze zur Abgabe. Rückgabe: { verstoesse: [{ pfad, art, text }], ungenutzt: [Pfade der Ausnahmen, die nichts mehr treffen] }
+export function pruefeAbgabeWortlaut(woerterbuch, ausnahmen = {}) {
+  const verstoesse = [];
+  const genutzt = new Set();
+  for (const { pfad, text } of alleTexte(woerterbuch)) {
+    const treffer = ALTE_ABGABE.filter(([muster]) => muster.test(text));
+    if (!treffer.length) continue;
+    if (pfad in ausnahmen) genutzt.add(pfad);
+    else for (const [, name] of treffer) verstoesse.push({ pfad, art: "alter Satz zur Abgabe: " + name, text });
+  }
+  return { verstoesse, ungenutzt: Object.keys(ausnahmen).filter((p) => !genutzt.has(p)) };
+}
+
 // Textschlüssel, die im Quelltext als Zeichenkette in t("…"), tl("…"), hatT("…")
 // stehen (ohne Verkettung). Verkettete Schlüssel prüft der E2E-Test zur Laufzeit
 // (Warnung "Text fehlt").
@@ -113,9 +153,12 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const w = await ladeWoerterbuch();
   const r = pruefeEinfacheSprache(w);
   const f = fehlendeSchluessel(w);
+  const a = pruefeAbgabeWortlaut(w, ABGABE_AUSNAHMEN_OBERFLAECHE);
   console.log("Sätze geprüft: " + r.anzahlSaetze + ", längster Satz: " + r.laengster.woerter + " Wörter (" + r.laengster.pfad + ")");
   for (const v of r.verstoesse) console.log("VERSTOSS " + v.pfad + " – " + v.art + ": " + v.text);
   for (const x of f) console.log("FEHLT " + x.schluessel + " (aufgerufen in " + x.datei + ")");
-  if (r.verstoesse.length || f.length) process.exit(1);
-  console.log("Einfache Sprache: in Ordnung. Textschlüssel: vollständig.");
+  for (const v of a.verstoesse) console.log("VERSTOSS " + v.pfad + " – " + v.art + ": " + v.text);
+  for (const p of a.ungenutzt) console.log("VERSTOSS " + p + " – Ausnahme zur Abgabe trifft keinen Text mehr (aus ABGABE_AUSNAHMEN_OBERFLAECHE streichen)");
+  if (r.verstoesse.length || f.length || a.verstoesse.length || a.ungenutzt.length) process.exit(1);
+  console.log("Einfache Sprache: in Ordnung. Textschlüssel: vollständig. Abgabe: kein alter Satz zu „getrennt abgeben“, „nicht per normaler E-Mail“, „im Verein abgeben“ oder „mitbringen“ (" + Object.keys(ABGABE_AUSNAHMEN_OBERFLAECHE).length + " Ausnahmen).");
 }

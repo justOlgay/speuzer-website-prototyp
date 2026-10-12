@@ -37,6 +37,9 @@
 //   - Paket M9 (11.10.2026, Jugendleitung): Die Familie unterschreibt alles am Bildschirm, auch die Blätter des
 //     Verbands (O68, O01). Ein Schalter in data/anmeldung.json (unterschriftHfv) stellt die Blätter des Verbands
 //     auf Stift zurück, falls der Verband widerspricht. Abschnitt 5 „Unterschrift“ beschreibt beide Wege.
+//   - Paket M11 (12.10.2026, Antworten der 1. Vorsitzenden vom 11.10.2026 und Entscheidung zu den Spielerpässen): O24, O25, O72 und O73 sind entschieden, O11 und O69
+//     geregelt; offen bleiben O45 und O67. Die Familie schickt die ganze Datei per E-Mail an die Geschäftsstelle, auch Teil C („Teil C –
+//     Vertraulich“); der Verein bewahrt ihn getrennt auf. Kein Server-Versand zum Start. Die Abschnitte 3, 4, 5, 9 und 13 sagen das so.
 //
 // Liegt wie /vorher-nachher/ und /app/ außerhalb der Hülle (docs/index.html) und
 // außerhalb der Workspace-Seiten (docs/ws/) – eigene Vorlage src/vorlagen/begleit.html,
@@ -480,8 +483,9 @@ function kurzAbschnitt() {
     "**Die Lösung.** Ein Assistent im Browser fragt Schritt für Schritt in Einfacher Sprache. Er bietet Übersetzungshilfe auf Englisch, Türkisch und Arabisch. Am Ende erzeugt er ein PDF mit allen Unterlagen. Ein Prototyp zum Ausprobieren liegt vor. {a:assistent}, {a:pdf}",
     "**Die Unterschrift.** Die Familie unterschreibt alles am Bildschirm, nachdem sie die Satzung gelesen hat. Das gilt auch für die Blätter des Verbands. Das hat die Jugendleitung am 11.10.2026 entschieden ({o:O68}). Widerspricht der Verband, stellen wir diese Blätter wieder auf Stift um. Es reicht ein Elternteil ({o:O26}). Das Kind und der andere Elternteil bei getrennt lebenden Eltern haben ein freiwilliges Feld. {a:unterschrift}",
     "**Entschieden am 11.10.2026.** Die 1. Vorsitzende hat die Fragen beantwortet. Nichtmitglieder sind beim Probetraining nicht über den Verein versichert ({o:O27}). Die Mitgliedschaft beginnt am Tag der Anmeldung ({o:O30}). Es gibt keine Probemitgliedschaft ({o:O31}). {a:entscheiden}",
-    `**Noch offen: ${z.offen} Punkte.** Sie stehen im Excel an die 1. Vorsitzende. Zum Beispiel: Wo liegen die Originale ({o:O24})? Wie übergibt die Familie das PDF in der Vereins-App ({o:O72})? Welche Rechtsgrundlage gilt für die Notfallkontakte ({o:O67})?`,
-    `**Beim HFV.** Der Assistent folgt den Vordrucken des HFV. Sonderfälle klärt das Passwesen im Einzelfall. Von ${hfv.length} Fragen sind ${zaehle(hfv).offen} offen. {a:hfv-fragen}`,
+    `**Noch offen: ${z.offen} ${z.offen === 1 ? "Punkt" : "Punkte"}.** Sie stehen im Excel an die 1. Vorsitzende. Zum Beispiel: Welche Rechtsgrundlage gilt für die Notfallkontakte ({o:O67})? Schreiben wir die Information zum Datenschutz in Einfacher Sprache ({o:O45})?`,
+    "**Die Datei geht per E-Mail.** Die Familie schickt die ganze Datei an die Geschäftsstelle, auch Teil C. Das hat die 1. Vorsitzende am 11.10.2026 entschieden ({o:O25}, {o:O73}). Es gibt keinen Versand über einen Server ({o:O72}). {a:datenschutz}",
+    `**Beim HFV.** Der Assistent folgt den Vordrucken des HFV. Sonderfälle klärt das Passwesen im Einzelfall. ${zaehlSatz(hfv, "Fragen")} {a:hfv-fragen}`,
     "**Karneval.** Karneval gehört nicht zur Anmeldung im Assistenten. Die Karnevalabteilung klärt ihre Fragen selbst ({o:O28}). {a:karneval}",
   ])}
     ${kasten(
@@ -583,7 +587,7 @@ function assistentAbschnitt() {
       "**Hilfe-Knopf.** Auf jeder Seite steht an derselben Stelle ein Hilfe-Knopf mit den Kontaktdaten des Vereins. Die Geschäftsstelle hilft per Telefon und E-Mail. Feste Sprechzeiten gibt es nicht. {o:O52}",
       "**Ehrliche Grenzen.** Wo eine Regel nicht sicher ist, sagt der Assistent das: „Vielleicht nötig – der Verein sagt Ihnen Bescheid.“ Auf dem Laufzettel steht der Punkt dann als „klären“. Fristen schätzt der Assistent nur ({a:wartefristen}).",
       "**Nichts wird gesendet oder gespeichert.** Alle Angaben und Fotos bleiben im Browser. Fotos werden dort neu kodiert, das entfernt Standort- und Kameradaten. Ein Knopf löscht alle Angaben. Ob ein Zwischenstand gespeichert werden soll, entscheidet der Verein später. Die Beispiele im Prototyp nutzen nur erfundene Daten. Ihre Telefonnummern stammen aus der Liste der Bundesnetzagentur für Medien.",
-      "**Website und App aus einem Guss.** Der Assistent ist in Website und Vereins-App dieselbe Seite. In der App fällt nur der Begleitrahmen weg. Offen ist die Übergabe der Datei in der App ({o:O72}). Dafür ist der automatische Versand über die eigene Annahme vorgesehen, mit Schutz für die Gesundheitsdaten ({o:O73}).",
+      "**Website und App aus einem Guss.** Der Assistent ist in Website und Vereins-App dieselbe Seite. In der App fällt nur der Begleitrahmen weg. Wie die Datei zum Verein kommt, ist entschieden: Es gibt keinen Server-Versand zum Start. Die Familie schickt die Datei selbst per E-Mail an die Geschäftsstelle ({o:O25}, {o:O72}). Klappt Speichern oder Teilen in der App nicht, hilft der Link „Im Browser öffnen“.",
       "**Vorführung.** Der Knopf „Vorführung“ öffnet auf jeder Frageseite fünf Beispiele und die Sicht des Vereins. Ein Beispiel füllt alle Angaben aus. Die Sicht des Vereins zeigt bei Unterlagen und Fristen die Quelle. Der Knopf ist für die Vorführung gedacht, nicht für Familien.",
     ])}`;
   return abschnitt("assistent", inhalt);
@@ -606,13 +610,13 @@ function pdfAbschnitt() {
         ],
         [
           "**Teil B – Für den Verein**",
-          "Wird im Verein abgegeben.",
+          "Geht per E-Mail an die Geschäftsstelle.",
           "Laufzettel als Deckblatt. Aufnahmeantrag mit Erlaubnis für Fotos und Erlaubnis für die Lastschrift. Liste der Familienmitglieder. Information zum Datenschutz. Antrag auf Spielerlaubnis, ausgefüllt. Vollmacht für die Abmeldung oder Abmeldung beim alten Verein. Weitere Einverständnisse und Erlaubnisse: Einverständnis für Spiele bei den Herren, Einverständnis für Mädchen bei den Jungen, Einverständnis für Fahrten und Messenger-Gruppe, Heimweg nach dem Training. Seite mit dem Spielerfoto. Kopien der Nachweise mit Wasserzeichen.",
         ],
         [
-          "**Teil C – Vertraulich, getrennt abgeben**",
-          "Attest nur für das Passwesen. Notfall- und Gesundheitsbogen nur für Trainer und Betreuer.",
-          "Trennblatt mit der Anleitung für den Umschlag. Attest vom Arzt: die Vorlage „Ärztliche Bescheinigung (Attest)“ oder die Kopie des Attests. Erlaubnis für das Attest. Notfall- und Gesundheitsbogen, freiwillig.",
+          "**Teil C – Vertraulich**",
+          "Geht mit der Datei per E-Mail an die Geschäftsstelle. Der Verein bewahrt ihn getrennt auf. Attest nur für das Passwesen. Notfall- und Gesundheitsbogen nur für Trainer und Betreuer.",
+          "Trennblatt: Was mit Teil C geschieht. Attest vom Arzt: die Vorlage „Ärztliche Bescheinigung (Attest)“ oder die Kopie des Attests. Erlaubnis für das Attest. Notfall- und Gesundheitsbogen, freiwillig.",
         ],
       ],
     })}
@@ -665,7 +669,7 @@ function unterschriftAbschnitt() {
       "**Satzung zuerst.** Vor der Bildschirm-Unterschrift liest die Familie die Satzung und setzt den Haken „Ich habe die Satzung gelesen.“ Der Haken ist Pflicht. Der Link führt auf die Satzung der Website, nicht auf die Adresse im Vordruck. Die Adresse im Vordruck ist defekt ({o:O66}). Auf dem Papierweg ist der Haken freiwillig. Dann kreuzt die Familie das Kästchen im Ausdruck von Hand an.",
       "**Ein Elternteil reicht.** Der Assistent zeigt nur ein Unterschriftsfeld für die Eltern, auch wenn beide Eltern das Sorgerecht haben. Das hat die Jugendleitung am 08.10.2026 entschieden ({o:O26}).",
       "**Zweiter Elternteil (nötig).** Das gilt nur, wenn die Eltern getrennt leben und der andere Elternteil nicht einverstanden ist. Dann muss auch er unterschreiben. Er hat ein eigenes Feld am Bildschirm. Das Feld ist freiwillig. Bleibt es leer, ist die Stelle im PDF mit Stift markiert, und der Laufzettel nennt es. Mit dem Schalter „stift“ gibt es kein Feld, er unterschreibt mit Stift. Grund ist die gemeinsame Vertretung nach § 1629 BGB: Ohne Zustimmung darf ein Elternteil nicht allein für beide handeln.",
-      "**Das Kind als Spielerin oder Spieler.** Der Antrag auf Spielerlaubnis und die Abmeldung beim alten Verein haben eine Zeile für die Spielerin oder den Spieler. Bei Minderjährigen zeigt der Assistent dafür ein freiwilliges Feld: „Kann Ihr Kind schon schreiben? Dann unterschreibt es hier selbst.“ Kleine Kinder können das noch nicht. Bleibt das Feld leer, bleibt die Zeile im Antrag auf Spielerlaubnis ohne Markierung. Teil A nennt das Blatt dann nicht bei „Ausdrucken müssen Sie nur“, die Prüfseite zeigt „Nicht unterschrieben (freiwillig)“, und der Laufzettel sagt: „Das Kind hat den Antrag nicht unterschrieben. Das Passwesen entscheidet, ob das nötig ist.“ Nur die Abmeldung beim alten Verein bekommt bei leerem Feld die Stift-Markierung, denn sie geht ohnehin auf Papier per Einschreiben. Ob ein kleines Kind unterschreiben muss, fragen wir die Passstelle ({o:O11}).",
+      "**Das Kind als Spielerin oder Spieler.** Der Antrag auf Spielerlaubnis und die Abmeldung beim alten Verein haben eine Zeile für die Spielerin oder den Spieler. Bei Minderjährigen zeigt der Assistent dafür ein freiwilliges Feld: „Kann Ihr Kind schon schreiben? Dann unterschreibt es hier selbst.“ Kleine Kinder können das noch nicht. Bleibt das Feld leer, bleibt die Zeile im Antrag auf Spielerlaubnis ohne Markierung. Teil A nennt das Blatt dann nicht bei „Ausdrucken müssen Sie nur“, die Prüfseite zeigt „Nicht unterschrieben (freiwillig)“, und der Laufzettel sagt: „Das Kind hat den Antrag nicht unterschrieben. Das Passwesen entscheidet, ob das nötig ist.“ Nur die Abmeldung beim alten Verein bekommt bei leerem Feld die Stift-Markierung, denn sie geht ohnehin auf Papier per Einschreiben. Ob ein kleines Kind unterschreiben muss, entscheidet das Passwesen im Einzelfall ({o:O11}).",
       "**Keine leeren Erklärungsfelder.** Eine Bildschirm-Unterschrift steht nur unter Angaben, die schon dastehen. Auf den eigenen Blättern des Vereins steht „–“ oder ein Satz statt eines leeren Feldes. Fehlt auf dem Aufnahmeantrag eine Erklärung, zum Beispiel zu den Fotos, zur IBAN oder zur Liste der Familienmitglieder, wird die Stelle zur Stift-Stelle. So ergänzt nach der Unterschrift niemand etwas von Hand.",
       "**Datum.** Eine Unterschrift am Bildschirm trägt Ort und Datum der Anmeldung. Das gilt auch auf den Blättern des Verbands, wo der Vordruck ein Datumsfeld neben der Unterschrift hat.",
       "**Was auf Papier bleibt.** Teil A nennt nur Blätter, die wirklich auf Papier müssen. Das sind die Vorlage für die Ärztin oder den Arzt und die Abmeldung beim alten Verein (Einschreiben). Dazu kommen Stellen, an denen ein freiwilliges Feld leer blieb: der zweite Elternteil und das Kind bei der Abmeldung. Die leere Zeile des Kindes im Antrag auf Spielerlaubnis zählt nicht dazu. Sonst steht dort: „Sie müssen nichts ausdrucken.“",
@@ -673,7 +677,7 @@ function unterschriftAbschnitt() {
     ])}
     <h3>Wer unterschreibt?</h3>
     ${liste([
-      "Für den Antrag auf Spielerlaubnis genügt ein gesetzlicher Vertreter (SpO § 92 Nr. 1). Ob auch ein kleines Kind selbst auf der Zeile „Spieler“ unterschreiben muss, ist offen ({o:O11}). Bis dahin bietet der Assistent dem Kind ein freiwilliges Feld. Bleibt es leer, bleibt die Zeile im Antrag ohne Markierung, und das Passwesen entscheidet.",
+      "Für den Antrag auf Spielerlaubnis genügt ein gesetzlicher Vertreter (SpO § 92 Nr. 1). Ob auch ein kleines Kind selbst auf der Zeile „Spieler“ unterschreiben muss, entscheidet das Passwesen im Einzelfall ({o:O11}). Der Assistent bietet dem Kind ein freiwilliges Feld. Bleibt es leer, bleibt die Zeile im Antrag ohne Markierung.",
       "Nach Zivilrecht vertreten Eltern ihr Kind gemeinsam (§ 1629 BGB).",
       "**Entscheidung der Jugendleitung (08.10.2026):** Ein Elternteil reicht. Bei „alleiniges Sorgerecht“, Vormund und Pflegeperson unterschreibt eine Person. {o:O26}",
       "Bei getrennt lebenden Eltern entscheidet der Elternteil, bei dem das Kind lebt, Alltagsfragen allein (§ 1687 BGB). Ob der Vereinsbeitritt dazu zählt, sagt das Gesetz nicht. {offen} Der Assistent fragt deshalb, ob der andere Elternteil einverstanden ist. Ohne Einverständnis unterschreibt der andere Elternteil zusätzlich, am Bildschirm oder mit Stift.",
@@ -1017,14 +1021,17 @@ function datenschutzAbschnitt() {
     ])}
     <h3>Versand und Übergabe</h3>
     ${liste([
-      "Die Familie gibt die Originale im Verein ab, im Vereinsheim oder beim Trainer.",
-      "Ausweiskopien und Atteste von Kindern gehen nicht per normaler Mail oder WhatsApp. Die Datenschutzkonferenz verlangt bei hohem Risiko Ende-zu-Ende-Verschlüsselung oder ein Webportal (Orientierungshilfe vom 16. Juni 2021).",
+      "Die Familie schickt die ganze Datei per E-Mail an die Geschäftsstelle, auch Teil C. Das hat die 1. Vorsitzende am 11.10.2026 entschieden ({o:O25}, {o:O73}). Der Assistent sendet selbst nichts. Es gibt keinen Server-Versand ({o:O72}).",
+      "Der Assistent zeigt die Schritte am Handy und am Computer, die Adresse mit einem Knopf zum Kopieren und einen Link, der die E-Mail öffnet. Die Familie hängt die Datei selbst an. Der Assistent bittet, die Datei nicht per WhatsApp zu schicken.",
+      "Der Verein bewahrt Teil C getrennt von den übrigen Unterlagen auf. Der 1. Kassierer prüft beim Erfassen, ob alles da ist ({o:O25}).",
+      "Das Passwesen gibt die Spielerpässe in DFBnet ein: für die Jugend der 1. Kassierer, für die Herren der Spielausschuss Senioren ({o:O24}). Auch die Vollmacht für die Abmeldung gibt das Passwesen in DFBnet ein, am besten am Tag des Eingangs ({o:O69}).",
+      "Zur Einordnung: Die Datenschutzkonferenz verlangt bei hohem Risiko Ende-zu-Ende-Verschlüsselung oder ein Webportal (Orientierungshilfe vom 16. Juni 2021). Der Verein hat sich für die E-Mail entschieden ({o:O73}).",
       "Die Familie schickt nichts an den HFV. Das E-Postfach der Passstelle ist nur aus DFBnet erreichbar.",
     ])}
     ${kasten(
-      "offen",
+      "info",
       `${p(
-        "**Offen: automatischer Versand.** Der geplante Versand läuft über die IONOS-Annahme des Vereins, die das PDF per E-Mail an die Geschäftsstelle weitergibt. Sie ist bisher für den Online-Aufnahmeantrag gebaut. Bevor Ausweiskopien und Atteste so übertragen werden, muss der Verein klären, ob das nach der Orientierungshilfe zulässig ist. Dann muss auch die Information zum Datenschutz angepasst werden: Sie sagt heute, die Angaben würden nicht an einen Server übertragen. {offen}"
+        "**Kein automatischer Versand zum Start.** Die IONOS-Annahme des Vereins ist bisher für den Online-Aufnahmeantrag gebaut. Für den Assistenten ist sie nicht vorgesehen ({o:O72}). Käme ein Versand später, müsste die Information zum Datenschutz angepasst werden: Sie sagt heute, die Angaben würden nicht an einen Server übertragen."
       )}`
     )}
     <h3>Was der Verein festlegen muss</h3>
@@ -1061,11 +1068,7 @@ const VORSTAND = [
     "Dürfen alle Unterlagen am Bildschirm unterschrieben werden, auch die Blätter des Verbands?",
     "Das ist eine einfache elektronische Unterschrift. Die Form bestimmt der Verein selbst: Die Satzung verlangt Schriftform, nach § 127 BGB kann eine elektronische Übermittlung reichen. Für die Blätter des Verbands verlangt JO § 37 Nr. 2 die eigenhändige Unterschrift. Der Laufzettel im PDF nennt das dem Verein ({a:unterschrift}).",
   ],
-  [
-    "O72",
-    "Wie übergibt die Familie das PDF in der Vereins-App?",
-    "In der App-Webansicht klappt Speichern oder Teilen der Datei vielleicht nicht. Für Website und App gleich wäre der automatische Versand an den Verein über die eigene Annahme (IONOS), wie beim Online-Aufnahmeantrag. Bis dahin weist der Assistent in der App auf „Im Browser öffnen“ hin.",
-  ],
+  ["O72", "Wie übergibt die Familie das PDF in der Vereins-App, wenn Speichern oder Teilen in der Webansicht nicht klappt? Gibt es einen automatischen Versand an den Verein über die eigene Annahme?"],
   ["O32", "Geben wir die HFV-Gebühr an die Familien weiter?"],
   ["O33", "Geben wir die Bescheinigung für Bildung und Teilhabe standardmäßig mit?"],
   ["O34", "Senatorenmitgliedschaft: Welchen Status und welches Stimmrecht haben Senatoren?"],
@@ -1079,21 +1082,9 @@ const VORSTAND = [
 
 // ----- Passwesen (DFBnet und Pass Online) -----
 const PASSWESEN = [
-  [
-    "O24",
-    "Wer hat die DFBnet-Kennung für Pass Online? Wo liegen die Originale 2 Jahre lang, und wer löscht sie danach?",
-    "Über DFBnet reicht der Verein den Antrag auf Spielerlaubnis online ein und lädt das Spielerfoto hoch. Der HFV kann Unterlagen stichprobenartig verlangen. Sie müssen dann binnen 14 Tagen im Original vorliegen.",
-  ],
-  [
-    "O25",
-    "Wie kommen die Unterlagen zum Verein, und wer prüft sie auf Vollständigkeit?",
-    "Der Antrag kann erst mit vollständigem, von Hand unterschriebenem Original an den HFV gehen.",
-  ],
-  [
-    "O69",
-    "Wer im Verein gibt eine Vollmacht für die Abmeldung am selben oder nächsten Tag in DFBnet ein?",
-    "Bei der Vollmacht zählt der Tag der Eingabe als Abmeldetag. Jeder Tag Verzögerung verlängert die Wartefrist. Der Assistent bietet sie nur an, wenn die Eingabe am selben oder nächsten Tag klappt.",
-  ],
+  ["O24", "Wer hat die DFBnet-Kennung für Pass Online? Wo liegen die Originale 2 Jahre lang, und wer löscht sie danach?"],
+  ["O25", "Wie kommen die Unterlagen zum Verein, und wer prüft sie auf Vollständigkeit?"],
+  ["O69", "Wer im Verein gibt eine Vollmacht für die Abmeldung am selben oder nächsten Tag in DFBnet ein?"],
   ["O70", "Wer meldet die Jugendspieler namentlich beim Kreisjugendwart, und bis wann?"],
 ];
 
@@ -1116,11 +1107,7 @@ const DATENSCHUTZ = [
     "Welche Rechtsgrundlage gilt für die Notfallkontakte ohne Angaben zur Gesundheit: Art. 6 Abs. 1 lit. b oder lit. f DSGVO?",
     "Art. 9 DSGVO (ausdrückliche Einwilligung) passt nur zur Fassung mit Angaben zur Gesundheit. Für die Fassung „nur Notfallkontakte“ braucht die Information zum Datenschutz eine eigene Rechtsgrundlage. Der Entwurf im PDF nennt beide: lit. b für Mitgliedschaft und Fürsorge im Training, lit. f (berechtigtes Interesse) für weitere Kontaktpersonen. Der Vorstand bestätigt die Wahl.",
   ],
-  [
-    "O73",
-    "Dürfen Gesundheitsdaten aus Teil C sowie Ausweis- und Passkopien per E-Mail an den Verein gehen?",
-    "Beim automatischen Versand kämen sie mit. Möglich ist: nur verschlüsselt, oder Teil C und die Kopien getrennt auf Papier. Gesundheitsdaten brauchen besonderen Schutz (Art. 9 DSGVO).",
-  ],
+  ["O73", "Dürfen Gesundheitsdaten aus Teil C sowie Ausweis- und Passkopien per E-Mail an den Verein gehen?"],
   [
     "O45",
     "Schreiben wir die Information zum Datenschutz in Einfacher Sprache, lassen sie übersetzen und vom Vorstand freigeben?",
@@ -1313,7 +1300,7 @@ const EINFUEHRUNG = [
   ],
   [
     "Fragen und Entscheidungen klären",
-    "Die 1. Vorsitzende hat am 11.10.2026 geantwortet. Offen sind nur noch die Fragen im Excel an sie ({a:entscheiden}). Die offenen Fragen zum HFV gehen an das Passwesen ({a:hfv-fragen}).",
+    "Die 1. Vorsitzende hat am 11.10.2026 geantwortet. Offen sind nur noch die Fragen im Excel an sie ({a:entscheiden}). Die Fragen zum HFV sind entschieden oder geregelt; Sonderfälle klärt das Passwesen im Einzelfall ({a:hfv-fragen}).",
   ],
   [
     "Texte prüfen und testen",
@@ -1321,7 +1308,7 @@ const EINFUEHRUNG = [
   ],
   [
     "Einbau auf Website und in der App",
-    "Der Assistent kommt auf die Website und in die App, in beiden gleich. Der automatische Versand läuft über die IONOS-Annahme des Vereins. Sie ist gebaut und geprüft und wartet auf den IONOS-Zugang. Für das größere PDF des Assistenten muss sie noch angepasst werden. Der Versand von Ausweisen und Attesten ist zu klären ({a:datenschutz}).",
+    "Der Assistent kommt auf die Website und in die App, in beiden gleich. Es gibt keinen Versand über einen Server ({o:O72}). Die Familie schickt die ganze Datei per E-Mail an die Geschäftsstelle ({o:O25}, {o:O73}, {a:datenschutz}).",
   ],
   [
     "Vereinsunterlagen aktualisieren",

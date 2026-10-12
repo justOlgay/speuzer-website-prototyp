@@ -32,6 +32,12 @@
 //     getrennt lebende Eltern auf "sorge" und "unterschriften"
 //   - Nachbesserung M9, Runde 2 (11.10.2026, Modus „bildschirm“): Feld des Kindes leer – der Hinweis am Feld ist ein einziger Satz (ohne den Satz zum
 //     Ausdruck mit Stift), Weiter geht, die Prüfseite zeigt in der Sprache „Nicht unterschrieben (freiwillig)“, die Fertig-Seite „alles am Bildschirm unterschrieben“
+//   - M10 (11.10.2026): Fertig-Seite, Abschnitt „So schicken Sie die Datei an den Verein“ in jeder Sprache (Titel, Einleitung, Schritte am Handy und am
+//     Computer mit der Beschriftung der Knöpfe, Adresse von links nach rechts, Knöpfe „Adresse kopieren“ und „E-Mail an die Geschäftsstelle öffnen“, Hinweis
+//     zum Anhang); der mailto-Link bleibt deutsch (Betreff „Anmeldung Vorname Nachname“, deutscher Text), auch in Arabisch. Die Seiten des Tests tun, als könne
+//     der Handy-Browser Dateien teilen (navigator.share): So steht auch der Weg am Handy da.
+//   - M12-ar, Runde 2 (12.10.2026): Prüfseite, Zeile „Geboren“: das Alter steht nach der Vorlage allgemein.alterJahre mit {n} hinter dem Datum, ohne ein an
+//     die Zahl gehängtes Wort (Arabisch: „العمر: 8“); allgemein.jahre gibt es nicht mehr
 //   - Bildschirmfotos von start, name, nachweise, unterschriften (auch der Ausschnitt mit Satzung und
 //     "Gilt für"), fertig (und Hilfe, Fehlermeldung, Heimweg, getrennte Eltern, lateinische
 //     Buchstaben) nach tools/cache/anmeldung-test/sprachen/
@@ -130,6 +136,11 @@ async function neueSeite(browser, server, name) {
   const page = await browser.newPage();
   await page.setViewport({ width: MOBIL.breite, height: MOBIL.hoehe, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
   await page.evaluateOnNewDocument(UHR);
+  // M10: Der Handy-Browser kann Dateien teilen (Web Share): Die Fertig-Seite zeigt „Datei teilen“ und den Weg am Handy (beide Wege des Abschnitts)
+  await page.evaluateOnNewDocument(() => {
+    Object.defineProperty(navigator, "canShare", { value: () => true, configurable: true });
+    Object.defineProperty(navigator, "share", { value: () => Promise.resolve(), configurable: true });
+  });
   const st = { name, konsole: [], warnungen: [], hosts: new Set(), antworten: [] };
   page.on("console", (m) => {
     const t = m.text();
@@ -303,8 +314,52 @@ async function pruefeTeilTitel(page, dict, kennung) {
   const seite = ohneSteuer(await page.$eval("#anmeldung", (e) => e.innerText));
   const titel = ["A", "B", "C"].map((x) => ohneSteuer(dict.fertig.teilTitel[x]));
   const da = titel.filter((t) => seite.includes(t));
-  const deutsch = ["Für Sie (", "Für den Verein (", "Vertraulich – getrennt abgeben ("].filter((t) => seite.includes(t));
+  const deutsch = ["Für Sie (", "Für den Verein (", "Vertraulich ("].filter((t) => seite.includes(t));
   ok(kennung + ": Teile der Datei mit übersetzten Titeln (A und B immer, C bei Gesundheitsdaten)", da.includes(titel[0]) && da.includes(titel[1]) && deutsch.length === 0, da.length + " von 3 gefunden" + (deutsch.length ? "; deutscher Titel: " + deutsch.join(", ") : ""));
+}
+
+// M10 (11.10.2026): Ergebnisseite – der Abschnitt „So schicken Sie die Datei an den Verein“ trägt die Texte der Sprache: Überschrift, Einleitung, die Schritte
+// am Handy und am Computer (mit der Beschriftung der Knöpfe aus dem Wörterbuch der Sprache), die Beschriftung der Knöpfe, den Hinweis zum Anhang.
+// Die Adresse steht von links nach rechts (auch in Arabisch). Der mailto-Link bleibt in jeder Sprache deutsch: Betreff „Anmeldung Vorname Nachname“ und
+// der deutsche Text, richtig kodiert (die Geschäftsstelle liest Deutsch).
+async function pruefeSenden(page, dict, kennung, server, beispielId) {
+  const adresse = server.konfig.verein.mail;
+  const beispiele = await import(pathToFileURL(path.join(ROOT, "assets", "js", "anmeldung", "beispiele.js")).href);
+  const a = beispiele.beispielAntworten(beispielId, "2026-09-29", server.konfig);
+  const d = await page.evaluate(() => {
+    const abschnitt = document.querySelector("#anmeldung [data-senden]");
+    if (!abschnitt) return null;
+    const text = (e) => (e ? e.textContent : null);
+    const adresseEl = abschnitt.querySelector("[data-mail-adresse]");
+    const link = abschnitt.querySelector('a[data-aktion="mail-oeffnen"]');
+    return {
+      titel: text(abschnitt.querySelector("h3")),
+      einleitung: text(abschnitt.querySelector(":scope > p.anm-text")),
+      wege: Array.from(abschnitt.querySelectorAll("[data-weg]")).map((w) => ({ art: w.getAttribute("data-weg"), titel: text(w.querySelector("h4")), schritte: Array.from(w.querySelectorAll("ol > li")).map((li) => li.textContent) })),
+      adresse: text(adresseEl),
+      adresseDir: adresseEl && adresseEl.getAttribute("dir"),
+      adressLabel: text(abschnitt.querySelector(".anm-senden__label")),
+      kopieren: text(abschnitt.querySelector('button[data-aktion="adresse-kopieren"]')),
+      linkText: text(link),
+      href: link && link.getAttribute("href"),
+      hinweise: Array.from(abschnitt.querySelectorAll("p.anm-hinweis")).map((p) => p.textContent),
+    };
+  });
+  if (!ok(kennung + ": Fertig-Seite hat den Abschnitt „So schicken Sie die Datei an den Verein“", !!d, "")) return;
+  const F = dict.fertig;
+  const S = F.senden;
+  const o = ohneSteuer;
+  ok(kennung + ": Abschnitt: Überschrift und Einleitung in der Sprache", o(d.titel) === o(S.titel) && o(d.einleitung) === o(S.einleitung), o(d.titel) + " | " + o(d.einleitung));
+  const handy = d.wege.find((w) => w.art === "handy");
+  const computer = d.wege.find((w) => w.art === "computer");
+  const schritte = (vorlage, knopf) => o(vorlage.replace("{knopf}", knopf));
+  ok(kennung + ": Abschnitt: Weg am Handy – Überschrift und drei Schritte in der Sprache, Schritt 1 mit der Beschriftung des Knopfes „" + o(F.teilen) + "“", !!handy && o(handy.titel) === o(S.handyTitel) && handy.schritte.length === 3 && o(handy.schritte[0]) === schritte(S.handy1, F.teilen) && o(handy.schritte[1]) === o(S.handy2) && o(handy.schritte[2]) === o(S.handy3), handy ? handy.schritte.map(o).join(" | ") : "kein Weg am Handy");
+  ok(kennung + ": Abschnitt: Weg am Computer – Überschrift und drei Schritte in der Sprache, Schritt 1 mit der Beschriftung des Knopfes „" + o(F.herunterladen) + "“", !!computer && o(computer.titel) === o(S.computerTitel) && computer.schritte.length === 3 && o(computer.schritte[0]) === schritte(S.computer1, F.herunterladen) && o(computer.schritte[1]) === o(S.computer2) && o(computer.schritte[2]) === o(S.computer3), computer ? computer.schritte.map(o).join(" | ") : "kein Weg am Computer");
+  ok(kennung + ": Abschnitt: Adresse der Geschäftsstelle aus der Konfiguration, von links nach rechts (dir=ltr), mit der Beschriftung der Sprache", d.adresse === adresse && d.adresseDir === "ltr" && o(d.adressLabel) === o(S.adresseTitel), d.adresse + " (" + d.adresseDir + ")");
+  ok(kennung + ": Abschnitt: Knöpfe „" + o(S.kopieren) + "“ und „" + o(S.oeffnen) + "“ und Hinweis zum Anhang in der Sprache", o(d.kopieren) === o(S.kopieren) && o(d.linkText) === o(S.oeffnen) && d.hinweise.map(o).includes(o(S.anhang)), o(d.kopieren) + " | " + o(d.linkText) + " | " + d.hinweise.map(o).join(" / "));
+  // Der Link bleibt deutsch, in jeder Sprache
+  const soll = "mailto:" + adresse + "?subject=" + encodeURIComponent("Anmeldung " + a.vorname + " " + a.nachname) + "&body=Guten%20Tag%2C%0D%0A%0D%0Aanbei%20die%20Anmeldung%20als%20PDF.%0D%0A%0D%0AViele%20Gr%C3%BC%C3%9Fe";
+  ok(kennung + ": mailto-Link bleibt deutsch (Betreff „Anmeldung " + a.vorname + " " + a.nachname + "“, deutscher Text, kodiert), ohne Steuerzeichen für die Schreibrichtung", d.href === soll && !/%E2%81|%E2%80/.test(d.href), d.href);
 }
 
 // ---------- Prüfungen je Seite ----------
@@ -437,6 +492,18 @@ async function durchlauf(browser, server, sprache, beispiel, muster, txt) {
       else info(kennung + ": Heimweg-Frage noch ohne Übersetzung (deutscher Rückfall, Paket M3): " + titel);
       await foto(page, code, beispiel.id, "heimweg");
     }
+    // Fahrten und Nachrichten (M11, 12.10.2026): Karneval ohne Fußball sagt „Messenger-Gruppe der Gruppe“, die übrigen „… der Mannschaft“; beide Sätze stehen in der Sprache
+    if (s.schritt === "einwilligungen" && s.teil === "fahrten") {
+      const schluessel = beispiel.id === "karneval-kind" ? "messengerKarneval" : "messenger";
+      const vorlage = dict.einwilligungen && dict.einwilligungen.fahrten && dict.einwilligungen.fahrten[schluessel];
+      const messenger = ohneSteuer(await page.evaluate(() => {
+        const i = document.querySelector('#anmeldung input[data-pfad="einwilligungen.messenger"]');
+        const l = i ? document.querySelector('label[for="' + i.id + '"] .anm-karte__titel') : null;
+        return l ? l.textContent : "";
+      }));
+      const teile = ohneSteuer(vorlage || "").split("{name}").map((t) => t.trim());
+      ok(kennung + ": Messenger-Satz in der Sprache (" + (beispiel.id === "karneval-kind" ? "Karneval: Gruppe" : "Fußball: Mannschaft") + ", Schlüssel " + schluessel + ")", !!vorlage && teile.length === 2 && messenger.length > 0 && messenger.includes(teile[1]) && (!teile[0] || messenger.includes(teile[0])), messenger);
+    }
     const r = await klickeWeiter(page, s);
     if (r.fehler.length) {
       problem.hang = kenn + ": Fehlermeldung " + r.fehler.join(" | ");
@@ -458,6 +525,7 @@ async function durchlauf(browser, server, sprache, beispiel, muster, txt) {
       datei = status === "fertig" ? await page.$eval("#anmeldung [data-datei]", (e) => e.textContent.trim()) : "FEHLER-SEITE";
       await warte(300);
       await pruefeTeilTitel(page, dict, kennung);
+      await pruefeSenden(page, dict, kennung, server, beispiel.id);
       const p = await seitenPruefung(page, muster);
       if (p.treffer.length) problem.deutsch.push("fertig/ergebnis: " + p.treffer.slice(0, 2).join(" | "));
       if (!p.scrollOk) problem.querscroll.push("fertig/ergebnis (" + p.scrollBreite + ")");
@@ -697,6 +765,12 @@ async function einzelKindLeer(browser, server, sprache, muster, dict) {
     // Die Zeile des Kindes trägt den Vornamen (Beispiel „Kind neu“: Mila); „İmza: {name}“ im Türkischen beginnt wie die Zeile der Eltern
     const kind = zeilen.find((z) => ohneSteuer(z.label).startsWith(vorlage[0]) && ohneSteuer(z.label).includes(vorlage[1]) && ohneSteuer(z.label).includes("Mila")) || { label: "", wert: "" };
     ok(kennung + ": Prüfseite: das leere Feld des Kindes steht in der Sprache als „" + ohneSteuer(dict.pruefen.werte.nichtUnterschriebenFreiwillig) + "“ (nicht „mit Stift“)", ohneSteuer(kind.wert) === ohneSteuer(dict.pruefen.werte.nichtUnterschriebenFreiwillig) && ohneSteuer(kind.wert) !== ohneSteuer(dict.pruefen.werte.mitStift), ohneSteuer(kind.label) + " = " + ohneSteuer(kind.wert));
+    // M12-ar, Runde 2 (12.10.2026): Das Alter steht hinter dem Geburtsdatum nach der Vorlage allgemein.alterJahre mit {n}, ohne ein an die Zahl gehängtes Wort
+    // (Arabisch beugt die Einheit nach der Zahl: „العمر: 8“, nicht „8 سنة“; allgemein.jahre gibt es nicht mehr).
+    const alterVorlage = ohneSteuer(dict.allgemein.alterJahre);
+    const alterMuster = new RegExp("\\(" + alterVorlage.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace("\\{n\\}", "\\d+") + "\\)$");
+    const geboren = zeilen.find((z) => ohneSteuer(z.label) === ohneSteuer(dict.pruefen.zeilen.geboren)) || { label: "", wert: "" };
+    ok(kennung + ": Prüfseite: Alter nach der Vorlage „" + alterVorlage + "“ (kein an die Zahl gehängtes Wort)", alterMuster.test(ohneSteuer(geboren.wert)) && !dict.allgemein.jahre, ohneSteuer(geboren.label) + " = " + ohneSteuer(geboren.wert));
     const p = await seitenPruefung(page, muster);
     ok(kennung + ": Prüfseite ohne deutschen Text und ohne Textschlüssel", p.treffer.length === 0, p.treffer.slice(0, 2).join(" | "));
     await foto(page, code, "kind-leer", "pruefen");
@@ -737,7 +811,7 @@ async function seitenPruefungText(page, text, muster) {
 // Entfernt im Schnappschuss von docs/ (nur dort, nie in assets/) einige Schlüssel aus den
 // englischen Dateien, damit der Durchlauf den Rückfall auf Deutsch bemerken muss.
 const MANGEL = {
-  oberflaeche: ["wer.titel", "abmeldung.status.hinweis", "fertig.abgeben", "unterschriften.stiftTitel", "unterschriften.satzung.titel", "fertig.teilTitel.A", "notfall.kontakt.hinweis"],
+  oberflaeche: ["wer.titel", "abmeldung.status.hinweis", "fertig.senden.einleitung", "unterschriften.stiftTitel", "unterschriften.satzung.titel", "fertig.teilTitel.A", "notfall.kontakt.hinweis"],
   regeln: ["unterlagen.U09.warum", "hinweise.abmeldung_formlos"],
 };
 async function erzeugeMangel() {

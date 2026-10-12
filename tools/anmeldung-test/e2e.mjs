@@ -46,6 +46,12 @@
 //   - M9, Runde 2 (11.10.2026): Bleibt das freiwillige Feld des Kindes leer, bleibt die Zeile im Antrag auf Spielerlaubnis ohne Markierung (kein „mit Stift“): Hinweis am
 //     Feld ohne den Satz zum Ausdruck, Prüfseite „Nicht unterschrieben (freiwillig)“, Fertig-Seite „Sie haben alles am Bildschirm unterschrieben.“, Teil A ohne den
 //     Antrag unter „Ausdrucken müssen Sie nur“ (mit allen Nachweisen: „Sie müssen nichts ausdrucken.“), Laufzettel „Das Kind hat den Antrag nicht unterschrieben. …“
+//   - M10 (11.10.2026): Die Familie schickt die Datei per E-Mail an die Geschäftsstelle (Entscheidung der 1. Vorsitzenden, kein Server-Versand). statischeM10:
+//     mailto-Link (Betreff „Anmeldung Vorname Nachname“ und deutscher Text richtig kodiert, auch bei Umlauten und Zeichen mit Bedeutung in einer Adresse),
+//     Mailtext in Einfacher Sprache, neue Textschlüssel, die Adresse steht nicht fest im Code. pruefeMailAnVerein (390 x 844): Abschnitt „So schicken Sie
+//     die Datei an den Verein“ auf der Fertig-Seite (Wege am Handy und am Computer, Adresse groß und richtig, Knopf „Adresse kopieren“ mit Zwischenablage und
+//     ohne sie, Link „E-Mail an die Geschäftsstelle öffnen“ mit mailto:, alter Wortlaut weg, Hinweis zu WhatsApp bleibt, axe, Tippflächen) und
+//     „Alles auf Papier, selbst ausdrucken“ (Teil B zusätzlich ausgedruckt abgeben). App-Modus: der Link bleibt mailto:.
 //   - Screenshots je Seite nach tools/cache/anmeldung-test/e2e/
 //
 // Aufruf: node tools/anmeldung-test/e2e.mjs [--ohne-desktop] [--nur-sprache] [--nur=pruefeHeimweg,…]
@@ -59,7 +65,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import puppeteer from "puppeteer-core";
 import { starteTestserver } from "./testserver.mjs";
-import { pruefeEinfacheSprache, fehlendeSchluessel, ladeWoerterbuch } from "./sprache-check.mjs";
+import { pruefeEinfacheSprache, fehlendeSchluessel, ladeWoerterbuch, pruefeAbgabeWortlaut, ABGABE_AUSNAHMEN_OBERFLAECHE } from "./sprache-check.mjs";
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -929,7 +935,7 @@ async function pruefeGetrennteEltern(browser, server, dateien) {
         ok("Getrennte Eltern (Modus bildschirm): im PDF steht die Markierung „zweiter Elternteil (nötig)“ und der Laufzettel nennt das leere Feld", t3.includes("zweiter Elternteil (nötig)") && t3.includes("Die Unterschrift des zweiten Elternteils wurde am Bildschirm nicht geleistet. Die Unterschrift steht deshalb als Stift-Markierung im Formular."), "");
         ok("Getrennte Eltern (Modus bildschirm): Teil A: „Einige Unterschriften fehlen noch.“ und der Aufnahmeantrag steht unter „Ausdrucken müssen Sie nur:“", t3.includes("Einige Unterschriften fehlen noch. Unterschreiben Sie diese an den blauen Markierungen mit Stift.") && /Ausdrucken müssen Sie nur:.*Aufnahmeantrag/.test(t3), "");
         // Das Feld des Kindes blieb auch leer: Der Antrag auf Spielerlaubnis bleibt ohne Markierung für das Kind und steht nicht unter „Ausdrucken müssen Sie nur:“; der Laufzettel nennt beides
-        const druck3 = (t3.match(/Ausdrucken müssen Sie nur:(.*?)Geben Sie Teil B/) || [])[1] || "";
+        const druck3 = (t3.match(/Ausdrucken müssen Sie nur:(.*?)Schicken Sie die Datei per E-Mail/) || [])[1] || "";
         ok("Getrennte Eltern (Modus bildschirm): der Antrag auf Spielerlaubnis steht nicht unter „Ausdrucken müssen Sie nur:“, das leere Feld des Kindes bekommt keine Markierung", !/Antrag auf Spielerlaubnis/.test(druck3) && (pdfText(pdf3.pfad, pdfAntragSeite(pdf3.pfad)).match(/Hier mit Stift unterschreiben/g) || []).length === 1, druck3.slice(0, 200));
         ok("Getrennte Eltern (Modus bildschirm): der Laufzettel sagt „… außer an den Stift-Stellen … und an der Unterschriftszeile des Kindes …“ und „Das Kind hat den Antrag nicht unterschrieben. …“", t3.includes(LAUFZETTEL_HFV_REST_KIND) && t3.includes(LAUFZETTEL_KIND_LEER), "");
       }
@@ -1051,7 +1057,7 @@ async function pruefeUnterschriftenModus(browser, server, dateien) {
           const t = ohneLeer(pdfText(pdfOhne.pfad));
           const antrag = pdfBilderAntrag(pdfOhne.pfad);
           // Die Nachweise fehlen in diesem Lauf: Die Attest-Vorlage steht unter „Ausdrucken müssen Sie nur:“, der Antrag auf Spielerlaubnis nie.
-          const druckListe = (t.match(/Ausdrucken müssen Sie nur:(.*?)Geben Sie Teil B/) || [])[1] || "";
+          const druckListe = (t.match(/Ausdrucken müssen Sie nur:(.*?)Schicken Sie die Datei per E-Mail/) || [])[1] || "";
           ok("Modus bildschirm, Kind ohne Unterschrift: Teil A „Sie haben alles am Bildschirm unterschrieben.“, unter „Ausdrucken müssen Sie nur:“ nur die Attest-Vorlage, nie der Antrag auf Spielerlaubnis", t.includes("Sie haben alles am Bildschirm unterschrieben.") && !t.includes("Einige Unterschriften fehlen noch") && /Ärztliche Bescheinigung \(Attest\)/.test(druckListe) && !/Antrag auf Spielerlaubnis/.test(druckListe), druckListe.slice(0, 160));
           ok("Modus bildschirm, Kind ohne Unterschrift: Laufzettel „Das Kind hat den Antrag nicht unterschrieben. Das Passwesen entscheidet, ob das nötig ist.“, kein Hinweis „Stift-Markierung“ zum Antrag", t.includes(LAUFZETTEL_KIND_LEER) && !t.includes("Antrag auf Spielerlaubnis Seite 1: Die Unterschrift der Spielerin oder des Spielers wurde am Bildschirm nicht geleistet"), "");
           ok("Modus bildschirm, Kind ohne Unterschrift: Laufzettel sagt „… außer an der Unterschriftszeile des Kindes im Antrag auf Spielerlaubnis“, nicht „Alle Unterschriften … geleistet“", t.includes(LAUFZETTEL_HFV_KIND) && !t.includes("Alle Unterschriften der Familie sind am Bildschirm geleistet") && !t.includes("außer an den Stift-Stellen"), "");
@@ -1132,7 +1138,7 @@ async function pruefeUnterschriftenModus(browser, server, dateien) {
         ok("Modus bildschirm, Wechsel Hessen (Feld des Kindes leer): das PDF hat den Antrag auf Spielerlaubnis und die Abmeldung beim alten Verein", antragNr > 0 && abmeldungNr > 0, "Antrag Seite " + antragNr + ", Abmeldung Seite " + abmeldungNr);
         ok("Modus bildschirm, Wechsel Hessen (Feld des Kindes leer): im Antrag nur die Markierung des Vereins, bei der Abmeldung die Markierung für das Kind", antragNr > 0 && abmeldungNr > 0 && markierungen(w.pdf.pfad, antragNr) === 1 && markierungen(w.pdf.pfad, abmeldungNr) === 1, "Antrag " + (antragNr ? markierungen(w.pdf.pfad, antragNr) : "?") + ", Abmeldung " + (abmeldungNr ? markierungen(w.pdf.pfad, abmeldungNr) : "?"));
         ok("Modus bildschirm, Wechsel Hessen (Feld des Kindes leer): Fertig-Seite „Einige Unterschriften fehlen noch.“ (wegen der Abmeldung), nicht „alles am Bildschirm unterschrieben“", w.fertigText.includes("Einige Unterschriften fehlen noch. Das sind die blauen Markierungen im PDF.") && !w.fertigText.includes("Sie haben alles am Bildschirm unterschrieben."), "");
-        const druckListe = (t.match(/Ausdrucken müssen Sie nur:(.*?)Geben Sie Teil B/) || [])[1] || "";
+        const druckListe = (t.match(/Ausdrucken müssen Sie nur:(.*?)Schicken Sie die Datei per E-Mail/) || [])[1] || "";
         ok("Modus bildschirm, Wechsel Hessen (Feld des Kindes leer): Teil A „Einige Unterschriften fehlen noch.“, die Abmeldung mit Stift und Einschreiben, der Antrag nicht unter „Ausdrucken müssen Sie nur:“", t.includes("Einige Unterschriften fehlen noch. Unterschreiben Sie diese an den blauen Markierungen mit Stift.") && t.includes("Unterschreiben Sie es mit Stift. Schicken Sie es selbst als Einschreiben an den alten Verein.") && !/Antrag auf Spielerlaubnis/.test(druckListe), druckListe.slice(0, 160));
         ok("Modus bildschirm, Wechsel Hessen (Feld des Kindes leer): Laufzettel „… außer an den Stift-Stellen … und an der Unterschriftszeile des Kindes …“, „Das Kind hat den Antrag nicht unterschrieben. …“ und die Meldung zur Abmeldung", t.includes(LAUFZETTEL_HFV_REST_KIND) && t.includes(LAUFZETTEL_KIND_LEER) && t.includes("Abmeldung beim alten Verein Seite 1: Die Unterschrift der Spielerin oder des Spielers wurde am Bildschirm nicht geleistet (freiwillig)."), "");
       }
@@ -1632,6 +1638,8 @@ async function pruefeFahrtenSatz(browser, server, beispiele) {
   const wb = await ladeWoerterbuch();
   const T = (pfad) => pfad.split(".").reduce((x, sch) => (x === undefined || x === null ? undefined : x[sch]), wb);
   ok("Fahrten: das Wörterbuch hat den neuen Satz 'fahrtenKarneval' und behält den bisherigen Satz", T("einwilligungen.fahrten.fahrtenKarneval") === "{name} darf zu Veranstaltungen des Vereins mitfahren." && T("einwilligungen.fahrten.fahrten") === "{name} darf zu Spielen und Turnieren mitfahren.", "");
+  // M11 (12.10.2026): Beim Karneval gibt es Gruppen, keine Mannschaften: eigener Satz zur Messenger-Gruppe für Karneval ohne Fußball
+  ok("Messenger: das Wörterbuch hat den Satz 'messengerKarneval' („… der Gruppe“) und behält den bisherigen Satz („… der Mannschaft“)", T("einwilligungen.fahrten.messengerKarneval") === "{name} darf in die Messenger-Gruppe der Gruppe." && T("einwilligungen.fahrten.messenger") === "{name} darf in die Messenger-Gruppe der Mannschaft.", "");
   ok("Konfiguration: die in die gebaute Seite eingebettete Konfiguration enthält keine karnevalGruppen mehr", !("karnevalGruppen" in server.konfig), Object.keys(server.konfig).join(", "));
   const vorname = (id) => beispiele.beispielAntworten(id, HEUTE, server.konfig).vorname;
   const VERBOTEN = /Turnier|Auftritt|Kostüm/;
@@ -1641,8 +1649,11 @@ async function pruefeFahrtenSatz(browser, server, beispiele) {
       const w = document.getElementById("anmeldung");
       const i = w.querySelector('input[data-pfad="einwilligungen.fahrten"]');
       const l = i ? w.querySelector('label[for="' + i.id + '"]') : null;
+      const im = w.querySelector('input[data-pfad="einwilligungen.messenger"]');
+      const lm = im ? w.querySelector('label[for="' + im.id + '"]') : null;
       return {
         satz: l ? ((l.querySelector(".anm-karte__titel") || {}).textContent || "").trim() : null,
+        messenger: lm ? ((lm.querySelector(".anm-karte__titel") || {}).textContent || "").trim() : null,
         seite: w.innerText.replace(/\s+/g, " "),
       };
     });
@@ -1669,6 +1680,8 @@ async function pruefeFahrtenSatz(browser, server, beispiele) {
     const soll = vorname("karneval-kind") + " darf zu Veranstaltungen des Vereins mitfahren.";
     ok("Fahrten Karneval-Kind: die Seite 'Fahrten und Nachrichten' zeigt '" + soll + "'", !!fahrten && fahrten.satz === soll, fahrten ? fahrten.satz : "Seite nicht erreicht: " + besucht.map((x) => x.ort).join(" › "));
     ok("Fahrten Karneval-Kind: der Satz nennt weder Spiele noch Turniere, und auf der Seite steht nichts zu Turnieren, Auftritten oder Kostümen", !!fahrten && !/Spiel|Turnier/.test(fahrten.satz) && !VERBOTEN.test(fahrten.seite), fahrten ? fahrten.satz : "");
+    const sollMessengerK = vorname("karneval-kind") + " darf in die Messenger-Gruppe der Gruppe.";
+    ok("Messenger Karneval-Kind: die Seite zeigt '" + sollMessengerK + "', auf der Seite steht kein „Mannschaft“ (M11)", !!fahrten && fahrten.messenger === sollMessengerK && !/Mannschaft/.test(fahrten.seite), fahrten ? fahrten.messenger : "Seite nicht erreicht");
     const treffer = besucht.filter((x) => VERBOTEN.test(x.seite)).map((x) => x.ort);
     ok("Karneval-Kind: auf keiner der " + besucht.length + " Seiten bis zur Prüfung steht 'Turnier', 'Auftritt' oder 'Kostüm'", besucht.length > 10 && treffer.length === 0, treffer.join(", "));
     const letzte = besucht[besucht.length - 1];
@@ -1687,6 +1700,7 @@ async function pruefeFahrtenSatz(browser, server, beispiele) {
     const l = await lesen(page);
     const soll = vorname("kind-neu") + " darf zu Spielen und Turnieren mitfahren.";
     ok("Fahrten Fußball-Kind: die Seite 'Fahrten und Nachrichten' zeigt '" + soll + "'", s.schritt === "einwilligungen" && s.teil === "fahrten" && l.satz === soll, s.schritt + "/" + s.teil + "; " + l.satz);
+    ok("Messenger Fußball-Kind: der bisherige Satz '" + vorname("kind-neu") + " darf in die Messenger-Gruppe der Mannschaft.' (M11: unverändert)", l.messenger === vorname("kind-neu") + " darf in die Messenger-Gruppe der Mannschaft.", String(l.messenger));
     await page.screenshot({ path: path.join(AUSGABE, MOBIL.name, "fahrten-fussball.png"), fullPage: false });
     protokoll.screenshots++;
     await page.close();
@@ -1700,6 +1714,7 @@ async function pruefeFahrtenSatz(browser, server, beispiele) {
     const l = await lesen(page);
     const soll = vorname("kind-neu") + " darf zu Spielen und Turnieren mitfahren.";
     ok("Fahrten Kind in Fußball und Karneval: der bisherige Satz '" + soll + "'", s.schritt === "einwilligungen" && s.teil === "fahrten" && l.satz === soll, s.schritt + "/" + s.teil + "; " + l.satz);
+    ok("Messenger Kind in Fußball und Karneval: der bisherige Satz '… der Mannschaft.' (M11: unverändert)", l.messenger === vorname("kind-neu") + " darf in die Messenger-Gruppe der Mannschaft.", String(l.messenger));
     await page.close();
   }
 
@@ -1711,6 +1726,7 @@ async function pruefeFahrtenSatz(browser, server, beispiele) {
     const l = await lesen(page);
     const name = vorname("kind-neu");
     ok("Fahrten, Abteilung auf Karneval gewechselt: der Satz heißt jetzt '… zu Veranstaltungen des Vereins …'", s.schritt === "einwilligungen" && s.teil === "fahrten" && l.satz === name + " darf zu Veranstaltungen des Vereins mitfahren.", s.schritt + "/" + s.teil + "; " + l.satz);
+    ok("Messenger, Abteilung auf Karneval gewechselt: der Satz heißt jetzt '… der Gruppe.' (M11)", l.messenger === name + " darf in die Messenger-Gruppe der Gruppe.", String(l.messenger));
     await page.close();
   }
 }
@@ -2098,6 +2114,16 @@ async function main() {
   for (const v of sprache.verstoesse.slice(0, 10)) info(v.pfad + ": " + v.art + " – " + v.text);
   const fehlendeTexte = fehlendeSchluessel(woerterbuch);
   ok("Textschlüssel im Quelltext sind alle vorhanden", fehlendeTexte.length === 0, fehlendeTexte.map((f) => f.schluessel).join(", "));
+  // M11 (12.10.2026): Die ganze Datei geht per E-Mail an die Geschäftsstelle, auch Teil C; der Verein bewahrt Teil C getrennt auf. Kein Text der
+  // Oberfläche sagt mehr „getrennt abgeben“, „nicht per normaler E-Mail“, „im Verein abgeben“ oder „mitbringen“ – außer an den Ausnahmen.
+  const abgabeWort = pruefeAbgabeWortlaut(woerterbuch, ABGABE_AUSNAHMEN_OBERFLAECHE);
+  ok("Abgabe (M11): kein Text der Oberfläche sagt mehr „getrennt abgeben“, „nicht per normaler E-Mail“, „im Verein abgeben“ oder „mitbringen“ (außer den " + Object.keys(ABGABE_AUSNAHMEN_OBERFLAECHE).length + " Ausnahmen)",
+    abgabeWort.verstoesse.length === 0 && abgabeWort.ungenutzt.length === 0, abgabeWort.verstoesse.map((v) => v.pfad + ": " + v.text).concat(abgabeWort.ungenutzt.map((u) => "Ausnahme ohne Treffer: " + u)).join(" | "));
+  ok("Abgabe (M11): Teil C heißt „Teil C – Vertraulich“; Fertig-Seite: „Der Verein bewahrt ihn getrennt auf.“, „Schicken Sie sie per E-Mail nach, …“ und der Satz zum Papierweg",
+    woerterbuch.fertig.teilTitel.C === "Teil C – Vertraulich" && woerterbuch.fertig.teilC === "Teil C enthält Gesundheitsdaten. Der Verein bewahrt ihn getrennt auf." &&
+      woerterbuch.fertig.fehltHinweis === "Schicken Sie sie per E-Mail nach, sobald Sie sie haben." &&
+      woerterbuch.fertig.abgebenAusgedruckt === "Fotografieren oder scannen Sie die unterschriebenen Blätter. Schicken Sie sie per E-Mail an die Geschäftsstelle. Oder geben Sie sie im Verein ab.",
+    [woerterbuch.fertig.teilTitel.C, woerterbuch.fertig.teilC, woerterbuch.fertig.fehltHinweis, woerterbuch.fertig.abgebenAusgedruckt].join(" | "));
   const seitenModul = await import(pathToFileURL(path.join(ROOT, "assets", "js", "anmeldung", "seiten.js")).href);
   const schluesselSeiten = Object.keys(seitenModul.SEITEN);
   const fehlendeSeiten = SCHRITTE.filter((id) => !schluesselSeiten.includes(id) || typeof seitenModul.SEITEN[id].render !== "function" || typeof seitenModul.SEITEN[id].pruefe !== "function");
@@ -2163,8 +2189,8 @@ async function main() {
             const teile = Array.isArray(erg.teile) ? erg.teile : [];
             ok("Profil " + id + " (" + vp.name + "): Ergebnisseite nennt die Teile der Datei und die Seitenzahl", daten.teileAnzeige === teile.length && new RegExp("^" + erg.seiten + " Seiten").test(daten.infoZeile), "angezeigt: " + daten.teileAnzeige + " Teil(e), '" + daten.infoZeile + "'; geliefert: " + (teile.map((x) => x.teil).join("") || "keine") + ", " + erg.seiten + " Seiten");
             // Die Titel stehen im Wörterbuch (fertig.teilTitel.A/B/C), mit Buchstaben; die Seitenbereiche kommen aus erzeugePdf().
-            const titel = { A: "Teil A – Für Sie", B: "Teil B – Für den Verein", C: "Teil C – Vertraulich, getrennt abgeben" };
-            ok("Profil " + id + " (" + vp.name + "): Teile heißen 'Teil A – Für Sie', 'Teil B – Für den Verein', 'Teil C – Vertraulich, getrennt abgeben', dazu die Seiten aus pdf.js", teile.length > 0 && daten.teileTexte.length === teile.length && teile.every((x, i) => daten.teileTexte[i] === titel[x.teil] + " (Seite " + x.vonSeite + " bis " + x.bisSeite + ")"), daten.teileTexte.join(" | "));
+            const titel = { A: "Teil A – Für Sie", B: "Teil B – Für den Verein", C: "Teil C – Vertraulich" };
+            ok("Profil " + id + " (" + vp.name + "): Teile heißen 'Teil A – Für Sie', 'Teil B – Für den Verein', 'Teil C – Vertraulich', dazu die Seiten aus pdf.js", teile.length > 0 && daten.teileTexte.length === teile.length && teile.every((x, i) => daten.teileTexte[i] === titel[x.teil] + " (Seite " + x.vonSeite + " bis " + x.bisSeite + ")"), daten.teileTexte.join(" | "));
           }
           if (daten) {
             // Hinweis-Kästen auf 'pruefen' und 'fertig': offen nur Warnungen und Fristen, alles andere zugeklappt.
@@ -2370,6 +2396,10 @@ async function eingabeLaeufe(browser, server, dateien, beispiele, alleSchritte) 
       }
       await downloadPruefen(browser, page, "Eingabe Kind neu");
       await prueflistePruefen(page);
+      // M10: Am Rechner zeigt die Fertig-Seite den Abschnitt zum Schicken der Datei per E-Mail; ohne „Datei teilen“ nur den Weg über das Herunterladen, ohne Überschrift
+      const senden = await leseSenden(page);
+      const teilenDa = !!(await page.$('#anmeldung [data-aktion="teilen"]:not([hidden])'));
+      ok("Eingabe Kind neu (Rechner): die Fertig-Seite zeigt den Abschnitt „So schicken Sie die Datei an den Verein“ mit der Adresse der Geschäftsstelle und " + (teilenDa ? "beiden Wegen" : "nur dem Weg über das Herunterladen (ohne Überschrift)"), !!senden && senden.titel === "So schicken Sie die Datei an den Verein" && senden.adresse === konfig.verein.mail && senden.wege.length === (teilenDa ? 2 : 1) && (teilenDa || (senden.wege[0].art === "computer" && senden.wege[0].titel === null)), senden && senden.wege.map((w) => w.art + ":" + w.titel).join(", "));
     }
     await speicherPruefung(page, "Eingabe Kind neu");
 
@@ -2385,6 +2415,11 @@ async function eingabeLaeufe(browser, server, dateien, beispiele, alleSchritte) 
     if (daten2 && daten2.attrappe) {
       const a2 = daten2.attrappe.a;
       ok("Weitere Person: Anschrift, E-Mail und IBAN der Familie sind übernommen", a2.anschrift.strasse === profil.anschrift.strasse && a2.email === profil.email && a2.zahlung.iban === profil.zahlung.iban, a2.anschrift.strasse + " | " + a2.email);
+    }
+    if (daten2) {
+      // M10: Der E-Mail-Link der Fertig-Seite nennt die zweite Person, nicht die erste
+      const mail2 = await page.$eval('#anmeldung [data-senden] a[data-aktion="mail-oeffnen"]', (a) => a.getAttribute("href")).catch(() => "");
+      ok("Weitere Person anmelden: der E-Mail-Link der Fertig-Seite trägt den Betreff „Anmeldung Ben Mustermann“ (die zweite Person)", decodeURIComponent((/[?&]subject=([^&]*)/.exec(mail2) || [])[1] || "") === "Anmeldung Ben Mustermann", mail2);
     }
     r2.besucht.forEach((b) => alleSchritte.add(b.split("/")[0]));
     protokoll.profile.push({ name: "eingabe-geschwister", viewport: vp.name, modus: "eingabe", seiten: r2.besucht, datei: daten2 && daten2.dateiname });
@@ -2660,6 +2695,8 @@ async function einzelpruefungen(browser, server, dateien, beispiele) {
     ["pruefeKopfSchmal", () => pruefeKopfSchmal(browser, server)],
     ["pruefeBilder", () => pruefeBilder(browser, server, dateien, beispiele)],
     ["pruefeBerichtsseite", () => pruefeBerichtsseite(browser, server, beispiele)],
+    ["statischeM10", () => statischeM10(server)],
+    ["pruefeMailAnVerein", () => pruefeMailAnVerein(browser, server, dateien, beispiele)],
   ];
   const unbekannt = NUR.filter((n) => !alle.some(([name]) => name === n));
   if (unbekannt.length) throw new Error("--nur: unbekannte Einzelprüfung(en) " + unbekannt.join(", ") + " – möglich: " + alle.map(([name]) => name).join(", "));
@@ -3235,6 +3272,18 @@ async function pruefeAppModus(browser, server, dateien) {
   // Teilen schlägt fehl und Herunterladen schlägt fehl: Statt still nichts zu tun, kommt eine Meldung mit dem Link
   const knoepfe = await page.evaluate(() => Array.from(document.querySelectorAll('#anmeldung .anm-ergebnis [data-aktion]')).filter((e) => !e.hidden).map((e) => e.getAttribute("data-aktion")));
   ok("App-Modus (Fertig-Seite): Knöpfe zum Herunterladen und Teilen sind da (Teilen ist hier erlaubt gestellt)", knoepfe.includes("herunterladen") && knoepfe.includes("teilen"), knoepfe.join(","));
+  // M10: Der Link zum Mail-Programm bleibt in der App ein mailto:-Link wie auf den übrigen App-Seiten (kein ext://, kein ?app=1, kein target), auch nach einem Klick
+  const mail = await page.evaluate(() => {
+    const a = document.querySelector('#anmeldung [data-senden] a[data-aktion="mail-oeffnen"]');
+    if (!a) return null;
+    const vorher = a.getAttribute("href");
+    const sperre = (e) => e.preventDefault(); // die Navigation selbst verhindern: Der Test prüft nur, ob der Link umgeschrieben würde
+    document.addEventListener("click", sperre);
+    a.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    document.removeEventListener("click", sperre);
+    return { vorher, nachher: a.getAttribute("href"), target: a.getAttribute("target"), text: a.textContent.trim(), sichtbar: a.checkVisibility(), abschnitt: !!document.querySelector("#anmeldung [data-senden] [data-mail-adresse]") };
+  });
+  ok("App-Modus (Fertig-Seite): der Abschnitt „So schicken Sie die Datei an den Verein“ ist da; der Link „E-Mail an die Geschäftsstelle öffnen“ bleibt ein mailto:-Link (kein ext://, kein ?app=1, kein target), auch nach einem Klick", !!mail && mail.abschnitt && mail.sichtbar && /^mailto:/.test(mail.vorher) && mail.vorher === mail.nachher && mail.target === null && !/app=1|ext:/.test(mail.nachher) && mail.text === "E-Mail an die Geschäftsstelle öffnen", JSON.stringify(mail));
   await page.evaluate(() => {
     window.__anklickSperre = HTMLAnchorElement.prototype.click;
     HTMLAnchorElement.prototype.click = function () { throw new Error("Speichern in der App nicht möglich"); };
@@ -3259,6 +3308,255 @@ async function pruefeAppModus(browser, server, dateien) {
   protokoll.screenshots++;
   ok("App-Modus: keine Fehler in der Konsole (außer dem gewollten Fehler beim Speichern)", page.__st.konsole.filter((t) => !/Datei nicht gespeichert|Speichern in der App nicht möglich/.test(t)).length === 0, page.__st.konsole.slice(0, 3).join(" | "));
   await page.close();
+}
+
+// ---------- M10: Datei per E-Mail an die Geschäftsstelle (11.10.2026) ----------
+// Entscheidung der 1. Vorsitzenden: Es gibt keinen Versand über einen Server. Die Familie schickt die fertige Datei selbst per E-Mail an die
+// Geschäftsstelle. Die Fertig-Seite zeigt dafür den Abschnitt „So schicken Sie die Datei an den Verein“ (Wege am Handy und am Computer, die Adresse groß,
+// „Adresse kopieren“, Link „E-Mail an die Geschäftsstelle öffnen“); Betreff und Text der E-Mail stehen auf Deutsch (hilfen.js, mailtoAnVerein).
+
+// Ohne Browser: der mailto-Link (Betreff und Text kodiert), der Mailtext in Einfacher Sprache, die neuen Textschlüssel, die Adresse steht nicht fest im Code.
+async function statischeM10(server) {
+  console.log("\n=== M10: Datei per E-Mail an die Geschäftsstelle (ohne Browser) ===");
+  const hilfen = await import(pathToFileURL(path.join(ROOT, "assets", "js", "anmeldung", "hilfen.js")).href);
+  const adresse = server.konfig.verein.mail;
+  ok("Konfiguration: konfig.verein.mail ist eine E-Mail-Adresse (die der Geschäftsstelle)", /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adresse), adresse);
+
+  // Der einfache Fall, Zeichen für Zeichen: so sieht der Link aus, den die Familie bekommt
+  const soll = "mailto:" + adresse + "?subject=Anmeldung%20Mila%20Mustermann&body=Guten%20Tag%2C%0D%0A%0D%0Aanbei%20die%20Anmeldung%20als%20PDF.%0D%0A%0D%0AViele%20Gr%C3%BC%C3%9Fe";
+  const einfach = hilfen.mailtoAnVerein(adresse, "Mila", "Mustermann");
+  ok("mailto (Mila Mustermann): Betreff „Anmeldung Mila Mustermann“ und Text genau so kodiert (Leerzeichen %20, Umlaut %C3%BC, Zeilenumbrüche %0D%0A)", einfach === soll, einfach);
+
+  // Dekodiert stimmen An, Betreff und Text auch bei Umlauten und bei Zeichen, die in einer Adresse etwas bedeuten
+  const MAIL_TEXT = "Guten Tag,\r\n\r\nanbei die Anmeldung als PDF.\r\n\r\nViele Grüße";
+  const zerlege = (href) => {
+    const m = /^mailto:([^?]*)\?subject=([^&]*)&body=([^&]*)$/.exec(href);
+    return m ? { an: m[1], betreff: m[2], text: m[3] } : null;
+  };
+  const faelle = [
+    ["Umlaute und ß", "Jörg", "Weiß-Mustermann", "Anmeldung Jörg Weiß-Mustermann"],
+    ["Apostroph, Leerzeichen im Namen", "Ömer Faruk", "D'Mustermann", "Anmeldung Ömer Faruk D'Mustermann"],
+    ["Zeichen mit Bedeutung in einer Adresse (& # ? % + =)", "A&B", "C#D?E%F+G=H", "Anmeldung A&B C#D?E%F+G=H"],
+    ["Leerzeichen am Rand und doppelte Leerzeichen", "  Mila ", "Muster  mann", "Anmeldung Mila Muster mann"],
+    ["ohne Namen", "", "", "Anmeldung"],
+    ["Namen fehlen ganz", undefined, null, "Anmeldung"],
+  ];
+  for (const [name, vorname, nachname, erwBetreff] of faelle) {
+    const href = hilfen.mailtoAnVerein(adresse, vorname, nachname);
+    const z = zerlege(href);
+    const dekodiert = z ? { an: z.an, betreff: decodeURIComponent(z.betreff), text: decodeURIComponent(z.text) } : null;
+    ok("mailto (" + name + "): An, Betreff und Text stimmen nach dem Dekodieren, genau die drei Teile (kein eingeschmuggelter Zusatz)", !!dekodiert && dekodiert.an === adresse && dekodiert.betreff === erwBetreff && dekodiert.text === MAIL_TEXT, href);
+    ok("mailto (" + name + "): nur ASCII ohne Leerzeichen, kein „+“ und kein weiteres „&“ oder „?“ im Betreff und Text", /^[\x21-\x7e]+$/.test(href) && !!z && !/[+&?#]/.test(z.betreff + z.text), href);
+  }
+
+  // Der Mailtext ist deutsch und in Einfacher Sprache (höchstens 12 Wörter je Satz, keine Abkürzungen)
+  ok("Mailtext: deutsch und gleich für jede Sprache des Assistenten (hilfen.js), nicht im Wörterbuch", hilfen.MAIL_BETREFF === "Anmeldung" && hilfen.MAIL_TEXT.replace(/\n/g, "\r\n") === MAIL_TEXT, hilfen.MAIL_TEXT.replace(/\n/g, " | "));
+  const einfachMail = pruefeEinfacheSprache({ betreff: hilfen.MAIL_BETREFF, text: hilfen.MAIL_TEXT });
+  ok("Mailtext: Einfache Sprache (kein Satz über 12 Wörter, keine Abkürzungen)", einfachMail.verstoesse.length === 0 && einfachMail.anzahlSaetze >= 3, einfachMail.anzahlSaetze + " Sätze, längster " + einfachMail.laengster.woerter + " Wörter");
+
+  // Die Textschlüssel
+  const de = await ladeWoerterbuch();
+  const senden = (de.fertig && de.fertig.senden) || {};
+  const schluessel = ["titel", "einleitung", "handyTitel", "handy1", "handy2", "handy3", "computerTitel", "computer1", "computer2", "computer3", "adresseTitel", "kopieren", "kopiert", "kopierenFehler", "oeffnen", "anhang"];
+  const fehlt = schluessel.filter((k) => typeof senden[k] !== "string" || !senden[k].trim());
+  ok("Wörterbuch: fertig.senden hat alle " + schluessel.length + " Texte", fehlt.length === 0, fehlt.join(", "));
+  ok("Wörterbuch: die Schritte 1 nennen den Knopf als {knopf} (so passen sie immer zu den Knöpfen)", /\{knopf\}/.test(senden.handy1) && /\{knopf\}/.test(senden.computer1) && !/Datei teilen|Datei herunterladen/.test(senden.handy1 + senden.computer1), senden.handy1 + " | " + senden.computer1);
+  ok("Wörterbuch: Titel „So schicken Sie die Datei an den Verein“, Knöpfe „Adresse kopieren“ und „E-Mail an die Geschäftsstelle öffnen“", senden.titel === "So schicken Sie die Datei an den Verein" && senden.kopieren === "Adresse kopieren" && senden.oeffnen === "E-Mail an die Geschäftsstelle öffnen", senden.titel + " | " + senden.kopieren + " | " + senden.oeffnen);
+  ok("Wörterbuch: der Weg am Handy nennt das Mail-Programm, der Weg am Computer den Anhang", /Mail-Programm/.test(senden.handy2) && /Hängen Sie die Datei an/.test(senden.computer2) && /Hängen Sie die Datei/.test(senden.anhang), senden.handy2 + " | " + senden.computer2 + " | " + senden.anhang);
+  ok("Wörterbuch: der alte Text zum Abgeben im Verein (fertig.abgeben) ist entfallen, der Hinweis zu WhatsApp bleibt", de.fertig.abgeben === undefined && de.fertig.nichtWhatsapp === "Bitte schicken Sie die Datei nicht per WhatsApp. Sie enthält private Daten." && !/auf dem Handy mit/.test(JSON.stringify(de.fertig)), String(de.fertig.nichtWhatsapp));
+  ok("Wörterbuch: ohne eingebauten Mailtext und ohne feste Adresse (beides steht in hilfen.js bzw. der Konfiguration)", !/Guten Tag|@sportfreunde04/.test(JSON.stringify(de.fertig)), "");
+
+  // Die Adresse kommt aus der Konfiguration und steht nirgends fest im Code der Fertig-Seite
+  const fest = ["hilfen.js", "seiten-ende.js"].filter((f) => /sportfreunde04\.de/i.test(fs.readFileSync(path.join(ROOT, "assets", "js", "anmeldung", f), "utf8")));
+  ok("Adresse der Geschäftsstelle: steht nicht fest in hilfen.js und seiten-ende.js (sie kommt aus konfig.verein.mail)", fest.length === 0, fest.join(", "));
+}
+
+// Liest den Abschnitt „So schicken Sie die Datei an den Verein“ von der Fertig-Seite
+const leseSenden = (page) =>
+  page.evaluate(() => {
+    const sicht = (e) => !!e && e.checkVisibility();
+    const gross = (e) => (e ? parseFloat(getComputedStyle(e).fontSize) : 0);
+    const a = document.querySelector("#anmeldung [data-senden]");
+    if (!a) return null;
+    const adresse = a.querySelector("[data-mail-adresse]");
+    const kopieren = a.querySelector('button[data-aktion="adresse-kopieren"]');
+    const link = a.querySelector('a[data-aktion="mail-oeffnen"]');
+    const status = a.querySelector("[data-mail-status]");
+    const rb = (e) => (e ? e.getBoundingClientRect() : null);
+    return {
+      sichtbar: sicht(a),
+      titel: (a.querySelector("h3") || {}).textContent || "",
+      einleitung: ((a.querySelector(":scope > p.anm-text") || {}).textContent || "").trim(),
+      wege: Array.from(a.querySelectorAll("[data-weg]")).map((w) => ({
+        art: w.getAttribute("data-weg"),
+        titel: w.querySelector("h4") ? w.querySelector("h4").textContent : null,
+        schritte: Array.from(w.querySelectorAll("ol > li")).map((li) => li.textContent.trim()),
+        nummeriert: !!w.querySelector("ol"),
+      })),
+      adresse: adresse ? adresse.textContent : null,
+      adresseDir: adresse ? adresse.getAttribute("dir") : null,
+      adresseSchrift: gross(adresse),
+      adresseMarkierbar: adresse ? getComputedStyle(adresse).userSelect : null,
+      kopieren: kopieren && { text: kopieren.textContent.trim(), sichtbar: sicht(kopieren), breite: Math.round(rb(kopieren).width), hoehe: Math.round(rb(kopieren).height), typ: kopieren.getAttribute("type") },
+      link: link && { text: link.textContent.trim(), href: link.getAttribute("href"), target: link.getAttribute("target"), rel: link.getAttribute("rel"), sichtbar: sicht(link), hoehe: Math.round(rb(link).height), breite: Math.round(rb(link).width) },
+      status: status ? status.textContent : null,
+      statusRolle: status ? status.getAttribute("role") : null,
+      hinweise: Array.from(a.querySelectorAll("p.anm-hinweis")).map((p) => p.textContent.trim()),
+      auswahl: String(window.getSelection()),
+      querScroll: document.documentElement.scrollWidth > window.innerWidth,
+      seitenText: document.getElementById("anmeldung").innerText.replace(/\s+/g, " "),
+      naechste: ((document.querySelector("#anmeldung .anm-naechste") || {}).textContent || "").replace(/\s+/g, " ").trim(),
+    };
+  });
+
+// Zurück zur Prüfseite und wieder vor: Die Fertig-Seite wird neu gezeichnet (die Datei bleibt, nur die Ansicht entsteht neu)
+async function zeichneFertigNeu(page) {
+  await page.click('#anmeldung [data-aktion="zurueck"]');
+  await page.waitForFunction(() => document.getElementById("anmeldung").dataset.schritt === "pruefen", { timeout: 5000 });
+  await page.click('#anmeldung [data-aktion="weiter"]');
+  await page.waitForFunction(() => document.getElementById("anmeldung").dataset.schritt === "fertig" && document.querySelector('#anmeldung [data-status="fertig"]'), { timeout: 20000 });
+}
+
+// Fertig-Seite am Handy: der Abschnitt, die Adresse, Kopieren (mit und ohne Zwischenablage), der mailto-Link, die Reihenfolge der Wege, der Papierweg
+async function pruefeMailAnVerein(browser, server, dateien, beispiele) {
+  console.log("\n=== M10: Fertig-Seite – Datei per E-Mail an die Geschäftsstelle (390 x 844) ===");
+  const de = await ladeWoerterbuch();
+  const T = de.fertig;
+  const adresse = server.konfig.verein.mail;
+  const profil = profilKindNeu(beispiele, server);
+  const schritt = (vorlage, knopf) => vorlage.replace("{knopf}", knopf);
+  // Ein Handy-Browser, der Dateien teilen kann: Der Knopf „Datei teilen“ ist da, und der Abschnitt zeigt den Weg am Handy
+  const mitTeilen = async (page) => {
+    await page.evaluateOnNewDocument(() => {
+      Object.defineProperty(navigator, "canShare", { value: () => true, configurable: true });
+      Object.defineProperty(navigator, "share", { value: () => Promise.resolve(), configurable: true });
+    });
+  };
+  await browser.defaultBrowserContext().overridePermissions(server.basis, ["clipboard-read", "clipboard-write"]);
+  const page = await neueSeite(browser, server, MOBIL, "mail-an-verein", { vorLaden: mitTeilen });
+  await ladeBeispielPerKnopf(page, "kind-neu");
+  const ctx = neuerKontext({ name: "mail-an-verein", vp: MOBIL, modus: "beispiel", gesehen: new Set(), touch: true, axeImmer: false, dateien });
+  const r = await laufe(page, ctx);
+  const erreicht = r.besucht[r.besucht.length - 1].startsWith("fertig");
+  const daten = erreicht ? await ergebnisPruefen(page, ctx, dateien) : null;
+  ok("Fertig-Seite am Handy: bis „fertig“ durchgeklickt, Datei erstellt", erreicht && !!daten, r.besucht.length + " Seiten");
+  if (!daten) {
+    await page.close();
+    return;
+  }
+
+  // 1. Der Abschnitt mit „Datei teilen“ und am Handy: beide Wege, der Weg am Handy zuerst
+  let d = await leseSenden(page);
+  ok("Fertig-Seite: der Abschnitt „So schicken Sie die Datei an den Verein“ ist da und sichtbar (Überschrift h3)", !!d && d.sichtbar && d.titel === "So schicken Sie die Datei an den Verein", d && d.titel);
+  ok("Fertig-Seite: kurzer Satz unter der Überschrift: „Schicken Sie die Datei per E-Mail an die Geschäftsstelle.“", !!d && d.einleitung === "Schicken Sie die Datei per E-Mail an die Geschäftsstelle.", d && d.einleitung);
+  const coarse = await page.evaluate(() => window.matchMedia("(pointer: coarse)").matches);
+  ok("Fertig-Seite: mit „Datei teilen“ zwei Wege (Am Handy, Am Computer), am Handy der Weg am Handy zuerst", !!d && d.wege.map((w) => w.art).join(",") === (coarse ? "handy,computer" : "computer,handy") && d.wege.every((w) => w.nummeriert && w.schritte.length === 3), d && d.wege.map((w) => w.art).join(",") + " (pointer coarse: " + coarse + ")");
+  const handy = d && d.wege.find((w) => w.art === "handy");
+  const computer = d && d.wege.find((w) => w.art === "computer");
+  ok("Weg am Handy: „Am Handy“ – Datei teilen, Mail-Programm wählen, an die Adresse schicken (drei Schritte, Knopf als „Datei teilen“)", !!handy && handy.titel === "Am Handy" && handy.schritte[0] === schritt(T.senden.handy1, T.teilen) && handy.schritte[0] === "Tippen Sie oben auf „Datei teilen“." && handy.schritte[1] === "Wählen Sie Ihr Mail-Programm." && handy.schritte[2] === "Schicken Sie die E-Mail an die Adresse unten.", handy && handy.schritte.join(" | "));
+  ok("Weg am Computer: „Am Computer“ – Datei herunterladen, E-Mail mit Anhang, an die Adresse schicken (Knopf als „Datei herunterladen“)", !!computer && computer.titel === "Am Computer" && computer.schritte[0] === "Klicken Sie oben auf „Datei herunterladen“." && /Hängen Sie die Datei an\./.test(computer.schritte[1]) && computer.schritte[2] === "Schicken Sie die E-Mail an die Adresse unten.", computer && computer.schritte.join(" | "));
+  // Die Knöpfe, auf die die Schritte zeigen, gibt es wirklich und heißen so
+  const knoepfe = await page.$$eval('#anmeldung .anm-ergebnis > .anm-knoepfe [data-aktion]', (l) => l.filter((e) => !e.hidden).map((e) => ({ aktion: e.getAttribute("data-aktion"), text: e.textContent.trim() })));
+  ok("Die Knöpfe „Datei teilen“ und „Datei herunterladen“ stehen über dem Abschnitt, mit der Beschriftung aus den Schritten", knoepfe.some((k) => k.aktion === "teilen" && k.text === "Datei teilen") && knoepfe.some((k) => k.aktion === "herunterladen" && k.text === "Datei herunterladen"), JSON.stringify(knoepfe));
+
+  // 2. Die Adresse: sichtbar, groß, richtig, ein Tipp markiert sie
+  ok("Adresse der Geschäftsstelle: steht groß im Abschnitt und ist die Adresse aus der Konfiguration (" + adresse + ")", !!d && d.adresse === adresse && d.adresseSchrift >= 18, d && d.adresse + " (" + (d && d.adresseSchrift) + " px)");
+  ok("Adresse: von links nach rechts (dir=ltr) und mit einem Tipp ganz zu markieren (user-select: all)", !!d && d.adresseDir === "ltr" && d.adresseMarkierbar === "all", d && d.adresseDir + ", " + d.adresseMarkierbar);
+  // 3. Knopf „Adresse kopieren“ und Link „E-Mail an die Geschäftsstelle öffnen“
+  ok("Knopf „Adresse kopieren“ ist da (Button, sichtbar, mindestens 44 px hoch)", !!d && !!d.kopieren && d.kopieren.text === "Adresse kopieren" && d.kopieren.sichtbar && d.kopieren.typ === "button" && d.kopieren.hoehe >= 44 && d.kopieren.breite >= 44, JSON.stringify(d && d.kopieren));
+  ok("Link „E-Mail an die Geschäftsstelle öffnen“ ist da (sichtbar, mindestens 44 px hoch), ohne target und ohne ext://", !!d && !!d.link && d.link.text === "E-Mail an die Geschäftsstelle öffnen" && d.link.sichtbar && d.link.hoehe >= 44 && d.link.target === null && /^mailto:/.test(d.link.href), JSON.stringify(d && d.link));
+  // mailto: An, Betreff „Anmeldung Vorname Nachname“ und der deutsche Text, richtig kodiert
+  const soll = "mailto:" + adresse + "?subject=" + encodeURIComponent("Anmeldung " + profil.vorname + " " + profil.nachname) + "&body=Guten%20Tag%2C%0D%0A%0D%0Aanbei%20die%20Anmeldung%20als%20PDF.%0D%0A%0D%0AViele%20Gr%C3%BC%C3%9Fe";
+  const z = d && d.link && /^mailto:([^?]*)\?subject=([^&]*)&body=([^&]*)$/.exec(d.link.href);
+  ok("mailto-Link: An die Adresse der Geschäftsstelle, Betreff „Anmeldung " + profil.vorname + " " + profil.nachname + "“, Text „Guten Tag, anbei die Anmeldung als PDF. Viele Grüße“ (kodiert)", !!z && d.link.href === soll && z[1] === adresse && decodeURIComponent(z[2]) === "Anmeldung " + profil.vorname + " " + profil.nachname && decodeURIComponent(z[3]) === "Guten Tag,\r\n\r\nanbei die Anmeldung als PDF.\r\n\r\nViele Grüße", d && d.link && d.link.href);
+  ok("Hinweis zum Anhang: „Hängen Sie die Datei an die E-Mail an.“ steht beim Link; der Hinweis zu WhatsApp bleibt im Abschnitt", !!d && d.hinweise.includes(T.senden.anhang) && d.hinweise.includes("Bitte schicken Sie die Datei nicht per WhatsApp. Sie enthält private Daten."), d && d.hinweise.join(" | "));
+  // Alter Wortlaut weg, WhatsApp-Satz genau einmal
+  ok("Der alte Wortlaut zum Abgeben im Verein ist von der Fertig-Seite verschwunden (auch „Geben Sie ihn getrennt ab“ und „Bringen Sie sie mit“; M11)", !!d && !/Bringen Sie die Datei auf dem Handy mit|Geben Sie die Unterlagen im Verein ab|Oder geben Sie sie ausgedruckt ab|getrennt ab\b|getrennt abgeben|Bringen Sie sie mit|im Verein ab\b/.test(d.seitenText), d ? (d.seitenText.match(/.{0,40}(getrennt ab|Bringen Sie sie mit|im Verein ab).{0,30}/) || [""])[0] : "");
+  ok("Der Hinweis zu WhatsApp steht genau einmal auf der Fertig-Seite (im Abschnitt, nicht noch einmal unter „So geht es weiter“)", !!d && (d.seitenText.match(/nicht per WhatsApp/g) || []).length === 1 && !/WhatsApp/.test(d.naechste), d && String((d.seitenText.match(/nicht per WhatsApp/g) || []).length));
+  ok("„So geht es weiter“ bleibt mit den übrigen Schritten (Unterschriften, Teil C: „Der Verein bewahrt ihn getrennt auf.“), ohne Schritt zum Abgeben", !!d && /Sie haben alles am Bildschirm unterschrieben/.test(d.naechste) && /Teil C enthält Gesundheitsdaten\. Der Verein bewahrt ihn getrennt auf\./.test(d.naechste) && !/ab\.$|im Verein ab|getrennt ab\b/.test(d.naechste), d && d.naechste.slice(0, 200));
+  ok("Fertig-Seite: kein Querscrollen", !!d && !d.querScroll, "");
+
+  // 4. Zwischenablage: Kopieren legt die Adresse in die Zwischenablage, der Status meldet es
+  await page.bringToFront();
+  await page.evaluate(() => window.getSelection().removeAllRanges());
+  await page.click('#anmeldung [data-aktion="adresse-kopieren"]');
+  await page.waitForFunction(() => (document.querySelector("[data-mail-status]") || {}).textContent !== "", { timeout: 4000 }).catch(() => {});
+  d = await leseSenden(page);
+  const zwischenablage = await page.evaluate(() => navigator.clipboard.readText().catch((e) => "FEHLER " + e.message));
+  ok("Kopieren (mit Zwischenablage): die Adresse liegt in der Zwischenablage, der Status sagt „" + T.senden.kopiert + "“ (role=status)", zwischenablage === adresse && d.status === T.senden.kopiert && d.statusRolle === "status", "Zwischenablage: " + zwischenablage + "; Status: " + d.status);
+
+  // Ohne Zwischenablage (zum Beispiel in der App): die Adresse wird markiert, Meldung „Kopieren geht hier nicht …“; klappt der ältere Weg, steht „kopiert“
+  const stelle = (clipboardWert, kopierenKlappt) =>
+    page.evaluate((cw, klappt) => {
+      Object.defineProperty(navigator, "clipboard", { value: cw === "weg" ? undefined : { writeText: () => Promise.reject(new Error("verweigert")) }, configurable: true });
+      document.execCommand = () => klappt;
+      document.querySelector("[data-mail-status]").textContent = "";
+      window.getSelection().removeAllRanges();
+    }, clipboardWert, kopierenKlappt);
+  await stelle("weg", false);
+  await page.click('#anmeldung [data-aktion="adresse-kopieren"]');
+  d = await leseSenden(page);
+  ok("Kopieren (ohne Zwischenablage, ohne älteren Weg): die Adresse ist markiert (Text markierbar), der Status sagt „" + T.senden.kopierenFehler + "“", d.status === T.senden.kopierenFehler && d.auswahl === adresse, "Status: " + d.status + "; markiert: " + d.auswahl);
+  await stelle("verweigert", false);
+  await page.click('#anmeldung [data-aktion="adresse-kopieren"]');
+  await page.waitForFunction(() => (document.querySelector("[data-mail-status]") || {}).textContent !== "", { timeout: 4000 }).catch(() => {});
+  d = await leseSenden(page);
+  ok("Kopieren (Zwischenablage verweigert, älterer Weg klappt nicht): Meldung „Kopieren geht hier nicht …“, Adresse markiert", d.status === T.senden.kopierenFehler && d.auswahl === adresse, "Status: " + d.status + "; markiert: " + d.auswahl);
+  await stelle("verweigert", true);
+  await page.click('#anmeldung [data-aktion="adresse-kopieren"]');
+  await page.waitForFunction(() => (document.querySelector("[data-mail-status]") || {}).textContent !== "", { timeout: 4000 }).catch(() => {});
+  d = await leseSenden(page);
+  ok("Kopieren (Zwischenablage verweigert, älterer Weg klappt): die Adresse ist markiert und kopiert, Status „" + T.senden.kopiert + "“", d.status === T.senden.kopiert && d.auswahl === adresse, "Status: " + d.status + "; markiert: " + d.auswahl);
+  await page.screenshot({ path: path.join(AUSGABE, MOBIL.name, "fertig-mail-an-verein.png"), fullPage: true });
+  protokoll.screenshots++;
+  // Tippflächen, axe-core, Konsole
+  const klein = (await kleineTippflaechen(page)).filter((k) => /Adresse kopieren|E-Mail an die Geschäftsstelle/.test(k));
+  ok("Tippflächen des Abschnitts mindestens 44 px", klein.length === 0, klein.join(" | "));
+  const axeOk = await axePruefen(page, "M10 Fertig-Seite mit E-Mail-Abschnitt (390 px)");
+  ok("axe-core: keine Verstöße critical/serious auf der Fertig-Seite mit dem Abschnitt", axeOk, "");
+
+  // 5. Reihenfolge der Wege: am Computer mit „Datei teilen“ steht der Weg am Computer vorn; ohne „Datei teilen“ nur ein Weg, ohne Überschrift
+  await page.evaluate(() => {
+    const echt = window.matchMedia.bind(window);
+    window.matchMedia = (q) => (/\(pointer:\s*coarse\)/.test(q) ? { matches: false, media: q, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} } : echt(q));
+  });
+  await zeichneFertigNeu(page);
+  d = await leseSenden(page);
+  ok("Am Computer mit „Datei teilen“: zwei Wege, der Weg am Computer zuerst", !!d && d.wege.map((w) => w.art).join(",") === "computer,handy" && d.wege.every((w) => w.titel), d && d.wege.map((w) => w.art + ":" + w.titel).join(", "));
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, "canShare", { value: undefined, configurable: true });
+  });
+  await zeichneFertigNeu(page);
+  d = await leseSenden(page);
+  const knopfTeilen = await page.$('#anmeldung [data-aktion="teilen"]:not([hidden])');
+  ok("Ohne „Datei teilen“ (Knopf fehlt): nur der Weg über das Herunterladen, ohne Überschrift „Am Computer“ (er gilt auch am Handy)", !knopfTeilen && !!d && d.wege.length === 1 && d.wege[0].art === "computer" && d.wege[0].titel === null && d.wege[0].schritte.length === 3 && !/Datei teilen|Am Handy/.test(d.seitenText.slice(d.seitenText.indexOf("So schicken Sie die Datei an den Verein"))), d && d.wege.map((w) => w.art + ":" + w.titel).join(", "));
+  ok("Ohne „Datei teilen“ bleiben Adresse, Kopieren und mailto-Link", !!d && d.adresse === adresse && !!d.kopieren && !!d.link && d.link.href === soll, d && d.link && d.link.href);
+  ok("keine Fehler in der Konsole", page.__st.konsole.length === 0, page.__st.konsole.slice(0, 3).join(" | "));
+  await page.close();
+
+  // 6. Alles auf Papier, selbst ausdrucken: Foto oder Scan der unterschriebenen Blätter per E-Mail, oder die Blätter im Verein abgeben (M11); beim ersten Training („training“) nicht
+  console.log("--- Alles auf Papier ---");
+  for (const wahl of ["selbst_drucken", "training"]) {
+    const seite = await neueSeite(browser, server, MOBIL, "mail-an-verein-papier-" + wahl);
+    await ladeBeispielPerKnopf(seite, "kind-neu");
+    const c = neuerKontext({ name: "mail-an-verein-papier-" + wahl, vp: MOBIL, modus: "beispiel", gesehen: new Set(), touch: true, axeImmer: false, dateien, papier: true });
+    c.vorWeiter = async (p, s) => {
+      if (s.schritt !== "unterschriften") return;
+      const id = await p.$eval('#anmeldung input[data-pfad="hfvUnterschrift"][data-wert="' + wahl + '"]', (e) => e.id);
+      await p.click('#anmeldung label[for="' + id + '"]');
+    };
+    const lauf = await laufe(seite, c);
+    const fertig = lauf.besucht[lauf.besucht.length - 1].startsWith("fertig");
+    const ergebnis = fertig ? await ergebnisPruefen(seite, c, dateien) : null;
+    const dd = ergebnis ? await leseSenden(seite) : null;
+    ok("Papier (" + wahl + "): bis „fertig“, Datei erstellt, der Abschnitt zum Schicken per E-Mail steht da", fertig && !!ergebnis && !!dd && dd.titel === "So schicken Sie die Datei an den Verein" && dd.adresse === adresse, lauf.besucht.length + " Seiten");
+    if (dd) {
+      const abgeben = T.abgebenAusgedruckt;
+      ok("Papier (" + wahl + "): " + (wahl === "selbst_drucken" ? "„So geht es weiter“ nennt den Ausdruck und dazu „" + abgeben + "“" : "„So geht es weiter“: Alle Blätter beim ersten Training, kein Satz zum ausgedruckten Teil B"), wahl === "selbst_drucken" ? dd.naechste.includes(T.unterschriftDrucken) && dd.naechste.includes(abgeben) : dd.naechste.includes(T.unterschriftTrainingAlle) && !dd.naechste.includes(abgeben), dd.naechste.slice(0, 220));
+    }
+    ok("Papier (" + wahl + "): keine Fehler in der Konsole", seite.__st.konsole.length === 0, seite.__st.konsole.slice(0, 3).join(" | "));
+    await seite.close();
+  }
 }
 
 // Die Namen der Beitragsgruppen kommen aus den Texten der Sprache (Nachbesserung sprache-16): Auf Deutsch stehen sie wie in den Daten;

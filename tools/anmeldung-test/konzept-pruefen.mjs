@@ -438,9 +438,9 @@ gruppe("3  Namen der Papiere (Abschnitt 9) und Begriffe");
 
   const teile = Object.values(deOberflaeche.fertig?.teilTitel || {});
   const teileFehlen = teile.filter((t) => !seiteText.includes(t));
-  pruefe("die Teile heißen „Teil A – Für Sie“, „Teil B – Für den Verein“ und „Teil C – Vertraulich, getrennt abgeben“",
+  pruefe("die Teile heißen „Teil A – Für Sie“, „Teil B – Für den Verein“ und „Teil C – Vertraulich“ (M11: nicht mehr „… getrennt abgeben“)",
     teile.length === 3 && teileFehlen.length === 0 &&
-      ["Teil A – Für Sie", "Teil B – Für den Verein", "Teil C – Vertraulich, getrennt abgeben"].every((t) => teile.includes(t)),
+      ["Teil A – Für Sie", "Teil B – Für den Verein", "Teil C – Vertraulich"].every((t) => teile.includes(t)),
     teileFehlen.map((t) => `„${t}“ fehlt`));
 
   const alt = [
@@ -487,7 +487,7 @@ gruppe("4  Endstand in den Abschnitten „Assistent“, „PDF“ und „Untersc
   const kriterium = (name, text, muster) => pruefe(name, text.length > 0 && alleEnthalten(text, muster).length === 0,
     text.length ? alleEnthalten(text, muster).map((m) => "fehlt: " + m) : ["Abschnitt nicht gefunden"]);
 
-  kriterium("a  Teile und Namen: Teil A, B und C stehen im Abschnitt „Was im PDF steht“", P, ["Teil A – Für Sie", "Teil B – Für den Verein", "Teil C – Vertraulich, getrennt abgeben"]);
+  kriterium("a  Teile und Namen: Teil A, B und C stehen im Abschnitt „Was im PDF steht“", P, ["Teil A – Für Sie", "Teil B – Für den Verein", "Teil C – Vertraulich"]);
   kriterium("b1 Unterschrift: alles am Bildschirm, auch die Blätter des Verbands (Jugendleitung, 11.10.2026, O68); Schalter „stift“ als Weg zurück; Antwort der Passstelle O01", U,
     [/Am Bildschirm/, /Blätter des Verbands/, /11\.10\.2026/, /O68/, /Schalter/, /„stift“/, /O01/, /Mit Stift/, /Ärztin oder der Arzt/, /Stempel des Vereins/]);
   pruefe("b1 die Seite sagt nicht mehr, die Vordrucke des HFV würden mit Stift unterschrieben (ohne Schalter „stift“)",
@@ -499,7 +499,7 @@ gruppe("4  Endstand in den Abschnitten „Assistent“, „PDF“ und „Untersc
     [/Satzung/, /Haken/, /Pflicht/, /Satzung der Website/, /Adresse im Vordruck/, /defekt/, /O66/]);
   kriterium("b3 ein Elternteil reicht (Jugendleitung, O26); Ausnahme zweiter Elternteil: getrennt lebende Eltern ohne Einverständnis, eigenes freiwilliges Feld am Bildschirm, leer: Stift-Markierung", U,
     [/Ein Elternteil reicht/, /Jugendleitung/, /08\.10\.2026/, /O26/, /Zweiter Elternteil \(nötig\)/, /getrennt/, /nicht einverstanden/, /eigenes Feld am Bildschirm/, /freiwillig/, /mit Stift markiert/, /Laufzettel nennt es/]);
-  kriterium("b3 das Kind als Spielerin oder Spieler: freiwilliges Feld „Kann Ihr Kind schon schreiben? Dann unterschreibt es hier selbst.“, leer: Zeile im Antrag ohne Markierung, Laufzettel sagt, dass das Passwesen entscheidet; nur die Abmeldung bekommt die Stift-Markierung; offene Frage O11", U,
+  kriterium("b3 das Kind als Spielerin oder Spieler: freiwilliges Feld „Kann Ihr Kind schon schreiben? Dann unterschreibt es hier selbst.“, leer: Zeile im Antrag ohne Markierung, Laufzettel sagt, dass das Passwesen entscheidet; nur die Abmeldung bekommt die Stift-Markierung; O11 ist geregelt (das Passwesen entscheidet im Einzelfall)", U,
     [/Das Kind als Spielerin oder Spieler/, /Kann Ihr Kind schon schreiben\? Dann unterschreibt es hier selbst\./, /freiwilliges Feld/, /Zeile im Antrag auf Spielerlaubnis ohne Markierung/, /Nicht unterschrieben \(freiwillig\)/,
       /Das Kind hat den Antrag nicht unterschrieben\. Das Passwesen entscheidet, ob das nötig ist\./, /Nur die Abmeldung beim alten Verein bekommt bei leerem Feld die Stift-Markierung/, /O11/]);
   pruefe("b3 das leere Kinderfeld heißt nicht mehr „mit Stift markiert“ (nur der zweite Elternteil und die Abmeldung)",
@@ -527,6 +527,17 @@ gruppe("4  Endstand in den Abschnitten „Assistent“, „PDF“ und „Untersc
     [/Heimweg nach dem Training/, /allein oder abgeholt/, /Beim Probetraining sind Nichtmitglieder nicht über den Verein versichert/]);
   kriterium("j  Ablauf: bei Karneval keine Gruppenwahl, die Trainer ordnen die Kinder einer Gruppe zu", A,
     [/Bei Karneval entfallen diese Fragen/, /Eine Gruppenwahl gibt es nicht/, /Die Trainer ordnen die Kinder einer Gruppe zu/]);
+  // Paket M11 (12.10.2026): Versand und Übergabe. Die ganze Datei geht per E-Mail an die Geschäftsstelle, auch Teil C (O25, O73); der Verein
+  // bewahrt Teil C getrennt auf; kein Server-Versand zum Start (O72); Spielerpässe: Jugend 1. Kassierer, Herren Spielausschuss Senioren (O24).
+  const D = abschnittText("datenschutz");
+  kriterium("k  Versand und Übergabe: die ganze Datei geht per E-Mail an die Geschäftsstelle, auch Teil C; der Verein bewahrt Teil C getrennt auf; der 1. Kassierer prüft beim Erfassen; kein Server-Versand zum Start", D,
+    [/Die Familie schickt die ganze Datei per E-Mail an die Geschäftsstelle, auch Teil C/, /1\. Vorsitzende am 11\.10\.2026/, /O25/, /O73/, /Der Verein bewahrt Teil C getrennt von den übrigen Unterlagen auf/,
+      /1\. Kassierer prüft beim Erfassen, ob alles da ist/, /Kein automatischer Versand zum Start/, /O72/, /Spielausschuss Senioren/, /O24/, /Tag des Eingangs/, /O69/]);
+  kriterium("k  Teil B geht per E-Mail an die Geschäftsstelle, Teil C heißt „Vertraulich“ und liegt beim Verein getrennt", P,
+    [/Geht per E-Mail an die Geschäftsstelle/, /Teil C – Vertraulich/, /Der Verein bewahrt ihn getrennt auf/, /Trennblatt: Was mit Teil C geschieht/]);
+  pruefe("k  die Seite sagt nirgends mehr, die Familie gebe die Unterlagen im Verein ab, gebe Teil C getrennt ab, brauche einen Umschlag oder müsse auf den automatischen Versand warten",
+    !/getrennt abgeben|im Verein abgegeben|gibt die Originale im Verein ab|Umschlag|nicht per normaler Mail|Offen: automatischer Versand|Passwesen noch zu klären/.test(seiteText),
+    ["die Seite sagt noch, die Unterlagen würden im Verein abgegeben, Teil C getrennt abgegeben oder der automatische Versand sei offen"]);
 }
 
 // ---------- 5. Personendaten ----------

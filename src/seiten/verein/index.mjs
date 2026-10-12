@@ -15,7 +15,7 @@
 
 // Diese Seite liegt immer unter "/verein/" (Tiefe 1), daher immer "../"
 // (siehe pfadZurWurzel() in tools/build.mjs).
-import { PROBETRAINING_MAILTO, BESCHEINIGUNG_MAILTO } from "../../vorlagen/hilfen.mjs";
+import { PROBETRAINING_MAILTO, BESCHEINIGUNG_MAILTO, ORGANIGRAMM_LIVE } from "../../vorlagen/hilfen.mjs";
 
 const PFAD = "../";
 
@@ -77,6 +77,9 @@ function derVereinAbschnitt() {
     ]),
     gruppe("Kontakt", [
       zeile("Vorstand", "Wer den Verein führt", `${PFAD}verein/vorstand/`),
+      // Organigramm (M13, 11.10.2026): nur mit ORGANIGRAMM_LIVE (src/vorlagen/hilfen.mjs). Ohne den Schalter bleibt die
+      // Seite Byte für Byte wie vorher; die Verlinkung in der App richtet der Orchestrator im CMS ein.
+      ...(ORGANIGRAMM_LIVE ? [zeile("Wer macht was", "Wer im Verein wofür zuständig ist", `${PFAD}verein/organigramm/`)] : []),
       zeile("Kontakt & Anfahrt", "Adresse, E-Mail, Anfahrt", `${PFAD}kontakt/`),
     ]),
     gruppe("Mitmachen", [

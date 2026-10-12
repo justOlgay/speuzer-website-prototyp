@@ -65,8 +65,8 @@ export async function erzeugePdf(opts) {
   if (a.gesundheitsbogen === true) {
     p = seite();
     y = 800;
-    zeile("Teil C – Vertraulich, getrennt abgeben (Attrappe)", 16);
-    teile.push({ teil: "C", titel: "Vertraulich – getrennt abgeben", vonSeite: doc.getPageCount(), bisSeite: doc.getPageCount() });
+    zeile("Teil C – Vertraulich (Attrappe)", 16);
+    teile.push({ teil: "C", titel: "Vertraulich", vonSeite: doc.getPageCount(), bisSeite: doc.getPageCount() });
   }
   const bytes = await doc.save();
   const teil = (s) => String(s || "x").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Za-z0-9]+/g, "-");

@@ -462,15 +462,18 @@ export const einwilligungen = {
       };
     }
     // Nur Karneval (ohne Fußball): keine Spiele und Turniere im Satz zur Fahrt (Entscheidung der 1. Vorsitzenden vom
-    // 11.10.2026). Fußball und "beides" behalten den bisherigen Satz. Das PDF-Blatt (pdf.js, seiteFahrten) folgt derselben Regel.
-    const fahrtenSatz = k.a.abteilung === "karneval" ? "einwilligungen.fahrten.fahrtenKarneval" : "einwilligungen.fahrten.fahrten";
+    // 11.10.2026) und die Messenger-Gruppe der Gruppe statt der Mannschaft (M11, 12.10.2026). Fußball und "beides" behalten die
+    // bisherigen Sätze. Das PDF-Blatt (pdf.js, seiteFahrten) folgt derselben Regel.
+    const nurKarneval = k.a.abteilung === "karneval";
+    const fahrtenSatz = nurKarneval ? "einwilligungen.fahrten.fahrtenKarneval" : "einwilligungen.fahrten.fahrten";
+    const messengerSatz = nurKarneval ? "einwilligungen.fahrten.messengerKarneval" : "einwilligungen.fahrten.messenger";
     return {
       titel: k.t("einwilligungen.fahrten.titel"),
       inhalt: [
         h("p", { klasse: "anm-hinweis" }, k.t("einwilligungen.fahrten.hinweis")),
         h("div", { klasse: "anm-karten" },
           kaestchen(k, { pfad: "einwilligungen.fahrten", label: k.t(fahrtenSatz), hinweis: k.t("einwilligungen.fahrten.fahrtenHinweis") }),
-          kaestchen(k, { pfad: "einwilligungen.messenger", label: k.t("einwilligungen.fahrten.messenger"), hinweis: k.t("einwilligungen.fahrten.messengerHinweis") })),
+          kaestchen(k, { pfad: "einwilligungen.messenger", label: k.t(messengerSatz), hinweis: k.t("einwilligungen.fahrten.messengerHinweis") })),
       ],
     };
   },

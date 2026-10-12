@@ -170,3 +170,23 @@ export function dateiteil(text) {
 export function kbText(bytes) {
   return bytes < 1024 * 1024 ? Math.max(1, Math.round(bytes / 1024)) + " KB" : (bytes / (1024 * 1024)).toFixed(1).replace(".", ",") + " MB";
 }
+
+// ---------- E-Mail an die Geschäftsstelle ----------
+// Die Familie schickt die fertige Datei selbst per E-Mail an die Geschäftsstelle (Entscheidung der 1. Vorsitzenden vom
+// 11.10.2026; es gibt keinen Versand über einen Server). Betreff und Text stehen auf Deutsch, auch wenn der Assistent in einer
+// anderen Sprache läuft: Die Geschäftsstelle liest Deutsch. Ein Link kann keine Datei anhängen; die Familie hängt sie selbst an.
+
+export const MAIL_BETREFF = "Anmeldung";
+export const MAIL_TEXT = "Guten Tag,\n\nanbei die Anmeldung als PDF.\n\nViele Grüße";
+
+// "Anmeldung Vorname Nachname" (ohne Namen nur "Anmeldung")
+export function mailBetreff(vorname, nachname) {
+  return [MAIL_BETREFF, sauber(vorname), sauber(nachname)].filter(Boolean).join(" ");
+}
+
+// mailto:-Adresse mit Betreff und Text. Betreff und Text sind als URL-Teile kodiert (Umlaute, Leerzeichen als %20, Zeilenumbrüche
+// als %0D%0A nach RFC 6068); die Adresse bleibt, wie sie ist.
+export function mailtoAnVerein(adresse, vorname, nachname) {
+  const kodiere = (text) => encodeURIComponent(String(text).replace(/\n/g, "\r\n"));
+  return "mailto:" + sauber(adresse) + "?subject=" + kodiere(mailBetreff(vorname, nachname)) + "&body=" + kodiere(MAIL_TEXT);
+}

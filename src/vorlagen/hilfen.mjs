@@ -81,8 +81,9 @@ const ANMELDUNG_LIVE_TEST = globalThis.process?.env?.ANMELDUNG_LIVE;
 export const ANMELDUNG_LIVE =
   ANMELDUNG_LIVE_TEST === "1" ? true : ANMELDUNG_LIVE_TEST === "0" ? false : ANMELDUNG_LIVE_SCHALTER;
 
-// Sprachen der Live-Seite (Sprachwahl oben und im Kopf des Assistenten). Türkisch ("tr") und Arabisch ("ar") kommen erst
-// nach der Durchsicht durch Muttersprachler dazu; "de" steht immer vorn. Für einen Test-Bau setzt
+// Sprachen der Live-Seite (Sprachwahl oben und im Kopf des Assistenten). Türkisch ("tr") und Arabisch ("ar") sind seit
+// 12.10.2026 dabei: Muttersprachler standen nicht zur Verfügung, deshalb je eine unabhängige Sprachprüfung mit Korrektur (M12,
+// Berichte in tools/cache/orchestrierung-anmeldung/pruefung/m12-*). "de" steht immer vorn und ist verbindlich. Für einen Test-Bau setzt
 // ANMELDUNG_SPRACHEN_LIVE=de,en,tr,ar die Liste nur für diesen Bau.
 const ANMELDUNG_SPRACHEN_ALLE = ["de", "en", "tr", "ar"];
 const ANMELDUNG_SPRACHEN_TEST = (globalThis.process?.env?.ANMELDUNG_SPRACHEN_LIVE ?? "")
@@ -91,7 +92,22 @@ const ANMELDUNG_SPRACHEN_TEST = (globalThis.process?.env?.ANMELDUNG_SPRACHEN_LIV
   .filter((s) => ANMELDUNG_SPRACHEN_ALLE.includes(s));
 export const ANMELDUNG_SPRACHEN_LIVE = ANMELDUNG_SPRACHEN_TEST.length
   ? ANMELDUNG_SPRACHEN_ALLE.filter((s) => s === "de" || ANMELDUNG_SPRACHEN_TEST.includes(s))
-  : ["de", "en"];
+  : ["de", "en", "tr", "ar"]; // 12.10.2026: Türkisch und Arabisch nach eigener Sprachprüfung (M12) freigegeben (Olgay)
+
+// ---------- Organigramm „Wer macht was“ (M13, 11.10.2026) ----------
+
+// Die Seite src/seiten/verein/organigramm.mjs (Workspace-Seite web/verein-organigramm.html, Daten data/organigramm.json
+// und data/vorstand.json) entsteht immer, hängt aber ohne Link in der Luft. Mit ORGANIGRAMM_LIVE = true bekommt die
+// Verein-Seite (src/seiten/verein/index.mjs, Gruppe „Kontakt“) die Zeile „Wer macht was“ – nur auf der Website; die
+// Verlinkung in der App (Seite Verein, Seitenmodul im CMS) richtet der Orchestrator später ein.
+// Solange der Schalter AUS ist (Standard), sind docs/ws/* und dist/appack-paket/* bis auf die neue Seite (und die Listen
+// manifest.json, LIESMICH.md, sitemap.xml) Byte für Byte wie vorher. Umstellen erst nach der Bestätigung der Namen und
+// Aufgaben durch Olgay und die 1. Vorsitzende. Für einen Test-Bau setzt die Umgebungsvariable ORGANIGRAMM_LIVE=1 (an)
+// bzw. ORGANIGRAMM_LIVE=0 (aus) den Wert nur für diesen Bau – danach wieder ohne sie bauen.
+const ORGANIGRAMM_LIVE_SCHALTER = false;
+const ORGANIGRAMM_LIVE_TEST = globalThis.process?.env?.ORGANIGRAMM_LIVE;
+export const ORGANIGRAMM_LIVE =
+  ORGANIGRAMM_LIVE_TEST === "1" ? true : ORGANIGRAMM_LIVE_TEST === "0" ? false : ORGANIGRAMM_LIVE_SCHALTER;
 
 export const BESCHEINIGUNG_MAILTO =
   "mailto:geschaeftsstelle@sportfreunde04.de?subject=Anforderung%20Mitgliedsbescheinigung&body=Hallo%2C%0A%0Abitte%20schicken%20Sie%20mir%20eine%20Mitgliedsbescheinigung.%0A%0AF%C3%BCr%20%28mich%20selbst%20/%20mein%20Kind%29%3A%20%0AName%20und%20Vorname%20des%20Mitglieds%3A%20%0AGeburtsdatum%20des%20Mitglieds%3A%20%0AAnschrift%3A%20%0AMitgliedsnummer%20%28falls%20bekannt%29%3A%20%0ATelefon%20f%C3%BCr%20R%C3%BCckfragen%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe";

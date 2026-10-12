@@ -97,7 +97,7 @@ export default {
     moment: "Einen Moment bitte …",
     datei: "Datei",
     keineAngabe: "keine Angabe",
-    jahre: "Jahre",
+    alterJahre: "{n} Jahre",
   },
 
   kopf: {
@@ -670,6 +670,8 @@ export default {
       fahrtenKarneval: "{name} darf zu Veranstaltungen des Vereins mitfahren.",
       fahrtenHinweis: "Zum Beispiel in Autos anderer Eltern.",
       messenger: "{name} darf in die Messenger-Gruppe der Mannschaft.",
+      // Nur Karneval (ohne Fußball): Beim Karneval gibt es Gruppen, keine Mannschaften (M11, 12.10.2026)
+      messengerKarneval: "{name} darf in die Messenger-Gruppe der Gruppe.",
       messengerHinweis: "Dort stehen Termine und Absprachen.",
     },
   },
@@ -952,7 +954,7 @@ export default {
     teilTitel: {
       A: "Teil A – Für Sie",
       B: "Teil B – Für den Verein",
-      C: "Teil C – Vertraulich, getrennt abgeben",
+      C: "Teil C – Vertraulich",
     },
     herunterladen: "Datei herunterladen",
     teilen: "Datei teilen",
@@ -968,19 +970,43 @@ export default {
       modul: "Die Datei kann noch nicht erstellt werden. Bitte rufen Sie die Geschäftsstelle an.",
       pdf: "Die Datei konnte nicht erstellt werden. Bitte versuchen Sie es noch einmal.",
     },
+    // Die Datei per E-Mail an die Geschäftsstelle schicken (M10; Entscheidung der 1. Vorsitzenden vom 11.10.2026: kein Versand über
+    // einen Server). {knopf} ist die Beschriftung des Knopfes (herunterladen, teilen), damit die Schritte immer zu den Knöpfen passen.
+    // Betreff und Text der E-Mail stehen auf Deutsch in hilfen.js (mailtoAnVerein); sie werden nicht übersetzt.
+    senden: {
+      titel: "So schicken Sie die Datei an den Verein",
+      einleitung: "Schicken Sie die Datei per E-Mail an die Geschäftsstelle.",
+      handyTitel: "Am Handy",
+      handy1: "Tippen Sie oben auf „{knopf}“.",
+      handy2: "Wählen Sie Ihr Mail-Programm.",
+      handy3: "Schicken Sie die E-Mail an die Adresse unten.",
+      computerTitel: "Am Computer",
+      computer1: "Klicken Sie oben auf „{knopf}“.",
+      computer2: "Schreiben Sie eine neue E-Mail. Hängen Sie die Datei an.",
+      computer3: "Schicken Sie die E-Mail an die Adresse unten.",
+      adresseTitel: "Die E-Mail-Adresse der Geschäftsstelle:",
+      kopieren: "Adresse kopieren",
+      kopiert: "Die Adresse ist kopiert.",
+      kopierenFehler: "Kopieren geht hier nicht. Die Adresse ist markiert. Kopieren Sie die Adresse selbst.",
+      oeffnen: "E-Mail an die Geschäftsstelle öffnen",
+      anhang: "Hängen Sie die Datei an die E-Mail an.",
+    },
     naechsteTitel: "So geht es weiter",
     unterschriftTraining: "Die Blätter für den Fußball-Verband unterschreiben Sie beim ersten Training mit Stift.",
     unterschriftDrucken: "Drucken Sie die Datei aus. Unterschreiben Sie an allen blauen Markierungen mit Stift.",
+    // Wer alles auf Papier unterschreibt und selbst ausdruckt, schickt die unterschriebenen Blätter als Foto oder Scan per E-Mail
+    // oder gibt sie im Verein ab (M11, 12.10.2026; wie Teil A der Datei, pdf.js). Die einzige Stelle, die noch zur Abgabe im Verein rät.
+    abgebenAusgedruckt: "Fotografieren oder scannen Sie die unterschriebenen Blätter. Schicken Sie sie per E-Mail an die Geschäftsstelle. Oder geben Sie sie im Verein ab.",
     unterschriftDruckenTeil: "Drucken Sie die Blätter für den Fußball-Verband aus. Unterschreiben Sie an den blauen Markierungen mit Stift.",
     unterschriftTrainingAlle: "Alle Blätter unterschreiben Sie beim ersten Training mit Stift. Der Verein druckt sie aus.",
     unterschriftFertig: "Sie haben alles am Bildschirm unterschrieben. Was Sie ausdrucken müssen, steht in Teil A der Datei.",
     // Modus "bildschirm": ein freiwilliges Feld (Kind, anderer Elternteil) blieb leer
     unterschriftRest: "Einige Unterschriften fehlen noch. Das sind die blauen Markierungen im PDF.\nUnterschreiben Sie dort mit Stift. Was Sie ausdrucken müssen, steht in Teil A der Datei.",
     fehltTitel: "Diese Unterlagen fehlen noch:",
-    fehltHinweis: "Bringen Sie sie mit, sobald Sie sie haben.",
-    abgeben: "Geben Sie die Unterlagen im Verein ab.\nBringen Sie die Datei auf dem Handy mit. Oder geben Sie sie ausgedruckt ab.",
+    fehltHinweis: "Schicken Sie sie per E-Mail nach, sobald Sie sie haben.",
     nichtWhatsapp: "Bitte schicken Sie die Datei nicht per WhatsApp. Sie enthält private Daten.",
-    teilC: "Teil C enthält Gesundheitsdaten. Geben Sie ihn getrennt ab.",
+    // Teil C geht mit der ganzen Datei per E-Mail an die Geschäftsstelle; der Verein bewahrt ihn getrennt auf (M11, O73)
+    teilC: "Teil C enthält Gesundheitsdaten. Der Verein bewahrt ihn getrennt auf.",
     weiterePerson: "Weitere Person anmelden",
     weiterePersonHinweis: "Wir übernehmen Adresse, Kontakt, Eltern und Zahlung.",
     neuePerson: "Sie melden jetzt die nächste Person an.",

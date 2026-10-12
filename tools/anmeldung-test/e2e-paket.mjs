@@ -21,6 +21,10 @@
 //   kein Rahmen der Begleitseite, kein Knopf "Vorführung", Titel ohne "Entwurf"; axe-core ohne Verstöße "critical" und
 //   "serious" auf der Startseite, einer Frage und der Fertig-Seite.
 //   "Mitglied werden": Hauptknopf "Schritt für Schritt anmelden" (Web und App), Nebenwege bleiben, der Link führt auf die Seite.
+//   M10 (11.10.2026): Die Familie schickt die Datei per E-Mail an die Geschäftsstelle (kein Server-Versand). In jedem Lauf (auch Englisch, auch ?app=1): die Fertig-Seite zeigt
+//   den Abschnitt „So schicken Sie die Datei an den Verein“ mit der Adresse aus der Konfiguration des Pakets und einem mailto:-Link (Betreff „Anmeldung Vorname Nachname“,
+//   deutscher Text, kodiert); mit ?app=1 bleibt der Link auch nach einem Klick ein mailto:-Link (die Umschreibung auf ext:// gilt nur für Adressen mit http/https); Teil A
+//   der Datei nennt den Schritt „Schicken Sie die Datei per E-Mail an die Geschäftsstelle: <Adresse>“.
 //   Module: Die Module im Paket (ohne Kommentare, umbenannt) liefern dieselben Ergebnisse wie die Quellen
 //   (Regelwerk für fünf Beispiele, PDF Byte für Byte, Schrift und Vordrucke aus den Base64-Modulen, Texte).
 // Bildschirmfotos (390 px) nach tools/cache/orchestrierung-anmeldung/pruefung/m6/.
@@ -602,6 +606,28 @@ async function pruefeAblauf(srv, browser, beispiele, konfig, dateien, ablauf, sp
   }
   ok(name + ": Hinweiskästen „Für den Verein“ auf keiner Seite sichtbar", vereinsKaesten.sichtbar.length === 0, vereinsKaesten.sichtbar.slice(0, 3).join(", ") || vereinsKaesten.gesamt + " im DOM, alle ausgeblendet");
   const ergebnis = await dateiPruefen(browser, page, name, profil);
+  if (ergebnis) {
+    // M10: Teil A nennt den Schritt zur E-Mail mit der Adresse der Konfiguration; die Fertig-Seite zeigt den Abschnitt mit dem mailto:-Link
+    const adresse = konfig.verein.mail;
+    ok(name + ": Teil A der Datei nennt „Schicken Sie die Datei per E-Mail an die Geschäftsstelle: " + adresse + "“, den alten Satz zum Abgeben im Verein nicht mehr", ergebnis.text.replace(/\s+/g, " ").includes("Schicken Sie die Datei per E-Mail an die Geschäftsstelle: " + adresse) && !/Geben Sie Teil B im Verein ab|auf dem Handy mit/.test(ergebnis.text.replace(/\s+/g, " ")), "");
+    const mail = await page.evaluate(() => {
+      const abschnitt = document.querySelector("#anmeldung [data-senden]");
+      const a = abschnitt && abschnitt.querySelector('a[data-aktion="mail-oeffnen"]');
+      if (!a) return null;
+      const vorher = a.getAttribute("href");
+      const sperre = (e) => e.preventDefault(); // die Navigation selbst verhindern: Der Test prüft nur, ob der Link umgeschrieben würde
+      document.addEventListener("click", sperre);
+      a.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+      document.removeEventListener("click", sperre);
+      const adr = abschnitt.querySelector("[data-mail-adresse]");
+      const kopieren = abschnitt.querySelector('button[data-aktion="adresse-kopieren"]');
+      return { vorher, nachher: a.getAttribute("href"), target: a.getAttribute("target"), sichtbar: a.checkVisibility(), adresse: adr && adr.textContent, kopieren: !!kopieren && kopieren.checkVisibility() };
+    });
+    const erwBetreff = "Anmeldung " + profil.vorname + " " + profil.nachname;
+    const soll = "mailto:" + adresse + "?subject=" + encodeURIComponent(erwBetreff) + "&body=Guten%20Tag%2C%0D%0A%0D%0Aanbei%20die%20Anmeldung%20als%20PDF.%0D%0A%0D%0AViele%20Gr%C3%BC%C3%9Fe";
+    ok(name + ": Fertig-Seite zeigt den Abschnitt zum Schicken per E-Mail: Adresse " + adresse + ", Knopf „Adresse kopieren“, mailto-Link mit Betreff „" + erwBetreff + "“ und deutschem Text", !!mail && mail.adresse === adresse && mail.kopieren && mail.sichtbar && mail.vorher === soll, JSON.stringify(mail));
+    if (optionen.app) ok(name + ": mit ?app=1 bleibt der Link ein mailto:-Link (kein ext://, kein ?app=1, ohne target), auch nach einem Klick", !!mail && mail.nachher === mail.vorher && /^mailto:/.test(mail.nachher) && mail.target === null && !/ext:|app=1/.test(mail.nachher), JSON.stringify(mail));
+  }
   if (ablauf.id === "kind-neu" && sprache === "de" && !optionen.app && ergebnis) {
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({ path: path.join(FOTOS, "fertig-390.png"), fullPage: true });

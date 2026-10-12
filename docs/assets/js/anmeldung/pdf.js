@@ -10,8 +10,10 @@
                                              HFV-Antrag, Vollmacht/Abmeldung, Einverständnisse und
                                              Erklärungen (Fahrten, Heimweg), Spielerfoto, Kopien der
                                              Nachweise mit Wasserzeichen
-    Teil C "Vertraulich – getrennt abgeben"  Trennblatt, Attest (Vorlage oder Kopie), Einwilligung
-                                             zum Attest, Notfall- und Gesundheitsbogen
+    Teil C "Vertraulich"                     Trennblatt, Attest (Vorlage oder Kopie), Einwilligung
+                                             zum Attest, Notfall- und Gesundheitsbogen (geht mit der ganzen
+                                             Datei per E-Mail an die Geschäftsstelle; der Verein bewahrt
+                                             ihn getrennt auf, Entscheidung der 1. Vorsitzenden vom 11.10.2026)
 
   Läuft im Browser und in Node ohne DOM: pdf-lib, fontkit, Schrift und Vorlagen kommen von außen
   (opts). Der Baustein liest weder Browser- noch Node-Objekte noch Dateien und kennt keine
@@ -90,9 +92,9 @@ const FARBE = {
 
 const MAX_PT_JE_PX = 0.55; // größter Maßstab einer Unterschrift (wie im Online-Aufnahmeantrag)
 const ENTWURF_TEXT = "Entwurf – vom Vorstand zu prüfen";
-const TEIL_TITEL = { A: "Für Sie", B: "Für den Verein", C: "Vertraulich – getrennt abgeben" };
+const TEIL_TITEL = { A: "Für Sie", B: "Für den Verein", C: "Vertraulich" };
 // So heißen die Teile im PDF-Text (SCHNITTSTELLEN Abschnitt 9); TEIL_TITEL bleibt der Wert von teile[].titel
-const TEIL_ANZEIGE = { A: "Teil A – Für Sie", B: "Teil B – Für den Verein", C: "Teil C – Vertraulich, getrennt abgeben" };
+const TEIL_ANZEIGE = { A: "Teil A – Für Sie", B: "Teil B – Für den Verein", C: "Teil C – Vertraulich" };
 // Vorlage für die Ärztin oder den Arzt (Abschnitt 9 erlaubt „Ärztliche Bescheinigung (Attest)“ statt „Attest vom Arzt“)
 const ATTEST_VORLAGE_NAME = "Ärztliche Bescheinigung (Attest)";
 const VORLAGEN = ["aufnahmeantrag", "hfv_antrag", "vollmacht", "abmeldung", "einverstaendnis_senioren"];
@@ -150,8 +152,9 @@ export const TEXTE_TEIL_A = {
   titel: "Ihre Anmeldung",
   einleitung: "Hier ist Ihre fertige Anmeldung. Die Datei hat {anzahl} Teile.",
   teilA: "Das lesen Sie jetzt. Sie behalten diesen Teil.",
-  teilB: "Sie geben ihn im Verein ab.",
-  teilC: "Er enthält Angaben zur Gesundheit. Sie geben ihn getrennt ab.",
+  // Die Datei geht per E-Mail an die Geschäftsstelle (M10, Entscheidung der 1. Vorsitzenden vom 11.10.2026), siehe „abgeben“.
+  teilB: "Er geht an den Verein.",
+  teilC: "Er enthält Angaben zur Gesundheit. Der Verein bewahrt ihn getrennt auf.",
   weiterTitel: "So geht es weiter",
   // Unterschriften. Der Verband (der Hessische Fußball-Verband) verlangt für seine Blätter eine Unterschrift mit Stift. Die
   // Sätze stehen so, dass nach der Erklärung beim ersten Vorkommen („Hessischer Fußball-Verband (kurz: der Verband)“,
@@ -179,11 +182,15 @@ export const TEXTE_TEIL_A = {
   // Am Bildschirm unterschrieben (Modus „bildschirm“): Die Unterschriften stehen schon auf dem Blatt, es geht nur noch an den alten Verein.
   abmeldungBildschirm: "Das Blatt {name} steht auf {seiten}. Schicken Sie das Blatt an Ihren alten Verein. Am sichersten per Einschreiben.",
   fehlt: "Besorgen Sie die Unterlagen aus der Liste Das fehlt noch.",
-  abgeben: "Geben Sie Teil B im Verein ab. Bringen Sie die Datei auf dem Handy mit. Oder geben Sie sie ausgedruckt ab.",
-  // Wer die ganze Datei ausdruckt und mit Stift unterschreibt, gibt Papier ab; die Datei auf dem Handy genügt dann nicht.
-  abgebenAusgedruckt: "Geben Sie Teil B im Verein ab. Geben Sie ihn ausgedruckt und unterschrieben ab.",
-  // Teil C: Die Übergabe der Unterlagen ist noch offen (O25). Der Text verlangt deshalb keinen Umschlag.
-  abgebenC: "Teil C gehört nicht zu den übrigen Unterlagen. Der Verein bewahrt ihn getrennt auf.",
+  // Die Familie schickt die fertige Datei selbst per E-Mail an die Geschäftsstelle (M10, Entscheidung der 1. Vorsitzenden vom
+  // 11.10.2026; kein Versand über einen Server). {adresse} kommt aus der Konfiguration (konfig.verein.mail).
+  abgeben: "Schicken Sie die Datei per E-Mail an die Geschäftsstelle: {adresse}.",
+  // Wer die ganze Datei ausdruckt und mit Stift unterschreibt, schickt die unterschriebenen Blätter als Foto oder Scan per E-Mail
+  // oder gibt sie im Verein ab (M11, 12.10.2026; gleichwertig). Die einzige Stelle, die noch zur Abgabe im Verein rät.
+  abgebenAusgedruckt: "Fotografieren oder scannen Sie die unterschriebenen Blätter. Schicken Sie sie per E-Mail an die Geschäftsstelle: {adresse}. Oder geben Sie sie im Verein ab.",
+  // Teil C geht mit der ganzen Datei per E-Mail an die Geschäftsstelle (O25, O73, 11.10.2026). Dass der Verein ihn getrennt aufbewahrt, sagt
+  // schon die Übersicht der Teile (teilC); der Schritt wiederholt es nicht, sondern sagt, dass nichts abzutrennen ist (M11, 12.10.2026).
+  abgebenC: "Teil C bleibt in der Datei. Er geht in derselben E-Mail mit.",
   verband: "Danach stellt der Verein den Antrag beim Verband.",
   verein: "Danach prüft der Verein Ihre Anmeldung.",
   nichtWhatsapp: "Schicken Sie die Datei nicht per WhatsApp. Sie enthält private Daten.",
@@ -204,9 +211,9 @@ export const TEXTE_TEIL_A = {
   // Gibt es Papiere, die vielleicht nötig sind (Laufzettel: „klären“), liegen nicht „alle nötigen Unterlagen“ bei (sprache-9).
   fehltKeineSicher: "Es fehlt nichts, was sicher nötig ist.",
   fehltVielleicht: "Vielleicht kommt noch etwas dazu. Das steht unter „Das klärt der Verein mit Ihnen“.",
-  fehltNichtLesbar: "Die Datei ließ sich nicht übernehmen. Bringen Sie das Original oder eine Kopie mit.",
+  fehltNichtLesbar: "Die Datei ließ sich nicht übernehmen. Schicken Sie ein neues Foto oder einen Scan per E-Mail nach.",
   fehltWie: "So bekommen Sie es:",
-  fehltWo: "So geben Sie es ab:",
+  fehltWo: "So schicken Sie es nach:",
   wartezeitTitel: "Wann darf gespielt werden?",
   mannschaftTitel: "Die Mannschaft",
   wartezeitSchaetzung: "Das ist eine Schätzung. Der Verein prüft das genau.",
@@ -1248,7 +1255,7 @@ const FREIWILLIG_GRUND = {
 // beantwortet), "stift" oder "leer". grund: warum ein mögliches Bild nicht gesetzt wird (unbeantwortete Erklärung, leeres freiwilliges Feld).
 // "leer" gibt es nur für die Zeile der Spielerin oder des Spielers im Antrag auf Spielerlaubnis, wenn das Kind im Modus "bildschirm"
 // nicht unterschrieben hat: Kleine Kinder können noch nicht schreiben, deshalb bleibt die Zeile ohne Markierung und das Passwesen
-// entscheidet, ob die Unterschrift nötig ist (Jugendleitung, 11.10.2026, Nachbesserung Runde 2; offene Frage O11). Die Abmeldung beim
+// entscheidet, ob die Unterschrift nötig ist (Jugendleitung, 11.10.2026, Nachbesserung Runde 2; O11 ist seit M11 geregelt: Das Passwesen entscheidet im Einzelfall). Die Abmeldung beim
 // alten Verein geht ohnehin auf Papier per Einschreiben: Dort bleibt die Stift-Markierung.
 function stelleEntscheidung(K, formular, wer, stelleKey) {
   if (wer === "arzt" || wer === "verein") return { art: "stift", grund: "" };
@@ -1868,6 +1875,11 @@ function vereinAnschrift(K) {
   return zeilen;
 }
 
+// E-Mail-Adresse der Geschäftsstelle: konfig.verein.mail, sonst die Kontakte des Regelwerks (wie in kontaktText und unter „So erreichen Sie uns“)
+function geschaeftsstellenMail(K) {
+  return text(K.verein.mail) || text(objekt(objekt(K.cfg.kontakte).geschaeftsstelle).mail);
+}
+
 function kontaktText(K) {
   const k = objekt(K.cfg.kontakte);
   const mail = text(K.verein.mail) || text(objekt(k.geschaeftsstelle).mail);
@@ -1920,6 +1932,17 @@ function gruppeText(K) {
   const abteilung = text(K.a.abteilung);
   if (abteilung !== "karneval" && abteilung !== "beides") return "";
   return K.minderjaehrig ? "Die Trainer ordnen das Kind einer Gruppe zu." : "Die Trainer ordnen die Person einer Gruppe zu.";
+}
+
+// Nur Karneval (ohne Fußball): Dort gibt es Gruppen, keine Mannschaften (M11, 12.10.2026; wie in der Oberfläche, seiten-verein.js).
+// „Messenger-Gruppe der Gruppe“, „Trainer und Betreuer der Gruppe“. Fußball und „beides“ sagen weiter „Mannschaft“.
+function teamWort(K) {
+  return text(K.a.abteilung) === "karneval" ? "Gruppe" : "Mannschaft";
+}
+
+// Nur Karneval (ohne Fußball): „Training und Veranstaltungen“ statt „Training und Spiele“ (M11, Runde 2, 12.10.2026; Muster wie teamWort).
+function spieleWort(K) {
+  return text(K.a.abteilung) === "karneval" ? "Veranstaltungen" : "Spiele";
 }
 
 // Titelblock einer Seite: Überschrift, Untertitel und Angaben zur Person
@@ -1990,7 +2013,7 @@ function seiteDatenschutz(K, S) {
       ["Spielerfoto, das der Verein selbst aufnimmt", "Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse, Widerspruch möglich)"],
       ["Kopien von Ausweis oder Pass, wenn der Verband sie verlangt", "Art. 6 Abs. 1 lit. a und b DSGVO (Ihre Zustimmung zur Kopie)"],
       ["Fotos, Videos und Namen in den Vereinsmedien (Internetseite, App, Presse, Chronik)", "Art. 6 Abs. 1 lit. a DSGVO (Einwilligung)"],
-      ["Fahrten und Messenger-Gruppe der Mannschaft", "Art. 6 Abs. 1 lit. a DSGVO (Einwilligung)"],
+      ["Fahrten und Messenger-Gruppe der " + teamWort(K), "Art. 6 Abs. 1 lit. a DSGVO (Einwilligung)"],
       ["Attest vom Arzt (Gesundheitsdatum)", "Art. 9 Abs. 2 lit. a DSGVO (ausdrückliche Einwilligung)"],
       ["Notfallkontakte (Name, Beziehung, Telefon)", "Art. 6 Abs. 1 lit. b DSGVO (Mitgliedschaft, Fürsorge im Training) und lit. f DSGVO (weitere Kontaktpersonen)"],
       ["Angaben zur Gesundheit im Notfall- und Gesundheitsbogen (freiwillig)", "Art. 9 Abs. 2 lit. a DSGVO (ausdrückliche Einwilligung)"],
@@ -2005,7 +2028,7 @@ function seiteDatenschutz(K, S) {
       "Hessischer Fußball-Verband (HFV) und Deutscher Fußball-Bund (DFB) über das System DFBnet: für das Spielrecht und den Spielbetrieb. Der HFV ist dafür selbst verantwortlich. Seine Datenschutzinformation steht auf Seite 3 des Antrags auf Spielerlaubnis und unter hfv-online.de. Fragen dazu richten Sie an datenschutz@hfv-online.de. Bei einem Wechsel aus dem Ausland gibt der Verband Angaben über den DFB an den ausländischen Verband weiter.",
       "Landessportbund Hessen und Sportversicherung: Wir melden jährlich den Mitgliederbestand (Bestandsmeldung). Darüber besteht der Versicherungsschutz.",
       "Kreditinstitut: beim Einzug des Beitrags per SEPA-Lastschrift.",
-      "Trainerinnen, Trainer und Betreuer: nur die Angaben, die sie für Training und Spiele brauchen. Die Gesundheitsangaben aus dem Notfall- und Gesundheitsbogen und aus der Absprache zur Medikamentengabe sehen nur die Trainer und Betreuer der Mannschaft.",
+      "Trainerinnen, Trainer und Betreuer: nur die Angaben, die sie für Training und " + spieleWort(K) + " brauchen. Die Gesundheitsangaben aus dem Notfall- und Gesundheitsbogen und aus der Absprache zur Medikamentengabe sehen nur die Trainer und Betreuer der " + teamWort(K) + ".",
       "Eine Weitergabe an weitere Empfänger oder in Länder außerhalb der Europäischen Union ist nicht vorgesehen.",
     ],
     { size: 9, nach: 2 }
@@ -2016,7 +2039,7 @@ function seiteDatenschutz(K, S) {
   // („offen“) klärt der Verein das noch; bei Erwachsenen („verein“) verlangt es nur der Verein.
   const fassungDs = attestFassung(K);
   const antragsUnterlagen =
-    "Unterlagen zum Antrag auf Spielerlaubnis (unterschriebener Antrag, Nachweise" + (fassungDs === "pflicht" ? ", Attest" : "") + "): mindestens zwei Jahre ab Antragstellung, weil der Verband das verlangt (Spielordnung § 92). Danach vernichten wir sie. Auf Anforderung legen wir sie dem Verband binnen 14 Tagen im Original vor." +
+    "Unterlagen zum Antrag auf Spielerlaubnis (unterschriebener Antrag, Nachweise" + (fassungDs === "pflicht" ? ", Attest" : "") + "): mindestens zwei Jahre ab Antragstellung, weil der Verband das verlangt (Spielordnung § 92). Danach vernichten wir sie. Auf Anforderung legen wir sie dem Verband binnen 14 Tagen vor." +
     (fassungDs === "offen" ? " Ob der Verband beim Wechsel ein Attest verlangt, klärt der Verein noch. Braucht der Verband es, gilt dieselbe Frist." : "");
   S.liste(
     [
@@ -2052,7 +2075,7 @@ function seiteDatenschutz(K, S) {
   );
 
   S.ueberschrift("9. So entsteht Ihre Anmeldedatei", 3);
-  S.absatz("Der Anmelde-Assistent arbeitet nur in Ihrem Browser. Ihre Angaben und Fotos werden nicht an einen Server übertragen. Der Verein erhält die Datei erst, wenn Sie sie abgeben.", g);
+  S.absatz("Der Anmelde-Assistent arbeitet nur in Ihrem Browser. Ihre Angaben und Fotos werden nicht an einen Server übertragen. Der Verein erhält die Datei erst, wenn Sie sie schicken.", g);
 
   S.trenner();
   S.absatz([{ t: "Kenntnisnahme:", fett: true }, { t: "Ich habe die Information zum Datenschutz erhalten und zur Kenntnis genommen." }], { size: 9.5, nach: 2 });
@@ -2127,7 +2150,10 @@ function seiteFahrten(K, S) {
   frage(
     "messenger",
     ew.messenger,
-    "Ja, meine Telefonnummer darf in die Messenger-Gruppe der Mannschaft. Alle Mitglieder der Gruppe können sie sehen.",
+    // Nur Karneval: „der Gruppe“ statt „der Mannschaft“ (die Oberfläche, seiten-verein.js, folgt derselben Regel)
+    nurKarneval
+      ? "Ja, meine Telefonnummer darf in die Messenger-Gruppe der Gruppe. Alle Mitglieder der Messenger-Gruppe können sie sehen."
+      : "Ja, meine Telefonnummer darf in die Messenger-Gruppe der Mannschaft. Alle Mitglieder der Gruppe können sie sehen.",
     "Nein, ich möchte nicht in die Messenger-Gruppe.",
     "Sie haben dazu nichts angegeben. Ihre Telefonnummer kommt dann nicht in die Messenger-Gruppe."
   );
@@ -2179,16 +2205,18 @@ function seiteHeimweg(K, S) {
 
 function seiteTrennblatt(K, S, plan) {
   S.ueberschrift(TEIL_ANZEIGE.C, 1);
-  S.absatz("Diese Seiten enthalten Angaben zur Gesundheit. Sie gehören nicht zu den übrigen Unterlagen. Trennen Sie Teil C von Teil A und Teil B ab.", { size: 11, nach: 8 });
+  // Teil C geht mit der ganzen Datei per E-Mail an die Geschäftsstelle; der Verein bewahrt ihn getrennt auf (O25 und O73,
+  // Entscheidung der 1. Vorsitzenden vom 11.10.2026). Die Familie trennt nichts ab. Nur WhatsApp bleibt verboten.
+  S.absatz("Diese Seiten enthalten Angaben zur Gesundheit. Sie gehören nicht zu den übrigen Unterlagen.", { size: 11, nach: 8 });
   S.ueberschrift("Das steht in Teil C", 2);
   const zeilen = liste(plan.teilCListe).map((z) => [{ t: "Seite " + z.seite + ":", fett: true }, { t: z.titel + " – " + z.wer }]);
   S.liste(zeilen, { size: 11, nach: 5 });
-  S.ueberschrift("So geben Sie Teil C ab", 2);
+  S.ueberschrift("Was mit Teil C geschieht", 2);
   S.liste(
     [
-      "Teil C gehört nicht zu den übrigen Unterlagen.",
-      "Der Verein bewahrt ihn getrennt auf.",
-      "Schicken Sie Teil C nicht per WhatsApp oder normaler E-Mail.",
+      "Teil C geht mit der Datei per E-Mail an die Geschäftsstelle.",
+      "Der Verein bewahrt ihn getrennt von den übrigen Unterlagen auf.",
+      "Schicken Sie Teil C nicht per WhatsApp.",
     ],
     { size: 11, nach: 5 }
   );
@@ -2196,10 +2224,10 @@ function seiteTrennblatt(K, S, plan) {
   const liste2 = liste(plan.teilCListe);
   const hatAttest = liste2.some((z) => /Bescheinigung|Attest/.test(z.titel));
   const hatNotfall = liste2.some((z) => /Notfall/.test(z.titel));
-  const schluss = ["Der Verein bewahrt Teil C getrennt von den übrigen Unterlagen auf."];
+  const schluss = [];
   if (hatAttest) schluss.push("Das " + unterlageName(K, "U10") + " bleibt im Passwesen.");
-  if (hatNotfall) schluss.push("Der " + eintragName("notfall") + " ist nur für die Trainer und Betreuer der Mannschaft.");
-  S.absatz(schluss.join(" "), { size: 9.5, farbe: FARBE.tinte2 });
+  if (hatNotfall) schluss.push("Der " + eintragName("notfall") + " ist nur für die Trainer und Betreuer der " + teamWort(K) + ".");
+  if (schluss.length) S.absatz(schluss.join(" "), { size: 9.5, farbe: FARBE.tinte2 });
 }
 
 // Sätze der Ärztlichen Bescheinigung (Grundsatz, Zusatz für Herren-Aushilfe und Juniorinnen)
@@ -2356,10 +2384,10 @@ function seiteNotfall(K, S) {
   S.platz(150); // Text und Unterschrift bleiben zusammen
   if (nurKontakte) {
     S.ueberschrift("Ihre Unterschrift", 3);
-    S.absatz("Mit Ihrer Unterschrift bestätigen Sie die Notfallkontakte. Die Trainerinnen, Trainer und Betreuer der Mannschaft nutzen sie nur im Notfall. Ohne die Absprache unten stehen auf diesem Blatt keine Angaben zur Gesundheit. Der Verein bewahrt den Bogen getrennt von den übrigen Unterlagen auf. Er löscht ihn beim Austritt.", { size: 9, nach: 4 });
+    S.absatz("Mit Ihrer Unterschrift bestätigen Sie die Notfallkontakte. Die Trainerinnen, Trainer und Betreuer der " + teamWort(K) + " nutzen sie nur im Notfall. Ohne die Absprache unten stehen auf diesem Blatt keine Angaben zur Gesundheit. Der Verein bewahrt den Bogen getrennt von den übrigen Unterlagen auf. Er löscht ihn beim Austritt.", { size: 9, nach: 4 });
   } else {
     S.ueberschrift("Einwilligung in die Angaben zur Gesundheit", 3);
-    S.absatz("Ich willige ausdrücklich ein. Die Trainerinnen, Trainer und Betreuer der Mannschaft dürfen diese Angaben nutzen. Das gilt im Notfall und zur Vorsorge. Der Verein bewahrt den Bogen getrennt von den übrigen Unterlagen auf. Er löscht ihn beim Austritt oder auf Widerruf. Die Einwilligung ist freiwillig und jederzeit für die Zukunft widerrufbar.", { size: 9, nach: 4 });
+    S.absatz("Ich willige ausdrücklich ein. Die Trainerinnen, Trainer und Betreuer der " + teamWort(K) + " dürfen diese Angaben nutzen. Das gilt im Notfall und zur Vorsorge. Der Verein bewahrt den Bogen getrennt von den übrigen Unterlagen auf. Er löscht ihn beim Austritt oder auf Widerruf. Die Einwilligung ist freiwillig und jederzeit für die Zukunft widerrufbar.", { size: 9, nach: 4 });
   }
   unterschriftFuer(K, S, "notfall", "unterschrift");
   // Absprache zur Medikamentengabe: immer mit Stift, getrennt von der Unterschrift oben. Mit der Absprache kommen
@@ -2555,7 +2583,10 @@ function seiteTeilA(K, S, plan) {
   }
   const fehlend = liste(e.fehlend);
   if (fehlend.length) schritte.push(E(T.fehlt));
-  schritte.push(E(druck.alles ? T.abgebenAusgedruckt : T.abgeben));
+  // Ist keine Adresse bekannt (fehlt in der Konfiguration), entfällt ": {adresse}"; der Satz bleibt richtig.
+  const mailAdresse = geschaeftsstellenMail(K);
+  const abgabe = druck.alles ? T.abgebenAusgedruckt : T.abgeben;
+  schritte.push(E(ersetzePlatzhalter(mailAdresse ? abgabe : abgabe.replace(/:\s*\{adresse\}/, ""), { adresse: mailAdresse })));
   if (hatC) schritte.push(E(T.abgebenC));
   schritte.push(E(K.a.spielen === true && e.status ? T.verband : T.verein));
   schritte.push(E(T.nichtWhatsapp));
@@ -2677,7 +2708,7 @@ function unterlageStatus(K, plan, u) {
   const nw = plan.nachweise[u.id];
   const seiteBis = (r) => (r.von === r.bis ? String(r.von) : r.von + "–" + r.bis);
   if (nw) {
-    if (nw.nichtLesbar >= nw.dateien) return "Datei nicht lesbar, bitte im Verein vorlegen";
+    if (nw.nichtLesbar >= nw.dateien) return "Datei nicht lesbar, bitte nachreichen";
     if (nw.nichtLesbar > 0) return "liegt bei (Seite " + seiteBis(nw) + "), eine Datei nicht lesbar";
     return "liegt bei (Seite " + seiteBis(nw) + ")";
   }
@@ -2887,8 +2918,8 @@ function seiteLaufzettel(K, S, plan) {
   // Bearbeitungsfelder
   S.ueberschrift("Bearbeitung durch den Verein", 3, 82); // der Block (zwei Reihen und die Schlusszeile) bleibt zusammen
   S.feldZeile([{ label: "Eingang am", w: 1, wer: "verein" }, { label: "geprüft von", w: 1.3, wer: "verein" }, { label: "DFBnet-Antrag gestellt am", w: 1.2, wer: "verein" }], { hoehe: 20 });
-  S.feldZeile([{ label: "Spielberechtigung erteilt am", w: 1.2, wer: "verein" }, { label: "Originale abgelegt am", w: 1.1, wer: "verein" }, { label: "Löschung am", w: 1, wer: "verein" }], { hoehe: 20 });
-  S.absatz("Regelwerk Version " + e.version + " · Stand " + text(K.konfig.stand || K.cfg.stand) + " · Aufbewahrung der Originale mindestens " + text(objekt(objekt(K.cfg.fristen).aufbewahrungJahre).wert || 2) + " Jahre ab Antrag.", { size: 7.5, farbe: FARBE.tinte3, nach: 0 });
+  S.feldZeile([{ label: "Spielberechtigung erteilt am", w: 1.2, wer: "verein" }, { label: "Unterlagen abgelegt am", w: 1.1, wer: "verein" }, { label: "Löschung am", w: 1, wer: "verein" }], { hoehe: 20 });
+  S.absatz("Regelwerk Version " + e.version + " · Stand " + text(K.konfig.stand || K.cfg.stand) + " · Aufbewahrung der Unterlagen mindestens " + text(objekt(objekt(K.cfg.fristen).aufbewahrungJahre).wert || 2) + " Jahre ab Antrag.", { size: 7.5, farbe: FARBE.tinte3, nach: 0 });
 }
 
 // ---------------------------------------------------------------------------
@@ -3058,8 +3089,8 @@ function seiteNachweisBild(K, S, d) {
 function seiteNachweisErsatz(K, S, d) {
   S.ueberschrift(kopieTitel(unterlageName(K, d.id)), 2);
   S.absatz("Nachweis " + d.id + " · Datei " + d.nr + " von " + d.von, { size: 9, farbe: FARBE.tinte2, nach: 12 });
-  S.absatz("Datei konnte nicht übernommen werden – bitte im Verein vorlegen", { size: 14, fett: true, farbe: FARBE.blau, nach: 8 });
-  S.absatz("Grund: " + (d.fehler || "unbekannt") + ". Bringen Sie das Original oder eine Kopie mit.", { size: 10.5, nach: 4 });
+  S.absatz("Datei konnte nicht übernommen werden – bitte nachreichen", { size: 14, fett: true, farbe: FARBE.blau, nach: 8 });
+  S.absatz("Grund: " + (d.fehler || "unbekannt") + ". Schicken Sie ein neues Foto oder einen Scan per E-Mail an die Geschäftsstelle.", { size: 10.5, nach: 4 });
 }
 
 // Abbildung von Koordinaten der sichtbaren Seite (Ursprung unten links) auf den Seitenraum einer gedrehten Seite

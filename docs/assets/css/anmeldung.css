@@ -1222,6 +1222,79 @@
   padding-inline-start: 1.25rem;
 }
 
+/* ---------- Datei per E-Mail an die Geschäftsstelle schicken ----------
+   Der Abschnitt steht in der Karte mit dem Ergebnis: die Schritte am Handy und am Computer, die Adresse groß, Knöpfe zum
+   Kopieren und zum Öffnen der E-Mail. Nur Vereinsblau; logische Eigenschaften, damit er in Arabisch spiegelt. */
+.anm-senden {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--blau-50);
+}
+
+.anm-zwischentitel--klein {
+  font-size: var(--fs-md);
+}
+
+.anm-senden__wege {
+  display: grid;
+  gap: var(--sp-4);
+}
+
+.anm-senden__schritte {
+  margin: var(--sp-2) 0 0;
+  padding-inline-start: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.anm-senden__adressblock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding-block-start: var(--sp-3);
+  border-block-start: 1px solid var(--line);
+}
+
+.anm-senden__label,
+.anm-senden__adresse {
+  margin: 0;
+}
+
+.anm-senden__label {
+  font-weight: 600;
+}
+
+/* Die Adresse steht groß und lässt sich mit einem Tipp ganz markieren (zum Kopieren von Hand). Sie bricht nur vor dem "@" um. Das Span
+   bleibt "inline": In Arabisch steht der Absatz rechts, die Adresse (von links nach rechts) beginnt dort, nicht am linken Rand. */
+.anm-senden__adresse {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--blau-900);
+  overflow-wrap: anywhere;
+}
+
+.anm-senden__adresse-text {
+  unicode-bidi: isolate;
+  -webkit-user-select: all;
+  user-select: all;
+}
+
+/* Die beiden Knöpfe teilen sich eine Zeile, wenn Platz ist; am Handy steht jeder in einer eigenen Zeile. */
+.anm-senden .anm-knoepfe .knopf {
+  flex: 1 1 14rem;
+}
+
+@media (min-width: 720px) {
+  .anm-senden__wege {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 /* ---------- Fuß und Dialoge ---------- */
 
 .anm-fuss {

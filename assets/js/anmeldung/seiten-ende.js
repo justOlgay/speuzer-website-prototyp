@@ -6,7 +6,7 @@
 
 import { h, absaetze, knopf, hinweisKasten, vereinsKasten } from "./bausteine.js";
 import { landName } from "./laender.js";
-import { sauber, gruppiereIban, kbText, zerlegeIso } from "./hilfen.js";
+import { sauber, gruppiereIban, kbText, zerlegeIso, mailtoAnVerein } from "./hilfen.js";
 import { unterschriftenPlan, unterschriftTitel } from "./seiten-unterlagen.js";
 import { erstelleAnmeldungPdf, LadeFehler } from "./pdf-lader.js";
 
@@ -200,7 +200,8 @@ function pruefBereiche(k) {
 
   let z = bereich("person");
   z(Z("name"), D([a.vorname, a.nachname].filter(Boolean).join(" ")), "name");
-  z(Z("geboren"), datum(a.geburtsdatum) + (typeof e.alter === "number" ? " (" + e.alter + " " + k.t("allgemein.jahre") + ")" : ""), "geburt", "datum");
+  // Alter hinter dem Geburtsdatum nach der Vorlage allgemein.alterJahre mit {n}: kein Wort an die Zahl hängen (Arabisch beugt die Einheit nach der Zahl).
+  z(Z("geboren"), datum(a.geburtsdatum) + (typeof e.alter === "number" ? " (" + k.t("allgemein.alterJahre", { n: e.alter }) + ")" : ""), "geburt", "datum");
   z(Z("geburtsort"), LISTE([D(a.geburtsort), landName(a.geburtsland, k.sprache)]), "geburt", "datum");
   z(Z("geschlecht"), a.geschlecht ? W("geschlecht." + a.geschlecht) : "", "geburt", "geschlecht");
 
@@ -383,6 +384,9 @@ function naechsteSchritte(k, pdf) {
   if (plan.stift.length) {
     if (k.a.unterschriftWeg === "papier") {
       schritte.push(k.a.hfvUnterschrift === "training" ? k.t("fertig.unterschriftTrainingAlle") : k.t("fertig.unterschriftDrucken"));
+      // Alles ausgedruckt und mit Stift unterschrieben: Die Blätter gehen als Foto oder Scan per E-Mail oder ausgedruckt in den Verein
+      // (M11, 12.10.2026; wie in Teil A der Datei)
+      if (k.a.hfvUnterschrift === "selbst_drucken") schritte.push(k.t("fertig.abgebenAusgedruckt"));
     } else if (k.a.hfvUnterschrift === "training") schritte.push(k.t("fertig.unterschriftTraining"));
     else schritte.push(k.t("fertig.unterschriftDruckenTeil"));
   } else if (plan.liste.some((p) => p.stiftBeiLeer && !k.bilder.unterschriften[p.schluessel])) {
@@ -398,9 +402,94 @@ function naechsteSchritte(k, pdf) {
   }
   const liste = schritte.map((s) => h("li", {}, absaetze(s)));
   liste.push(...eintraege);
-  liste.push(h("li", {}, absaetze(k.t("fertig.abgeben") + "\n" + k.t("fertig.nichtWhatsapp"))));
+  // Wie die Datei zum Verein kommt, steht im Abschnitt "So schicken Sie die Datei an den Verein" (sendenAbschnitt) darüber.
   if (pdf && (pdf.teile || []).some((t) => t.teil === "C")) liste.push(h("li", {}, h("p", {}, k.t("fertig.teilC"))));
   return h("ol", { klasse: "anm-naechste" }, liste);
+}
+
+// ---------- Datei per E-Mail an die Geschäftsstelle schicken ----------
+// Die Familie schickt die fertige Datei selbst per E-Mail (Entscheidung der 1. Vorsitzenden vom 11.10.2026; kein Versand über
+// einen Server). Der Abschnitt zeigt die Schritte am Handy (Datei teilen) und am Computer (Datei herunterladen, E-Mail mit Anhang),
+// die Adresse groß, einen Knopf zum Kopieren und einen Link, der die E-Mail mit Betreff und Text öffnet. Betreff und Text sind
+// deutsch (hilfen.js); die Datei hängt die Familie selbst an.
+
+// Adresse der Geschäftsstelle aus der Konfiguration (konfig.verein.mail, sonst die Kontakte des Regelwerks), nie fest im Code.
+// Ist keine gültige Adresse da, entfällt der Adressblock; die Schritte bleiben.
+function geschaeftsstellenMail(k) {
+  const verein = k.konfig.verein || {};
+  const kontakte = (k.konfig.anmeldung && k.konfig.anmeldung.kontakte) || {};
+  const adresse = sauber(verein.mail || (kontakte.geschaeftsstelle && kontakte.geschaeftsstelle.mail) || "");
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adresse) ? adresse : "";
+}
+
+// Kopiert die Adresse in die Zwischenablage. Geht das nicht (kein Zugriff auf die Zwischenablage, zum Beispiel in der App), markiert
+// die Funktion die Adresse und versucht den älteren Weg; klappt auch der nicht, bleibt die Adresse markiert, und die Familie
+// kopiert sie selbst. Rückgabe: ob die Adresse kopiert wurde.
+async function kopiereAdresse(element, text) {
+  try {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (fehler) {
+    // Der Browser verweigert den Zugriff: weiter mit dem zweiten Weg
+  }
+  try {
+    const auswahl = window.getSelection();
+    const bereich = document.createRange();
+    bereich.selectNodeContents(element);
+    auswahl.removeAllRanges();
+    auswahl.addRange(bereich);
+    return typeof document.execCommand === "function" && document.execCommand("copy") === true;
+  } catch (fehler) {
+    return false;
+  }
+}
+
+// `optionen.teilen`: Der Browser kann die Datei teilen (der Knopf "Datei teilen" ist da). `optionen.handy`: Gerät mit Touch-Bedienung.
+function sendenAbschnitt(k, optionen) {
+  const adresse = geschaeftsstellenMail(k);
+  // Drei Schritte je Weg. {knopf} ist die Beschriftung des Knopfes, damit der Schritt zum Knopf passt.
+  const weg = (art, knopfText, mitTitel) =>
+    h("div", { klasse: "anm-senden__weg", "data-weg": art },
+      mitTitel ? h("h4", { klasse: "anm-zwischentitel anm-zwischentitel--klein" }, k.t("fertig.senden." + art + "Titel")) : null,
+      h("ol", { klasse: "anm-senden__schritte" },
+        [k.t("fertig.senden." + art + "1", { knopf: knopfText }), k.t("fertig.senden." + art + "2"), k.t("fertig.senden." + art + "3")].map((t) => h("li", {}, t))));
+  // Ohne "Datei teilen" gibt es nur den Weg über das Herunterladen (ohne Überschrift "Am Computer": er gilt auch am Handy).
+  // Sonst stehen beide da, der Weg des Geräts vorn.
+  const computerWeg = () => weg("computer", k.t("fertig.herunterladen"), optionen.teilen);
+  const handyWeg = () => weg("handy", k.t("fertig.teilen"), true);
+  const wege = !optionen.teilen ? [computerWeg()] : optionen.handy ? [handyWeg(), computerWeg()] : [computerWeg(), handyWeg()];
+
+  let adressBlock = null;
+  if (adresse) {
+    const [lokal, domain] = adresse.split("@");
+    // Die Adresse steht von links nach rechts, auch in Arabisch; die Umbruchstelle liegt vor dem "@". Ein Tipp markiert sie ganz.
+    const adresseText = h("span", { klasse: "anm-senden__adresse-text", dir: "ltr", "data-mail-adresse": "" }, lokal, h("wbr"), "@" + domain);
+    const status = h("p", { klasse: "anm-status", role: "status", "data-mail-status": "" });
+    adressBlock = h("div", { klasse: "anm-senden__adressblock", "data-adressblock": "" },
+      h("p", { klasse: "anm-senden__label" }, k.t("fertig.senden.adresseTitel")),
+      h("p", { klasse: "anm-senden__adresse" }, adresseText),
+      // Der Link hat kein target: In der App öffnet sich das Mail-Programm wie bei den mailto-Links der übrigen App-Seiten.
+      h("div", { klasse: "anm-knoepfe" },
+        knopf(k.t("fertig.senden.kopieren"), {
+          sekundaer: true,
+          aktion: "adresse-kopieren",
+          beiKlick: async () => {
+            const geklappt = await kopiereAdresse(adresseText, adresse);
+            status.textContent = k.t(geklappt ? "fertig.senden.kopiert" : "fertig.senden.kopierenFehler");
+          },
+        }),
+        h("a", { klasse: "knopf knopf--sekundaer", href: mailtoAnVerein(adresse, k.a.vorname, k.a.nachname), "data-aktion": "mail-oeffnen" }, k.t("fertig.senden.oeffnen"))),
+      status,
+      h("p", { klasse: "anm-hinweis" }, k.t("fertig.senden.anhang")));
+  }
+  return h("div", { klasse: "anm-senden", "data-senden": "" },
+    h("h3", { klasse: "anm-zwischentitel" }, k.t("fertig.senden.titel")),
+    h("p", { klasse: "anm-text" }, k.t("fertig.senden.einleitung")),
+    h("div", { klasse: "anm-senden__wege" }, wege),
+    adressBlock,
+    h("p", { klasse: "anm-hinweis anm-hinweis--achtung" }, k.t("fertig.nichtWhatsapp")));
 }
 
 function ergebnisAnsicht(k, pdf) {
@@ -491,6 +580,8 @@ function ergebnisAnsicht(k, pdf) {
     status,
     // Nur im App-Modus: kurzer Hinweis, falls Teilen oder Herunterladen nicht klappt, mit dem Link zum Browser
     appZeile,
+    // Wie die Datei zum Verein kommt: per E-Mail an die Geschäftsstelle (M10)
+    sendenAbschnitt(k, { teilen: !teilen.hidden, handy: !!handy }),
     h("h3", { klasse: "anm-zwischentitel" }, k.t("fertig.naechsteTitel")),
     naechsteSchritte(k, pdf.ergebnis),
     h("div", { klasse: "anm-block" },

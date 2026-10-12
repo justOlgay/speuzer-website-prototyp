@@ -55,7 +55,7 @@ export const SCHLUESSEL = {
     "wechsel_lv_anfrage", "entschaedigung_hinweis", "nachtraegliche_freigabe", "sperre_laeuft", "sonderwege_jugend",
     "e_aelter_juni", "international_dauer", "international_unter10", "zuzug_pruefen", "maedchen_jungenteam",
     "herren_aushilfe", "herren_ohne_antrag", "frau_herren", "keine_frauenmannschaft", "vertrauensperson",
-    "sonderspielrecht", "getrennt_einverstanden", "sorge_allein_nachweis",
+    "sonderspielrecht", "getrennt_einverstanden", "sorge_allein_nachweis", "spieler_unterschrift_kind",
     "vormund_hinweis", "pflege_hinweis", "f17_moeglich_5_jahre", "austausch_ein_jahr",
     "karneval_kein_attest", "passiv_hinweis", "senator_vorstand", "beitrag_doppel",
     "kontoinhaber_andere", "bildung_teilhabe", "beitragserlass", "medikamente_absprache", "passiv_alter_verein",
@@ -64,7 +64,7 @@ export const SCHLUESSEL = {
     "abmeldung_unklar", "freigabe_unklar", "sperre_unklar", "d_jahrgang_wartefrist_offen", "vollmacht_anderer_verband",
     "grenze_10_offen", "ausweis_deutsch_original", "meldebescheinigung_elternteil", "laenderformulare_offen",
     "ausland_erwachsen_wechselperiode", "doppelstaatler", "staatsangehoerigkeit_unklar", "spielerpass_unklar",
-    "sportarzt_offen", "frau_herren_offen", "spieler_unterschrift_kind", "unterlagen_liste_offen",
+    "sportarzt_offen", "frau_herren_offen", "unterlagen_liste_offen",
     "wohnen_nicht_gemeinsam", "beitrag_familie_offen", "iban_ausland_pruefen", "mitgliedschaft_alter_verein_unklar",
   ],
   frist: [
@@ -1285,7 +1285,9 @@ function sammleHinweise(p, e) {
     // Foto-Einwilligung (O65, Entscheidung der 1. Vorsitzenden vom 11.10.2026): Es unterschreiben nur die Eltern, auch bei
     // Jugendlichen (aufnahmeantrag, s3.unterschrift). Deshalb gibt es keinen Hinweis, dass Jugendliche mit unterschreiben,
     // und kein Text sagt, der Verein kläre das noch.
-    if (p.spielen) h("offen", "spieler_unterschrift_kind");
+    // O11 ist geregelt (11.10.2026): Ein Elternteil unterschreibt, das Kind freiwillig, das Passwesen entscheidet im Einzelfall. Der Hinweis
+    // ist deshalb eine Information (art "info"), keine offene Frage mehr.
+    if (p.spielen) h("info", "spieler_unterschrift_kind");
     if (p.f14) w("jugendleitung", "sonderfall_kind");
     if (p.wohnen === "nicht_gemeinsam") { h("offen", "wohnen_nicht_gemeinsam"); w("jugendleitung", "wohnen_nicht_gemeinsam"); }
     if (p.ohneZusage) {

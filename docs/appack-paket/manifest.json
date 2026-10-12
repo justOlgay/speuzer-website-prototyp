@@ -186,6 +186,11 @@
       "sha256": "9ee8a1281956e0137976b40156ec5ce36df0649b70b3604ce9cd392603f6611f"
     },
     {
+      "datei": "web/verein-organigramm.html",
+      "bytes": 30395,
+      "sha256": "a809c9fc3ca086ebc81b368d87e944cc1cccdcaf981dfec348fc008fa80da907"
+    },
+    {
       "datei": "web/verein-sponsoren.html",
       "bytes": 14466,
       "sha256": "f94a8c38e8d533a2f1929b7d6811e28cd62221647e57b24065bf0083fb1e375e"

@@ -556,7 +556,7 @@
       "form": "formular_im_pdf",
       "formular": "attest",
       "nachweis": false,
-      "bedingung": "Überall dort, wo ein Attest verlangt wird. Auch beim Wechsel Minderjähriger, wo das Attest selbst noch offen ist (U10), sobald die Familie ein Attest hat und abgibt (Nachweis U10 auf \"habe\"). Das Attest ist ein Gesundheitsdatum (Art. 9 DSGVO). Die Rechtsgrundlage des Verbands ist offen.",
+      "bedingung": "Überall dort, wo ein Attest verlangt wird. Auch beim Wechsel Minderjähriger, wo das Attest selbst noch offen ist (U10), sobald die Familie ein Attest hat und einreicht (Nachweis U10 auf \"habe\"). Das Attest ist ein Gesundheitsdatum (Art. 9 DSGVO). Die Rechtsgrundlage des Verbands ist offen.",
       "quelle": "DSGVO Art. 9; Stiftung Datenschutz, Praxisratgeber Gesundheitsdaten (ohne Datum)"
     },
     "U12": {
@@ -1375,7 +1375,7 @@
     "passwesen": {
       "mail": "geschaeftsstelle@sportfreunde04.de",
       "telefon": "069 736868",
-      "hinweis": "Wer im Verein das Passwesen bearbeitet, ist noch offen. Bis dahin ist die Geschäftsstelle die Anlaufstelle."
+      "hinweis": "Spielerpässe: Die Jugend gibt der 1. Kassierer ein, die Herren der Spielausschuss Senioren (11.10.2026, O24). Die Geschäftsstelle ist die Anlaufstelle."
     },
     "quelle": "data/verein.json, Stand 2026-09"
   },
@@ -1526,8 +1526,8 @@
         "U07",
         "R13"
       ],
-      "status": "offen",
-      "stand": "Frage an das Passwesen (Excel Nr. 7). Vorschlag: Ein Elternteil reicht; das Kind unterschreibt mit, wenn es schreiben kann. Bis zur Antwort gilt (Jugendleitung, 11.10.2026): Kann das Kind nicht schreiben, bleibt die Zeile im Antrag leer, ohne Markierung. Der Laufzettel nennt es, und das Passwesen entscheidet.",
+      "status": "geregelt",
+      "entscheidung": "Ein Elternteil unterschreibt, das Kind freiwillig. Das Passwesen entscheidet im Einzelfall.",
       "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
     },
     {
@@ -1705,8 +1705,8 @@
         "U07",
         "R13"
       ],
-      "status": "offen",
-      "stand": "Jugend: Passwesen noch zu klären; Senioren: Spielausschuss Senioren (1. Vorsitzende, 11.10.2026). Excel Nr. 5.",
+      "status": "entschieden",
+      "entscheidung": "Spielerpässe: Die Jugend gibt der 1. Kassierer ein, die Herren der Spielausschuss Senioren (11.10.2026).",
       "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
     },
     {
@@ -1718,8 +1718,8 @@
         "U01",
         "U07"
       ],
-      "status": "offen",
-      "stand": "Vorschlag: PDF per E-Mail, Gesundheitsdaten auf Papier (Excel Nr. 2). Die Blätter des Verbands unterschreibt die Familie seit dem 11.10.2026 am Bildschirm (O68). Die Mitgliederverwaltung prüft beim Erfassen, ob alles ausgefüllt ist (1. Vorsitzende, 11.10.2026).",
+      "status": "entschieden",
+      "entscheidung": "Die Familie schickt die Datei per E-Mail an die Geschäftsstelle (1. Vorsitzende, 11.10.2026). Der 1. Kassierer prüft beim Erfassen, ob alles da ist.",
       "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
     },
     {
@@ -2265,8 +2265,8 @@
       "betrifft": [
         "U18"
       ],
-      "status": "offen",
-      "stand": "Mit dem Passwesen klären (Excel Nr. 5).",
+      "status": "geregelt",
+      "entscheidung": "Das Passwesen gibt die Vollmacht in DFBnet ein, am besten am Tag des Eingangs.",
       "quelle": "Prüfung Orchestrator, 30.09.2026"
     },
     {
@@ -2297,8 +2297,8 @@
       "prioritaet": "P1",
       "frage": "App: Wie übergibt die Familie das PDF in der Vereins-App? In der App-Webansicht klappt Speichern oder Teilen vielleicht nicht. Für Website und App gleich wäre der automatische Versand an den Verein über die eigene Annahme (IONOS, wie beim Online-Aufnahmeantrag). Bis dahin weist der Assistent in der App auf „Im Browser öffnen“ hin.",
       "betrifft": [],
-      "status": "offen",
-      "stand": "In der App ist der Hinweis „Im Browser öffnen“ eingebaut. Automatischer Versand nach dem Gespräch zu IONOS (Excel Nr. 4).",
+      "status": "entschieden",
+      "entscheidung": "Kein Server-Versand zum Start (1. Vorsitzende, 11.10.2026). Die Familie schickt die Datei selbst. In der App hilft „Im Browser öffnen“.",
       "quelle": "Prüfung Orchestrator, 07.10.2026"
     },
     {
@@ -2312,8 +2312,8 @@
         "U12",
         "U28"
       ],
-      "status": "offen",
-      "stand": "Vorschlag: Gesundheitsdaten auf Papier, nicht per E-Mail (Excel Nr. 2).",
+      "status": "entschieden",
+      "entscheidung": "Die ganze Datei geht per E-Mail an die Geschäftsstelle, auch Teil C (1. Vorsitzende, 11.10.2026). Der Verein bewahrt Teil C getrennt auf.",
       "quelle": "Prüfung Orchestrator, 07.10.2026"
     }
   ]

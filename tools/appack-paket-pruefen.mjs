@@ -402,8 +402,9 @@ async function main() {
   }
   const seiten = readdirSync(WEB_DIR).filter((d) => d.endsWith(".html")).sort();
   // 28.09.2026: 38 (+ formular-gesendet.html), dann 39 (+ termine.html),
-  // dann 40 (+ aufnahmeantrag.html); mit dem Assistenten (ANMELDUNG_LIVE) 41 (+ anmeldung.html)
-  const erwarteteSeiten = 40 + (MIT_ANMELDUNG ? 1 : 0);
+  // dann 40 (+ aufnahmeantrag.html), dann 41 (+ verein-organigramm.html, M13, 11.10.2026);
+  // mit dem Assistenten (ANMELDUNG_LIVE) 42 (+ anmeldung.html)
+  const erwarteteSeiten = 41 + (MIT_ANMELDUNG ? 1 : 0);
   if (seiten.length !== erwarteteSeiten) {
     console.error(`Erwartet ${erwarteteSeiten} Seiten in ${path.relative(ROOT, WEB_DIR)}/, gefunden ${seiten.length}.`);
     process.exit(1);
