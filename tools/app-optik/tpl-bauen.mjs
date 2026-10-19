@@ -28,7 +28,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { termineAppSeite, termineDaten } from "../../src/vorlagen/termine.mjs";
-import { ANMELDUNG_LIVE } from "../../src/vorlagen/hilfen.mjs";
+import { ANMELDUNG_LIVE, ORGANIGRAMM_LIVE } from "../../src/vorlagen/hilfen.mjs";
 import { mitgliedWerdenAppSeite } from "../../src/seiten/mitglied-werden.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -176,6 +176,17 @@ function ersetzeBauzeitWerte(html, werte) {
 // (keine privaten Telefonnummern) – die Quell-JSONs enthalten ohnehin keine.
 // Ein Platzhalter, der in einer Datei nicht vorkommt, bleibt folgenlos
 // (String.split().join() auf einen nicht vorhandenen Text ändert nichts).
+// Zeile „Wer macht was“ auf der App-Seite Verein (Livegang 19.10.2026): normaler Link auf die Website-Seite im App-Modus, wie „Mach mit“,
+// „Downloads“ und „Shop“; kein eigenes App-Modul nötig.
+const ORGANIGRAMM_ZEILE = `
+  <a class="zeile" href="https://cdn.appack.de/sportfreunde04/workspace/web/verein-organigramm.html?app=1">
+    <span class="zeile__text">
+      <span class="zeile__titel">Wer macht was</span>
+      <span class="zeile__untertitel">Wer im Verein wofür zuständig ist</span>
+    </span>
+    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+  </a>`;
+
 function datenPlatzhalter() {
   const laden = (datei) => JSON.parse(readFileSync(path.join(DATA_DIR, datei), "utf8"));
   return {
@@ -191,6 +202,9 @@ function datenPlatzhalter() {
     // baut man die Vorlagen mit ANMELDUNG_LIVE=1 (npm run tpl-bauen).
     __PROBETRAINING_SCHRITT3__: ANMELDUNG_LIVE ? "Mit dem Code anmelden" : "Aufnahmeantrag stellen",
     __MITGLIED_WERDEN_UNTERTITEL__: ANMELDUNG_LIVE ? "Beiträge, Ablauf, Anmeldung" : "Beiträge, Ablauf, Antrag",
+    // Organigramm „Wer macht was“ (Schalter ORGANIGRAMM_LIVE): Zeile auf der Seite Verein, nur wenn die Website-Seite live ist. Ohne den Schalter bleibt
+    // die Datei Byte für Byte wie vorher (der Platzhalter steht am Ende der Zeile davor und verschwindet).
+    __ORGANIGRAMM_ZEILE__: ORGANIGRAMM_LIVE ? ORGANIGRAMM_ZEILE : "",
   };
 }
 

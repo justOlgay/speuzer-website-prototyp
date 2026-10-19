@@ -366,6 +366,13 @@ button.knopf {
     </span>
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
   </a>
+  <a class="zeile" href="https://cdn.appack.de/sportfreunde04/workspace/web/verein-organigramm.html?app=1">
+    <span class="zeile__text">
+      <span class="zeile__titel">Wer macht was</span>
+      <span class="zeile__untertitel">Wer im Verein wofür zuständig ist</span>
+    </span>
+    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+  </a>
   <a class="zeile" href="nav://sportfreunde04_TextImage_1780401660324">
     <span class="zeile__text">
       <span class="zeile__titel">Kontakt &amp; Anfahrt</span>

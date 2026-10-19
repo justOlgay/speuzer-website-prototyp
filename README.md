@@ -80,7 +80,8 @@ für den Verein, Teil C vertraulich). Es wird nichts gesendet und nichts gespeic
 erklärt das Konzept und listet die offenen Entscheidungen (O-Nummern) für Vorstand, Kasse und Passstelle.
 Beide Seiten sind `noindex` und nicht Teil des appack-Pakets.
 
-Livegang (vorbereitet, aus): `ANMELDUNG_LIVE_SCHALTER` in `src/vorlagen/hilfen.mjs` nimmt den Assistenten als
+Livegang (seit 19.10.2026 an; `ANMELDUNG_LIVE_SCHALTER` und `ORGANIGRAMM_LIVE_SCHALTER` stehen auf `true`, ein normaler Bau ist der Live-Bau;
+Rückweg: auf `false` setzen und neu bauen, dazu im CMS das Modul „Mitglied werden“ wieder auf `Mitglied werden_2.tpl`): `ANMELDUNG_LIVE_SCHALTER` in `src/vorlagen/hilfen.mjs` nimmt den Assistenten als
 `web/anmeldung.html` (37 Dateien `anmeldung*` im Ordner `web`, flach) ins appack-Paket. „Mitglied werden“ (Website `web/mitglied-werden.html` und
 die App-Datei `assets/app/Mitglied-werden-App.html`) und „Downloads“ führen dann nur noch über den Knopf
 „Jetzt anmelden“ zur Anmeldung; die alten Wege (Seite „Aufnahmeantrag online“, Vordruck zum Ausfüllen, Antrag per
