@@ -3,7 +3,7 @@
 // übernommen (siehe dort: Stand, Quelle und Hinweis auf die noch fehlende
 // juristische Prüfung).
 
-import { mailLink, telefonAnzeige, APP_MODUS_SKRIPT, AUFNAHMEANTRAG_VERSAND } from "../vorlagen/hilfen.mjs";
+import { mailLink, telefonAnzeige, APP_MODUS_SKRIPT, AUFNAHMEANTRAG_VERSAND, ANMELDUNG_LIVE } from "../vorlagen/hilfen.mjs";
 
 // Abschnitte mit zwei Fassungen je nach Versandweg des Online-Aufnahmeantrags
 // (hilfen.mjs, AUFNAHMEANTRAG_VERSAND): Im Weg "endpunkt" gilt
@@ -13,6 +13,33 @@ function mitVersandweg(abschnitt) {
   if (AUFNAHMEANTRAG_VERSAND.art !== "endpunkt" || !abschnitt.absaetze_endpunkt) return abschnitt;
   const host = new URL(AUFNAHMEANTRAG_VERSAND.url).host;
   return { ...abschnitt, absaetze: abschnitt.absaetze_endpunkt.map((p) => p.replaceAll("{annahme_host}", host)) };
+}
+
+// Livegang des Anmelde-Assistenten (Paket P5, 12.10.2026, Schalter ANMELDUNG_LIVE in hilfen.mjs): Dann gibt es den
+// Online-Aufnahmeantrag (Website-Seite und App-Formular) nicht mehr, und Abschnitt 14 beschreibt die Anmeldung über den
+// Assistenten. Dafür tragen Abschnitt und Kopf des Datensatzes eigene Felder: "titel_live" und "absaetze_live" (Abschnitt)
+// sowie "stand_live" und "quelle_live" (Stand im Seitenkopf und Quellenzeile). Sie gelten nur mit dem Schalter und lösen
+// dann "titel", "absaetze" (auch "absaetze_endpunkt" des Versandwegs) und "stand", "quelle" ab. Ohne den Schalter bleibt
+// die Seite Zeichen für Zeichen, wie sie war.
+function mitLiveFassung(abschnitt) {
+  if (!ANMELDUNG_LIVE || !abschnitt.absaetze_live) return abschnitt;
+  return { ...abschnitt, titel: abschnitt.titel_live ?? abschnitt.titel, absaetze: abschnitt.absaetze_live };
+}
+
+function mitLiveKopf(datenschutz) {
+  if (!ANMELDUNG_LIVE) return datenschutz;
+  return { ...datenschutz, stand: datenschutz.stand_live, quelle: datenschutz.quelle_live };
+}
+
+// Mit dem Schalter dürfen Live-Fassung, Stand und Quellenzeile nicht fehlen: Der Bau bricht ab, statt den alten Text
+// (Online-Aufnahmeantrag) als geltende Datenschutzerklärung zu veröffentlichen.
+function pruefeLiveFassung(datenschutz) {
+  if (!ANMELDUNG_LIVE) return;
+  const fehlt = [];
+  if (!datenschutz.stand_live) fehlt.push("stand_live");
+  if (!datenschutz.quelle_live) fehlt.push("quelle_live");
+  if (!(datenschutz.abschnitte ?? []).some((a) => a.titel_live && a.absaetze_live?.length)) fehlt.push("titel_live/absaetze_live (Abschnitt 14)");
+  if (fehlt.length) throw new Error(`datenschutz.mjs: Mit ANMELDUNG_LIVE fehlt in data/datenschutz.json: ${fehlt.join(", ")}`);
 }
 
 function escapeHtml(text) {
@@ -380,8 +407,9 @@ function quelleAbschnitt(datenschutz) {
 }
 
 export function seite(daten) {
-  const datenschutz = daten.datenschutz ?? {};
-  const abschnitte = (datenschutz.abschnitte ?? []).map(mitVersandweg);
+  pruefeLiveFassung(daten.datenschutz ?? {});
+  const datenschutz = mitLiveKopf(daten.datenschutz ?? {});
+  const abschnitte = (datenschutz.abschnitte ?? []).map(mitVersandweg).map(mitLiveFassung);
 
   const inhalt = [
     seitenkopfAbschnitt(datenschutz),

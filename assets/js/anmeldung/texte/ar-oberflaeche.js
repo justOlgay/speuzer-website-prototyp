@@ -1,7 +1,7 @@
 /*
   Texte der Oberfläche des Anmelde-Assistenten - Arabisch (العربية, Hocharabisch, einfach).
   Übersetzungshilfe: Verbindlich ist der deutsche Text (de-oberflaeche.js), das PDF bleibt deutsch.
-  Stand 12.10.2026 (Sprachprüfung M12). Dieselbe Schlüsselstruktur wie de-oberflaeche.js, aber ohne "sprachen" und
+  Stand 12.10.2026 (Sprachprüfung M12; die gekürzten deutschen Texte sind in P4 neu übersetzt). Dieselbe Schlüsselstruktur wie de-oberflaeche.js, aber ohne "sprachen" und
   ohne "demo" (die Vorführung bleibt deutsch). Fehlt hier ein Eintrag, gilt der deutsche.
   Prüfung: node tools/anmeldung-test/uebersetzung-pruefen.mjs
 
@@ -125,7 +125,7 @@ export default {
     titel: "التسجيل (مسودة)",
     beschreibung:
       `مسودة مساعد التسجيل في نادي ${D("FFV Sportfreunde 04")}. تقوم بالتسجيل خطوة بخطوة. وفي النهاية تحصل على ملف PDF.`,
-    lead: "نسألك خطوة بخطوة. وفي النهاية تحصل على ملف يضم كل المستندات.",
+    lead: "نسألك خطوة بخطوة.",
     assistentTitel: "مساعد التسجيل",
     laedt: `جارٍ تحميل المساعد. إذا لم يحدث شيء، فاتصل بنا على الرقم: ${TEL}.`,
     ohneSkript: `يحتاج المساعد إلى ${D("JavaScript")}. يرجى تشغيله. أو اتصل بنا على الرقم: ${TEL}.`,
@@ -152,6 +152,7 @@ export default {
     ja: "نعم",
     nein: "لا",
     weissNicht: "لا أعرف",
+    mehrErfahren: "اعرف المزيد",
     dasKind: "الطفل",
     diePerson: "الشخص",
     entfernen: "إزالة",
@@ -230,15 +231,32 @@ export default {
     schreiben: "كتابة بريد إلكتروني",
   },
 
-  // ---------- App ----------
-  // In der Vereins-App (Seite mit ?app=1) klappt Speichern oder Teilen der Datei manchmal nicht.
-  // Der Link "Im Browser öffnen" führt auf dieselbe Seite ohne ?app=1.
+  // ---------- Zugang und App ----------
+  // Code-Seite: {link} steht für den Link, dessen Text im Schlüssel mit "Link" am Ende steht.
+  // In der Vereins-App läuft der Assistent nie: Es steht nur die Übergabe in den Browser da.
+
+  code: {
+    titel: "التسجيل بعد التدريب التجريبي",
+    einleitung: "يرجى إدخال الرمز.\nتحصل عليه في التدريب التجريبي.",
+    label: "الرمز",
+    fehlerLeer: "يرجى إدخال الرمز.",
+    fehlerFalsch: "الرمز غير صحيح. يرجى التحقق منه.",
+    kein: "لم تحضر تدريبًا تجريبيًا بعد؟ {link}",
+    keinLink: "احجز موعدًا لتدريب تجريبي",
+    passiv: "عضو داعم؟ تحصل على الرمز من {link}.",
+    passivLink: "مكتب النادي",
+  },
 
   app: {
-    hinweisStart: "في التطبيق قد لا ينجح حفظ ملف PDF أحيانًا. في هذه الحالة افتح التسجيل في المتصفح.",
-    hinweisFertig: "هل يتعذّر الحفظ؟ عندها افتح التسجيل في المتصفح.",
-    fehler: "لم ينجح الحفظ. افتح التسجيل في المتصفح.",
+    uebergabe: "يرجى فتح التسجيل في المتصفح.",
     browser: "فتح في المتصفح",
+  },
+
+  umgebung: {
+    rahmen: "قد لا ينجح الحفظ هنا.",
+    rahmenLink: "فتح في نافذة جديدة",
+    inApp: `يرجى فتح التسجيل في متصفح مثل ${D("Safari")} أو ${D("Chrome")}. قد لا ينجح الحفظ هنا.`,
+    inAppSo: `اضغط في الأعلى على ${D("⋯")} ثم على «فتح في المتصفح».`,
   },
 
   // ---------- Fehlermeldungen ----------
@@ -338,18 +356,16 @@ export default {
 
   start: {
     titel: "مرحبًا",
-    einleitung: "هنا تسجّل نفسك أو طفلك في النادي.\nنسألك خطوة بخطوة.",
-    ergebnis: "في النهاية تحصل على ملف PDF.\nهذا ملف للعرض والطباعة.\nيحتوي على كل المستندات الخاصة بالنادي.",
+    einleitung: "هنا تسجّل نفسك أو طفلك.",
+    ergebnis: "في النهاية ترسل لنا ملفًا بالبريد الإلكتروني.",
     brauchenTitel: "ما تحتاج إليه:",
     brauchen: [
       "الاسم وتاريخ الميلاد",
-      "عنوانك وبريدك الإلكتروني ورقم هاتفك",
+      "العنوان والبريد الإلكتروني ورقم الهاتف",
       `للخصم المباشر (${D("Lastschrift")}): رقم ${D("IBAN")} (رقم الحساب المصرفي)`,
       "هاتف بكاميرا لالتقاط صور للمستندات",
     ],
-    dauer: "تحتاج إلى نحو 15 دقيقة.",
-    datenschutz: "بياناتك تبقى على جهازك.\nلا نرسل أي شيء.",
-    hilfe: "هل تحتاج إلى مساعدة؟ اضغط في الأعلى على «مساعدة».",
+    dauer: "يستغرق هذا نحو 15 دقيقة.",
     spracheTitel: "اختر اللغة",
     los: "لنبدأ",
   },
@@ -357,17 +373,13 @@ export default {
   wer: {
     titel: "من يريد أن يصبح عضوًا؟",
     kind: "طفلي",
-    kindHinweis: "تملأ كل شيء من أجل طفلك.",
     selbst: "أنا",
-    selbstHinweis: "تسجّل نفسك.",
-    mehrere: "هل تريد تسجيل عدة أشخاص؟\nفي النهاية يمكنك تسجيل الشخص التالي.\nعندها نستخدم عنوانك وبيانات الدفع نفسها.",
   },
 
   name: {
     titel: { kind: "ما اسم طفلك؟", selbst: "ما اسمك؟" },
     hinweis: "اكتب الاسم كما هو في جواز السفر.\nاستخدم الأحرف اللاتينية.",
     vorname: "الاسم الأول",
-    vornameHinweis: "كل الأسماء الأولى كما في جواز السفر.",
     nachname: "اسم العائلة",
   },
 
@@ -376,7 +388,6 @@ export default {
       titel: { kind: "متى وأين وُلد طفلك؟", selbst: "متى وأين وُلدت؟" },
       legende: "تاريخ الميلاد",
       ort: "مكان الميلاد",
-      ortHinweis: "المدينة أو البلدة.",
       land: "بلد الميلاد",
     },
     geschlecht: {
@@ -396,20 +407,15 @@ export default {
   abteilung: {
     titel: { kind: "أين يشارك طفلك؟", selbst: "أين تريد أن تشارك؟" },
     fussball: "كرة القدم",
-    fussballHinweis: "التدريب والمباريات",
     karneval: "الكرنفال",
     karnevalHinweis: `الرقص مع ${D("Schnauzer")}`,
     beides: "كرة القدم والكرنفال",
-    beidesHinweis: "كلاهما في نادٍ واحد",
     passiv: "الدعم فقط",
-    passivHinweis: "أنت عضو. لا تمارس أي رياضة.",
+    passivHinweis: { kind: "طفلك عضو. لا يمارس أي رياضة.", selbst: "أنت عضو. لا تمارس أي رياضة." },
   },
 
   mannschaft: {
     titel: { kind: "أي فريق يناسب طفلك؟", selbst: "أي فريق يناسبك؟" },
-    alter: "عمر {name}: {alter}. الفئة: مواليد {jahrgang}.",
-    klasse: `هذا يناسب فريق ${D("{klasse}-Jugend")} (فريق الشباب).`,
-    klasseHerren: `هذا يناسب فريق ${D("Herren")} (فريق الرجال).`,
     mannschaften: "الفرق في النادي: {namen}.",
     keine: "ليس لدى النادي فريق خاص بهذه الفئة.",
     keineFolge: "ستتواصل معك إدارة الشباب.",
@@ -418,10 +424,10 @@ export default {
 
   spielerpass: {
     titel: { kind: `هل كانت لدى طفلك بطاقة لاعب (${D("Spielerpass")}) من قبل؟`, selbst: `هل كانت لديك بطاقة لاعب (${D("Spielerpass")}) من قبل؟` },
-    hinweis: { kind: "حتى لو اقتصر الأمر على التدريب. وحتى في الخارج.", selbst: "حتى لو كنت تتدرب فقط. وحتى في الخارج." },
     erklaerung: `بطاقة اللاعب (${D("Spielerpass")}) هي بطاقة الهوية الخاصة بالمباريات في النادي.`,
     // Neu am 12.10.2026 (Entscheidung der 1. Vorsitzenden): Der Verein beantragt das Spielrecht immer; die frühere Frage zu den Spielen entfällt.
     spielrecht: `من يلعب كرة القدم يحتاج إلى إذن اللعب (${D("Spielrecht")}) من اتحاد ولاية هيسن لكرة القدم (${D("Hessischer Fußball-Verband, HFV")}).\nيطلب النادي هذا الإذن من أجلك.\nيستغرق ذلك أحيانًا عدة أسابيع.`,
+    jaHinweis: `تُحتسب أيضًا بطاقة لاعب (${D("Spielerpass")}) من الخارج.`,
     weissNichtHinweis: "يتحقق النادي من ذلك من أجلك.",
   },
 
@@ -435,13 +441,12 @@ export default {
     ort: "مدينة النادي",
     land: "بلد النادي",
     verband: "الاتحاد الكروي هناك",
-    verbandHinweis: "فقط إذا كنت تعرفه.",
   },
 
   abmeldung: {
     status: {
       titel: { kind: "هل تم إلغاء تسجيل طفلك في النادي القديم؟", selbst: "هل تم إلغاء تسجيلك في النادي القديم؟" },
-      hinweis: `المقصود هو إلغاء التسجيل كلاعب.\nلا تنتهي العضوية في النادي القديم بذلك.\nرسالة بريد إلكتروني إلى النادي القديم لا تكفي.\nيحتاج اتحاد ولاية هيسن لكرة القدم (${D("Hessischer Fußball-Verband, HFV")}) إلى رسالة مسجلة (${D("Einschreiben")}).\nأو توقّع على توكيل لإلغاء التسجيل (${D("Vollmacht für die Abmeldung")}).`,
+      hinweis: "المقصود هو إلغاء التسجيل كلاعب، وليس إنهاء العضوية.",
       einschreiben: `نعم، برسالة مسجلة (${D("Einschreiben")})`,
       einschreibenHinweis: "لديك إيصال البريد.",
       formlos: "نعم، لكن بالبريد الإلكتروني أو برسالة نصية فقط",
@@ -452,27 +457,25 @@ export default {
     datum: {
       titel: "متى ألغيت التسجيل؟",
       legende: "تاريخ إلغاء التسجيل",
-      hinweis: `في الرسالة المسجلة (${D("Einschreiben")}) يُعتمد التاريخ المكتوب على الإيصال.`,
+      hinweis: "المعتمد هو التاريخ المكتوب على الإيصال.",
     },
     weg: {
       titel: "كيف تلغي التسجيل؟",
       vollmacht: `بتوكيل (${D("Vollmacht")})`,
-      vollmachtHinweis: `توقّع على توكيل لإلغاء التسجيل (${D("Vollmacht für die Abmeldung")}). ثم يلغي النادي التسجيل.`,
+      vollmachtHinweis: `توقّع على التوكيل (${D("Vollmacht")}). ويلغي نادينا التسجيل.`,
       einschreiben: `برسالة مسجلة (${D("Einschreiben")})`,
-      einschreibenHinweis: `ترسل الرسالة المسجلة (${D("Einschreiben")}) إلى النادي القديم بنفسك.`,
+      einschreibenHinweis: "ترسلها بنفسك إلى النادي القديم.",
     },
     mitgliedschaft: {
       titel: { kind: "هل يبقى طفلك عضوًا في النادي القديم؟", selbst: "هل تبقى عضوًا في النادي القديم؟" },
-      hinweis: "العضوية لا تنتهي من تلقاء نفسها.\nوهي لا تنتهي أيضًا بإلغاء التسجيل كلاعب.",
       kuendigen: "لا، سأنهي العضوية",
-      kuendigenHinweis: `تنهي العضوية في النادي القديم (${D("Kündigung")}).`,
       passiv: "نعم، كعضو داعم",
-      passivHinweis: { kind: "طفلك لا يلعب هناك بعد الآن. يبقى عضوًا.", selbst: "أنت لا تلعب هناك بعد الآن. تبقى عضوًا." },
+      passivHinweis: { kind: "الطفل لم يعد يلعب هناك. يبقى عضوًا.", selbst: "أنت لم تعد تلعب هناك. تبقى عضوًا." },
       weiss_nicht: "لا أعرف",
     },
     anschrift: {
       titel: `إلى أي عنوان تُرسل الرسالة المسجلة (${D("Einschreiben")}) الموجّهة إلى النادي القديم؟`,
-      hinweis: `ليس عليك كتابة شيء. النادي يساعدك.\nنكتب العنوان في استمارة إلغاء التسجيل لدى النادي القديم (${D("Abmeldung")}).`,
+      hinweis: `نكتب العنوان في استمارة إلغاء التسجيل (${D("Abmeldung")}).`,
       empfaenger: "اسم المستلم",
       empfaengerHinweis: "مثال: مجلس إدارة النادي",
       strasse: "الشارع ورقم المنزل",
@@ -480,7 +483,6 @@ export default {
     },
     spiele: {
       titel: "متى كانت آخر مباراة؟",
-      hinweis: "إذا كنت لا تعرف التاريخ، فاترك الحقل فارغًا.",
       letztes: "آخر مباراة",
       pflicht: "آخر مباراة في الدوري أو الكأس",
       pflichtHinweis: "المباريات الودية لا تُحتسب هنا.",
@@ -494,11 +496,10 @@ export default {
     freigabe: {
       titel: { kind: "هل يمنح النادي القديم طفلك إخلاء الطرف؟", selbst: "هل يمنحك النادي القديم إخلاء الطرف؟" },
       hinweis: `إخلاء الطرف (${D("Freigabe")}) يعني: النادي القديم موافق على الانتقال.`,
-      jaHinweis: "النادي القديم وافق.",
     },
     wechsel: {
-      titel: { kind: "هل غيّر طفلك النادي خلال آخر 6 أشهر؟", selbst: "هل غيّرت النادي خلال آخر 6 أشهر؟" },
-      hinweis: "المقصود هو الانتقال من نادٍ إلى نادٍ آخر.",
+      titel: { kind: "هل سبق أن غيّر طفلك ناديه قبل هذا؟", selbst: "هل سبق أن غيّرت ناديك قبل هذا؟" },
+      hinweis: "المقصود انتقال سابق خلال آخر 6 أشهر، وليس هذا الانتقال.",
     },
   },
 
@@ -518,7 +519,6 @@ export default {
 
   ausland: {
     titel: { kind: "هل عاش طفلك في الخارج من قبل؟", selbst: "هل عشت في الخارج من قبل؟" },
-    hinweis: "الخارج يعني: ليس في ألمانيا.",
     land: "الدولة",
     landHinweis: "آخر مكان إقامة قبل ألمانيا.",
     stadt: "المدينة",
@@ -527,9 +527,9 @@ export default {
   wohnen: {
     ort: {
       titel: { kind: "أين يعيش طفلك؟", selbst: "أين تعيش؟" },
-      gemeinsam: { kind: "معي على العنوان نفسه", selbst: "مع والديّ على العنوان نفسه" },
+      gemeinsam: { kind: "معي على العنوان نفسه", selbst: "مع والديّ" },
       gemeinsamHinweis: { kind: "نحن مسجلون لدى الجهات الرسمية على العنوان نفسه.", selbst: "نحن مسجلون لدى الجهات الرسمية على العنوان نفسه." },
-      nicht_gemeinsam: { kind: "في ألمانيا، لكن على عنوان آخر", selbst: "في ألمانيا، لكن ليس عند والديّ" },
+      nicht_gemeinsam: { kind: "على عنوان آخر", selbst: "ليس مع والديّ" },
       nicht_gemeinsamHinweis: { kind: "نحن مسجلون لدى الجهات الرسمية على عناوين مختلفة.", selbst: "نحن مسجلون لدى الجهات الرسمية على عناوين مختلفة." },
       verwandte: "عند أقارب في ألمانيا",
       ohne_eltern: "في ألمانيا بدون الوالدين",
@@ -571,7 +571,6 @@ export default {
     zweiterAmBildschirm: `هل وافق الطرف الآخر من الوالدين؟ عندها ضع علامة في المربع.\nإذا لم يكن قد وافق بعد، فيوقّع الطرف الآخر على طلب الانضمام (${D("Aufnahmeantrag")}) أيضًا.\nيمكن ذلك على الشاشة. أو بالقلم على النسخة المطبوعة.`,
     personen: {
       titel: { kind: "من يتخذ القرارات نيابةً عن {name}؟", selbst: "من يتخذ القرارات نيابةً عنك؟" },
-      hinweis: "نسأل عن رقم الهاتف لاحقًا.",
       erste: { kind: "بياناتك", selbst: "الشخص الأول" },
       zweite: "الشخص الثاني",
       rolle: "من هذا الشخص؟",
@@ -587,15 +586,15 @@ export default {
 
   besonderes: {
     titel: "هل توجد حالة خاصة؟",
-    hinweis: "ضع علامة على ما ينطبق. وإذا لم ينطبق شيء، فتابع.",
+    hinweis: "إذا لم ينطبق شيء، فتابع.",
     legende: "ما الذي ينطبق؟",
-    maedchen: "فتاة ستلعب في فريق للفتيان.",
-    maedchenHinweis: `هذا ممكن في فئتي ${D("C-Jugend")} و ${D("B-Jugend")}. يجب أن يوافق الوالدان.`,
-    herrenAushilfe: `سيلعب الشاب أيضًا عند الحاجة في فريق ${D("Herren")} (فريق الرجال).`,
-    herrenAushilfeHinweis: `يتطلب ذلك موافقة الوالدين وشهادة طبية (${D("Attest")}).`,
-    sonderspielrecht: "اللعب سيكون في فئة عمرية أصغر.",
-    sonderspielrechtHinweis: "هذا ممكن مثلًا عند وجود إعاقة. ويتطلب ذلك طلبًا.",
-    frauHerren: `امرأة تريد اللعب في فريق ${D("Herren")} (فريق الرجال).`,
+    maedchen: "فتاة في فريق للفتيان",
+    maedchenHinweis: `في الفئتين ${D("C-Jugend")} و ${D("B-Jugend")}، يجب أن يوافق الوالدان.`,
+    herrenAushilfe: `اللعب عند الحاجة في فريق ${D("Herren")} (فريق الرجال)`,
+    herrenAushilfeHinweis: `يجب أن يوافق الوالدان. ويلزم أيضًا تقديم شهادة طبية (${D("Attest")}).`,
+    sonderspielrecht: "اللعب في فئة عمرية أصغر",
+    sonderspielrechtHinweis: "مثلًا في حالة الإعاقة. ويلزم تقديم طلب.",
+    frauHerren: `امرأة في فريق ${D("Herren")} (فريق الرجال)`,
     frauHerrenHinweis: "يتطلب ذلك طلبًا إلى الاتحاد.",
   },
 
@@ -610,7 +609,6 @@ export default {
       titel: "كيف يمكننا التواصل معك؟",
       hinweisKind: "يرجى إدخال بياناتك هنا بصفتك أحد الوالدين.",
       email: "البريد الإلكتروني",
-      emailHinweis: "نرسل إليه الرسائل المهمة.",
       mobil: "رقم الهاتف المحمول",
       telefon: "رقم الهاتف الثابت",
       telefonHinweis: "يرجى ذكر رقم هاتف واحد على الأقل.",
@@ -620,12 +618,11 @@ export default {
   beitrag: {
     gruppe: {
       titel: { kind: "ما رسوم العضوية التي تدفعها من أجل {name}؟", selbst: "ما رسوم العضوية التي تدفعها؟" },
-      vorschlagKopf: "نقترح: {gruppe}.",
       vorschlag: "تبلغ التكلفة {jahr} يورو في السنة.\nأي {monat} يورو في الشهر.",
       vorschlagOhneMonat: "تبلغ التكلفة {jahr} يورو في السنة.",
       aufnahme: "يضاف إلى ذلك رسوم قبول لمرة واحدة قدرها {betrag} يورو.",
-      andere: "يمكنك اختيار فئة أخرى.",
       legende: "فئة الرسوم",
+      andereGruppe: "فئة الرسوم الأخرى",
       proJahr: "{jahr} يورو في السنة",
       doppel: "هل أنت في كرة القدم والكرنفال؟\nاسأل عن رسوم عضوية خاصة.",
       vorgeschlagen: "اقتراح",
@@ -645,7 +642,7 @@ export default {
     },
     senator: {
       titel: `هل تريد أن تصبح سيناتورًا (${D("Senator")})؟`,
-      hinweis: "يدعم السيناتورات قسم الكرنفال.\nيدفعون رسومًا خاصة.\nيقرر مجلس الإدارة بشأن الطلب.",
+      hinweis: "يدعم السيناتورات قسم الكرنفال.\nيقرر مجلس الإدارة بشأن الطلب.",
       ja: "نعم، أقدّم الطلب",
       nein: "لا",
     },
@@ -656,7 +653,7 @@ export default {
     hinweis: `مثل دعم الدخل الأساسي (${D("Grundsicherungsgeld")}) أو المساعدة الاجتماعية (${D("Sozialhilfe")}) أو إعانة السكن (${D("Wohngeld")}) أو علاوة الأطفال (${D("Kinderzuschlag")}) أو مساعدات طالبي اللجوء (${D("Asylbewerberleistungen")}).\nعندها تدفع الجهة الحكومية رسوم العضوية في الغالب.\nيُسمّى هذا التعليم والمشاركة (${D("Bildung und Teilhabe")}).`,
     ja: "نعم",
     nein: "لا",
-    jaHinweis: "تحدّث إلينا. نصدر لك شهادة.",
+    jaHinweis: "نصدر لك شهادة.",
     wenigGeld: "هل دخلك قليل؟ تحدّث إلينا.",
   },
 
@@ -664,7 +661,7 @@ export default {
     art: {
       titel: "كيف تريد أن تدفع؟",
       sepa: `الخصم المباشر (${D("Lastschrift")}) – موصى به`,
-      sepaHinweis: "يخصم النادي رسوم العضوية من حسابك مرة واحدة في السنة.",
+      sepaHinweis: "يخصم النادي الرسوم من حسابك مرة في السنة.",
       rechnung: "فاتورة",
       rechnungHinweis: "تحوّل رسوم العضوية بنفسك.",
     },
@@ -675,7 +672,7 @@ export default {
       person: "صاحب الحساب",
       vorname: "الاسم الأول",
       nachname: "اسم العائلة",
-      anschriftGleich: "يسكن الشخص على العنوان نفسه.",
+      anschriftGleich: "على العنوان نفسه",
       strasse: "الشارع ورقم المنزل",
       plz: "الرمز البريدي",
       ort: "المدينة أو البلدة",
@@ -683,7 +680,7 @@ export default {
     iban: {
       titel: `ما هو رقم ${D("IBAN")}؟`,
       iban: "IBAN",
-      ibanHinweis: `رقم ${D("IBAN")} مكتوب على بطاقتك المصرفية.\nالمسافات غير مهمة.`,
+      ibanHinweis: `رقم ${D("IBAN")} مكتوب على بطاقتك المصرفية.`,
       bank: "اسم البنك",
     },
   },
@@ -693,10 +690,8 @@ export default {
       titel: { kind: "هل يجوز لنا عرض صور طفلك؟", selbst: "هل يجوز لنا عرض صورك؟" },
       hinweis: "تقرر بحرية. ويمكنك تغيير ذلك لاحقًا.",
       ja: "نعم",
-      jaHinweis: "ستختار بعد قليل أين تُعرض الصور.",
       nein: "لا",
       medienLegende: "أين يجوز لنا عرض الصور؟",
-      medienHinweis: "اختر خيارًا واحدًا على الأقل.",
       intern: "داخل النادي: لوحات الإعلانات والنشرات",
       web: "على الإنترنت: الموقع الإلكتروني ووسائل التواصل الاجتماعي وتطبيق النادي",
       presse: "في الصحف: تقارير عن النادي",
@@ -725,13 +720,10 @@ export default {
 
   // Aufsichtspflicht: Minderjährige, die trainieren oder tanzen (Schritt "heimweg").
   heimweg: {
-    titel: "هل يجوز لطفلك العودة إلى البيت دون مرافق بعد التدريب؟",
-    hinweis: "أثناء التدريب يشرف النادي على طفلك.\nأخبرنا: كيف يعود طفلك إلى البيت بعد ذلك؟",
+    titel: "هل تسمح لطفلك بالعودة إلى البيت دون مرافق؟",
+    hinweis: "أثناء التدريب يشرف النادي على طفلك.",
     allein: "العودة إلى البيت دون مرافق",
-    alleinHinweis: "يجوز لطفلي العودة إلى البيت دون مرافق بعد التدريب.",
     abholen: "يأتي شخص لاصطحاب الطفل",
-    abholenHinweis: "ينتظر طفلي حتى يصطحبه أحد.",
-    aendern: "يمكنك تغيير ذلك في أي وقت. وعندها أخبر المدرب.",
   },
 
   notfall: {
@@ -751,11 +743,11 @@ export default {
     },
     gesundheit: {
       titel: "الصحة: {name}",
-      hinweis: "كل الحقول اختيارية.\nتُحفظ البيانات منفصلة في قسم خاص من الملف.",
+      hinweis: "كل الحقول اختيارية.\nتُحفظ البيانات منفصلة في جزء خاص من الملف.",
       allergien: "الحساسية",
       erkrankungen: "الأمراض",
       medikamente: "الأدوية",
-      medikamenteHinweis: `هل يحتاج طفلك إلى دواء للطوارئ؟ مثلًا بخاخ الربو أو قلم الأدرينالين. تحدّث مع المدرب. في الجزء ${D("C")} توجد استمارة الطوارئ والصحة (${D("Notfall- und Gesundheitsbogen")}). وفيها أسطر لهذا الغرض.`,
+      medikamenteHinweis: "مثلًا بخاخ الربو أو قلم الأدرينالين. تحدّث إلى المدرب.",
       sonstiges: "أخرى",
     },
   },
@@ -764,9 +756,7 @@ export default {
     titel: `كيف نحصل على صورة بطاقة اللاعب (${D("Spielerpass")})؟`,
     hinweis: `يحتاج اتحاد ولاية هيسن لكرة القدم (${D("Hessischer Fußball-Verband, HFV")}) إلى صورة للرأس والكتفين.\nيجب أن يكون الوجه واضحًا.`,
     foto: "ألتقط صورة الآن",
-    fotoHinweis: "بكاميرا الهاتف.",
-    datei: "أختار صورة من جهازي",
-    dateiHinweis: "صورة لديك بالفعل.",
+    datei: "أختار صورة موجودة",
     verein: "النادي يلتقط الصورة",
     vereinHinweis: "في أول تدريب.",
     machen: "التقاط صورة",
@@ -779,7 +769,7 @@ export default {
 
   nachweise: {
     titel: "ما المستندات التي لديك بالفعل؟",
-    hinweis: "صوّر كل مستند لديك.\nيمكنك تسليم الناقص لاحقًا.\nالصورة تبقى على جهازك.",
+    hinweis: "صوّر كل مستند لديك.\nأرسل المستندات الناقصة لاحقًا.",
     habe: "لديّ",
     fehlt: "ما زال ناقصًا",
     foto: "التقاط صورة",
@@ -790,12 +780,10 @@ export default {
     entfernt: "تمت إزالة الملف.",
     vorschau: "معاينة: {datei}",
     pdf: "ملف PDF",
-    warum: "لماذا؟",
     wie: "كيف تحصل عليه:",
     wo: "أين؟",
     dateien: "ملفاتك:",
     art: {
-      pflicht: "هذا مطلوب.",
       verein: "يريد النادي هذا.",
       freiwillig: "هذا اختياري.",
       nur_wenn: "مطلوب إذا كان ينطبق عليك.",
@@ -808,25 +796,23 @@ export default {
     titel: "كيف تريد أن توقّع؟",
     weg: {
       bildschirm: "على الشاشة حيث يُسمح بذلك",
-      bildschirmHinweis: "توقّع مستندات النادي هنا بإصبعك.",
+      bildschirmHinweis: "توقّع هنا بإصبعك.",
       bildschirmAlles: "على الشاشة",
-      bildschirmAllesHinweis: `توقّع كل شيء هنا بإصبعك. ويشمل ذلك الأوراق الخاصة باتحاد ولاية هيسن لكرة القدم (${D("Hessischer Fußball-Verband, HFV")}).`,
+      bildschirmAllesHinweis: `بإصبعك، حتى على أوراق الاتحاد (${D("HFV")}).`,
       papier: "أوقّع كل شيء على الورق",
-      papierHinweis: "تطبع الملف وتوقّع بالقلم.",
+      papierHinweis: "تطبع وتوقّع بالقلم.",
     },
     satzung: {
-      titel: `النظام الأساسي للنادي (${D("Satzung")})`,
       erklaerung: `النظام الأساسي (${D("Satzung")}) هو قواعد النادي.`,
       link: `قراءة النظام الأساسي (${D("Satzung")})`,
       linkZusatz: "ملف PDF، يُفتح في علامة تبويب جديدة",
       ohneLink: `تجد النظام الأساسي (${D("Satzung")}) على موقع النادي على الإنترنت.`,
       label: `لقد قرأت النظام الأساسي (${D("Satzung")}).`,
-      pflicht: "بدون علامة في المربع لا يمكنك التوقيع على الشاشة.",
       freiwillig: "اختياري. بدون علامة هنا تضع العلامة بخط اليد على النسخة المطبوعة.",
     },
-    hierTitel: "توقّع هنا على هذه المستندات",
     hierHinweis: "ارسم بإصبعك أو بالقلم أو بالفأرة.",
     giltFuer: "يسري هذا التوقيع على:",
+    giltFuerBlaetter: "يسري هذا التوقيع على أوراق عددها {n}",
     person: {
       mitglied: { kind: "توقيع {name}", selbst: "توقيعك" },
       sorgeberechtigte: "توقيع {person}",
@@ -834,11 +820,11 @@ export default {
       kontoinhaber: "توقيع صاحب الحساب: {person}",
       spieler: { kind: "توقيع {name}", selbst: "توقيعك" },
       spielerHinweis: {
-        kind: "هل يستطيع طفلك الكتابة؟ عندها يوقّع طفلك هنا بنفسه.",
-        selbst: "أنت لم تبلغ 18 عامًا بعد. وقّع هنا بنفسك أيضًا.",
+        kind: "هل يستطيع طفلك الكتابة؟ عندها يوقّع طفلك بنفسه.",
+        selbst: "هل عمرك أقل من 18 عامًا؟ وقّع بنفسك أيضًا.",
       },
       zweiteEltern: "التوقيع: الطرف الآخر من الوالدين",
-      zweiteHinweis: "يوقّع الطرف الآخر من الوالدين هنا بنفسه.\nأو يوقّع لاحقًا بالقلم على النسخة المطبوعة.",
+      zweiteHinweis: "يوقّع الطرف الآخر من الوالدين هنا بنفسه.\nأو لاحقًا بالقلم على النسخة المطبوعة.",
       ersteSorge: "توقيعك",
     },
     stand0: "لم يتم التوقيع بعد",
@@ -860,7 +846,7 @@ export default {
 
   pruefen: {
     titel: "هل كل شيء صحيح؟",
-    hinweis: "راجع بياناتك.\nاستخدم «تعديل» لتصحيح أي شيء.",
+    hinweis: "استخدم «تعديل» لتصحيح أي شيء.",
     weiter: "كل شيء صحيح – إنشاء الملف",
     aendern: "تعديل",
     aendernLang: "تعديل {bereich}",
@@ -958,7 +944,6 @@ export default {
       mitStift: "ليس على الشاشة – بالقلم على النسخة المطبوعة",
       betragJahr: "{gruppe}، {jahr} يورو في السنة",
     },
-    hinweiseTitel: "ما ينبغي أن تعرفه",
     weitereHinweise: "ملاحظات أخرى ({anzahl})",
     klaertVerein: "يوضح النادي ذلك",
     fristUnsicher: "هذا تقدير. يتحقق النادي منه بدقة.",
@@ -986,8 +971,6 @@ export default {
     nochmal: "حاول مرة أخرى",
     datei: "الملف: {name}",
     info: `عدد الصفحات: {seiten}، الحجم: ${D("{groesse}")}`,
-    teileTitel: "محتويات الملف:",
-    teil: `{titel} (${"من الصفحة {von} إلى الصفحة {bis}".replace(/ /g, "\u00A0")})`,
     // Titel der Teile des PDF (SCHNITTSTELLEN Abschnitt 9); der Buchstabe steht im Isolat
     teilTitel: {
       A: `الجزء ${D("A")} – لك`,
@@ -1011,12 +994,9 @@ export default {
     // إرسال الملف بالبريد الإلكتروني (M10)؛ {knopf} هو نص الزر. موضوع الرسالة ونصها يبقيان بالألمانية (hilfen.js).
     senden: {
       titel: "كيف ترسل الملف إلى النادي",
-      einleitung: `أرسل الملف بالبريد الإلكتروني إلى مكتب النادي (${D("Geschäftsstelle")}).`,
-      handyTitel: "على الهاتف",
-      handy1: "اضغط على «{knopf}» في الأعلى.",
-      handy2: "اختر تطبيق البريد الإلكتروني.",
-      handy3: "أرسل الرسالة إلى العنوان أدناه.",
-      computerTitel: "على الكمبيوتر",
+      handy1: "اضغط على «{knopf}» في الأسفل.",
+      handy2: "اضغط على «{knopf}» في الأعلى. اختر تطبيق البريد الإلكتروني. الملف مرفق بالفعل.",
+      handy3: "الصق العنوان في خانة «إلى». ثم أرسل الرسالة.",
       computer1: "انقر على «{knopf}» في الأعلى.",
       computer2: "اكتب رسالة بريد إلكتروني جديدة. وأرفق الملف.",
       computer3: "أرسل الرسالة إلى العنوان أدناه.",
@@ -1025,7 +1005,7 @@ export default {
       kopiert: "تم نسخ العنوان.",
       kopierenFehler: "النسخ غير ممكن هنا. العنوان محدد. انسخه بنفسك.",
       oeffnen: "فتح رسالة بريد إلكتروني إلى مكتب النادي",
-      anhang: "أرفق الملف بالرسالة.",
+      anhang: "عند استخدام «{knopf}» أرفق الملف بنفسك.",
     },
     naechsteTitel: "الخطوات التالية",
     unterschriftTraining: `توقّع أوراق اتحاد ولاية هيسن لكرة القدم (${D("Hessischer Fußball-Verband, HFV")}) بالقلم في أول تدريب.`,
@@ -1035,10 +1015,12 @@ export default {
     unterschriftTrainingAlle: "توقّع كل الأوراق بالقلم في أول تدريب. ويطبعها النادي.",
     unterschriftFertig: `لقد وقّعت كل شيء على الشاشة. ما عليك طباعته مذكور في الجزء ${D("A")} من الملف.`,
     unterschriftRest: `بعض التوقيعات ما زالت ناقصة. وهي العلامات الزرقاء في ملف PDF.\nوقّع هناك بالقلم. ما عليك طباعته مذكور في الجزء ${D("A")} من الملف.`,
+    unterschriftFoto: "صوّر الأوراق الموقّعة أو امسحها ضوئيًا. أرسلها في نفس رسالة البريد الإلكتروني.",
     fehltTitel: "ما زالت هذه المستندات ناقصة:",
     fehltHinweis: "أرسلها بالبريد الإلكتروني لاحقًا بمجرد أن تحصل عليها.",
     nichtWhatsapp: `يرجى عدم إرسال الملف عبر ${D("WhatsApp")}. فهو يحتوي على بيانات خاصة.`,
     teilC: `الجزء ${D("C")} (${D("Teil C")}) يحتوي على بيانات صحية. يحفظه النادي بشكل منفصل.`,
+    danach: "بعد ذلك يتحقق النادي من تسجيلك.",
     weiterePerson: "تسجيل شخص آخر",
     weiterePersonHinweis: "نستخدم نفس العنوان وبيانات الاتصال وبيانات الوالدين وبيانات الدفع.",
     neuePerson: "أنت الآن تسجّل الشخص التالي.",

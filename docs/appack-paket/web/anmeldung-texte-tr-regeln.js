@@ -1,0 +1,515 @@
+export default {
+ "unterlagen": {
+  "U01": {
+   "name": "Üyelik başvurusu (Aufnahmeantrag)",
+   "kurz": "Bu başvuruyla kulübe üye olursunuz.",
+   "warum": "Üyelik olmadan oynama izni (Spielrecht) olmaz. Oynama iznini federasyon verir.",
+   "wie": "Asistan başvuruyu sizin için doldurur. Sonra imzalarsınız.",
+   "wo": "Başvuru dosyanın içinde. Dosyayı e-posta ile kulüp ofisine gönderirsiniz."
+  },
+  "U02": {
+   "name": "Aile üyeleri listesi",
+   "kurz": "Burada ailenizden kulüpte olan tüm kişiler yazılıdır.",
+   "warum": "Ancak o zaman uygun fiyatlı aile aidatı geçerli olur.",
+   "wie": "Her aile üyesinin adını, soyadını ve doğum tarihini yazın.",
+   "wo": "Liste, üyelik başvurusunda (Aufnahmeantrag) yer alır."
+  },
+  "U03": {
+   "name": "Meslek eğitimi veya öğrenim belgesi",
+   "kurz": "Bu, okuldan, üniversiteden ya da işyerinden alınan bir kâğıttır.",
+   "warum": "Ancak bununla daha uygun aidat geçerli olur.",
+   "wie": "Kâğıdın fotoğrafını çekin. Ya da tarayın.",
+   "wo": "Fotoğrafı asistana yüklersiniz. Ya da kopyayı e-posta ile kulüp ofisine gönderirsiniz."
+  },
+  "U04": {
+   "name": "Fotoğraflar için izin",
+   "kurz": "Kulübün fotoğraf gösterip gösteremeyeceğine siz karar verirsiniz.",
+   "warum": "Kulüp fotoğrafları sadece sizin izninizle gösterir.",
+   "wie": "Evet ya da hayır dersiniz. Bunu sonra değiştirebilirsiniz.",
+   "wo": "İzin, üyelik başvurusunda (Aufnahmeantrag) yer alır."
+  },
+  "U05": {
+   "name": "Otomatik çekim için izin (Lastschrift)",
+   "kurz": "Kulüp aidatı hesabınızdan çeker.",
+   "warum": "Böylece aidatı kendiniz havale etmek zorunda kalmazsınız.",
+   "wie": "Hesap numarasını yazarsınız. Hesap sahibi imzalar.",
+   "wo": "İzin, üyelik başvurusunda (Aufnahmeantrag) yer alır."
+  },
+  "U06": {
+   "name": "Veri koruma bilgisi (Datenschutz)",
+   "kurz": "Burada kulübün verilerinizle ne yaptığı yazıyor.",
+   "warum": "Kulüp sizi bu konuda bilgilendirmek zorunda. Bunu yasa şart koşar.",
+   "wie": "Metni rahatça okuyun. Sorularınız olursa bizi arayın.",
+   "wo": "Metin dosyanın içinde. Bir kopyasını siz saklarsınız."
+  },
+  "U07": {
+   "name": "Oynama izni başvurusu (Antrag auf Spielerlaubnis)",
+   "kurz": "Kulüp bu başvuruyla Hessen Futbol Federasyonu’ndan (Hessischer Fußball-Verband, HFV) oynama izni (Spielrecht) ister.",
+   "warum": "Maçlara ancak oynama izni olan kişiler katılabilir.",
+   "wie": "Asistan formu önceden doldurur. Formu siz imzalarsınız.",
+   "wo": "Kulüp başvuruyu federasyona gönderir. Dosya kulüpte kalır."
+  },
+  "U08": {
+   "name": "İsim ve fotoğrafın internette gösterilmesi için izin",
+   "kurz": "Federasyonun isim ve fotoğraf gösterip gösteremeyeceğine siz karar verirsiniz.",
+   "warum": "16 yaşından küçük çocuklarda federasyon ismi sadece izinle gösterir.",
+   "wie": "Evet ya da hayır dersiniz. İzni sonra geri alabilirsiniz.",
+   "wo": "İzin, oynama izni başvurusunda (Antrag auf Spielerlaubnis) yer alır."
+  },
+  "U09": {
+   "name": "Doğum belgesi (Geburtsurkunde) kopyası",
+   "kurz": "Bu, doğumu gösteren kâğıdın kopyasıdır.",
+   "warum": "Federasyon bununla ad ve doğum tarihini kontrol eder.",
+   "wie": "Belgenin fotoğrafını çekin. Her şey iyi okunmalıdır.",
+   "wo": "Fotoğrafı asistana yüklersiniz. Ya da bir kopyayı e-posta ile kulüp ofisine gönderirsiniz."
+  },
+  "U10": {
+   "name": "Doktordan sağlık raporu (Attest)",
+   "kurz": "Sağlık raporu (Attest), doktordan alınan bir kâğıttır. Üzerinde şu yazıyor: Spor yapmakta sakınca yok.",
+   "warum": "Federasyon bunu çocuklar ve gençler için ister. Yetişkinlerden bunu kulüp ister.",
+   "wie": "Formla birlikte doktora gidin. Doktor imzalar.",
+   "wo": "Bir fotoğraf yüklersiniz. Ya da bir fotoğrafı e-posta ile kulüp ofisine gönderirsiniz."
+  },
+  "U11": {
+   "name": "Sağlık raporu (Attest) için izin",
+   "kurz": "Sağlık raporu (Attest) sağlıkla ilgili bilgiler içerir. Kulübün izninize ihtiyacı var.",
+   "warum": "Sağlık verileri özel olarak korunur.",
+   "wie": "İzni, sağlık raporu (Attest) formunun üzerinde imzalarsınız.",
+   "wo": "Bu sayfa gizli bölüme aittir. Kulüpte sadece birkaç kişi görür."
+  },
+  "U12": {
+   "name": "Kimlik kartı (Personalausweis) veya pasaport (Reisepass) kopyası",
+   "kurz": "Bu, pasaportun, kimlik kartının ya da oturma izninin (Aufenthaltstitel) kopyasıdır.",
+   "warum": "Federasyon bununla ad, doğum tarihi ve vatandaşlığı kontrol eder.",
+   "wie": "Ön yüzün fotoğrafını çekin. Alman kimlik belgelerinin aslını kulüpte gösterirsiniz.",
+   "wo": "Fotoğrafı asistana yüklersiniz. Kopyanın üzerinde KOPIE yazıyor."
+  },
+  "U13": {
+   "name": "İkametgâh belgesi (Meldebescheinigung)",
+   "kurz": "Bu, vatandaş bürosundan (Bürgeramt) alınan bir kâğıttır. Nerede oturduğunuzu gösterir.",
+   "warum": "Federasyon, çocuğun ve ebeveynlerin Almanya’da birlikte yaşayıp yaşamadığını kontrol eder.",
+   "wie": "Kâğıdı vatandaş bürosundan (Bürgeramt) ya da internetten alın. Şunu söyleyin: Spor kulübü buna ihtiyaç duyuyor.",
+   "wo": "Bir fotoğraf ya da dosya yüklersiniz."
+  },
+  "U14": {
+   "name": "Almanya dışındaki önceki kulüp hakkında bilgiler",
+   "kurz": "Asistan eski kulübün adını, yerini ve ülkesini sorar.",
+   "warum": "Federasyon Almanya dışından serbest bırakma (Freigabe) ister.",
+   "wie": "Adı mümkün olduğunca tam yazın.",
+   "wo": "Bilgileri asistana girersiniz. Bunlar başvuruda yer alır."
+  },
+  "U15": {
+   "name": "Federasyonun sistemi için ek bilgiler",
+   "kurz": "Federasyon doğum yerini ve son oturulan yeri ister.",
+   "warum": "Kulüp bunu federasyonun bilgisayar sistemine girer.",
+   "wie": "Bilgileri asistana girersiniz.",
+   "wo": "Bilgiler, kulüp için hazırlanan bilgi sayfasında yer alır."
+  },
+  "U16": {
+   "name": "Oyuncu lisansı (Spielerpass) için fotoğraf",
+   "kurz": "Fotoğraf yüzü ve omuzları net gösterir.",
+   "warum": "Hakem fotoğrafı maçtan önce karşılaştırır. Fotoğraf yoksa kimse oynayamaz.",
+   "wie": "Telefonla bir fotoğraf çekin. {jahre} yıl sonra kulübün yeni bir fotoğrafa ihtiyacı olur.",
+   "wo": "Fotoğrafı asistana yüklersiniz. Kulüp onu federasyona yükler."
+  },
+  "U17": {
+   "name": "Eski kulüpteki kayıt silme (Abmeldung)",
+   "kurz": "Eski kulüpte oyuncu olarak kaydınızı sildirirsiniz. Bu, taahhütlü mektupla (Einschreiben) olur. E-posta yetmez.",
+   "warum": "Kayıt silme günü önemlidir. Bekleme süresi o günden başlar.",
+   "wie": "Formu taahhütlü mektup (Einschreiben) olarak gönderin. Postanede şunu söyleyin: normal taahhütlü mektup, kapıya bırakma tipi taahhütlü mektup (Einwurf-Einschreiben) değil. Kapıya bırakma tipinde mektup yalnızca posta kutusuna atılır. Bu geçerli değildir. Makbuzu saklayın.",
+   "wo": "Makbuzun fotoğrafını çekip yüklersiniz. Ya da fotoğrafı e-posta ile kulüp ofisine gönderirsiniz."
+  },
+  "U18": {
+   "name": "Kayıt silme için vekâletname (Vollmacht für die Abmeldung)",
+   "kurz": "Vekâletname (Vollmacht) ile yeni kulüp, kaydınızı eski kulüpten sildirir.",
+   "warum": "Böylece postaneye gitmeniz gerekmez. Girişin yapıldığı gün, kayıt silme günü sayılır.",
+   "wie": "Sayfayı imzalarsınız. Kulüp kayıt silmeyi hemen girer.",
+   "wo": "Sayfa dosyanın içinde. Kulüp kaydı mümkünse dosyanın ulaştığı gün sildirir."
+  },
+  "U19": {
+   "name": "Eski kulüpte üyelikten çıkma (Kündigung) ya da pasif kalma",
+   "kurz": "Oyuncu olarak kaydı sildirmek (Abmeldung) üyeliği bitirmez.",
+   "warum": "Aksi halde eski kulüpte aidat ödemeye devam edersiniz.",
+   "wie": "Üyelikten çıkabilir ya da pasif üye olarak kalabilirsiniz. Bunu sayfada işaretlersiniz. Çoğunlukla taahhütlü mektupla (Einschreiben) olur.",
+   "wo": "Sayfayı eski kulübe kendiniz gönderirsiniz."
+  },
+  "U20": {
+   "name": "Eski kulüpten serbest bırakma (Freigabe)",
+   "kurz": "Eski kulüp sonradan evet diyebilir. O zaman bekleme süresi kısalır.",
+   "warum": "Serbest bırakma olmazsa bekleme süresi daha uzun sürer.",
+   "wie": "Eski kulüpten bir mektup isteyin. Mektupta hiçbir şart olmamalı.",
+   "wo": "Yeni kulüp mektubu federasyona gönderir. Hiçbir şey yüklemenize gerek yok."
+  },
+  "U21": {
+   "name": "Yeni kulüpten ödeme",
+   "kurz": "Yeni kulüp eski kulübe para ödeyebilir.",
+   "warum": "O zaman Haziran’daki bekleme süresi daha kısa olur.",
+   "wie": "Bunu yeni kulübün yönetim kurulu belirler.",
+   "wo": "Kulüp belgeyi federasyona gönderir. Sizin bir şey yapmanız gerekmiyor."
+  },
+  "U22": {
+   "name": "Eski kulüpten onay",
+   "kurz": "Eski kulüp, son lig veya kupa maçını onaylar.",
+   "warum": "6 ay boyunca lig veya kupa maçı olmadı mı? O zaman bekleme süresi yok.",
+   "wie": "Yeni kulüp bunu eski kulüpten ister.",
+   "wo": "Hiçbir şey yüklemenize gerek yok."
+  },
+  "U23": {
+   "name": "Herren takımındaki maçlar için onay",
+   "kurz": "Genç henüz 18 yaşında değil ve Herren (yetişkin erkek) takımında oynayacak.",
+   "warum": "Federasyon bunun için ebeveynlerin onayını ister.",
+   "wie": "Sayfayı imzalarsınız. Ayrıca sağlık raporu (Attest) gerekir.",
+   "wo": "Kulüp bunu federasyona gönderir."
+  },
+  "U24": {
+   "name": "Erkek takımlarındaki kız çocukları için onay",
+   "kurz": "Kızınız erkek takımında oynayacak.",
+   "warum": "B-Jugend ve C-Jugend’de federasyon sizin onayınızı ister.",
+   "wie": "Sayfayı imzalarsınız.",
+   "wo": "Bu sayfa kulüp bölümüne aittir."
+  },
+  "U25": {
+   "name": "Vasi (Vormund) ya da koruyucu aile için belge",
+   "kurz": "Bu, mahkemeden ya da gençlik dairesinden (Jugendamt) alınan bir kâğıttır.",
+   "warum": "Kulüp, çocuk adına kimin imza atabileceğini bilmek zorunda.",
+   "wie": "Kâğıdın fotoğrafını çekin.",
+   "wo": "Fotoğrafı yüklersiniz. Ya da bir kopyayı e-posta ile kulüp ofisine gönderirsiniz."
+  },
+  "U26": {
+   "name": "Ebeveynlerden ek beyan",
+   "kurz": "Federasyon belki ebeveynlerden bir beyan daha ister.",
+   "warum": "Eskiden bu, Almanya dışından gelen çocuklarda olağandı.",
+   "wie": "Kulüp size haber verir.",
+   "wo": "Şimdi bir şey yapmanıza gerek yok."
+  },
+  "U27": {
+   "name": "Bazı ülkeler için ek evrak",
+   "kurz": "Bazı ülkeler için federasyon başka evrak da ister.",
+   "warum": "Bu, eski kulübün ülkesine bağlıdır.",
+   "wie": "Kulüp federasyona sorar ve size haber verir.",
+   "wo": "Bu yüzden kaydınız durdurulmaz."
+  },
+  "U28": {
+   "name": "Acil durum ve sağlık formu (Notfall- und Gesundheitsbogen)",
+   "kurz": "Burada acil durum numaraları ve sağlıkla ilgili önemli notlar yazılıdır.",
+   "warum": "Antrenörler acil durumda hızlıca yardım edebilir.",
+   "wie": "Sadece istediğinizi doldurun. Her şey isteğe bağlıdır.",
+   "wo": "Bu sayfa gizli bölüme aittir. Sadece antrenörler ve takım sorumluları görür."
+  },
+  "U29": {
+   "name": "Yolculuklar ve mesajlaşma grubu için onay",
+   "kurz": "Maçlara araçla gitmeye ve mesajlaşma grubuna katılmaya izin verirsiniz.",
+   "warum": "Kulüp çocukları böyle korur.",
+   "wie": "İzin verdiklerinizi işaretlersiniz. Sonra imzalarsınız.",
+   "wo": "Bu sayfa kulüp bölümüne aittir."
+  },
+  "U33": {
+   "name": "Eğitim ve Katılım (Bildung und Teilhabe) için belge",
+   "kurz": "Bu, kulüpten aidatla ilgili bir kâğıttır.",
+   "warum": "Bununla aidat için yardım başvurusu yapabilirsiniz. Ayda {betrag} Euro’ya kadar.",
+   "wie": "Başvuru için iş merkezine (Jobcenter) ya da sosyal yardım dairesine (Sozialamt) sorun.",
+   "wo": "Belgeyi kulüp düzenler. Bizden isteyin."
+  },
+  "U34": {
+   "name": "Senatörlük üyeliği başvurusu",
+   "kurz": "Senatör olmak ve karnavalı desteklemek istiyorsunuz.",
+   "warum": "Kabul kararını yönetim kurulu verir.",
+   "wie": "Üyelik başvurusunda (Aufnahmeantrag) “Senatör” seçeneğini işaretlersiniz.",
+   "wo": "Başvuru, üyelik başvurusunun (Aufnahmeantrag) içindedir."
+  },
+  "U35": {
+   "name": "Kayıt ücreti (Aufnahmegebühr)",
+   "kurz": "Yeni üyeler bir kez {betrag} Euro öder.",
+   "warum": "Bu, üyelik başvurusunda (Aufnahmeantrag) böyle yazıyor.",
+   "wie": "Kulüp bunu ilk aidatla birlikte tahsil eder.",
+   "wo": "Bunun için bir şey yüklemenize gerek yok."
+  },
+  "U36": {
+   "name": "Oturma ya da koruma durumu belgesi",
+   "kurz": "Bu, Almanya’daki oturma durumunuzu gösteren bir kâğıttır.",
+   "warum": "Federasyon bununla ebeveynsiz çocuklar için olan istisnayı kontrol eder.",
+   "wie": "Kâğıdın fotoğrafını çekin. Bu, oturma izni (Aufenthaltstitel) olabilir.",
+   "wo": "Fotoğrafı yüklersiniz. Gerisini gençlik birimi sizinle netleştirir."
+  },
+  "U37": {
+   "name": "Okul değişim programı evrakı",
+   "kurz": "Bunlar okuldan ya da değişim programından alınan kâğıtlardır.",
+   "warum": "Federasyon çocuğun burada ne kadar kalacağını kontrol eder.",
+   "wie": "Programı süresiyle birlikte ekleyin. Ayrıca ev sahibi ailenin ve ebeveynlerin iznini ekleyin.",
+   "wo": "Fotoğrafları yüklersiniz. Gerisini gençlik birimi sizinle netleştirir."
+  },
+  "U38": {
+   "name": "5 yıllık ikamet belgesi",
+   "kurz": "Kâğıt vatandaş bürosundan (Bürgeramt) gelir. Son 5 yılın oturulan yerlerini gösterir.",
+   "warum": "Federasyon bununla çocuğun 5 yıldır burada yaşayıp yaşamadığını kontrol eder.",
+   "wie": "Kâğıdı vatandaş bürosundan (Bürgeramt) alın. 3 aydan eski olmamalı.",
+   "wo": "Bir fotoğraf yüklersiniz. Gerisini gençlik birimi sizinle netleştirir."
+  },
+  "U39": {
+   "name": "Kadınlar için Herren takımında özel oynama izni (Sonderspielrecht)",
+   "kurz": "18 yaş ve üzeri kadınlar Herren (yetişkin erkek) takımında oynayabilir. Federasyonun buna izin vermesi gerekir.",
+   "warum": "Kulübün kadın takımı yok.",
+   "wie": "Başvuruyu kulüp sizin için yapar. Federasyon karar verir.",
+   "wo": "Hiçbir şey yüklemenize gerek yok."
+  },
+  "U40": {
+   "name": "Divers ya da belirtilmemiş kaydında oynama izni (Spielrecht)",
+   "kurz": "Oynama izninin kadınlar için mi yoksa erkekler için mi geçerli olacağını seçersiniz.",
+   "warum": "Federasyonun bunun için özel bir kuralı var.",
+   "wie": "Başvuruyu kulüp, federasyonun güvenilir irtibat kişisiyle birlikte hazırlar.",
+   "wo": "Güvenilir irtibat kişisi sizinle iletişime geçer. Çocuklarda ebeveynler onay verir."
+  },
+  "U41": {
+   "name": "Antrenmandan sonra eve dönüş",
+   "kurz": "Çocuğunuzun antrenmandan sonra eve nasıl döneceğini söylersiniz.",
+   "warum": "Böylece kulüp, çocuğunuzun tek başına gidip gidemeyeceğini bilir.",
+   "wie": "Asistanda bir cevap seçersiniz. Sonra imzalarsınız.",
+   "wo": "Bu sayfa kulüp bölümüne aittir. Antrenörler bir kopya alır."
+  }
+ },
+ "hinweise": {
+  "regelwerk_saison": "Bu kurallar {saison} sezonu için geçerlidir. Kulüp doğum yılını ve süreleri bir kez daha kontrol eder.",
+  "abmeldung_formlos": "E-posta, WhatsApp mesajı ya da sıradan bir mektup kayıt silme sayılmaz. Taahhütlü mektup (Einschreiben) gönderin.",
+  "abmeldung_nach_letztem_spiel": "Eski kulüpteki kaydınızı ancak son maçtan sonra sildirin.",
+  "abmeldung_vor_letztem_spiel": "Son maç, kayıt silmeden sonraydı. Lütfen iki tarihi de kontrol edin. Federasyon bunu sorar.",
+  "nie_zwei_vereine": "Aynı anda iki kulüp için asla imza atmayın. Yoksa federasyon oyuncuyu cezalandırır.",
+  "kuendigung_extra": "Eski kulüpteki üyelikten ayrıca çıkın. Oyuncu olarak kaydı sildirmek bunun için yetmez.",
+  "vollmacht_eingabe_zeitnah": "Yeni kulüp kayıt silmeyi aynı gün ya da ertesi gün sisteme girmelidir. Aksi halde bekleme süresi uzar.",
+  "wiederholter_wechsel": "Son 6 ayda zaten bir kulüp değişikliği oldu. O zaman bekleme süresi daha uzun olabilir. Federasyon karar verir.",
+  "antrag_zu_spaet": "Başvuru {datum} tarihine kadar federasyonda olmalıdır. Bu süre geçti. Kulüp federasyona sorar.",
+  "ohne_zusage_spielen": "Çocuğun maç oynayabileceğine dair söz veremeyiz. Antrenman yapabilir.",
+  "f17_wahrscheinlich_nicht": "5 yıllık ikamet olmadan çocuğun büyük olasılıkla oynamasına izin verilmez. O zaman oynamak ancak 18 yaşında mümkündür. Hazırlık maçlarına da izin verilmez.",
+  "aushilfe_nur_ausnahme": "Bu doğum yılında genç, gerektiğinde Herren (yetişkin erkek) takımında ancak nadiren oynayabilir. Gençlik birimi bunu kontrol eder.",
+  "getrennt_zustimmung": "Lütfen diğer ebeveyne sorun. Kayda razı olması gerekir. En iyisi, üyelik başvurusunu (Aufnahmeantrag) o da imzalasın.",
+  "beitrag_gruppe_pruefen": "Aidat grubu: {gruppe}. Bu grup yaşa uygun olmayabilir. Kulüp bunu kontrol eder.",
+  "antrag_bis": "Başvuru {datum} tarihine kadar federasyonda olmalıdır. Sonrasında geçiş ancak daha sonra mümkündür.",
+  "frist_annahme_heute": "Şöyle hesaplıyoruz: Kayıt silme, {abmeldung} tarihinde geçerli olur. Daha geç sildirirseniz bekleme süresi uzar.",
+  "mitgliedschaft_beginn": "Üyelik, kayıt olduğunuz gün başlar.",
+  "kuendigung_jahresende": "Kulübümüzde ancak yıl sonunda üyelikten çıkabilirsiniz. Üyelikten çıkma bildirimini taahhütlü mektupla (Einschreiben) gönderin.",
+  "ohne_spielrecht_kein_spiel": "Oynama izni olmadan çocuk maçlara katılamaz. Hazırlık maçlarına da katılamaz. Antrenman serbesttir.",
+  "mitgliedschaft_zuerst": "Önce üye olursunuz. Sonra kulüp federasyona başvuruyu yapar.",
+  "spielerfoto_hinweis": "Fotoğraf ilk maçtan önce sistemde olmalıdır. Fotoğraf yoksa kimse oynayamaz.",
+  "attest_kosten": "Doktora fiyatı önceden sorun. Sağlık sigortası sağlık raporunu (Attest) ödemez.",
+  "unterlagen_kein_whatsapp": "Kimlikleri ve sağlık raporlarını (Attest) WhatsApp ile göndermeyin. Bunları yalnızca e-posta ile kulüp ofisine gönderin.",
+  "juni_wechselzeit": "Kulüp değiştirmek için en iyi zaman Haziran’dır. O zaman bekleme süreleri en kısadır.",
+  "vollmacht_ohne_kurze_frist": "Vekâletname (Vollmacht) bekleme süresini kısaltmaz. Kısa bekleme süresi sadece Haziran’da geçerlidir.",
+  "wechsel_lv_anfrage": "Hessen Futbol Federasyonu (Hessischer Fußball-Verband, HFV), eski kulübün bağlı olduğu federasyona sorar. {tage} gün içinde cevap gelmezse kayıt silme geçerli sayılır.",
+  "entschaedigung_hinweis": "Yeni kulüp serbest bırakmanın yerine bir ödeme yapabilir. Ödeme {betrag} Euro’dan başlar. Buna yönetim kurulu karar verir.",
+  "nachtraegliche_freigabe": "Eski kulüp sonradan da evet diyebilir. O zaman bekleme süresi kısalır.",
+  "sperre_laeuft": "Oynama yasağı geçerliliğini korur. Bekleme süresi boyunca askıya alınır. Sonra yasağın kalan kısmı uygulanır.",
+  "sonderwege_jugend": "Bazen daha kısa bekleme süreleri geçerlidir, örneğin eski kulübe dönüşte. Gençlik birimi bunu kontrol eder.",
+  "e_aelter_juni": "E-Jugend’in yaşça büyük oyuncularının Haziran’da serbest bırakmaya ihtiyacı yoktur. Bu, D-Jugend’e geçişte geçerlidir.",
+  "international_dauer": "Federasyon Almanya dışından serbest bırakma onayı alır. Bu daha uzun sürer. Antrenman şimdiden yapılabilir. Oynamak ancak federasyon evet dediğinde mümkündür.",
+  "international_unter10": "10 yaşından küçük çocuklarda federasyon özellikle dikkatli kontrol eder. Bu daha uzun sürebilir.",
+  "zuzug_pruefen": "Çocuk en son Almanya dışında yaşadı. O zaman özel kurallar geçerlidir. Kulüp bunu kontrol eder.",
+  "maedchen_jungenteam": "Kulübün henüz kız takımı yok. Kızlar erkeklerle oynar. Buna izin var. B-Jugend ve C-Jugend’de kulübün onayınıza ihtiyacı var.",
+  "herren_aushilfe": "Genç, gerektiğinde Herren (yetişkin erkek) takımında oynayabilir. Bunun için üç şey gerekir: bir başvuru, ebeveynlerin onayı ve bir sağlık raporu (Attest).",
+  "herren_ohne_antrag": "18 yaşından itibaren Herren (yetişkin erkek) takımında da oynayabilirsiniz. Bunun için ek başvuruya gerek yok.",
+  "frau_herren": "Kulübün kadın takımı yok. 18 yaşından itibaren kadınlar Herren (yetişkin erkek) takımında oynayabilir. Bunun için federasyona başvuru gerekir.",
+  "keine_frauenmannschaft": "Kulübün kadın takımı yok. 18 yaşından itibaren kadınlar başvuruyla Herren (yetişkin erkek) takımında oynayabilir. Bizimle konuşun.",
+  "vertrauensperson": "Federasyonun bu durum için güvenilir bir irtibat kişisi var. Bu kişi başvuruda yardım eder. Çocuklarda ebeveynler onay verir.",
+  "sonderspielrecht": "Engelli çocuklar daha küçük bir yaş grubunda oynayabilir. Buna özel oynama izni (Sonderspielrecht) denir. Bunun için bir uzman doktordan rapor (Gutachten) gerekir. Gençlik birimi size yardım eder.",
+  "getrennt_einverstanden": "Diğer ebeveyn razı. Bu yüzden bir kişi imzalar.",
+  "sorge_allein_nachweis": "Velayet hakkı yalnızca sizde. Kulüp isterse göstermek için bir belge hazır tutun.",
+  "vormund_hinweis": "Vasi (Vormund) çocuk adına imzalar. Vasilik belgesini kayıtla birlikte gönderin.",
+  "pflege_hinweis": "Koruyucu aile günlük hayatta çocuk adına imzalar. Belgeyi kayıtla birlikte gönderin.",
+  "f17_moeglich_5_jahre": "Çocuk 5 yıldır burada yaşıyor. O zaman federasyon bir istisnayı inceleyebilir. İkamet belgesi gerekir.",
+  "austausch_ein_jahr": "Okul değişim programında oynama izni en fazla 1 yıl geçerlidir. Bir kulüp değişikliği daha yapılamaz.",
+  "karneval_kein_attest": "Karnaval için sağlık raporu (Attest) gerekmez. Hessen Futbol Federasyonu’ndan (Hessischer Fußball-Verband, HFV) da hiçbir evrak gerekmez.",
+  "passiv_hinweis": "Pasif üyesiniz. Oynamıyor ve antrenman yapmıyorsunuz. Kulübü destekliyorsunuz.",
+  "senator_vorstand": "Senatör olup olmayacağınıza yönetim kurulu karar verir.",
+  "beitrag_doppel": "Hem futbolda hem karnavalda mısınız? Ayrı bir aidat hakkında bilgi isteyin.",
+  "kontoinhaber_andere": "Hesap başka bir kişiye ait. Bu kişi otomatik çekim (Lastschrift) iznini imzalar.",
+  "bildung_teilhabe": "Az parası olan aileler aidat için yardım alır. Ayda {betrag} Euro’ya kadar. İş merkezine (Jobcenter) ya da sosyal yardım dairesine (Sozialamt) sorun.",
+  "beitragserlass": "Paranız az mı? Bizimle konuşun. Yönetim kurulu aidattan tamamen ya da kısmen muaf tutabilir.",
+  "medikamente_absprache": "Çocuğun ilaç kullanması gerekiyor mu? Antrenörle konuşun. İlacı ne zaman ve nasıl alacağını yazın.",
+  "passiv_alter_verein": "Eski kulüpte pasif üye olarak kalırsınız. Bunu eski kulübe de bildirin.",
+  "regelwerk_fifa_2027": "{datum} tarihinden itibaren kulüp değişiklikleri için yeni uluslararası kurallar geçerli olur. Kulüp nelerin değiştiğini kontrol eder.",
+  "regelwerk_saison_2027": "{datum} tarihinden itibaren E-Jugend için kurallar değişir. Kulüp nelerin değiştiğini kontrol eder.",
+  "attest_aktuell": "Sağlık raporu (Attest) güncel olmalıdır. En fazla ne kadar eski olabileceğini kulüp netleştirir.",
+  "wechselgebuehr": "Federasyon kulüp değişikliği için {betrag} Euro alır. Bunu sizin ödeyip ödemeyeceğinizi kulüp netleştirir.",
+  "abmeldung_unklar": "Kaydınızın silinip silinmediğini bilmiyorsunuz. Kulüp bunu federasyonun sisteminde kontrol eder.",
+  "freigabe_unklar": "Eski kulübün sizi serbest bırakıp bırakmadığını bilmiyorsunuz. Orada sorun. O zamana kadar süreler belirsizdir.",
+  "sperre_unklar": "Bir oynama yasağının sürüp sürmediğini bilmiyorsunuz. Eski kulübe sorun.",
+  "d_jahrgang_wartefrist_offen": "Bu doğum yılı için kural net değil. Serbest bırakma olmadan bekleme süresi 3 ya da 6 ay sürebilir. Kulüp federasyona sorar.",
+  "vollmacht_anderer_verband": "Başka bir eyaletten geçişte vekâletnamenin (Vollmacht) geçerli olup olmadığı belirsizdir. Taahhütlü mektubu (Einschreiben) öneriyoruz.",
+  "grenze_10_offen": "Yakında 10 yaşından itibaren çocuklar için kurallar geçerli olacak. Bunun hangi günden itibaren sayılacağını kulüp netleştirir.",
+  "ausweis_deutsch_original": "Kulüp Alman kimlik belgelerini başkalarına iletemez. Aslını kulüpte gösterin. Gerisini kulüp netleştirir.",
+  "meldebescheinigung_elternteil": "İkametgâh belgesi (Meldebescheinigung), çocuğun ve ebeveynlerin birlikte yaşadığını gösterir. Bir ebeveynin yeterli olup olmadığını federasyon netleştirir.",
+  "laenderformulare_offen": "Bu ülke için federasyon belki başka formlar da ister. Kulüp sorar ve size haber verir.",
+  "ausland_erwachsen_wechselperiode": "Oynayıp oynayamayacağınızı kulüp federasyonla netleştirir. Ne zamandan itibaren oynayabileceğinizi de netleştirir.",
+  "doppelstaatler": "İki pasaportunuz var. Kulüp kaydı Alman vatandaşı olarak girer. Bunun yeterli olup olmadığını federasyon netleştirir.",
+  "staatsangehoerigkeit_unklar": "Alman pasaportunuz olup olmadığını bilmiyorsunuz. Pasaportunuzu ya da kimlik kartınızı kulübe getirin.",
+  "spielerpass_unklar": "Oyuncu lisansı (Spielerpass) olup olmadığını bilmiyorsunuz. Kulüp federasyonun sisteminde arar.",
+  "sportarzt_offen": "Normal bir doktor yeterli mi? Yoksa spor doktoru mu gerekli? Kulüp bunu federasyonla netleştirir.",
+  "frau_herren_offen": "Başvurunun tam olarak nasıl işlediğini kulüp federasyonla netleştirir. Hessen Futbol Federasyonu’nun (Hessischer Fußball-Verband, HFV) pilot projesi 2028 ortasına kadar sürüyor.",
+  "spieler_unterschrift_kind": "Çocuğunuz başvuruyu sizinle birlikte, isteğe bağlı olarak imzalayabilir.",
+  "unterlagen_liste_offen": "Federasyonun tam olarak hangi evrakı istediği henüz belli değil. Kulüp sorar ve size haber verir.",
+  "wohnen_nicht_gemeinsam": "Çocuk ve ebeveynler birlikte yaşamıyor. Gençlik birimi sizinle iletişime geçecek.",
+  "beitrag_familie_offen": "Kimin aileden sayılacağını kulüp netleştirir. Tüm aile üyelerini adlarıyla yazın.",
+  "iban_ausland_pruefen": "Hesap numaranız Almanya’dan değil. Kulüp aidatı çekip çekemeyeceğini kontrol eder.",
+  "mitgliedschaft_alter_verein_unklar": "Eski kulübün üyesi olarak kalıp kalmayacağınız belli değil. Bunu eski kulüple netleştirin."
+ },
+ "faelle": {
+  "F01": "Sadece karnaval için kayıt oluyorsunuz.",
+  "F02": "Pasif üyesiniz ya da destekçisiniz.",
+  "F03": "Çocuk futbola yeni başlıyor ve Alman pasaportu var.",
+  "F04": "Çocuk futbola yeni başlıyor. 10 yaşından küçük ve Alman pasaportu yok.",
+  "F05": "Çocuk futbola yeni başlıyor. Alman pasaportu yok ya da en son Almanya dışında yaşadı.",
+  "F06": "Çocuk Hessen’deki bir kulüpten geçiyor. Alman pasaportu var.",
+  "F07": "Çocuk Hessen’deki bir kulüpten geçiyor. Alman pasaportu yok.",
+  "F08": "Almanya’nın başka bir eyaletindeki bir kulüpten geçiyorsunuz.",
+  "F09": "Almanya dışındaki bir kulüpten geçiyorsunuz.",
+  "F10": "Yetişkinsiniz, futbola yeni başlıyorsunuz ve Alman pasaportunuz var.",
+  "F11": "Yetişkinsiniz ve futbola yeni başlıyorsunuz. Alman pasaportunuz yok ya da Almanya dışından geliyorsunuz.",
+  "F12": "Yetişkinsiniz ve kulüp değiştiriyorsunuz.",
+  "F13": "Genç henüz 18 yaşında değil ve gerektiğinde Herren (yetişkin erkek) takımında oynuyor.",
+  "F14": "Velayet hakkında ya da oturulan yerde özel bir durum var. Gençlik birimi bunu sizinle netleştirir.",
+  "F15": "Çocuk ebeveynleri olmadan ülkesinden kaçtı ve Almanya’da yaşıyor.",
+  "F16": "Çocuk değişim öğrencisi ve burada ebeveynleri olmadan yaşıyor.",
+  "F17": "Çocuk akrabalarının yanında ya da bir koruyucu ailede yaşıyor. Resmen tanınmış bir koruma statüsü yok.",
+  "F18": "Genç 16 ya da 17 yaşında. Avrupa’dan geliyor ve burada ebeveynleri olmadan yaşıyor."
+ },
+ "weiterleitung": {
+  "keine_mannschaft": "Kulübün bu doğum yılı için takımı yok. Gençlik birimi sizinle iletişime geçecek. Kaydınız devam eder.",
+  "sonderfall_kind": "Gençlik birimi durumunuzu sizinle bire bir netleştirir. Kaydınız devam eder.",
+  "aushilfe": "Gençlik birimi, gencin Herren (yetişkin erkek) takımında ne zaman oynayacağını sizinle netleştirir.",
+  "vertrauensperson": "Gençlik birimi sizi federasyonun güvenilir irtibat kişisiyle iletişime geçirir.",
+  "sonderspielrecht": "Gençlik birimi, özel oynama izni (Sonderspielrecht) başvurusunda size yardım eder.",
+  "sonderwege": "Gençlik birimi daha kısa bir bekleme süresinin mümkün olup olmadığını kontrol eder.",
+  "getrennte_eltern": "Gençlik birimi, diğer ebeveynin imzası hakkında sizinle konuşur.",
+  "wohnen_nicht_gemeinsam": "Gençlik birimi çocuğun nerede yaşadığını sorar.",
+  "spielerpass_unklar": "Kulüp, oyuncu lisansını (Spielerpass) federasyonun sisteminde arar.",
+  "international_klaeren": "Kulüp işlemi federasyonla başlatır. Size haber verir.",
+  "unter10_pruefung": "Kulüp hangi evrakın gerektiğini federasyonla netleştirir.",
+  "staatsangehoerigkeit_unklar": "Kulüp pasaporta bakar. Pasaportu getirin.",
+  "abmeldung_unklar": "Kulüp kayıt silmenin olup olmadığını kontrol eder.",
+  "laenderformulare": "Kulüp federasyondan ek formları sorar.",
+  "vollmacht_anderer_verband": "Kulüp federasyona vekâletnamenin (Vollmacht) geçerli olup olmadığını sorar.",
+  "wiederholter_wechsel": "Kulüp bekleme süresinin daha uzun olup olmadığını kontrol eder.",
+  "doppelstaatler": "Kulüp pasaportun sisteme nasıl girileceğini netleştirir.",
+  "offene_fragen_verband": "Kulüp federasyona sorar. Konu, hâlâ açık olan evraktır.",
+  "beitrag_doppel": "Kulüp ofisi size iki bölüm için aidatı söyler.",
+  "beitrag_familie": "Kulüp ofisi kimin aileden sayılacağını kontrol eder.",
+  "senator": "Kulüp ofisi başvurunuzu yönetim kuruluna iletir.",
+  "beitragserlass": "Kulüp ofisi sizinle aidat için yardım hakkında konuşur.",
+  "herren_wechsel": "Herren (yetişkin erkek) takımı maç komitesi geçişinizi ve süreleri kontrol eder.",
+  "frau_herren": "Herren (yetişkin erkek) takımı maç komitesi, kadınların Herren takımında oynaması için başvuruyu yapar."
+ },
+ "frist": {
+  "frist_kein_spiel": "Oynama iznine ihtiyacınız yok. Bu yüzden maçlar için bekleme süresi yok.",
+  "frist_offen": "Bekleme süresi henüz söylenemiyor. Lütfen önce tüm soruları cevaplayın.",
+  "frist_klasse_unbekannt": "Doğum tarihi olmadan bekleme süresi hesaplanamaz.",
+  "frist_neu": "Bekleme süresi yok. Başvuru federasyona ulaşır ulaşmaz oynanabilir. Bu, en erken {pflichtspiele} tarihinde olur.",
+  "frist_neu_unklar": "Muhtemelen bekleme süresi yok. Kulüp önce bir oyuncu lisansı (Spielerpass) olup olmadığına bakar.",
+  "frist_neu_pruefung": "10 yaşından küçük çocuklarda federasyon önce kontrol eder. Bunun ne kadar süreceği belli değil.",
+  "frist_international": "Federasyon önce Almanya dışından serbest bırakma onayı alır. Ne zaman oynanabileceğini kimse tam olarak söyleyemez.",
+  "frist_ohne_zusage": "Maç oynanabileceğine dair söz veremeyiz. Antrenman yapılabilir.",
+  "frist_wechsel_fg": "F-Jugend ve G-Jugend’de bekleme süresi yok. {pflichtspiele} tarihinden itibaren oynanabilir.",
+  "frist_wechsel_e_juni": "Haziran’da kaydı sildirirsiniz. Lig ve kupa maçları {pflichtspiele} tarihinden itibaren mümkündür. Hazırlık maçları {freundschaftsspiele} tarihinden itibaren mümkündür.",
+  "frist_wechsel_e": "Bekleme süresi {monate} ay sürer. Lig ve kupa maçları {pflichtspiele} tarihinden itibaren mümkündür. Hazırlık maçları {freundschaftsspiele} tarihinden itibaren mümkündür.",
+  "frist_wechsel_juni_freigabe": "Haziran’da kaydı sildirirsiniz ve eski kulüp sizi serbest bırakır. Lig ve kupa maçları {pflichtspiele} tarihinden itibaren mümkündür. Hazırlık maçları {freundschaftsspiele} tarihinden itibaren mümkündür.",
+  "frist_wechsel_juni_ohne": "Haziran’da kaydı sildirirsiniz ama eski kulüp sizi serbest bırakmaz. Lig ve kupa maçları ancak {pflichtspiele} tarihinden itibaren mümkündür. Hazırlık maçları {freundschaftsspiele} tarihinden itibaren mümkündür.",
+  "frist_wechsel_3monate": "Eski kulüp sizi serbest bırakır. Bekleme süresi {monate} ay sürer. Lig ve kupa maçları {pflichtspiele} tarihinden itibaren mümkündür. Hazırlık maçları {freundschaftsspiele} tarihinden itibaren mümkündür.",
+  "frist_wechsel_6monate": "Eski kulüp sizi serbest bırakmaz. Bekleme süresi {monate} ay sürer. Lig ve kupa maçları {pflichtspiele} tarihinden itibaren mümkündür. Hazırlık maçları {freundschaftsspiele} tarihinden itibaren mümkündür.",
+  "frist_freigabe_unklar": "Eski kulübün sizi serbest bırakıp bırakmadığını bilmiyorsunuz. Serbest bırakma olmazsa lig ve kupa maçları {pflichtspiele} tarihinden itibaren mümkündür. Serbest bırakma olursa daha erken, {alternativ} tarihinden itibaren.",
+  "frist_d_jung_offen": "Bu doğum yılı için kural net değil. Lig ve kupa maçları en erken {alternativ} tarihinden itibaren mümkündür. Belki ancak {pflichtspiele} tarihinden itibaren.",
+  "frist_entfaellt": "6 aydan uzun süredir lig veya kupa maçı olmadı. Bu yüzden bekleme süresi yok.",
+  "frist_herren_wp1_zustimmung": "30 Haziran’a kadar kaydı sildirirsiniz ve eski kulüp onay verir. Lig ve kupa maçları {pflichtspiele} tarihinden itibaren mümkündür.",
+  "frist_herren_wp1_ohne": "30 Haziran’a kadar kaydı sildirirsiniz ama eski kulüp onay vermez. Lig ve kupa maçları ancak {pflichtspiele} tarihinden itibaren mümkündür.",
+  "frist_herren_wp2_zustimmung": "30 Haziran’dan sonra kaydı sildirirsiniz ve eski kulüp onay verir. Lig ve kupa maçları {pflichtspiele} tarihinden itibaren mümkündür.",
+  "frist_herren_wp2_ohne": "Eski kulüp onay vermez. O zaman lig ve kupa maçları ancak {pflichtspiele} tarihinden itibaren mümkündür."
+ },
+ "mannschaft": {
+  "mannschaft_unbekannt": "Doğum tarihi olmadan takımı söyleyemeyiz.",
+  "keine_mannschaft": "{jahrgang} doğum yılı için kulübün takımı yok. Gençlik birimi sizinle iletişime geçecek. Kaydınız devam eder.",
+  "mannschaft_gefunden": "Çocuk şu takıma uyuyor: {mannschaft}.",
+  "mannschaft_mehrere": "Çocuk şu takımlarda oynayabilir: {mannschaften}. Antrenörler onu yerleştirir.",
+  "mannschaft_2020_f2": "{jahrgang} doğum yılı kulüpte {mannschaft} takımında oynar. Frankfurt bölgesi bu yılı G-Jugend sayar.",
+  "mannschaft_herren": "Şu takıma uyuyorsunuz: {mannschaft}.",
+  "mannschaft_maedchen_bonus": "Kızlar erkeklerden bir yaş büyük olabilir. Çocuk şu takımlara uyuyor: {mannschaften}.",
+  "mannschaft_frau_herren": "Federasyon özel oynama iznine (Sonderspielrecht) izin verirse Herren (yetişkin erkek) takımında oynarsınız.",
+  "mannschaft_frau_keine": "Kulübün kadın takımı yok. Herren (yetişkin erkek) takımında özel oynama izniyle (Sonderspielrecht) mümkün."
+ },
+ "beitrag": {
+  "beitrag_offen": "Bir bölüm seçin. Sonra aidatı söyleriz.",
+  "beitrag_standard": "Aidat yılda {jahr} Euro. Bu, ayda {monat} Euro eder.",
+  "beitrag_familie": "Aile aidatı yılda {jahr} Euro. Bu, ayda {monat} Euro eder. Tüm aile üyeleri dahildir.",
+  "beitrag_azubi": "Çıraklar ve öğrenciler için aidat yılda {jahr} Euro. Bir belge gerekir.",
+  "beitrag_senator": "Senatörler yılda {jahr} Euro öder. Kabul kararını yönetim kurulu verir.",
+  "beitrag_doppel": "Hem futbolda hem karnavalda mısınız? Ayrı bir aidat hakkında bilgi isteyin.",
+  "gruppen": {
+   "fussball_jugend": "Futbolda çocuklar ve gençler, A-Jugend dahil (Kinder und Jugendliche)",
+   "fussball_erwachsene": "Futbolda yetişkinler (Erwachsene)",
+   "fussball_passiv": "Futbolda pasif üyeler, kadınlar ve 65 yaş ve üstü emekliler (Passive, Frauen und Rentner ab 65)",
+   "fussball_familie": "Futbolda aile aidatı (Familienbeitrag)",
+   "karneval_kinder": "Karnavalda çocuklar ve gençler (Kinder und Jugendliche)",
+   "karneval_azubi": "Karnavalda belgesi olan çıraklar ve öğrenciler (Auszubildende und Studierende mit Nachweis)",
+   "karneval_erwachsene": "Karnavalda yetişkinler (Erwachsene)",
+   "karneval_rentner": "Karnavalda 65 yaş ve üstü emekliler (Rentner ab 65)",
+   "karneval_familie": "Karnavalda aile aidatı (Familienbeitrag)",
+   "karneval_senator": "Karnavalda senatörlük üyeliği (Senatorenmitgliedschaft)"
+  }
+ },
+ "formulare": {
+  "aufnahmeantrag": "Üyelik başvurusu (Aufnahmeantrag)",
+  "foto_einwilligung": "Fotoğraflar için izin",
+  "sepa": "Otomatik çekim için izin (Lastschrift)",
+  "familienliste": "Aile üyeleri listesi",
+  "datenschutz": "Veri koruma bilgisi (Datenschutz)",
+  "hfv_antrag": "Oynama izni başvurusu (Antrag auf Spielerlaubnis)",
+  "vollmacht": "Kayıt silme için vekâletname (Vollmacht für die Abmeldung)",
+  "abmeldung": "Eski kulüpteki kayıt silme (Abmeldung)",
+  "einverstaendnis_senioren": "Herren takımındaki maçlar için onay",
+  "einverstaendnis_maedchen": "Erkek takımlarındaki kız çocukları için onay",
+  "einverstaendnis_fahrten": "Yolculuklar ve mesajlaşma grubu için onay",
+  "heimweg": "Antrenmandan sonra eve dönüş",
+  "attest": "Doktordan sağlık raporu (Attest)",
+  "notfall": "Acil durum ve sağlık formu (Notfall- und Gesundheitsbogen)"
+ },
+ "unterschriften": {
+  "aufnahmeantrag.s2.unterschrift": "Üyelik başvurusu (Aufnahmeantrag)",
+  "aufnahmeantrag.s2.unterschrift_sorgeberechtigte": "Üyelik başvurusu (Aufnahmeantrag): ikinci ebeveynin imzası",
+  "aufnahmeantrag.s3.unterschrift": "Fotoğraflar için izin",
+  "aufnahmeantrag.s4.unterschrift": "Otomatik çekim için izin (Lastschrift)",
+  "datenschutz.kenntnisnahme": "Veri koruma bilgisinden (Datenschutz) haberdar olma",
+  "hfv_antrag.spieler": "Oynama izni başvurusu (Antrag auf Spielerlaubnis): oyuncu",
+  "hfv_antrag.erziehungsberechtigte": "Oynama izni başvurusu (Antrag auf Spielerlaubnis): ebeveynler",
+  "hfv_antrag.verein": "Oynama izni başvurusu (Antrag auf Spielerlaubnis): kulüp",
+  "hfv_antrag.einwilligung_a": "İsmin internette gösterilmesi için izin",
+  "hfv_antrag.einwilligung_b": "Fotoğrafın internette gösterilmesi için izin",
+  "vollmacht.unterschrift": "Kayıt silme için vekâletname (Vollmacht für die Abmeldung)",
+  "abmeldung.unterschrift": "Eski kulüpteki kayıt silme (Abmeldung): oyuncu",
+  "abmeldung.unterschrift_vertreter": "Eski kulüpteki kayıt silme (Abmeldung): ebeveynlerin imzası",
+  "einverstaendnis_senioren.unterschrift": "Herren takımındaki maçlar için onay",
+  "einverstaendnis_maedchen.unterschrift": "Erkek takımlarındaki kız çocukları için onay",
+  "einverstaendnis_fahrten.unterschrift": "Yolculuklar ve mesajlaşma grubu için onay",
+  "heimweg.unterschrift": "Antrenmandan sonra eve dönüş",
+  "attest.arzt": "Doktordan sağlık raporu (Attest)",
+  "attest.einwilligung": "Sağlık raporu (Attest) için izin",
+  "notfall.unterschrift": "Acil durum ve sağlık formu (Notfall- und Gesundheitsbogen)"
+ },
+ "wer": {
+  "mitglied": "Siz kendiniz",
+  "sorgeberechtigte": "Velayet hakkı olan bir kişi",
+  "sorgeberechtigte_beide": "Velayet hakkı olan her iki kişi",
+  "kontoinhaber": "Hesap sahibi kişi",
+  "arzt": "Doktor",
+  "verein": "Kulüp",
+  "spieler": "Çocuk"
+ },
+ "art": {
+  "pflicht": "Bu zorunludur.",
+  "verein": "Kulüp bunu istiyor.",
+  "freiwillig": "Bu isteğe bağlıdır.",
+  "nur_wenn": "Sizin durumunuzda buna ihtiyacınız var.",
+  "offen": "Belki gerekli. Kulüp size haber verir."
+ },
+ "status": {
+  "neu": "Futbola yeni başlıyor",
+  "wechsel_hfv": "Hessen’den geçiş",
+  "wechsel_lv": "Almanya’nın başka bir eyaletinden geçiş",
+  "wechsel_ausland": "Almanya dışından geçiş",
+  "ausland_unbekannt": "Daha önce Almanya dışında bir kulüpteydi, kulüp bilinmiyor"
+ }
+};

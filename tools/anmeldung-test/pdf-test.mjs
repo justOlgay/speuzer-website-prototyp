@@ -49,6 +49,10 @@
 //  - M14 (12.10.2026): Für Fußball beantragt der Verein immer das Spielrecht (Entscheidung der 1. Vorsitzenden). Die Antworten kennen kein Feld „spielen“
 //    mehr; jedes Fußballprofil hat Laufzettel mit Wartefrist und DFBnet-Angaben, Teil A mit Wartezeit und Antrag auf Spielerlaubnis. Eine alte Antwort
 //    spielen = false wird nicht gelesen (Profil kind-alte-antwort-nein; Sonderfall 15: dasselbe PDF Byte für Byte wie ohne das Feld).
+//  - P3 Teil b (12.10.2026, Kürzungen nach STILREGELN): D1 Teil A „Wo unterschreiben Sie?“ nennt nur noch Stift-Unterschriften der Familie (eine Zeile je Stift-Stelle, Einleitung
+//    „Diese Blätter brauchen eine Unterschrift mit Stift.“; ohne Stift-Stelle entfällt der Abschnitt; Rückfall-Stellen zählen als Stift); D2 „Das sollten Sie wissen“ ohne den
+//    Hinweis zu WhatsApp und ohne „Zuerst werden Sie Mitglied“, die zwei Hinweise zur Unterschrift nur mit Stift; D3 der Fristsatz steht in Teil A, nicht im Laufzettel; D4 das
+//    Trennblatt von Teil C hat zwei Punkte, keinen Satz zu WhatsApp und keinen Schlussabsatz; R1 kein Hinweis zur Versicherung beim Probetraining.
 // Aufruf-Optionen: --profil=a,b (nur diese Profile)  --ohne-sonderfaelle  --szenarien (Szenarien auch bei --profil)  --ohne-stift (ohne den Lauf mit dem Schalter „stift“)
 //   --nur-schalter (nur die Läufe zum Schalter unterschriftHfv, ohne Profile, Sonderfälle und Rückfälle)
 // Werkzeuge: pdf-lib und fontkit aus node_modules, dazu poppler (pdftotext, pdfinfo, pdfimages, pdftoppm).
@@ -869,6 +873,10 @@ function pruefeEigeneSeiten(c) {
     if (nf.length) zeilen.push([nf[0].nr, deRegeln.formulare.notfall]);
     zeilen.forEach(([seite, titel]) => ok(t.includes("Seite " + seite + ": " + titel), () => "Trennblatt nennt „Seite " + seite + ": " + titel + "“ nicht (" + t.slice(0, 400) + ")"));
     ok(zeilen.length === (t.match(/Seite \d+:/g) || []).length, "Trennblatt nennt genau die Seiten von Teil C ohne Trennblatt: " + zeilen.length);
+    // U-15 (12.10.2026): Der Satz „Sie gehören nicht zu den übrigen Unterlagen“ stammt aus der Zeit, als Teil C abgetrennt wurde; heute bleibt er in der Datei
+    ok(norm(t).includes("Diese Seiten enthalten Angaben zur Gesundheit.") && !/gehören nicht zu den übrigen Unterlagen/.test(t), "Trennblatt (U-15): „Diese Seiten enthalten Angaben zur Gesundheit.“ ohne den Satz „Sie gehören nicht zu den übrigen Unterlagen“");
+    // P3 Teil b (D4): zwei Punkte unter „Was mit Teil C geschieht“; der Satz zu WhatsApp steht nur in Teil A, ein Schlussabsatz (Passwesen, Trainer und Betreuer) fehlt
+    ok(t.includes("Teil C geht mit der Datei per E-Mail an die Geschäftsstelle.") && t.includes("Der Verein bewahrt ihn getrennt von den übrigen Unterlagen auf.") && !/WhatsApp/.test(t) && !/bleibt im Passwesen|ist nur für die Trainer und Betreuer/.test(t), "Trennblatt (D4): zwei Punkte unter „Was mit Teil C geschieht“, kein Satz zu WhatsApp (steht in Teil A), kein Schlussabsatz");
   }
   const inhaltUeberschrift = lz.indexOf("Inhalt dieser Datei");
   if (bericht.plan.attestVorlage) ok(lz.indexOf(ATTEST_VORLAGE_TITEL, inhaltUeberschrift) > 0, "Laufzettel „Inhalt dieser Datei“ nennt „" + ATTEST_VORLAGE_TITEL + "“");
@@ -954,9 +962,11 @@ function pruefeEigeneSeiten(c) {
     if (a.unterschriftWeg !== "bildschirm" && !antwort) ok(bericht.hinweise.some((h) => /Heimweg nach dem Training: Der Heimweg ist nicht angegeben\. Die Familie kreuzt ihn auf dem Blatt an\./.test(h)), "Heimweg: ohne Antwort auf dem Papierweg nennt der Laufzettel den Fall");
     if (antwort) ok(!bericht.hinweise.some((h) => /Heimweg/.test(h)), "Heimweg: mit Antwort kein Hinweis auf dem Laufzettel");
     ok(!/Uhr\b/.test(t.replace(/Uhrzeit/g, "")), "Heimweg: keine Uhrzeit auf dem Blatt");
-    // „Gilt für“ in Teil A („Wo unterschreiben Sie?“): eine Zeile für das Blatt, am Bildschirm oder mit Stift
+    // „Wo unterschreiben Sie?“ in Teil A (P3 Teil b, D1): Die Tabelle nennt nur Blätter, die die Familie noch mit Stift unterschreibt. Das Blatt Heimweg
+    // hat eine Zeile mit „Mit Stift“, wenn es nicht am Bildschirm unterschrieben ist; am Bildschirm erledigt hat es keine Zeile.
     const taText = ohneRahmen(S.map((x, i) => ({ x: x, t: texte[i] })).filter((x) => x.x.art === "teil-a").map((x) => x.t).join(" "));
-    ok(new RegExp("\\b" + seite + " " + esc("Heimweg nach dem Training") + " Eine Person mit Sorgerecht " + (digital ? "Am Bildschirm erledigt" : "Mit Stift")).test(taText), () => "Teil A, „Wo unterschreiben Sie?“: Zeile für das Blatt Heimweg auf Seite " + seite + " (" + (digital ? "am Bildschirm" : "mit Stift") + ")");
+    const zeileHeimweg = (wie) => new RegExp("\\b" + seite + " " + esc("Heimweg nach dem Training") + " Eine Person mit Sorgerecht " + wie).test(taText);
+    ok(digital ? !zeileHeimweg("Am Bildschirm erledigt") && !zeileHeimweg("Mit Stift") : zeileHeimweg("Mit Stift") && !zeileHeimweg("Am Bildschirm erledigt"), () => "Teil A, „Wo unterschreiben Sie?“: Blatt Heimweg auf Seite " + seite + (digital ? " am Bildschirm erledigt: keine Zeile" : " mit Stift: eine Zeile „Mit Stift“"));
   }
   // Laufzettel: das Blatt zum Heimweg geht als Kopie an das Trainerteam; ohne Blatt steht nichts dazu da
   if (heimwegSoll) ok(lz.includes("Heimweg nach dem Training: Kopie an das Trainerteam."), "Laufzettel: „Heimweg nach dem Training: Kopie an das Trainerteam.“");
@@ -1144,7 +1154,8 @@ function saetzeVon(s) {
 const woerterVon = (satz) => satz.replace(/[.!?]$/, "").split(/\s+/).filter((w) => w && w !== "§").length;
 
 // Seitenrahmen (Kopf- und Fußzeile) aus einem zusammengesetzten Seitentext entfernen, damit Sätze über einen Seitenumbruch passen
-const ohneRahmen = (s) => s.replace(/Entwurf – vom Vorstand zu prüfen Seite \d+ von \d+/g, " ").replace(/FFV Sportfreunde 04 · Anmeldung .*? · Teil [ABC]/g, " ").replace(/\s+/g, " ");
+// P3 Teil b: Die Fußzeile „Seite N von N“ fällt auch ohne den Entwurfsvermerk davor weg (der Umbruch der Seiten liegt nach den Kürzungen anders).
+const ohneRahmen = (s) => s.replace(/(?:Entwurf – vom Vorstand zu prüfen )?Seite \d+ von \d+/g, " ").replace(/FFV Sportfreunde 04 · Anmeldung .*? · Teil [ABC]/g, " ").replace(/\s+/g, " ");
 
 // Alle Fundstellen einer Wortfolge in einer Wortliste (Wörter mit Koordinaten, nach Zeilen von oben nach unten sortiert);
 // zurückgegeben wird jeweils das erste Wort der Folge
@@ -1388,7 +1399,8 @@ function pruefeNA2(c) {
     const teilASeitenNr = teilASeiten.map((x) => x.nr);
     const zeilen = teilASeitenNr.flatMap((nr) => zeilenSeite(pfad, nr)).filter((z) => /Abmeldung beim alten Verein: /.test(z));
     const sollStiftAbm = abmeldungStellen.filter((s) => s.art === "stift").length;
-    ok(zeilen.length === abmeldungStellen.length && zeilen.filter((z) => /Mit Stift, selbst verschicken/.test(z)).length === sollStiftAbm && zeilen.filter((z) => /Am Bildschirm erledigt/.test(z)).length === abmeldungStellen.length - sollStiftAbm && zeilen.every((z) => !/beim ersten Training|nach dem Ausdrucken/.test(z)), () => "Teil A, Tabelle: Zeilen zur Abmeldung nennen „Mit Stift, selbst verschicken“ (Stift-Stellen: " + sollStiftAbm + ") oder „Am Bildschirm erledigt“ (" + zeilen.length + " Zeilen, erwartet " + abmeldungStellen.length + "): " + JSON.stringify(zeilen));
+    // P3 Teil b (D1): Die Tabelle nennt nur Zeilen mit Stift; was am Bildschirm erledigt ist, steht dort nicht mehr.
+    ok(zeilen.length === sollStiftAbm && zeilen.every((z) => /Mit Stift, selbst verschicken/.test(z) && !/Am Bildschirm erledigt|beim ersten Training|nach dem Ausdrucken/.test(z)), () => "Teil A, Tabelle: nur Zeilen zur Abmeldung mit „Mit Stift, selbst verschicken“ (Stift-Stellen: " + sollStiftAbm + "), keine mit „Am Bildschirm erledigt“ (" + zeilen.length + " Zeilen, erwartet " + sollStiftAbm + "): " + JSON.stringify(zeilen));
     ok(zaehle(ta, /Mit Stift, selbst verschicken/g) === sollStiftAbm, "Teil A, Tabelle: „Mit Stift, selbst verschicken“ nur bei Stift-Stellen der Abmeldung");
   } else {
     ok(!ta.includes("Mit Stift, selbst verschicken") && !ta.includes("als Einschreiben an den alten Verein"), "Teil A: ohne Blatt zur Abmeldung kein Schritt dazu");
@@ -1431,7 +1443,9 @@ function pruefeNA2(c) {
   const mailSatz = papierWeg && !training ? "Schicken Sie sie per E-Mail an die Geschäftsstelle: " : "Schicken Sie die Datei per E-Mail an die Geschäftsstelle: ";
   const stelleMail = ta.indexOf(mailSatz);
   ok(zaehle(ta, new RegExp(esc(mailSatz), "g")) === 1 && ta.includes("Geschäftsstelle: " + konfig.verein.mail), "Teil A: der Schritt „" + mailSatz + "<Adresse>“ steht genau einmal, mit der Adresse aus der Konfiguration");
-  ok(ta.indexOf("So geht es weiter") >= 0 && ta.indexOf("So geht es weiter") < stelleMail && stelleMail < ta.indexOf("Wo unterschreiben Sie?"), "Teil A: der Schritt zur E-Mail steht unter „So geht es weiter“");
+  // P3 Teil b (D1): „Wo unterschreiben Sie?“ steht nur, wenn die Familie noch mit Stift unterschreibt; sonst folgt „Das fehlt noch“ auf die Schritte.
+  const nachSchritten = ta.indexOf("Wo unterschreiben Sie?") >= 0 ? ta.indexOf("Wo unterschreiben Sie?") : ta.indexOf("Das fehlt noch", stelleMail); // „Das fehlt noch“ steht auch in einem Schritt („… Sie stehen unter Das fehlt noch.“, D-05)
+  ok(ta.indexOf("So geht es weiter") >= 0 && ta.indexOf("So geht es weiter") < stelleMail && stelleMail < nachSchritten, "Teil A: der Schritt zur E-Mail steht unter „So geht es weiter“");
   // M11: Die alten Sätze zur Abgabe im Verein sind weg, auch „Sie geben ihn getrennt ab“ (Übersicht zu Teil C) und „bitte im Verein vorlegen“.
   // Ausnahme: der Satz zum Papierweg („Oder geben Sie sie im Verein ab.“, nur bei ganz ausgedruckter Datei). Unter „Das fehlt noch“ steht jetzt
   // „Schicken Sie die Kopie per E-Mail …“ statt „Oder Sie geben die Kopie im Verein ab.“
@@ -1439,6 +1453,22 @@ function pruefeNA2(c) {
   const alteTeilA = alteAbgabe(ta);
   ok(alteTeilA.length === 0, () => "Teil A: außer dem Satz zum Papierweg und den deutschen Ausweisen steht nichts mehr zum Abgeben, Mitbringen oder „nicht per normaler E-Mail“: " + JSON.stringify(alteTeilA));
   ok(ta.includes(norm(T.teilB)), "Teil A: die Übersicht der Teile nennt Teil B mit „" + T.teilB + "“");
+  // Paket P6 (12.10.2026): Teil A sagt, dass die ganze Datei geht (U-14); erst geht die Datei ab, dann kommt Fehlendes nach (D-05, Reihenfolge wie auf der Fertig-Seite);
+  // nichts mehr zum Hochladen im Assistenten (U-13); der Preis des Attests steht nur einmal (U-17); der Foto-Schritt steht, wo die Familie Blätter nach dem Ausdrucken
+  // mit Stift unterschreibt und mit der Datei schickt (U-16)
+  ok(T.teilA === "Das lesen Sie jetzt." && T.teilB === "Damit arbeitet der Verein." && ta.includes(norm("Sie schicken die ganze Datei.")) && !/Sie behalten diesen Teil|Er geht an den Verein/.test(ta), "Teil A (U-14): „Das lesen Sie jetzt.“, „Damit arbeitet der Verein.“, „Sie schicken die ganze Datei.“; nichts mehr von „behalten“ oder „geht an den Verein“");
+  ok(!/Besorgen Sie die Unterlagen|im Assistenten hoch|laden (?:das |ein |die )?(?:Foto|Fotos|Datei)[^.]* hoch|hochlad/.test(ta), "Teil A (D-05, U-13): kein „Besorgen Sie die Unterlagen“ und nichts mehr zum Hochladen im Assistenten");
+  ok(zaehle(ta, /nach dem Preis/g) <= 1, () => "Teil A (U-17): „Fragen Sie den Arzt vorher nach dem Preis.“ steht höchstens einmal (nur im Hinweis „Das sollten Sie wissen“), nicht auch im Schritt zum Arzt");
+  const fehlendNA = liste(e.fehlend);
+  if (fehlendNA.length) {
+    ok(ta.includes(norm(T.fehltNachschicken)) && stelleMail >= 0 && ta.indexOf(norm(T.fehltNachschicken)) > stelleMail, "Teil A (D-05): „" + T.fehltNachschicken + "“ steht nach dem Schritt zur E-Mail");
+    ok(ta.includes(norm(T.fehltWo + " " + T.fehltWoMail)), "Teil A (U-13): unter „Das fehlt noch“ steht „" + T.fehltWo + " " + T.fehltWoMail + "“");
+  } else ok(!ta.includes(norm(T.fehltNachschicken)), "Teil A (D-05): ohne fehlende Unterlagen kein Schritt „Schicken Sie fehlende Unterlagen später nach“");
+  if (plan.attestVorlage) ok(ta.indexOf("Gehen Sie damit zum Arzt") > stelleMail && stelleMail >= 0, "Teil A (D-05): der Schritt zum Arzt steht nach dem Schritt zur E-Mail (Fehlendes kommt später nach)");
+  if (abmeldung) ok(Math.max(ta.indexOf("als Einschreiben an den alten Verein"), ta.indexOf("Am sichersten per Einschreiben")) > stelleMail && stelleMail >= 0, "Teil A (D-05): der Schritt zur Abmeldung beim alten Verein steht nach dem Schritt zur E-Mail");
+  const erwFoto = !papierWeg && formulareMitStift.some((f) => plan.formulare[f]);
+  const stelleFoto = ta.indexOf(norm(T.fotoUnterschrieben));
+  ok(erwFoto ? stelleFoto > ta.indexOf(norm(T.ausdruckenNur)) && stelleFoto < stelleMail : stelleFoto < 0, () => "Teil A (U-16): „Fotografieren oder scannen Sie die unterschriebenen Blätter. Schicken Sie sie in derselben E-Mail mit.“ steht " + (erwFoto ? "zwischen „Ausdrucken müssen Sie nur“ und dem Schritt zur E-Mail" : "nicht (kein Blatt mit Stift nach dem Ausdrucken, ohne die Abmeldung und das Attest)") + " – Stelle " + stelleFoto);
   // Teil C ohne Umschlag-Pflicht (O25 und O73: die ganze Datei geht per E-Mail an die Geschäftsstelle)
   ok(!/Umschlag/.test(ta), "Teil A verlangt keinen Umschlag (die ganze Datei geht per E-Mail, O25 und O73)");
   // Das Attest-Blatt steht nur dort, wo es die Familie ausdrucken muss: auch der Satz im Schritt zum Arzt bleibt
@@ -1635,7 +1665,24 @@ async function pruefePdf(b, g, opt) {
 
   // --- Teil A ---
   const ta = S.map((s, i) => ({ s: s, t: texte[i] })).filter((x) => x.s.art === "teil-a").map((x) => x.t).join(" ");
-  ["Ihre Anmeldung", "So geht es weiter", "Wo unterschreiben Sie?", "Das fehlt noch", "So erreichen Sie uns"].forEach((w) => ok(ta.includes(w), "Teil A hat den Abschnitt „" + w + "“"));
+  ["Ihre Anmeldung", "So geht es weiter", "Das fehlt noch", "So erreichen Sie uns"].forEach((w) => ok(ta.includes(w), "Teil A hat den Abschnitt „" + w + "“"));
+  // P3 Teil b (D1): „Wo unterschreiben Sie?“ nennt nur Blätter, die die Familie noch mit Stift unterschreibt. Ist alles am Bildschirm unterschrieben (oder die Zeile des
+  // Kindes leer geblieben), entfällt der Abschnitt samt Überschrift. Ärztin oder Arzt und Verein stehen in „So geht es weiter“ und im Laufzettel.
+  const tabellenZeilen = e.unterschriften.filter((u) => u.wer !== "arzt" && u.wer !== "verein" && erwarteteArt(b, u) === "stift");
+  ok(ta.includes("Wo unterschreiben Sie?") === (tabellenZeilen.length > 0), () => "Teil A: der Abschnitt „Wo unterschreiben Sie?“ steht " + (tabellenZeilen.length ? "(Stift-Unterschriften der Familie: " + tabellenZeilen.length + ")" : "nicht (nichts mit Stift zu unterschreiben)"));
+  ok(!ta.includes("Diese Tabelle zeigt alle Unterschriften") && (!tabellenZeilen.length || ta.includes("Diese Blätter brauchen eine Unterschrift mit Stift.")), "Teil A: Einleitung „Diese Blätter brauchen eine Unterschrift mit Stift.“ (nicht mehr „Diese Tabelle zeigt alle Unterschriften.“)");
+  const tabelleText = ta.includes("Wo unterschreiben Sie?") ? ta.slice(ta.indexOf("Wo unterschreiben Sie?"), ta.indexOf("Das fehlt noch", ta.indexOf("Wo unterschreiben Sie?"))) : "";
+  // P3 Teil b (D2): „Das sollten Sie wissen“ ohne Doppelungen. Der Hinweis zu WhatsApp (letzter Schritt von „So geht es weiter“) und „Zuerst werden Sie Mitglied“ (Schritt 7) stehen
+  // nicht mehr dort; „Ihr Kind kann den Antrag freiwillig mit unterschreiben.“ und „Der andere Elternteil ist einverstanden. …“ nur, solange die Familie noch mit Stift unterschreibt.
+  ok(!ta.includes(norm(deRegeln.hinweise.unterlagen_kein_whatsapp)) && !ta.includes(norm(deRegeln.hinweise.mitgliedschaft_zuerst)), "Teil A, „Das sollten Sie wissen“ (D2): ohne den Hinweis zu WhatsApp und ohne „Zuerst werden Sie Mitglied“ (Teil A sagt es schon in „So geht es weiter“)");
+  if (!tabellenZeilen.length) ok(!ta.includes(norm(deRegeln.hinweise.spieler_unterschrift_kind)) && !ta.includes(norm(deRegeln.hinweise.getrennt_einverstanden)), "Teil A, „Das sollten Sie wissen“ (D2): ohne die zwei Hinweise zur Unterschrift, wenn alles am Bildschirm unterschrieben ist");
+  // P3 Teil b (R1): Die Anmeldung kommt erst nach dem Probetraining; der Hinweis zur Versicherung beim Probetraining (de-regeln: hinweise.probetraining_versicherung) gibt es nicht mehr
+  ok(deRegeln.hinweise.probetraining_versicherung === undefined && !/Nichtmitglieder nicht über den Verein versichert|beim Probetraining.{0,40}versichert/i.test(gesamt), "Kein Hinweis zur Versicherung beim Probetraining im PDF (R1: Schlüssel hinweise.probetraining_versicherung entfällt)");
+  // P3 Teil b (D3): Der Fristsatz für die Familie steht in Teil A („Wann darf gespielt werden?“), im Laufzettel nur die Daten der Wartefrist
+  if (mitSpielrecht && e.status && e.frist && deRegeln.frist[e.frist.key]) {
+    const fristSatz = norm(deRegeln.frist[e.frist.key].replace(/\{(\w+)\}/g, (m, k) => (e.frist.werte && e.frist.werte[k] !== undefined ? e.frist.werte[k] : m)));
+    ok(ta.includes(fristSatz) && !lz.includes(fristSatz), () => "Fristsatz „" + fristSatz.slice(0, 70) + "…“: steht in Teil A " + (ta.includes(fristSatz) ? "(ja)" : "(nein)") + " und nicht im Laufzettel " + (lz.includes(fristSatz) ? "(steht dort)" : "(ok)"));
+  }
   ok(ta.includes("069 736868") && ta.includes("geschaeftsstelle@sportfreunde04.de"), "Teil A nennt die Kontakte des Vereins");
   if (mitSpielrecht && e.status) {
     ok(ta.includes("Wann darf gespielt werden?") && ta.includes("Der Verein prüft das genau"), "Teil A nennt die geschätzte Wartezeit mit dem Hinweis „Der Verein prüft das genau“");
@@ -1658,17 +1705,23 @@ async function pruefePdf(b, g, opt) {
     ok(ta.includes(norm(TEXTE_TEIL_A.stiftOffen)), "Teil A (Modus bildschirm): „Einige Unterschriften fehlen noch …“ bei leeren Stift-Stellen");
     ok(!ta.includes("Der Hessische Fußball-Verband (kurz: der Verband) hat eigene Blätter") && !ta.includes("Diese unterschreiben Sie beim ersten Training mit Stift"), "Teil A (Modus bildschirm): kein Satz mehr, die Blätter des Verbands müssten mit Stift unterschrieben werden");
   } else if (hfvStift.length) ok(ta.includes(norm(training ? TEXTE_TEIL_A.stiftTraining : TEXTE_TEIL_A.stiftDrucken).replace(/^Der Verband/, "Der Hessische Fußball-Verband (kurz: der Verband)")), "Teil A: Blätter des Verbands mit Stift (" + a.hfvUnterschrift + ")");
-  e.unterschriften.filter((u) => u.wer !== "arzt" || bereich("attest_vorlage").length).forEach((u) => {
+  // Eine Zeile je Unterschrift der Familie mit Stift (D1); alle anderen (am Bildschirm erledigt, leere Zeile des Kindes, Ärztin oder Arzt, Verein) stehen nicht in der Tabelle
+  tabellenZeilen.forEach((u) => {
     const zeile = deRegeln.unterschriften[u.formular + "." + u.stelleKey];
-    ok(ta.includes(norm(zeile).slice(0, 30)), "Teil A führt die Unterschrift " + u.formular + "." + u.stelleKey + " auf");
+    ok(tabelleText.includes(norm(zeile).slice(0, 30)), "Teil A führt die Unterschrift " + u.formular + "." + u.stelleKey + " mit Stift in der Tabelle auf");
   });
+  ok(!/Am Bildschirm erledigt|Nicht unterschrieben \(freiwillig\)|Ärztin oder Arzt|Verein \(mit Stempel\)/.test(tabelleText), () => "Teil A, Tabelle: keine Zeile „Am Bildschirm erledigt“, „Nicht unterschrieben (freiwillig)“, für die Ärztin oder den Arzt und für den Verein: " + tabelleText.slice(0, 160));
+  ok(zaehle(tabelleText, /Mit Stift/g) === tabellenZeilen.length, () => "Teil A, Tabelle: genau " + tabellenZeilen.length + " Zeilen „Mit Stift …“, gefunden " + zaehle(tabelleText, /Mit Stift/g));
   if (a.satzung !== true) ok(ta.includes("das Kästchen zur Satzung an"), "Teil A bittet, das Kästchen zur Satzung anzukreuzen");
   else ok(!ta.includes("das Kästchen zur Satzung an"), "Teil A verlangt kein Kästchen zur Satzung, wenn es schon angekreuzt ist");
 
   // Seitenzahlen in Teil A und im Laufzettel stimmen mit dem fertigen PDF überein
+  // Die Tabelle nennt die Seite zu jeder Stift-Unterschrift der Familie (D1); für Blätter, die am Bildschirm erledigt sind, und für die Ärztin oder den Arzt
+  // und den Verein gibt es keine Zeile (die Zeilenzahl ist oben genau geprüft)
   for (const z of bericht.stellen.filter((s) => (s.art === "bild" || s.art === "stift" || s.art === "leer") && !s.zusatz)) {
     const label = deRegeln.unterschriften[z.formular + "." + z.stelleKey];
-    ok(new RegExp("\\b" + z.seite + " " + norm(label).slice(0, 18).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).test(ta), () => "Teil A nennt für " + z.formular + "." + z.stelleKey + " nicht die Seite " + z.seite);
+    const sollZeile = z.art === "stift" && z.wer !== "arzt" && z.wer !== "verein";
+    if (sollZeile) ok(new RegExp("\\b" + z.seite + " " + norm(label).slice(0, 18).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).test(tabelleText), () => "Teil A nennt für " + z.formular + "." + z.stelleKey + " nicht die Seite " + z.seite);
   }
   const pl = bericht.plan.formulare;
   const zeilenNummer = (id) => {
@@ -1793,8 +1846,9 @@ async function pruefePdf(b, g, opt) {
       ok(!z.bild, "Zeile des Kindes im Antrag auf Spielerlaubnis: kein Bild");
       ok(zaehle(norm(lz), new RegExp(esc(LAUFZETTEL_KIND_LEER), "g")) === 1, () => "Laufzettel nennt das leere Kinderfeld genau einmal: „" + LAUFZETTEL_KIND_LEER + "“");
       ok(!bericht.hinweise.some((h) => h.startsWith(deRegeln.formulare.hfv_antrag + " Seite ")), "Hinweise zur Datei: keine Stift-Meldung zum leeren Kinderfeld im Antrag auf Spielerlaubnis");
-      const taZeilen = S.flatMap((x, i) => (x.art === "teil-a" ? zeilenSeite(pfad, i + 1) : [])).filter((zl) => zl.includes(deRegeln.unterschriften["hfv_antrag.spieler"].slice(0, 36)));
-      ok(taZeilen.length === 1 && /Nicht unterschrieben \(freiwillig\)/.test(taZeilen[0]) && !/Mit Stift|Am Bildschirm erledigt/.test(taZeilen[0]), () => "Teil A, Tabelle: die Zeile des Kindes im Antrag steht mit „Nicht unterschrieben (freiwillig)“: " + JSON.stringify(taZeilen));
+      // P3 Teil b (D1): Die leere Zeile des Kindes steht nicht mehr in der Tabelle von Teil A („Wo unterschreiben Sie?“ nennt nur Stift-Unterschriften); der Laufzettel nennt sie (oben geprüft)
+      const taZeilen = S.flatMap((x, i) => (x.art === "teil-a" ? zeilenSeite(pfad, i + 1) : [])).filter((zl) => /Nicht unterschrieben \(freiwillig\)/.test(zl));
+      ok(taZeilen.length === 0, () => "Teil A, Tabelle: die leere Zeile des Kindes im Antrag steht nicht in der Tabelle (D1; der Laufzettel nennt sie): " + JSON.stringify(taZeilen));
     } else if (u.formular === "hfv_antrag" && u.wer === "spieler") {
       ok(!norm(lz).includes(norm(LAUFZETTEL_KIND_LEER)), "Laufzettel: der Satz zum leeren Kinderfeld steht nur, wenn die Zeile leer blieb");
     }
@@ -2033,7 +2087,9 @@ async function unterschriftsregeln() {
       ok(zweiteG && tg[zweiteG.seite - 1].includes("zweiter Elternteil (nötig)") && !tg.join("\n").includes("zweiter Elternteil (empfohlen)"), "getrennt lebend ohne Einverständnis (Modus stift): Markierung „zweiter Elternteil (nötig)“, nie „(empfohlen)“");
       ok(!g2g.bericht.hinweise.some((h) => /zweiten Elternteils/.test(h)), "getrennt lebend ohne Einverständnis (Modus stift): kein Satz zu einem leeren Feld (es gibt kein Feld)");
     }
-    ok(tg.join("\n").includes("Der zweite Elternteil (nötig)"), "getrennt lebend ohne Einverständnis: Teil A nennt „Der zweite Elternteil (nötig)“ in der Tabelle der Unterschriften");
+    // P3 Teil b (D1): Die Tabelle „Wo unterschreiben Sie?“ nennt nur Stift-Unterschriften. Der zweite Elternteil steht dort, wenn er mit Stift unterschreibt
+    // (Modus „stift“ immer, Modus „bildschirm“ ohne sein Bild); hat er am Bildschirm unterschrieben, gibt es keine Zeile.
+    ok(tg.join("\n").includes("Der zweite Elternteil (nötig)") === !hfvBild(), () => "getrennt lebend ohne Einverständnis: Teil A nennt „Der zweite Elternteil (nötig)“ in der Tabelle der Unterschriften " + (hfvBild() ? "nicht (er hat am Bildschirm unterschrieben)" : "(Stift)"));
     await pruefePdf(b2g, g2g, { tief: false, bilder: true, nachweise: false });
     // ohne sein Bild: in beiden Modi die Stift-Markierung „zweiter Elternteil (nötig)“; im Modus „bildschirm“ nennt der Laufzettel den Fall
     const b2n = getrennt(false);
@@ -2042,6 +2098,7 @@ async function unterschriftsregeln() {
     const zweiteN = g2n.bericht.stellen.find((s) => s.stelleKey === "s2.unterschrift_sorgeberechtigte");
     const tn = textSeiten(g2n.pfad);
     ok(zweiteN && zweiteN.art === "stift" && tn[zweiteN.seite - 1].includes("zweiter Elternteil (nötig)"), "getrennt lebend ohne Einverständnis, ohne sein Bild: Stift-Markierung „zweiter Elternteil (nötig)“ (beide Modi)");
+    ok(tn.join("\n").includes("Der zweite Elternteil (nötig)"), "getrennt lebend ohne Einverständnis, ohne sein Bild: Teil A nennt „Der zweite Elternteil (nötig)“ in der Tabelle (Stift, beide Modi)");
     const lzN = tn.filter((tx, i) => g2n.bericht.seiten[i].art === "laufzettel").join(" ");
     const satzZweite = "Aufnahmeantrag Seite 2: Die Unterschrift des zweiten Elternteils wurde am Bildschirm nicht geleistet. Die Unterschrift steht deshalb als Stift-Markierung im Formular.";
     ok(hfvBild() === g2n.bericht.hinweise.includes(satzZweite) && hfvBild() === norm(lzN).includes(satzZweite), () => "getrennt lebend ohne Einverständnis, ohne sein Bild: der Laufzettel " + (hfvBild() ? "nennt" : "nennt nicht") + " das leere Feld des zweiten Elternteils");
@@ -2481,7 +2538,9 @@ async function sonderfaelle() {
     ok(karneval.t.includes(MESSENGER_KARNEVAL) && !karneval.t.includes("Mannschaft"), "Karneval-Kind: Messenger-Satz „… der Gruppe. Alle Mitglieder der Messenger-Gruppe …“, auf dem Blatt kein „Mannschaft“");
     ok(eK.includes("Fahrten und Messenger-Gruppe der Gruppe") && eK.includes("sehen nur die Trainer und Betreuer der Gruppe."), "Karneval-Kind: die Information zum Datenschutz sagt „… Messenger-Gruppe der Gruppe“ und „Trainer und Betreuer der Gruppe“");
     ok(mitNotfall(karneval) && /Trainerinnen, Trainer und Betreuer der Gruppe (?:nutzen sie nur im Notfall|dürfen diese Angaben nutzen)/.test(eK), "Karneval-Kind: der Notfall- und Gesundheitsbogen nennt die Trainer und Betreuer der Gruppe");
-    ok(/Der Notfall- und Gesundheitsbogen ist nur für die Trainer und Betreuer der Gruppe\./.test(eK), "Karneval-Kind: das Trennblatt von Teil C nennt die Trainer und Betreuer der Gruppe");
+    // P3 Teil b (D4): Das Trennblatt hat keinen Schlussabsatz mehr („Der Notfall- und Gesundheitsbogen ist nur für die Trainer und Betreuer der …“); die Liste „Das steht in Teil C“
+    // nennt schon, wer den Bogen sieht („nur für Trainerinnen, Trainer und Betreuer“), ohne das Wort „Mannschaft“ oder „Gruppe“.
+    ok(/Seite \d+: Notfall- und Gesundheitsbogen – nur für Trainerinnen, Trainer und Betreuer\b/.test(eK) && !/Der Notfall- und Gesundheitsbogen ist nur für die Trainer und Betreuer/.test(eK), "Karneval-Kind: das Trennblatt von Teil C nennt in der Liste, wer den Bogen sieht („nur für Trainerinnen, Trainer und Betreuer“), ohne Schlussabsatz (D4)");
     ok(!/Mannschaft/.test(eK), () => "Karneval-Kind: auf keiner eigenen Seite steht „Mannschaft“: " + (eK.match(/.{0,50}Mannschaft.{0,30}/) || [""])[0]);
     ok(eK.includes("nur die Angaben, die sie für Training und Veranstaltungen brauchen.") && !eK.includes("Training und Spiele"), "Karneval-Kind: die Information zum Datenschutz sagt „Training und Veranstaltungen“ statt „Training und Spiele“ (Runde 2)");
     for (const [name, x] of [["Fußball-Kind", fussball], ["Kind in Fußball und Karneval", beides]]) {
@@ -2489,7 +2548,7 @@ async function sonderfaelle() {
       ok(x.t.includes(MESSENGER_MANNSCHAFT) && !x.t.includes("Messenger-Gruppe der Gruppe"), name + ": Messenger-Satz wie bisher („… der Mannschaft. Alle Mitglieder der Gruppe …“)");
       ok(eF.includes("Fahrten und Messenger-Gruppe der Mannschaft") && eF.includes("sehen nur die Trainer und Betreuer der Mannschaft."), name + ": die Information zum Datenschutz sagt weiter „Mannschaft“");
       ok(eF.includes("nur die Angaben, die sie für Training und Spiele brauchen.") && !eF.includes("Training und Veranstaltungen"), name + ": die Information zum Datenschutz sagt weiter „Training und Spiele“ (Runde 2)");
-      ok(mitNotfall(x) && /Trainerinnen, Trainer und Betreuer der Mannschaft (?:nutzen sie nur im Notfall|dürfen diese Angaben nutzen)/.test(eF) && /Der Notfall- und Gesundheitsbogen ist nur für die Trainer und Betreuer der Mannschaft\./.test(eF) && !/Betreuer der Gruppe/.test(eF), name + ": Notfallbogen und Trennblatt sagen weiter „Mannschaft“");
+      ok(mitNotfall(x) && /Trainerinnen, Trainer und Betreuer der Mannschaft (?:nutzen sie nur im Notfall|dürfen diese Angaben nutzen)/.test(eF) && /Seite \d+: Notfall- und Gesundheitsbogen – nur für Trainerinnen, Trainer und Betreuer\b/.test(eF) && !/Der Notfall- und Gesundheitsbogen ist nur für die Trainer und Betreuer/.test(eF) && !/Betreuer der Gruppe/.test(eF), name + ": der Notfallbogen sagt weiter „Mannschaft“; das Trennblatt nennt in der Liste, wer den Bogen sieht (ohne Schlussabsatz, D4)");
     }
     // Ohne Antwort am Bildschirm: der Ersatzsatz und die Überschrift bleiben die der Abteilung
     const ohneAntwort = bereite("karneval-kind", "bild", 0, (a) => {
@@ -2807,8 +2866,10 @@ async function bildschirmModusTests() {
     ok(!ta.includes("beim ersten Training") && !ta.includes("Der Verein bringt sie ausgedruckt mit") && !ta.includes("bringt der Verein die Blätter"), "Teil A: kein Satz mehr zum ersten Training und zu Blättern, die der Verein ausgedruckt mitbringt (Modus bildschirm)");
     ok(ta.includes("Am sichersten per Einschreiben") === mitBild, () => "Teil A: Abmeldung beim alten Verein: " + (mitBild ? "„Schicken Sie das Blatt an Ihren alten Verein. Am sichersten per Einschreiben.“" : "mit Stift unterschreiben und selbst als Einschreiben schicken"));
     ok(!/Mit Stift, beim ersten Training/.test(ta) && !/Mit Stift, nach dem Ausdrucken/.test(ta), "Teil A, Tabelle: nie „Mit Stift, beim ersten Training“ und nie „Mit Stift, nach dem Ausdrucken“ (Modus bildschirm, Antrag leer oder am Bildschirm)");
-    ok(/Mit Stift, selbst verschicken/.test(ta) === !mitBild && /Nicht unterschrieben \(freiwillig\)/.test(ta) === !mitBild, "Teil A, Tabelle: leere Zeile des Kindes „Nicht unterschrieben (freiwillig)“, leere Zeile bei der Abmeldung „Mit Stift, selbst verschicken“, sonst nur „Am Bildschirm erledigt“");
-    // Teil A, „Wo unterschreiben Sie?“: alle Blätter der Familie „Am Bildschirm“ (nur der Verein und die Ärztin oder der Arzt mit Stift)
+    // P3 Teil b (D1): Die Tabelle nennt nur Stift-Unterschriften der Familie: die leere Zeile bei der Abmeldung („Mit Stift, selbst verschicken“). Die leere Zeile des Kindes im
+    // Antrag („Nicht unterschrieben (freiwillig)“) und alles am Bildschirm Erledigte stehen dort nicht; der Laufzettel nennt die leere Zeile (siehe oben).
+    ok(/Mit Stift, selbst verschicken/.test(ta) === !mitBild && !/Nicht unterschrieben \(freiwillig\)/.test(ta) && !ta.includes(T.wieBildschirm) && ta.includes("Wo unterschreiben Sie?") === !mitBild, "Teil A, Tabelle: nur die leere Zeile bei der Abmeldung „Mit Stift, selbst verschicken“ (wenn das Kind nicht unterschrieben hat), nie „Nicht unterschrieben (freiwillig)“ und nie „Am Bildschirm erledigt“; ohne Stift-Zeile keine Tabelle");
+    // Teil A, „Wo unterschreiben Sie?“: nur noch Stift-Zeilen der Familie (D1); alle anderen Blätter der Familie sind am Bildschirm unterschrieben (Verein und Ärztin oder Arzt stehen nicht in der Tabelle)
     const wie = g.bericht.stellen.filter((st) => FAMILIE_ROLLEN.includes(st.wer) && st.art);
     ok(wie.every((st) => st.art === (st.stelleKey === "unterschrift" && st.formular === "abmeldung" ? (mitBild ? "bild" : "stift") : st.stelleKey === "spieler" ? (mitBild ? "bild" : "leer") : "bild")), "Alle Stellen der Familie sind Bilder (nur die leere Zeile des Kindes im Antrag bleibt leer, die leere Zeile bei der Abmeldung steht mit Stift)");
   }
@@ -2841,7 +2902,7 @@ async function bildschirmModusTests() {
       }
       ok(!nachSatz.includes(deRegeln.formulare.hfv_antrag), "Teil A, „Ausdrucken müssen Sie nur:“ nennt den Antrag auf Spielerlaubnis nicht");
       ok(!/Mit Stift, nach dem Ausdrucken|Mit Stift, beim ersten Training|Mit Stift, selbst verschicken/.test(ta), "Teil A, Tabelle „Wo unterschreiben Sie?“: kein „Mit Stift …“ für die Familie (nur „beim Arzt“ und „durch den Verein“)");
-      ok(/Nicht unterschrieben \(freiwillig\)/.test(ta) === !mitBild, "Teil A, Tabelle: „Nicht unterschrieben (freiwillig)“ nur bei leerer Zeile des Kindes");
+      ok(!/Nicht unterschrieben \(freiwillig\)/.test(ta) && !ta.includes(T.wieBildschirm) && !ta.includes("Wo unterschreiben Sie?"), "Teil A: keine Tabelle „Wo unterschreiben Sie?“ (nichts mit Stift, auch bei leerer Zeile des Kindes; D1), nie „Nicht unterschrieben (freiwillig)“ und nie „Am Bildschirm erledigt“");
       // Genau eine Markierung „Hier mit Stift unterschreiben“ im Antrag auf Spielerlaubnis: die des Vereins (nicht die des Kindes)
       const antragSeite = g.bericht.seiten.findIndex((x) => x.schluessel === "hfv_antrag") + 1;
       ok(zaehle(textSeiten(g.pfad)[antragSeite - 1], /Hier mit Stift unterschreiben/g) === 1, "Antrag auf Spielerlaubnis Seite 1: nur die Markierung des Vereins, keine für das Kind");
@@ -2859,6 +2920,7 @@ async function bildschirmModusTests() {
     ok(!g.bericht.stellen.some((st) => st.wer === "spieler"), "Herren: keine Stelle für „Spielerin oder Spieler“ als Kind");
     ok(lz.includes(norm(LAUFZETTEL_HFV_ALLE)), "Laufzettel (Herren): Satz zu den Blättern des Verbands");
     ok(ta.includes(norm(T.stiftKeine)), "Teil A (Herren): alles am Bildschirm unterschrieben");
+    ok(!ta.includes("Wo unterschreiben Sie?") && !ta.includes(T.wieBildschirm), "Teil A (Herren): keine Tabelle „Wo unterschreiben Sie?“ (alles am Bildschirm; D1)");
     // Datum neben den Einwilligungen auf Seite 3 steht (pruefePdf prüft es Stelle für Stelle)
   }
   // Wechsel mit Vollmacht: Vollmacht mit Ort und Datum; A-Jugend bei den Herren: Einverständnis mit Ort und Datum (pruefePdf prüft die Stellen)

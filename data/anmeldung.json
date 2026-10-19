@@ -1,8 +1,15 @@
 {
-  "stand": "2026-10-12",
-  "version": "2026-10-12.1",
+  "stand": "2026-10-19",
+  "version": "2026-10-19.1",
   "hinweis": "Regelwerk des Anmelde-Assistenten. Alle Zahlen und Fristen stehen hier; regeln.js enthält die Logik. Nichts hier enthält Personendaten.",
   "saison": "2026/27",
+  "zugang": {
+    "parameter": "code",
+    "pruefwerte": [
+      "c4a0263ea0e44359bbc400fb3a8b41963b5f821d9cee32d637624505d552ccb6"
+    ],
+    "hinweis": "Zugang nur mit Code vom Probetraining (Entscheidung der 1. Vorsitzenden vom 12.10.2026). Jeder Prüfwert ist der SHA-256 (hex, klein) des Codes ohne Leerzeichen und Bindestriche in Großbuchstaben. Mehrere Prüfwerte gelten nebeneinander. Leere Liste: keine Code-Abfrage. Setzen und prüfen mit tools/anmeldung-zugang.mjs. Der Code selbst steht nie in dieser Datei."
+  },
   "quellenStand": [
     {
       "quelle": "HFV-Jugendordnung (JO)",
@@ -1744,7 +1751,7 @@
         "U01"
       ],
       "status": "entschieden",
-      "entscheidung": "Keine Versicherung für Nichtmitglieder (zu teuer). Assistent, Website und App weisen darauf hin: Beim Probetraining ist man nicht über den Verein versichert (1. Vorsitzende, 11.10.2026).",
+      "entscheidung": "Keine Versicherung für Nichtmitglieder (zu teuer). Website und App weisen darauf hin: Beim Probetraining ist man nicht über den Verein versichert (1. Vorsitzende, 11.10.2026). Der Assistent sagt es nicht mehr: Die Anmeldung gibt es erst nach dem Probetraining (12.10.2026).",
       "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
     },
     {
@@ -1963,8 +1970,8 @@
       "betrifft": [
         "U06"
       ],
-      "status": "offen",
-      "stand": "Neue Texte: Die 1. Vorsitzende liest sie einmal und gibt sie frei (Excel Nr. 3).",
+      "status": "entschieden",
+      "entscheidung": "Freigegeben von der 1. Vorsitzenden am 12.10.2026 (Beispiel-PDF vom 11.10.2026).",
       "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
     },
     {
@@ -2233,8 +2240,8 @@
         "U28",
         "U06"
       ],
-      "status": "offen",
-      "stand": "Neue Texte: Die 1. Vorsitzende liest sie einmal und gibt sie frei (Excel Nr. 3).",
+      "status": "entschieden",
+      "entscheidung": "Freigegeben von der 1. Vorsitzenden am 12.10.2026 (Beispiel-PDF vom 11.10.2026). Der freigegebene Text nennt Art. 6 Abs. 1 lit. b DSGVO (Mitgliedschaft, Fürsorge im Training) und lit. f DSGVO (weitere Kontaktpersonen).",
       "quelle": "Prüfung Orchestrator, 30.09.2026"
     },
     {

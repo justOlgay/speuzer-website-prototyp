@@ -15,12 +15,17 @@ import { abteilung, mannschaft, spielerpass, alter_verein, abmeldung, besonderes
 import { kontakt, beitrag, leistungen, zahlung, einwilligungen, heimweg, notfall } from "./seiten-verein.js";
 import { spielerfoto, nachweise, unterschriften } from "./seiten-unterlagen.js";
 import { pruefen, fertig } from "./seiten-ende.js";
+import { code, uebergabe } from "./seiten-zugang.js";
 
 export const SEITEN = {
   start, wer, name, geburt, abteilung, mannschaft, spielerpass, alter_verein, abmeldung, pass, ausland,
   wohnen, sorge, besonderes, kontakt, beitrag, leistungen, zahlung, einwilligungen, heimweg, notfall, spielerfoto,
   nachweise, unterschriften, pruefen, fertig,
 };
+
+// Seiten vor dem Assistenten (Paket P1, 12.10.2026): der Code vom Probetraining und, nur in der Vereins-App, die Übergabe in den
+// Browser. Sie sind keine Schritte des Regelwerks (regeln.schritte kennt sie nicht) und stehen deshalb nicht in SEITEN.
+export const VORSEITEN = { code, uebergabe };
 
 export const REIHENFOLGE = [
   "start", "wer", "name", "geburt", "abteilung", "mannschaft", "spielerpass", "alter_verein", "abmeldung",

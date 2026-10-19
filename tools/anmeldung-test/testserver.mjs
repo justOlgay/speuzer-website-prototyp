@@ -18,6 +18,12 @@
 // unterschriftHfv (data/anmeldung.json, Jugendleitung 11.10.2026) in der eingebetteten Konfiguration
 // dieses Servers. So lässt sich der Modus „stift“ (Stand bis 11.10.2026) prüfen, ohne die Datei zu ändern.
 //
+// Zugang mit Code vom Probetraining (Paket P1, 12.10.2026): Die Prüfwerte in data/anmeldung.json › zugang gehören nicht zum Test. Der
+// Server setzt sie in der eingebetteten Konfiguration selbst: Standard ist eine leere Liste (keine Code-Abfrage), so laufen alle Tests
+// unabhängig davon, was im Repo steht (auch mit dem echten Prüfwert oder einem fremden). Die Tests zum Code schalten mit
+// server.setzeZugang([...Prüfwerte]) um; server.testCode ist ein Zufallscode dieses Laufs, server.testPruefwert sein Prüfwert,
+// server.fremderPruefwert ein Prüfwert, zu dem kein bekannter Code passt. Im ausgelieferten Code gibt es dafür keine Hintertür.
+//
 // Aufruf allein: node tools/anmeldung-test/testserver.mjs  (Adresse wird gezeigt)
 
 import { createServer } from "node:http";
@@ -26,6 +32,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { createRequire } from "node:module";
+import { createHash, randomBytes } from "node:crypto";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const QUELLE_DOCS = path.join(ROOT, "docs");
@@ -183,10 +190,22 @@ export async function starteTestserver(optionen) {
     neueKonfig.anmeldung = neueKonfig.anmeldung || {};
     neueKonfig.anmeldung.unterschriftHfv = Object.assign({}, neueKonfig.anmeldung.unterschriftHfv, { wert: hfv });
   }
-  const konfigGeaendert = !status.regeln || !status.formulare || Boolean(hfv);
-  const seiteAngepasst = konfigGeaendert
-    ? seite.replace(treffer[1], JSON.stringify(neueKonfig).replace(/</g, "\\u003c"))
-    : seite;
+  // Zugang (P1): Prüfwerte nur aus dem Test, nie aus data/anmeldung.json. Der Zufallscode dieses Laufs besteht nur aus A–Z, 0–9 und "-"
+  // (so ist sein Prüfwert unabhängig vom Code des Assistenten zu rechnen).
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const zufallsTeil = () => Array.from(randomBytes(4), (b) => alphabet[b % alphabet.length]).join("");
+  const testCode = o.testCode || "TEST-" + zufallsTeil() + "-" + zufallsTeil();
+  const sha = (text) => createHash("sha256").update(text, "utf8").digest("hex");
+  const testPruefwert = sha(testCode.replace(/[\s-]/g, "").toUpperCase());
+  const fremderPruefwert = sha("FREMD-" + zufallsTeil() + zufallsTeil() + zufallsTeil());
+  let zugangListe = Array.isArray(o.zugang) ? o.zugang.slice() : [];
+  const seiteMitZugang = () => {
+    const k = JSON.parse(JSON.stringify(neueKonfig));
+    k.anmeldung = k.anmeldung || {};
+    k.anmeldung.zugang = { parameter: "code", pruefwerte: zugangListe.slice() };
+    const json = JSON.stringify(k).replace(/</g, "\\u003c");
+    return seite.replace(treffer[1], () => json);
+  };
 
   const gesperrt = new Set(o.gesperrt || []);
   const anfragen = [];
@@ -202,7 +221,7 @@ export async function starteTestserver(optionen) {
     }
     if (pfad === "/anmeldung/" || pfad === "/anmeldung/index.html") {
       res.writeHead(200, { "Content-Type": MIME[".html"], "Cache-Control": "no-store" });
-      res.end(seiteAngepasst);
+      res.end(seiteMitZugang());
       return;
     }
     // Nur zum Entwickeln (ANM_QUELLE=assets): Dateien unter /assets/ direkt aus
@@ -246,6 +265,12 @@ export async function starteTestserver(optionen) {
     hfv: neueKonfig.anmeldung && neueKonfig.anmeldung.unterschriftHfv ? neueKonfig.anmeldung.unterschriftHfv.wert : null,
     konfig: neueKonfig,
     anfragen,
+    testCode,
+    testPruefwert,
+    fremderPruefwert,
+    setzeZugang: (liste) => {
+      zugangListe = Array.isArray(liste) ? liste.slice() : [];
+    },
     sperre: (pfad) => gesperrt.add(pfad),
     freigabe: (pfad) => gesperrt.delete(pfad),
     stop: () => new Promise((ok) => server.close(ok)),

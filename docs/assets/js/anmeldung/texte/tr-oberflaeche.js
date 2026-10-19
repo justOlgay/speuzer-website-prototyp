@@ -6,6 +6,10 @@
   Prüfung: node tools/anmeldung-test/uebersetzung-pruefen.mjs
   Unabhängige Sprachprüfung (M12, 12.10.2026): Befunde und Änderungen in
   tools/cache/orchestrierung-anmeldung/pruefung/m12-tr/BERICHT.md
+  Neu übersetzt nach den Kürzungen des deutschen Textes (P3 Teil b, Paket P4, 12.10.2026): 35 umformulierte und 3 neue
+  Schlüssel, Tabelle mit Rückübersetzung in tools/cache/orchestrierung-anmeldung/pruefung/p4-tr/BERICHT.md
+  Runde 2 (12.10.2026, Aufträge des Orchestrators): "küçük" statt "genç" für die jüngere Altersklasse (auch in tr-regeln.js),
+  abmeldung.status.hinweis grenzt die Abmeldung als Spieler vom Austritt ab, drei geänderte deutsche Texte nachgezogen.
 
   Stil: einfach und kurz wie das Deutsche - ein Gedanke pro Satz, kurze Wörter, aktiv, höfliches "siz"
   (Bitte-Form: Lütfen ... yazın). Zahlen als westliche Ziffern 0-9. Platzhalter wie {name}, {datum},
@@ -104,6 +108,12 @@
   Teil A, B, C (der Datei) = A, B, C bölümü
   Herren-Mannschaft = Herren (yetişkin erkek) takımı
   Senator (Karneval) = Senatör (Senator)
+  Mehr erfahren = Daha fazla bilgi
+  Aushilfe (bei den Herren) = gerektiğinde oynamak
+  Mädchen in einer Jungen-Mannschaft = erkek takımında oynayan kız
+  Bescheinigung (des Vereins) = belge (Bescheinigung)
+  jüngere Altersklasse = daha küçük yaş grubu
+  Abmeldung als Spieler (nicht Austritt aus dem Verein) = oyuncu kaydının silinmesi (üyelikten çıkma değil)
 */
 
 export default {
@@ -114,7 +124,7 @@ export default {
     titel: "Kayıt (taslak)",
     beschreibung:
       "FFV Sportfreunde 04 için kayıt asistanının taslağı. Adım adım kayıt olursunuz. Sonunda bir PDF dosyası alırsınız.",
-    lead: "Adım adım soruyoruz. Sonunda tüm evrakı içeren bir dosya alırsınız.",
+    lead: "Adım adım soruyoruz.",
     assistentTitel: "Kayıt asistanı",
     laedt: "Asistan yükleniyor. Bir şey olmazsa bizi arayın: 069 736868.",
     ohneSkript: "Asistanın çalışması için JavaScript gerekir. Lütfen etkinleştirin. Ya da bizi arayın: 069 736868.",
@@ -141,6 +151,7 @@ export default {
     ja: "Evet",
     nein: "Hayır",
     weissNicht: "Bilmiyorum",
+    mehrErfahren: "Daha fazla bilgi",
     dasKind: "çocuk",
     diePerson: "kişi",
     entfernen: "Kaldır",
@@ -219,15 +230,32 @@ export default {
     schreiben: "E-posta yaz",
   },
 
-  // ---------- App ----------
-  // In der Vereins-App (Seite mit ?app=1) klappt Speichern oder Teilen der Datei manchmal nicht.
-  // Der Link "Im Browser öffnen" führt auf dieselbe Seite ohne ?app=1.
+  // ---------- Zugang und App ----------
+  // Code-Seite: {link} steht für den Link, dessen Text im Schlüssel mit "Link" am Ende steht (keine Endung am Platzhalter).
+  // In der Vereins-App läuft der Assistent nie: Es steht nur die Übergabe in den Browser da.
+
+  code: {
+    titel: "Deneme antrenmanından sonra kayıt",
+    einleitung: "Lütfen kodu girin.\nKodu deneme antrenmanında alırsınız.",
+    label: "Kod",
+    fehlerLeer: "Lütfen kodu girin.",
+    fehlerFalsch: "Kod doğru değil. Lütfen kontrol edin.",
+    kein: "Henüz deneme antrenmanına katılmadınız mı? {link}",
+    keinLink: "Deneme antrenmanı için randevu alın",
+    passiv: "Pasif üye misiniz? Kodu {link} verir.",
+    passivLink: "kulüp ofisi",
+  },
 
   app: {
-    hinweisStart: "Uygulamada PDF dosyasını kaydetmek bazen çalışmayabilir. O zaman kayıt sayfasını tarayıcıda açın.",
-    hinweisFertig: "Kaydetme çalışmıyor mu? O zaman kayıt sayfasını tarayıcıda açın.",
-    fehler: "Kaydetme çalışmadı. Kayıt sayfasını tarayıcıda açın.",
+    uebergabe: "Lütfen kayıt sayfasını tarayıcıda açın.",
     browser: "Tarayıcıda aç",
+  },
+
+  umgebung: {
+    rahmen: "Burada kaydetme çalışmayabilir.",
+    rahmenLink: "Yeni pencerede aç",
+    inApp: "Lütfen kayıt sayfasını Safari veya Chrome gibi bir tarayıcıda açın. Burada kaydetme çalışmayabilir.",
+    inAppSo: "Üstteki ⋯ simgesine, sonra “Tarayıcıda aç” seçeneğine dokunun.",
   },
 
   // ---------- Fehlermeldungen ----------
@@ -327,18 +355,16 @@ export default {
 
   start: {
     titel: "Hoş geldiniz",
-    einleitung: "Burada kendinizi ya da çocuğunuzu kulübe kaydedersiniz.\nAdım adım soruyoruz.",
-    ergebnis: "Sonunda bir PDF dosyası alırsınız.\nBu dosya, görüntülemek ve yazdırmak içindir.\nİçinde kulüp için gereken tüm evrak vardır.",
+    einleitung: "Burada kendinizi ya da çocuğunuzu kaydedersiniz.",
+    ergebnis: "Sonunda bize e-postayla bir dosya gönderirsiniz.",
     brauchenTitel: "Şunlara ihtiyacınız var:",
     brauchen: [
       "Ad, soyad ve doğum tarihi",
-      "Adresiniz, e-posta adresiniz ve telefon numaranız",
+      "Adres, e-posta adresi ve telefon numarası",
       "Otomatik çekim (Lastschrift) için IBAN (banka hesap numarası)",
       "Evrakın fotoğrafını çekmek için kameralı bir telefon",
     ],
     dauer: "Bu yaklaşık 15 dakika sürer.",
-    datenschutz: "Bilgileriniz cihazınızda kalır.\nHiçbir şey göndermeyiz.",
-    hilfe: "Yardıma mı ihtiyacınız var? Yukarıdaki “Yardım”a dokunun.",
     spracheTitel: "Dil seçin",
     los: "Başlayalım",
   },
@@ -346,17 +372,13 @@ export default {
   wer: {
     titel: "Kim üye olmak istiyor?",
     kind: "Çocuğum",
-    kindHinweis: "Her şeyi çocuğunuz için doldurursunuz.",
     selbst: "Kendim",
-    selbstHinweis: "Kendinizi kaydedersiniz.",
-    mehrere: "Birden fazla kişiyi mi kaydetmek istiyorsunuz?\nSonunda bir sonraki kişiyi kaydedebilirsiniz.\nAdresiniz ve ödeme bilgileriniz o zaman kendiliğinden aktarılır.",
   },
 
   name: {
     titel: { kind: "Çocuğunuzun adı nedir?", selbst: "Adınız nedir?" },
     hinweis: "Adı pasaporttaki gibi yazın.\nLatin harfleri kullanın.",
     vorname: "Ad",
-    vornameHinweis: "Tüm adlar, pasaporttaki gibi.",
     nachname: "Soyad",
   },
 
@@ -365,7 +387,6 @@ export default {
       titel: { kind: "Çocuğunuz ne zaman ve nerede doğdu?", selbst: "Ne zaman ve nerede doğdunuz?" },
       legende: "Doğum tarihi",
       ort: "Doğum yeri",
-      ortHinweis: "Şehir ya da yer.",
       land: "Doğum ülkesi",
     },
     geschlecht: {
@@ -385,20 +406,15 @@ export default {
   abteilung: {
     titel: { kind: "Çocuğunuz hangi bölüme katılsın?", selbst: "Hangi bölüme katılmak istersiniz?" },
     fussball: "Futbol",
-    fussballHinweis: "Antrenman ve maçlar",
     karneval: "Karnaval",
     karnevalHinweis: "Schnauzer ekibiyle dans",
     beides: "Futbol ve karnaval",
-    beidesHinweis: "İkisi de tek kulüpte",
     passiv: "Sadece destek olmak",
-    passivHinweis: "Üyesiniz. Spor yapmıyorsunuz.",
+    passivHinweis: { kind: "Çocuğunuz üyedir. Spor yapmıyor.", selbst: "Üyesiniz. Spor yapmıyorsunuz." },
   },
 
   mannschaft: {
     titel: { kind: "Çocuğunuza hangi takım uyuyor?", selbst: "Size hangi takım uyuyor?" },
-    alter: "{name} {alter} yaşında. Doğum yılı: {jahrgang}.",
-    klasse: "Bu, {klasse}-Jugend (gençlik takımı) için uygun.",
-    klasseHerren: "Bu, Herren (yetişkin erkek) takımı için uygun.",
     mannschaften: "Kulüpteki takımlar: {namen}.",
     keine: "Kulübün bu doğum yılı için kendi takımı yok.",
     keineFolge: "Gençlik birimi sizinle iletişime geçecek.",
@@ -407,10 +423,10 @@ export default {
 
   spielerpass: {
     titel: { kind: "Çocuğunuzun daha önce oyuncu lisansı (Spielerpass) oldu mu?", selbst: "Daha önce oyuncu lisansınız (Spielerpass) oldu mu?" },
-    hinweis: { kind: "Sadece antrenman yapmış olsa bile. Almanya dışında olsa bile.", selbst: "Sadece antrenman yapmış olsanız bile. Almanya dışında olsa bile." },
     erklaerung: "Oyuncu lisansı (Spielerpass), bir kulüpte maç oynamak için gereken kimlik kartıdır.",
     // Neu am 12.10.2026 (Entscheidung der 1. Vorsitzenden): Der Verein beantragt das Spielrecht immer; die frühere Frage zu den Spielen entfällt.
     spielrecht: "Futbol oynayan kişinin Hessen Futbol Federasyonu’ndan (Hessischer Fußball-Verband, HFV) oynama izni (Spielrecht) alması gerekir.\nBu izni sizin için kulüp ister.\nBu bazen birkaç hafta sürer.",
+    jaHinweis: "Almanya dışından bir oyuncu lisansı (Spielerpass) da sayılır.",
     weissNichtHinweis: "Kulüp bunu sizin için kontrol eder.",
   },
 
@@ -424,44 +440,41 @@ export default {
     ort: "Kulübün bulunduğu yer",
     land: "Kulübün ülkesi",
     verband: "Oradaki futbol federasyonu",
-    verbandHinweis: "Sadece biliyorsanız.",
   },
 
   abmeldung: {
     status: {
       titel: { kind: "Çocuğunuzun eski kulüpteki kaydı silindi mi?", selbst: "Eski kulüpteki kaydınız silindi mi?" },
-      hinweis: "Burada oyuncu olarak kayıt silme kastedilir.\nBununla eski kulüpteki üyelik sona ermez.\nEski kulübe e-posta göndermek yetmez.\nHessen Futbol Federasyonu (Hessischer Fußball-Verband, HFV) taahhütlü mektup (Einschreiben) ister.\nYa da kayıt silme için vekâletnameyi (Vollmacht für die Abmeldung) imzalarsınız.",
+      hinweis: "Burada oyuncu kaydının silinmesi kastediliyor, üyelikten çıkma değil.",
       einschreiben: "Evet, taahhütlü mektupla (Einschreiben)",
       einschreibenHinweis: "Postanın makbuzu sizde.",
       formlos: "Evet, ama sadece e-posta ya da mesajla",
-      formlosHinweis: "Bu, kayıt silme sayılmaz.",
+      formlosHinweis: "Bu yolla kayıt silinmiş sayılmaz.",
       noch_nicht: "Hayır, henüz değil",
       weiss_nicht: "Bilmiyorum",
     },
     datum: {
       titel: "Kaydı ne zaman sildirdiniz?",
       legende: "Kayıt silme tarihi",
-      hinweis: "Taahhütlü mektupta (Einschreiben) makbuzdaki tarih geçerlidir.",
+      hinweis: "Makbuzdaki tarih geçerlidir.",
     },
     weg: {
       titel: "Kaydı nasıl sildiriyorsunuz?",
       vollmacht: "Vekâletname (Vollmacht) ile",
-      vollmachtHinweis: "Kayıt silme için vekâletnameyi (Vollmacht für die Abmeldung) imzalarsınız. Sonra kayıt silme işlemini kulüp yapar.",
+      vollmachtHinweis: "Vekâletnameyi (Vollmacht) imzalarsınız. Kayıt silme işlemini yeni kulüp yapar.",
       einschreiben: "Taahhütlü mektupla (Einschreiben)",
-      einschreibenHinweis: "Taahhütlü mektubu (Einschreiben) eski kulübe kendiniz gönderirsiniz.",
+      einschreibenHinweis: "Mektubu eski kulübe kendiniz gönderirsiniz.",
     },
     mitgliedschaft: {
       titel: { kind: "Çocuğunuz eski kulübün üyesi olarak kalıyor mu?", selbst: "Eski kulübün üyesi olarak kalıyor musunuz?" },
-      hinweis: "Üyelik kendiliğinden bitmez.\nOyuncu olarak kaydı sildirmek de üyeliği bitirmez.",
       kuendigen: "Hayır, üyelikten çıkıyorum",
-      kuendigenHinweis: "Eski kulüpteki üyelikten çıkarsınız (Kündigung).",
       passiv: "Evet, pasif üye olarak",
-      passivHinweis: { kind: "Çocuğunuz orada artık oynamıyor. Üye olarak kalıyor.", selbst: "Orada artık oynamıyorsunuz. Üye olarak kalıyorsunuz." },
+      passivHinweis: { kind: "Orada artık oynamıyor. Üye olarak kalıyor.", selbst: "Orada artık oynamıyorsunuz. Üye olarak kalıyorsunuz." },
       weiss_nicht: "Bilmiyorum",
     },
     anschrift: {
       titel: "Taahhütlü mektup (Einschreiben) eski kulübün hangi adresine gönderilecek?",
-      hinweis: "Bir şey yazmak zorunda değilsiniz. Kulüp size yardım eder.\nAdresi, eski kulübe gönderilecek kayıt silme formuna (Abmeldung) biz yazarız.",
+      hinweis: "Adresi kayıt silme formuna (Abmeldung) yazarız.",
       empfaenger: "Alıcının adı",
       empfaengerHinweis: "Örnek: kulübün yönetim kurulu",
       strasse: "Sokak ve kapı numarası",
@@ -469,7 +482,6 @@ export default {
     },
     spiele: {
       titel: "Son maç ne zamandı?",
-      hinweis: "Bir tarihi bilmiyorsanız alanı boş bırakın.",
       letztes: "Son maç",
       pflicht: "Son lig veya kupa maçı",
       pflichtHinweis: "Hazırlık maçları burada sayılmaz.",
@@ -483,11 +495,10 @@ export default {
     freigabe: {
       titel: { kind: "Eski kulüp çocuğunuzu serbest bırakıyor mu?", selbst: "Eski kulüp sizi serbest bırakıyor mu?" },
       hinweis: "Serbest bırakma (Freigabe) şu demek: Eski kulüp geçişe razı.",
-      jaHinweis: "Eski kulüp onay verdi.",
     },
     wechsel: {
-      titel: { kind: "Çocuğunuz son 6 ayda kulüp değiştirdi mi?", selbst: "Son 6 ayda kulüp değiştirdiniz mi?" },
-      hinweis: "Bir kulüpten başka bir kulübe geçiş kastediliyor.",
+      titel: { kind: "Çocuğunuz bundan önce de kulüp değiştirdi mi?", selbst: "Bundan önce de kulüp değiştirdiniz mi?" },
+      hinweis: "Burada son 6 ay içindeki önceki bir geçiş kastediliyor, bu geçiş değil.",
     },
   },
 
@@ -507,7 +518,6 @@ export default {
 
   ausland: {
     titel: { kind: "Çocuğunuz daha önce Almanya dışında yaşadı mı?", selbst: "Daha önce Almanya dışında yaşadınız mı?" },
-    hinweis: "Almanya dışı: Almanya’da olmayan her ülke.",
     land: "Ülke",
     landHinweis: "Almanya’dan önce en son yaşanan yer.",
     stadt: "Şehir",
@@ -516,9 +526,9 @@ export default {
   wohnen: {
     ort: {
       titel: { kind: "Çocuğunuz nerede yaşıyor?", selbst: "Nerede yaşıyorsunuz?" },
-      gemeinsam: { kind: "Benimle aynı adreste", selbst: "Ebeveynlerimle aynı adreste" },
+      gemeinsam: { kind: "Benimle aynı adreste", selbst: "Ebeveynlerimle birlikte" },
       gemeinsamHinweis: { kind: "Resmî olarak aynı adreste kayıtlıyız.", selbst: "Resmî olarak aynı adreste kayıtlıyız." },
-      nicht_gemeinsam: { kind: "Almanya’da, ama başka bir adreste", selbst: "Almanya’da, ama ebeveynlerimle değil" },
+      nicht_gemeinsam: { kind: "Başka bir adreste", selbst: "Ebeveynlerimden ayrı" },
       nicht_gemeinsamHinweis: { kind: "Resmî olarak farklı adreslerde kayıtlıyız.", selbst: "Resmî olarak farklı adreslerde kayıtlıyız." },
       verwandte: "Almanya’da akrabaların yanında",
       ohne_eltern: "Almanya’da ebeveynler olmadan",
@@ -560,7 +570,6 @@ export default {
     zweiterAmBildschirm: "Diğer ebeveyn onay verdi mi? O zaman kutucuğu işaretleyin.\nOnay vermediyse, üyelik başvurusunu (Aufnahmeantrag) o da imzalar.\nBu ekranda yapılabilir. Ya da çıktıda kalemle.",
     personen: {
       titel: { kind: "{name} için kim karar veriyor?", selbst: "Sizin için kim karar veriyor?" },
-      hinweis: "Telefon numarasını sonra soracağız.",
       erste: { kind: "Sizin bilgileriniz", selbst: "Birinci kişi" },
       zweite: "İkinci kişi",
       rolle: "Bu kişi kim?",
@@ -576,15 +585,15 @@ export default {
 
   besonderes: {
     titel: "Özel bir durum var mı?",
-    hinweis: "Uygun olanı işaretleyin. Hiçbiri uymuyorsa devam edin.",
+    hinweis: "Hiçbiri uymuyorsa devam edin.",
     legende: "Hangisi geçerli?",
-    maedchen: "Bir kız çocuğu erkek takımında oynayacak.",
-    maedchenHinweis: "Bu, C-Jugend ve B-Jugend’de mümkün. Ebeveynlerin onay vermesi gerekir.",
-    herrenAushilfe: "Genç, gerektiğinde Herren (yetişkin erkek) takımında da oynayacak.",
-    herrenAushilfeHinweis: "Bunun için ebeveynlerin onayı ve sağlık raporu (Attest) gerekir.",
-    sonderspielrecht: "Daha genç bir yaş grubunda oynanacak.",
-    sonderspielrechtHinweis: "Bu, örneğin engellilik durumunda mümkün. Bunun için başvuru gerekir.",
-    frauHerren: "Bir kadın Herren (yetişkin erkek) takımında oynamak istiyor.",
+    maedchen: "Erkek takımında oynayan kız",
+    maedchenHinweis: "C-Jugend ve B-Jugend’de ebeveynlerin onayı gerekir.",
+    herrenAushilfe: "Herren (yetişkin erkek) takımında gerektiğinde oynamak",
+    herrenAushilfeHinweis: "Ebeveynlerin onayı ve sağlık raporu (Attest) gerekir.",
+    sonderspielrecht: "Daha küçük bir yaş grubunda oynamak",
+    sonderspielrechtHinweis: "Örneğin engellilik durumunda. Başvuru gerekir.",
+    frauHerren: "Herren (yetişkin erkek) takımında oynayan kadın",
     frauHerrenHinweis: "Bunun için federasyona başvuru gerekir.",
   },
 
@@ -599,7 +608,6 @@ export default {
       titel: "Size nasıl ulaşabiliriz?",
       hinweisKind: "Lütfen burada ebeveyn olarak kendi bilgilerinizi yazın.",
       email: "E-posta",
-      emailHinweis: "Önemli mesajları oraya göndeririz.",
       mobil: "Cep telefonu numarası",
       telefon: "Sabit hat numarası",
       telefonHinweis: "Lütfen en az bir telefon numarası yazın.",
@@ -609,12 +617,11 @@ export default {
   beitrag: {
     gruppe: {
       titel: { kind: "{name} için hangi aidatı ödüyorsunuz?", selbst: "Hangi aidatı ödüyorsunuz?" },
-      vorschlagKopf: "Önerimiz: {gruppe}.",
       vorschlag: "Bunun bedeli yılda {jahr} Euro.\nBu, ayda {monat} Euro eder.",
       vorschlagOhneMonat: "Bunun bedeli yılda {jahr} Euro.",
       aufnahme: "Buna bir kez {betrag} Euro kayıt ücreti eklenir.",
-      andere: "Başka bir grup seçebilirsiniz.",
       legende: "Aidat grubu",
+      andereGruppe: "Başka bir aidat grubu",
       proJahr: "Yılda {jahr} Euro",
       doppel: "Hem futbolda hem karnavalda mısınız?\nAyrı bir aidat hakkında bilgi isteyin.",
       vorgeschlagen: "Öneri",
@@ -634,7 +641,7 @@ export default {
     },
     senator: {
       titel: "Senatör (Senator) olmak ister misiniz?",
-      hinweis: "Senatörler karnaval bölümünü destekler.\nÖzel bir aidat öderler.\nBaşvuruya yönetim kurulu karar verir.",
+      hinweis: "Senatörler karnaval bölümünü destekler.\nBaşvuruya yönetim kurulu karar verir.",
       ja: "Evet, başvuruyorum",
       nein: "Hayır",
     },
@@ -645,7 +652,7 @@ export default {
     hinweis: "Örneğin temel gelir desteği (Grundsicherungsgeld), sosyal yardım (Sozialhilfe), konut yardımı (Wohngeld), çocuk zammı (Kinderzuschlag) ya da sığınmacı yardımları (Asylbewerberleistungen).\nO zaman aidatı çoğu zaman kurum öder.\nBuna Eğitim ve Katılım desteği (Bildung und Teilhabe) denir.",
     ja: "Evet",
     nein: "Hayır",
-    jaHinweis: "Bizimle konuşun. Bir belge düzenleriz.",
+    jaHinweis: "Size bir belge (Bescheinigung) düzenleriz.",
     wenigGeld: "Paranız az mı? Bizimle konuşun.",
   },
 
@@ -653,7 +660,7 @@ export default {
     art: {
       titel: "Nasıl ödemek istersiniz?",
       sepa: "Otomatik çekim (Lastschrift), önerilen",
-      sepaHinweis: "Kulüp aidatı yılda bir kez hesabınızdan çeker.",
+      sepaHinweis: "Aidatı kulüp yılda bir kez hesaptan çeker.",
       rechnung: "Fatura",
       rechnungHinweis: "Aidatı kendiniz havale edersiniz.",
     },
@@ -664,7 +671,7 @@ export default {
       person: "Hesap sahibi",
       vorname: "Ad",
       nachname: "Soyad",
-      anschriftGleich: "Kişi aynı adreste oturuyor.",
+      anschriftGleich: "Aynı adreste oturuyor",
       strasse: "Sokak ve kapı numarası",
       plz: "Posta kodu",
       ort: "Şehir",
@@ -672,7 +679,7 @@ export default {
     iban: {
       titel: "IBAN numaranız nedir?",
       iban: "IBAN",
-      ibanHinweis: "IBAN, banka kartınızın üzerinde yazılıdır.\nBoşlukların önemi yok.",
+      ibanHinweis: "IBAN, banka kartınızın üzerinde yazılıdır.",
       bank: "Bankanın adı",
     },
   },
@@ -682,10 +689,8 @@ export default {
       titel: { kind: "Çocuğunuzun fotoğraflarını gösterebilir miyiz?", selbst: "Fotoğraflarınızı gösterebilir miyiz?" },
       hinweis: "Özgürce karar verirsiniz. Bunu sonra değiştirebilirsiniz.",
       ja: "Evet",
-      jaHinweis: "Nerede olacağını hemen seçersiniz.",
       nein: "Hayır",
       medienLegende: "Fotoğrafları nerede gösterebiliriz?",
-      medienHinweis: "En az bir seçenek seçin.",
       intern: "Kulüpte: ilan panoları ve bültenler",
       web: "İnternette: web sitesi, sosyal medya ve kulüp uygulaması",
       presse: "Gazetede: kulüple ilgili haberler",
@@ -714,13 +719,10 @@ export default {
 
   // Aufsichtspflicht: Minderjährige, die trainieren oder tanzen (Schritt "heimweg").
   heimweg: {
-    titel: "Çocuğunuz antrenmandan sonra eve tek başına gidebilir mi?",
-    hinweis: "Antrenman sırasında kulüp çocuğunuza göz kulak olur.\nBize söyleyin: Çocuğunuz antrenmandan sonra eve nasıl gider?",
+    titel: "Çocuğunuz eve tek başına gidebilir mi?",
+    hinweis: "Antrenman sırasında kulüp çocuğunuza göz kulak olur.",
     allein: "Eve tek başına",
-    alleinHinweis: "Çocuğum antrenmandan sonra eve tek başına gidebilir.",
     abholen: "Biri gelip alır",
-    abholenHinweis: "Çocuğum biri gelip alana kadar bekler.",
-    aendern: "Bunu istediğiniz zaman değiştirebilirsiniz. Değiştirirseniz antrenöre söyleyin.",
   },
 
   notfall: {
@@ -744,7 +746,7 @@ export default {
       allergien: "Alerjiler",
       erkrankungen: "Hastalıklar",
       medikamente: "İlaçlar",
-      medikamenteHinweis: "Çocuğunuzun acil durum ilacı gerekiyor mu? Örneğin astım spreyi ya da adrenalin kalemi. Antrenörle konuşun. C bölümündeki acil durum ve sağlık formunda (Notfall- und Gesundheitsbogen) bunun için satırlar var.",
+      medikamenteHinweis: "Örneğin astım spreyi ya da adrenalin kalemi (Adrenalin-Pen). Antrenörle konuşun.",
       sonstiges: "Diğer",
     },
   },
@@ -753,9 +755,7 @@ export default {
     titel: "Oyuncu lisansı (Spielerpass) için fotoğrafı nasıl alalım?",
     hinweis: "Hessen Futbol Federasyonu (Hessischer Fußball-Verband, HFV) baş ve omuzların göründüğü bir fotoğraf ister.\nYüz iyi görünmelidir.",
     foto: "Şimdi fotoğraf çekiyorum",
-    fotoHinweis: "Telefonun kamerasıyla.",
-    datei: "Cihazımdan bir fotoğraf seçiyorum",
-    dateiHinweis: "Zaten elinizde olan bir fotoğraf.",
+    datei: "Bir fotoğraf seçiyorum",
     verein: "Fotoğrafı kulüp çeker",
     vereinHinweis: "İlk antrenmanda.",
     machen: "Fotoğraf çek",
@@ -768,7 +768,7 @@ export default {
 
   nachweise: {
     titel: "Hangi evraklar şimdiden elinizde?",
-    hinweis: "Elinizdeki her evrakın fotoğrafını çekin.\nEksik olanları sonra teslim edebilirsiniz.\nFotoğraf cihazınızda kalır.",
+    hinweis: "Elinizdeki her evrakın fotoğrafını çekin.\nEksik olanları sonra gönderin.",
     habe: "Bende var",
     fehlt: "Henüz yok",
     foto: "Fotoğraf çek",
@@ -779,12 +779,10 @@ export default {
     entfernt: "Dosya kaldırıldı.",
     vorschau: "Önizleme: {datei}",
     pdf: "PDF dosyası",
-    warum: "Neden?",
     wie: "Nasıl edinirsiniz:",
     wo: "Nerede?",
     dateien: "Dosyalarınız:",
     art: {
-      pflicht: "Bu gereklidir.",
       verein: "Kulüp bunu istiyor.",
       freiwillig: "Bu isteğe bağlıdır.",
       nur_wenn: "Sizin için geçerliyse gereklidir.",
@@ -797,25 +795,23 @@ export default {
     titel: "Nasıl imzalamak istersiniz?",
     weg: {
       bildschirm: "Ekranda, izin verilen yerlerde",
-      bildschirmHinweis: "Kulüp evrakını burada parmağınızla imzalarsınız.",
+      bildschirmHinweis: "Burada parmağınızla imzalarsınız.",
       bildschirmAlles: "Ekranda",
-      bildschirmAllesHinweis: "Her şeyi burada parmağınızla imzalarsınız. Hessen Futbol Federasyonu (Hessischer Fußball-Verband, HFV) sayfaları da buna dahildir.",
+      bildschirmAllesHinweis: "Federasyon formlarını da parmağınızla imzalarsınız.",
       papier: "Her şeyi kâğıt üzerinde imzalıyorum",
-      papierHinweis: "Dosyayı yazdırırsınız ve kalemle imzalarsınız.",
+      papierHinweis: "Yazdırırsınız ve kalemle imzalarsınız.",
     },
     satzung: {
-      titel: "Kulübün tüzüğü (Satzung)",
       erklaerung: "Tüzük (Satzung), kulübün kurallarıdır.",
       link: "Tüzüğü (Satzung) okuyun",
       linkZusatz: "PDF, yeni sekmede açılır",
       ohneLink: "Tüzüğü (Satzung) kulübün internet sitesinde bulabilirsiniz.",
       label: "Tüzüğü (Satzung) okudum.",
-      pflicht: "Kutucuk işaretlenmeden ekranda imzalayamazsınız.",
       freiwillig: "İsteğe bağlı. Kutucuğu işaretlemezseniz, çıktıda elle işaretlersiniz.",
     },
-    hierTitel: "Bunları burada imzalıyorsunuz",
     hierHinweis: "Parmağınızla, kalemle ya da fareyle çizin.",
     giltFuer: "Bu imza şunlar için geçerlidir:",
+    giltFuerBlaetter: "Bu imza {n} sayfa için geçerlidir",
     person: {
       mitglied: { kind: "İmza: {name}", selbst: "İmzanız" },
       sorgeberechtigte: "İmza: {person}",
@@ -823,11 +819,11 @@ export default {
       kontoinhaber: "Hesap sahibinin imzası: {person}",
       spieler: { kind: "İmza: {name}", selbst: "İmzanız" },
       spielerHinweis: {
-        kind: "Çocuğunuz yazı yazabiliyor mu? O zaman burada kendisi imzalar.",
-        selbst: "Henüz 18 yaşında değilsiniz. Burada ayrıca siz de imzalayın.",
+        kind: "Çocuğunuz yazı yazabiliyor mu? O zaman kendisi imzalar.",
+        selbst: "18 yaşından küçük müsünüz? O zaman siz de imzalayın.",
       },
       zweiteEltern: "İmza: diğer ebeveyn",
-      zweiteHinweis: "Diğer ebeveyn burada kendisi imzalar.\nYa da daha sonra çıktıda kalemle imzalar.",
+      zweiteHinweis: "Diğer ebeveyn burada kendisi imzalar.\nYa da daha sonra çıktıyı kalemle imzalar.",
       ersteSorge: "İmzanız",
     },
     stand0: "Henüz imzalanmadı",
@@ -849,7 +845,7 @@ export default {
 
   pruefen: {
     titel: "Her şey doğru mu?",
-    hinweis: "Bilgilerinizi kontrol edin.\nBir şeyi düzeltmek için “Değiştir”i kullanın.",
+    hinweis: "Bir şeyi düzeltmek için “Değiştir”i kullanın.",
     weiter: "Her şey doğru – dosyayı oluştur",
     aendern: "Değiştir",
     aendernLang: "Değiştir: {bereich}",
@@ -947,7 +943,6 @@ export default {
       mitStift: "Ekranda değil – çıktıda kalemle",
       betragJahr: "{gruppe}, yılda {jahr} Euro",
     },
-    hinweiseTitel: "Bilmeniz gerekenler",
     weitereHinweise: "Diğer notlar ({anzahl})",
     klaertVerein: "Bunu kulüp netleştirir",
     fristUnsicher: "Bu bir tahmindir. Kulüp bunu ayrıntılı kontrol eder.",
@@ -975,8 +970,6 @@ export default {
     nochmal: "Yeniden dene",
     datei: "Dosya: {name}",
     info: "{seiten} sayfa, {groesse}",
-    teileTitel: "Dosyanın içinde şunlar var:",
-    teil: "{titel} (sayfa {von} ile {bis} arası)",
     // Titel der Teile des PDF (SCHNITTSTELLEN Abschnitt 9)
     teilTitel: {
       A: "A bölümü – Sizin için",
@@ -1000,12 +993,9 @@ export default {
     // Dosyayı e-posta ile gönderme (M10); {knopf} düğmenin yazısıdır. E-postanın konusu ve metni Almanca kalır (hilfen.js).
     senden: {
       titel: "Dosyayı kulübe nasıl gönderirsiniz",
-      einleitung: "Dosyayı e-posta ile kulüp ofisine (Geschäftsstelle) gönderin.",
-      handyTitel: "Telefonda",
-      handy1: "Yukarıdaki “{knopf}” düğmesine dokunun.",
-      handy2: "E-posta uygulamanızı seçin.",
-      handy3: "E-postayı aşağıdaki adrese gönderin.",
-      computerTitel: "Bilgisayarda",
+      handy1: "Aşağıdaki “{knopf}” düğmesine dokunun.",
+      handy2: "Yukarıdaki “{knopf}” düğmesine dokunun. E-posta uygulamanızı seçin. Dosya zaten ekli.",
+      handy3: "Adresi “Kime” alanına yapıştırın. E-postayı gönderin.",
       computer1: "Yukarıdaki “{knopf}” düğmesine tıklayın.",
       computer2: "Yeni bir e-posta yazın. Dosyayı ekleyin.",
       computer3: "E-postayı aşağıdaki adrese gönderin.",
@@ -1014,7 +1004,7 @@ export default {
       kopiert: "Adres kopyalandı.",
       kopierenFehler: "Burada kopyalama çalışmıyor. Adres seçili. Adresi kendiniz kopyalayın.",
       oeffnen: "Kulüp ofisine yeni e-posta aç",
-      anhang: "Dosyayı e-postaya ekleyin.",
+      anhang: "“{knopf}” düğmesini kullanırsanız dosyayı kendiniz ekleyin.",
     },
     naechsteTitel: "Sonraki adımlar",
     unterschriftTraining: "Hessen Futbol Federasyonu (Hessischer Fußball-Verband, HFV) sayfalarını ilk antrenmanda kalemle imzalarsınız.",
@@ -1024,10 +1014,12 @@ export default {
     unterschriftTrainingAlle: "Tüm sayfaları ilk antrenmanda kalemle imzalarsınız. Kulüp bunları yazdırır.",
     unterschriftFertig: "Her şeyi ekranda imzaladınız. Neleri yazdırmanız gerektiği dosyanın A bölümünde yazıyor.",
     unterschriftRest: "Bazı imzalar hâlâ eksik. Bunlar PDF’deki mavi işaretlerdir.\nOralara kalemle imza atın. Neleri yazdırmanız gerektiği dosyanın A bölümünde yazıyor.",
+    unterschriftFoto: "İmzalı sayfaların fotoğrafını çekin veya tarayın. Bunları aynı e-postayla gönderin.",
     fehltTitel: "Bu evraklar hâlâ eksik:",
     fehltHinweis: "Elinize geçer geçmez e-posta ile sonradan gönderin.",
     nichtWhatsapp: "Lütfen dosyayı WhatsApp ile göndermeyin. Özel bilgiler içeriyor.",
     teilC: "C bölümü (Teil C) sağlık bilgileri içerir. Kulüp bunu ayrı saklar.",
+    danach: "Ardından kulüp kaydınızı kontrol eder.",
     weiterePerson: "Başka bir kişiyi kaydet",
     weiterePersonHinweis: "Adres, iletişim, ebeveyn ve ödeme bilgileri aynen aktarılır.",
     neuePerson: "Şimdi bir sonraki kişiyi kaydediyorsunuz.",

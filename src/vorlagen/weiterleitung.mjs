@@ -36,7 +36,13 @@ function wsDateiname(url) {
 // relativiereFuerWorkspace() läuft und dadurch automatisch auf den
 // geflachten Workspace-Dateinamen umgeschrieben wird (identisch mit
 // wsDateiname(zuUrl) unten, siehe Prüfung in tools/pruefen.mjs).
-export function weiterleitungsSeite({ vonUrl, pfad, zuPfadTeil, zuUrl, zuTitel }) {
+//
+// P1, Runde 2 (12.10.2026): Die Seite „Aufnahmeantrag online“ wird mit dem Anmelde-Assistenten zur Weiterleitung auf „Mitglied werden“
+// (src/seiten/aufnahmeantrag.mjs). Dafür gibt es drei Angaben, die die Texte der Mannschaftsseiten (Anrede „du“) ersetzen: satz (der Satz
+// unter der Überschrift), linkText (Text des Links) und beschreibung (meta description). Ohne sie bleiben die Texte genau wie bisher,
+// die Seiten der Mannschaften ändern sich nicht. kopfZusatz: weitere Tags im <head> hinter den beiden Meta-Angaben (zum Beispiel das
+// Skript für die App, damit der Link dort auf die App-Seite führt).
+export function weiterleitungsSeite({ vonUrl, pfad, zuPfadTeil, zuUrl, zuTitel, satz, linkText, beschreibung, kopfZusatz: weitererKopf = "" }) {
   const zuHref = `${pfad}${zuPfadTeil}`;
   const wsZiel = wsDateiname(zuUrl);
 
@@ -47,22 +53,22 @@ export function weiterleitungsSeite({ vonUrl, pfad, zuPfadTeil, zuUrl, zuTitel }
   const kopfZusatz = "\n" + [
     `<meta http-equiv="refresh" content="0; url=${escapeHtml(wsZiel)}">`,
     `<meta name="robots" content="noindex">`,
-  ].join("\n");
+  ].join("\n") + weitererKopf;
 
   // Kein weiterer Inhalt (W6-Spezifikation A3): nur die sichtbare h1 und der
   // Weiter-Link.
   const inhalt = `<section class="abschnitt seitenkopf">
   <div class="container fluss">
     <h1>Diese Seite ist umgezogen</h1>
-    <p class="seitenkopf__lead">${escapeHtml(zuTitel)} findest du jetzt auf der Mannschaftsseite.</p>
-    <p><a href="${escapeHtml(zuHref)}">Weiter zu ${escapeHtml(zuTitel)}</a></p>
+    <p class="seitenkopf__lead">${escapeHtml(satz ?? `${zuTitel} findest du jetzt auf der Mannschaftsseite.`)}</p>
+    <p><a href="${escapeHtml(zuHref)}">${escapeHtml(linkText ?? `Weiter zu ${zuTitel}`)}</a></p>
   </div>
 </section>`;
 
   return {
     url: vonUrl,
     title: `Umgezogen: ${zuTitel}`,
-    description: `Diese Seite ist umgezogen. ${zuTitel} findest du jetzt auf der jeweiligen Mannschaftsseite.`,
+    description: beschreibung ?? `Diese Seite ist umgezogen. ${zuTitel} findest du jetzt auf der jeweiligen Mannschaftsseite.`,
     inhalt,
     kopfZusatz,
     wsZiel,

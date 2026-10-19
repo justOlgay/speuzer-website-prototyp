@@ -53,9 +53,26 @@ function zeichneStrich(ctx, punkte, breite) {
   ctx.stroke();
 }
 
+// "Diese Unterschrift gilt für …" (P3 Teil b, S7): Gilt die Unterschrift nur für ein Blatt, steht die Zeile direkt da, nämlich der Titel mit
+// Doppelpunkt und dahinter das Blatt. Der Blattname trägt oft selbst einen Doppelpunkt ("Titel: Person"); dann steht dort ein Gedankenstrich, damit
+// nicht zwei Doppelpunkte in einer Zeile stehen. Ab zwei Blättern ist es der zugeklappte Bereich mit einer Zeile je Blatt; seine Beschriftung
+// ("Diese Unterschrift gilt für {n} Blätter", D-07) kommt fertig in `liste.mehrere`. In beiden Fällen trägt das Element die Kennung, auf die
+// aria-describedby des Feldes zeigt.
+function giltBereich(id, liste) {
+  const n = liste.punkte.length;
+  if (n === 1) {
+    const blatt = String(liste.punkte[0]).replace(": ", " \u2013 ");
+    return h("p", { klasse: "anm-hinweis anm-unterschrift__gilt", id: id + "-hinweis", "data-gilt-fuer": "1" }, String(liste.titel).trim() + " " + blatt);
+  }
+  return h("details", { klasse: "anm-hinweis anm-einzelheiten anm-unterschrift__gilt", id: id + "-hinweis", "data-gilt-fuer": String(n) },
+    h("summary", {}, liste.mehrere),
+    h("ul", { klasse: "anm-liste-punkte" }, liste.punkte.map((x) => h("li", {}, x))));
+}
+
 // o: { speicher, id, titel, hinweis, hinweisListe, zusatz, texte: { ariaLabel, stand0, standOk,
 // standZuKurz, loeschen }, beiAenderung() }
-// hinweis: ein Satz; hinweisListe: { titel, punkte: [Text, …] } – "Diese Unterschrift gilt für:" mit einer Zeile je Blatt
+// hinweis: ein Satz; hinweisListe: { titel, mehrere, punkte: [Text, …] } – "Diese Unterschrift gilt für": bei einem Blatt eine Zeile, ab zwei Blättern
+// zugeklappt unter der Beschriftung `mehrere` mit einer Zeile je Blatt (giltBereich)
 export function unterschriftFeld(o) {
   const speicher = o.speicher;
   const leinwand = h("canvas", { klasse: "anm-unterschrift__leinwand", role: "img", "aria-label": o.texte.ariaLabel });
@@ -64,7 +81,7 @@ export function unterschriftFeld(o) {
   const huelle = h("div", { klasse: "anm-unterschrift", role: "group", tabindex: "-1", "aria-labelledby": o.id + "-titel", "aria-describedby": o.id + "-hinweis " + (o.zusatz ? o.id + "-zusatz " : "") + o.id + "-stand", "data-feld": o.feld, "data-unterschrift": o.wer },
     h("p", { klasse: "anm-unterschrift__titel", id: o.id + "-titel" }, o.titel),
     o.hinweisListe && o.hinweisListe.punkte.length
-      ? h("div", { klasse: "anm-hinweis anm-unterschrift__gilt", id: o.id + "-hinweis" }, h("p", {}, o.hinweisListe.titel), h("ul", { klasse: "anm-liste-punkte" }, o.hinweisListe.punkte.map((x) => h("li", {}, x))))
+      ? giltBereich(o.id, o.hinweisListe)
       : o.hinweis ? h("p", { klasse: "anm-hinweis", id: o.id + "-hinweis" }, o.hinweis) : null,
     o.zusatz ? h("p", { klasse: "anm-hinweis", id: o.id + "-zusatz" }, o.zusatz) : null,
     h("p", { klasse: "anm-fehler", id: o.id + "-f", hidden: true }),

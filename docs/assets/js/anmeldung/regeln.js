@@ -1,5 +1,5 @@
 /*
-  Regelwerk des Anmelde-Assistenten FFV Sportfreunde 04 (Stand 2026-10-12, Saison 2026/27)
+  Regelwerk des Anmelde-Assistenten FFV Sportfreunde 04 (Stand 2026-10-19, Saison 2026/27)
 
   Reine Funktionen ohne Browser- und Zeitzugriff: Das Heute-Datum kommt immer als
   Parameter "JJJJ-MM-TT" hinein, die Konfiguration (data/anmeldung.json und weitere
@@ -37,7 +37,7 @@
   Datenschutz: Das Modul liest nur die übergebenen Antworten. Es speichert und sendet nichts.
 */
 
-export const VERSION = "2026-10-12.1";
+export const VERSION = "2026-10-19.1";
 
 // ---------------------------------------------------------------------------
 // Schlüssel-Register: alle Schlüssel, die auswerten() zurückgeben kann. Zu jedem
@@ -54,7 +54,7 @@ export const SCHLUESSEL = {
     // Fristen
     "antrag_bis",
     // Infos
-    "frist_annahme_heute", "probetraining_versicherung", "mitgliedschaft_beginn", "kuendigung_jahresende", "ohne_spielrecht_kein_spiel", "mitgliedschaft_zuerst",
+    "frist_annahme_heute", "mitgliedschaft_beginn", "kuendigung_jahresende", "ohne_spielrecht_kein_spiel", "mitgliedschaft_zuerst",
     "spielerfoto_hinweis", "attest_kosten", "unterlagen_kein_whatsapp", "juni_wechselzeit", "vollmacht_ohne_kurze_frist",
     "wechsel_lv_anfrage", "entschaedigung_hinweis", "nachtraegliche_freigabe", "sperre_laeuft", "sonderwege_jugend",
     "e_aelter_juni", "international_dauer", "international_unter10", "zuzug_pruefen", "maedchen_jungenteam",
@@ -1169,7 +1169,8 @@ function sammleHinweise(p, e) {
   liste(F.aenderungen).forEach((x) => { if (p.heute >= x.ab) h("offen", x.key, { datum: datumText(x.ab, sp) }); });
 
   // --- Für alle ---
-  if (p.aktiv) h("info", "probetraining_versicherung"); // ARAG-Merkblatt A.II.2.1, Stand 2026-01-01: Nichtmitglieder nicht versichert
+  // Kein Hinweis zur Versicherung beim Probetraining mehr (P3, 12.10.2026): Die Anmeldung gibt es erst nach dem Probetraining; der Satz steht
+  // auf der Website, wo er vor dem Probetraining zu lesen ist (Entscheidung der 1. Vorsitzenden vom 11.10.2026: keine Versicherung für Nichtmitglieder).
   h("info", "mitgliedschaft_beginn"); // R15: Satzung § 6, Tag der Anmeldung (Entscheidung der 1. Vorsitzenden vom 11.10.2026)
   h("info", "kuendigung_jahresende"); // Aufnahmeantrag FFV Seite 1, Satzung § 8: Austritt nur zum 31. Dezember per Einschreiben
   if (p.passiv) h("info", "passiv_hinweis");

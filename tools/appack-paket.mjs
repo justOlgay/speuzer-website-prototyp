@@ -322,7 +322,7 @@ const ANM_KONFIG_MUSTER = /(<script type="application\/json" id="anmeldung-konfi
 const ANM_NUR_BEGLEIT = [
   "seite.titel", "seite.beschreibung", "band",
   "demo.werkzeugTitel", "demo.vorfuehrung", "demo.vereinssichtTitel", "demo.vereinssichtText", "demo.vereinssichtAn",
-  "demo.vereinssichtAus", "demo.beispieleTitel", "demo.beispieleText", "demo.konzeptLink", "demo.beispielGeladen",
+  "demo.vereinssichtAus", "demo.beispieleTitel", "demo.beispieleText", "demo.konzeptLink", "demo.beispielGeladen", "demo.codeZuerst",
 ];
 
 // assistent.js liest aus beispiele.js nur BEISPIELE und beispielAntworten, die Live-Seite hat keine Knöpfe dafür.
@@ -659,14 +659,23 @@ function baueLiesmichAnmeldung(anmeldung) {
   const module = namen.filter((n) => /^anmeldung-(?!texte-|schrift|vorlage-).+\.js$/.test(n));
   const texte = namen.filter((n) => n.startsWith("anmeldung-texte-"));
   const binaer = namen.filter((n) => n === "anmeldung-schrift.js" || n.startsWith("anmeldung-vorlage-"));
-  return `## Anmelde-Assistent (Livegang, M6)
+  return `## Anmelde-Assistent (Livegang, M6; Zugang mit Code, P1)
 
 Dieser Abschnitt steht nur im Paket, das mit dem Schalter \`ANMELDUNG_LIVE\`
 (\`src/vorlagen/hilfen.mjs\`) gebaut wurde. Ohne den Schalter gibt es diese
 Dateien nicht, und \`mitglied-werden.html\` führt nicht auf die Seite.
 
-\`${ANM_SEITE}\` ist die Live-Seite des Anmelde-Assistenten („Schritt für Schritt
-anmelden“, von \`mitglied-werden.html\` aus verlinkt, in der App mit \`?app=1\`).
+\`${ANM_SEITE}\` ist die Live-Seite des Anmelde-Assistenten. Sie startet nur mit dem Code
+vom Probetraining (Entscheidung der 1. Vorsitzenden vom 12.10.2026): Link
+\`${ANM_SEITE}?code=<CODE>\` (QR-Code und Blatt für die Trainer: \`node tools/anmeldung-zugang.mjs\`),
+sonst ist die Code-Seite der erste Bildschirm. Im Paket stehen nur die Prüfwerte (SHA-256) aus
+\`data/anmeldung.json › zugang › pruefwerte\` in der Konfiguration der Seite; ist die Liste leer, gibt es
+keine Code-Abfrage. Verlinkt ist die Seite von \`mitglied-werden.html\` („Jetzt anmelden“) und
+\`verein-downloads.html\` aus. In der App öffnet ein Link auf \`${ANM_SEITE}\` im Browser (\`ext://https://…\`, das
+Skript der Seiten setzt es um); \`${ANM_SEITE}?app=1\` zeigt nur die Übergabe „Im Browser öffnen“. Auf der Website öffnen
+die Links auf \`${ANM_SEITE}\` in einem neuen Fenster (\`target="_blank"\`), weil die Hülle die Seiten in einem Rahmen ohne
+\`allow\`-Angaben zeigt; läuft der Assistent doch in einem Rahmen oder im Browser einer anderen App (Facebook, Instagram, WebView),
+steht oben ein Hinweis (Modul \`anmeldung-umgebung.js\`).
 Sprachen: ${anmeldung.sprachen.join(", ")} (Schalter \`ANMELDUNG_SPRACHEN_LIVE\`). Alle Dateien liegen flach im
 Ordner \`web\` (keine Unterordner), nur als .html, .css und .js:
 
@@ -679,17 +688,24 @@ Ordner \`web\` (keine Unterordner), nur als .html, .css und .js:
   Kopf der Datei) und \`anmeldung-vorlage-<name>.js\` (die HFV-Vordrucke und der Aufnahmeantrag des Vereins; Größe und
   SHA-256 prüft der Assistent beim Laden gegen die Konfiguration). Beide Arten werden erst beim Erstellen der
   PDF-Datei geladen.
-- \`${ANM_PDFLIB}\` und \`${ANM_FONTKIT}\` (schon im Ordner, Teil des Aufnahmeantrags) werden mitbenutzt.
+- \`${ANM_PDFLIB}\` und \`${ANM_FONTKIT}\` (schon im Ordner, bisher Teil des Aufnahmeantrags) werden vom Assistenten mitbenutzt. \`aufnahmeantrag.js\`
+  (Formular und PDF-Erzeugung der alten Seite „Aufnahmeantrag online“) gehört nicht mehr ins Paket, weil keine Seite es lädt; der Abschnitt „Skripte für den
+  Aufnahmeantrag online“ weiter oben beschreibt den Stand davor. Die alte Datei im CMS kann liegen bleiben.
 
 Reihenfolge beim Einspielen: erst alle \`anmeldung-*.js\` (Base64-Module, Texte, Code) und \`anmeldung.css\`, dann
-\`anmeldung.html\`, zuletzt \`mitglied-werden.html\` (erst sie verlinkt die neue Seite). So ist nie eine Seite
-sichtbar, deren Dateien noch fehlen. Prüfen nach dem Einspielen: \`node tools/appack-paket-pruefen.mjs\` für das
+\`anmeldung.html\`, zuletzt \`mitglied-werden.html\` und \`verein-downloads.html\` (erst sie verlinken die neue Seite) und alle übrigen Seiten
+(ihr Skript für die App kennt jetzt den Weg in den Browser). Dazu gehört \`aufnahmeantrag.html\`: Sie ist jetzt eine Weiterleitung auf
+\`mitglied-werden.html\` (kurzer Satz, Link, \`<meta http-equiv="refresh">\`); die Datei im CMS wird beim Einspielen ersetzt, gelöscht wird nichts.
+So ist nie eine Seite sichtbar, deren Dateien noch fehlen.
+Für die App kommt \`assets/app/Mitglied-werden-App.html\` an die Workspace-Wurzel (nicht in diesen Ordner; Schritte in
+\`assets/app/LIESMICH.md\`). Prüfen nach dem Einspielen: \`node tools/appack-paket-pruefen.mjs\` für das
 Paket und der Abgleich der SHA-256 aus \`manifest.json\` mit den Dateien im CMS.
 
 Im CMS zu prüfen: Dateien dieser Größe (bis ${Math.round(Math.max(...[...anmeldung.dateien.values()].map((v) => Buffer.byteLength(v))) / 1024)} KB; Schrift und Vordrucke in
 Zeilen zu 100 Zeichen) im Quellcode-Editor; \`cdn.appack.de\` muss \`.js\` als JavaScript ausliefern (ES-Module verlangen
-das; bei \`aufnahmeantrag.js\` ist es \`application/javascript\`). Rückweg: die \`anmeldung*\`-Dateien löschen und die
-vorherige \`mitglied-werden.html\` wieder einspielen.
+das; bei der schon eingespielten \`aufnahmeantrag.js\` ist es \`application/javascript\`). Rückweg: die \`anmeldung*\`-Dateien löschen und die
+vorherigen \`mitglied-werden.html\`, \`verein-downloads.html\` und \`aufnahmeantrag.html\` (die alte Seite „Aufnahmeantrag online“) wieder einspielen
+(das Modul „Mitglied werden“ der App wieder auf den bisherigen Seitenlink stellen; \`aufnahmeantrag.js\` im CMS nicht löschen, solange der Rückweg offen ist).
 
 `;
 }
@@ -772,7 +788,7 @@ Widgets sind bei FUSSBALL.DE nur für die Domain \`cdn.appack.de\` freigegeben �
 lokal oder auf GitHub Pages zeigen sie eine Fehlermeldung von FUSSBALL.DE, das
 ist kein Seitenfehler (siehe \`tools/appack-paket-pruefen.mjs\`).
 
-## Skripte für den Aufnahmeantrag online (28.09.2026)
+## Skripte für den Aufnahmeantrag online (28.09.2026${anmeldung ? "; Stand vor dem Anmelde-Assistenten, siehe den Abschnitt dazu weiter unten" : ""})
 
 \`aufnahmeantrag.html\` lädt ihre Skripte aus demselben Ordner \`web\`:
 \`aufnahmeantrag.js\` (Formular, Unterschriften, PDF-Erzeugung) sofort,
@@ -875,12 +891,18 @@ async function main() {
       if (!webSkripte.includes(datei)) throw new Error(`Anmelde-Assistent: ${datei} fehlt in docs/assets/js/antrag/ (wird mitbenutzt)`);
     }
   }
-  const paketDateien = new Set([...htmlDateien, "site.css", ...webSkripte, ...(anmeldung ? anmeldung.dateien.keys() : [])]);
+  // Mit dem Anmelde-Assistenten (P1, Runde 2) ist aufnahmeantrag.html eine Weiterleitung auf mitglied-werden.html (src/seiten/aufnahmeantrag.mjs) und
+  // lädt kein Skript mehr. aufnahmeantrag.js (Formular und PDF-Erzeugung der alten Seite) kommt dann nicht ins Paket; im CMS bleibt die alte Datei liegen
+  // (es wird nichts gelöscht). pdf-lib und fontkit braucht der Assistent: Sie bleiben und zählen als verwendet.
+  const NUR_ALTE_SEITE = new Set(["aufnahmeantrag.js"]);
+  const paketSkripte = anmeldung ? webSkripte.filter((datei) => !NUR_ALTE_SEITE.has(datei)) : webSkripte;
+  const paketDateien = new Set([...htmlDateien, "site.css", ...paketSkripte, ...(anmeldung ? anmeldung.dateien.keys() : [])]);
   const zaehler = {
     cssLink: 0, href: 0, src: 0, srcset: 0, content: 0, poster: 0, dataStern: 0, cssUrl: 0,
     nurAppackHidden: 0, nurPrototyp: 0, canonical: 0, ogUrl: 0,
     webSkripte: new Set(), webSkriptVerweise: 0, anmeldungVerweise: 0,
   };
+  if (anmeldung) for (const datei of [ANM_PDFLIB, ANM_FONTKIT]) zaehler.webSkripte.add(datei);
   const manifestEintraege = [];
   let gesamtBytes = 0;
 
@@ -901,7 +923,7 @@ async function main() {
 
   // Skripte des Aufnahmeantrags unverändert in den Ordner web/ (siehe
   // WEB_SKRIPTE_DIR oben); jede Datei muss von einer Seite verwendet werden.
-  for (const datei of webSkripte) {
+  for (const datei of paketSkripte) {
     if (!zaehler.webSkripte.has(datei)) {
       throw new Error(`docs/assets/js/antrag/${datei}: von keiner Seite verwendet – nicht ins Paket`);
     }
@@ -948,7 +970,7 @@ async function main() {
   writeFileSync(LIESMICH_PFAD, liesmich, "utf8");
 
   console.log("=== appack-paket.mjs: Zusammenfassung ===");
-  console.log(`Dateien: ${manifestEintraege.length} (${htmlDateien.length} HTML + 1 site.css + ${webSkripte.length} Skripte)`);
+  console.log(`Dateien: ${manifestEintraege.length} (${htmlDateien.length} HTML + 1 site.css + ${paketSkripte.length} Skripte)`);
   console.log(`Bytes gesamt: ${gesamtBytes}`);
   console.log("Ausgabemodus (W2):");
   console.log(`  data-nur-appack: "hidden" entfernt (jetzt sichtbar): ${zaehler.nurAppackHidden}×`);

@@ -44,7 +44,8 @@ export const start = {
   teile: () => ["haupt"],
   render(k) {
     // Die Sprachwahl steht nicht in dieser Seite, sondern ganz oben im Seitenkopf (src/begleit/anmeldung.mjs, verdrahtet in
-    // assistent.js): Sie soll im ersten Bildschirm stehen, vor dem deutschen Erklärtext. Dort steht auch der Hinweis für die App.
+    // assistent.js): Sie soll im ersten Bildschirm stehen, vor dem deutschen Erklärtext. Kurz gehalten (Stilregeln, P1): Die
+    // Zusicherung "Alles bleibt auf Ihrem Gerät" steht in der Fußzeile jeder Seite, die Hilfe oben in der Leiste.
     return {
       titel: k.t("start.titel"),
       weiterText: k.t("start.los"),
@@ -54,8 +55,6 @@ export const start = {
         h("h3", { klasse: "anm-zwischentitel" }, k.t("start.brauchenTitel")),
         h("ul", { klasse: "anm-liste-punkte" }, k.tl("start.brauchen").map((x) => h("li", {}, x))),
         h("p", { klasse: "anm-text" }, k.t("start.dauer")),
-        ...absaetze(k.t("start.datenschutz")),
-        h("p", { klasse: "anm-hinweis" }, k.t("start.hilfe")),
       ],
     };
   },
@@ -74,11 +73,10 @@ export const wer = {
         kartenAuswahl(k, {
           pfad: "wer",
           optionen: [
-            { wert: "kind", label: k.t("wer.kind"), hinweis: k.t("wer.kindHinweis") },
-            { wert: "selbst", label: k.t("wer.selbst"), hinweis: k.t("wer.selbstHinweis") },
+            { wert: "kind", label: k.t("wer.kind") },
+            { wert: "selbst", label: k.t("wer.selbst") },
           ],
         }),
-        ...absaetze(k.t("wer.mehrere"), "anm-hinweis"),
       ],
     };
   },
@@ -101,7 +99,7 @@ export const name = {
       titel: k.t("name.titel"),
       inhalt: [
         ...absaetze(k.t("name.hinweis"), "anm-hinweis"),
-        textfeld(k, { pfad: "vorname", label: k.t("name.vorname"), hinweis: k.t("name.vornameHinweis"), autocomplete: selbst ? "given-name" : "off", maxlength: 40 }),
+        textfeld(k, { pfad: "vorname", label: k.t("name.vorname"), autocomplete: selbst ? "given-name" : "off", maxlength: 40 }),
         textfeld(k, { pfad: "nachname", label: k.t("name.nachname"), autocomplete: selbst ? "family-name" : "off", maxlength: 40 }),
         warnung,
       ],
@@ -128,7 +126,7 @@ export const geburt = {
         titel: k.t("geburt.datum.titel"),
         inhalt: [
           datumFelder(k, { pfad: "geburtsdatum", legende: k.t("geburt.datum.legende"), autocompleteVorsatz: k.a.wer === "selbst" ? "bday" : null }),
-          textfeld(k, { pfad: "geburtsort", label: k.t("geburt.datum.ort"), hinweis: k.t("geburt.datum.ortHinweis"), maxlength: 50 }),
+          textfeld(k, { pfad: "geburtsort", label: k.t("geburt.datum.ort"), maxlength: 50 }),
           landAuswahl(k, { pfad: "geburtsland", label: k.t("geburt.datum.land") }),
         ],
       };
@@ -212,7 +210,8 @@ export const pass = {
     if (teil === "deutsch") {
       return {
         titel: k.t("pass.deutsch.titel"),
-        inhalt: [kartenAuswahl(k, { pfad: "deutsch", hinweis: k.t("pass.deutsch.hinweis"), optionen: JANEINWEISS(k) })],
+        // Der Kinderreisepass betrifft nur Kinder: Wer sich selbst anmeldet, liest den Hinweis nicht.
+        inhalt: [kartenAuswahl(k, { pfad: "deutsch", hinweis: k.a.wer !== "selbst" ? k.t("pass.deutsch.hinweis") : null, optionen: JANEINWEISS(k) })],
       };
     }
     return {
@@ -251,7 +250,7 @@ export const ausland = {
     return {
       titel: k.t("ausland.titel"),
       inhalt: [
-        kartenAuswahl(k, { pfad: "auslandGewohnt", hinweis: k.t("ausland.hinweis"), optionen: JANEIN(k) }),
+        kartenAuswahl(k, { pfad: "auslandGewohnt", optionen: JANEIN(k) }),
         block,
       ],
     };
@@ -424,7 +423,7 @@ export const sorge = {
     };
     return {
       titel: k.t("sorge.personen.titel"),
-      inhalt: [h("p", { klasse: "anm-hinweis" }, k.t("sorge.personen.hinweis")), ...Array.from({ length: anzahlSorge(k) }, (_, i) => person(i))],
+      inhalt: Array.from({ length: anzahlSorge(k) }, (_, i) => person(i)),
     };
   },
   pruefe(k, teil) {

@@ -232,7 +232,11 @@ function pruefeAnmeldungDateien() {
   return fehler;
 }
 
-// "Mitglied werden": mit Assistent der Hauptknopf (Web und App) und die Nebenwege, ohne ihn kein Verweis auf die Seite.
+// "Mitglied werden" und die Wege zur Anmeldung. Mit Assistent (Paket P1, 12.10.2026): genau ein Weg, der Hauptknopf „Jetzt anmelden“ auf
+// anmeldung.html (Web und App gleich); die alten Wege (Aufnahmeantrag-Vordruck zum Ausfüllen, Seite „Aufnahmeantrag online“, Formular der
+// App, Antrag per E-Mail) sind von keiner Seite mehr verlinkt. Runde 2 (12.10.2026): Schritt 1 ohne „(nur Fußball)“, die Unterlagenlisten in einem
+// zugeklappten Bereich „Welche Unterlagen brauche ich?“, „Zum Herunterladen“ ohne Info-Blatt und „Wichtige Unterlagen“, und aufnahmeantrag.html ist eine
+// Weiterleitung auf mitglied-werden.html (aufnahmeantrag.js liegt nicht mehr im Paket). Ohne Assistent: kein Verweis auf die Seite.
 function pruefeMitgliedWerden() {
   const fehler = [];
   const melde = (name, ok, detail) => {
@@ -240,13 +244,71 @@ function pruefeMitgliedWerden() {
     if (!ok) fehler.push(name + (detail ? ": " + detail : ""));
   };
   const html = readFileSync(path.join(WEB_DIR, "mitglied-werden.html"), "utf8");
-  const knoepfe = [...html.matchAll(/<a class="knopf" href="anmeldung\.html">Schritt f\u00fcr Schritt anmelden<\/a>/g)].length;
+  const knoepfe = [...html.matchAll(/<a class="knopf" href="anmeldung\.html" target="_blank" rel="noopener">Jetzt anmelden<\/a>/g)].length;
   const verweise = [...html.matchAll(/href="anmeldung\.html"/g)].length;
   if (MIT_ANMELDUNG) {
-    melde("mitglied-werden.html: Hauptknopf „Schritt für Schritt anmelden“ in der Web- und in der App-Fassung (Schritt 2)", knoepfe === 2 && verweise === 2, `${knoepfe} Knöpfe, ${verweise} Verweise`);
-    melde("mitglied-werden.html: Nebenwege bleiben (Online ausfüllen, PDF zum Ausdrucken, App-Formular)", /href="aufnahmeantrag\.html"/.test(html) && /PDF zum Ausdrucken/.test(html) && /Aufnahmeantrag online ausfüllen/.test(html));
+    melde("mitglied-werden.html: genau ein Hauptknopf „Jetzt anmelden“ auf anmeldung.html, in einem neuen Fenster (target=\"_blank\" rel=\"noopener\"; die Weiche der App nimmt target weg), Schritt 2", knoepfe === 1 && verweise === 1, `${knoepfe} Knöpfe, ${verweise} Verweise`);
+    melde("mitglied-werden.html: Schritt 2 sagt „Nach dem Probetraining bekommen Sie einen Code. Damit melden Sie sich hier an.“", html.includes("Nach dem Probetraining bekommen Sie einen Code. Damit melden Sie sich hier an."));
+    melde("mitglied-werden.html: Schritt 1 (Probetraining) trägt den Anker #probetraining für die Code-Seite", /<li id="probetraining">/.test(html));
+    melde("mitglied-werden.html: Schritt 1 sagt „Probetraining vereinbaren: E-Mail an die Jugendleitung mit Jahrgang und Vorerfahrung.“ ohne „(nur Fußball)“; die Zeilen für die Herren und für Karneval bleiben",
+      html.includes("<p>Probetraining vereinbaren: E-Mail an die Jugendleitung mit Jahrgang und Vorerfahrung.</p>") && !/Probetraining vereinbaren \(nur Fußball\)/.test(html) && /Für die Herren: E-Mail an das Trainerteam der Herren/.test(html) && /Karneval: E-Mail an die <a href="mailto:[^"]+">Karnevalabteilung<\/a>/.test(html));
+    melde("mitglied-werden.html: Schritt 3 sagt nur „Datei schicken: Am Ende schicken Sie die Datei per E-Mail an die Geschäftsstelle.“ (kein „steht unten“, kein „mitbringen“, kein „abgeben“)",
+      html.includes("<p>Datei schicken: Am Ende schicken Sie die Datei per E-Mail an die Geschäftsstelle.</p>") && !/steht unten|mitzubringen|mitbringen|im Vereinsheim/.test(html.replace(/<script[\s\S]*?<\/script>/g, "")));
+    const aufklapper = /<details class="aufklapper">\s*<summary>Welche Unterlagen brauche ich\?<\/summary>\s*<div class="aufklapper__inhalt">([\s\S]*?)<\/div>\s*<\/details>/.exec(html);
+    melde("mitglied-werden.html: Die drei Unterlagenlisten (Neuanmeldung, Vereinswechsel, Ohne deutschen Pass) stehen in einem zugeklappten Bereich „Welche Unterlagen brauche ich?“ (<details> ohne open), davor der Satz „Die Anmeldung sagt Ihnen genau, was Sie brauchen.“",
+      !!aufklapper && !/<details[^>]*\sopen/.test(html) && ["Neuanmeldung", "Vereinswechsel", "Ohne deutschen Pass"].every((titel) => aufklapper[1].includes(`>${titel}<`)) && /<p class="inhalt">Die Anmeldung sagt Ihnen genau, was Sie brauchen\.<\/p>\s*<details class="aufklapper">/.test(html));
+    const titelAufDownloadSeite = ["Info-Blatt zur Anmeldung", "Wichtige Unterlagen, die mitzubringen sind"].filter((titel) => html.includes(titel));
+    melde("mitglied-werden.html: „Zum Herunterladen“ ohne „Info-Blatt zur Anmeldung“ und „Wichtige Unterlagen, die mitzubringen sind“ (nur noch Zusatzerklärung und Satzung, die Beitragsübersicht steht bei den Beiträgen)",
+      titelAufDownloadSeite.length === 0 && /Zusatzerklärung für Spieler/.test(html) && /Satzung \(Stand/.test(html) && /Beitragsübersicht/.test(html), titelAufDownloadSeite.join(", "));
+    melde("mitglied-werden.html: Hilfe-Zeile „Fragen? Die Geschäftsstelle hilft.“ mit E-Mail an die Geschäftsstelle", /<h2>Fragen\?<\/h2>\s*<p>Die Geschäftsstelle hilft\./.test(html) && /mailto:geschaeftsstelle@sportfreunde04\.de\?subject=Mitgliedschaft/.test(html));
+    melde("mitglied-werden.html: keine Teile nur für Web oder nur für die App mehr (data-nur-web, data-nur-app)", !/data-nur-web|data-nur-app/.test(html.replace(/<script[\s\S]*?<\/script>/g, "")));
+    melde("mitglied-werden.html: Anrede „Sie“ (kein „du“ in der Überschrift und im Schlusssatz)", !/wirst du|möchtest du|\bdu\b/.test(html.replace(/<script[\s\S]*?<\/script>/g, "")));
+    // Die alten Wege: von keiner Seite des Pakets verlinkt (href), auch nicht von aufnahmeantrag.html selbst (seit Runde 2 eine Weiterleitung). Außer der
+    // Weiterleitung alter Links auf das Formular im Skript (Konstante FORMULAR_WEB) darf die Kennung des Formulars nirgends stehen.
+    const ALTE_WEGE = [
+      [/^aufnahmeantrag\.html/, "Seite „Aufnahmeantrag online“"],
+      [/Vereinsanmeldung%20allgemein/, "Aufnahmeantrag-Vordruck (PDF)"],
+      [/subject=Aufnahmeantrag/, "Antrag per E-Mail"],
+      [/appack\.de\/rest-api\/drender\/6a903758/, "Formular der App (drender)"],
+    ];
+    const seitenMitAltemWeg = [];
+    for (const n of readdirSync(WEB_DIR).filter((x) => x.endsWith(".html"))) {
+      const text = readFileSync(path.join(WEB_DIR, n), "utf8");
+      const hrefs = [...text.matchAll(/href="([^"]*)"/g)].map((m) => m[1].replace(/&amp;/g, "&"));
+      for (const [muster, name] of ALTE_WEGE) if (hrefs.some((h) => muster.test(h))) seitenMitAltemWeg.push(`${n}: ${name}`);
+      if (n !== "anmeldung.html" && /6a903758/.test(text.replace(/var FORMULAR_WEB = "6a903758337cdc97f94f2655";/, ""))) seitenMitAltemWeg.push(`${n}: Kennung 6a903758 außerhalb von FORMULAR_WEB`);
+    }
+    melde("kein Link (href) auf die alten Anmeldewege in den Seiten des Pakets (Aufnahmeantrag online, Vordruck, Antrag per E-Mail, App-Formular); die Kennung des App-Formulars steht nur als FORMULAR_WEB im Skript (in allen Seiten, auch in aufnahmeantrag.html)", seitenMitAltemWeg.length === 0, seitenMitAltemWeg.slice(0, 4).join("; "));
+    // aufnahmeantrag.html ist eine Weiterleitung auf mitglied-werden.html (Muster der alten Seiten spielplan*/tabellen aus W6): meta refresh, noindex, kurzer Satz, Link;
+    // kein Formular, kein Skript des alten Formulars. aufnahmeantrag.js liegt nicht mehr im Paket, pdf-lib und fontkit schon (der Assistent braucht sie).
+    const antrag = readFileSync(path.join(WEB_DIR, "aufnahmeantrag.html"), "utf8");
+    const antragOhneSkript = antrag.replace(/<script[\s\S]*?<\/script>/g, "");
+    melde("aufnahmeantrag.html ist eine Weiterleitung auf mitglied-werden.html: <meta http-equiv=\"refresh\" content=\"0; url=mitglied-werden.html\">, noindex, „Diese Seite ist umgezogen“, der Satz „Die Anmeldung finden Sie jetzt bei „Mitglied werden“.“ und ein Link auf mitglied-werden.html; canonical zeigt auf das Ziel",
+      antrag.includes('<meta http-equiv="refresh" content="0; url=mitglied-werden.html">') && antrag.includes('<meta name="robots" content="noindex">') && antrag.includes(">Diese Seite ist umgezogen<") && antrag.includes("Die Anmeldung finden Sie jetzt bei „Mitglied werden“.") && antrag.includes('<a href="mitglied-werden.html">Weiter zu „Mitglied werden“</a>') && /<link rel="canonical" href="https:\/\/cdn\.appack\.de\/sportfreunde04\/workspace\/web\/mitglied-werden\.html">/.test(antrag));
+    // Das Skript der App (Weiche) steht in jeder Seite und nennt data-nur-web und data-nur-app selbst: Für diese beiden gilt der Text ohne Skripte.
+    melde("aufnahmeantrag.html: kein Formular und keine Skripte des alten Formulars (antrag-formular, aufnahmeantrag.js, pdf-lib, fontkit), keine Teile nur für Web oder App im Dokument",
+      !/antrag-formular|aufnahmeantrag(?:-pdf-lib|-fontkit)?\.js/.test(antrag) && !/data-nur-web|data-nur-app/.test(antragOhneSkript) && !/<form/.test(antragOhneSkript));
+    melde("aufnahmeantrag.js liegt nicht mehr im Paket (keine Seite lädt es); pdf-lib und fontkit liegen im Ordner (der Assistent braucht sie)",
+      !existsSync(path.join(WEB_DIR, "aufnahmeantrag.js")) && existsSync(path.join(WEB_DIR, "aufnahmeantrag-pdf-lib.js")) && existsSync(path.join(WEB_DIR, "aufnahmeantrag-fontkit.js")));
+    const downloads = readFileSync(path.join(WEB_DIR, "verein-downloads.html"), "utf8");
+    melde("verein-downloads.html: Hinweis mit dem Knopf „Jetzt anmelden“ (neues Fenster) statt des Aufnahmeantrags (Dokumente zum Lesen bleiben)", /<a class="knopf" href="anmeldung\.html" target="_blank" rel="noopener">Jetzt anmelden<\/a>/.test(downloads) && /Info-Blatt zur Anmeldung/.test(downloads) && /Satzung/.test(downloads));
+    // Jeder Link auf anmeldung.html in einer Seite der Website öffnet in einem neuen Fenster: Die Hülle zeigt die Seiten in einem Rahmen ohne allow-Angaben
+    // (src/huelle/huelle.html, #showFrame), in dem Teilen, Kopieren und Herunterladen nicht verlässlich sind. In der App gilt die Weiche (ext://, ohne target).
+    const ohneNeuesFenster = [];
+    let linksAufAnmeldung = 0;
+    for (const n of readdirSync(WEB_DIR).filter((x) => x.endsWith(".html") && x !== "anmeldung.html")) {
+      const text = readFileSync(path.join(WEB_DIR, n), "utf8").replace(/<script[\s\S]*?<\/script>/g, "");
+      for (const m of text.matchAll(/<a\s[^>]*href="anmeldung\.html[^"]*"[^>]*>/g)) {
+        linksAufAnmeldung++;
+        if (!/target="_blank"/.test(m[0]) || !/rel="noopener"/.test(m[0])) ohneNeuesFenster.push(`${n}: ${m[0].slice(0, 80)}`);
+      }
+    }
+    melde("jeder Link auf anmeldung.html in den Seiten der Website öffnet in einem neuen Fenster (target=\"_blank\" rel=\"noopener\"): " + linksAufAnmeldung + " Links, in mitglied-werden.html und verein-downloads.html", linksAufAnmeldung === 2 && ohneNeuesFenster.length === 0, ohneNeuesFenster.slice(0, 3).join("; ") || `${linksAufAnmeldung} Links`);
+    // Das Skript der App-Seiten kennt den Weg in den Browser (nur in Seiten mit APP_MODUS_SKRIPT)
+    const ohneWeiche = readdirSync(WEB_DIR).filter((x) => x.endsWith(".html")).filter((x) => /var FORMULAR_WEB/.test(readFileSync(path.join(WEB_DIR, x), "utf8")) && !/if \(name === "anmeldung"\) \{\s*url\.searchParams\.delete\("app"\);\s*a\.href = "ext:\/\/" \+ url\.toString\(\);/.test(readFileSync(path.join(WEB_DIR, x), "utf8")));
+    melde("Skript für die App (Seiten mit FORMULAR_WEB): Links auf anmeldung.html öffnen im Browser (ext://, ohne app=1) – in allen Seiten mit dem Skript", ohneWeiche.length === 0, ohneWeiche.slice(0, 3).join(", "));
   } else {
-    melde("mitglied-werden.html: ohne Assistent kein Verweis auf anmeldung.html und kein Hauptknopf", verweise === 0 && !/Schritt f\u00fcr Schritt anmelden/.test(html), `${verweise} Verweise`);
+    melde("mitglied-werden.html: ohne Assistent kein Verweis auf anmeldung.html und kein Hauptknopf", verweise === 0 && !/Jetzt anmelden|Schritt f\u00fcr Schritt anmelden/.test(html), `${verweise} Verweise`);
     const uebrig = readdirSync(WEB_DIR).filter((n) => /^anmeldung[.-]/.test(n));
     melde("ohne Assistent liegen keine anmeldung*-Dateien im Paket", uebrig.length === 0, uebrig.slice(0, 3).join(", "));
   }
@@ -278,8 +340,9 @@ function istDomainFreigabeAdresse(url) {
   }
 }
 
-// Die Live-Seite des Assistenten: Er startet, die Sprachwahl stimmt mit der Konfiguration überein, und vom Rahmen der
-// Begleitseite, vom Entwurfs-Band, vom Werkzeugkasten und von noindex ist nichts da.
+// Die Live-Seite des Assistenten: Er startet (bei aktivem Zugang auf der Code-Seite, sonst auf "start"), die Sprachwahl
+// stimmt mit der Konfiguration überein, und vom Rahmen der Begleitseite, vom Entwurfs-Band, vom Werkzeugkasten und von
+// noindex ist nichts da.
 async function pruefeAnmeldungImBrowser(page) {
   const fehler = [];
   try {
@@ -302,7 +365,13 @@ async function pruefeAnmeldungImBrowser(page) {
   if (d.werkzeuge) fehler.push("Entwurfs-Band, Werkzeugkasten, Knopf „Vorführung“ oder Beispiel-Knöpfe auf der Live-Seite");
   if (d.rahmen) fehler.push("Rahmen der Begleitseite (.begleit-kopf) auf der Live-Seite");
   if (d.noindex) fehler.push("meta robots (noindex) auf der Live-Seite");
-  if (d.schritt !== "start") fehler.push(`Assistent steht auf "${d.schritt}" statt auf "start"`);
+  // Livegang 19.10.2026 (L1): Ohne Code beginnt die Anmeldung auf der Code-Seite, sobald der Zugang aktiv ist, also data/anmeldung.json ›
+  // zugang › pruefwerte nicht leer ist (wie zugang.js: Einträge getrimmt, leere zählen nicht). Bei leerer Liste gibt es keine Abfrage,
+  // dann beginnt sie auf "start". Der Sollwert folgt der Konfiguration im Paket; geprüft wird in beide Richtungen.
+  const zugangPruefwerte = Array.isArray(konfig?.anmeldung?.zugang?.pruefwerte) ? konfig.anmeldung.zugang.pruefwerte.map((x) => String(x).trim()).filter(Boolean) : [];
+  const zugangAktiv = zugangPruefwerte.length > 0;
+  const sollSchritt = zugangAktiv ? "code" : "start";
+  if (d.schritt !== sollSchritt) fehler.push(`Assistent steht auf "${d.schritt}" statt auf "${sollSchritt}"${zugangAktiv ? " (Zugang aktiv: ohne Code beginnt die Anmeldung auf der Code-Seite)" : ""}`);
   if (/Entwurf|Prototyp/.test(d.titel)) fehler.push(`Titel enthält Entwurf oder Prototyp: ${d.titel}`);
   return fehler;
 }

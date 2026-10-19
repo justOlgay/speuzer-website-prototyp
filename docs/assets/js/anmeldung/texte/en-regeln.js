@@ -305,7 +305,6 @@ export default {
 
     // Infos
     frist_annahme_heute: "We calculate as if the deregistration counts on {abmeldung}. If you deregister later, the waiting period gets longer.",
-    probetraining_versicherung: "At trial training, people who are not members are not insured through the club. It is best to register before the first training.",
     mitgliedschaft_beginn: "The membership starts on the day you register.",
     kuendigung_jahresende: "In our club you can only cancel your membership at the end of the year. Send the cancellation as a registered letter (Einschreiben).",
     ohne_spielrecht_kein_spiel: "Without permission to play a child may not take part in matches. Not even in friendly matches. Training is allowed.",

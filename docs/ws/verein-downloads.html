@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Downloads &amp; Anträge – FFV Sportfreunde 04</title>
-<meta name="description" content="Downloads &amp; Anträge des FFV Sportfreunde 04: Aufnahmeantrag, Beitragsübersicht, Satzung 2025, Präventions- und Schutzkonzept, Vereinsphilosophie und Chronik als PDF.">
+<meta name="description" content="Downloads &amp; Anträge des FFV Sportfreunde 04: Anmeldung, Beitragsübersicht, Satzung 2025, Präventions- und Schutzkonzept, Vereinsphilosophie und Chronik als PDF.">
 <link rel="canonical" href="https://justolgay.github.io/speuzer-website-prototyp/ws/verein-downloads.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="FFV Sportfreunde 04">
 <meta property="og:title" content="Downloads &amp; Anträge – FFV Sportfreunde 04">
-<meta property="og:description" content="Downloads &amp; Anträge des FFV Sportfreunde 04: Aufnahmeantrag, Beitragsübersicht, Satzung 2025, Präventions- und Schutzkonzept, Vereinsphilosophie und Chronik als PDF.">
+<meta property="og:description" content="Downloads &amp; Anträge des FFV Sportfreunde 04: Anmeldung, Beitragsübersicht, Satzung 2025, Präventions- und Schutzkonzept, Vereinsphilosophie und Chronik als PDF.">
 <meta property="og:url" content="https://justolgay.github.io/speuzer-website-prototyp/ws/verein-downloads.html">
 <meta property="og:image" content="https://justolgay.github.io/speuzer-website-prototyp/assets/og/standard.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -50,6 +50,12 @@
       }
       if (url.hostname === location.hostname && /\/workspace\/web\//.test(url.pathname)) {
         var name = url.pathname.split("/").pop().replace(/\.html$/, "");
+        if (name === "anmeldung") {
+          url.searchParams.delete("app");
+          a.href = "ext://" + url.toString();
+          a.removeAttribute("target");
+          return;
+        }
         var modul = NAV[name] || (/^mannschaften-/.test(name) ? NAV.mannschaften : null) || (/^chronik/.test(name) ? NAV.chronik : null);
         if (modul && !url.hash) {
           a.href = "nav://" + modul;
@@ -91,23 +97,11 @@
 <section class="abschnitt">
   <div class="container fluss">
     <h2>Anmeldung</h2>
-    <div class="inhalt fluss downloads-einstieg" data-nur-web>
-      <p>Den Aufnahmeantrag online ausfüllen und am Bildschirm unterschreiben – daraus entsteht das fertige PDF für die E-Mail an die Geschäftsstelle.</p>
-      <p class="knopfzeile"><a class="knopf" href="aufnahmeantrag.html">Aufnahmeantrag online ausfüllen</a></p>
+    <div class="inhalt fluss downloads-einstieg">
+      <p>Nach dem Probetraining bekommen Sie einen Code. Damit melden Sie sich an.</p>
+      <p class="knopfzeile"><a class="knopf" href="anmeldung.html" target="_blank" rel="noopener">Jetzt anmelden</a></p>
     </div>
     <ul class="downloads inhalt" role="list">
-      <li class="download">
-      <a href="https://cdn.appack.de/sportfreunde04/pdf/Vereinsanmeldung%20allgemein_NEU_9-2026%20%20(1).pdf" target="_blank" rel="noopener">Aufnahmeantrag / Vereinsanmeldung (Stand: September 2026)</a>
-      <span class="meta">PDF · 4 Seiten · 213 KB</span>
-    </li>
-      <li class="download" data-nur-web>
-      <a href="mailto:geschaeftsstelle@sportfreunde04.de?subject=Aufnahmeantrag&amp;body=Hallo%2C%0A%0Aanbei%20der%20ausgef%C3%BCllte%20und%20unterschriebene%20Aufnahmeantrag%20%28PDF%29.%0A%0AName%20des%20neuen%20Mitglieds%3A%20%0AAbteilung%20%28Fu%C3%9Fball%20oder%20Karneval%29%3A%20%0AMannschaft%20bzw.%20Gruppe%20%28falls%20bekannt%29%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe">Ausgefüllten Antrag per E-Mail senden ›</a>
-      <span class="meta">E-Mail an die Geschäftsstelle · PDF anhängen</span>
-    </li>
-    <li class="download" data-nur-app hidden>
-      <a href="https://appack.de/rest-api/drender/6a903758337cdc97f94f2655" target="_blank" rel="noopener">Aufnahmeantrag online ausfüllen ›</a>
-      <span class="meta">Online-Formular</span>
-    </li>
       <li class="download">
       <a href="https://cdn.appack.de/sportfreunde04/pdf/Info-Blatt-FFV-Sportfreunde-04%20(2).pdf" target="_blank" rel="noopener">Info-Blatt zur Anmeldung</a>
       <span class="meta">PDF · 4 Seiten · 121 KB</span>
@@ -162,7 +156,7 @@
 </main>
 <footer class="ws-fuss">
   <div data-nur-prototyp>
-  <p>Prototyp · Testumgebung, keine Live-Seite · Inhalte Stand Montag, 12. Oktober 2026</p>
+  <p>Prototyp · Testumgebung, keine Live-Seite · Inhalte Stand Montag, 19. Oktober 2026</p>
   </div>
 </footer>
 </body>

@@ -26,20 +26,29 @@
 //     Namen mit dem Trenner der Sprache (Arabisch: arabisches Komma, sonst Komma und Leerzeichen);
 //     die Pflichtfrage zum Heimweg nach dem Training (M1, 11.10.2026; Beispiele "Kind neu" und "Karneval Kind"; solange
 //     eine Sprache den Schlüssel heimweg.titel noch nicht kennt, zeigt die Seite den deutschen Rückfall und der Lauf meldet das nur
-//     als Hinweis – die Übersetzung liefert Paket M3); die Teile der Datei tragen
-//     die übersetzten Titel (fertig.teilTitel); alle sechs Meldungen zu "lateinische Buchstaben"
+//     als Hinweis – die Übersetzung liefert Paket M3); alle sechs Meldungen zu "lateinische Buchstaben"
 //     (Name, Ort, Verein, Anschrift, Nummer, Text) mit Text in anderer Schrift im Feld; der Kasten für
 //     getrennt lebende Eltern auf "sorge" und "unterschriften"
 //   - Nachbesserung M9, Runde 2 (11.10.2026, Modus „bildschirm“): Feld des Kindes leer – der Hinweis am Feld ist ein einziger Satz (ohne den Satz zum
 //     Ausdruck mit Stift), Weiter geht, die Prüfseite zeigt in der Sprache „Nicht unterschrieben (freiwillig)“, die Fertig-Seite „alles am Bildschirm unterschrieben“
-//   - M10 (11.10.2026): Fertig-Seite, Abschnitt „So schicken Sie die Datei an den Verein“ in jeder Sprache (Titel, Einleitung, Schritte am Handy und am
+//   - M10 (11.10.2026): Fertig-Seite, Abschnitt „So schicken Sie die Datei an den Verein“ in jeder Sprache (Titel, Schritte am Handy und am
 //     Computer mit der Beschriftung der Knöpfe, Adresse von links nach rechts, Knöpfe „Adresse kopieren“ und „E-Mail an die Geschäftsstelle öffnen“, Hinweis
 //     zum Anhang); der mailto-Link bleibt deutsch (Betreff „Anmeldung Vorname Nachname“, deutscher Text), auch in Arabisch. Die Seiten des Tests tun, als könne
-//     der Handy-Browser Dateien teilen (navigator.share): So steht auch der Weg am Handy da.
+//     der Handy-Browser Dateien teilen (navigator.share): So steht der Weg am Handy da; ohne „Datei teilen“ (nach dem Neuzeichnen, siehe P3 Teil b) der Weg am Computer.
+//   - P3 Teil b (12.10.2026, Kürzungen nach STILREGELN): Der Satzung-Block hat keine eigene Überschrift mehr (Erklärung und Beschriftung stehen in der Sprache);
+//     „Diese Unterschrift gilt für {n} Blätter“ ist ab zwei Blättern zugeklappt und trägt den Text unterschriften.giltFuerBlaetter der Sprache mit der Zahl der Blätter (bei einem Blatt steht die Zeile „Titel: Blatt“ direkt da, Runde 2); die Fertig-Seite
+//     zeigt keine Liste der Teile mehr (weder die Titel der Sprache noch die deutschen) und im Abschnitt „So schicken Sie die Datei an den Verein“ keinen Satz unter
+//     der Überschrift und keine Überschriften der Wege: Es steht nur der Weg, der zum Gerät passt (am Handy mit „Datei teilen“ der Weg über das Teilen, sonst der
+//     Weg über das Herunterladen).
 //   - M12-ar, Runde 2 (12.10.2026): Prüfseite, Zeile „Geboren“: das Alter steht nach der Vorlage allgemein.alterJahre mit {n} hinter dem Datum, ohne ein an
 //     die Zahl gehängtes Wort (Arabisch: „العمر: 8“); allgemein.jahre gibt es nicht mehr
 //   - M14 (12.10.2026): Der Verein beantragt für Fußball immer das Spielrecht. Die Seite „spielerpass“ zeigt in jeder Sprache die übersetzte Erklärung zum Spielrecht
 //     (drei Absätze, Schlüssel spielerpass.spielrecht); die frühere Frage zu den Spielen (Block spielen) gibt es in keiner Sprache mehr
+//   - P1 (12.10.2026): Zugang mit Code vom Probetraining und Übergabe in den Browser in allen vier Sprachen (Deutsch, Englisch, Türkisch, Arabisch):
+//     Die Code-Seite zeigt die Texte der Sprache (Titel, zwei Sätze, Beschriftung, Meldungen leer und falsch, die zwei Links darunter mit dem Text in der
+//     Sprache), ohne deutschen Rückfalltext; Arabisch von rechts nach links (Beschriftung rechts, Hilfe links, das Feld bleibt von links nach rechts);
+//     ein richtiger Code führt zum Startschritt in der Sprache; ?app=1 zeigt nur die Übergabe („Im Browser öffnen“) in der Sprache. Der Testserver setzt
+//     die Prüfwerte zur Laufzeit (server.setzeZugang). Fotos code-390-<sprache>.png, code-fehler-390-<sprache>.png, app-uebergabe-390-<sprache>.png.
 //   - Bildschirmfotos von start, name, nachweise, unterschriften (auch der Ausschnitt mit Satzung und
 //     "Gilt für"), fertig (und Hilfe, Fehlermeldung, Heimweg, getrennte Eltern, lateinische
 //     Buchstaben) nach tools/cache/anmeldung-test/sprachen/
@@ -134,7 +143,7 @@ const UHR = `(() => {
   window.Date = Uhr;
 })();`;
 
-async function neueSeite(browser, server, name) {
+async function neueSeite(browser, server, name, abfrage = "") {
   const page = await browser.newPage();
   await page.setViewport({ width: MOBIL.breite, height: MOBIL.hoehe, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
   await page.evaluateOnNewDocument(UHR);
@@ -159,7 +168,7 @@ async function neueSeite(browser, server, name) {
   });
   page.on("dialog", (d) => d.accept());
   page.__st = st;
-  await page.goto(server.basis + "/anmeldung/", { waitUntil: "networkidle0" });
+  await page.goto(server.basis + "/anmeldung/" + abfrage, { waitUntil: "networkidle0" });
   await page.waitForSelector("#anmeldung[data-bereit]", { timeout: 10000 });
   return page;
 }
@@ -257,7 +266,9 @@ async function pruefeUnterschriftenSeite(page, code, sprache, dict, kennung, bei
     const haken = b.querySelector('input[data-pfad="satzung"]');
     const link = b.querySelector('a[data-aktion="satzung-lesen"]');
     return {
-      titel: (b.querySelector("h3") || {}).textContent || "",
+      // P3 Teil b (T70): Der Block hat keine eigene Überschrift mehr; die Erklärung ist der erste Satz darin
+      ueberschriften: b.querySelectorAll("h2, h3, h4").length,
+      erklaerung: (b.querySelector(":scope > p.anm-hinweis") || {}).textContent || "",
       text: b.innerText,
       linkText: link ? link.childNodes[0].textContent : null,
       linkZusatz: link ? (link.querySelector(".sr-only") || {}).textContent : null,
@@ -265,8 +276,20 @@ async function pruefeUnterschriftenSeite(page, code, sprache, dict, kennung, bei
       hakenDa: !!haken,
       angekreuzt: haken ? haken.checked : null,
       pflicht: haken ? haken.getAttribute("aria-required") : null,
-      giltTitel: Array.from(document.querySelectorAll("#anmeldung .anm-unterschrift .anm-unterschrift__gilt > p")).map((p) => p.textContent),
-      gilt: Array.from(document.querySelectorAll("#anmeldung .anm-unterschrift .anm-unterschrift__gilt > ul > li")).map((li) => li.textContent),
+      // „Diese Unterschrift gilt für (n)“ (P3 Teil b, S7): ab zwei Blättern ein zugeklappter Bereich; Beschriftung im summary, eine Zeile je Blatt in der Liste
+      gilt: Array.from(document.querySelectorAll("#anmeldung .anm-unterschrift details.anm-unterschrift__gilt")).map((d) => ({
+        offen: d.open === true,
+        beschriftung: (d.querySelector(":scope > summary") || {}).textContent || "",
+        punkte: Array.from(d.querySelectorAll(":scope > ul > li")).map((li) => li.textContent),
+        beschreibt: !!d.id && (d.closest(".anm-unterschrift").getAttribute("aria-describedby") || "").split(/\s+/).includes(d.id),
+      })),
+      // Runde 2 (S7): Gilt die Unterschrift nur für ein Blatt (n = 1), steht die Zeile direkt da (Absatz mit dem Titel und dem Blatt)
+      eine: Array.from(document.querySelectorAll("#anmeldung .anm-unterschrift p.anm-unterschrift__gilt")).map((e) => ({
+        text: e.textContent,
+        sichtbar: e.checkVisibility(),
+        beschreibt: !!e.id && (e.closest(".anm-unterschrift").getAttribute("aria-describedby") || "").split(/\s+/).includes(e.id),
+      })),
+      felder: document.querySelectorAll("#anmeldung .anm-unterschrift").length,
     };
   });
   // O26 (Jugendleitung, 08.10.2026): Ein Elternteil reicht. In keiner Sprache gibt es ein zweites Unterschriftsfeld der Eltern.
@@ -295,39 +318,106 @@ async function pruefeUnterschriftenSeite(page, code, sprache, dict, kennung, bei
     const vorlage = ohneSteuer(dict.unterschriften.person.spieler.kind).split("{name}");
     const titelKind = ohneSteuer(kindFeld.titel);
     ok(kennung + ": Feld des Kindes (freiwillig): Titel „" + vorlage.join("…") + "“ mit dem Zusatz der Sprache für „freiwillig“", titelKind.startsWith(vorlage[0]) && titelKind.includes(vorlage[1]) && titelKind.includes(ohneSteuer(dict.allgemein.freiwillig)), titelKind);
-    ok(kennung + ": Feld des Kindes: Hinweis in der Sprache („Kann Ihr Kind schon schreiben? …“), ohne deutschen Text", ohneSteuer(kindFeld.zusatz) === ohneSteuer(dict.unterschriften.person.spielerHinweis.kind.replace(/\n/g, " ")), ohneSteuer(kindFeld.zusatz));
+    ok(kennung + ": Feld des Kindes: Hinweis in der Sprache („Kann Ihr Kind schreiben? …“), ohne deutschen Text", ohneSteuer(kindFeld.zusatz) === ohneSteuer(dict.unterschriften.person.spielerHinweis.kind.replace(/\n/g, " ")), ohneSteuer(kindFeld.zusatz));
   } else if (!bildschirmModus) {
     ok(kennung + ": Modus stift: kein Feld für das Kind", !kindFeld, feldDom.felder.map((f) => f.wer).join(","));
   }
   if (!dom) return;
-  ok(kennung + ": Satzung-Block übersetzt, deutscher Name (Satzung) in Klammern", ohneSteuer(dom.titel) === ohneSteuer(erwartet.titel) && ohneSteuer(dom.label).includes(ohneSteuer(erwartet.label)) && /\(Satzung\)/.test(ohneSteuer(dom.text)), ohneSteuer(dom.titel) + " | " + ohneSteuer(dom.label).slice(0, 80));
+  ok(kennung + ": Satzung-Block übersetzt (Erklärung und Beschriftung), deutscher Name (Satzung) in Klammern, ohne eigene Überschrift (P3 Teil b)", dom.ueberschriften === 0 && erwartet.titel === undefined && ohneSteuer(dom.erklaerung) === ohneSteuer(erwartet.erklaerung) && ohneSteuer(dom.label).includes(ohneSteuer(erwartet.label)) && /\(Satzung\)/.test(ohneSteuer(dom.text)), dom.ueberschriften + " Überschrift(en) | " + ohneSteuer(dom.erklaerung).slice(0, 60) + " | " + ohneSteuer(dom.label).slice(0, 80));
   if (dom.linkText !== null) ok(kennung + ": Satzung-Link und Zusatz für Screenreader übersetzt", ohneSteuer(dom.linkText).includes(ohneSteuer(erwartet.link)) && ohneSteuer(dom.linkZusatz || "").includes(ohneSteuer(erwartet.linkZusatz)), ohneSteuer(dom.linkText) + " | " + ohneSteuer(dom.linkZusatz || ""));
-  // "Diese Unterschrift gilt für:" mit einer Zeile je Blatt (N-A2): kein Trenner zwischen Namen in einer Zeile. Die Überschrift der Liste
-  // steht im Wörterbuch der Sprache (unterschriften.giltFuer); solange die Übersetzung fehlt, steht der deutsche Text in Isolaten.
+  // „Diese Unterschrift gilt für {n} Blätter“ mit einer Zeile je Blatt (N-A2; zugeklappt seit P3 Teil b, S7): kein Trenner zwischen Namen in einer Zeile. Die Beschriftung ist
+  // der Text unterschriften.giltFuerBlaetter der Sprache mit der Zahl der Blätter (D-07, 12.10.2026; vorher der Titel ohne Doppelpunkt und „(n)“).
   const aussen = (t) => t.replace(/\([^()]*\)/g, "");
-  const punkte = dom.gilt.map((t) => ohneSteuer(t));
-  const titel = dom.giltTitel.map((t) => ohneSteuer(t));
-  const titelSoll = dict.unterschriften.giltFuer ? ohneSteuer(dict.unterschriften.giltFuer) : null;
-  ok(kennung + ": \"Diese Unterschrift gilt für:\" steht als Liste, ein Blatt je Zeile, ohne Trenner zwischen Namen", punkte.length > 0 && titel.length > 0 && punkte.every((t) => !/[,\u060C]/.test(aussen(t))) && (titelSoll === null || titel.every((t) => t === titelSoll)), titel.slice(0, 1).join("") + " | " + punkte.slice(0, 3).join(" || ").slice(0, 200));
+  const beschriftungSoll = (n) => ohneSteuer(dict.unterschriften.giltFuerBlaetter.replace("{n}", String(n)));
+  const gilt = dom.gilt.map((g) => ({ offen: g.offen, beschriftung: ohneSteuer(g.beschriftung), punkte: g.punkte.map((t) => ohneSteuer(t)), beschreibt: g.beschreibt }));
+  ok(kennung + ": „Diese Unterschrift gilt für {n} Blätter“ steht ab zwei Blättern zugeklappt als Liste, ein Blatt je Zeile, ohne Trenner zwischen Namen; die Beschriftung ist der Text der Sprache mit der Zahl der Blätter",
+    gilt.length > 0 && gilt.every((g) => !g.offen && g.punkte.length >= 2 && g.beschreibt && g.punkte.every((t) => !/[,\u060C]/.test(aussen(t))) && g.beschriftung === beschriftungSoll(g.punkte.length)),
+    gilt.slice(0, 1).map((g) => g.beschriftung + " | " + g.punkte.slice(0, 3).join(" || ")).join("").slice(0, 200));
+  // Runde 2 (S7): Bei einem Blatt (n = 1) steht die Zeile direkt da: der vorhandene Titel der Sprache mit Doppelpunkt, dahinter das Blatt; ohne „(1)“ und ohne Aufklappen.
+  // B-1 (12.10.2026): Trägt der Blattname selbst einen Doppelpunkt („Titel: Person“), steht dort ein Gedankenstrich: genau ein Doppelpunkt in der Zeile.
+  // Das Beispiel „Kind neu“ hat das Feld des Kindes mit einem Blatt; jede Sprache muss diesen Fall zeigen.
+  const titelMitDoppelpunkt = ohneSteuer(dict.unterschriften.giltFuer);
+  const eine = dom.eine.map((e) => ({ text: ohneSteuer(e.text), sichtbar: e.sichtbar, beschreibt: e.beschreibt }));
+  ok(kennung + ": „Diese Unterschrift gilt für: <Blatt>“ steht bei einem Blatt direkt da (Titel der Sprache mit Doppelpunkt und das Blatt, ohne Zahl in Klammern), das Feld verweist mit aria-describedby darauf; jedes Feld hat die Zeile oder den Bereich",
+    (beispielId !== "kind-neu" || eine.length > 0) && eine.every((e) => e.sichtbar && e.beschreibt && (e.text.startsWith(titelMitDoppelpunkt + " ") && e.text.length > titelMitDoppelpunkt.length + 1) && !/\(1\)\s*$/.test(e.text) && (e.text.match(/[:\uff1a]/g) || []).length === 1) && gilt.length + eine.length === dom.felder,
+    eine.map((e) => e.text).join(" || ").slice(0, 200) + " (Bereiche: " + gilt.length + ", Zeilen: " + eine.length + ", Felder: " + dom.felder + ")");
+  // Papierweg (P3 Teil b, T70): Nur dort steht unter dem Kästchen die Zeile „Freiwillig. Ohne Haken …“ (in der Sprache), und der Haken hängt an ihr
+  // (aria-describedby). Am Bildschirm steht keine Zeile. Danach wieder „Am Bildschirm“ wählen, damit der Durchlauf unverändert weitergeht.
+  const satzungsZeile = () =>
+    page.evaluate(() => {
+      const haken = document.querySelector('#anmeldung input[data-pfad="satzung"]');
+      const zeile = haken ? haken.closest("label").querySelector(".anm-karte__hinweis") : null;
+      return { zeile: zeile ? zeile.textContent : null, beschreibt: haken ? haken.getAttribute("aria-describedby") : null };
+    });
+  const waehleUnterschriftWeg = async (wert) => {
+    const id = await page.$eval('#anmeldung input[data-pfad="unterschriftWeg"][data-wert="' + wert + '"]', (e) => e.id);
+    await page.click('#anmeldung label[for="' + id + '"]');
+    await warte(200);
+  };
+  const amBildschirm = await satzungsZeile();
+  await waehleUnterschriftWeg("papier");
+  const aufPapier = await satzungsZeile();
+  await waehleUnterschriftWeg("bildschirm");
+  const zurueck = await satzungsZeile();
+  ok(kennung + ": Satzung-Kästchen: die Zeile „Freiwillig. Ohne Haken …“ steht nur auf dem Papierweg und in der Sprache; am Bildschirm keine Zeile (P3 Teil b)",
+    amBildschirm.zeile === null && !amBildschirm.beschreibt && aufPapier.zeile !== null && ohneSteuer(aufPapier.zeile) === ohneSteuer(erwartet.freiwillig) && !!aufPapier.beschreibt && zurueck.zeile === null,
+    JSON.stringify({ bildschirm: amBildschirm.zeile, papier: aufPapier.zeile && ohneSteuer(aufPapier.zeile).slice(0, 60), zurueck: zurueck.zeile }));
 }
 
-// Ergebnisseite: Die Teile der Datei tragen die übersetzten Titel (fertig.teilTitel), nicht die deutschen aus dem PDF-Modul.
-async function pruefeTeilTitel(page, dict, kennung) {
+// Ergebnisseite (P3 Teil b, S5): Die Liste „Das steht in der Datei“ mit den Titeln der Teile gibt es nicht mehr (Teil A der Datei nennt die Teile selbst). Weder die
+// Titel der Sprache (fertig.teilTitel) noch die deutschen Titel aus dem PDF-Modul stehen auf der Seite, und die Schlüssel der Liste (fertig.teileTitel, fertig.teil)
+// gibt es in keiner Sprache mehr. Die Zeile zu Teil C steht nur mit den Gesundheitsdaten da; ob sie in der Sprache steht, sagt der Rückfall-Test der Seite.
+async function pruefeKeineTeilListe(page, dict, kennung) {
   const seite = ohneSteuer(await page.$eval("#anmeldung", (e) => e.innerText));
   const titel = ["A", "B", "C"].map((x) => ohneSteuer(dict.fertig.teilTitel[x]));
   const da = titel.filter((t) => seite.includes(t));
   const deutsch = ["Für Sie (", "Für den Verein (", "Vertraulich ("].filter((t) => seite.includes(t));
-  ok(kennung + ": Teile der Datei mit übersetzten Titeln (A und B immer, C bei Gesundheitsdaten)", da.includes(titel[0]) && da.includes(titel[1]) && deutsch.length === 0, da.length + " von 3 gefunden" + (deutsch.length ? "; deutscher Titel: " + deutsch.join(", ") : ""));
+  const schluessel = ["teileTitel", "teil"].filter((x) => dict.fertig[x] !== undefined);
+  ok(kennung + ": Fertig-Seite ohne Liste der Teile (weder die Titel der Sprache noch die deutschen; die Schlüssel fertig.teileTitel und fertig.teil entfallen)", da.length === 0 && deutsch.length === 0 && schluessel.length === 0,
+    (da.length ? "Titel der Sprache auf der Seite: " + da.join(", ") : "") + (deutsch.length ? "; deutscher Titel: " + deutsch.join(", ") : "") + (schluessel.length ? "; Schlüssel noch da: " + schluessel.join(", ") : ""));
 }
 
-// M10 (11.10.2026): Ergebnisseite – der Abschnitt „So schicken Sie die Datei an den Verein“ trägt die Texte der Sprache: Überschrift, Einleitung, die Schritte
-// am Handy und am Computer (mit der Beschriftung der Knöpfe aus dem Wörterbuch der Sprache), die Beschriftung der Knöpfe, den Hinweis zum Anhang.
+// M10 (11.10.2026): Ergebnisseite – der Abschnitt „So schicken Sie die Datei an den Verein“ trägt die Texte der Sprache: Überschrift, die Schritte (mit der
+// Beschriftung der Knöpfe aus dem Wörterbuch der Sprache), die Beschriftung der Knöpfe, den Hinweis zum Anhang. P3 Teil b: kein Satz unter der Überschrift, keine
+// Überschriften der Wege; es steht nur der Weg, der zum Gerät passt (am Handy mit „Datei teilen“ der Weg am Handy, sonst der Weg am Computer).
 // Die Adresse steht von links nach rechts (auch in Arabisch). Der mailto-Link bleibt in jeder Sprache deutsch: Betreff „Anmeldung Vorname Nachname“ und
 // der deutsche Text, richtig kodiert (die Geschäftsstelle liest Deutsch).
+
+// Liest die Wege des Abschnitts: Art, Überschrift (null, wenn es keine gibt) und die Schritte
+const leseSendenWege = (page) =>
+  page.evaluate(() => {
+    const abschnitt = document.querySelector("#anmeldung [data-senden]");
+    if (!abschnitt) return null;
+    const text = (e) => (e ? e.textContent : null);
+    return {
+      titel: text(abschnitt.querySelector("h3")),
+      einleitung: text(abschnitt.querySelector(":scope > p.anm-text")),
+      ueberschriften: abschnitt.querySelectorAll("h4").length,
+      wege: Array.from(abschnitt.querySelectorAll("[data-weg]")).map((w) => ({ art: w.getAttribute("data-weg"), titel: text(w.querySelector("h2, h3, h4")), schritte: Array.from(w.querySelectorAll("ol > li")).map((li) => li.textContent) })),
+      handy: !!(window.matchMedia && window.matchMedia("(pointer: coarse)").matches),
+    };
+  });
+
+// Prüft den einen Weg des Abschnitts: Art, keine Überschrift, drei Schritte in der Sprache; die Schritte nennen die Knöpfe mit ihrer Beschriftung aus dem Wörterbuch:
+// am Handy Schritt 1 „Adresse kopieren“ und Schritt 2 „Datei teilen“ (U-01, 12.10.2026), am Computer Schritt 1 „Datei herunterladen“
+function pruefeSendenWeg(d, dict, kennung, art, zusatz) {
+  const F = dict.fertig;
+  const S = F.senden;
+  const o = ohneSteuer;
+  const knoepfe = art === "handy" ? [S.kopieren, F.teilen, ""] : [F.herunterladen, "", ""];
+  const w = d.wege[0];
+  const soll = (i) => o(S[art + (i + 1)].replace("{knopf}", knoepfe[i]));
+  ok(kennung + ": Abschnitt: nur der Weg " + (art === "handy" ? "am Handy" : "am Computer") + zusatz + ", ohne Überschrift, drei Schritte in der Sprache, mit der Beschriftung der Knöpfe „" + knoepfe.filter(Boolean).map(o).join("“, „") + "“",
+    d.wege.length === 1 && w.art === art && w.titel === null && d.ueberschriften === 0 && S[art + "Titel"] === undefined && w.schritte.length === 3 &&
+      o(w.schritte[0]) === soll(0) && o(w.schritte[1]) === soll(1) && o(w.schritte[2]) === soll(2),
+    d.wege.map((x) => x.art + (x.titel ? " „" + x.titel + "“" : "")).join(", ") + ": " + w.schritte.map(o).join(" | "));
+}
+
 async function pruefeSenden(page, dict, kennung, server, beispielId) {
   const adresse = server.konfig.verein.mail;
   const beispiele = await import(pathToFileURL(path.join(ROOT, "assets", "js", "anmeldung", "beispiele.js")).href);
   const a = beispiele.beispielAntworten(beispielId, "2026-09-29", server.konfig);
+  const w = await leseSendenWege(page);
   const d = await page.evaluate(() => {
     const abschnitt = document.querySelector("#anmeldung [data-senden]");
     if (!abschnitt) return null;
@@ -335,9 +425,6 @@ async function pruefeSenden(page, dict, kennung, server, beispielId) {
     const adresseEl = abschnitt.querySelector("[data-mail-adresse]");
     const link = abschnitt.querySelector('a[data-aktion="mail-oeffnen"]');
     return {
-      titel: text(abschnitt.querySelector("h3")),
-      einleitung: text(abschnitt.querySelector(":scope > p.anm-text")),
-      wege: Array.from(abschnitt.querySelectorAll("[data-weg]")).map((w) => ({ art: w.getAttribute("data-weg"), titel: text(w.querySelector("h4")), schritte: Array.from(w.querySelectorAll("ol > li")).map((li) => li.textContent) })),
       adresse: text(adresseEl),
       adresseDir: adresseEl && adresseEl.getAttribute("dir"),
       adressLabel: text(abschnitt.querySelector(".anm-senden__label")),
@@ -347,21 +434,37 @@ async function pruefeSenden(page, dict, kennung, server, beispielId) {
       hinweise: Array.from(abschnitt.querySelectorAll("p.anm-hinweis")).map((p) => p.textContent),
     };
   });
-  if (!ok(kennung + ": Fertig-Seite hat den Abschnitt „So schicken Sie die Datei an den Verein“", !!d, "")) return;
+  if (!ok(kennung + ": Fertig-Seite hat den Abschnitt „So schicken Sie die Datei an den Verein“", !!d && !!w, "")) return;
   const F = dict.fertig;
   const S = F.senden;
   const o = ohneSteuer;
-  ok(kennung + ": Abschnitt: Überschrift und Einleitung in der Sprache", o(d.titel) === o(S.titel) && o(d.einleitung) === o(S.einleitung), o(d.titel) + " | " + o(d.einleitung));
-  const handy = d.wege.find((w) => w.art === "handy");
-  const computer = d.wege.find((w) => w.art === "computer");
-  const schritte = (vorlage, knopf) => o(vorlage.replace("{knopf}", knopf));
-  ok(kennung + ": Abschnitt: Weg am Handy – Überschrift und drei Schritte in der Sprache, Schritt 1 mit der Beschriftung des Knopfes „" + o(F.teilen) + "“", !!handy && o(handy.titel) === o(S.handyTitel) && handy.schritte.length === 3 && o(handy.schritte[0]) === schritte(S.handy1, F.teilen) && o(handy.schritte[1]) === o(S.handy2) && o(handy.schritte[2]) === o(S.handy3), handy ? handy.schritte.map(o).join(" | ") : "kein Weg am Handy");
-  ok(kennung + ": Abschnitt: Weg am Computer – Überschrift und drei Schritte in der Sprache, Schritt 1 mit der Beschriftung des Knopfes „" + o(F.herunterladen) + "“", !!computer && o(computer.titel) === o(S.computerTitel) && computer.schritte.length === 3 && o(computer.schritte[0]) === schritte(S.computer1, F.herunterladen) && o(computer.schritte[1]) === o(S.computer2) && o(computer.schritte[2]) === o(S.computer3), computer ? computer.schritte.map(o).join(" | ") : "kein Weg am Computer");
+  ok(kennung + ": Abschnitt: Überschrift in der Sprache, kein Satz darunter (P3 Teil b)", o(w.titel) === o(S.titel) && w.einleitung === null && S.einleitung === undefined, o(w.titel) + " | " + o(w.einleitung || ""));
+  // Die Seiten des Tests tun, als könne der Browser Dateien teilen (navigator.share): Am Handy steht der Weg über das Teilen, am Computer der Weg über das Herunterladen.
+  pruefeSendenWeg(w, dict, kennung, w.handy ? "handy" : "computer", " (der Browser kann Dateien teilen; Gerät " + (w.handy ? "mit" : "ohne") + " Touch-Bedienung)");
   ok(kennung + ": Abschnitt: Adresse der Geschäftsstelle aus der Konfiguration, von links nach rechts (dir=ltr), mit der Beschriftung der Sprache", d.adresse === adresse && d.adresseDir === "ltr" && o(d.adressLabel) === o(S.adresseTitel), d.adresse + " (" + d.adresseDir + ")");
-  ok(kennung + ": Abschnitt: Knöpfe „" + o(S.kopieren) + "“ und „" + o(S.oeffnen) + "“ und Hinweis zum Anhang in der Sprache", o(d.kopieren) === o(S.kopieren) && o(d.linkText) === o(S.oeffnen) && d.hinweise.map(o).includes(o(S.anhang)), o(d.kopieren) + " | " + o(d.linkText) + " | " + d.hinweise.map(o).join(" / "));
+  // U-01: Der Hinweis zum Anhang („Bei „…“ hängen Sie die Datei selbst an“) steht nur am Handy; am Computer steht „Datei anhängen“ schon im zweiten Schritt
+  const anhangSoll = o(S.anhang.replace("{knopf}", S.oeffnen));
+  const anhangDa = d.hinweise.map(o).includes(anhangSoll);
+  ok(kennung + ": Abschnitt: Knöpfe „" + o(S.kopieren) + "“ und „" + o(S.oeffnen) + "“ in der Sprache; Hinweis zum Anhang " + (w.handy ? "steht (am Handy)" : "entfällt (am Computer)"), o(d.kopieren) === o(S.kopieren) && o(d.linkText) === o(S.oeffnen) && anhangDa === !!w.handy, o(d.kopieren) + " | " + o(d.linkText) + " | " + d.hinweise.map(o).join(" / "));
   // Der Link bleibt deutsch, in jeder Sprache
   const soll = "mailto:" + adresse + "?subject=" + encodeURIComponent("Anmeldung " + a.vorname + " " + a.nachname) + "&body=Guten%20Tag%2C%0D%0A%0D%0Aanbei%20die%20Anmeldung%20als%20PDF.%0D%0A%0D%0AViele%20Gr%C3%BC%C3%9Fe";
   ok(kennung + ": mailto-Link bleibt deutsch (Betreff „Anmeldung " + a.vorname + " " + a.nachname + "“, deutscher Text, kodiert), ohne Steuerzeichen für die Schreibrichtung", d.href === soll && !/%E2%81|%E2%80/.test(d.href), d.href);
+}
+
+// Der Browser kann keine Dateien teilen (kein „Datei teilen“): Nach dem Neuzeichnen der Fertig-Seite (zurück zur Prüfseite und wieder vor; die Datei bleibt) steht der
+// Weg über das Herunterladen mit den Texten der Sprache da, auch am Handy. So bleibt der zweite Weg des Abschnitts in jeder Sprache geprüft.
+async function pruefeSendenOhneTeilen(page, dict, kennung) {
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, "canShare", { value: undefined, configurable: true });
+    Object.defineProperty(navigator, "share", { value: undefined, configurable: true });
+  });
+  await page.click('#anmeldung [data-aktion="zurueck"]');
+  await page.waitForFunction(() => document.getElementById("anmeldung").dataset.schritt === "pruefen", { timeout: 8000 });
+  await page.click('#anmeldung [data-aktion="weiter"]');
+  await page.waitForFunction(() => document.getElementById("anmeldung").dataset.schritt === "fertig" && document.querySelector('#anmeldung [data-status="fertig"]'), { timeout: 30000 });
+  const w = await leseSendenWege(page);
+  if (!ok(kennung + ": Fertig-Seite ohne „Datei teilen“ hat den Abschnitt „So schicken Sie die Datei an den Verein“", !!w, "")) return;
+  pruefeSendenWeg(w, dict, kennung, "computer", " (der Browser kann keine Dateien teilen)");
 }
 
 // ---------- Prüfungen je Seite ----------
@@ -533,12 +636,14 @@ async function durchlauf(browser, server, sprache, beispiel, muster, txt) {
       const status = await page.$eval("#anmeldung [data-status]", (e) => e.getAttribute("data-status"));
       datei = status === "fertig" ? await page.$eval("#anmeldung [data-datei]", (e) => e.textContent.trim()) : "FEHLER-SEITE";
       await warte(300);
-      await pruefeTeilTitel(page, dict, kennung);
+      await pruefeKeineTeilListe(page, dict, kennung);
       await pruefeSenden(page, dict, kennung, server, beispiel.id);
       const p = await seitenPruefung(page, muster);
       if (p.treffer.length) problem.deutsch.push("fertig/ergebnis: " + p.treffer.slice(0, 2).join(" | "));
       if (!p.scrollOk) problem.querscroll.push("fertig/ergebnis (" + p.scrollBreite + ")");
       await foto(page, code, beispiel.id, "fertig");
+      // Zuletzt: ohne „Datei teilen“ (die Seite wird neu gezeichnet) steht der andere Weg da
+      await pruefeSendenOhneTeilen(page, dict, kennung);
     } catch (e) {
       datei = null;
     }
@@ -619,6 +724,139 @@ async function einzelpruefungen(browser, server, sprache, muster, txt) {
   ok(kennung + " (Einzelprüfungen): keine Fehler in der Konsole, keine Warnung \"Text fehlt\"", page.__st.konsole.length === 0 && page.__st.warnungen.length === 0, page.__st.konsole.concat(page.__st.warnungen).slice(0, 3).join(" | "));
   void txt;
   await page.close();
+}
+
+// ---------- P1: Code-Seite und Übergabe in jeder Sprache ----------
+
+const AXE = fs.readFileSync(path.join(ROOT, "node_modules", "axe-core", "axe.min.js"), "utf8");
+
+async function axeSchwer(page) {
+  if (await page.evaluate(() => typeof window.axe === "undefined")) await page.evaluate(AXE);
+  const verstoesse = await page.evaluate(async () => {
+    const r = await window.axe.run(document, { resultTypes: ["violations"] });
+    return r.violations.map((v) => ({ id: v.id, impact: v.impact, ziele: v.nodes.slice(0, 2).map((n) => n.target.join(" ")) }));
+  });
+  return verstoesse.filter((v) => v.impact === "critical" || v.impact === "serious");
+}
+
+// code: "de", "en", "tr" oder "ar". muster: deutsche Muster (nur für die übersetzten Sprachen).
+async function einzelZugang(browser, server, code, rtl, muster) {
+  const kennung = (NAMEN[code] || "Deutsch") + " (Code-Seite)";
+  const dict = await ladeDe(code + "-oberflaeche.js");
+  const T = dict.code;
+  const norm = server.testCode.replace(/-/g, "");
+  const wahl = async (page) => {
+    if (code !== "de") await waehleSpracheAufStart(page, code);
+  };
+  server.setzeZugang([server.testPruefwert]);
+  try {
+    const page = await neueSeite(browser, server, code + "-code");
+    await wahl(page);
+    const d = await page.evaluate(() => {
+      const w = document.getElementById("anmeldung");
+      const ohne = (s) => s.replace(/[\u2060\u2066-\u2069\u200E\u200F\u202A-\u202E]/g, "").replace(/\u00A0/g, " ").replace(/\s+/g, " ").trim();
+      const eingabe = w.querySelector('[data-pfad="zugang.code"]');
+      const label = w.querySelector('[data-feld="code"] label');
+      const hilfeK = w.querySelector('[data-aktion="hilfe"]').getBoundingClientRect();
+      const rl = label.getBoundingClientRect();
+      return {
+        schritt: w.dataset.schritt,
+        lang: w.getAttribute("lang"),
+        dir: w.getAttribute("dir"),
+        css: getComputedStyle(w).direction,
+        titel: ohne(w.querySelector(".anm-titel").textContent),
+        absaetze: Array.from(w.querySelectorAll(".anm-absaetze p")).map((p) => ohne(p.textContent)),
+        label: ohne(label.textContent),
+        weiter: ohne(w.querySelector('[data-aktion="weiter"]').textContent),
+        links: Array.from(w.querySelectorAll(".anm-code-hilfen p")).map((p) => ({ text: ohne(p.textContent), link: ohne(p.querySelector("a").textContent), aktion: p.querySelector("a").getAttribute("data-aktion") })),
+        eingabeDir: eingabe.getAttribute("dir"),
+        eingabeLang: eingabe.getAttribute("lang"),
+        labelRechts: rl.right > window.innerWidth / 2,
+        hilfeLinks: hilfeK.left < window.innerWidth / 2,
+        scroll: document.documentElement.scrollWidth <= window.innerWidth,
+        uebersetzungsHinweis: !!w.querySelector(".anm-meldung") && ohne((document.querySelector(".anm-uebersetzung") || { textContent: "" }).textContent),
+      };
+    });
+    ok(kennung + ": erster Bildschirm ist die Code-Seite, Sprache " + code + (rtl ? " von rechts nach links" : ""), d.schritt === "code" && d.lang === code && d.dir === (rtl ? "rtl" : "ltr") && d.css === (rtl ? "rtl" : "ltr"), JSON.stringify({ schritt: d.schritt, lang: d.lang, dir: d.dir, css: d.css }));
+    const einleitung = T.einleitung.split("\n").map(ohneSteuer);
+    ok(kennung + ": Titel, zwei Sätze und Beschriftung stehen in der Sprache (aus dem Wörterbuch)", d.titel === ohneSteuer(T.titel) && JSON.stringify(d.absaetze) === JSON.stringify(einleitung) && d.label === ohneSteuer(T.label) && d.weiter === ohneSteuer(dict.nav.weiter), JSON.stringify([d.titel, d.absaetze, d.label, d.weiter]));
+    const sollKein = ohneSteuer(T.kein.replace("{link}", T.keinLink));
+    const sollPassiv = ohneSteuer(T.passiv.replace("{link}", T.passivLink));
+    ok(kennung + ": die zwei Zeilen darunter (Probetraining vereinbaren, Code von der Geschäftsstelle) stehen in der Sprache, der Link trägt den Text aus dem Wörterbuch", d.links.length === 2 && d.links[0].text === sollKein && d.links[0].link === ohneSteuer(T.keinLink) && d.links[0].aktion === "probetraining" && d.links[1].text === sollPassiv && d.links[1].link === ohneSteuer(T.passivLink) && d.links[1].aktion === "code-anfragen", JSON.stringify(d.links));
+    ok(kennung + ": das Feld bleibt von links nach rechts (dir=ltr, lang=en), kein Querscrollen" + (rtl ? "; Beschriftung rechts, Hilfe links (Spiegelung)" : ""), d.eingabeDir === "ltr" && d.eingabeLang === "en" && d.scroll && (!rtl || (d.labelRechts && d.hilfeLinks)), JSON.stringify({ dir: d.eingabeDir, scroll: d.scroll, labelRechts: d.labelRechts, hilfeLinks: d.hilfeLinks }));
+    ok(kennung + ": " + (code === "de" ? "kein Hinweis „Übersetzungshilfe“ auf Deutsch" : "Hinweis „Übersetzungshilfe“ in der Sprache"), code === "de" ? !d.uebersetzungsHinweis : d.uebersetzungsHinweis === ohneSteuer(dict.sprache.uebersetzungshilfe), String(d.uebersetzungsHinweis));
+    if (muster) {
+      const p = await seitenPruefung(page, muster);
+      ok(kennung + ": kein deutscher Rückfalltext, kein sichtbarer Textschlüssel, westliche Ziffern", p.treffer.length === 0 && p.westlich, p.treffer.slice(0, 3).join(" | "));
+    }
+    fs.mkdirSync(AUSGABE, { recursive: true });
+    await page.screenshot({ path: path.join(AUSGABE, "code-390-" + code + ".png"), fullPage: false });
+    const schwer = await axeSchwer(page);
+    ok(kennung + ": axe-core ohne Verstöße critical/serious", schwer.length === 0, schwer.map((v) => v.impact + " " + v.id + " " + v.ziele.join(" | ")).join("; "));
+    // leer: Meldung in der Sprache
+    await page.click('#anmeldung [data-aktion="weiter"]');
+    await warte(300);
+    const leer = await page.evaluate(() => {
+      const w = document.getElementById("anmeldung");
+      const ohne = (s) => s.replace(/[\u2060\u2066-\u2069\u200E\u200F\u202A-\u202E]/g, "").replace(/\u00A0/g, " ").replace(/\s+/g, " ").trim();
+      const f = w.querySelector('[data-feld="code"] .anm-fehler');
+      const box = w.querySelector(".anm-fehlerbox");
+      return { feld: f && !f.hidden ? ohne(f.textContent) : "", titel: box && !box.hidden ? ohne(box.querySelector(".anm-fehlerbox__titel").textContent) : "", liste: box && !box.hidden ? Array.from(box.querySelectorAll("li")).map((li) => ohne(li.textContent)) : [], schritt: w.dataset.schritt };
+    });
+    ok(kennung + ": leerer Code: Meldung am Feld und in der Fehlerliste in der Sprache, kein Weiter", leer.schritt === "code" && leer.feld === ohneSteuer(T.fehlerLeer) && leer.titel === ohneSteuer(dict.fehler.titelEins) && leer.liste.length === 1 && leer.liste[0] === ohneSteuer(T.label + ": " + T.fehlerLeer), JSON.stringify(leer));
+    // falsch
+    await page.type('[data-pfad="zugang.code"]', "FALSCH-" + norm.slice(-4));
+    await page.click('#anmeldung [data-aktion="weiter"]');
+    await warte(300);
+    const falsch = await page.evaluate(() => {
+      const f = document.querySelector('#anmeldung [data-feld="code"] .anm-fehler');
+      return f && !f.hidden ? f.textContent.replace(/[\u2060\u2066-\u2069\u200E\u200F\u202A-\u202E]/g, "").replace(/\s+/g, " ").trim() : "";
+    });
+    ok(kennung + ": falscher Code: Meldung am Feld in der Sprache", falsch === ohneSteuer(T.fehlerFalsch), falsch);
+    await page.screenshot({ path: path.join(AUSGABE, "code-fehler-390-" + code + ".png"), fullPage: false });
+    if (muster) {
+      const p = await seitenPruefung(page, muster);
+      ok(kennung + ": Seite mit Fehlermeldung ohne deutschen Text", p.treffer.length === 0, p.treffer.slice(0, 3).join(" | "));
+    }
+    // Hilfe-Dialog auf der Code-Seite
+    await page.click('#anmeldung [data-aktion="hilfe"]');
+    await page.waitForSelector("dialog.anm-dialog--hilfe[open]", { timeout: 3000 });
+    await page.keyboard.press("Escape");
+    await page.waitForFunction(() => !document.querySelector("dialog.anm-dialog--hilfe[open]"), { timeout: 3000 });
+    // richtig
+    await page.$eval('[data-pfad="zugang.code"]', (e) => { e.focus(); e.select(); });
+    await page.keyboard.press("Backspace");
+    await page.keyboard.type(server.testCode.toLowerCase());
+    await page.click('#anmeldung [data-aktion="weiter"]');
+    await page.waitForFunction(() => document.getElementById("anmeldung").dataset.schritt === "start", { timeout: 8000 }).catch(() => {});
+    const start = await page.evaluate(() => ({ schritt: document.getElementById("anmeldung").dataset.schritt, titel: document.querySelector(".anm-titel").textContent.replace(/[\u2060\u2066-\u2069\u200E\u200F\u202A-\u202E]/g, "").trim(), lang: document.getElementById("anmeldung").getAttribute("lang"), suche: location.search }));
+    ok(kennung + ": richtiger Code (klein getippt): Startschritt in der Sprache, Adresse trägt code=", start.schritt === "start" && start.titel === ohneSteuer(dict.start.titel) && start.lang === code && start.suche === "?code=" + norm, JSON.stringify(start));
+    ok(kennung + ": keine Fehler in der Konsole, keine Warnung „Text fehlt“", page.__st.konsole.length === 0 && page.__st.warnungen.length === 0, page.__st.konsole.concat(page.__st.warnungen).slice(0, 3).join(" | "));
+    await page.close();
+
+    // Übergabe
+    server.setzeZugang([]);
+    const app = await neueSeite(browser, server, code + "-uebergabe", "?app=1");
+    await wahl(app);
+    const u = await app.evaluate(() => {
+      const w = document.getElementById("anmeldung");
+      const ohne = (s) => s.replace(/[\u2060\u2066-\u2069\u200E\u200F\u202A-\u202E]/g, "").replace(/\u00A0/g, " ").replace(/\s+/g, " ").trim();
+      const a = w.querySelector('a[data-aktion="im-browser-oeffnen"]');
+      return { schritt: w.dataset.schritt, lang: w.getAttribute("lang"), dir: w.getAttribute("dir"), titel: ohne(w.querySelector(".anm-titel").textContent), knopf: a ? ohne(a.textContent) : null, href: a ? a.getAttribute("href") : null, felder: w.querySelectorAll("input:not([type=hidden]), select, textarea").length, scroll: document.documentElement.scrollWidth <= window.innerWidth };
+    });
+    ok(kennung.replace("Code-Seite", "Übergabe") + ": ?app=1 zeigt nur die Übergabe: Titel und Knopf in der Sprache, Link ext://http… ohne app=1", u.schritt === "uebergabe" && u.lang === code && u.dir === (rtl ? "rtl" : "ltr") && u.titel === ohneSteuer(dict.app.uebergabe) && u.knopf === ohneSteuer(dict.app.browser) && /^ext:\/\/http/.test(u.href) && !/app=1/.test(u.href) && u.scroll, JSON.stringify(u));
+    if (muster) {
+      const p = await seitenPruefung(app, muster);
+      ok(kennung.replace("Code-Seite", "Übergabe") + ": kein deutscher Rückfalltext", p.treffer.length === 0, p.treffer.slice(0, 3).join(" | "));
+    }
+    await app.screenshot({ path: path.join(AUSGABE, "app-uebergabe-390-" + code + ".png"), fullPage: false });
+    const schwerU = await axeSchwer(app);
+    ok(kennung.replace("Code-Seite", "Übergabe") + ": axe-core ohne Verstöße critical/serious", schwerU.length === 0, schwerU.map((v) => v.impact + " " + v.id + " " + v.ziele.join(" | ")).join("; "));
+    ok(kennung.replace("Code-Seite", "Übergabe") + ": keine Fehler in der Konsole", app.__st.konsole.length === 0 && app.__st.warnungen.length === 0, app.__st.konsole.slice(0, 3).join(" | "));
+    await app.close();
+  } finally {
+    server.setzeZugang([]);
+  }
 }
 
 // Alle sechs Meldungen zu "lateinische Buchstaben" im Browser: In ein Feld wird Text in anderer Schrift getippt,
@@ -780,6 +1018,10 @@ async function einzelKindLeer(browser, server, sprache, muster, dict) {
     const alterMuster = new RegExp("\\(" + alterVorlage.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace("\\{n\\}", "\\d+") + "\\)$");
     const geboren = zeilen.find((z) => ohneSteuer(z.label) === ohneSteuer(dict.pruefen.zeilen.geboren)) || { label: "", wert: "" };
     ok(kennung + ": Prüfseite: Alter nach der Vorlage „" + alterVorlage + "“ (kein an die Zahl gehängtes Wort)", alterMuster.test(ohneSteuer(geboren.wert)) && !dict.allgemein.jahre, ohneSteuer(geboren.label) + " = " + ohneSteuer(geboren.wert));
+    // U-11 (12.10.2026): Das Datum steht in der Schreibweise der Sprache wie auf der Fertig-Seite: Englisch britisch (Tag zuerst), Arabisch mit westlichen Ziffern
+    const datumText = ohneSteuer(geboren.wert);
+    const datumMuster = { en: /^\d{1,2} [A-Z][a-z]+ \d{4}/, ar: /^\d{1,2} \S+ \d{4}/, tr: /^\d{1,2} \S+ \d{4}/, de: /^\d{1,2}\. \S+ \d{4}/ }[code];
+    ok(kennung + ": Prüfseite: Geburtsdatum in der Schreibweise der Sprache (en: „14 May 2018“, nicht „May 14, 2018“; ar: westliche Ziffern)", !!datumMuster && datumMuster.test(datumText) && (code !== "ar" || !/[\u0660-\u0669]/.test(datumText)), datumText);
     const p = await seitenPruefung(page, muster);
     ok(kennung + ": Prüfseite ohne deutschen Text und ohne Textschlüssel", p.treffer.length === 0, p.treffer.slice(0, 2).join(" | "));
     await foto(page, code, "kind-leer", "pruefen");
@@ -820,7 +1062,9 @@ async function seitenPruefungText(page, text, muster) {
 // Entfernt im Schnappschuss von docs/ (nur dort, nie in assets/) einige Schlüssel aus den
 // englischen Dateien, damit der Durchlauf den Rückfall auf Deutsch bemerken muss.
 const MANGEL = {
-  oberflaeche: ["wer.titel", "abmeldung.status.hinweis", "fertig.senden.einleitung", "unterschriften.stiftTitel", "unterschriften.satzung.titel", "fertig.teilTitel.A", "notfall.kontakt.hinweis"],
+  // P3 Teil b: Was die Seiten nicht mehr zeigen (fertig.senden.einleitung, unterschriften.satzung.titel, die Liste der Teile), taugt nicht mehr als Beispiel; dafür
+  // fehlen jetzt die Erklärung im Satzung-Block (unterschriften.satzung.erklaerung) und die Überschrift des Abschnitts „So schicken Sie die Datei“ (fertig.senden.titel)
+  oberflaeche: ["wer.titel", "abmeldung.status.hinweis", "fertig.senden.titel", "unterschriften.stiftTitel", "unterschriften.satzung.erklaerung", "notfall.kontakt.hinweis"],
   regeln: ["unterlagen.U09.warum", "hinweise.abmeldung_formlos"],
 };
 async function erzeugeMangel() {
@@ -886,6 +1130,11 @@ async function main() {
       await einzelLateinisch(browser, server, s, dict);
       await einzelSorge(browser, server, s, muster, dict);
       await einzelKindLeer(browser, server, s, muster, dict);
+      await einzelZugang(browser, server, s.code, s.rtl, muster);
+    }
+    if (!ARG_SPRACHE) {
+      console.log("\n=== Deutsch (de): Code-Seite und Übergabe ===");
+      await einzelZugang(browser, server, "de", false, null);
     }
   } finally {
     await browser.close();
@@ -900,11 +1149,11 @@ async function main() {
   for (const p of pruefungen.filter((x) => !x.ok)) console.log("  FEHLER: " + p.name + (p.detail ? " – " + p.detail : ""));
   fs.writeFileSync(path.join(AUSGABE, "bericht.json"), JSON.stringify({ pruefungen, fehler: fehlerAnzahl, bilder: dateien }, null, 2));
   if (MANGELTEST) {
-    // Der Rückfall auf Deutsch muss bemerkt werden, ebenso ein fehlender Titel im Satzung-Block und im Teil A der Datei.
+    // Der Rückfall auf Deutsch muss bemerkt werden, ebenso eine fehlende Erklärung im Satzung-Block und eine fehlende Überschrift im Abschnitt zum Schicken der Datei.
     const gefangen =
       pruefungen.some((p) => !p.ok && /Rückfalltext/.test(p.name)) &&
       pruefungen.some((p) => !p.ok && /Satzung-Block übersetzt/.test(p.name)) &&
-      pruefungen.some((p) => !p.ok && /Teile der Datei mit übersetzten Titeln/.test(p.name));
+      pruefungen.some((p) => !p.ok && /Abschnitt: Überschrift in der Sprache/.test(p.name));
     console.log(gefangen ? "\nMängeltest bestanden: Der Durchlauf hat die fehlenden Texte bemerkt (die Fehler oben sind gewollt)." : "\nMängeltest FEHLGESCHLAGEN: Der Durchlauf hat die fehlenden Texte NICHT alle bemerkt.");
     process.exit(gefangen ? 0 : 1);
   }

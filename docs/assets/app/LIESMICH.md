@@ -841,16 +841,21 @@ Woche ohne Training ohne Ferieneintrag heißt „Kein Training eingetragen“
 
 ### Winterhalle G1, F1, F2
 
-Der Generator schreibt bis zur Eintragung der Hallenzeiten (`HALLE` in
-`build_ics.py`) den Satz „Über den Winter trainiert die Mannschaft in der
-Halle. Zeitraum, Halle und Zeiten folgen, bis dahin gelten die Zeiten auf
-dem Platz.“ in jede Trainingsbeschreibung. Die Terminseite liest den Satz aus
-dem Kalender (Haus-Symbol an der Mannschaft, Fußnote unter dem Plan, Zeile in
-der Mannschaftswoche); stehen später „Halle: …“ und andere Sätze drin,
-erscheinen sie ohne Änderung an der Seite. Die Mannschaftsseiten (Website
-`team.mjs`, App `Mannschaften-App.html`) zeigen denselben Satz aus
-`data/teams.json` (`trainingHinweis`) als leise Zeile unter den
-Trainingszeiten – beim Eintragen der Hallenzeiten dort mit anpassen.
+Seit dem 12.10.2026 stehen die Hallenzeiten im Trainingsgenerator (`HALLE` in
+`build_ics.py`, Repo speuzer-spielplan): G1 mittwochs, F1 und F2 donnerstags,
+jeweils 17:30–19:00 Uhr, vom 01.11.2026 bis 28.02.2027 ohne Ferien; in dieser
+Zeit ersetzen sie die Platztermine. Jeder Hallentermin trägt „Halle: …“ mit der
+Adresse in Beschreibung und Ort, dazu „Bitte Hallenschuhe, Schienbeinschoner
+und Wasser mitbringen.“; der frühere Platzhalter-Hinweis steht nicht mehr in
+den Terminen. Die Terminseite liest das aus dem Kalender (Zelle „Sporthalle …“,
+Zeile „Halle: …“ auch in der Karte „Als Nächstes“, Route planen) und zeigt den
+Mitbring-Satz als Hinweis (Haus-Symbol, Fußnote unter dem Wochenplan,
+„Hinweis:“ in der Teamwoche), weil er „Hallen…“ enthält. Die
+Mannschaftsseiten (Website `team.mjs`, App `Mannschaften-App.html`) und die
+Terminseite (Fußnote unter dem regelmäßigen Plan, Zeile in der
+Mannschaftswoche) zeigen den Satz aus `data/teams.json` (`trainingHinweis`)
+als leise Zeile unter den Trainingszeiten – bei geänderten Hallenzeiten dort
+mit anpassen.
 
 ### Terminblock der App-Startseite (Stand 28.09.2026)
 
@@ -934,7 +939,9 @@ API) liegen in `tools/cache/app-optik/termine-umsetzung/` (nicht im Repo).
 - Genaue Form der Trainingsbeschreibungen im appack-Kalender (Zeilenumbrüche
   oder eine Zeile): beide Formen sind berücksichtigt, gegen den echten
   Kalender erst prüfbar, wenn er öffentlich ist.
-- Zeitraum, Halle und Zeiten der Winterhalle (G1, F1, F2) fehlen noch.
+- Winterhalle (G1, F1, F2): Die Hallentermine stehen seit 12.10.2026 im
+  Generator; ob sie nach dem nächsten Abgleich des App-Kalenders in der
+  Terminseite der App stehen, ist erst nach dem Push des Generators prüfbar.
 
 
 ### Termine – eingeführt am 28.09.2026
@@ -951,3 +958,82 @@ Regelseite des Moduls „Schwarzes Brett“ (Pinnwand `sportfreunde04_Applicatio
 liegt an der Workspace-Wurzel. Entscheidung der 1. Vorsitzenden: Aushänge sind für alle sichtbar; wer einen Aushang aufgibt,
 erfährt vorher, dass der Name aus dem Profil erscheint und welche Kontaktdaten er selbst in den Text schreibt.
 Rückweg: in den Pinnwand-Einstellungen die Regelseite leeren.
+
+## Mitglied werden (12.10.2026): Anmeldung nur nach dem Probetraining
+
+Entscheidung der 1. Vorsitzenden vom 12.10.2026: Neue Mitglieder melden sich nur noch nach einem Probetraining an. Wer dort war,
+bekommt einen Code, einen Link oder einen QR-Code; nur damit startet der Anmelde-Assistent (`web/anmeldung.html`), auf der Website
+und aus der App. Die App öffnet den Assistenten im Browser: Dort klappen Speichern, Teilen und E-Mail sicher. „Mitglied werden“
+(Website und App) bietet nur noch diesen Weg an. Der Assistent selbst, der Code und das Werkzeug für das Blatt mit dem QR-Code
+stehen in der `README.md` (Abschnitt „Anmelde-Assistent“, Zugang mit Code vom Probetraining).
+
+### Dateien und Quelle
+
+| Datei | Wofür | Entsteht aus |
+|---|---|---|
+| `web/mitglied-werden.html` (Paket `dist/appack-paket/web/`) | Seite „Mitglied werden“ der Website | `src/seiten/mitglied-werden.mjs` (`npm run build`; mit dem Assistenten nur bei `ANMELDUNG_LIVE=1`) |
+| `assets/app/Mitglied-werden-App.html` | Seitenmodul „Mitglied werden“ der App (Workspace-Wurzel) | `npm run tpl-bauen` (nur diese Datei: `npm run tpl-bauen -- --nur=mitglied-werden`) |
+
+Beide Seiten haben **dieselbe Quelle** (`src/seiten/mitglied-werden.mjs`, Fassung mit dem Assistenten). `Mitglied-werden-App.html` ist
+dieselbe Seite mit fest eingeschaltetem App-Modus (`<html class="app-modus" data-app-seite>`: Titel in der App-Kopfleiste, die
+Überschrift nur noch für Bildschirmleser) und lädt `site.css` absolut aus dem Ordner `web`; sie braucht also das hochgeladene
+Website-Paket, und alle Verweise sind absolute Adressen. Die Datei ist die Fassung für den Tag des Livegangs (sie entsteht
+unabhängig vom Schalter `ANMELDUNG_LIVE`).
+
+Der Ablauf auf der Seite: 1 „Probetraining vereinbaren: E-Mail an die Jugendleitung mit Jahrgang und Vorerfahrung.“ (Anker `#probetraining`, dorthin
+führt die Code-Seite des Assistenten; ohne „(nur Fußball)“, denn der Code gilt für alle; die Zeilen für die Herren und für Karneval bleiben) ·
+2 „Nach dem Probetraining bekommen Sie einen Code. Damit melden Sie sich hier an.“ mit dem Knopf **„Jetzt anmelden“** · 3 „Datei schicken: Am Ende
+schicken Sie die Datei per E-Mail an die Geschäftsstelle.“ · 4 Spielerpass (nur Fußball). Darunter die Beiträge (mit der Beitragsübersicht) und
+„Unterlagen (Fußball)“: erst der Satz „Die Anmeldung sagt Ihnen genau, was Sie brauchen.“, dann ein **zugeklappter Bereich „Welche Unterlagen
+brauche ich?“** mit den drei Listen (Neuanmeldung, Vereinswechsel, Ohne deutschen Pass; der Text der Listen ist unverändert), danach „Zum
+Herunterladen“: nur die Zusatzerklärung für Spieler von 12 bis 18 Jahren und die Satzung. Das Info-Blatt zur Anmeldung und „Wichtige
+Unterlagen, die mitzubringen sind“ stehen dort nicht mehr (zum Papierweg gehörend); sie bleiben auf der Seite Verein › Downloads. Am Ende
+„Fragen? Die Geschäftsstelle hilft.“ (E-Mail). Der Bereich ist ein `<details>` (mit der Tastatur auf- und zuklappbar: Tab, Eingabetaste, Leertaste;
+sein Stil, `AUFKLAPPER_CSS` in `src/seiten/mitglied-werden.mjs`, steht nur auf dieser Seite, in der Website-Fassung im `<style>` der Seite,
+in der App-Datei in deren `<style>`; `site.css` bleibt unverändert). Entfallen sind überall der Aufnahmeantrag-Vordruck zum Ausfüllen,
+der Antrag per E-Mail und das App-Formular; die Seite „Aufnahmeantrag online“ ist nur noch eine Weiterleitung (siehe unten). Die
+Weiterleitung alter Links auf das Formular (`FORMULAR_WEB` im Skript der Seiten → Modul „Mitglied werden“) bleibt.
+
+**Die alte Seite `aufnahmeantrag.html`:** Im Paket (Live-Bau) ist sie eine Weiterleitung auf `mitglied-werden.html`: „Diese Seite ist umgezogen“,
+der Satz „Die Anmeldung finden Sie jetzt bei „Mitglied werden“.“, der Link „Weiter zu „Mitglied werden““ und `<meta http-equiv="refresh" content="0; url=mitglied-werden.html">`
+(`noindex`; Muster der alten Seiten `spielplan*` und `tabellen`, Quelle `src/seiten/aufnahmeantrag.mjs` und `src/vorlagen/weiterleitung.mjs`). In der App
+führt der Link über das Skript der Seite auf das Seitenmodul „Mitglied werden“ (`nav://`). Im CMS wird nichts gelöscht: Die Datei wird beim Einspielen
+ersetzt. Ihr Skript `aufnahmeantrag.js` (Formular, Unterschriften, PDF-Erzeugung der alten Seite) liegt nicht mehr im Paket und wird von keiner Seite
+mehr geladen; die alte Datei im CMS kann stehen bleiben oder später gelöscht werden. `aufnahmeantrag-pdf-lib.js` und `aufnahmeantrag-fontkit.js`
+bleiben im Paket, der Assistent braucht sie. Ohne den Schalter `ANMELDUNG_LIVE` bleibt die alte Seite, wie sie war. `formular-gesendet.html` bleibt.
+
+**Der Knopf auf der Website:** „Jetzt anmelden“ (und der gleiche Knopf auf „Downloads“) öffnet ein neues Fenster (`target="_blank" rel="noopener"`),
+denn die Hülle zeigt die Seiten in einem Rahmen (`<iframe id="showFrame">` ohne `allow`-Angaben): Dort sind Teilen, Kopieren und Herunterladen nicht verlässlich.
+Läuft der Assistent trotzdem in einem Rahmen oder im Browser einer anderen App (Facebook, Instagram, Android-WebView), steht auf dem ersten Bildschirm oben ein
+Hinweiskasten mit dem Link „In neuem Fenster öffnen“ bzw. der Bitte, die Anmeldung in Safari oder Chrome zu öffnen.
+
+**Der Knopf in der App:** Das Skript der App-Seiten (`APP_MODUS_SKRIPT`, in der App-Datei `APP_MODUS_SKRIPT_APP_DATEI`;
+`src/vorlagen/hilfen.mjs`) schreibt Links auf `…/workspace/web/anmeldung.html` zu `ext://https://cdn.appack.de/sportfreunde04/workspace/web/anmeldung.html`
+um (ohne `app=1`; ein `code` in der Adresse bleibt). Das öffnet den System-Browser. Wird `anmeldung.html?app=1` doch in der App
+geöffnet, zeigt der Assistent nur den Bildschirm „Bitte öffnen Sie die Anmeldung im Browser.“ mit dem Knopf „Im Browser öffnen“.
+
+### Einführung im CMS (Reihenfolge verbindlich)
+
+1. **Zuerst den Code festlegen**, damit der Prüfwert im Paket steht (sonst fragt die Seite keinen Code ab):
+   `node tools/anmeldung-zugang.mjs --code <CODE> --blatt <Ordner>` (setzt den Prüfwert in `data/anmeldung.json`, legt das Blatt mit dem QR-Code
+   im Ordner ab). Dann den Live-Bau (`ANMELDUNG_LIVE=1 sh tools/cache/bau-sperre.sh build`) und den Assistenten mit den Seiten des Pakets
+   einspielen; Reihenfolge und Rückweg stehen im `LIESMICH.md` des Pakets (erst `anmeldung-*.js`, `anmeldung.css`, `anmeldung.html`, zuletzt
+   `mitglied-werden.html`, `verein-downloads.html`, `aufnahmeantrag.html` (jetzt die Weiterleitung) und die übrigen Seiten mit dem neuen Skript).
+2. `assets/app/Mitglied-werden-App.html` an die Workspace-Wurzel hochladen
+   (`https://cdn.appack.de/sportfreunde04/workspace/Mitglied-werden-App.html`).
+3. Den **bisherigen Seitenlink** des Moduls „Mitglied werden“ (`sportfreunde04_TextImage_1780401660329`) notieren (laut Übernahme-Doku
+   das App-Formular `Mitglied werden_2.tpl`, `drender/6a85624e98e2060bf879caa6`; den genauen Wert im CMS ablesen) und den Seitenlink auf
+   `Mitglied-werden-App.html` setzen.
+4. Prüfen: In der App „Mitglied werden“ öffnen, „Jetzt anmelden“ tippen: Der Browser öffnet die Anmeldung und fragt nach dem Code.
+   Mit dem Link aus dem Blatt (oder dem QR-Code) startet sie ohne Code-Seite. Von außen: `node tools/anmeldung-test/e2e-paket.mjs --cdn --code=<CODE>`.
+
+**Rückweg:** Seitenlink des Moduls zurück auf den notierten Wert; die vorherigen `mitglied-werden.html`, `verein-downloads.html` und `aufnahmeantrag.html`
+des Pakets wieder einspielen (siehe Rückweg im `LIESMICH.md` des Pakets). `Mitglied-werden-App.html` kann stehen bleiben.
+
+### Offene Punkte (nur in der echten App prüfbar)
+
+- `ext://` aus der Webansicht (iOS und Android): Öffnet der System-Browser die Adresse mit `?code=` unverändert?
+- Hülle der Website: Öffnet „Jetzt anmelden“ (`target="_blank"`) im echten Rahmen (`#showFrame` auf `appack.de`) ein neues Fenster oder einen neuen Tab, und bleibt die Website offen?
+- Der Link zur Code-Seite „Probetraining vereinbaren“ führt auf `mitglied-werden.html#probetraining` (Website, nicht die App-Datei).
+- `aufnahmeantrag.html?app=1` in der Webansicht der App: Das `<meta refresh>` führt sofort auf `mitglied-werden.html` (ohne `app=1`), die Weiche im Skript der Seite
+  schreibt nur den Link um. Die App selbst verlinkt die alte Seite nirgends mehr; nur alte Lesezeichen und Links aus Nachrichten kommen hierher.

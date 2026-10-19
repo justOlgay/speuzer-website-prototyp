@@ -12,7 +12,7 @@
 // Trainingstage jetzt direkt in den Teamkarten zeigt (teamKarte() in
 // src/seiten/mannschaften/index.mjs) statt in einer zweiten, doppelten Liste.
 
-import { PROBETRAINING_MAILTO, initialen, eMailSchreibenLink } from "./hilfen.mjs";
+import { PROBETRAINING_MAILTO, ANMELDUNG_LIVE, initialen, eMailSchreibenLink } from "./hilfen.mjs";
 import { bild } from "./bild.mjs";
 
 function escapeHtml(text) {
@@ -43,6 +43,8 @@ function escapeHtml(text) {
 // Jugendleitung), Hauptknopf "E-Mail an die Jugendleitung" (das Ziel steht
 // jetzt im Knopftext selbst), Textlink für die Herren direkt darunter statt
 // in Schritt 1 – keine doppelte Nennung mehr.
+// Schritt 3 gilt mit dem Anmelde-Assistenten (Schalter ANMELDUNG_LIVE, Paket P6 U-20) als „Mit dem Code anmelden“: Nach dem Probetraining gibt es einen
+// Code, den Antrag zum Ausfüllen gibt es nicht mehr. Ohne den Schalter bleibt der Abschnitt Byte für Byte wie vorher.
 export function probetrainingAbschnitt(pfad, herrenMailtoHref = "") {
   // W10-Nachprüfung (offen Nr. 9, zoom/herrenlink-390.png): "Herren ›" brach
   // auf dem Handy als eigene zweite Zeile ab dem Wort "Herren" ab – Wort und
@@ -56,7 +58,7 @@ export function probetrainingAbschnitt(pfad, herrenMailtoHref = "") {
     <ol class="schritte">
       <li><p>E-Mail an die Jugendleitung (Jahrgang, Vorerfahrung)</p></li>
       <li><p>Probetraining beim Team</p></li>
-      <li><p>Aufnahmeantrag stellen</p></li>
+      <li><p>${ANMELDUNG_LIVE ? "Mit dem Code anmelden" : "Aufnahmeantrag stellen"}</p></li>
     </ol>
     <p class="meta">Beim Probetraining ist man noch nicht über den Verein versichert.</p>
     <p class="knopfzeile">

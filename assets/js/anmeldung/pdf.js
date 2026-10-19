@@ -150,10 +150,11 @@ const STELLE_KLARTEXT = {
 
 export const TEXTE_TEIL_A = {
   titel: "Ihre Anmeldung",
-  einleitung: "Hier ist Ihre fertige Anmeldung. Die Datei hat {anzahl} Teile.",
-  teilA: "Das lesen Sie jetzt. Sie behalten diesen Teil.",
-  // Die Datei geht per E-Mail an die Geschäftsstelle (M10, Entscheidung der 1. Vorsitzenden vom 11.10.2026), siehe „abgeben“.
-  teilB: "Er geht an den Verein.",
+  einleitung: "Hier ist Ihre fertige Anmeldung. Die Datei hat {anzahl} Teile. Sie schicken die ganze Datei.",
+  teilA: "Das lesen Sie jetzt.",
+  // Die ganze Datei geht per E-Mail an die Geschäftsstelle (M10, Entscheidung der 1. Vorsitzenden vom 11.10.2026), siehe „abgeben“;
+  // die Familie behält nichts und trennt nichts ab.
+  teilB: "Damit arbeitet der Verein.",
   teilC: "Er enthält Angaben zur Gesundheit. Der Verein bewahrt ihn getrennt auf.",
   weiterTitel: "So geht es weiter",
   // Unterschriften. Der Verband (der Hessische Fußball-Verband) verlangt für seine Blätter eine Unterschrift mit Stift. Die
@@ -176,12 +177,14 @@ export const TEXTE_TEIL_A = {
   ausdruckenNur: "Ausdrucken müssen Sie nur:",
   satzung: "Kreuzen Sie im Aufnahmeantrag auf Seite {seite} das Kästchen zur Satzung an. Die Satzung steht auf der Internetseite des Vereins.",
   attest: "Das Blatt Ärztliche Bescheinigung (Attest) steht auf Seite {seite}. Gehen Sie damit zum Arzt. Der Arzt unterschreibt und stempelt es.",
-  attestKosten: "Fragen Sie den Arzt vorher nach dem Preis.",
   // Das Blatt „Abmeldung beim alten Verein“ (sprache-10): Die Familie unterschreibt es mit Stift und schickt es selbst.
   abmeldung: "Das Blatt {name} steht auf {seiten}. Unterschreiben Sie es mit Stift. Schicken Sie es selbst als Einschreiben an den alten Verein.",
   // Am Bildschirm unterschrieben (Modus „bildschirm“): Die Unterschriften stehen schon auf dem Blatt, es geht nur noch an den alten Verein.
   abmeldungBildschirm: "Das Blatt {name} steht auf {seiten}. Schicken Sie das Blatt an Ihren alten Verein. Am sichersten per Einschreiben.",
-  fehlt: "Besorgen Sie die Unterlagen aus der Liste Das fehlt noch.",
+  // D-05 (12.10.2026): Die Datei geht zuerst ab (die Mitgliedschaft beginnt am Tag der Anmeldung); was fehlt, kommt später nach. Wie auf der Fertig-Seite.
+  fehltNachschicken: "Schicken Sie fehlende Unterlagen später nach. Sie stehen unter Das fehlt noch.",
+  // Blätter, die die Familie nach dem Ausdrucken mit Stift unterschreibt (nicht die Abmeldung beim alten Verein, nicht das Attest): Sie gehen mit der Datei.
+  fotoUnterschrieben: "Fotografieren oder scannen Sie die unterschriebenen Blätter. Schicken Sie sie in derselben E-Mail mit.",
   // Die Familie schickt die fertige Datei selbst per E-Mail an die Geschäftsstelle (M10, Entscheidung der 1. Vorsitzenden vom
   // 11.10.2026; kein Versand über einen Server). {adresse} kommt aus der Konfiguration (konfig.verein.mail).
   abgeben: "Schicken Sie die Datei per E-Mail an die Geschäftsstelle: {adresse}.",
@@ -195,8 +198,7 @@ export const TEXTE_TEIL_A = {
   verein: "Danach prüft der Verein Ihre Anmeldung.",
   nichtWhatsapp: "Schicken Sie die Datei nicht per WhatsApp. Sie enthält private Daten.",
   unterschriftenTitel: "Wo unterschreiben Sie?",
-  unterschriftenEinleitung: "Diese Tabelle zeigt alle Unterschriften. Die Seitenzahl steht in der ersten Spalte.",
-  unterschriftenKeine: "Für Ihre Anmeldung gibt es keine Unterschriften.",
+  unterschriftenEinleitung: "Diese Blätter brauchen eine Unterschrift mit Stift.",
   wieBildschirm: "Am Bildschirm erledigt",
   wieLeer: "Nicht unterschrieben (freiwillig)",
   wieStift: "Mit Stift",
@@ -214,6 +216,9 @@ export const TEXTE_TEIL_A = {
   fehltNichtLesbar: "Die Datei ließ sich nicht übernehmen. Schicken Sie ein neues Foto oder einen Scan per E-Mail nach.",
   fehltWie: "So bekommen Sie es:",
   fehltWo: "So schicken Sie es nach:",
+  // Der Assistent speichert nichts: Nachgereichtes geht immer per E-Mail. Die Texte „wo“ der Regeln (Bildschirm „Nachweise“) sprechen vom Hochladen.
+  fehltWoMail: "Schicken Sie ein Foto per E-Mail an die Geschäftsstelle.",
+  fehltWoJugend: "Die Jugendleitung klärt den Rest mit Ihnen.",
   wartezeitTitel: "Wann darf gespielt werden?",
   mannschaftTitel: "Die Mannschaft",
   wartezeitSchaetzung: "Das ist eine Schätzung. Der Verein prüft das genau.",
@@ -226,6 +231,9 @@ export const TEXTE_TEIL_A = {
   kontaktTitel: "So erreichen Sie uns",
   kontaktEinleitung: "Bei Fragen rufen Sie uns an oder schreiben Sie uns.",
 };
+
+// Unterlagen, bei denen die Jugendleitung den Rest mit der Familie klärt (U36 bis U38: Besonderheiten beim Spielrecht)
+const FEHLT_JUGENDLEITUNG = ["U36", "U37", "U38"];
 
 // ---------------------------------------------------------------------------
 // Kleine Hilfen: Text, Datum, Zahlen
@@ -2213,8 +2221,8 @@ function seiteHeimweg(K, S) {
 function seiteTrennblatt(K, S, plan) {
   S.ueberschrift(TEIL_ANZEIGE.C, 1);
   // Teil C geht mit der ganzen Datei per E-Mail an die Geschäftsstelle; der Verein bewahrt ihn getrennt auf (O25 und O73,
-  // Entscheidung der 1. Vorsitzenden vom 11.10.2026). Die Familie trennt nichts ab. Nur WhatsApp bleibt verboten.
-  S.absatz("Diese Seiten enthalten Angaben zur Gesundheit. Sie gehören nicht zu den übrigen Unterlagen.", { size: 11, nach: 8 });
+  // Entscheidung der 1. Vorsitzenden vom 11.10.2026). Die Familie trennt nichts ab. Das Verbot für WhatsApp steht in Teil A (letzter Schritt).
+  S.absatz("Diese Seiten enthalten Angaben zur Gesundheit.", { size: 11, nach: 8 });
   S.ueberschrift("Das steht in Teil C", 2);
   const zeilen = liste(plan.teilCListe).map((z) => [{ t: "Seite " + z.seite + ":", fett: true }, { t: z.titel + " – " + z.wer }]);
   S.liste(zeilen, { size: 11, nach: 5 });
@@ -2223,18 +2231,9 @@ function seiteTrennblatt(K, S, plan) {
     [
       "Teil C geht mit der Datei per E-Mail an die Geschäftsstelle.",
       "Der Verein bewahrt ihn getrennt von den übrigen Unterlagen auf.",
-      "Schicken Sie Teil C nicht per WhatsApp.",
     ],
     { size: 11, nach: 5 }
   );
-  S.abstand(8);
-  const liste2 = liste(plan.teilCListe);
-  const hatAttest = liste2.some((z) => /Bescheinigung|Attest/.test(z.titel));
-  const hatNotfall = liste2.some((z) => /Notfall/.test(z.titel));
-  const schluss = [];
-  if (hatAttest) schluss.push("Das " + unterlageName(K, "U10") + " bleibt im Passwesen.");
-  if (hatNotfall) schluss.push("Der " + eintragName("notfall") + " ist nur für die Trainer und Betreuer der " + teamWort(K) + ".");
-  if (schluss.length) S.absatz(schluss.join(" "), { size: 9.5, farbe: FARBE.tinte2 });
 }
 
 // Sätze der Ärztlichen Bescheinigung (Grundsatz, Zusatz für Herren-Aushilfe und Juniorinnen)
@@ -2437,7 +2436,10 @@ function wieText(K, u) {
   const T = TEXTE_TEIL_A;
   if (u.wer === "arzt") return T.wieArzt;
   if (u.wer === "verein") return T.wieVerein;
-  const art = stelleArt(K, u.formular, u.wer, u.stelleKey);
+  // Rückfall: Die Regeln kennen die Stelle nicht, die Seite zeigt eine Stift-Markierung (auch wenn die Familie am Bildschirm unterschrieben hat).
+  // Die Tabelle nennt nur Blätter mit Stift (P3 Teil b, D1) und darf so eine Stelle nicht als „am Bildschirm erledigt“ auslassen.
+  const rueckfall = K.rueckfall.some((r) => r.formular === u.formular && r.stelleKey === u.stelleKey);
+  const art = rueckfall ? "stift" : stelleArt(K, u.formular, u.wer, u.stelleKey);
   if (art === "bild") return T.wieBildschirm;
   if (art === "leer") return T.wieLeer; // Zeile des Kindes im Antrag auf Spielerlaubnis: nicht unterschrieben, ohne Markierung
   // Die Abmeldung beim alten Verein bringt der Verein nicht zum Verband: Die Familie schickt sie selbst (sprache-10).
@@ -2506,13 +2508,15 @@ function unterlagenZuKlaeren(K, plan) {
 //  - Blätter des Verbands (HFV) im Modus „stift“: am Bildschirm unterschrieben druckt sie der Verein zum ersten Training, wenn die
 //    Familie "beim ersten Training" wählt; sonst druckt sie die Familie. Im Modus „bildschirm“ (Jugendleitung, 11.10.2026) steht
 //    nur noch auf der Liste, was wirklich eine Stift-Stelle hat (leeres freiwilliges Feld); das druckt immer die Familie.
-// Rückgabe: { alles: true } wenn die ganze Datei auszudrucken ist, sonst { blaetter: [{ name, von, bis }] }.
+// Rückgabe: { alles: true } wenn die ganze Datei auszudrucken ist, sonst { blaetter: [{ name, von, bis }], stiftBlaetter } (stiftBlaetter: wie viele
+// dieser Blätter die Familie nach dem Ausdrucken mit Stift unterschreibt und mit der Datei schickt; ohne Attest-Vorlage und Abmeldung).
 function druckListe(K, plan, stifte) {
   const papierWeg = K.a.unterschriftWeg !== "bildschirm";
   const training = K.a.hfvUnterschrift !== "selbst_drucken";
-  if (papierWeg && !training) return { alles: true, blaetter: [] };
+  if (papierWeg && !training) return { alles: true, blaetter: [], stiftBlaetter: 0 };
   const hfvImTraining = training && !hfvAmBildschirm(K); // druckt der Verein zum ersten Training
   const blaetter = [];
+  let stiftBlaetter = 0;
   const merke = (name, r) => r && blaetter.push({ name: name, von: r.von, bis: r.bis });
   if (!papierWeg) {
     const formulare = [];
@@ -2521,12 +2525,14 @@ function druckListe(K, plan, stifte) {
       if (HFV_FORMULARE.includes(u.formular) && hfvImTraining) return;
       formulare.push(u.formular);
     });
-    formulare.forEach((f) => merke(deRegeln.formulare[f] || f, plan.formulare[f]));
+    formulare.forEach((f) => {
+      if (merke(deRegeln.formulare[f] || f, plan.formulare[f])) stiftBlaetter++;
+    });
   }
   if (plan.attestVorlage) merke(ATTEST_VORLAGE_NAME, plan.attestVorlage);
   if (plan.formulare.abmeldung) merke(deRegeln.formulare.abmeldung, plan.formulare.abmeldung);
   blaetter.sort((p, q) => p.von - q.von);
-  return { alles: false, blaetter: blaetter };
+  return { alles: false, blaetter: blaetter, stiftBlaetter: stiftBlaetter };
 }
 
 function seiteTeilA(K, S, plan) {
@@ -2578,8 +2584,19 @@ function seiteTeilA(K, S, plan) {
     schritte.push({ inhalt: E(T.ausdruckenNur), unter: druck.blaetter.map((b) => E(seitenText(b.von, b.bis) + ": " + b.name)) });
   }
   if (K.a.satzung !== true && plan.formulare.aufnahmeantrag) schritte.push(E(ersetzePlatzhalter(T.satzung, { seite: plan.formulare.aufnahmeantrag.von })));
+  // Blätter, die die Familie nach dem Ausdrucken mit Stift unterschreibt, gehen als Foto oder Scan in derselben E-Mail mit (U-16; erst nach allem, was auf
+  // Papier zu tun ist, auch nach dem Kästchen zur Satzung). Nicht dazu gehören die Abmeldung beim alten Verein (Einschreiben), das Attest (Arzt) und
+  // Blätter, die beim ersten Training unterschrieben werden.
+  if (druck.stiftBlaetter) schritte.push(E(T.fotoUnterschrieben));
+  // D-05 (12.10.2026): Erst geht die Datei ab, dann kommt Fehlendes nach – wie auf der Fertig-Seite. Die Mitgliedschaft beginnt am Tag der Anmeldung.
+  // Ist keine Adresse bekannt (fehlt in der Konfiguration), entfällt ": {adresse}"; der Satz bleibt richtig.
+  const mailAdresse = geschaeftsstellenMail(K);
+  const abgabe = druck.alles ? T.abgebenAusgedruckt : T.abgeben;
+  schritte.push(E(ersetzePlatzhalter(mailAdresse ? abgabe : abgabe.replace(/:\s*\{adresse\}/, ""), { adresse: mailAdresse })));
+  if (hatC) schritte.push(E(T.abgebenC));
+  // Danach, was die Familie selbst besorgt oder verschickt (U-17: der Preis des Attests steht nur unter „Das sollten Sie wissen“)
   if (plan.attestVorlage) {
-    schritte.push(E(ersetzePlatzhalter(T.attest, { seite: plan.attestVorlage.von }) + " " + T.attestKosten));
+    schritte.push(E(ersetzePlatzhalter(T.attest, { seite: plan.attestVorlage.von })));
   }
   if (hatAbmeldung) {
     // Am Bildschirm unterschrieben steht alles auf dem Blatt: Die Familie schickt es nur noch ab. Fehlt noch eine Unterschrift
@@ -2589,21 +2606,17 @@ function seiteTeilA(K, S, plan) {
     schritte.push(E(ersetzePlatzhalter(abmeldungText, { name: deRegeln.formulare.abmeldung, seiten: seitenText(plan.formulare.abmeldung.von, plan.formulare.abmeldung.bis) })));
   }
   const fehlend = liste(e.fehlend);
-  if (fehlend.length) schritte.push(E(T.fehlt));
-  // Ist keine Adresse bekannt (fehlt in der Konfiguration), entfällt ": {adresse}"; der Satz bleibt richtig.
-  const mailAdresse = geschaeftsstellenMail(K);
-  const abgabe = druck.alles ? T.abgebenAusgedruckt : T.abgeben;
-  schritte.push(E(ersetzePlatzhalter(mailAdresse ? abgabe : abgabe.replace(/:\s*\{adresse\}/, ""), { adresse: mailAdresse })));
-  if (hatC) schritte.push(E(T.abgebenC));
+  if (fehlend.length) schritte.push(E(T.fehltNachschicken));
   schritte.push(E(mitSpielrecht(K) && e.status ? T.verband : T.verein));
   schritte.push(E(T.nichtWhatsapp));
   S.liste(schritte, { size: 10.5, marker: "nummer", nach: 4 });
 
   // --- Wo unterschreiben Sie? ---
-  S.ueberschrift(T.unterschriftenTitel, 2);
-  const verlangt = gezeichnet;
-  if (!verlangt.length) S.absatz(T.unterschriftenKeine, zwischen);
-  else {
+  // Nur Blätter, die die Familie noch mit Stift unterschreibt (P3 Teil b). Ist alles am Bildschirm erledigt, entfällt der Abschnitt:
+  // Schritt 1 von „So geht es weiter“ sagt es schon. Arzt und Verein stehen in „So geht es weiter“ und im Laufzettel.
+  const verlangt = gezeichnet.filter((u) => FAMILIE_WER.includes(u.wer) && ![T.wieBildschirm, T.wieLeer].includes(wieText(K, u)));
+  if (verlangt.length) {
+    S.ueberschrift(T.unterschriftenTitel, 2);
     S.absatz(T.unterschriftenEinleitung, { size: 10, nach: 4 });
     S.tabelle(
       [{ w: 9, titel: "Seite" }, { w: 35, titel: "Blatt" }, { w: 27, titel: "Wer unterschreibt?" }, { w: 29, titel: "Wie?" }],
@@ -2633,7 +2646,7 @@ function seiteTeilA(K, S, plan) {
       const u = liste(et.unterlagen).find((x) => x.id === id) || { id: id, werte: {} };
       S.kaestchenZeile(false, [{ t: unterlageName(K, id), fett: true }], { size: 10.5, nach: 1 });
       S.absatz(ER([{ t: T.fehltWie, fett: true }, { t: unterlageText(K, u, "wie") }]), { size: 10, einzug: 18, nach: 1 });
-      S.absatz(ER([{ t: T.fehltWo, fett: true }, { t: unterlageText(K, u, "wo") }]), { size: 10, einzug: 18, nach: 5 });
+      S.absatz(ER([{ t: T.fehltWo, fett: true }, { t: T.fehltWoMail + (FEHLT_JUGENDLEITUNG.includes(id) ? " " + T.fehltWoJugend : "") }]), { size: 10, einzug: 18, nach: 5 });
     });
   }
   if (klaeren.length) S.absatz(E(T.fehltVielleicht), { size: 10, farbe: FARBE.tinte2, nach: 4 });
@@ -2664,7 +2677,9 @@ function seiteTeilA(K, S, plan) {
   // --- Das sollten Sie wissen ---
   const hw = liste(et.hinweise);
   const wichtig = hw.filter((h) => h.art === "warnung" || h.art === "frist");
-  const info = hw.filter((h) => h.art === "info");
+  // Nicht noch einmal: der Hinweis zu WhatsApp (letzter Schritt oben) und "Zuerst werden Sie Mitglied" (Schritt: Danach stellt der Verein den
+  // Antrag). Die zwei Hinweise zur Unterschrift stehen nur, solange die Familie noch mit Stift unterschreiben muss (P3 Teil b).
+  const info = hw.filter((h) => h.art === "info" && !["unterlagen_kein_whatsapp", "mitgliedschaft_zuerst"].includes(h.key) && !(!stifte.length && ["spieler_unterschrift_kind", "getrennt_einverstanden"].includes(h.key)));
   const offen = hw.filter((h) => h.art === "offen");
   if (wichtig.length || info.length) {
     S.ueberschrift(T.wissenTitel, 2);
@@ -2790,7 +2805,6 @@ function seiteLaufzettel(K, S, plan) {
     if (fr.alternativ && fr.alternativ.pflichtspieleAb) zeilen.push([{ t: "Mit Freigabe schon ab:", fett: true }, { t: datumDe(fr.alternativ.pflichtspieleAb) }]);
     if (fr.antragBis) zeilen.push([{ t: "Antrag beim Verband bis:", fett: true }, { t: datumDe(fr.antragBis) + (fr.zuSpaet ? " – Frist ist vorbei" : "") }]);
     zeilen.forEach((z) => S.absatz(z, Object.assign({}, g, { nach: 1 })));
-    S.absatz(ersetzePlatzhalter(deRegeln.frist[et.frist.key], et.frist.werte), Object.assign({}, g, { farbe: FARBE.tinte2 }));
   }
 
   // Unterlagen
@@ -2890,7 +2904,8 @@ function seiteLaufzettel(K, S, plan) {
     pruef.push(unterlageName(K, "U05") + " (SEPA-Lastschriftmandat): Seite 1 des Aufnahmeantrags nennt als Abbuchung das erste Kalendervierteljahr, Seite 4 den Februar. Termin klären.");
   }
   const digital = alleStellen(K).some((u) => stelleArt(K, u.formular, u.wer, u.stelleKey) === "bild");
-  if (digital) pruef.push("Unterschriften am Bildschirm gezeichnet (einfache elektronische Signatur) auf Vereinsunterlagen. Der Vorstand bestätigt, dass die Satzung (Schriftform, § 127 BGB) das zulässt.");
+  // Die Form bestimmt der Verein selbst; entschieden (O68, Jugendleitung 11.10.2026, freigegeben von der 1. Vorsitzenden am 12.10.2026): keine offene Frage an den Vorstand mehr.
+  if (digital) pruef.push("Unterschriften am Bildschirm gezeichnet (einfache elektronische Signatur) auf Vereinsunterlagen. Die Form bestimmt der Verein selbst (Satzung, § 127 BGB); entschieden von der Jugendleitung am 11.10.2026.");
   // Blätter des Verbands am Bildschirm unterschrieben (Entscheidung der Jugendleitung vom 11.10.2026, O68). Das Passwesen prüft beim Antrag,
   // ob der Verband die Bildschirm-Unterschrift annimmt; sonst druckt der Verein das Blatt aus und lässt es mit Stift unterschreiben.
   // Ausnahmen nennt der Satz: Stift-Stellen (leeres Feld des zweiten Elternteils oder des Kindes in der Abmeldung) und die leere Zeile des

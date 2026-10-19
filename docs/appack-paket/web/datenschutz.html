@@ -50,6 +50,12 @@
       }
       if (url.hostname === location.hostname && /\/workspace\/web\//.test(url.pathname)) {
         var name = url.pathname.split("/").pop().replace(/\.html$/, "");
+        if (name === "anmeldung") {
+          url.searchParams.delete("app");
+          a.href = "ext://" + url.toString();
+          a.removeAttribute("target");
+          return;
+        }
         var modul = NAV[name] || (/^mannschaften-/.test(name) ? NAV.mannschaften : null) || (/^chronik/.test(name) ? NAV.chronik : null);
         if (modul && !url.hash) {
           a.href = "nav://" + modul;
@@ -84,7 +90,7 @@
 <section class="abschnitt seitenkopf">
   <div class="container">
     <h1>Datenschutz&shy;erklärung</h1>
-    <p class="seitenkopf__lead">Stand: 28.09.2026 – gilt für Vereins‑App und Website</p>
+    <p class="seitenkopf__lead">Stand: 12.10.2026 – gilt für Vereins‑App und Website</p>
   </div>
 </section>
 <section class="abschnitt">
@@ -114,7 +120,7 @@
       <li><a href="#abschnitt-13">11. Einbindung von Inhalten Dritter – FUSSBALL.DE-Widgets</a></li>
       <li><a href="#abschnitt-14">12. Hosting von Website und App</a></li>
       <li><a href="#abschnitt-15">13. Schriften, Bilder, Spielpläne und Kalender über GitHub Pages</a></li>
-      <li><a href="#abschnitt-16">14. Online-Aufnahmeantrag</a></li>
+      <li><a href="#abschnitt-16">14. Anmeldung über den Anmelde-Assistenten</a></li>
       <li><a href="#abschnitt-17">15. Links zu anderen Anbietern</a></li>
       <li><a href="#abschnitt-18">16. Fotos von Personen</a></li>
       <li><a href="#abschnitt-19">17. Beschwerderecht bei der Aufsichtsbehörde</a></li>
@@ -446,11 +452,12 @@
 <section id="abschnitt-16" class="abschnitt">
   <div class="container fluss">
     <div class="inhalt prosa fluss">
-    <h2>14. Online-Aufnahmeantrag</h2>
-    <p>In der Vereins-App können Sie den Aufnahmeantrag über ein Formular der Plattform appack stellen. Dabei verarbeiten wir die Angaben aus dem Formular: Vor- und Nachname, Geburtsdatum, Anschrift, Telefonnummer, E-Mail-Adresse, gewählte Sparte (Fußball, Karneval), gegebenenfalls weitere Familienmitglieder sowie für das SEPA-Lastschriftmandat Kontoinhaber, IBAN, Kreditinstitut und Unterschrift.</p>
-      <p>Auf der Website füllen Sie den Aufnahmeantrag auf der Seite „Aufnahmeantrag online“ aus. Aus Ihren Angaben und Ihrer Unterschrift erzeugt Ihr Browser das Antragsformular des Vereins als PDF, und zwar auf Ihrem Gerät. Das PDF enthält dieselben Angaben wie das Papierformular, dazu Ihre Entscheidung zur Veröffentlichung von Fotos und Namen. Die Angaben werden dabei weder an den Verein noch an appack oder andere Dritte übertragen. Die Seite speichert keine Angaben, auch nicht im Browser; beim Schließen oder Neuladen der Seite sind sie gelöscht. Unabhängig davon kann Ihr Browser über seine eigene Funktion zum automatischen Ausfüllen anbieten, Angaben wie Anschrift oder Bankverbindung zu speichern – ob Sie das zulassen, entscheiden Sie in Ihrem Browser. Für das Erzeugen lädt Ihr Browser nur die leere Antragsvorlage und die nötigen Programmdateien von cdn.appack.de (siehe „12. Hosting von Website und App“), bei Namen mit besonderen Schriftzeichen außerdem eine Schriftdatei über GitHub Pages (siehe „13. Schriften, Bilder, Spielpläne und Kalender über GitHub Pages“).</p>
-      <p>Der Verein erhält den Antrag erst, wenn Sie das PDF selbst senden, zum Beispiel als Anhang einer E-Mail an die Geschäftsstelle, oder ausgedruckt abgeben. Die vorbereitete E-Mail enthält keine Angaben aus dem Formular. Für die E-Mail gilt „4. Kontaktmöglichkeiten“. Das gespeicherte PDF enthält alle Angaben einschließlich Bankverbindung und Unterschrift und bleibt auf Ihrem Gerät, bis Sie es löschen; nach dem Senden können Sie es löschen.</p>
-      <p>Wir verwenden diese Daten ausschließlich zur Bearbeitung des Antrags, zur Mitgliederverwaltung und zum Einzug der Beiträge (Art. 6 Abs. 1 lit. b DSGVO). Nach dem Ende der Mitgliedschaft löschen wir die Daten, soweit keine gesetzlichen Aufbewahrungsfristen (z. B. für Buchungsbelege) entgegenstehen.</p>
+    <h2>14. Anmeldung über den Anmelde-Assistenten</h2>
+    <p>Neue Mitglieder melden sich mit dem Anmelde-Assistenten an. Den Code dafür bekommen Sie nach dem Probetraining. Sie geben ihn ein oder öffnen den Link mit dem Code. Der Code enthält keine persönlichen Angaben. In der Vereins-App öffnet sich die Anmeldung im Browser Ihres Geräts.</p>
+      <p>Der Anmelde-Assistent arbeitet in Ihrem Browser. Ihre Angaben, Fotos und Unterschriften bleiben auf Ihrem Gerät. Sie werden weder an einen Server übertragen noch im Browser gespeichert. Beim Schließen oder Neuladen der Seite sind sie gelöscht. Unabhängig davon kann Ihr Browser über seine eigene Funktion zum automatischen Ausfüllen anbieten, Angaben wie Anschrift oder E-Mail-Adresse zu speichern. Ob Sie das zulassen, entscheiden Sie in Ihrem Browser.</p>
+      <p>Am Ende erzeugt Ihr Browser aus Ihren Angaben eine PDF-Datei auf Ihrem Gerät. Sie enthält alle Angaben, Fotos und Unterschriften, zum Beispiel Anschrift und Bankverbindung. Wenn Sie die Datei speichern, bleibt sie auf Ihrem Gerät, bis Sie sie löschen. Der Verein erhält die Angaben erst, wenn Sie die Datei selbst per E-Mail an die Geschäftsstelle schicken oder ausgedruckte Blätter im Verein abgeben. Für die E-Mail gilt „4. Kontaktmöglichkeiten“.</p>
+      <p>In der Datei steht die „Information zum Datenschutz“ nach Art. 13 DSGVO. Dort lesen Sie, wofür wir die Angaben verwenden, auf welcher Rechtsgrundlage, an wen wir sie weitergeben und wie lange wir sie speichern. Enthält die Datei Angaben zur Gesundheit (Teil C), bewahrt der Verein diesen Teil getrennt von den übrigen Unterlagen auf.</p>
+      <p>Ihr Browser lädt die Seite, die Programmdateien, die Schrift für die PDF-Datei und die leeren Vordrucke von cdn.appack.de. Dabei verarbeiten die Server von appack die unter „2. Erfassung von allgemeinen Daten / Informationen“ genannten Zugriffsdaten, insbesondere Ihre IP-Adresse (siehe „12. Hosting von Website und App“). Schriften und Bilder der Seite selbst liefert GitHub Pages aus (siehe „13. Schriften, Bilder, Spielpläne und Kalender über GitHub Pages“).</p>
     
     
     <p class="meta"><a href="#inhaltsverzeichnis">↑ Nach oben</a></p>
@@ -532,7 +539,7 @@
 <section class="abschnitt">
   <div class="container fluss">
     <div class="inhalt fluss">
-    <p class="meta">Quelle: Datenschutzerklärung der Vereins-App (cdn.appack.de), Fassung vom 17.07.2026, für Website und App ergänzt am 24.09.2026 (Hosting, GitHub Pages, Online-Aufnahmeantrag, Links, Fotos, Aufsichtsbehörde) und am 28.09.2026 (Aufnahmeantrag online auf der Website)</p>
+    <p class="meta">Quelle: Datenschutzerklärung der Vereins-App (cdn.appack.de), Fassung vom 17.07.2026, für Website und App ergänzt am 24.09.2026 (Hosting, GitHub Pages, Links, Fotos, Aufsichtsbehörde) und am 12.10.2026 (Anmeldung über den Anmelde-Assistenten)</p>
     </div>
   </div>
 </section>

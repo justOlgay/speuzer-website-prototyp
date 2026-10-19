@@ -76,7 +76,7 @@ export const AUFNAHMEANTRAG_VERSAND = TEST_ANNAHME_URL
 // Umstellen erst nach dem Ja von Olgay und der Freigabe durch den Vorstand; der Ablauf steht in
 // tools/cache/orchestrierung-anmeldung/m6-upload-liste.md. Für einen Test-Bau setzt die Umgebungsvariable
 // ANMELDUNG_LIVE=1 (an) bzw. ANMELDUNG_LIVE=0 (aus) den Wert nur für diesen Bau – danach wieder ohne sie bauen.
-const ANMELDUNG_LIVE_SCHALTER = false;
+const ANMELDUNG_LIVE_SCHALTER = true; // 19.10.2026: an (Olgay); Rückweg: false und neu bauen
 const ANMELDUNG_LIVE_TEST = globalThis.process?.env?.ANMELDUNG_LIVE;
 export const ANMELDUNG_LIVE =
   ANMELDUNG_LIVE_TEST === "1" ? true : ANMELDUNG_LIVE_TEST === "0" ? false : ANMELDUNG_LIVE_SCHALTER;
@@ -104,7 +104,7 @@ export const ANMELDUNG_SPRACHEN_LIVE = ANMELDUNG_SPRACHEN_TEST.length
 // manifest.json, LIESMICH.md, sitemap.xml) Byte für Byte wie vorher. Umstellen erst nach der Bestätigung der Namen und
 // Aufgaben durch Olgay und die 1. Vorsitzende. Für einen Test-Bau setzt die Umgebungsvariable ORGANIGRAMM_LIVE=1 (an)
 // bzw. ORGANIGRAMM_LIVE=0 (aus) den Wert nur für diesen Bau – danach wieder ohne sie bauen.
-const ORGANIGRAMM_LIVE_SCHALTER = false;
+const ORGANIGRAMM_LIVE_SCHALTER = true; // 19.10.2026: an (Olgay); Rückweg: false und neu bauen
 const ORGANIGRAMM_LIVE_TEST = globalThis.process?.env?.ORGANIGRAMM_LIVE;
 export const ORGANIGRAMM_LIVE =
   ORGANIGRAMM_LIVE_TEST === "1" ? true : ORGANIGRAMM_LIVE_TEST === "0" ? false : ORGANIGRAMM_LIVE_SCHALTER;
@@ -883,11 +883,28 @@ export const APP_MODULE = {
 // das App-Formular (Modul „Mitglied werden“, mit Foto-Upload und Profil-
 // Vorbelegung). Ohne ?app=1 passiert nichts. Wird über kopfZusatz nur in die
 // Seiten eingebunden, die die App öffnet.
-export const APP_MODUS_SKRIPT = `
+function appModusSkript(mitAnmeldung, festerAppModus = false) {
+  // Der Anmelde-Assistent läuft nie in der Webansicht der App (Paket P1, 12.10.2026): Links auf anmeldung.html öffnen im Browser,
+  // als ext:// plus absolute https-Adresse, ohne app=1; ein vorhandener code bleibt. Der Zweig steht nur im Skript, wenn es den
+  // Assistenten gibt (ANMELDUNG_LIVE) oder die App-Datei Mitglied-werden-App.html gebaut wird; ohne ihn bleiben die Seiten unverändert.
+  const weiche = mitAnmeldung
+    ? `
+        if (name === "anmeldung") {
+          url.searchParams.delete("app");
+          a.href = "ext://" + url.toString();
+          a.removeAttribute("target");
+          return;
+        }`
+    : "";
+  // Eine App-Datei (Mitglied-werden-App.html, <html data-app-seite>) hat kein ?app=1 in der Adresse: Dort gilt der App-Modus immer.
+  const wache = festerAppModus
+    ? `if (!/(^|[?&])app=1(&|$)/.test(location.search) && !document.documentElement.hasAttribute("data-app-seite")) return;`
+    : `if (!/(^|[?&])app=1(&|$)/.test(location.search)) return;`;
+  return `
 <script>
 (function () {
   "use strict";
-  if (!/(^|[?&])app=1(&|$)/.test(location.search)) return;
+  ${wache}
   var NAV = {
 ${Object.entries(APP_MODULE).map(([name, modul]) => `    "${name}": "${modul}"`).join(",\n")}
   };
@@ -904,7 +921,7 @@ ${Object.entries(APP_MODULE).map(([name, modul]) => `    "${name}": "${modul}"`)
         return;
       }
       if (url.hostname === location.hostname && /\\/workspace\\/web\\//.test(url.pathname)) {
-        var name = url.pathname.split("/").pop().replace(/\\.html$/, "");
+        var name = url.pathname.split("/").pop().replace(/\\.html$/, "");${weiche}
         var modul = NAV[name] || (/^mannschaften-/.test(name) ? NAV.mannschaften : null) || (/^chronik/.test(name) ? NAV.chronik : null);
         if (modul && !url.hash) {
           a.href = "nav://" + modul;
@@ -933,3 +950,9 @@ ${Object.entries(APP_MODULE).map(([name, modul]) => `    "${name}": "${modul}"`)
   else start();
 })();
 </script>`;
+}
+
+export const APP_MODUS_SKRIPT = appModusSkript(ANMELDUNG_LIVE);
+// Für die App-Datei Mitglied-werden-App.html (tools/app-optik/tpl-bauen.mjs), unabhängig vom Schalter: mit dem Zweig für den Assistenten und
+// fest eingeschaltet (data-app-seite am <html>).
+export const APP_MODUS_SKRIPT_APP_DATEI = appModusSkript(true, true);

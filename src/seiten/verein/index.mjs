@@ -15,7 +15,7 @@
 
 // Diese Seite liegt immer unter "/verein/" (Tiefe 1), daher immer "../"
 // (siehe pfadZurWurzel() in tools/build.mjs).
-import { PROBETRAINING_MAILTO, BESCHEINIGUNG_MAILTO, ORGANIGRAMM_LIVE } from "../../vorlagen/hilfen.mjs";
+import { PROBETRAINING_MAILTO, BESCHEINIGUNG_MAILTO, ORGANIGRAMM_LIVE, ANMELDUNG_LIVE } from "../../vorlagen/hilfen.mjs";
 
 const PFAD = "../";
 
@@ -83,7 +83,8 @@ function derVereinAbschnitt() {
       zeile("Kontakt & Anfahrt", "Adresse, E-Mail, Anfahrt", `${PFAD}kontakt/`),
     ]),
     gruppe("Mitmachen", [
-      zeile("Mitglied werden", "Beiträge, Ablauf, Antrag", `${PFAD}mitglied-werden/`),
+      // Mit dem Anmelde-Assistenten (ANMELDUNG_LIVE) gibt es keinen Antrag mehr, sondern die Anmeldung mit dem Code (Paket P6, U-21).
+      zeile("Mitglied werden", ANMELDUNG_LIVE ? "Beiträge, Ablauf, Anmeldung" : "Beiträge, Ablauf, Antrag", `${PFAD}mitglied-werden/`),
       // W6 (Entscheidung Olgay 23.09.2026): Spielplan & Tabelle gehören nur
       // noch zur jeweiligen Mannschaftsseite, keine eigene Seite mehr dafür –
       // die Zeile "Spielplan & Tabellen" entfällt hier (führte auf
@@ -122,6 +123,7 @@ function derVereinAbschnitt() {
     <p class="knopfzeile">
       <a class="knopf" href="${escapeHtml(PROBETRAINING_MAILTO)}">Probetraining vereinbaren</a>
     </p>
+    <p class="meta">Beim Probetraining ist man noch nicht über den Verein versichert.</p>
   </div>
 </section>`;
 }

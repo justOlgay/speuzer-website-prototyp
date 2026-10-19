@@ -190,3 +190,13 @@ export function mailtoAnVerein(adresse, vorname, nachname) {
   const kodiere = (text) => encodeURIComponent(String(text).replace(/\n/g, "\r\n"));
   return "mailto:" + sauber(adresse) + "?subject=" + kodiere(mailBetreff(vorname, nachname)) + "&body=" + kodiere(MAIL_TEXT);
 }
+
+// ---------- E-Mail wegen des Codes ----------
+// Passive Mitglieder bekommen den Code von der Geschäftsstelle (Code-Seite, Paket P1). Der Link öffnet eine E-Mail an die Geschäftsstelle
+// mit einem deutschen Betreff, ohne Text und ohne Angaben zur Person.
+
+export const MAIL_BETREFF_CODE = "Code für die Anmeldung";
+
+export function mailtoCode(adresse) {
+  return "mailto:" + sauber(adresse) + "?subject=" + encodeURIComponent(MAIL_BETREFF_CODE);
+}

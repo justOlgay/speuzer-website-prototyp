@@ -102,7 +102,7 @@ export const spielerfoto = {
         ...absaetze(k.t("spielerfoto.hinweis"), "anm-hinweis"),
         kartenAuswahl(k, {
           pfad: "spielerfoto.weg",
-          optionen: ["foto", "datei", "verein"].map((w) => ({ wert: w, label: k.t("spielerfoto." + w), hinweis: k.t("spielerfoto." + w + "Hinweis") })),
+          optionen: ["foto", "datei", "verein"].map((w) => ({ wert: w, label: k.t("spielerfoto." + w), hinweis: k.hatT("spielerfoto." + w + "Hinweis") ? k.t("spielerfoto." + w + "Hinweis") : null })),
         }),
         block,
       ],
@@ -173,7 +173,7 @@ function nachweisKarte(k, u) {
   zeige();
   const einzelheiten = [texte.warum, texte.wie, texte.wo].some(Boolean)
     ? h("details", { klasse: "anm-einzelheiten" },
-        h("summary", {}, k.t("nachweise.warum")),
+        h("summary", {}, k.t("allgemein.mehrErfahren")),
         texte.warum ? h("p", {}, texte.warum) : null,
         texte.wie ? h("p", {}, h("strong", {}, k.t("nachweise.wie") + " "), texte.wie) : null,
         texte.wo ? h("p", {}, h("strong", {}, k.t("nachweise.wo") + " "), texte.wo) : null)
@@ -296,7 +296,9 @@ export function unterschriftenPlan(k) {
   const liste = REIHENFOLGE.filter((s) => personen.has(s)).map((schluessel) => {
     const stellen = personen.get(schluessel);
     const freiwillig = FREIWILLIG.includes(schluessel);
-    return { schluessel, stellen, freiwillig, stiftBeiLeer: freiwillig && stellen.some((x) => !OHNE_MARKIERUNG.includes(x)) };
+    // stiftBeiLeerBlatt: wie stiftBeiLeer, aber nur Markierungen auf Blättern, die mit der Datei zum Verein gehen (nicht die Abmeldung beim alten
+    // Verein: Sie schickt die Familie selbst per Einschreiben).
+    return { schluessel, stellen, freiwillig, stiftBeiLeer: freiwillig && stellen.some((x) => !OHNE_MARKIERUNG.includes(x)), stiftBeiLeerBlatt: freiwillig && stellen.some((x) => !OHNE_MARKIERUNG.includes(x) && !x.startsWith("abmeldung.")) };
   });
   return { liste, stift, alias, papier, hfvBildschirm };
 }
@@ -357,7 +359,7 @@ function satzungBlock(k) {
     name: "satzung",
     "data-pfad": "satzung",
     klasse: "anm-karte__eingabe anm-karte__eingabe--kasten",
-    "aria-describedby": hinweisId,
+    "aria-describedby": bildschirm ? null : hinweisId,
     "aria-required": bildschirm ? "true" : null,
   });
   eingabe.checked = k.a.satzung === true;
@@ -365,16 +367,16 @@ function satzungBlock(k) {
     k.a.satzung = eingabe.checked;
     k.aenderung();
   });
+  // Am Bildschirm braucht das Kästchen keine Zusatzzeile: Ohne Haken meldet die Fehlerzeile, was fehlt. Auf Papier sagt die Zeile, was zu tun ist.
   const karte = h("label", { klasse: "anm-karte anm-karte--kasten", for: id },
     eingabe,
     h("span", { klasse: "anm-karte__text" },
       h("span", { klasse: "anm-karte__titel" }, k.t("unterschriften.satzung.label")),
-      h("span", { klasse: "anm-karte__hinweis", id: hinweisId }, k.t(bildschirm ? "unterschriften.satzung.pflicht" : "unterschriften.satzung.freiwillig"))));
+      bildschirm ? null : h("span", { klasse: "anm-karte__hinweis", id: hinweisId }, k.t("unterschriften.satzung.freiwillig"))));
   const link = url
     ? h("a", { href: url, target: "_blank", rel: "noopener", "data-aktion": "satzung-lesen" }, k.t("unterschriften.satzung.link"), h("span", { klasse: "sr-only" }, " (" + k.t("unterschriften.satzung.linkZusatz") + ")"))
     : k.t("unterschriften.satzung.ohneLink");
   return h("div", { klasse: "anm-block anm-satzung" },
-    h("h3", { klasse: "anm-zwischentitel" }, k.t("unterschriften.satzung.titel")),
     h("p", { klasse: "anm-hinweis" }, k.t("unterschriften.satzung.erklaerung")),
     h("p", { klasse: "anm-text anm-satzung__link" }, link),
     h("div", { klasse: "anm-feld", "data-feld": "satzung" }, h("p", { klasse: "anm-fehler", id: id + "-f", hidden: true }), karte));
@@ -405,12 +407,13 @@ export const unterschriften = {
         unten.append(h("div", { klasse: "anm-block", "data-zweiter-elternteil": "" }, hinweisKasten("offen", k.t("pruefen.hinweisArt.warnung"), absaetze(k.t(hfvBildschirm ? "sorge.zweiterAmBildschirm" : "sorge.zweiterMitStift")))));
       }
       if (plan.liste.length) {
-        unten.append(h("h3", { klasse: "anm-zwischentitel" }, k.t("unterschriften.hierTitel")), h("p", { klasse: "anm-hinweis" }, k.t("unterschriften.hierHinweis")));
+        unten.append(h("p", { klasse: "anm-hinweis" }, k.t("unterschriften.hierHinweis")));
         for (const person of plan.liste) {
           const name = personenName(k, person.schluessel);
           const titel = unterschriftTitel(k, person.schluessel);
           // "Diese Unterschrift gilt für:" mit einer Zeile je Blatt (keine Aufzählung in einer Zeile)
-          const gilt = { titel: k.t("unterschriften.giltFuer"), punkte: Array.from(new Set(person.stellen.map((s) => stelleName(k, s)))) };
+          const giltPunkte = Array.from(new Set(person.stellen.map((s) => stelleName(k, s))));
+          const gilt = { titel: k.t("unterschriften.giltFuer"), mehrere: k.t("unterschriften.giltFuerBlaetter", { n: giltPunkte.length }), punkte: giltPunkte };
           // Freiwillige Felder: das Kind trägt den Zusatz "(freiwillig)" und einen Hinweis, der zweite Elternteil nur den Hinweis.
           const hinweisKey = { spieler: "unterschriften.person.spielerHinweis", sorgeberechtigte_2: "unterschriften.person.zweiteHinweis" }[person.schluessel];
           const feld = unterschriftFeld({

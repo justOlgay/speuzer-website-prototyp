@@ -309,7 +309,6 @@ export default {
 
     // Infos
     frist_annahme_heute: "Şöyle hesaplıyoruz: Kayıt silme, {abmeldung} tarihinde geçerli olur. Daha geç sildirirseniz bekleme süresi uzar.",
-    probetraining_versicherung: "Deneme antrenmanında üye olmayanlar kulüp üzerinden sigortalı değildir. En iyisi ilk antrenmandan önce kayıt olmaktır.",
     mitgliedschaft_beginn: "Üyelik, kayıt olduğunuz gün başlar.",
     kuendigung_jahresende: "Kulübümüzde ancak yıl sonunda üyelikten çıkabilirsiniz. Üyelikten çıkma bildirimini taahhütlü mektupla (Einschreiben) gönderin.",
     ohne_spielrecht_kein_spiel: "Oynama izni olmadan çocuk maçlara katılamaz. Hazırlık maçlarına da katılamaz. Antrenman serbesttir.",
@@ -334,7 +333,7 @@ export default {
     frau_herren: "Kulübün kadın takımı yok. 18 yaşından itibaren kadınlar Herren (yetişkin erkek) takımında oynayabilir. Bunun için federasyona başvuru gerekir.",
     keine_frauenmannschaft: "Kulübün kadın takımı yok. 18 yaşından itibaren kadınlar başvuruyla Herren (yetişkin erkek) takımında oynayabilir. Bizimle konuşun.",
     vertrauensperson: "Federasyonun bu durum için güvenilir bir irtibat kişisi var. Bu kişi başvuruda yardım eder. Çocuklarda ebeveynler onay verir.",
-    sonderspielrecht: "Engelli çocuklar daha genç bir yaş grubunda oynayabilir. Buna özel oynama izni (Sonderspielrecht) denir. Bunun için bir uzman doktordan rapor gerekir. Gençlik birimi size yardım eder.",
+    sonderspielrecht: "Engelli çocuklar daha küçük bir yaş grubunda oynayabilir. Buna özel oynama izni (Sonderspielrecht) denir. Bunun için bir uzman doktordan rapor (Gutachten) gerekir. Gençlik birimi size yardım eder.",
     getrennt_einverstanden: "Diğer ebeveyn razı. Bu yüzden bir kişi imzalar.",
     sorge_allein_nachweis: "Velayet hakkı yalnızca sizde. Kulüp isterse göstermek için bir belge hazır tutun.",
     vormund_hinweis: "Vasi (Vormund) çocuk adına imzalar. Vasilik belgesini kayıtla birlikte gönderin.",

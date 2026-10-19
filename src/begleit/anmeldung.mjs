@@ -17,6 +17,12 @@
 // oder data/anmeldung-formulare.json noch, baut die Seite trotzdem – dann
 // stehen leere Objekte in der Konfiguration.
 //
+// Zugang (Paket P1, 12.10.2026): Der Assistent startet nur mit dem Code vom Probetraining, sobald data/anmeldung.json › zugang › pruefwerte
+// nicht leer ist (assets/js/anmeldung/zugang.js; Werkzeug tools/anmeldung-zugang.mjs). Die Konfiguration trägt dafür zugang (im
+// Regelwerk) und seiten.probetraining (Ziel des Links „Probetraining vereinbaren“ auf der Code-Seite). In der Vereins-App läuft der
+// Assistent nie: Mit ?app=1 steht nur die Übergabe in den Browser da, und APP_MODUS_SKRIPT (hilfen.mjs) öffnet Links auf anmeldung.html
+// dort per ext:// im Browser.
+//
 // Livegang (M6, 11.10.2026): Dasselbe Modul erzeugt mit seiteLive() auch die Live-Fassung als Workspace-Seite
 // (docs/ws/anmeldung.html, im appack-Paket web/anmeldung.html). tools/build.mjs nimmt sie nur auf, wenn der Schalter
 // ANMELDUNG_LIVE (src/vorlagen/hilfen.mjs) an ist. Die Live-Fassung hat dieselbe Seitenerzeugung (Sprachwahl, Hinweis
@@ -28,6 +34,7 @@
 import de from "../../assets/js/anmeldung/texte/de-oberflaeche.js";
 import { BEISPIELE } from "../../assets/js/anmeldung/beispiele.js";
 import { ANMELDUNG_SPRACHEN_LIVE } from "../vorlagen/hilfen.mjs";
+import { PRUEFWERT_MUSTER } from "../../assets/js/anmeldung/zugang.js";
 
 // Diese Seite liegt immer unter "/anmeldung/" (Tiefe 1), daher "../".
 const PFAD = "../";
@@ -92,6 +99,7 @@ function baueKonfig(daten, live = false) {
   const verein = daten.verein ?? {};
   const sportstaette = verein.sportstaette ?? null;
   const regelwerk = daten.anmeldung ?? {};
+  pruefeZugang(regelwerk);
   const konfig = {
     anmeldung: live ? ohneOffenePunkte(regelwerk) : regelwerk,
     formulare: bereinigeFormulare(daten["anmeldung-formulare"]),
@@ -112,12 +120,31 @@ function baueKonfig(daten, live = false) {
     // Stand der Regeldaten; ohne data/anmeldung.json der Tag des Baus (nur das
     // Datum, damit die Seite bei mehreren Bauten am selben Tag gleich bleibt).
     stand: daten.anmeldung?.stand ?? String(daten.stand ?? "").slice(0, 10),
+    // Ziele von Links der Code-Seite: „Probetraining vereinbaren“ führt zu „Mitglied werden“ (Schritt 1). Die Live-Seite liegt im Ordner
+    // web/ neben mitglied-werden.html; die Begleitseite führt auf die Workspace-Seite in docs/ws/.
+    seiten: { probetraining: (live ? "" : PFAD + "ws/") + "mitglied-werden.html#probetraining" },
   };
   if (live) {
     konfig.live = true;
     konfig.sprachen = [...ANMELDUNG_SPRACHEN_LIVE];
   }
   return konfig;
+}
+
+// Der Zugang (data/anmeldung.json › zugang) muss stimmen, sonst bricht der Bau ab: Jeder Prüfwert ist ein SHA-256 in Hexschreibweise
+// (64 Zeichen, klein). Ein anderer Eintrag würde den Assistenten für alle schließen, ohne dass es jemand merkt. Eine leere Liste ist
+// erlaubt und heißt: keine Code-Abfrage.
+function pruefeZugang(regelwerk) {
+  if (regelwerk.zugang === undefined) return;
+  const z = regelwerk.zugang;
+  if (!z || typeof z !== "object" || !Array.isArray(z.pruefwerte)) {
+    throw new Error("anmeldung.mjs: data/anmeldung.json › zugang braucht die Liste pruefwerte");
+  }
+  for (const wert of z.pruefwerte) {
+    if (typeof wert !== "string" || !PRUEFWERT_MUSTER.test(wert)) {
+      throw new Error("anmeldung.mjs: data/anmeldung.json › zugang › pruefwerte: Einträge sind SHA-256 in Hexschreibweise (64 Zeichen, klein)");
+    }
+  }
 }
 
 // Regelwerk ohne die internen Fragen an den Vorstand (data/anmeldung.json › offenePunkte). Der Assistent liest sie nicht.
@@ -149,25 +176,18 @@ function sprachleiste(codes = null) {
     </div>`;
 }
 
-// Hinweis nur im App-Modus (Seite mit ?app=1, Klasse app-modus am <html>, siehe APP_MODUS_KOPF; anmeldung.css zeigt ihn nur
-// dort und nur auf dem Startschritt): In der Vereins-App klappt das Speichern der Datei manchmal nicht. Der Link führt auf
-// dieselbe Seite ohne ?app=1 (assistent.js setzt die genaue Adresse; "./" ist der Rückfall).
-function appHinweis() {
-  return `<div class="anm-apphinweis" data-anm-apphinweis>
-      <p><span data-anm-t="app.hinweisStart">${escapeHtml(de.app.hinweisStart)}</span> <a href="./" target="_blank" rel="noopener" data-anm-browserlink data-anm-t="app.browser">${escapeHtml(de.app.browser)}</a></p>
-    </div>`;
-}
-
 // live = true: ohne den Knopf "Vorführung" (es gibt keinen Werkzeugkasten), nur mit den Sprachen der Live-Seite.
 function seitenkopfAbschnitt(live = false) {
   const vorfuehrKnopf = live
     ? ""
     : `
       <button type="button" class="knopf knopf--sekundaer anm-vorfuehrknopf" data-anm-vorfuehrung aria-expanded="false" aria-controls="anm-werkzeugkasten">${escapeHtml(de.demo.vorfuehrung)}</button>`;
+  // Hinweiskasten für Rahmen und Browser anderer Apps (Zusätze zu P1, 12.10.2026): leer und verborgen; assistent.js füllt ihn auf dem ersten
+  // Bildschirm (Code-Seite oder Start), wenn die Seite in einem Rahmen oder im Browser einer anderen App läuft (umgebung.js).
   return `<section class="abschnitt seitenkopf">
   <div class="container">
     ${sprachleiste(live ? ANMELDUNG_SPRACHEN_LIVE : null)}
-    ${appHinweis()}
+    <div class="anm-umgebungshinweis" data-anm-umgebungshinweis role="note" hidden></div>
     <div class="anm-titelzeile">
       <h1 data-anm-t="seite.h1">${escapeHtml(de.seite.h1)}</h1>${vorfuehrKnopf}
     </div>
@@ -231,22 +251,13 @@ const APP_MODUS_KOPF = `<script>
 })();
 </script>`;
 
-// App-Modus der Live-Seite: Die Vereins-App öffnet sie mit ?app=1. Das Skript setzt vor dem ersten Zeichnen die Klasse
-// app-modus am <html> (anmeldung.css zeigt dann den Hinweis „Im Browser öffnen“) und lässt in der App Links nach außen
-// (Satzung, „Im Browser öffnen“) über ext:// öffnen, wie APP_MODUS_SKRIPT (src/vorlagen/hilfen.mjs) es auf den anderen
-// Seiten tut. Die Links des Assistenten entstehen erst nach dem Laden, deshalb schreibt ein Klick sie um (Capture-Phase,
-// also vor der Standardaktion des Links). APP_MODUS_SKRIPT selbst ist hier nicht eingebunden: Es schriebe den Link
-// „Im Browser öffnen“ beim Start auf ?app=1 um und der Link bliebe in der App. Außerhalb der App passiert nichts.
+// App-Modus der Live-Seite: Die Vereins-App öffnet sie mit ?app=1 (sonst öffnet sie Links auf anmeldung.html mit ext:// im Browser,
+// siehe APP_MODUS_SKRIPT in src/vorlagen/hilfen.mjs). Das Skript setzt vor dem ersten Zeichnen die Klasse app-modus am <html>.
+// Der Assistent läuft dann nicht: Er zeigt nur die Übergabe in den Browser mit einem ext://-Link (assistent.js, seiten-zugang.js).
+// APP_MODUS_SKRIPT selbst ist hier nicht eingebunden. Außerhalb der App passiert nichts.
 const APP_MODUS_KOPF_LIVE = `<script>
 (function () {
-  if (!/(^|[?&])app=1(&|$)/.test(location.search)) return;
-  document.documentElement.classList.add("app-modus");
-  document.addEventListener("click", function (e) {
-    var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
-    if (!a || !/^https?:/i.test(a.href)) return;
-    a.setAttribute("href", "ext://" + a.href);
-    a.removeAttribute("target");
-  }, true);
+  if (/(^|[?&])app=1(&|$)/.test(location.search)) document.documentElement.classList.add("app-modus");
 })();
 </script>`;
 
@@ -283,7 +294,7 @@ export function seite(daten) {
       `<meta name="robots" content="noindex">`,
       `<link rel="stylesheet" href="${PFAD}assets/css/anmeldung.css">`,
       APP_MODUS_KOPF,
-      `<noscript><style>.anm-sprachleiste, .anm-apphinweis { display: none !important; }</style></noscript>`,
+      `<noscript><style>.anm-sprachleiste { display: none !important; }</style></noscript>`,
       `<script type="module" src="${PFAD}assets/js/anmeldung/assistent.js"></script>`,
     ].join("\n"),
     inhalt,
@@ -296,7 +307,20 @@ export function seite(daten) {
 // seite.beschreibung) gehören zur Begleitseite.
 const LIVE_TITEL = "Anmeldung";
 const LIVE_BESCHREIBUNG =
-  "Beim FFV Sportfreunde 04 anmelden: Sie werden Schritt für Schritt durch die Anmeldung geführt und bekommen am Ende eine PDF-Datei mit allen Unterlagen.";
+  "Anmeldung beim FFV Sportfreunde 04 nach dem Probetraining: Mit dem Code vom Training melden Sie sich Schritt für Schritt an.";
+
+// Impressum und Datenschutz am Ende der Live-Seite (U-18, 12.10.2026): Die Seite steht oft ohne Hülle da (neues Fenster nach „Jetzt anmelden“, Browser des
+// Geräts aus der App, QR-Code) und hätte sonst keinen Weg zu Impressum und Datenschutzerklärung; sie lädt beim Aufruf Schrift und Symbol vom CDN
+// (Datenschutzerklärung Abschnitt 13). Die Zielseiten liegen im selben Ordner (docs/ws, im Paket web/) und sind deutsch, darum steht auch die Zeile auf
+// Deutsch, in jeder Sprache des Assistenten (wie die Hülle der Website sie nennt). Die Links öffnen ein neues Fenster: Die Seite speichert nichts, beim
+// Verlassen gingen die Eingaben verloren. Nur hier, nicht auf der Begleitseite (dort steht die Hülle mit ihren Links).
+function rechtlichesAbschnitt() {
+  return `<section class="abschnitt anm-rechtliches" lang="de">
+  <div class="container">
+    <p class="anm-rechtliches__zeile" dir="ltr"><a href="impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a></p>
+  </div>
+</section>`;
+}
 
 // Workspace-Seite docs/ws/anmeldung.html (tools/build.mjs, wenn ANMELDUNG_LIVE an ist; Name aus url "/anmeldung/").
 // Der Rahmen kommt von workspace.html (wie bei den übrigen Seiten des Pakets, ohne Kopfleiste und Begleitfuß). Die Pfade
@@ -309,6 +333,7 @@ export function seiteLive(daten) {
   const inhalt = [
     seitenkopfAbschnitt(true),
     assistentAbschnitt(),
+    rechtlichesAbschnitt(),
     `<script type="application/json" id="anmeldung-konfig">${jsonImSkript(konfig)}</script>`,
   ].join("\n");
 
@@ -320,7 +345,7 @@ export function seiteLive(daten) {
     kopfZusatz: "\n" + [
       `<link rel="stylesheet" href="../assets/css/anmeldung.css">`,
       APP_MODUS_KOPF_LIVE,
-      `<noscript><style>.anm-sprachleiste, .anm-apphinweis { display: none !important; }</style></noscript>`,
+      `<noscript><style>.anm-sprachleiste { display: none !important; }</style></noscript>`,
       `<script type="module" src="../assets/js/anmeldung/assistent.js"></script>`,
     ].join("\n"),
     inhalt,

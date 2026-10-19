@@ -1,7 +1,7 @@
 // Downloads /verein/downloads/ (P5) – Gruppen aus data/downloads.json in
 // fester Reihenfolge (Anmeldung, Verein, Kinder- und Jugendschutz).
 
-import { ruecklink, APP_MODUS_SKRIPT, AUFNAHMEANTRAG_MAILTO, AUFNAHMEANTRAG_VERSAND } from "../../vorlagen/hilfen.mjs";
+import { ruecklink, APP_MODUS_SKRIPT, AUFNAHMEANTRAG_MAILTO, AUFNAHMEANTRAG_VERSAND, ANMELDUNG_LIVE } from "../../vorlagen/hilfen.mjs";
 import { downloadZeile } from "../../vorlagen/bausteine.mjs";
 
 // Diese Seite liegt immer unter "/verein/downloads/" (Tiefe 2), daher immer
@@ -63,16 +63,29 @@ function aufnahmeantragOnlineKnopf() {
     </div>`;
 }
 
+// Livegang des Anmelde-Assistenten (Paket P1, 12.10.2026): Mit dem Schalter ANMELDUNG_LIVE gibt es keinen Weg mehr an der Anmeldung nach
+// dem Probetraining vorbei. Die Gruppe „Anmeldung“ zeigt statt des Aufnahmeantrags zum Ausfüllen (PDF, online, per E-Mail, App-Formular)
+// einen kurzen Hinweis mit dem Knopf „Jetzt anmelden“; die Dokumente zum Lesen bleiben. Das Zusatzformular für Spieler ohne deutsche
+// Staatsangehörigkeit bleibt (der Assistent erzeugt es nicht). Der Knopf öffnet die Anmeldung in einem neuen Fenster (target="_blank"): Auf der Website
+// läuft diese Seite in einem Rahmen der Hülle, in dem Teilen, Kopieren und Herunterladen nicht verlässlich sind. In der App gilt die Weiche (ext://).
+function anmeldungHinweis() {
+  return `<div class="inhalt fluss downloads-einstieg">
+      <p>Nach dem Probetraining bekommen Sie einen Code. Damit melden Sie sich an.</p>
+      <p class="knopfzeile"><a class="knopf" href="${PFAD}anmeldung/" target="_blank" rel="noopener">Jetzt anmelden</a></p>
+    </div>`;
+}
+
 // W10-Nachprüfung (offen 12): die Liste lief bisher über die volle
 // .container-Breite (bis 1304px), während derselbe Baustein auf
 // /verein/ueber-uns/ auf die Lesebreite (.inhalt, 720px) begrenzt ist – ein
 // Download-Baustein für die ganze Website soll überall gleich breit sein.
 function gruppenAbschnitt(gruppe, downloads, index) {
-  const eintraege = downloads.filter((d) => d.gruppe === gruppe);
+  // Mit dem Assistenten fällt der Aufnahmeantrag zum Ausfüllen (PDF) weg.
+  const eintraege = downloads.filter((d) => d.gruppe === gruppe && !(ANMELDUNG_LIVE && d.titel.startsWith("Aufnahmeantrag")));
   if (!eintraege.length) return "";
   const zeilenListe = eintraege.map((d) => downloadZeile(d, PFAD));
   // Direkt nach dem PDF-Aufnahmeantrag, in derselben Gruppe "Anmeldung".
-  if (gruppe === "Anmeldung") {
+  if (gruppe === "Anmeldung" && !ANMELDUNG_LIVE) {
     const pdfIndex = eintraege.findIndex((d) => d.titel.startsWith("Aufnahmeantrag"));
     zeilenListe.splice(pdfIndex === -1 ? 0 : pdfIndex + 1, 0, aufnahmeantragOnlineZeile());
   }
@@ -82,7 +95,7 @@ function gruppenAbschnitt(gruppe, downloads, index) {
   return `<section class="abschnitt${hellKlasse}">
   <div class="container fluss">
     <h2>${escapeHtml(gruppe)}</h2>
-    ${gruppe === "Anmeldung" ? aufnahmeantragOnlineKnopf() : ""}
+    ${gruppe === "Anmeldung" ? (ANMELDUNG_LIVE ? anmeldungHinweis() : aufnahmeantragOnlineKnopf()) : ""}
     <ul class="downloads inhalt" role="list">
       ${zeilen}
     </ul>
@@ -107,8 +120,12 @@ export function seite(daten) {
     // App-Modus (?app=1): Links führen in die App-Seiten, siehe hilfen.mjs
     kopfZusatz: APP_MODUS_SKRIPT,
     title: "Downloads & Anträge",
-    description:
-      "Downloads & Anträge des FFV Sportfreunde 04: Aufnahmeantrag, Beitragsübersicht, Satzung 2025, Präventions- und Schutzkonzept, Vereinsphilosophie und Chronik als PDF.",
+    // Livegang des Anmelde-Assistenten (Paket P5, 12.10.2026): Mit ANMELDUNG_LIVE gibt es den Aufnahmeantrag zum Ausfüllen
+    // auf dieser Seite nicht mehr (siehe gruppenAbschnitt); die Beschreibung nennt dann „Anmeldung“. Ohne den Schalter
+    // bleibt sie, wie sie war.
+    description: ANMELDUNG_LIVE
+      ? "Downloads & Anträge des FFV Sportfreunde 04: Anmeldung, Beitragsübersicht, Satzung 2025, Präventions- und Schutzkonzept, Vereinsphilosophie und Chronik als PDF."
+      : "Downloads & Anträge des FFV Sportfreunde 04: Aufnahmeantrag, Beitragsübersicht, Satzung 2025, Präventions- und Schutzkonzept, Vereinsphilosophie und Chronik als PDF.",
     inhalt,
   };
 }

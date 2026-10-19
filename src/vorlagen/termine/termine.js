@@ -782,7 +782,7 @@
         liste.appendChild(naechstesEintrag("Training", "Siehe Trainingswoche", "", "#training",
           function () { scrolleZu(document.getElementById("training"), document.getElementById("tr-titel")); }));
       } else if (tr) {
-        liste.appendChild(naechstesEintrag("Training", wannKurz(tr, heute), tr.platz ? "Platz: " + tr.platz : "", "#ts-t-" + tr.schluessel,
+        liste.appendChild(naechstesEintrag("Training", wannKurz(tr, heute), tr.platz ? (tr.inHalle ? "Halle: " : "Platz: ") + tr.platz : "", "#ts-t-" + tr.schluessel,
           function () { springeZuTraining(tr); }));
       } else {
         liste.appendChild(naechstesEintrag("Training", "Kein Training eingetragen", "in den nächsten " + SUCHE_WOCHEN + " Wochen", "", null));
@@ -1327,7 +1327,7 @@
     for (var d = 0; d < 5; d++) { var x = freiAm(montag + d); if (x && x.ferien) { f = x; break; } }
     var k;
     if (f) {
-      k = kasten(f.name + " – kein Training eingetragen", spanneLang(f.von, f.bis) + " · " + wochenText(f.von, f.bis) + ". Ob in den Ferien trainiert wird, entscheidet das Trainerteam der Mannschaft. Spiele und Veranstaltungen stehen weiter oben.");
+      k = kasten(f.name + " – kein Training eingetragen", spanneLang(f.von, f.bis) + " · " + wochenText(f.von, f.bis) + ". Ob trotzdem trainiert wird, sagt das Trainerteam. Spiele und Veranstaltungen stehen weiter oben.");
       var erster = f.bis + 1;
       while (wtVonNr(erster) === 6 || wtVonNr(erster) === 0) erster++;
       var naechste = montagVon(erster);

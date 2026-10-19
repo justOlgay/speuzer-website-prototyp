@@ -4,7 +4,7 @@
   Abschnitt 4). Aufbau der Seiten: siehe seiten-person.js.
 */
 
-import { h, absaetze, textfeld, kartenAuswahl, kaestchen, kaestchenListe, datumFelder, pruefeDatumsfeld, knopf, hinweisKasten, lateinFehler } from "./bausteine.js";
+import { h, absaetze, textfeld, kartenAuswahl, kaestchen, kaestchenListe, datumFelder, pruefeDatumsfeld, knopf, hinweisKasten, mehrErfahren, lateinFehler } from "./bausteine.js";
 import { hole, sauber, pruefeIban, bereinigeIban, gruppiereIban } from "./hilfen.js";
 
 function leer(x) {
@@ -45,7 +45,7 @@ export const kontakt = {
       titel: k.t("kontakt.erreichen.titel"),
       inhalt: [
         k.a.wer === "kind" ? h("p", { klasse: "anm-hinweis" }, k.t("kontakt.erreichen.hinweisKind")) : null,
-        textfeld(k, { pfad: "email", label: k.t("kontakt.erreichen.email"), hinweis: k.t("kontakt.erreichen.emailHinweis"), typ: "email", autocomplete: "email", maxlength: 80, ltr: true }),
+        textfeld(k, { pfad: "email", label: k.t("kontakt.erreichen.email"), typ: "email", autocomplete: "email", maxlength: 80, ltr: true }),
         h("p", { klasse: "anm-hinweis" }, k.t("kontakt.erreichen.telefonHinweis")),
         textfeld(k, { pfad: "mobil", label: k.t("kontakt.erreichen.mobil"), typ: "tel", autocomplete: "tel", maxlength: 30, ltr: true, pflicht: false }),
         textfeld(k, { pfad: "telefon", label: k.t("kontakt.erreichen.telefon"), typ: "tel", autocomplete: "off", maxlength: 30, ltr: true, pflicht: false }),
@@ -212,7 +212,6 @@ export const beitrag = {
       // Erst der Text des Regelwerks (er nennt Betrag und Besonderheiten); fehlt
       // er, rechnet die Oberfläche selbst.
       const regelText = vorschlag.hinweisKey ? k.rt("beitrag", vorschlag.hinweisKey, werte) : "";
-      if (!doppel) inhalt.push(h("p", { klasse: "anm-text anm-text--gross" }, k.t("beitrag.gruppe.vorschlagKopf", werte)));
       if (regelText) inhalt.push(...absaetze(regelText, "anm-text"));
       else if (doppel) inhalt.push(hinweisKasten("info", k.t("pruefen.hinweisArt.info"), absaetze(k.t("beitrag.gruppe.doppel"))));
       else {
@@ -221,16 +220,21 @@ export const beitrag = {
       }
     }
     if (gruppen.length) {
-      inhalt.push(h("p", { klasse: "anm-hinweis" }, k.t("beitrag.gruppe.andere")));
+      const karte = (g) => ({
+        wert: g.schluessel,
+        label: g.bezeichnung,
+        meta: g.jahr !== null ? k.t("beitrag.gruppe.proJahr", { jahr: g.jahr }) : null,
+        hinweis: vorschlag && vorschlag.vorschlag === g.schluessel && !vorschlag.gewaehlt ? k.t("beitrag.gruppe.vorgeschlagen") : null,
+      });
+      // Die vorgewählte Gruppe steht offen da; die anderen Gruppen klappen unter "Andere Beitragsgruppe" auf (P3 Teil b, O1).
+      // Ist keine Gruppe gewählt, stehen alle offen.
+      const gewaehlt = gruppen.find((g) => g.schluessel === b.gruppe);
+      const rest = gewaehlt ? gruppen.filter((g) => g !== gewaehlt) : [];
       inhalt.push(kartenAuswahl(k, {
         pfad: "beitrag.gruppe",
         legende: k.t("beitrag.gruppe.legende"),
-        optionen: gruppen.map((g) => ({
-          wert: g.schluessel,
-          label: g.bezeichnung,
-          meta: g.jahr !== null ? k.t("beitrag.gruppe.proJahr", { jahr: g.jahr }) : null,
-          hinweis: vorschlag && vorschlag.vorschlag === g.schluessel && !vorschlag.gewaehlt ? k.t("beitrag.gruppe.vorgeschlagen") : null,
-        })),
+        optionen: (gewaehlt ? [gewaehlt] : gruppen).map(karte),
+        weitere: rest.length ? { titel: k.t("beitrag.gruppe.andereGruppe"), optionen: rest.map(karte) } : null,
       }));
     }
     return { titel: k.t("beitrag.gruppe.titel"), inhalt };
@@ -271,13 +275,19 @@ export const leistungen = {
   render(k) {
     const ja = h("div", { klasse: "anm-block" }, hinweisKasten("info", k.t("pruefen.hinweisArt.info"), h("p", {}, k.t("leistungen.jaHinweis"))));
     k.bedingt(ja, () => k.a.leistungen === "ja");
+    // Bei "Ja" beginnt der Hinweis "beitragserlass" (Weitere Hinweise) mit demselben Satz: Dann steht die Zeile hier nicht noch einmal.
+    const wenigGeld = h("p", { klasse: "anm-hinweis" }, k.t("leistungen.wenigGeld"));
+    k.bedingt(wenigGeld, () => k.a.leistungen !== "ja");
+    // Die erste Zeile nennt Beispiele und hilft bei der Antwort. Die übrigen Zeilen erklären, warum das Amt zahlt: zugeklappt (P3 Teil b).
+    const zeilen = String(k.t("leistungen.hinweis")).split("\n").filter((z) => z.trim());
     return {
       titel: k.t("leistungen.titel"),
       inhalt: [
-        ...absaetze(k.t("leistungen.hinweis"), "anm-hinweis"),
+        ...absaetze(zeilen.slice(0, 1).join("\n"), "anm-hinweis"),
         kartenAuswahl(k, { pfad: "leistungen", optionen: [{ wert: "ja", label: k.t("leistungen.ja") }, { wert: "nein", label: k.t("leistungen.nein") }] }),
         ja,
-        h("p", { klasse: "anm-hinweis" }, k.t("leistungen.wenigGeld")),
+        wenigGeld,
+        zeilen.length > 1 ? mehrErfahren(k, absaetze(zeilen.slice(1).join("\n"), "anm-hinweis")) : null,
       ],
     };
   },
@@ -429,7 +439,6 @@ export const einwilligungen = {
         kaestchenListe(k, {
           pfad: "einwilligungen.medien",
           legende: k.t("einwilligungen.fotos.medienLegende"),
-          hinweis: k.t("einwilligungen.fotos.medienHinweis"),
           optionen: ["intern", "web", "presse", "dokumentation"].map((w) => ({ wert: w, label: k.t("einwilligungen.fotos." + w) })),
         }));
       k.bedingt(medien, () => ein.fotos === "ja");
@@ -440,7 +449,7 @@ export const einwilligungen = {
           kartenAuswahl(k, {
             pfad: "einwilligungen.fotos",
             optionen: [
-              { wert: "ja", label: k.t("einwilligungen.fotos.ja"), hinweis: k.t("einwilligungen.fotos.jaHinweis") },
+              { wert: "ja", label: k.t("einwilligungen.fotos.ja") },
               { wert: "nein", label: k.t("einwilligungen.fotos.nein") },
             ],
           }),
@@ -517,11 +526,10 @@ export const heimweg = {
         kartenAuswahl(k, {
           pfad: "heimweg",
           optionen: [
-            { wert: "allein", label: k.t("heimweg.allein"), hinweis: k.t("heimweg.alleinHinweis") },
-            { wert: "abholen", label: k.t("heimweg.abholen"), hinweis: k.t("heimweg.abholenHinweis") },
+            { wert: "allein", label: k.t("heimweg.allein") },
+            { wert: "abholen", label: k.t("heimweg.abholen") },
           ],
         }),
-        ...absaetze(k.t("heimweg.aendern"), "anm-hinweis"),
       ],
     };
   },

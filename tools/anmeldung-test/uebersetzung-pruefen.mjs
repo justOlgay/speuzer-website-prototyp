@@ -70,6 +70,7 @@ const GLEICH_ERLAUBT = {
   "abschnitte.person": { en: "Wort ist im Englischen gleich" },
   "pruefen.bereiche.person": { en: "Wort ist im Englischen gleich" },
   "notfall.kontakt.name": { en: "Wort ist im Englischen gleich" },
+  "code.label": { en: "Wort ist im Englischen gleich" },
   "pruefen.zeilen.name": { en: "Wort ist im Englischen gleich" },
   // Türkisch schreibt Telefon wie das Deutsche
   "pruefen.zeilen.telefon": { tr: "Wort ist im Türkischen gleich" },

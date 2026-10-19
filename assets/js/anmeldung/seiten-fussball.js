@@ -9,7 +9,7 @@
   1. Vorsitzenden vom 12.10.2026). Die Erklärung dazu steht kurz auf der Seite "spielerpass".
 */
 
-import { h, absaetze, textfeld, kartenAuswahl, kaestchen, datumFelder, pruefeDatumsfeld, landAuswahl, hinweisKasten, lateinFehler } from "./bausteine.js";
+import { h, absaetze, textfeld, kartenAuswahl, kaestchen, datumFelder, pruefeDatumsfeld, landAuswahl, mehrErfahren, lateinFehler } from "./bausteine.js";
 import { sauber } from "./hilfen.js";
 
 function leer(x) {
@@ -37,7 +37,8 @@ export const abteilung = {
   id: "abteilung",
   teile: () => ["haupt"],
   render(k) {
-    const opt = (wert) => ({ wert, label: k.t("abteilung." + wert), hinweis: k.t("abteilung." + wert + "Hinweis") });
+    // Zusatzzeile nur, wo der Text sie erklärt (Karneval, Nur unterstützen)
+    const opt = (wert) => ({ wert, label: k.t("abteilung." + wert), hinweis: k.hatT("abteilung." + wert + "Hinweis") ? k.t("abteilung." + wert + "Hinweis") : null });
     return {
       titel: k.t("abteilung.titel"),
       inhalt: [kartenAuswahl(k, { pfad: "abteilung", optionen: ["fussball", "karneval", "beides", "passiv"].map(opt) })],
@@ -59,11 +60,6 @@ export const mannschaft = {
   render(k) {
     const e = k.ergebnis();
     const zeilen = [];
-    if (e && e.alter !== null && e.alter !== undefined) {
-      zeilen.push(k.t("mannschaft.alter", { alter: e.alter, jahrgang: e.jahrgang }));
-      if (e.altersklasse === "Herren") zeilen.push(k.t("mannschaft.klasseHerren"));
-      else if (e.altersklasse) zeilen.push(k.t("mannschaft.klasse", { klasse: e.altersklasse }));
-    }
     const m = e && e.mannschaft;
     // Der Text des Regelwerks sagt, welche Mannschaft passt; fehlt er, stehen
     // hier die Namen aus dem Ergebnis.
@@ -77,7 +73,8 @@ export const mannschaft = {
       titel: k.t("mannschaft.titel"),
       inhalt: [
         ...zeilen.map((z) => h("p", { klasse: "anm-text anm-text--gross" }, z)),
-        regelText ? hinweisKasten("info", k.t("pruefen.hinweisArt.info"), absaetze(regelText)) : null,
+        // Der Satz des Regelwerks steht als Absatz, nicht in einem Kasten (P3 Teil b: ein Kasten nur, wenn er die Antwort ändert).
+        ...(regelText ? absaetze(regelText, "anm-text anm-text--gross") : []),
       ],
     };
   },
@@ -93,18 +90,18 @@ export const spielerpass = {
     return {
       titel: k.t("spielerpass.titel"),
       inhalt: [
-        h("p", { klasse: "anm-hinweis" }, k.t("spielerpass.hinweis")),
         h("p", { klasse: "anm-hinweis" }, k.t("spielerpass.erklaerung")),
-        // Das Spielrecht beantragt der Verein immer (12.10.2026): ein kurzer Hinweis statt der früheren Frage zu den Spielen.
-        ...absaetze(k.t("spielerpass.spielrecht"), "anm-hinweis"),
         kartenAuswahl(k, {
           pfad: "spielerpass",
           optionen: [
-            { wert: "ja", label: k.t("allgemein.ja") },
+            { wert: "ja", label: k.t("allgemein.ja"), hinweis: k.t("spielerpass.jaHinweis") },
             { wert: "nein", label: k.t("allgemein.nein") },
             { wert: "weiss_nicht", label: k.t("allgemein.weissNicht"), hinweis: k.t("spielerpass.weissNichtHinweis") },
           ],
         }),
+        // Das Spielrecht beantragt der Verein immer (12.10.2026): ein kurzer Hinweis statt der früheren Frage zu den Spielen. Für die
+        // Antwort braucht man ihn nicht; er steht zugeklappt unter den Antworten (P3 Teil b).
+        mehrErfahren(k, absaetze(k.t("spielerpass.spielrecht"), "anm-hinweis")),
       ],
     };
   },
@@ -127,7 +124,7 @@ export const alter_verein = {
     const land = h("div", { klasse: "anm-block" }, landAuswahl(k, { pfad: "alterVerein.land", label: k.t("alterVerein.land") }));
     k.bedingt(land, () => k.a.alterVerein.region === "ausland");
     const verband = h("div", { klasse: "anm-block" },
-      textfeld(k, { pfad: "alterVerein.verband", label: k.t("alterVerein.verband"), hinweis: k.t("alterVerein.verbandHinweis"), freiwillig: true, maxlength: 60 }));
+      textfeld(k, { pfad: "alterVerein.verband", label: k.t("alterVerein.verband"), freiwillig: true, maxlength: 60 }));
     k.bedingt(verband, () => ["bundesland", "ausland"].includes(k.a.alterVerein.region));
     return {
       titel: k.t("alterVerein.titel"),
@@ -218,11 +215,10 @@ export const abmeldung = {
       return {
         titel: k.t("abmeldung.mitgliedschaft.titel"),
         inhalt: [
-          ...absaetze(k.t("abmeldung.mitgliedschaft.hinweis"), "anm-hinweis"),
           kartenAuswahl(k, {
             pfad: "alterVerein.mitgliedschaft",
             optionen: [
-              { wert: "kuendigen", label: k.t("abmeldung.mitgliedschaft.kuendigen"), hinweis: k.t("abmeldung.mitgliedschaft.kuendigenHinweis") },
+              { wert: "kuendigen", label: k.t("abmeldung.mitgliedschaft.kuendigen") },
               { wert: "passiv", label: k.t("abmeldung.mitgliedschaft.passiv"), hinweis: k.t("abmeldung.mitgliedschaft.passivHinweis") },
               { wert: "weiss_nicht", label: k.t("abmeldung.mitgliedschaft.weiss_nicht") },
             ],
@@ -245,7 +241,6 @@ export const abmeldung = {
       return {
         titel: k.t("abmeldung.spiele.titel"),
         inhalt: [
-          h("p", { klasse: "anm-hinweis" }, k.t("abmeldung.spiele.hinweis")),
           datumFelder(k, { pfad: "letztesSpiel", legende: k.t("abmeldung.spiele.letztes"), freiwillig: true }),
           datumFelder(k, { pfad: "letztesPflichtspiel", legende: k.t("abmeldung.spiele.pflicht"), hinweis: k.t("abmeldung.spiele.pflichtHinweis"), freiwillig: true }),
         ],
@@ -268,7 +263,7 @@ export const abmeldung = {
           kartenAuswahl(k, {
             pfad: "freigabe",
             optionen: [
-              { wert: "ja", label: k.t("allgemein.ja"), hinweis: k.t("abmeldung.freigabe.jaHinweis") },
+              { wert: "ja", label: k.t("allgemein.ja") },
               { wert: "nein", label: k.t("allgemein.nein") },
               { wert: "weiss_nicht", label: k.t("allgemein.weissNicht") },
             ],

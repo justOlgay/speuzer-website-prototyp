@@ -141,7 +141,7 @@ function trainingshinweisAbschnitt(daten) {
   // bleibt.
   return `<section class="abschnitt">
   <div class="container fluss">
-    <p class="meta" style="max-width:880px;">Alle Mannschaften trainieren auf dem Vereinsplatz an der Mainzer Landstraße 480 – nur die Herren auf der Bezirkssportanlage am&nbsp;Rebstock (SW&nbsp;Griesheim).</p>
+    <p class="meta" style="max-width:880px;">Alle Mannschaften trainieren auf dem Vereinsplatz an der Mainzer Landstraße 480 – nur die Herren auf der Bezirkssportanlage am&nbsp;Rebstock (SW&nbsp;Griesheim). Von November bis Februar trainieren G1, F1 und F2 in der Halle.</p>
     <div class="hinweis hinweis--info" style="max-width:880px;">
       <p style="margin:0;">${escapeHtml(verein.hinweise?.ferien ?? "")}</p>
     </div>

@@ -216,7 +216,7 @@ function testeDaten() {
   // Runde 4 (Prüfung Orchestrator, 30.09.2026): fünf weitere offene Punkte, die auch die Konzeptseite (AP-6) führt
   const punkt = (id) => cfg.offenePunkte.find((o) => o.id === id);
   [
-    ["O67", "datenschutz", "P1", "U28,U06", /Art\. 6 Abs\. 1 lit\. b DSGVO/, /oder lit\. f/, "offen"],
+    ["O67", "datenschutz", "P1", "U28,U06", /Art\. 6 Abs\. 1 lit\. b DSGVO/, /oder lit\. f/, "entschieden"], // seit 12.10.2026 (Paket P1) entschieden
     ["O68", "vorstand", "P1", "U01,U04,U05,U06,U07,U17,U18,U23,U29", /am Bildschirm unterschrieben/, /§ 127 BGB/, "entschieden"],
     ["O69", "jugendleitung", "P2", "U18", /Vollmacht für die Abmeldung/, /in DFBnet ein/, "geregelt"], // seit M11 (11.10.2026) geregelt
     ["O70", "jugendleitung", "P2", "U07", /Kreisjugendwart \(HFV-Jugendordnung § 7 Nr\. 2\)/, /Wer meldet, bis wann\?$/, "vorgemerkt"],
@@ -264,20 +264,20 @@ function testeDaten() {
   wahr("Offene Punkte: Status nur offen, entschieden, geregelt, entfaellt oder vorgemerkt (weitgehend_geklaert gibt es nicht mehr)", cfg.offenePunkte.every((o) => STATUS_PUNKT.includes(o.status)),
     cfg.offenePunkte.filter((o) => !STATUS_PUNKT.includes(o.status)).map((o) => o.id + ":" + o.status).join(","));
   // Stand nach M11 (12.10.2026, Antworten der 1. Vorsitzenden vom 11.10.2026 und Entscheidung zu den Spielerpässen): O24, O25, O72 und O73 sind entschieden,
-  // O11 und O69 geregelt. Offen bleiben nur noch O45 und O67.
+  // O11 und O69 geregelt. Paket P1 (12.10.2026): Auch O45 und O67 sind entschieden (die 1. Vorsitzende hat die Datenschutz-Texte freigegeben); nichts ist mehr offen.
   const STAND_11_10 = {
-    entschieden: ["O01", "O24", "O25", "O26", "O27", "O30", "O31", "O65", "O66", "O68", "O72", "O73"],
+    entschieden: ["O01", "O24", "O25", "O26", "O27", "O30", "O31", "O45", "O65", "O66", "O67", "O68", "O72", "O73"],
     geregelt: ["O02", "O03", "O04", "O05", "O06", "O07", "O08", "O09", "O10", "O11", "O12", "O13", "O14", "O15", "O16",
       "O17", "O18", "O19", "O20", "O21", "O22", "O23", "O32", "O33", "O34", "O37", "O38", "O39", "O40",
       "O41", "O42", "O43", "O44", "O50", "O52", "O54", "O60", "O61", "O62", "O63", "O64", "O69", "O71"],
     entfaellt: ["O28", "O29", "O35", "O36", "O49", "O51", "O55", "O56", "O57"],
     vorgemerkt: ["O46", "O47", "O48", "O53", "O58", "O59", "O70"],
-    offen: ["O45", "O67"],
+    offen: [],
   };
   Object.keys(STAND_11_10).forEach((status) =>
     gleich("Offene Punkte: Stand " + status + " (" + STAND_11_10[status].length + ")", cfg.offenePunkte.filter((o) => o.status === status).map((o) => o.id), STAND_11_10[status]));
-  gleich("Offene Punkte: Zahl je Stand (12 entschieden, 43 geregelt, 9 entfällt, 7 später, 2 offen; zusammen 73; seit M11 sind O24, O25, O72 und O73 entschieden, O11 und O69 geregelt)",
-    Object.keys(STAND_11_10).map((status) => cfg.offenePunkte.filter((o) => o.status === status).length), [12, 43, 9, 7, 2]);
+  gleich("Offene Punkte: Zahl je Stand (14 entschieden, 43 geregelt, 9 entfällt, 7 später, 0 offen; zusammen 73; seit M11 sind O24, O25, O72 und O73 entschieden, O11 und O69 geregelt, seit P1 auch O45 und O67)",
+    Object.keys(STAND_11_10).map((status) => cfg.offenePunkte.filter((o) => o.status === status).length), [14, 43, 9, 7, 0]);
   wahr("Offene Punkte: nur offene Punkte tragen „stand“ (nie leer), alle übrigen „entscheidung“ (nie leer), nie beides",
     cfg.offenePunkte.every((o) => o.status === "offen"
       ? typeof o.stand === "string" && o.stand.trim().length > 0 && !("entscheidung" in o)
@@ -285,7 +285,8 @@ function testeDaten() {
     cfg.offenePunkte.filter((o) => !(o.status === "offen" ? o.stand && !("entscheidung" in o) : o.entscheidung && !("stand" in o))).map((o) => o.id).join(","));
   // Entscheidungen der 1. Vorsitzenden vom 11.10.2026: der Wortlaut steht fest und wird so auf der Konzeptseite gezeigt (Paket M2)
   [
-    ["O27", "Keine Versicherung für Nichtmitglieder (zu teuer). Assistent, Website und App weisen darauf hin: Beim Probetraining ist man nicht über den Verein versichert (1. Vorsitzende, 11.10.2026)."],
+    // P3 Teil b (R1, 12.10.2026): Die Anmeldung gibt es erst nach dem Probetraining; der Assistent sagt den Satz zur Versicherung nicht mehr, Website und App weiterhin
+    ["O27", "Keine Versicherung für Nichtmitglieder (zu teuer). Website und App weisen darauf hin: Beim Probetraining ist man nicht über den Verein versichert (1. Vorsitzende, 11.10.2026). Der Assistent sagt es nicht mehr: Die Anmeldung gibt es erst nach dem Probetraining (12.10.2026)."],
     ["O30", "Wie in der Satzung: Die Mitgliedschaft beginnt am Tag der Anmeldung. Website, App und Formulare sind angepasst (1. Vorsitzende, 11.10.2026)."],
     ["O31", "Keine Probemitgliedschaft. Hinweis auf den fehlenden Versicherungsschutz beim Probetraining (siehe O27) (1. Vorsitzende, 11.10.2026)."],
     ["O65", "Nur die Eltern unterschreiben, Jugendliche nicht zusätzlich (1. Vorsitzende, 11.10.2026)."],
@@ -304,6 +305,22 @@ function testeDaten() {
     gleich("Offener Punkt " + id + ": Entscheidung (M11, " + status + ")", punkt(id).entscheidung, text);
     wahr("Offener Punkt " + id + ": Status " + status + ", ohne „stand“", punkt(id).status === status && !("stand" in punkt(id)));
   });
+  // Paket P1 (12.10.2026): O45 und O67 sind entschieden. Die 1. Vorsitzende hat die Datenschutz-Texte nach dem Beispiel-PDF vom 11.10.2026 freigegeben;
+  // bei O67 nennt die Entscheidung die Rechtsgrundlage, die der freigegebene Text verwendet (Information zum Datenschutz in pdf.js, Zeile „Notfallkontakte“).
+  [
+    ["O45", "Freigegeben von der 1. Vorsitzenden am 12.10.2026 (Beispiel-PDF vom 11.10.2026)."],
+    ["O67", "Freigegeben von der 1. Vorsitzenden am 12.10.2026 (Beispiel-PDF vom 11.10.2026). Der freigegebene Text nennt Art. 6 Abs. 1 lit. b DSGVO (Mitgliedschaft, Fürsorge im Training) und lit. f DSGVO (weitere Kontaktpersonen)."],
+  ].forEach(([id, text]) => {
+    gleich("Offener Punkt " + id + ": Entscheidung (P1, entschieden)", punkt(id).entscheidung, text);
+    wahr("Offener Punkt " + id + ": Status entschieden, ohne „stand“", punkt(id).status === "entschieden" && !("stand" in punkt(id)));
+  });
+  wahr("Offener Punkt O67: die Rechtsgrundlage der Entscheidung steht so in der Information zum Datenschutz (pdf.js)",
+    lies("assets/js/anmeldung/pdf.js").includes("Art. 6 Abs. 1 lit. b DSGVO (Mitgliedschaft, Fürsorge im Training) und lit. f DSGVO (weitere Kontaktpersonen)") &&
+      punkt("O67").entscheidung.includes("Art. 6 Abs. 1 lit. b DSGVO (Mitgliedschaft, Fürsorge im Training) und lit. f DSGVO (weitere Kontaktpersonen)"));
+  // Paket P1: Zugang mit Code vom Probetraining. Die Liste der Prüfwerte darf leer sein (keine Code-Abfrage); der echte Prüfwert kommt erst beim Livegang.
+  wahr("Zugang: data/anmeldung.json › zugang mit dem Parameter „code“ und einer Liste „pruefwerte“", !!cfg.zugang && cfg.zugang.parameter === "code" && Array.isArray(cfg.zugang.pruefwerte));
+  wahr("Zugang: jeder Prüfwert ist ein SHA-256 in Hexschreibweise (64 Zeichen, klein, keine Leerzeichen)", cfg.zugang.pruefwerte.every((x) => typeof x === "string" && /^[0-9a-f]{64}$/.test(x)), cfg.zugang.pruefwerte.join(","));
+  gleich("Zugang: kein Prüfwert doppelt", new Set(cfg.zugang.pruefwerte).size, cfg.zugang.pruefwerte.length);
   wahr("Daten: der Hinweis zum Passwesen nennt die Entscheidung zu O24 (kein „noch offen“ mehr)",
     /1\. Kassierer/.test(cfg.kontakte.passwesen.hinweis) && /Spielausschuss Senioren/.test(cfg.kontakte.passwesen.hinweis) && !/noch offen/.test(cfg.kontakte.passwesen.hinweis));
   wahr("Offene Punkte: „geregelt“ und „vorgemerkt“ nennen den Wortlaut der 1. Vorsitzenden (Beispiele O02, O08, O13, O48, O58)",
@@ -312,7 +329,7 @@ function testeDaten() {
       punkt("O13").entscheidung === "Nicht nötig für den Start. Der Assistent nennt keine Bearbeitungszeiten." &&
       punkt("O48").entscheidung === "Satzungslink siehe O66. Die alten Info-Blätter später ersetzen." &&
       punkt("O58").entscheidung === "Zum 1. Januar 2027 prüfen.");
-  gleich("Daten: Stand und Version 12.10.2026 (Version .1 seit dem Wegfall der Frage zu den Spielen, Paket M14; davor 2026-10-11.2 mit dem Schalter unterschriftHfv, Paket M9)", [cfg.stand, cfg.version], ["2026-10-12", "2026-10-12.1"]);
+  gleich("Daten: Stand und Version 19.10.2026 (Livegang; davor 2026-10-12.1 seit dem Wegfall der Frage zu den Spielen, Paket M14, und 2026-10-11.2 mit dem Schalter unterschriftHfv, Paket M9)", [cfg.stand, cfg.version], ["2026-10-19", "2026-10-19.1"]);
   gleich("Offene Punkte: Kennungen O01 bis O73 lückenlos und in Reihenfolge", cfg.offenePunkte.map((o) => o.id), Array.from({ length: 73 }, (_, i) => "O" + String(i + 1).padStart(2, "0")));
   // Entscheidungen der 1. Vorsitzenden vom 11.10.2026: Heimweg (U41), Beginn der Mitgliedschaft (R15), Aufnahmegebühr (U35)
   const u41 = cfg.unterlagen.U41;
@@ -578,10 +595,14 @@ function testeFaelleUndRegeln() {
     const h = R.auswerten(BAUSTEINE.erwachsen({ abteilung: abt, spielerpass: null }), konfig, HEUTE_STANDARD).hinweise.find((x) => x.key === "mitgliedschaft_beginn");
     wahr("R15: Hinweis auch bei " + abt, !!h && h.art === "info");
   });
-  // Probetraining: Nichtmitglieder sind nicht über den Verein versichert (O27 und O31)
-  enthaelt("Probetraining-Hinweis bei aktiven Mitgliedern", e15.hinweise.map((h) => h.key), "probetraining_versicherung");
-  gleich("Probetraining: Text des Hinweises", texte.hinweise.probetraining_versicherung, "Beim Probetraining sind Nichtmitglieder nicht über den Verein versichert. Melden Sie sich am besten vor dem ersten Training an.");
-  enthaeltNicht("Probetraining: kein Hinweis bei passiven Mitgliedern", R.auswerten(BAUSTEINE.erwachsen({ abteilung: "passiv", spielerpass: null }), konfig, HEUTE_STANDARD).hinweise.map((h) => h.key), "probetraining_versicherung");
+  // Probetraining: Nichtmitglieder sind nicht über den Verein versichert (O27 und O31). Seit P3 Teil b (12.10.2026) sagt der Assistent das nicht
+  // mehr: Die Anmeldung gibt es erst nach dem Probetraining ("Melden Sie sich am besten vor dem ersten Training an" stimmt dann nicht mehr).
+  // Der Satz steht auf der Website, wo er vor dem Probetraining zu lesen ist. Der Hinweis fehlt für alle: Regel und Text.
+  ["fussball", "karneval", "beides", "passiv"].forEach((abt) => {
+    enthaeltNicht("Probetraining: kein Hinweis zur Versicherung bei " + abt, R.auswerten(BAUSTEINE.erwachsen({ abteilung: abt, spielerpass: abt === "fussball" || abt === "beides" ? "nein" : null }), konfig, HEUTE_STANDARD).hinweise.map((h) => h.key), "probetraining_versicherung");
+  });
+  enthaeltNicht("Probetraining: kein Hinweis zur Versicherung bei aktiven Mitgliedern (Kind, Fußball)", e15.hinweise.map((h) => h.key), "probetraining_versicherung");
+  gleich("Probetraining: der Text des Hinweises ist aus den Regeltexten entfernt", texte.hinweise.probetraining_versicherung, undefined);
   // Aufnahmegebühr: für alle neuen Mitglieder (Fußball, Karneval, passiv), ohne „offen“; kein Zuschlag ohne Lastschrift
   ["fussball", "karneval", "beides", "passiv"].forEach((abt) => {
     const ee = R.auswerten(BAUSTEINE.erwachsen({ abteilung: abt, spielerpass: abt === "fussball" || abt === "beides" ? "nein" : null, zahlung: { art: "rechnung", kontoinhaber: null, iban: "" } }), konfig, HEUTE_STANDARD);

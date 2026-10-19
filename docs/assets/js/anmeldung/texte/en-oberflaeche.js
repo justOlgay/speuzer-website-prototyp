@@ -99,7 +99,7 @@ export default {
     titel: "Registration (draft)",
     beschreibung:
       "Draft of the registration assistant for FFV Sportfreunde 04. You register step by step. At the end you get a PDF file.",
-    lead: "We ask step by step. At the end you get a file with all the documents.",
+    lead: "We ask step by step.",
     assistentTitel: "Registration assistant",
     laedt: "The assistant is loading. If nothing happens, please call us: 069 736868.",
     ohneSkript: "The assistant needs JavaScript. Please turn it on. Or call us: 069 736868.",
@@ -126,6 +126,7 @@ export default {
     ja: "Yes",
     nein: "No",
     weissNicht: "I do not know",
+    mehrErfahren: "Learn more",
     dasKind: "the child",
     diePerson: "the person",
     entfernen: "Remove",
@@ -204,15 +205,32 @@ export default {
     schreiben: "Write an email",
   },
 
-  // ---------- App ----------
-  // In der Vereins-App (Seite mit ?app=1) klappt Speichern oder Teilen der Datei manchmal nicht.
-  // Der Link "Im Browser öffnen" führt auf dieselbe Seite ohne ?app=1.
+  // ---------- Zugang und App ----------
+  // Code-Seite: {link} steht für den Link, dessen Text im Schlüssel mit "Link" am Ende steht.
+  // In der Vereins-App läuft der Assistent nie: Es steht nur die Übergabe in den Browser da.
+
+  code: {
+    titel: "Registration after the trial training",
+    einleitung: "Please enter the code.\nYou get it at the trial training.",
+    label: "Code",
+    fehlerLeer: "Please enter the code.",
+    fehlerFalsch: "The code is not correct. Please check it.",
+    kein: "No trial training yet? {link}",
+    keinLink: "Arrange a trial training",
+    passiv: "Passive member? You get the code from the {link}.",
+    passivLink: "club office",
+  },
 
   app: {
-    hinweisStart: "In the app, saving the PDF file sometimes does not work. Then open the registration in the browser.",
-    hinweisFertig: "Is saving not working? Then open the registration in the browser.",
-    fehler: "Saving did not work. Open the registration in the browser.",
+    uebergabe: "Please open the registration in the browser.",
     browser: "Open in browser",
+  },
+
+  umgebung: {
+    rahmen: "Saving may not work here.",
+    rahmenLink: "Open in a new window",
+    inApp: "Please open the registration in a browser such as Safari or Chrome. Saving may not work here.",
+    inAppSo: "Tap ⋯ at the top, then “Open in browser”.",
   },
 
   // ---------- Fehlermeldungen ----------
@@ -312,18 +330,16 @@ export default {
 
   start: {
     titel: "Welcome",
-    einleitung: "Here you register yourself or your child with the club.\nWe ask you step by step.",
-    ergebnis: "At the end you get a PDF file.\nThis is a file to view and print.\nIt contains all the documents for the club.",
+    einleitung: "Here you register yourself or your child.",
+    ergebnis: "At the end you send us a file by email.",
     brauchenTitel: "You need:",
     brauchen: [
       "Name and date of birth",
-      "Your address, email and phone number",
+      "Address, email and phone number",
       "For direct debit (Lastschrift): the IBAN (bank account number)",
       "A phone with a camera for photos of documents",
     ],
-    dauer: "You need about 15 minutes.",
-    datenschutz: "Your details stay on your device.\nWe do not send anything.",
-    hilfe: "Do you need help? Tap “Help” at the top.",
+    dauer: "This takes about 15 minutes.",
     spracheTitel: "Choose a language",
     los: "Let’s start",
   },
@@ -331,17 +347,13 @@ export default {
   wer: {
     titel: "Who would like to become a member?",
     kind: "My child",
-    kindHinweis: "You fill in everything for your child.",
     selbst: "Myself",
-    selbstHinweis: "You register yourself.",
-    mehrere: "Do you want to register several people?\nAt the end you can register the next person.\nWe then keep your address and your payment details.",
   },
 
   name: {
     titel: { kind: "What is your child’s name?", selbst: "What is your name?" },
     hinweis: "Write the name as it is in the passport.\nUse Latin letters.",
     vorname: "First name",
-    vornameHinweis: "All first names, as in the passport.",
     nachname: "Last name",
   },
 
@@ -350,7 +362,6 @@ export default {
       titel: { kind: "When and where was your child born?", selbst: "When and where were you born?" },
       legende: "Date of birth",
       ort: "Place of birth",
-      ortHinweis: "The town or city.",
       land: "Country of birth",
     },
     geschlecht: {
@@ -370,20 +381,15 @@ export default {
   abteilung: {
     titel: { kind: "Where should your child take part?", selbst: "Where would you like to take part?" },
     fussball: "Football",
-    fussballHinweis: "Training and matches",
     karneval: "Carnival",
     karnevalHinweis: "Dancing with the Schnauzer",
     beides: "Football and carnival",
-    beidesHinweis: "Both in one club",
     passiv: "Support only",
-    passivHinweis: "You are a member. You do not do any sport.",
+    passivHinweis: { kind: "Your child is a member. They do not do any sport.", selbst: "You are a member. You do not do any sport." },
   },
 
   mannschaft: {
     titel: { kind: "Which team fits your child?", selbst: "Which team fits you?" },
-    alter: "{name} is {alter} years old. This is birth year {jahrgang}.",
-    klasse: "This fits the {klasse}-Jugend (youth team).",
-    klasseHerren: "This fits the Herren (men’s team).",
     mannschaften: "Teams at the club: {namen}.",
     keine: "The club has no team of its own for this birth year.",
     keineFolge: "The youth department will contact you.",
@@ -392,10 +398,10 @@ export default {
 
   spielerpass: {
     titel: { kind: "Has your child ever had a player pass (Spielerpass)?", selbst: "Have you ever had a player pass (Spielerpass)?" },
-    hinweis: { kind: "Even if the child only trained. Also abroad.", selbst: "Even if you only trained. Also abroad." },
     erklaerung: "A player pass (Spielerpass) is the ID card for matches in a club.",
     // Neu am 12.10.2026 (Entscheidung der 1. Vorsitzenden): Der Verein beantragt das Spielrecht immer; die frühere Frage zu den Spielen entfällt.
     spielrecht: "Anyone who plays football needs permission to play (Spielrecht) from the Hessian Football Association (Hessischer Fußball-Verband, HFV).\nThe club applies for this for you.\nThis sometimes takes a few weeks.",
+    jaHinweis: "A player pass (Spielerpass) from abroad also counts.",
     weissNichtHinweis: "The club checks this for you.",
   },
 
@@ -409,13 +415,12 @@ export default {
     ort: "Town of the club",
     land: "Country of the club",
     verband: "Football association there",
-    verbandHinweis: "Only if you know it.",
   },
 
   abmeldung: {
     status: {
       titel: { kind: "Has your child been deregistered from the old club?", selbst: "Have you been deregistered from the old club?" },
-      hinweis: "We mean deregistration as a player.\nThis does not end the membership in the old club.\nAn email to the old club is not enough.\nThe Hessian Football Association (Hessischer Fußball-Verband, HFV) needs a registered letter (Einschreiben).\nOr you sign the authorisation for the deregistration (Vollmacht für die Abmeldung).",
+      hinweis: "We mean deregistration as a player.",
       einschreiben: "Yes, by registered letter (Einschreiben)",
       einschreibenHinweis: "You have the receipt from the post office.",
       formlos: "Yes, but only by email or message",
@@ -426,27 +431,25 @@ export default {
     datum: {
       titel: "When did you deregister?",
       legende: "Date of deregistration",
-      hinweis: "For a registered letter (Einschreiben), the date on the receipt counts.",
+      hinweis: "The date on the receipt counts.",
     },
     weg: {
       titel: "How do you deregister?",
       vollmacht: "With an authorisation (Vollmacht)",
-      vollmachtHinweis: "You sign the authorisation for the deregistration (Vollmacht für die Abmeldung). Then the club deregisters you.",
+      vollmachtHinweis: "You sign the authorisation (Vollmacht). The club does the deregistration.",
       einschreiben: "With a registered letter (Einschreiben)",
-      einschreibenHinweis: "You send the registered letter (Einschreiben) to the old club yourself.",
+      einschreibenHinweis: "You send it to the old club yourself.",
     },
     mitgliedschaft: {
       titel: { kind: "Does your child stay a member of the old club?", selbst: "Do you stay a member of the old club?" },
-      hinweis: "The membership does not end by itself.\nIt also does not end when you deregister from playing.",
       kuendigen: "No, I cancel",
-      kuendigenHinweis: "You cancel the membership (Kündigung) at the old club.",
       passiv: "Yes, as a passive member",
-      passivHinweis: { kind: "Your child no longer plays there. Your child stays a member.", selbst: "You no longer play there. You stay a member." },
+      passivHinweis: { kind: "They no longer play there. They stay a member.", selbst: "You no longer play there. You stay a member." },
       weiss_nicht: "I do not know",
     },
     anschrift: {
       titel: "Where does the registered letter (Einschreiben) to the old club go?",
-      hinweis: "You do not have to enter anything. The club helps you.\nWe enter the address in the form for deregistration from the old club (Abmeldung).",
+      hinweis: "We enter the address in the deregistration form.",
       empfaenger: "Name of the recipient",
       empfaengerHinweis: "For example: board of the club",
       strasse: "Street and house number",
@@ -454,7 +457,6 @@ export default {
     },
     spiele: {
       titel: "When was the last match?",
-      hinweis: "If you do not know a date, leave the field empty.",
       letztes: "Last match",
       pflicht: "Last league or cup match",
       pflichtHinweis: "Friendly matches do not count here.",
@@ -468,11 +470,10 @@ export default {
     freigabe: {
       titel: { kind: "Does the old club release your child?", selbst: "Does the old club release you?" },
       hinweis: "Release (Freigabe) means: the old club agrees to the move.",
-      jaHinweis: "The old club has agreed.",
     },
     wechsel: {
-      titel: { kind: "Has your child already changed clubs in the last 6 months?", selbst: "Have you already changed clubs in the last 6 months?" },
-      hinweis: "This means a move from one club to another.",
+      titel: { kind: "Did your child change clubs before this?", selbst: "Did you change clubs before this?" },
+      hinweis: "This means an earlier move in the last 6 months, not this one.",
     },
   },
 
@@ -492,7 +493,6 @@ export default {
 
   ausland: {
     titel: { kind: "Has your child ever lived abroad?", selbst: "Have you ever lived abroad?" },
-    hinweis: "Abroad means: not in Germany.",
     land: "Country",
     landHinweis: "The last place of residence before Germany.",
     stadt: "City",
@@ -501,9 +501,9 @@ export default {
   wohnen: {
     ort: {
       titel: { kind: "Where does your child live?", selbst: "Where do you live?" },
-      gemeinsam: { kind: "With me at the same address", selbst: "With my parents at the same address" },
+      gemeinsam: { kind: "With me at the same address", selbst: "With my parents" },
       gemeinsamHinweis: { kind: "We are registered with the authorities at the same address.", selbst: "We are registered with the authorities at the same address." },
-      nicht_gemeinsam: { kind: "In Germany, but at a different address", selbst: "In Germany, but not with my parents" },
+      nicht_gemeinsam: { kind: "At a different address", selbst: "Not with my parents" },
       nicht_gemeinsamHinweis: { kind: "We are registered with the authorities at different addresses.", selbst: "We are registered with the authorities at different addresses." },
       verwandte: "With relatives in Germany",
       ohne_eltern: "Without parents in Germany",
@@ -545,7 +545,6 @@ export default {
     zweiterAmBildschirm: "Has the other parent agreed? Then tick the box.\nIf not: he or she signs the membership application (Aufnahmeantrag) too.\nThis works on the screen. Or with a pen on the printout.",
     personen: {
       titel: { kind: "Who decides for {name}?", selbst: "Who decides for you?" },
-      hinweis: "We ask for the phone number later.",
       erste: { kind: "Your details", selbst: "First person" },
       zweite: "Second person",
       rolle: "Who is this?",
@@ -561,15 +560,15 @@ export default {
 
   besonderes: {
     titel: "Is there anything special?",
-    hinweis: "Tick what applies. If nothing applies, go on.",
+    hinweis: "If nothing applies, continue.",
     legende: "What applies?",
-    maedchen: "A girl should play in a boys’ team.",
-    maedchenHinweis: "This works in the C-Jugend and B-Jugend. The parents must agree.",
-    herrenAushilfe: "The young person should also help out in the men’s team (Herren).",
-    herrenAushilfeHinweis: "This needs the parents’ consent and a medical certificate (Attest).",
-    sonderspielrecht: "Playing should be in a younger age group.",
-    sonderspielrechtHinweis: "This is possible, for example, with a disability. It needs an application.",
-    frauHerren: "A woman wants to play in the men’s team (Herren).",
+    maedchen: "A girl in a boys’ team",
+    maedchenHinweis: "In the C-Jugend and B-Jugend, the parents must agree.",
+    herrenAushilfe: "Helping out in the men’s team (Herren)",
+    herrenAushilfeHinweis: "Parents must agree. You also need a medical certificate (Attest).",
+    sonderspielrecht: "Playing in a younger age group",
+    sonderspielrechtHinweis: "For example with a disability. An application is needed.",
+    frauHerren: "A woman in the men’s team (Herren)",
     frauHerrenHinweis: "This needs an application to the association.",
   },
 
@@ -584,7 +583,6 @@ export default {
       titel: "How can we reach you?",
       hinweisKind: "Please enter your details as a parent here.",
       email: "Email",
-      emailHinweis: "We send important messages there.",
       mobil: "Mobile number",
       telefon: "Landline number",
       telefonHinweis: "Please give at least one phone number.",
@@ -594,12 +592,11 @@ export default {
   beitrag: {
     gruppe: {
       titel: { kind: "Which membership fee do you pay for {name}?", selbst: "Which membership fee do you pay?" },
-      vorschlagKopf: "We suggest: {gruppe}.",
       vorschlag: "This costs {jahr} euros a year.\nThat is {monat} euros a month.",
       vorschlagOhneMonat: "This costs {jahr} euros a year.",
       aufnahme: "There is also a one-time joining fee of {betrag} euros.",
-      andere: "You can choose a different group.",
       legende: "Fee group",
+      andereGruppe: "Another fee group",
       proJahr: "{jahr} euros a year",
       doppel: "Are you in football and carnival?\nAsk about a separate membership fee.",
       vorgeschlagen: "Suggestion",
@@ -619,7 +616,7 @@ export default {
     },
     senator: {
       titel: "Would you like to become a senator?",
-      hinweis: "Senators support the carnival department.\nThey pay a special fee.\nThe board decides on the application.",
+      hinweis: "Senators support the carnival department.\nThe board decides on the application.",
       ja: "Yes, I apply",
       nein: "No",
     },
@@ -627,10 +624,10 @@ export default {
 
   leistungen: {
     titel: { kind: "Does your family receive money from the authorities?", selbst: "Do you receive money from the authorities?" },
-    hinweis: "For example basic income support (Grundsicherungsgeld), social assistance (Sozialhilfe), housing benefit (Wohngeld), child supplement (Kinderzuschlag) or asylum seeker benefits (Asylbewerberleistungen).\nThen the office often pays the membership fee.\nThis is called Education and Participation (Bildung und Teilhabe).",
+    hinweis: "For example basic income support (Grundsicherungsgeld), social assistance (Sozialhilfe), housing benefit (Wohngeld), child supplement (Kinderzuschlag) or asylum seeker benefits (Asylbewerberleistungen).\nThen the authorities often pay the membership fee.\nThis is called Education and Participation (Bildung und Teilhabe).",
     ja: "Yes",
     nein: "No",
-    jaHinweis: "Talk to us. We issue a certificate.",
+    jaHinweis: "We issue a certificate.",
     wenigGeld: "Do you have little money? Talk to us.",
   },
 
@@ -638,7 +635,7 @@ export default {
     art: {
       titel: "How would you like to pay?",
       sepa: "Direct debit (Lastschrift), recommended",
-      sepaHinweis: "The club collects the membership fee once a year.",
+      sepaHinweis: "The club collects the fee once a year.",
       rechnung: "Invoice",
       rechnungHinweis: "You transfer the membership fee yourself.",
     },
@@ -649,7 +646,7 @@ export default {
       person: "Account holder",
       vorname: "First name",
       nachname: "Last name",
-      anschriftGleich: "The person lives at the same address.",
+      anschriftGleich: "Lives at the same address",
       strasse: "Street and house number",
       plz: "Postcode",
       ort: "Town",
@@ -657,7 +654,7 @@ export default {
     iban: {
       titel: "What is the IBAN?",
       iban: "IBAN",
-      ibanHinweis: "The IBAN is on your bank card.\nSpaces do not matter.",
+      ibanHinweis: "The IBAN is on your bank card.",
       bank: "Name of the bank",
     },
   },
@@ -667,10 +664,8 @@ export default {
       titel: { kind: "May we show photos of your child?", selbst: "May we show photos of you?" },
       hinweis: "You decide freely. You can change this later.",
       ja: "Yes",
-      jaHinweis: "You choose where in a moment.",
       nein: "No",
       medienLegende: "Where may we show photos?",
-      medienHinweis: "Choose at least one option.",
       intern: "In the club: notice boards and newsletters",
       web: "On the internet: website, social media and club app",
       presse: "In the newspaper: reports about the club",
@@ -699,13 +694,10 @@ export default {
 
   // Aufsichtspflicht: Minderjährige, die trainieren oder tanzen (Schritt "heimweg").
   heimweg: {
-    titel: "May your child go home alone after training?",
-    hinweis: "During training, the club looks after your child.\nTell us: how does your child get home afterwards?",
+    titel: "May your child go home alone?",
+    hinweis: "During training, the club looks after your child.",
     allein: "Going home alone",
-    alleinHinweis: "My child may go home alone after training.",
     abholen: "Being picked up",
-    abholenHinweis: "My child waits until someone picks them up.",
-    aendern: "You can change this at any time. Then tell the coach.",
   },
 
   notfall: {
@@ -729,7 +721,7 @@ export default {
       allergien: "Allergies",
       erkrankungen: "Illnesses",
       medikamente: "Medication",
-      medikamenteHinweis: "Does your child need emergency medication? For example an asthma spray or an adrenaline pen. Talk to the coach. The emergency and health form (Notfall- und Gesundheitsbogen) in Part C has lines for this.",
+      medikamenteHinweis: "For example an asthma spray or an adrenaline pen. Talk to the coach.",
       sonstiges: "Other",
     },
   },
@@ -738,9 +730,7 @@ export default {
     titel: "How do we get the photo for the player pass (Spielerpass)?",
     hinweis: "The Hessian Football Association (Hessischer Fußball-Verband, HFV) needs a photo of head and shoulders.\nThe face must be clearly visible.",
     foto: "I take a photo now",
-    fotoHinweis: "With the camera of the phone.",
-    datei: "I choose a photo from my device",
-    dateiHinweis: "A photo you already have.",
+    datei: "I choose a photo",
     verein: "The club takes the photo",
     vereinHinweis: "At the first training.",
     machen: "Take a photo",
@@ -753,7 +743,7 @@ export default {
 
   nachweise: {
     titel: "Which documents do you already have?",
-    hinweis: "Take a photo of every document you have.\nYou can hand in what is missing later.\nThe photo stays on your device.",
+    hinweis: "Take a photo of every document you have.\nSend what is missing later.",
     habe: "I have it",
     fehlt: "Still missing",
     foto: "Take a photo",
@@ -764,12 +754,10 @@ export default {
     entfernt: "File removed.",
     vorschau: "Preview: {datei}",
     pdf: "PDF file",
-    warum: "Why?",
     wie: "How to get it:",
     wo: "Where?",
     dateien: "Your files:",
     art: {
-      pflicht: "This is required.",
       verein: "The club would like this.",
       freiwillig: "This is voluntary.",
       nur_wenn: "Required if it applies to you.",
@@ -782,25 +770,23 @@ export default {
     titel: "How would you like to sign?",
     weg: {
       bildschirm: "On the screen, where allowed",
-      bildschirmHinweis: "You sign club documents here with your finger.",
+      bildschirmHinweis: "You sign here with your finger.",
       bildschirmAlles: "On the screen",
-      bildschirmAllesHinweis: "You sign everything here with your finger. This includes the pages for the Hessian Football Association (Hessischer Fußball-Verband, HFV).",
+      bildschirmAllesHinweis: "With your finger, also for the Hessian Football Association (Hessischer Fußball-Verband, HFV).",
       papier: "I sign everything on paper",
-      papierHinweis: "You print the file and sign with a pen.",
+      papierHinweis: "You print it out and sign with a pen.",
     },
     satzung: {
-      titel: "The club’s statutes (Satzung)",
       erklaerung: "The statutes (Satzung) are the rules of the club.",
       link: "Read the statutes (Satzung)",
       linkZusatz: "PDF, opens in a new tab",
       ohneLink: "You can find the statutes (Satzung) on the club’s website.",
       label: "I have read the statutes (Satzung).",
-      pflicht: "Without a tick you cannot sign on the screen.",
       freiwillig: "Voluntary. Without a tick here, you mark it by hand on the printout.",
     },
-    hierTitel: "You sign these here",
     hierHinweis: "Draw with your finger, a pen or the mouse.",
     giltFuer: "This signature applies to:",
+    giltFuerBlaetter: "This signature applies to {n} pages",
     person: {
       mitglied: { kind: "Signature of {name}", selbst: "Your signature" },
       sorgeberechtigte: "Signature of {person}",
@@ -808,11 +794,11 @@ export default {
       kontoinhaber: "Signature of the account holder: {person}",
       spieler: { kind: "Signature of {name}", selbst: "Your signature" },
       spielerHinweis: {
-        kind: "Can your child already write? Then your child signs here themselves.",
-        selbst: "You are not yet 18. Please sign here yourself too.",
+        kind: "Can your child write? Then they sign it themselves.",
+        selbst: "Are you under 18? Please sign it yourself too.",
       },
       zweiteEltern: "Signature: the other parent",
-      zweiteHinweis: "The other parent signs here himself or herself.\nOr he or she signs later with a pen on the printout.",
+      zweiteHinweis: "The other parent signs here himself or herself.\nOr later with a pen on the printout.",
       ersteSorge: "Your signature",
     },
     stand0: "Not signed yet",
@@ -834,7 +820,7 @@ export default {
 
   pruefen: {
     titel: "Is everything correct?",
-    hinweis: "Check your details.\nUse “Change” to correct something.",
+    hinweis: "Use “Change” to correct something.",
     weiter: "Everything is correct – create file",
     aendern: "Change",
     aendernLang: "Change {bereich}",
@@ -932,7 +918,6 @@ export default {
       mitStift: "Not on the screen – with a pen on the printout",
       betragJahr: "{gruppe}, {jahr} euros a year",
     },
-    hinweiseTitel: "Good to know",
     weitereHinweise: "More notes ({anzahl})",
     klaertVerein: "The club will clarify this",
     fristUnsicher: "This is an estimate. The club checks it exactly.",
@@ -960,8 +945,6 @@ export default {
     nochmal: "Try again",
     datei: "File: {name}",
     info: "{seiten} pages, {groesse}",
-    teileTitel: "What is in the file:",
-    teil: "{titel} (page {von} to {bis})",
     // Titel der Teile des PDF (SCHNITTSTELLEN Abschnitt 9)
     teilTitel: {
       A: "Part A – For you",
@@ -985,12 +968,9 @@ export default {
     // Send the file by email (M10); {knopf} is the label of the button. Subject and text of the email stay German (hilfen.js).
     senden: {
       titel: "How to send the file to the club",
-      einleitung: "Send the file by email to the club office (Geschäftsstelle).",
-      handyTitel: "On your phone",
-      handy1: "Tap “{knopf}” above.",
-      handy2: "Choose your email app.",
-      handy3: "Send the email to the address below.",
-      computerTitel: "On a computer",
+      handy1: "Tap “{knopf}” below.",
+      handy2: "Tap “{knopf}” above. Choose your email app. The file is already attached.",
+      handy3: "Paste the address into “To”. Send the email.",
       computer1: "Click “{knopf}” above.",
       computer2: "Write a new email. Attach the file.",
       computer3: "Send the email to the address below.",
@@ -999,7 +979,7 @@ export default {
       kopiert: "The address is copied.",
       kopierenFehler: "Copying does not work here. The address is selected. Copy it yourself.",
       oeffnen: "Open an email to the club office",
-      anhang: "Attach the file to the email.",
+      anhang: "With “{knopf}”, attach the file yourself.",
     },
     naechsteTitel: "What happens next",
     unterschriftTraining: "You sign the pages for the Hessian Football Association (Hessischer Fußball-Verband, HFV) with a pen at the first training.",
@@ -1009,10 +989,12 @@ export default {
     unterschriftTrainingAlle: "You sign all pages with a pen at the first training. The club prints them.",
     unterschriftFertig: "You have signed everything on the screen. What you have to print out is in Part A of the file.",
     unterschriftRest: "Some signatures are still missing. These are the blue marks in the PDF.\nSign there with a pen. What you have to print out is in Part A of the file.",
+    unterschriftFoto: "Take a photo of the signed pages or scan them. Send them in the same email.",
     fehltTitel: "These documents are still missing:",
     fehltHinweis: "Send them by email later, as soon as you have them.",
     nichtWhatsapp: "Please do not send the file by WhatsApp. It contains private data.",
     teilC: "Part C (Teil C) contains health data. The club keeps it separate.",
+    danach: "After that, the club checks your registration.",
     weiterePerson: "Register another person",
     weiterePersonHinweis: "We keep the address, contact, parents and payment details.",
     neuePerson: "You are now registering the next person.",

@@ -317,7 +317,6 @@ export default {
 
     // Infos
     frist_annahme_heute: "Wir rechnen so, als ob die Abmeldung am {abmeldung} zählt. Melden Sie später ab, wird die Wartezeit länger.",
-    probetraining_versicherung: "Beim Probetraining sind Nichtmitglieder nicht über den Verein versichert. Melden Sie sich am besten vor dem ersten Training an.",
     mitgliedschaft_beginn: "Die Mitgliedschaft beginnt am Tag der Anmeldung.",
     kuendigung_jahresende: "In unserem Verein können Sie nur zum Jahresende kündigen. Schicken Sie die Kündigung als Einschreiben.",
     ohne_spielrecht_kein_spiel: "Ohne Spielrecht darf ein Kind nicht bei Spielen mitmachen. Auch nicht bei Freundschaftsspielen. Training ist erlaubt.",

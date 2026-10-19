@@ -211,12 +211,14 @@ export function textfeld(k, o) {
 // meta, lang, dir }]. Werte können Text oder true/false sein; lang und dir
 // setzen Sprache und Schreibrichtung einer Karte (Sprachwahl). Mit `legende` ein fieldset
 // mit Legende, sonst beschriftet k.titelId (die Überschrift der Seite) die
-// Gruppe.
+// Gruppe. Mit `weitere` ({ titel, optionen }) stehen diese Karten zugeklappt unter dem
+// Titel in derselben Gruppe (eine Wahl für alle Karten); ist eine von ihnen gewählt,
+// ist der Bereich offen.
 export function kartenAuswahl(k, o) {
   const f = felder(k, { pfad: o.pfad });
   const gewaehlt = hole(k.a, o.pfad);
   const name = k.nextId("g");
-  const karten = o.optionen.map((opt) => {
+  const karte = (opt) => {
     const eingabe = h("input", {
       type: "radio",
       name,
@@ -241,7 +243,13 @@ export function kartenAuswahl(k, o) {
         h("span", { klasse: "anm-karte__titel", lang: opt.lang, dir: opt.dir }, opt.label, opt.meta ? h("span", { klasse: "anm-karte__meta" }, " " + opt.meta) : null),
         opt.hinweis ? h("span", { klasse: "anm-karte__hinweis" }, opt.hinweis) : null)
     );
-  });
+  };
+  const karten = o.optionen.map(karte);
+  const weitere = o.weitere && o.weitere.optionen && o.weitere.optionen.length
+    ? h("details", { klasse: "anm-einzelheiten anm-karten-weitere", "data-weitere-karten": "", open: o.weitere.optionen.some((opt) => opt.wert === gewaehlt) || null },
+        h("summary", {}, o.weitere.titel),
+        h("div", { klasse: "anm-karten" }, o.weitere.optionen.map(karte)))
+    : null;
   const beschriftung = o.legende
     ? { legende: h("legend", { klasse: "anm-legende" }, o.legende) }
     : { "aria-labelledby": k.titelId };
@@ -252,7 +260,8 @@ export function kartenAuswahl(k, o) {
     o.legende ? beschriftung.legende : null,
     hinweisZeile(f.hinweisId, o.hinweis),
     fehlerZeile(f.fehlerId),
-    h("div", { klasse: "anm-karten" }, karten)
+    h("div", { klasse: "anm-karten" }, karten),
+    weitere
   );
 }
 
@@ -405,6 +414,14 @@ export function landAuswahl(k, o) {
 }
 
 // ---------- Knöpfe, Hinweise ----------
+
+// Zugeklappter Zusatz unter den Antworten ("Mehr erfahren"): Was man für die Antwort nicht braucht, steht hier
+// (STILREGELN Nr. 2; P3 Teil b). `inhalt`: Knoten oder Liste von Knoten.
+export function mehrErfahren(k, inhalt) {
+  return h("details", { klasse: "anm-einzelheiten anm-mehr", "data-mehr": "" },
+    h("summary", {}, k.t("allgemein.mehrErfahren")),
+    h("div", { klasse: "anm-mehr__inhalt" }, inhalt));
+}
 
 export function knopf(text, o) {
   const opt = o || {};

@@ -17,12 +17,19 @@
 // Termine-App.html (28.09.2026) entsteht aus derselben Quelle wie die
 // Website-Seite web/termine.html (src/vorlagen/termine.mjs).
 //
+// Mitglied-werden-App.html (Livegang des Anmelde-Assistenten, Paket P1, 12.10.2026) entsteht aus derselben Quelle wie die
+// Website-Seite web/mitglied-werden.html (src/seiten/mitglied-werden.mjs, Fassung mit dem Assistenten), mit fest eingeschaltetem
+// App-Modus. Unabhängig vom Schalter ANMELDUNG_LIVE: Die Datei ist für den Tag des Livegangs gedacht.
+//
 // Aufruf: npm run tpl-bauen
+//         npm run tpl-bauen -- --nur=mitglied-werden    (baut nur Mitglied-werden-App.html, ohne die übrigen Dateien anzufassen)
 
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { termineAppSeite, termineDaten } from "../../src/vorlagen/termine.mjs";
+import { ANMELDUNG_LIVE } from "../../src/vorlagen/hilfen.mjs";
+import { mitgliedWerdenAppSeite } from "../../src/seiten/mitglied-werden.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const SRC_APP = path.join(ROOT, "src", "app");
@@ -179,6 +186,11 @@ function datenPlatzhalter() {
     __KARNEVAL_JSON__: JSON.stringify(laden("karneval.json")),
     __VORSTAND_JSON__: JSON.stringify(laden("vorstand.json")),
     __SPONSOREN_JSON__: JSON.stringify(laden("sponsoren.json")),
+    // Texte, die erst mit dem Anmelde-Assistenten gelten (Schalter ANMELDUNG_LIVE in src/vorlagen/hilfen.mjs; Paket P6, U-20 und U-21): Nach dem
+    // Probetraining gibt es einen Code statt eines Antrags. Ohne den Schalter bleibt jede Datei Byte für Byte wie vorher; für den Livegang
+    // baut man die Vorlagen mit ANMELDUNG_LIVE=1 (npm run tpl-bauen).
+    __PROBETRAINING_SCHRITT3__: ANMELDUNG_LIVE ? "Mit dem Code anmelden" : "Aufnahmeantrag stellen",
+    __MITGLIED_WERDEN_UNTERTITEL__: ANMELDUNG_LIVE ? "Beiträge, Ablauf, Anmeldung" : "Beiträge, Ablauf, Antrag",
   };
 }
 
@@ -305,7 +317,29 @@ function aktualisiereStartseite(daten) {
   }
 }
 
+// Mitglied-werden-App.html (Paket P1): die Daten der Seite wie beim Bau der Website (data/*.json).
+function schreibeMitgliedWerdenApp() {
+  const laden = (datei) => JSON.parse(readFileSync(path.join(DATA_DIR, datei), "utf8"));
+  const daten = {
+    beitraege: laden("beitraege.json"),
+    karneval: laden("karneval.json"),
+    unterlagen: laden("unterlagen.json"),
+    downloads: laden("downloads.json"),
+    teams: laden("teams.json"),
+  };
+  const seite = mitgliedWerdenAppSeite(daten);
+  writeFileSync(path.join(ZIEL_APP, "Mitglied-werden-App.html"), seite, "utf8");
+  console.log(`  assets/app/Mitglied-werden-App.html geschrieben (${seite.length} Zeichen)`);
+}
+
 function main() {
+  const nur = (process.argv.find((a) => a.startsWith("--nur=")) || "").slice("--nur=".length);
+  if (nur) {
+    if (nur !== "mitglied-werden") throw new Error(`tpl-bauen: --nur kennt nur "mitglied-werden", nicht "${nur}"`);
+    schreibeMitgliedWerdenApp();
+    console.log("Fertig (nur Mitglied-werden-App.html).");
+    return;
+  }
   const werte = bauzeitWerte();
   const datenWerte = datenPlatzhalter();
   for (const { name, beschreibung, stufe } of SEITEN) {
@@ -339,6 +373,7 @@ function main() {
   writeFileSync(path.join(ZIEL_APP, "Termine-App.html"), termineApp, "utf8");
   console.log(`  assets/app/Termine-App.html geschrieben (${termineApp.length} Zeichen)`);
   aktualisiereStartseite(termineDatenQuelle);
+  schreibeMitgliedWerdenApp();
 
   console.log("Fertig.");
 }

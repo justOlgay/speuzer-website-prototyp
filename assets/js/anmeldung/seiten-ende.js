@@ -23,7 +23,7 @@ const HINWEIS_ORT = {
   abmeldung_formlos: "abmeldung/status", abmeldung_nach_letztem_spiel: "abmeldung/status", abmeldung_vor_letztem_spiel: "abmeldung/status",
   nie_zwei_vereine: "abmeldung/status", abmeldung_unklar: "abmeldung/status",
   vollmacht_eingabe_zeitnah: "abmeldung/weg", vollmacht_ohne_kurze_frist: "abmeldung/weg", vollmacht_anderer_verband: "abmeldung/weg",
-  kuendigung_extra: "abmeldung/mitgliedschaft", kuendigung_jahresende: "abmeldung/mitgliedschaft",
+  kuendigung_extra: "abmeldung/mitgliedschaft",
   sperre_laeuft: "abmeldung/sperre", sperre_unklar: "abmeldung/sperre", freigabe_unklar: "abmeldung/freigabe",
   wiederholter_wechsel: "abmeldung/wechsel",
   ohne_spielrecht_kein_spiel: "spielerpass", spielerpass_unklar: "spielerpass",
@@ -46,10 +46,14 @@ function hinweisOrt(x) {
   return x.schritt || HINWEIS_ORT[x.key] || null;
 }
 
-// Höchstens so viele Kästen stehen auf einer Seite mit einer Frage offen; alles
-// weitere klappt unter "Weitere Hinweise (n)" auf. Prüf- und Endseite zeigen alle
-// Warnungen und Fristen offen.
-const MAX_OFFEN_JE_SEITE = 2;
+// Höchstens ein Kasten steht auf einer Seite mit einer Frage offen (STILREGELN Nr. 3; P3 Teil b); alles
+// weitere klappt unter "Weitere Hinweise (n)" auf. Die Endseite zeigt die Fristen und die Warnungen offen,
+// die zu keiner Frage gehören.
+const MAX_OFFEN_JE_SEITE = 1;
+
+// Fristtexte ohne Frist: Wer kein Spielrecht braucht, hat keine Wartezeit, und bei „Kind ohne Eltern“ sagt schon die Warnung „ohne_zusage_spielen“, dass gespielt
+// werden darf oder nicht. Die Fertig-Seite zeigt dafür keinen Kasten „Frist“ (Teil A und die Regeltexte bleiben).
+const FRIST_OHNE_DATUM = ["frist_kein_spiel", "frist_ohne_zusage"];
 
 // Ein Hinweiskasten, mit Art und Schlüssel als Merkmale (für Tests und Stile).
 function kasten(k, stil, art, key, label, text) {
@@ -85,7 +89,8 @@ function weitereHinweise(k, ort, info, verein, ebene) {
 // und Dinge, die der Verein klärt ("offen"), stehen zugeklappt darunter in
 // "Weitere Hinweise (n)"; die "offen"-Hinweise dort unter der Überschrift
 // "Das klärt der Verein". `optionen.ebene`: Überschriftenebene dieser
-// Unterüberschrift (Standard 3).
+// Unterüberschrift (Standard 3). Auf der Endseite (ohne `ort`) stehen die Hinweise nicht noch
+// einmal, die schon bei ihrer Frage standen (P3 Teil b): Dort bleibt, was zu keiner Frage gehört.
 export function regelHinweise(k, e, ort, optionen) {
   if (!e) return [];
   const ebene = (optionen && optionen.ebene) || 3;
@@ -94,7 +99,11 @@ export function regelHinweise(k, e, ort, optionen) {
     const ziel = hinweisOrt(x);
     return !!ziel && (ziel === ort || ort.startsWith(ziel + "/"));
   };
-  const gewaehlt = hinweise.filter((x) => (ort ? gehoert(x) : true));
+  // Auf der Endseite stehen die Hinweise nicht noch einmal, die die Familie schon bei ihrer Frage gesehen hat (k.gezeigteHinweise: Kennungen
+  // der Hinweise, die auf einer Seite mit einer Frage gezeichnet wurden). Was dort nicht stand, steht hier, auch wenn es zu einer Frage gehört
+  // (zum Beispiel, wenn eine spätere Änderung den Hinweis erst auslöst).
+  const gezeigt = k.gezeigteHinweise || (k.gezeigteHinweise = new Set());
+  const gewaehlt = hinweise.filter((x) => (ort ? gehoert(x) : !gezeigt.has(x.key)));
   const rang = { warnung: 0, frist: 1, info: 2, offen: 3 };
   gewaehlt.sort((x, y) => (rang[x.art] ?? 9) - (rang[y.art] ?? 9));
   const grenze = ort ? MAX_OFFEN_JE_SEITE : Infinity;
@@ -107,12 +116,21 @@ export function regelHinweise(k, e, ort, optionen) {
     const art = x.art in ART_STIL ? x.art : "info";
     const stil = ART_STIL[art];
     const label = k.t("pruefen.hinweisArt." + art);
-    if ((art === "warnung" || art === "frist") && offen.length < grenze) offen.push(kasten(k, stil, art, x.key, label, text));
-    else if (art === "offen") verein.push(kasten(k, stil, art, x.key, null, text));
-    else info.push(kasten(k, stil, art, x.key, label, text));
+    const warnungOderFrist = art === "warnung" || art === "frist";
+    if (warnungOderFrist && offen.length < grenze) {
+      offen.push(kasten(k, stil, art, x.key, label, text));
+      if (ort) gezeigt.add(x.key);
+    } else if (art === "offen") {
+      verein.push(kasten(k, stil, art, x.key, null, text));
+      if (ort) gezeigt.add(x.key);
+    } else {
+      info.push(kasten(k, stil, art, x.key, label, text));
+      // Eine Warnung oder Frist, die hier nur zugeklappt steht (es steht schon ein Kasten offen), gilt nicht als gesehen: Die Fertig-Seite zeigt sie offen.
+      if (ort && !warnungOderFrist) gezeigt.add(x.key);
+    }
   }
   // Die Frist des Regelwerks (frühester Spieltermin) gehört zu den offenen Kästen.
-  if (!ort && e.frist && e.frist.key) {
+  if (!ort && e.frist && e.frist.key && !FRIST_OHNE_DATUM.includes(e.frist.key)) {
     const werte = {
       ...(e.frist.werte || {}),
       pflichtspieleAb: e.frist.pflichtspieleAb ? k.formatDatum(e.frist.pflichtspieleAb) : "",
@@ -140,7 +158,10 @@ function weiterleitungen(k, e) {
     zeilen.push(h("li", {}, h("strong", {}, k.t("pruefen.weiterleitungAn." + w.an) + ": "), text));
   }
   if (!zeilen.length) return null;
-  return h("div", { klasse: "anm-block" }, h("h3", { klasse: "anm-zwischentitel" }, k.t("pruefen.weiterleitungTitel")), h("ul", { klasse: "anm-liste-punkte" }, zeilen));
+  // Zugeklappt (P3 Teil b): Die Familie muss nichts tun; die Liste steht auch in Teil A der Datei. Die Beschriftung ist der Titel ohne Doppelpunkt.
+  return h("details", { klasse: "anm-einzelheiten anm-block", "data-weiterleitung": "" },
+    h("summary", {}, String(k.t("pruefen.weiterleitungTitel")).replace(/\s*[:\uff1a]\s*$/, "")),
+    h("ul", { klasse: "anm-liste-punkte" }, zeilen));
 }
 
 // Was nur der Vorstand sehen soll: Fälle, Status, Frist-Regel mit Quelle.
@@ -329,16 +350,14 @@ export const pruefen = {
         h("h3", { klasse: "anm-zwischentitel", id: titelId }, k.t("pruefen.bereiche." + b.id)),
         h("dl", { klasse: "anm-pruefliste" }, zeilen));
     });
-    // Unter der Überschrift "Das sollten Sie wissen" (h3) ist die Gruppe im Aufklapper eine h4.
-    const hinweise = regelHinweise(k, e, undefined, { ebene: 4 });
+    // Hinweise und "Diese Stellen melden sich bei Ihnen" stehen nicht auf der Prüfseite (P3 Teil b): Sie stehen bei der Frage, auf der
+    // Fertig-Seite und in Teil A der Datei. Hier prüft die Familie nur ihre Angaben.
     return {
       titel: k.t("pruefen.titel"),
       weiterText: k.t("pruefen.weiter"),
       inhalt: [
         ...absaetze(k.t("pruefen.hinweis"), "anm-hinweis"),
         ...teile,
-        hinweise.length ? h("div", { klasse: "anm-block" }, h("h3", { klasse: "anm-zwischentitel" }, k.t("pruefen.hinweiseTitel")), ...hinweise) : null,
-        weiterleitungen(k, e),
         vereinsUebersicht(k, e),
       ],
     };
@@ -391,7 +410,10 @@ function naechsteSchritte(k, pdf) {
   } else if (plan.liste.some((p) => p.stiftBeiLeer && !k.bilder.unterschriften[p.schluessel])) {
     // Modus "bildschirm": Ein freiwilliges Feld blieb leer und im PDF steht dafür eine Stift-Markierung (zweiter Elternteil, Kind bei
     // der Abmeldung). Die leere Zeile des Kindes im Antrag auf Spielerlaubnis zählt nicht: Sie bleibt ohne Markierung.
-    schritte.push(k.t("fertig.unterschriftRest"));
+    // Liegt eine offene Markierung auf einem Blatt, das mit der Datei verschickt wird (nicht bei der Abmeldung beim alten Verein: Sie geht per
+    // Einschreiben), kommt der Weg zum Verein dazu: Foto oder Scan in derselben E-Mail.
+    const foto = plan.liste.some((p) => p.stiftBeiLeerBlatt && !k.bilder.unterschriften[p.schluessel]);
+    schritte.push(k.t("fertig.unterschriftRest") + (foto ? "\n" + k.t("fertig.unterschriftFoto") : ""));
   } else schritte.push(k.t("fertig.unterschriftFertig"));
   const fehlend = Array.isArray(e.fehlend) ? e.fehlend : [];
   const eintraege = [];
@@ -403,6 +425,8 @@ function naechsteSchritte(k, pdf) {
   liste.push(...eintraege);
   // Wie die Datei zum Verein kommt, steht im Abschnitt "So schicken Sie die Datei an den Verein" (sendenAbschnitt) darüber.
   if (pdf && (pdf.teile || []).some((t) => t.teil === "C")) liste.push(h("li", {}, h("p", {}, k.t("fertig.teilC"))));
+  // Letzter Punkt (Entscheidung D-06): Was der Verein nach dem Eingang tut
+  liste.push(h("li", {}, h("p", {}, k.t("fertig.danach"))));
   return h("ol", { klasse: "anm-naechste" }, liste);
 }
 
@@ -448,17 +472,16 @@ async function kopiereAdresse(element, text) {
 // `optionen.teilen`: Der Browser kann die Datei teilen (der Knopf "Datei teilen" ist da). `optionen.handy`: Gerät mit Touch-Bedienung.
 function sendenAbschnitt(k, optionen) {
   const adresse = geschaeftsstellenMail(k);
-  // Drei Schritte je Weg. {knopf} ist die Beschriftung des Knopfes, damit der Schritt zum Knopf passt.
-  const weg = (art, knopfText, mitTitel) =>
+  // Drei Schritte je Weg. {knopf} ist die Beschriftung des Knopfes, auf den der Schritt zeigt (je Schritt die eigene), damit der Schritt zum Knopf passt.
+  const weg = (art, knoepfe) =>
     h("div", { klasse: "anm-senden__weg", "data-weg": art },
-      mitTitel ? h("h4", { klasse: "anm-zwischentitel anm-zwischentitel--klein" }, k.t("fertig.senden." + art + "Titel")) : null,
       h("ol", { klasse: "anm-senden__schritte" },
-        [k.t("fertig.senden." + art + "1", { knopf: knopfText }), k.t("fertig.senden." + art + "2"), k.t("fertig.senden." + art + "3")].map((t) => h("li", {}, t))));
-  // Ohne "Datei teilen" gibt es nur den Weg über das Herunterladen (ohne Überschrift "Am Computer": er gilt auch am Handy).
-  // Sonst stehen beide da, der Weg des Geräts vorn.
-  const computerWeg = () => weg("computer", k.t("fertig.herunterladen"), optionen.teilen);
-  const handyWeg = () => weg("handy", k.t("fertig.teilen"), true);
-  const wege = !optionen.teilen ? [computerWeg()] : optionen.handy ? [handyWeg(), computerWeg()] : [computerWeg(), handyWeg()];
+        [1, 2, 3].map((i) => h("li", {}, k.t("fertig.senden." + art + i, { knopf: knoepfe[i - 1] || "" })))));
+  // Nur der Weg, der zum Gerät passt (P3 Teil b): am Handy mit "Datei teilen" der Weg über das Teilen, sonst (Computer, oder Teilen
+  // geht nicht) der Weg über das Herunterladen. Er trägt keine Überschrift. Am Handy kopiert die Familie zuerst die Adresse (Schritt 1): Das
+  // Teilen gibt der Mail-App nur die Datei, keinen Empfänger; die Adresse fügt sie danach bei "An" ein (Schritt 3).
+  const handyWeg = !!(optionen.teilen && optionen.handy);
+  const wege = handyWeg ? weg("handy", [k.t("fertig.senden.kopieren"), k.t("fertig.teilen")]) : weg("computer", [k.t("fertig.herunterladen")]);
 
   let adressBlock = null;
   if (adresse) {
@@ -481,11 +504,12 @@ function sendenAbschnitt(k, optionen) {
         }),
         h("a", { klasse: "knopf knopf--sekundaer", href: mailtoAnVerein(adresse, k.a.vorname, k.a.nachname), "data-aktion": "mail-oeffnen" }, k.t("fertig.senden.oeffnen"))),
       status,
-      h("p", { klasse: "anm-hinweis" }, k.t("fertig.senden.anhang")));
+      // Der Link öffnet die E-Mail ohne Anhang: Am Handy (Teilen hängt die Datei schon an) sagt dieser Satz, dass sie die Datei hier selbst anhängt.
+      // Am Computer steht "Hängen Sie die Datei an" schon im zweiten Schritt.
+      handyWeg ? h("p", { klasse: "anm-hinweis" }, k.t("fertig.senden.anhang", { knopf: k.t("fertig.senden.oeffnen") })) : null);
   }
   return h("div", { klasse: "anm-senden", "data-senden": "" },
     h("h3", { klasse: "anm-zwischentitel" }, k.t("fertig.senden.titel")),
-    h("p", { klasse: "anm-text" }, k.t("fertig.senden.einleitung")),
     h("div", { klasse: "anm-senden__wege" }, wege),
     adressBlock,
     h("p", { klasse: "anm-hinweis anm-hinweis--achtung" }, k.t("fertig.nichtWhatsapp")));
@@ -495,29 +519,12 @@ function ergebnisAnsicht(k, pdf) {
   const datei = pdf.datei;
   const status = h("p", { klasse: "anm-status", role: "status" });
   const knoepfe = [];
-  // In der Vereins-App (App-Modus) kann Speichern oder Teilen scheitern. Dann tut der Assistent nicht still nichts: Eine
-  // Meldung nennt den Weg über den Browser und führt mit einem Link dorthin.
-  // Der kurze Hinweis unter den Knöpfen steht nur im App-Modus; zeigt der Status schon die Fehlermeldung mit dem Link, entfällt er.
-  const appZeile = k.appModus() ? h("p", { klasse: "anm-hinweis anm-app-hinweis", "data-app-hinweis": "" }, k.t("app.hinweisFertig"), " ", k.browserLink()) : null;
   const zeigeStatus = (text) => {
     status.textContent = text;
-    if (appZeile) appZeile.hidden = false;
   };
-  const meldeAppFehler = () => {
-    status.textContent = "";
-    status.append(k.t("app.fehler"), " ", k.browserLink());
-    if (appZeile) appZeile.hidden = true;
-  };
-  // Speichert die Datei; in der App fängt es einen Fehler ab, sonst gilt das bisherige Verhalten.
+  // Speichert die Datei und meldet es. (In der Vereins-App läuft der Assistent nicht: Sie öffnet ihn im Browser, siehe seiten-zugang.js.)
   const speichereMitMeldung = (bytes, typ, name, erfolg) => {
-    try {
-      speichern(bytes, typ, name);
-    } catch (fehler) {
-      if (!k.appModus()) throw fehler;
-      console.error("Anmeldung: Datei nicht gespeichert", fehler);
-      meldeAppFehler();
-      return false;
-    }
+    speichern(bytes, typ, name);
     zeigeStatus(erfolg);
     return true;
   };
@@ -544,8 +551,7 @@ function ergebnisAnsicht(k, pdf) {
         })
         .catch((fehler) => {
           if (fehler && fehler.name === "AbortError") return;
-          // Teilen geht nicht: erst die Datei speichern. In der App steht danach die Meldung mit dem Link zum Browser.
-          // (Der kurze Hinweis mit dem Link steht in der App ohnehin unter den Knöpfen.)
+          // Teilen geht nicht: erst die Datei speichern.
           if (speichereMitMeldung(pdf.ergebnis.bytes, "application/pdf", pdf.ergebnis.dateiname, k.t("fertig.teilenFehler"))) k.gesichert = true;
         });
     },
@@ -569,24 +575,18 @@ function ergebnisAnsicht(k, pdf) {
       },
     }));
   }
-  // Die Titel der Teile stehen im Wörterbuch (übersetzbar, mit Buchstaben); pdf.js liefert nur Teil und Seiten.
-  const teile = (pdf.ergebnis.teile || []).map((t) => h("li", {}, k.t("fertig.teil", { titel: k.hatT("fertig.teilTitel." + t.teil) ? k.t("fertig.teilTitel." + t.teil) : t.titel, von: t.vonSeite, bis: t.bisSeite })));
   return h("div", { klasse: "anm-ergebnis", "data-status": "fertig" },
     h("p", { klasse: "anm-text anm-datei-zeile", "data-datei": "" }, k.t("fertig.datei", { name: pdf.ergebnis.dateiname })),
     h("p", { klasse: "anm-hinweis" }, k.t("fertig.info", { seiten: pdf.ergebnis.seiten, groesse: kbText(pdf.ergebnis.bytes.byteLength) })),
-    teile.length ? h("div", { klasse: "anm-block" }, h("h3", { klasse: "anm-zwischentitel" }, k.t("fertig.teileTitel")), h("ul", { klasse: "anm-liste-punkte" }, teile)) : null,
     h("div", { klasse: "anm-knoepfe" }, knoepfe),
     status,
-    // Nur im App-Modus: kurzer Hinweis, falls Teilen oder Herunterladen nicht klappt, mit dem Link zum Browser
-    appZeile,
     // Wie die Datei zum Verein kommt: per E-Mail an die Geschäftsstelle (M10)
     sendenAbschnitt(k, { teilen: !teilen.hidden, handy: !!handy }),
     h("h3", { klasse: "anm-zwischentitel" }, k.t("fertig.naechsteTitel")),
     naechsteSchritte(k, pdf.ergebnis),
     h("div", { klasse: "anm-block" },
       h("div", { klasse: "anm-knoepfe" },
-        knopf(k.t("fertig.weiterePerson"), { aktion: "weitere-person", beiKlick: () => k.weiterePerson() }),
-        knopf(k.t("fuss.loeschen"), { sekundaer: true, aktion: "loeschen", beiKlick: () => k.frageLoeschen() })),
+        knopf(k.t("fertig.weiterePerson"), { aktion: "weitere-person", beiKlick: () => k.weiterePerson() })),
       h("p", { klasse: "anm-hinweis" }, k.t("fertig.weiterePersonHinweis"))));
 }
 

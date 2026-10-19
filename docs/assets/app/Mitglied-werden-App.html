@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="de" class="app-modus" data-app-seite>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="format-detection" content="telephone=no">
+<meta name="format-detection" content="address=no">
+<meta name="format-detection" content="email=no">
+<meta name="format-detection" content="date=no">
+<title>Mitglied werden</title>
+<!-- Speuzer Blau-Weiß – Mitglied-werden-App.html
+     Statische Workspace-Seite für das Seitenmodul „Mitglied werden“ der App
+     (Seitenlink Mitglied-werden-App.html an der Workspace-Wurzel, ausgeliefert unter
+     https://cdn.appack.de/sportfreunde04/workspace/Mitglied-werden-App.html).
+     Gleicher Inhalt wie web/mitglied-werden.html (Quelle src/seiten/mitglied-werden.mjs),
+     braucht dessen site.css im Ordner web. Erzeugt durch
+     tools/app-optik/tpl-bauen.mjs (npm run tpl-bauen) – NICHT von Hand
+     bearbeiten. Details: assets/app/LIESMICH.md, Abschnitt „Mitglied werden“. -->
+<link rel="canonical" href="https://cdn.appack.de/sportfreunde04/workspace/web/mitglied-werden.html">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#191793">
+<link rel="preload" href="https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://justolgay.github.io/speuzer-website-prototyp/assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="https://cdn.appack.de/sportfreunde04/workspace/web/site.css">
+<style>
+.app-modus .seitenkopf { padding-block: var(--sp-4) 0; }
+.app-modus .seitenkopf h1 {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+.app-modus .seitenkopf__lead { margin-top: 0; font-size: .9375rem; }
+.app-modus .ws-fuss { display: none; }
+.aufklapper { margin-block: var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); }
+.aufklapper > summary { display: flex; align-items: center; gap: var(--sp-2); min-height: 48px; padding: var(--sp-2) var(--sp-4); cursor: pointer; font-weight: 700; color: var(--blau-800); list-style: none; }
+.aufklapper > summary::-webkit-details-marker { display: none; }
+.aufklapper > summary::before { content: ""; flex: none; width: .5em; height: .5em; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-45deg); transition: transform var(--t-kurz, .15s); }
+.aufklapper[open] > summary::before { transform: rotate(45deg); }
+.aufklapper > summary:focus-visible { outline: var(--fokus, 3px solid currentColor); outline-offset: 2px; border-radius: var(--r-md); }
+.aufklapper__inhalt { padding: 0 var(--sp-4) var(--sp-4); }
+</style>
+<script>
+(function () {
+  "use strict";
+  if (!/(^|[?&])app=1(&|$)/.test(location.search) && !document.documentElement.hasAttribute("data-app-seite")) return;
+  var NAV = {
+    "mannschaften": "sportfreunde04_TextImage_1783343147611",
+    "verein": "sportfreunde04_TextImage_1783060935192",
+    "verein-karneval": "sportfreunde04_TextImage_1780401660343",
+    "verein-vorstand": "sportfreunde04_TextImage_1780401660340",
+    "verein-sponsoren": "sportfreunde04_TextImage_1780401660337",
+    "verein-ueber-uns": "sportfreunde04_TextImage_1784295208452",
+    "kontakt": "sportfreunde04_TextImage_1780401660324",
+    "mitglied-werden": "sportfreunde04_TextImage_1780401660329",
+    "chronik": "sportfreunde04_TextImage_1789020275334"
+  };
+  var FORMULAR_WEB = "6a903758337cdc97f94f2655";
+  function umschreiben() {
+    [].forEach.call(document.querySelectorAll("a[href]"), function (a) {
+      var href = a.getAttribute("href");
+      if (/^(mailto:|tel:|#|nav:|ext:|javascript:)/i.test(href)) return;
+      var url;
+      try { url = new URL(href, location.href); } catch (e) { return; }
+      if (url.pathname.indexOf(FORMULAR_WEB) !== -1) {
+        a.href = "nav://" + NAV["mitglied-werden"];
+        a.removeAttribute("target");
+        return;
+      }
+      if (url.hostname === location.hostname && /\/workspace\/web\//.test(url.pathname)) {
+        var name = url.pathname.split("/").pop().replace(/\.html$/, "");
+        if (name === "anmeldung") {
+          url.searchParams.delete("app");
+          a.href = "ext://" + url.toString();
+          a.removeAttribute("target");
+          return;
+        }
+        var modul = NAV[name] || (/^mannschaften-/.test(name) ? NAV.mannschaften : null) || (/^chronik/.test(name) ? NAV.chronik : null);
+        if (modul && !url.hash) {
+          a.href = "nav://" + modul;
+        } else {
+          url.searchParams.set("app", "1");
+          a.href = url.toString();
+        }
+        a.removeAttribute("target");
+        return;
+      }
+      if (/^https?:$/.test(url.protocol)) {
+        a.href = "ext://" + url.toString();
+        a.removeAttribute("target");
+      }
+    });
+  }
+  // Teile nur für Website bzw. nur für die App (Übergangslösung Anträge,
+  // 28.09.2026): in der App gibt es die Online-Formulare, auf der Website PDF
+  // und E-Mail.
+  function teileUmschalten() {
+    [].forEach.call(document.querySelectorAll("[data-nur-web]"), function (el) { el.parentNode.removeChild(el); });
+    [].forEach.call(document.querySelectorAll("[data-nur-app]"), function (el) { el.removeAttribute("hidden"); });
+  }
+  function start() { teileUmschalten(); umschreiben(); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
+})();
+</script>
+</head>
+<body class="ws">
+<main id="inhalt">
+<section class="abschnitt seitenkopf">
+  <div class="container">
+    <h1>Mitglied werden</h1>
+    <p class="seitenkopf__lead">Beiträge, Ablauf und Unterlagen auf einen Blick.</p>
+  </div>
+</section>
+<section class="abschnitt">
+  <div class="container fluss">
+    <h2>Beiträge</h2>
+    <div class="raster raster--2">
+      <div class="karte fluss">
+        <span class="karte__titel">Fußballabteilung</span>
+        <div class="tabelle-wrap">
+      <table class="beitragstabelle">
+        <thead>
+          <tr>
+            <th>Beitragsgruppe</th>
+            <th class="zahl"><span class="beitragstabelle__lang">monatlich</span><span class="beitragstabelle__kurz">Monat</span></th>
+            <th class="zahl"><span class="beitragstabelle__lang">jährlich</span><span class="beitragstabelle__kurz">Jahr</span></th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>Kinder und Jugendliche</td>
+          <td class="zahl">9 €</td>
+          <td class="zahl">108 €</td>
+        </tr>
+        <tr>
+          <td>Erwachsene</td>
+          <td class="zahl">10 €</td>
+          <td class="zahl">120 €</td>
+        </tr>
+        <tr>
+          <td>Passive, Frauen, Rentner</td>
+          <td class="zahl">7 €</td>
+          <td class="zahl">84 €</td>
+        </tr>
+        <tr>
+          <td>Familien</td>
+          <td class="zahl">15 €</td>
+          <td class="zahl">180 €</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+      </div>
+      <div class="karte fluss">
+        <span class="karte__titel">Karnevalabteilung „Die&nbsp;Schnauzer“</span>
+        <div class="tabelle-wrap">
+      <table class="beitragstabelle">
+        <thead>
+          <tr>
+            <th>Beitragsgruppe</th>
+            <th class="zahl"><span class="beitragstabelle__lang">monatlich</span><span class="beitragstabelle__kurz">Monat</span></th>
+            <th class="zahl"><span class="beitragstabelle__lang">jährlich</span><span class="beitragstabelle__kurz">Jahr</span></th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>Kinder, Jugendliche, Auszubildende und Studierende (mit Nachweis)</td>
+          <td class="zahl">9 €</td>
+          <td class="zahl">108 €</td>
+        </tr>
+        <tr>
+          <td>Erwachsene</td>
+          <td class="zahl">10 €</td>
+          <td class="zahl">120 €</td>
+        </tr>
+        <tr>
+          <td>Rentner ab 65</td>
+          <td class="zahl">7 €</td>
+          <td class="zahl">84 €</td>
+        </tr>
+        <tr>
+          <td>Familien</td>
+          <td class="zahl">15 €</td>
+          <td class="zahl">180 €</td>
+        </tr>
+        <tr>
+          <td>Senatoren</td>
+          <td class="zahl">–</td>
+          <td class="zahl">144 €</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+      </div>
+    </div>
+    <div class="karte">
+      <h3 style="margin:0 0 var(--sp-4);">Gut zu wissen</h3>
+      <dl class="angaben">
+        <dt>Aufnahmegebühr</dt>
+        <dd>Einmalig 20 €, wird mit dem ersten Beitrag eingezogen.</dd>
+
+        <dt>Ohne SEPA-Lastschrift</dt>
+        <dd>3 € zusätzlich pro Jahr.</dd>
+
+        <dt>Fälligkeit</dt>
+        <dd>Jährlich zum 1. Januar im Voraus, Abbuchung im ersten Quartal; bei Eintritt im Jahr anteilig mit der Aufnahme.</dd>
+
+        <dt>Kündigung</dt>
+        <dd>Nur zum Ende eines Kalenderjahres, per Einschreiben an die Postanschrift.</dd>
+
+        <dt>Doppelmitgliedschaft</dt>
+        <dd>Bei einer Doppelmitgliedschaft in der Fußball- und der Karnevalabteilung kann ein gesonderter Beitrag erfragt werden.</dd>
+      </dl>
+    </div>
+    <p class="meta">Beiträge laut Beitragsordnung 2026; verbindlich ist der Aufnahmeantrag.</p>
+    <ul class="downloads inhalt" role="list">
+      <li class="download">
+      <a href="https://cdn.appack.de/sportfreunde04/pdf/Beitrags%C3%BCbersicht%20F.F.V.%20Sportfreunde%2004%20e.V._.pdf" target="_blank" rel="noopener">Beitragsübersicht</a>
+      <span class="meta">PDF · 2 Seiten · 145 KB</span>
+    </li>
+    </ul>
+  </div>
+</section>
+<section class="abschnitt--hell abschnitt">
+  <div class="container fluss">
+    <h2>So werden Sie Mitglied</h2>
+    <ol class="schritte" style="max-width:var(--inhalt);">
+      <li id="probetraining">
+        <div class="schritt__inhalt">
+          <p>Probetraining vereinbaren: E-Mail an die Jugendleitung mit Jahrgang und Vorerfahrung.</p>
+          <p class="meta">Beim Probetraining ist man noch nicht über den Verein versichert.</p>
+          <p class="knopfzeile">
+            <a class="knopf" href="mailto:jugendleitung@sportfreunde04.de?subject=Probetraining%20beim%20FFV%20Sportfreunde%2004&amp;body=Hallo%2C%0A%0Awir%20interessieren%20uns%20f%C3%BCr%20ein%20Probetraining.%0AJahrgang%20des%20Kindes%3A%20%0AVorerfahrung%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe">E-Mail an die Jugendleitung</a>
+          </p>
+          <p class="meta"><a href="mailto:senioren_mannschaft@sportfreunde04.de">Für die Herren: E-Mail an das Trainerteam der Herren ›</a></p>
+          <p class="meta">Karneval: E-Mail an die <a href="mailto:karnevalabteilung@sportfreunde04.de">Karnevalabteilung</a>.</p>
+        </div>
+      </li>
+      <li>
+        <div class="schritt__inhalt">
+          <p>Nach dem Probetraining bekommen Sie einen Code. Damit melden Sie sich hier an.</p>
+          <p class="knopfzeile">
+            <a class="knopf" href="https://cdn.appack.de/sportfreunde04/workspace/web/anmeldung.html" target="_blank" rel="noopener">Jetzt anmelden</a>
+          </p>
+          <p class="meta">Die Mitgliedschaft beginnt am Tag der Anmeldung.</p>
+        </div>
+      </li>
+      <li><div class="schritt__inhalt"><p>Datei schicken: Am Ende schicken Sie die Datei per E-Mail an die Geschäftsstelle.</p></div></li>
+      <li><div class="schritt__inhalt"><p>Spielerpass – nur Fußball: Der Verein beantragt das Spielrecht (Erlaubnis zum Spielen) beim Hessischen Fußball-Verband.</p></div></li>
+    </ol>
+  </div>
+</section>
+<section class="abschnitt">
+  <div class="container fluss">
+    <h2>Unterlagen (Fußball)</h2>
+    <p class="inhalt">Die Anmeldung sagt Ihnen genau, was Sie brauchen.</p>
+    <details class="aufklapper">
+      <summary>Welche Unterlagen brauche ich?</summary>
+      <div class="aufklapper__inhalt">
+        <div class="raster raster--3">
+      <div class="karte fluss">
+      <span class="karte__titel">Neuanmeldung</span>
+      <ul>
+        <li>Aufnahmeantrag des Vereins (unterschrieben)</li>
+        <li>Antrag auf Spielerlaubnis beim Hessischen Fußball-Verband</li>
+        <li>Einzugsermächtigung / SEPA-Lastschriftmandat</li>
+        <li>Ärztliches Attest über die Sporttauglichkeit</li>
+        <li>Kopie der Geburtsurkunde</li>
+        <li>Aktuelles Passbild für den Spielerpass</li>
+      </ul>
+      
+    </div>
+      <div class="karte fluss">
+      <span class="karte__titel">Vereinswechsel</span>
+      <ul>
+        <li>Aufnahmeantrag des Vereins</li>
+        <li>Antrag auf Spielerlaubnis beim Hessischen Fußball-Verband</li>
+        <li>Einzugsermächtigung / SEPA-Lastschriftmandat</li>
+        <li>Abmeldebestätigung des bisherigen Vereins oder Vollmacht zur Abmeldung durch den aufnehmenden Verein</li>
+        <li>Aktuelles Passbild für den Spielerpass</li>
+      </ul>
+      
+    </div>
+      <div class="karte fluss">
+      <span class="karte__titel">Ohne deutschen Pass</span>
+      <ul>
+        <li>Meldebescheinigung der Wohnortgemeinde</li>
+        <li>Kopie des Reisepasses</li>
+        <li>Zusatzerklärung für Spieler zwischen 12 und 18 Jahren</li>
+      </ul>
+      <p class="meta">Zusätzlich zu Neuanmeldung oder Vereinswechsel. Spieler aus den USA, Mexiko, Argentinien oder Brasilien brauchen ein weiteres Formular. Es kommt vom Hessischen Fußball-Verband.</p>
+    </div>
+    </div>
+      </div>
+    </details>
+    <h3 class="inhalt">Zum Herunterladen</h3>
+    <ul class="downloads inhalt" role="list">
+      <li class="download">
+      <a href="https://cdn.appack.de/sportfreunde04/pdf/Zusatzerklrung_12-18%20(1).pdf" target="_blank" rel="noopener">Zusatzerklärung für Spieler zwischen 12 und 18 Jahren ohne deutsche Staatsangehörigkeit</a>
+      <span class="meta">PDF · 1 Seite · 60 KB</span>
+    </li>
+      <li class="download">
+      <a href="https://cdn.appack.de/sportfreunde04/pdf/Satzung_Aktuell_2025%20(1).pdf" target="_blank" rel="noopener">Satzung (Stand: 2025)</a>
+      <span class="meta">PDF · 8 Seiten · 138 KB</span>
+    </li>
+    </ul>
+  </div>
+</section>
+<section class="abschnitt--blau abschnitt abschnitt--eng">
+  <div class="container fluss">
+    <h2>Fragen?</h2>
+    <p>Die Geschäftsstelle hilft. Oder möchten Sie sich als Trainer, Betreuer oder Helfer <a href="https://cdn.appack.de/sportfreunde04/workspace/web/verein-mach-mit.html">einbringen</a>?</p>
+    <p class="knopfzeile">
+      <a class="knopf knopf--weiss" href="mailto:geschaeftsstelle@sportfreunde04.de?subject=Mitgliedschaft">E-Mail an die Geschäftsstelle</a>
+    </p>
+  </div>
+</section>
+</main>
+</body>
+</html>

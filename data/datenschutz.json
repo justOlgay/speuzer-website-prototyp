@@ -1,6 +1,8 @@
 {
   "stand": "28.09.2026",
+  "stand_live": "12.10.2026",
   "quelle": "Datenschutzerklärung der Vereins-App (cdn.appack.de), Fassung vom 17.07.2026, für Website und App ergänzt am 24.09.2026 (Hosting, GitHub Pages, Online-Aufnahmeantrag, Links, Fotos, Aufsichtsbehörde) und am 28.09.2026 (Aufnahmeantrag online auf der Website)",
+  "quelle_live": "Datenschutzerklärung der Vereins-App (cdn.appack.de), Fassung vom 17.07.2026, für Website und App ergänzt am 24.09.2026 (Hosting, GitHub Pages, Links, Fotos, Aufsichtsbehörde) und am 12.10.2026 (Anmeldung über den Anmelde-Assistenten)",
   "hinweis": "Fragen beantwortet die Geschäftsstelle.",
   "abschnitte": [
     {
@@ -238,6 +240,14 @@
         "Mit „An die Geschäftsstelle senden“ überträgt Ihr Browser das PDF zusammen mit dem Namen des neuen Mitglieds und Ihrer E-Mail-Adresse verschlüsselt (HTTPS) an unseren Webspace unter {annahme_host}. Den Webspace und die Postfächer des Vereins betreibt für uns die IONOS SE, Elgendorfer Str. 57, 56410 Montabaur, als Auftragsverarbeiter nach Art. 28 DSGVO. Ein Programm dort schickt das PDF per E-Mail an die Geschäftsstelle und Ihnen eine Eingangsbestätigung ohne Anhang an die angegebene Adresse. Auf dem Webspace wird das PDF nicht gespeichert; danach liegt es nur im Postfach der Geschäftsstelle. Zum Schutz vor Missbrauch begrenzt das Programm die Zahl der Anträge je Internetanschluss; dafür speichert es kurzzeitig nur einen gekürzten Prüfwert Ihrer IP-Adresse, aus dem sich die Adresse nicht zurückrechnen lässt. Beim Aufruf verarbeitet der Webserver außerdem die unter „2. Erfassung von allgemeinen Daten / Informationen“ genannten Zugriffsdaten. Rechtsgrundlage dafür ist unser berechtigtes Interesse an einem sicheren Betrieb (Art. 6 Abs. 1 lit. f DSGVO).",
         "Sie können das PDF zusätzlich herunterladen; dann bleibt es auf Ihrem Gerät, bis Sie es löschen. Wer von Hand unterschreibt oder lieber selbst sendet, kann das PDF weiterhin per E-Mail an die Geschäftsstelle schicken oder ausgedruckt abgeben; für die E-Mail gilt „4. Kontaktmöglichkeiten“.",
         "Wir verwenden diese Daten ausschließlich zur Bearbeitung des Antrags, zur Mitgliederverwaltung und zum Einzug der Beiträge (Art. 6 Abs. 1 lit. b DSGVO). Nach dem Ende der Mitgliedschaft löschen wir die Daten, soweit keine gesetzlichen Aufbewahrungsfristen (z. B. für Buchungsbelege) entgegenstehen."
+      ],
+      "titel_live": "14. Anmeldung über den Anmelde-Assistenten",
+      "absaetze_live": [
+        "Neue Mitglieder melden sich mit dem Anmelde-Assistenten an. Den Code dafür bekommen Sie nach dem Probetraining. Sie geben ihn ein oder öffnen den Link mit dem Code. Der Code enthält keine persönlichen Angaben. In der Vereins-App öffnet sich die Anmeldung im Browser Ihres Geräts.",
+        "Der Anmelde-Assistent arbeitet in Ihrem Browser. Ihre Angaben, Fotos und Unterschriften bleiben auf Ihrem Gerät. Sie werden weder an einen Server übertragen noch im Browser gespeichert. Beim Schließen oder Neuladen der Seite sind sie gelöscht. Unabhängig davon kann Ihr Browser über seine eigene Funktion zum automatischen Ausfüllen anbieten, Angaben wie Anschrift oder E-Mail-Adresse zu speichern. Ob Sie das zulassen, entscheiden Sie in Ihrem Browser.",
+        "Am Ende erzeugt Ihr Browser aus Ihren Angaben eine PDF-Datei auf Ihrem Gerät. Sie enthält alle Angaben, Fotos und Unterschriften, zum Beispiel Anschrift und Bankverbindung. Wenn Sie die Datei speichern, bleibt sie auf Ihrem Gerät, bis Sie sie löschen. Der Verein erhält die Angaben erst, wenn Sie die Datei selbst per E-Mail an die Geschäftsstelle schicken oder ausgedruckte Blätter im Verein abgeben. Für die E-Mail gilt „4. Kontaktmöglichkeiten“.",
+        "In der Datei steht die „Information zum Datenschutz“ nach Art. 13 DSGVO. Dort lesen Sie, wofür wir die Angaben verwenden, auf welcher Rechtsgrundlage, an wen wir sie weitergeben und wie lange wir sie speichern. Enthält die Datei Angaben zur Gesundheit (Teil C), bewahrt der Verein diesen Teil getrennt von den übrigen Unterlagen auf.",
+        "Ihr Browser lädt die Seite, die Programmdateien, die Schrift für die PDF-Datei und die leeren Vordrucke von cdn.appack.de. Dabei verarbeiten die Server von appack die unter „2. Erfassung von allgemeinen Daten / Informationen“ genannten Zugriffsdaten, insbesondere Ihre IP-Adresse (siehe „12. Hosting von Website und App“). Schriften und Bilder der Seite selbst liefert GitHub Pages aus (siehe „13. Schriften, Bilder, Spielpläne und Kalender über GitHub Pages“)."
       ]
     },
     {

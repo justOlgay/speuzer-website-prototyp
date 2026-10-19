@@ -17,7 +17,7 @@
 //                    genau ein Kennzeichen (P1 bis P3 nur bei offenen Punkten, sonst Entschieden, Geregelt, Entfällt, Später),
 //                    den passenden data-status und data-prio und den Text aus dem Regelwerk. Keine Zeile ohne Kennzeichen.
 //                    Der Kasten „Stand“ ganz oben nennt Datum, Gesamtzahl und die Zahl je Stand wie das Regelwerk. Die Legende
-//                    erklärt alle Kennzeichen. Der Text der Zeile passt zur Frage im Regelwerk; O67 und O68 stehen sichtbar
+//                    erklärt alle Kennzeichen. Der Text der Zeile passt zur Frage im Regelwerk; O45, O67 und O68 stehen sichtbar
 //                    mit ihrem Inhalt da. Die Seite nennt Version und Zahl der Punkte.
 //   3  Namen         die Namen der Papiere und die Teile A, B und C stehen so auf der Seite, wie sie im
 //                    Prototyp heißen (assets/js/anmeldung/texte); die alten Namen kommen nicht vor (im Wortlaut aus
@@ -34,6 +34,9 @@
 //   7  Karneval      kein Karneval-Text beschreibt Gruppenwahl, Turniere, Auftritte, Kostüme oder den Fastnachtszug als Teil
 //                    der Anmeldung; keine Verweise auf die entfernten Unterlagen U30 bis U32; Heimweg nach dem Training
 //                    und der Hinweis zum Probetraining stehen im Ablauf
+//   8  Zugang (P1)   Paket P1, 12.10.2026: Die Seite beschreibt den Zugang mit dem Code vom Probetraining (Code, Link, QR-Code, Blatt der
+//                    Trainer, Prüfwert statt Code, leere Liste = aus), den Weg der App in den Browser und sagt, dass O45 und O67 entschieden
+//                    sind und nichts mehr offen ist; kein Satz nennt O45 oder O67 noch offen.
 //
 // Die Prüfung nimmt das gebaute HTML, nicht den Quelltext: Was hier durchgeht, steht so auf der Seite.
 
@@ -341,15 +344,17 @@ gruppe("2  Stand der Punkte gegen data/anmeldung.json");
   hinweis("keine Zeile und kein Text mit dem Kennzeichen „neu“ (Punkte ohne O-Nummer gibt es nicht mehr)", neuMarken.length === 0 && neuText.length === 0,
     [...neuMarken.map((k) => `Kennzeichen „neu“: ${textVon(k.tag === "tr" ? k : k.eltern || k).slice(0, 80)}`), ...neuText.map((t) => `Text: ${t}`)]);
 
-  // O67 steht offen, O68 und O01 stehen entschieden (11.10.2026, Jugendleitung) sichtbar mit ihrem Inhalt auf der Seite
+  // O45 und O67 (seit dem 12.10.2026, Paket P1) sowie O68 und O01 (11.10.2026, Jugendleitung) stehen entschieden und sichtbar mit ihrem Inhalt auf der Seite
   const sichtbarMit = (oid, muster) => {
     const z = (nachId.get(oid.toLowerCase()) || [])[0];
     if (!z) return false;
     const t = textVon(z);
     return muster.every((m) => m.test(t)) && !hatVorfahr(z, (e) => e.tag === "details");
   };
-  pruefe("O67: Rechtsgrundlage der Notfallkontakte (Art. 6 Abs. 1 lit. b oder f) steht sichtbar auf der Seite",
-    sichtbarMit("O67", [/Notfallkontakte/, /Art\. 6/, /lit\. b/, /lit\. f/]));
+  pruefe("O67: Rechtsgrundlage der Notfallkontakte (Art. 6 Abs. 1 lit. b und f) steht entschieden und sichtbar auf der Seite, mit der Freigabe vom 12.10.2026",
+    sichtbarMit("O67", [/Notfallkontakte/, /Art\. 6/, /lit\. b/, /lit\. f/, /Freigegeben von der 1\. Vorsitzenden am 12\.10\.2026/]) && (nachId.get("o67") || [])[0].attrs["data-status"] === "entschieden");
+  pruefe("O45: Freigabe der Datenschutz-Texte steht entschieden und sichtbar auf der Seite (1. Vorsitzende, 12.10.2026)",
+    sichtbarMit("O45", [/Information zum Datenschutz/, /Freigegeben von der 1\. Vorsitzenden am 12\.10\.2026/]) && (nachId.get("o45") || [])[0].attrs["data-status"] === "entschieden");
   pruefe("O68: Entscheidung der Jugendleitung steht sichtbar auf der Seite (alles am Bildschirm, auch die Blätter des Verbands; sonst wieder auf Stift)",
     sichtbarMit("O68", [/Bildschirm/, /Blätter des Verbands/, /Stift/, /Jugendleitung, 11\.10\.2026/, /Widerspricht der Verband/]));
   pruefe("O68 und O01 sind entschieden: Kennzeichen „Entschieden“, nicht „offen“; O01 verweist auf O68, die Antwort der Passstelle und den Schalter",
@@ -380,9 +385,12 @@ gruppe("2  Stand der Punkte gegen data/anmeldung.json");
     }
     if (summe !== punkte.length) kastenFehler.push(`die Zahlen im Kasten ergeben ${summe}, das Regelwerk hat ${punkte.length} Punkte`);
     if (!/Die Antworten der 1\. Vorsitzenden sind eingearbeitet/.test(kastenText)) kastenFehler.push("der Satz „Die Antworten der 1. Vorsitzenden sind eingearbeitet.“ fehlt");
-    if (!/Offen sind nur noch die Fragen im Excel an die 1\. Vorsitzende/.test(kastenText)) kastenFehler.push("der Satz „Offen sind nur noch die Fragen im Excel an die 1. Vorsitzende.“ fehlt");
+    // Mit offenen Punkten steht der Satz zu den Fragen im Excel, ohne offene Punkte (seit 12.10.2026) der Satz „Nichts ist mehr offen.“
+    if (zahl.offen > 0 && !/Offen sind nur noch die Fragen im Excel an die 1\. Vorsitzende/.test(kastenText)) kastenFehler.push("der Satz „Offen sind nur noch die Fragen im Excel an die 1. Vorsitzende.“ fehlt");
+    if (zahl.offen === 0 && !/Nichts ist mehr offen/.test(kastenText)) kastenFehler.push("der Satz „Nichts ist mehr offen.“ fehlt");
+    if (zahl.offen === 0 && /Offen sind nur noch/.test(kastenText)) kastenFehler.push("der Kasten sagt noch, es seien Fragen offen");
   }
-  pruefe("Kasten „Stand“: Datum, Gesamtzahl und Zahl je Stand stimmen mit dem Regelwerk überein; er nennt die Antworten der 1. Vorsitzenden und die offenen Fragen im Excel", kastenFehler.length === 0, kastenFehler);
+  pruefe("Kasten „Stand“: Datum, Gesamtzahl und Zahl je Stand stimmen mit dem Regelwerk überein; er nennt die Antworten der 1. Vorsitzenden und, was offen ist (seit 12.10.2026: nichts)", kastenFehler.length === 0, kastenFehler);
   pruefe("der Kasten „Stand“ steht ganz oben im Seitenkopf, vor dem Inhaltsverzeichnis", !!kasten && hatVorfahr(kasten, (e) => (e.attrs.class || "").split(/\s+/).includes("seitenkopf")));
 
   // 2.6 Legende: alle Kennzeichen sind erklärt
@@ -500,8 +508,8 @@ gruppe("4  Endstand in den Abschnitten „Assistent“, „PDF“ und „Untersc
     [/Satzung/, /Haken/, /Pflicht/, /Satzung der Website/, /Adresse im Vordruck/, /defekt/, /O66/]);
   kriterium("b3 ein Elternteil reicht (Jugendleitung, O26); Ausnahme zweiter Elternteil: getrennt lebende Eltern ohne Einverständnis, eigenes freiwilliges Feld am Bildschirm, leer: Stift-Markierung", U,
     [/Ein Elternteil reicht/, /Jugendleitung/, /08\.10\.2026/, /O26/, /Zweiter Elternteil \(nötig\)/, /getrennt/, /nicht einverstanden/, /eigenes Feld am Bildschirm/, /freiwillig/, /mit Stift markiert/, /Laufzettel nennt es/]);
-  kriterium("b3 das Kind als Spielerin oder Spieler: freiwilliges Feld „Kann Ihr Kind schon schreiben? Dann unterschreibt es hier selbst.“, leer: Zeile im Antrag ohne Markierung, Laufzettel sagt, dass das Passwesen entscheidet; nur die Abmeldung bekommt die Stift-Markierung; O11 ist geregelt (das Passwesen entscheidet im Einzelfall)", U,
-    [/Das Kind als Spielerin oder Spieler/, /Kann Ihr Kind schon schreiben\? Dann unterschreibt es hier selbst\./, /freiwilliges Feld/, /Zeile im Antrag auf Spielerlaubnis ohne Markierung/, /Nicht unterschrieben \(freiwillig\)/,
+  kriterium("b3 das Kind als Spielerin oder Spieler: freiwilliges Feld „Kann Ihr Kind schreiben? Dann unterschreibt es selbst.“, leer: Zeile im Antrag ohne Markierung, Laufzettel sagt, dass das Passwesen entscheidet; nur die Abmeldung bekommt die Stift-Markierung; O11 ist geregelt (das Passwesen entscheidet im Einzelfall)", U,
+    [/Das Kind als Spielerin oder Spieler/, /Kann Ihr Kind schreiben\? Dann unterschreibt es selbst\./, /freiwilliges Feld/, /Zeile im Antrag auf Spielerlaubnis ohne Markierung/, /Nicht unterschrieben \(freiwillig\)/,
       /Das Kind hat den Antrag nicht unterschrieben\. Das Passwesen entscheidet, ob das nötig ist\./, /Nur die Abmeldung beim alten Verein bekommt bei leerem Feld die Stift-Markierung/, /O11/]);
   pruefe("b3 das leere Kinderfeld heißt nicht mehr „mit Stift markiert“ (nur der zweite Elternteil und die Abmeldung)",
     U.length > 0 && !/Bleibt es leer, ist die Stelle im PDF mit Stift markiert, und der Laufzettel nennt es\. Ob ein kleines Kind/.test(U) && !/Sonst unterschreibt es später mit Stift/.test(U),
@@ -524,8 +532,11 @@ gruppe("4  Endstand in den Abschnitten „Assistent“, „PDF“ und „Untersc
     [/Vorführung/, /Beispiele/, /Sicht des Vereins/, /für die Vorführung gedacht/]);
   kriterium("h  Datenschutz: nichts gesendet oder gespeichert; erfundene Beispieldaten; Telefonnummern der Bundesnetzagentur für Medien", A,
     [/Nichts wird gesendet oder gespeichert/, /erfundene Daten/, /Bundesnetzagentur für Medien/]);
-  kriterium("i  Ablauf: Heimweg nach dem Training (allein oder abgeholt) im Schritt „Unterlagen“; Probetraining ohne Versicherung im Schritt „Fertig“", A,
-    [/Heimweg nach dem Training/, /allein oder abgeholt/, /Beim Probetraining sind Nichtmitglieder nicht über den Verein versichert/]);
+  kriterium("i  Ablauf: Heimweg nach dem Training (allein oder abgeholt) im Schritt „Unterlagen“", A,
+    [/Heimweg nach dem Training/, /allein oder abgeholt/]);
+  // P3 Teil b (12.10.2026): Der Assistent sagt nichts mehr zur Versicherung beim Probetraining (die Anmeldung gibt es erst danach); der Ablauf nennt es nicht mehr.
+  pruefe("i2 Ablauf: kein Satz mehr zur Versicherung beim Probetraining im Schritt „Fertig“", !/Beim Probetraining sind Nichtmitglieder nicht über den Verein versichert/.test(A),
+    ["Der Ablauf nennt den Hinweis zur Versicherung beim Probetraining noch; der Assistent zeigt ihn nicht mehr"]);
   kriterium("j  Ablauf: bei Karneval keine Gruppenwahl, die Trainer ordnen die Kinder einer Gruppe zu", A,
     [/Bei Karneval entfallen diese Fragen/, /Eine Gruppenwahl gibt es nicht/, /Die Trainer ordnen die Kinder einer Gruppe zu/]);
   // Paket M14 (12.10.2026): Für Fußball beantragt der Verein immer das Spielrecht (Entscheidung der 1. Vorsitzenden). Die Frage, ob das Kind bei Spielen mitmacht,
@@ -640,9 +651,40 @@ gruppe("7  Karneval ohne Gruppenwahl, Turniere und Auftritte; Heimweg und Probet
   const imKarneval = karnevalZeilen.map((z, i) => z && hatVorfahr(z, (e) => e.tag === "section" && e.attrs.id === "karneval") ? null : karnevalPunkte[i].id).filter(Boolean);
   pruefe(`die ${karnevalPunkte.length} Punkte der Karnevalabteilung (${karnevalPunkte.map((p) => p.id).join(", ")}) haben ihre Zeile im Abschnitt „Karneval“`, imKarneval.length === 0, imKarneval.map((o) => `${o}: Zeile steht nicht im Abschnitt „Karneval“`));
   const probe = abschnittText("entscheiden");
-  pruefe("Probetraining: der Abschnitt „Entscheidungen“ nennt die Entscheidung (keine Versicherung für Nichtmitglieder, Hinweis in Assistent, Website und App, Beginn am Tag der Anmeldung)",
-    /Versicherung beim Probetraining: entschieden am 11\.10\.2026/.test(probe) && /Der Verein schließt sie nicht ab/.test(probe) && /Assistent, Website und App weisen stattdessen darauf hin/.test(probe) && /Die Mitgliedschaft beginnt am Tag der Anmeldung/.test(probe),
+  pruefe("Probetraining: der Abschnitt „Entscheidungen“ nennt die Entscheidung (keine Versicherung für Nichtmitglieder, Hinweis auf Website und in der App, der Assistent sagt es nicht mehr, Beginn am Tag der Anmeldung)",
+    /Versicherung beim Probetraining: entschieden am 11\.10\.2026/.test(probe) && /Der Verein schließt sie nicht ab/.test(probe) && /Website und App weisen stattdessen darauf hin/.test(probe) && /Der Assistent sagt es nicht mehr: Die Anmeldung gibt es erst nach dem Probetraining/.test(probe) && /Die Mitgliedschaft beginnt am Tag der Anmeldung/.test(probe),
     ["Der Kasten zur Versicherung beim Probetraining nennt die Entscheidung vom 11.10.2026 nicht vollständig"]);
+}
+
+// ---------- 8. Zugang mit Code vom Probetraining (Paket P1, 12.10.2026) ----------
+
+gruppe("8  Zugang mit Code vom Probetraining, App im Browser, nichts mehr offen (Paket P1)");
+{
+  const K = abschnittText("kurz");
+  const A = abschnittText("assistent");
+  const D = abschnittText("datenschutz");
+  const E = abschnittText("einfuehrung");
+  const noetig = (name, text, muster) => pruefe(name, text.length > 0 && muster.every((m) => m.test(text)), text.length ? muster.filter((m) => !m.test(text)).map((m) => "fehlt: " + m) : ["Abschnitt nicht gefunden"]);
+  noetig("„Kurz gesagt“ nennt den Zugang: nur nach dem Probetraining, Code, Link oder QR-Code, in Website und App, Entscheidung vom 12.10.2026", K,
+    [/Der Zugang\./, /nur nach dem Probetraining/, /Code, einen Link oder einen QR-Code/, /in der Website und in der App/, /12\.10\.2026/]);
+  noetig("„Kurz gesagt“ sagt, dass nichts mehr offen ist: O45 und O67 sind entschieden (Datenschutz-Texte freigegeben)", K,
+    [/Nichts mehr offen/, /12\.10\.2026/, /O45/, /O67/]);
+  pruefe("„Kurz gesagt“ nennt keinen Punkt mehr als offene Frage („Noch offen“)", K.length > 0 && !/Noch offen/.test(K));
+  noetig("„So funktioniert der Assistent“ beschreibt den Schritt „Zugang“: Code beim Probetraining, Seite „Anmeldung nach dem Probetraining“ vor jeder persönlichen Frage, Link überspringt sie, ein Code für alle, passive Mitglieder über die Geschäftsstelle", A,
+    [/Zugang/, /Anmeldung nach dem Probetraining/, /vor jeder persönlichen Frage/, /Ein Link mit Code überspringt sie/, /Fußball, Karneval und passive Mitglieder/, /Geschäftsstelle/, /Neuladen/]);
+  noetig("„So funktioniert der Assistent“: Blatt mit QR-Code für die Trainer; im Programm steht nur der Prüfwert, nie der Code; der Code ist ein Zugang, kein Geheimnis", A,
+    [/Blatt/, /QR-Code/, /Prüfwert \(SHA-256\)/, /nie der Code/, /Zugang, kein Geheimnis/]);
+  noetig("„So funktioniert der Assistent“: In der App öffnet ein Link den Browser; die Seite zeigt dort nur den Knopf „Im Browser öffnen“", A,
+    [/In der App läuft er nicht in der Webansicht/, /öffnet den Browser/, /Im Browser öffnen/]);
+  pruefe("„So funktioniert der Assistent“ sagt nicht mehr, in der App klappe das Speichern manchmal nicht (der Hinweis auf der Fertig-Seite entfällt)", A.length > 0 && !/Klappt Speichern oder Teilen in der App nicht/.test(A));
+  noetig("„So funktioniert der Assistent“ (Zusätze zu P1): Auf der Website öffnet „Jetzt anmelden“ ein neues Fenster (die Seiten laufen in einem Rahmen); läuft der Assistent doch in einem Rahmen oder im Browser einer anderen App (Facebook, Instagram), steht oben ein Hinweis, die Anmeldung im Browser zu öffnen", A,
+    [/öffnet der Knopf „Jetzt anmelden“ ein neues Fenster/, /in einem Rahmen/, /Rahmen oder im Browser einer anderen App/, /Facebook oder Instagram/, /steht oben ein Hinweis/, /im Browser zu öffnen/, /bleibt dabei bedienbar/]);
+  noetig("„Datenschutz“: Rechtsgrundlage der Notfallkontakte (Art. 6 Abs. 1 lit. b und lit. f DSGVO) und Freigabe der 1. Vorsitzenden am 12.10.2026 (O67, O45); der Vorstand „klärt“ nichts mehr", D,
+    [/Art\. 6 Abs\. 1 lit\. b DSGVO \(Mitgliedschaft, Fürsorge im Training\) und lit\. f DSGVO \(weitere Kontaktpersonen\)/, /12\.10\.2026 freigegeben \(O67\)/, /Texte der Information und der Einverständnisse am 12\.10\.2026 freigegeben/, /O45/]);
+  pruefe("„Datenschutz“: keine offene Frage mehr zu O45 und O67 (kein „klärt der Vorstand“, keine Aufgabe „Information in Einfacher Sprache schreiben“)", D.length > 0 && !/klärt der Vorstand \(\{?o?:?O67/.test(D) && !/Die Rechtsgrundlage dafür klärt der Vorstand/.test(D) && !/Die Information zum Datenschutz in Einfacher Sprache schreiben und übersetzen/.test(D));
+  noetig("„Einführung in Schritten“: Trainer geben nach dem Probetraining einen Link oder QR-Code mit dem Code; in der App öffnet der Assistent im Browser; nichts ist mehr offen", E,
+    [/nach dem Probetraining einen Link oder QR-Code mit dem Code/, /In der App öffnet der Assistent im Browser/, /Nichts ist mehr offen/]);
+  pruefe("die ganze Seite nennt O45 und O67 nirgends offen (kein „Offen“-Kennzeichen, kein Excel-Hinweis auf offene Fragen)", !/Offen sind nur noch|Noch offen:/.test(seiteText) && alle(baum, (k) => k.tag === "tr" && ["o45", "o67"].includes(k.attrs.id) && k.attrs["data-status"] !== "entschieden").length === 0);
 }
 
 // ---------- Ergebnis ----------

@@ -1,6 +1,6 @@
 # appack-Upload-Paket – Ordner "web" (W1)
 
-Stand: 2026-10-12. Erzeugt von `tools/appack-paket.mjs` (`npm run appack-paket`)
+Stand: 2026-10-19. Erzeugt von `tools/appack-paket.mjs` (`npm run appack-paket`)
 aus `docs/ws/*.html` und `docs/assets/css/site.css` (Ergebnis von
 `npm run build`). Dieses Paket liegt unter `dist/appack-paket/` und wird
 nicht committet.
@@ -74,7 +74,7 @@ Widgets sind bei FUSSBALL.DE nur für die Domain `cdn.appack.de` freigegeben –
 lokal oder auf GitHub Pages zeigen sie eine Fehlermeldung von FUSSBALL.DE, das
 ist kein Seitenfehler (siehe `tools/appack-paket-pruefen.mjs`).
 
-## Skripte für den Aufnahmeantrag online (28.09.2026)
+## Skripte für den Aufnahmeantrag online (28.09.2026; Stand vor dem Anmelde-Assistenten, siehe den Abschnitt dazu weiter unten)
 
 `aufnahmeantrag.html` lädt ihre Skripte aus demselben Ordner `web`:
 `aufnahmeantrag.js` (Formular, Unterschriften, PDF-Erzeugung) sofort,
@@ -92,6 +92,54 @@ Aufruf; wurde die Datei im CMS ersetzt, blendet sie das Formular aus und
 bietet den Papierweg an (dann Vermessung erneuern). Beim Anlegen
 der Skripte im Workspace darauf achten, dass cdn.appack.de sie als
 JavaScript ausliefert (`curl -I …/web/aufnahmeantrag.js`, Content-Type).
+
+## Anmelde-Assistent (Livegang, M6; Zugang mit Code, P1)
+
+Dieser Abschnitt steht nur im Paket, das mit dem Schalter `ANMELDUNG_LIVE`
+(`src/vorlagen/hilfen.mjs`) gebaut wurde. Ohne den Schalter gibt es diese
+Dateien nicht, und `mitglied-werden.html` führt nicht auf die Seite.
+
+`anmeldung.html` ist die Live-Seite des Anmelde-Assistenten. Sie startet nur mit dem Code
+vom Probetraining (Entscheidung der 1. Vorsitzenden vom 12.10.2026): Link
+`anmeldung.html?code=<CODE>` (QR-Code und Blatt für die Trainer: `node tools/anmeldung-zugang.mjs`),
+sonst ist die Code-Seite der erste Bildschirm. Im Paket stehen nur die Prüfwerte (SHA-256) aus
+`data/anmeldung.json › zugang › pruefwerte` in der Konfiguration der Seite; ist die Liste leer, gibt es
+keine Code-Abfrage. Verlinkt ist die Seite von `mitglied-werden.html` („Jetzt anmelden“) und
+`verein-downloads.html` aus. In der App öffnet ein Link auf `anmeldung.html` im Browser (`ext://https://…`, das
+Skript der Seiten setzt es um); `anmeldung.html?app=1` zeigt nur die Übergabe „Im Browser öffnen“. Auf der Website öffnen
+die Links auf `anmeldung.html` in einem neuen Fenster (`target="_blank"`), weil die Hülle die Seiten in einem Rahmen ohne
+`allow`-Angaben zeigt; läuft der Assistent doch in einem Rahmen oder im Browser einer anderen App (Facebook, Instagram, WebView),
+steht oben ein Hinweis (Modul `anmeldung-umgebung.js`).
+Sprachen: de, en, tr, ar (Schalter `ANMELDUNG_SPRACHEN_LIVE`). Alle Dateien liegen flach im
+Ordner `web` (keine Unterordner), nur als .html, .css und .js:
+
+- `anmeldung.css` – Stylesheet (ohne Kommentare)
+- 21 Module `anmeldung-<name>.js` – Code des Assistenten (ES-Module; Einstieg
+  `anmeldung-assistent.js`; ohne Kommentare, Importe auf diese Namen umgeschrieben;
+  `anmeldung-beispiele.js` ist ein leerer Ersatz ohne Beispiel-Profile)
+- 8 Textmodule `anmeldung-texte-<sprache>-oberflaeche.js` und `…-regeln.js`
+- 6 Module mit Base64-Text: `anmeldung-schrift.js` (Liberation Sans, SIL OFL 1.1, Lizenztext im
+  Kopf der Datei) und `anmeldung-vorlage-<name>.js` (die HFV-Vordrucke und der Aufnahmeantrag des Vereins; Größe und
+  SHA-256 prüft der Assistent beim Laden gegen die Konfiguration). Beide Arten werden erst beim Erstellen der
+  PDF-Datei geladen.
+- `aufnahmeantrag-pdf-lib.js` und `aufnahmeantrag-fontkit.js` (schon im Ordner, bisher Teil des Aufnahmeantrags) werden vom Assistenten mitbenutzt. `aufnahmeantrag.js`
+  (Formular und PDF-Erzeugung der alten Seite „Aufnahmeantrag online“) gehört nicht mehr ins Paket, weil keine Seite es lädt; der Abschnitt „Skripte für den
+  Aufnahmeantrag online“ weiter oben beschreibt den Stand davor. Die alte Datei im CMS kann liegen bleiben.
+
+Reihenfolge beim Einspielen: erst alle `anmeldung-*.js` (Base64-Module, Texte, Code) und `anmeldung.css`, dann
+`anmeldung.html`, zuletzt `mitglied-werden.html` und `verein-downloads.html` (erst sie verlinken die neue Seite) und alle übrigen Seiten
+(ihr Skript für die App kennt jetzt den Weg in den Browser). Dazu gehört `aufnahmeantrag.html`: Sie ist jetzt eine Weiterleitung auf
+`mitglied-werden.html` (kurzer Satz, Link, `<meta http-equiv="refresh">`); die Datei im CMS wird beim Einspielen ersetzt, gelöscht wird nichts.
+So ist nie eine Seite sichtbar, deren Dateien noch fehlen.
+Für die App kommt `assets/app/Mitglied-werden-App.html` an die Workspace-Wurzel (nicht in diesen Ordner; Schritte in
+`assets/app/LIESMICH.md`). Prüfen nach dem Einspielen: `node tools/appack-paket-pruefen.mjs` für das
+Paket und der Abgleich der SHA-256 aus `manifest.json` mit den Dateien im CMS.
+
+Im CMS zu prüfen: Dateien dieser Größe (bis 545 KB; Schrift und Vordrucke in
+Zeilen zu 100 Zeichen) im Quellcode-Editor; `cdn.appack.de` muss `.js` als JavaScript ausliefern (ES-Module verlangen
+das; bei der schon eingespielten `aufnahmeantrag.js` ist es `application/javascript`). Rückweg: die `anmeldung*`-Dateien löschen und die
+vorherigen `mitglied-werden.html`, `verein-downloads.html` und `aufnahmeantrag.html` (die alte Seite „Aufnahmeantrag online“) wieder einspielen
+(das Modul „Mitglied werden“ der App wieder auf den bisherigen Seitenlink stellen; `aufnahmeantrag.js` im CMS nicht löschen, solange der Rückweg offen ist).
 
 ## Datenschutz
 
@@ -135,8 +183,9 @@ hier nur dokumentiert (W3-Spezifikation Abschnitt 5), nicht umgesetzt:
 - Facebook-Link der Fußzeile zeigt auf eine andere Adresse als
   `kontakt.html` (Worksheet-Pflege, macht der Auftraggeber im CMS).
 
-## Dateien (45)
+## Dateien (81)
 
+- web/anmeldung.html
 - web/aufnahmeantrag.html
 - web/datenschutz.html
 - web/formular-gesendet.html
@@ -180,5 +229,40 @@ hier nur dokumentiert (W3-Spezifikation Abschnitt 5), nicht umgesetzt:
 - web/verein.html
 - web/aufnahmeantrag-fontkit.js
 - web/aufnahmeantrag-pdf-lib.js
-- web/aufnahmeantrag.js
 - web/site.css
+- web/anmeldung-antworten.js
+- web/anmeldung-assistent.js
+- web/anmeldung-bausteine.js
+- web/anmeldung-beispiele.js
+- web/anmeldung-bilder.js
+- web/anmeldung-hilfen.js
+- web/anmeldung-laender.js
+- web/anmeldung-pdf-lader.js
+- web/anmeldung-pdf.js
+- web/anmeldung-regeln.js
+- web/anmeldung-schrift.js
+- web/anmeldung-seiten-ende.js
+- web/anmeldung-seiten-fussball.js
+- web/anmeldung-seiten-person.js
+- web/anmeldung-seiten-unterlagen.js
+- web/anmeldung-seiten-verein.js
+- web/anmeldung-seiten-zugang.js
+- web/anmeldung-seiten.js
+- web/anmeldung-texte-ar-oberflaeche.js
+- web/anmeldung-texte-ar-regeln.js
+- web/anmeldung-texte-de-oberflaeche.js
+- web/anmeldung-texte-de-regeln.js
+- web/anmeldung-texte-en-oberflaeche.js
+- web/anmeldung-texte-en-regeln.js
+- web/anmeldung-texte-tr-oberflaeche.js
+- web/anmeldung-texte-tr-regeln.js
+- web/anmeldung-umgebung.js
+- web/anmeldung-unterschrift.js
+- web/anmeldung-vorlage-abmeldung.js
+- web/anmeldung-vorlage-aufnahmeantrag.js
+- web/anmeldung-vorlage-einverstaendnis-senioren.js
+- web/anmeldung-vorlage-hfv-antrag.js
+- web/anmeldung-vorlage-vollmacht.js
+- web/anmeldung-zeichen.js
+- web/anmeldung-zugang.js
+- web/anmeldung.css

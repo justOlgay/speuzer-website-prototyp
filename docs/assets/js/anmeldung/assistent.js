@@ -35,10 +35,21 @@
     - Am Ende erzeugt pdf-lader.js das PDF.
     - Die Sprachwahl steht nicht in einer Seite des Assistenten, sondern ganz oben im Seitenkopf
       (src/begleit/anmeldung.mjs, [data-anm-sprachleiste]): So ist sie im ersten Bildschirm zu sehen,
-      vor dem deutschen Erklärtext. Nur der Startschritt zeigt sie (Klasse anm-ohne-sprachleiste am <main>).
-    - App-Modus (Seite mit ?app=1, Klasse app-modus am <html>, vom Skript im Seitenkopf gesetzt): Der Assistent
-      bleibt gleich; der Hinweis "Im Browser öffnen" steht oben auf dem Startschritt und auf der Fertig-Seite
-      (k.appModus, k.browserUrl).
+      vor dem deutschen Erklärtext. Nur der Startschritt, die Code-Seite und die Übergabe zeigen sie (Klasse
+      anm-ohne-sprachleiste am <main>).
+    - Zugang (Paket P1, 12.10.2026): Ist data/anmeldung.json › zugang › pruefwerte nicht leer, startet der Assistent nur mit
+      dem Code vom Probetraining. Ohne gültigen Code ist die Seite "code" der erste Bildschirm (Sprachwahl oben wie auf
+      "start", vor jeder persönlichen Frage). Ein Link mit ?code=… überspringt sie, wenn der Code stimmt; stimmt er nicht,
+      steht der Code im Feld und die Meldung darunter. Nach dem richtigen Code setzt history.replaceState code=… in die
+      Adresse (andere Parameter bleiben): Neuladen fragt dann nicht noch einmal. Geprüft wird der SHA-256 des normalisierten
+      Codes gegen die Liste (zugang.js); der Code selbst steht nirgends. Eine leere Liste heißt: keine Abfrage.
+    - App-Modus (Seite mit ?app=1, Klasse app-modus am <html>, vom Skript im Seitenkopf gesetzt): Der Assistent läuft nie
+      in der Webansicht der App. Dort steht nur die Seite "uebergabe" mit dem Knopf "Im Browser öffnen"
+      (ext://https://…, dieselbe Seite ohne ?app=1, mit code; k.appModus, k.browserUrl).
+    - Umgebung (umgebung.js, Zusätze zu P1, 12.10.2026): Läuft die Seite in einem Rahmen (zum Beispiel in der Hülle der Website) oder in
+      dem Browser einer anderen App (Facebook, Instagram …, Android-WebView), klappt das Speichern der Datei vielleicht nicht. Dann
+      steht auf dem ersten Bildschirm (Code-Seite oder Start) oben ein Hinweiskasten (k.umgebung = "rahmen" mit dem Link "In neuem
+      Fenster öffnen", "inapp" mit der Bitte um den Browser). Der Assistent bleibt bedienbar. Im App-Modus gibt es ihn nie.
     - Live-Fassung (Livegang, M6): Die Konfiguration trägt dann sprachen (nur diese Sprachen stehen zur Wahl, die
       Sprachwahl oben auf der Seite baut src/begleit/anmeldung.mjs mit derselben Liste) und live = true (pdf-lader.js
       lässt den Entwurfsvermerk im PDF weg). Ohne diese Angaben gilt alles wie auf der Begleitseite.
@@ -48,10 +59,15 @@ import { zeigeFehlerAnFeldern, fokusZiel, feldBezeichnung, h, anhaengen } from "
 import { kopiere, mische, sauber, heuteIso, ersetzePlatzhalter, dateiteil, zerlegeIso } from "./hilfen.js";
 import { neueAntworten } from "./antworten.js";
 import { BEISPIELE, beispielAntworten } from "./beispiele.js";
-import { SEITEN, REIHENFOLGE, ABSCHNITTE, ABSCHNITT_VON } from "./seiten.js";
+import { SEITEN as REGELSEITEN, VORSEITEN, REIHENFOLGE, ABSCHNITTE, ABSCHNITT_VON } from "./seiten.js";
+import { zugangAusKonfig, pruefeCode } from "./zugang.js";
+import { umgebungshinweis } from "./umgebung.js";
 import { neuerSpeicher } from "./unterschrift.js";
 import { regelHinweise, erstelleDatei } from "./seiten-ende.js";
 import { beitragsgruppen } from "./seiten-verein.js";
+
+// Alle Seiten: die Schritte des Regelwerks und die beiden Seiten vor dem Assistenten (code, uebergabe; seiten-zugang.js).
+const SEITEN = { ...REGELSEITEN, ...VORSEITEN };
 
 // Kennung dieses Aufrufs. Einträge im Verlauf des Browsers aus einem früheren
 // Aufruf gehören nicht mehr zu diesen Antworten und werden ignoriert.
@@ -123,10 +139,10 @@ async function starte() {
     zeigeLadefehler(wurzel);
     return;
   }
-  baue(wurzel, konfig, regeln, deDatei.default, deRegelnDatei.default);
+  await baue(wurzel, konfig, regeln, deDatei.default, deRegelnDatei.default);
 }
 
-function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
+async function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
   // ---------- Zustand und Kontext ----------
   const k = {
     konfig,
@@ -141,6 +157,12 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
     wartend: new Set(),
     pdf: { zustand: "leer", veraltet: false, ergebnis: null, datei: null, fehlerArt: null },
     sprache: "de",
+    // Zugang mit dem Code vom Probetraining (zugang.js): aktiv, wenn data/anmeldung.json › zugang › pruefwerte nicht leer ist.
+    // frei: der Assistent darf starten. eingabe: der Text im Feld (liegt nicht in den Antworten). geprueft und gueltig: das
+    // Ergebnis der letzten Prüfung für den normalisierten Text.
+    zugang: { ...zugangAusKonfig(konfig.anmeldung), frei: false, eingabe: "", geprueft: "", gueltig: false },
+    // Umgebung (umgebung.js): "inapp" (Browser einer anderen App), "rahmen" (Seite in einem Rahmen) oder null.
+    umgebung: umgebungshinweis(navigator.userAgent, window),
     dicts: { de: deTexte },
     regelDicts: { de: deRegelTexte },
     version: 0,
@@ -158,6 +180,34 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
     vorschauen: new Map(),
     titelId: "anm-titel",
   };
+
+  // ---------- Erste Seite ----------
+  // In der Vereins-App: die Übergabe in den Browser. Sonst der Startschritt; ist der Zugang aktiv und noch nicht frei, die Code-Seite.
+  // Ein Link mit ?code=… wird schon hier geprüft, vor dem Aufbau der Seite: Bei einem gültigen Code erscheint die Code-Seite nie.
+  // Bei einem ungültigen stehen der Code im Feld und die Meldung darunter (codeFehler).
+  let ersteSeite = "start";
+  let codeFehler = false;
+  k.zugang.frei = !k.zugang.aktiv;
+  if (document.documentElement.classList.contains("app-modus")) ersteSeite = "uebergabe";
+  else if (!k.zugang.frei) {
+    ersteSeite = "code";
+    let ausLink = null;
+    try {
+      ausLink = new URL(location.href).searchParams.get(k.zugang.parameter);
+    } catch (e) {
+      ausLink = null;
+    }
+    if (ausLink !== null) {
+      k.zugang.eingabe = ausLink;
+      const r = await pruefeCode(ausLink, k.zugang.pruefwerte);
+      k.zugang.geprueft = r.code;
+      k.zugang.gueltig = r.gueltig;
+      if (r.gueltig) {
+        k.zugang.frei = true;
+        ersteSeite = "start";
+      } else codeFehler = !r.leer;
+    }
+  }
 
   // ---------- Texte ----------
   const teilPfad = (dict, pfad) => pfad.split(".").reduce((x, teil) => (x === undefined || x === null ? undefined : x[teil]), dict);
@@ -191,9 +241,10 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
   k.richtung = () => (istRtl() ? "rtl" : "ltr");
 
   // App-Modus: Die Vereins-App öffnet die Seite mit ?app=1; ein Skript im Seitenkopf setzt die Klasse app-modus
-  // am <html>, bevor etwas gezeichnet wird. Der Assistent bleibt gleich, nur ein Hinweis kommt dazu.
+  // am <html>, bevor etwas gezeichnet wird. In der App läuft der Assistent nie: Es steht nur die Seite "uebergabe" da.
   k.appModus = () => document.documentElement.classList.contains("app-modus");
-  // Dieselbe Seite ohne ?app=1: Dort klappt Speichern und Teilen der Datei im Browser.
+  // Dieselbe Seite ohne ?app=1 (andere Angaben der Adresse, zum Beispiel code, bleiben): Im Browser klappen Speichern, Teilen
+  // und E-Mail. Die Vereins-App öffnet sie über ext://https://… im Browser (seiten-zugang.js).
   k.browserUrl = () => {
     try {
       const u = new URL(location.href);
@@ -201,11 +252,9 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
       u.hash = "";
       return u.toString();
     } catch (e) {
-      return "./";
+      return location.href.split("#")[0].replace(/([?&])app=1(&|$)/, "$1").replace(/[?&]$/, "");
     }
   };
-  // Link "Im Browser öffnen" (neuer Tab, ohne Rückbezug auf die App).
-  k.browserLink = () => h("a", { href: k.browserUrl(), target: "_blank", rel: "noopener", klasse: "anm-browserlink", "data-aktion": "im-browser-oeffnen" }, k.t("app.browser"));
 
   // Deutsche Angaben aus der Konfiguration (Namen der Beitragsgruppen, Mannschaften):
   // in Sprachen von rechts nach links in Isolaten.
@@ -338,7 +387,9 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
     const z = zerlegeIso(iso);
     if (!z) return String(iso || "");
     try {
-      return new Intl.DateTimeFormat(k.sprache, { dateStyle: "long", timeZone: "UTC" }).format(new Date(Date.UTC(z.jahr, z.monat - 1, z.tag)));
+      // Wie datumText in regeln.js: Englisch britisch (Tag zuerst), Arabisch mit westlichen Ziffern
+      const ort = { en: "en-GB", ar: "ar-u-nu-latn" }[k.sprache] || k.sprache;
+      return new Intl.DateTimeFormat(ort, { dateStyle: "long", timeZone: "UTC" }).format(new Date(Date.UTC(z.jahr, z.monat - 1, z.tag)));
     } catch (e) {
       return z.tag + "." + z.monat + "." + z.jahr;
     }
@@ -402,10 +453,11 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
   // Der Seitenkopf über dem Assistenten (h1, Lead, Entwurfs-Band, Werkzeuge) wird
   // kompakt, sobald die Fragen beginnen: Die Klasse sitzt am umgebenden <main>.
   const seitenwurzel = wurzel.closest("main") || document.body;
-  // Sprachwahl im Seitenkopf (siehe oben) und Hinweis für die App
+  // Sprachwahl im Seitenkopf (siehe oben)
   const sprachleiste = document.querySelector("[data-anm-sprachleiste]");
-  const appHinweis = document.querySelector("[data-anm-apphinweis]");
   const entwurfsband = document.querySelector("[data-anm-band]");
+  // Hinweiskasten für Rahmen und Browser anderer Apps (src/begleit/anmeldung.mjs, leer und verborgen)
+  const umgebungsKasten = document.querySelector("[data-anm-umgebungshinweis]");
 
   function fuelleSprachen() {
     spracheAuswahl.textContent = "";
@@ -425,11 +477,42 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
     });
   }
 
+  // Hinweis oben auf dem ersten Bildschirm (Code-Seite oder Start): "inapp" bittet um den Browser und sagt, wie man ihn öffnet, "rahmen"
+  // bietet den Link "In neuem Fenster öffnen" (dieselbe Seite, mit code). Nie in der App (dort gilt die Übergabe), nie auf den Fragen.
+  function aktualisiereUmgebungshinweis() {
+    if (!umgebungsKasten) return;
+    const art = k.appModus() ? null : k.umgebung;
+    const zeigen = !!art && (k.schritt === "code" || k.schritt === "start");
+    umgebungsKasten.hidden = !zeigen;
+    umgebungsKasten.textContent = "";
+    if (!zeigen) {
+      umgebungsKasten.removeAttribute("data-art");
+      return;
+    }
+    const info = k.sprachen.find((x) => x.code === k.sprache) || {};
+    umgebungsKasten.setAttribute("data-art", art);
+    umgebungsKasten.setAttribute("lang", k.sprache);
+    umgebungsKasten.setAttribute("dir", info.dir || "ltr");
+    if (art === "inapp") {
+      anhaengen(umgebungsKasten, [h("p", { "data-anm-umgebung": "text" }, k.t("umgebung.inApp")), h("p", { "data-anm-umgebung": "so" }, k.t("umgebung.inAppSo"))]);
+    } else {
+      anhaengen(umgebungsKasten, [
+        h("p", { "data-anm-umgebung": "text" }, k.t("umgebung.rahmen"), " ", h("a", { href: k.browserUrl(), target: "_blank", rel: "noopener", "data-aktion": "neues-fenster" }, k.t("umgebung.rahmenLink"))),
+      ]);
+    }
+  }
+
   function aktualisiereKopf() {
+    aktualisiereUmgebungshinweis();
+    // Vor den Fragen (Code-Seite, Übergabe in der App) gibt es weder Abschnitte noch Fußzeile mit "Alle Angaben löschen":
+    // Es gibt noch nichts zu löschen, und niemand hat etwas angegeben.
+    const vorFragen = k.schritt === "code" || k.schritt === "uebergabe";
     // Kompakter Seitenkopf bei allen Fragen; auf "start" und "fertig" steht er voll da.
     seitenwurzel.classList.toggle("anm-kompakt", k.schritt !== "start" && k.schritt !== "fertig");
-    // Sprachwahl und App-Hinweis oben stehen nur auf dem Startschritt.
-    seitenwurzel.classList.toggle("anm-ohne-sprachleiste", k.schritt !== "start");
+    // Die Sprachwahl oben steht auf dem Startschritt, der Code-Seite und der Übergabe in der App.
+    seitenwurzel.classList.toggle("anm-ohne-sprachleiste", k.schritt !== "start" && !vorFragen);
+    abschnitte.hidden = vorFragen;
+    fuss.hidden = vorFragen;
     zeigeSprachwahl();
     zurueckKnopf.textContent = k.t("kopf.zurueck");
     zurueckKnopf.setAttribute("aria-label", k.t("kopf.zurueckLang"));
@@ -437,7 +520,7 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
     hilfeKnopf.textContent = k.t("kopf.hilfe");
     spracheEtikett.textContent = k.t("kopf.sprache");
     spracheAuswahl.value = k.sprache;
-    spracheAuswahl.parentElement.hidden = k.schritt === "start";
+    spracheAuswahl.parentElement.hidden = k.schritt === "start" || vorFragen;
     abschnittTitel.textContent = k.t("kopf.abschnitte");
     const aktuell = ABSCHNITT_VON[k.schritt];
     for (const li of abschnittListe.children) {
@@ -462,15 +545,11 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
       el.setAttribute("lang", k.sprache);
       el.setAttribute("dir", info.dir || "ltr");
     }
-    // Das Entwurfs-Band und der Hinweis für die App folgen der Sprache als Ganzes (Balken und Text auf der Seite, wo der
-    // Text beginnt), nicht nur ihre Sätze.
-    for (const kasten of [entwurfsband, appHinweis]) {
-      if (!kasten) continue;
-      kasten.setAttribute("lang", k.sprache);
-      kasten.setAttribute("dir", info.dir || "ltr");
+    // Das Entwurfs-Band folgt der Sprache als Ganzes (Balken und Text auf der Seite, wo der Text beginnt), nicht nur seine Sätze.
+    if (entwurfsband) {
+      entwurfsband.setAttribute("lang", k.sprache);
+      entwurfsband.setAttribute("dir", info.dir || "ltr");
     }
-    // Link "Im Browser öffnen": dieselbe Seite ohne ?app=1
-    for (const a of document.querySelectorAll("[data-anm-browserlink]")) a.setAttribute("href", k.browserUrl());
     zeigeSprachwahl();
   }
 
@@ -518,6 +597,25 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
     zeigeFehler(fehler, false);
     if (!fehler.length) k.fehlerAktiv = false;
   }
+
+  // Entfernt die Fehlermeldungen der Seite (am Feld und in der Liste), zum Beispiel wenn jemand im Feld weitertippt.
+  k.fehlerLoeschen = () => {
+    zeigeFehler([], false);
+    k.fehlerAktiv = false;
+  };
+
+  // Der Code stimmt: Der Assistent darf starten, und die Adresse trägt den Code (andere Angaben der Adresse bleiben), damit
+  // Neuladen nicht noch einmal fragt. Der Eintrag im Verlauf bleibt derselbe (replaceState).
+  k.zugangFreigeben = (code) => {
+    k.zugang.frei = true;
+    try {
+      const u = new URL(location.href);
+      u.searchParams.set(k.zugang.parameter, code);
+      history.replaceState(history.state, "", u.toString());
+    } catch (e) {
+      /* ohne Adresse: Neuladen fragt dann noch einmal nach dem Code */
+    }
+  };
 
   k.aenderung = () => {
     k.version++;
@@ -577,7 +675,7 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
       });
     } else hinweisBereich.hidden = true;
     formular.textContent = "";
-    anhaengen(formular, [titel, fehlerBox, ergebnis.inhalt, hinweisBereich, knoepfe.length ? h("div", { klasse: "anm-navigation" }, ...knoepfe) : null]);
+    anhaengen(formular, [titel, fehlerBox, ergebnis.inhalt, hinweisBereich, knoepfe.length ? h("div", { klasse: "anm-navigation" }, ...knoepfe) : null, ergebnis.nach]);
     wurzel.setAttribute("data-schritt", schrittId);
     wurzel.setAttribute("data-teil", t);
     if (o.fokus !== false) vorfuehrungOffen(false);
@@ -611,6 +709,8 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
   // Nächste Seite nach der aktuellen: erst die weiteren Teilseiten des
   // Schritts, dann der nächste Schritt der Liste aus regeln.schritte().
   function naechstesZiel() {
+    // Nach dem richtigen Code: der Startschritt ersetzt die Code-Seite im Verlauf (Zurück führt nicht zurück zur Code-Seite).
+    if (k.schritt === "code") return { schritt: "start", teil: "haupt", ersetzen: true };
     const seite = SEITEN[k.schritt];
     const teile = seite.teile(k);
     const i = teile.indexOf(k.teil);
@@ -665,7 +765,7 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
         k.melde(k.t("fehler.seite"));
         return;
       }
-      geheZu(ziel.schritt, ziel.teil);
+      geheZu(ziel.schritt, ziel.teil, { ersetzen: ziel.ersetzen });
     } finally {
       beschaeftigt = false;
     }
@@ -758,7 +858,7 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
     const kontakte = k.tl("hilfe.kontakte").map((c) => {
       const zeile = [];
       // Die Rufnummer ist ein eigener Block von links nach rechts, auch im arabischen Satz ("069 736868").
-      if (c.tel) zeile.push(h("a", { klasse: "knopf", href: "tel:" + c.tel.replace(/\D/g, "") }, k.t("hilfe.anrufen") + ": ", h("span", { klasse: "anm-tel", dir: "ltr" }, c.tel)));
+      if (c.tel) zeile.push(h("a", { klasse: "knopf", href: "tel:" + c.tel.replace(/\D/g, "") }, k.t("hilfe.anrufen") + ":\u00a0", h("span", { klasse: "anm-tel", dir: "ltr" }, c.tel)));
       if (c.mail) {
         // Zwei Zeilen im Knopf: die Aufgabe und darunter die Adresse (mit Umbruchstellen vor "@" und vor Punkten).
         const adresse = [];
@@ -798,6 +898,7 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
     for (const v of k.vorschauen.values()) URL.revokeObjectURL(v.url);
     k.vorschauen.clear();
     k.bilder = { spielerfoto: null, nachweise: {}, unterschriften: {} };
+    k.gezeigteHinweise = new Set();
     k.roh = {};
     k.striche = {};
     k.wartend.clear();
@@ -839,6 +940,12 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
   function ladeBeispiel(id) {
     const b = BEISPIELE.find((x) => x.id === id);
     if (!b) return;
+    // Auch die Vorführung ist kein Weg am Code vorbei, und in der App läuft der Assistent nie.
+    if (k.appModus()) return;
+    if (!k.zugang.frei) {
+      k.melde(k.t("demo.codeZuerst"));
+      return;
+    }
     leereAlles();
     mische(k.a, b.antworten(k.heute, konfig));
     k.a.sprache = k.sprache;
@@ -908,8 +1015,9 @@ function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
   fuelleSprachen();
   aktualisiereSeitentexte();
-  history.replaceState({ anm: SITZUNG, tiefe: 0, schritt: "start", teil: "haupt" }, "");
-  zeigeSeite("start", "haupt", { fokus: false });
+  history.replaceState({ anm: SITZUNG, tiefe: 0, schritt: ersteSeite, teil: "haupt" }, "");
+  zeigeSeite(ersteSeite, "haupt", { fokus: false });
+  if (codeFehler) zeigeFehler(SEITEN.code.pruefe(k), false);
   wurzel.setAttribute("lang", "de");
   wurzel.setAttribute("dir", "ltr");
   wurzel.setAttribute("data-sprache", "de");

@@ -31,8 +31,8 @@
 //     (Vereinssicht und Beispiele auf jedem Schritt), ein einziger Kasten für getrennt lebende Eltern,
 //     Feldname vor jeder Meldung in der Fehlerliste
 //   - N-A2 (07.10.2026): Sprachwahl ganz oben im ersten Bildschirm (vier Sprachen in eigener Schrift, vor Überschrift und Erklärtext),
-//     App-Modus ?app=1 bei 390 x 844 (Rahmen der Begleitseite weg, Hinweis und Link „Im Browser öffnen“ ohne ?app=1, dieselben Schritte
-//     bis „fertig“, Fehler beim Speichern und Teilen abgefangen), „Diese Unterschrift gilt für:“ als Liste, kein BIC-Feld, Arabisch
+//     App-Modus ?app=1 (bis 11.10.2026: Hinweis „Im Browser öffnen“ und dieselben Schritte bis „fertig“; seit P1 nur noch die Übergabe, siehe unten),
+//     „Diese Unterschrift gilt für:“ als Liste, kein BIC-Feld, Arabisch
 //     (Entwurfsband rechts, Rufnummer im Hilfe-Dialog als LTR-Block, Prüfseite ohne <bdi> um den ganzen Wert), Beitragsgruppen aus den
 //     Texten der Sprache (mit abgefangenem englischem Wörterbuch; die Übungszeiten der Karnevalgruppen sind seit M1 entfallen)
 //   - M1 (11.10.2026): Heimweg nach dem Training als eigene Pflichtseite für Minderjährige, die trainieren oder tanzen (Texte, Fehlermeldung,
@@ -57,6 +57,22 @@
 //     Erklärung zum Spielrecht kurz (Kind und Erwachsene), der Hinweis „ohne Spielrecht kein Spiel“ steht im Aufklapper derselben Seite, nirgends steht die frühere
 //     Antwort (Training ohne Spiele), die Prüfseite hat keine Zeile „Spiele“, Karneval und Passive haben weder Mannschaft noch Spielerpass; die Beispiel-Läufe prüfen
 //     die besuchten Schritte je Beispiel (Nachweis: schritte-m14-<Beispiel>.json im Ausgabeordner).
+//   - P1 (12.10.2026): Zugang mit Code vom Probetraining (pruefeZugang, Prüfungen in zugang-browser.mjs; der Testserver setzt die Prüfwerte zur Laufzeit,
+//     Standard: leere Liste): Code-Seite als erster Bildschirm (Sprachwahl oben, vor jeder persönlichen Frage, Feld und Knöpfe, Links darunter), leerer und
+//     falscher Code (Meldung am Feld, aria-invalid, Fehlerliste, Fokus), richtiger Code in jeder Schreibweise (Adresse trägt code=, andere Angaben bleiben,
+//     Neuladen fragt nicht noch einmal, Zurück führt nie auf die Code-Seite), Link mit gültigem und mit ungültigem Code, ohne crypto.subtle, eigene SHA-256
+//     gegen crypto.subtle, mehrere und fremde Prüfwerte, Tastatur, axe, Sprache; die Vorführung ist kein Weg am Code vorbei. pruefeUebergabe: ?app=1 zeigt nur
+//     die Übergabe mit dem Knopf „Im Browser öffnen“ (ext:// plus dieselbe Seite ohne app=1, code bleibt). pruefeCodeNichtImPdf: Der Code steht weder in den
+//     Antworten noch im PDF noch im Speicher des Browsers.
+//   - P1, Zusätze (12.10.2026): pruefeUmgebungshinweis (Prüfungen in zugang-browser.mjs): Hinweiskasten oben auf dem ersten Bildschirm (Code-Seite oder Start), wenn die Seite
+//     in einem Rahmen oder im Browser einer anderen App läuft. Oben im normalen Browser: kein Kasten. Im Rahmen: Testseite auf einem anderen Port mit einem <iframe> ohne allow-Angaben
+//     (wie die Hülle der Website), Hinweis mit dem Link „In neuem Fenster öffnen“ (target=_blank, gleiche Adresse, mit code), Sprachwechsel, auf den Fragen kein Kasten mehr.
+//     Browser anderer Apps: gesetzter User-Agent (Facebook, Instagram, Android-WebView, Snapchat) zeigt den Hinweis zum Browser, normale Browser (Safari, Chrome, Firefox, Edge,
+//     Samsung Internet) nicht; ?app=1 hat Vorrang (nur die Übergabe). Alle vier Sprachen, Arabisch von rechts nach links.
+//   - P3 Teil b (12.10.2026, Kürzungen nach STILREGELN; pruefeKuerzungenP3 und die angepassten Prüfungen zu Hinweisen, Beitrag, Unterschriften, Fertig-Seite): Zusatzzeilen und Sätze
+//     entfallen (P3_GESTRICHEN, P3_NEU im Wörterbuch); höchstens ein Hinweiskasten je Frage-Seite, die Prüfseite zeigt keine Hinweise, die Fertig-Seite wiederholt nicht, was bei der Frage stand;
+//     Beitrag: nur die vorgewählte Gruppe offen, die übrigen unter „Andere Beitragsgruppe“; „Mehr erfahren“ (Spielerpass, Leistungen); „Diese Unterschrift gilt für (n)“ ab zwei Blättern zugeklappt, bei einem Blatt die Zeile „Diese Unterschrift gilt für: Blatt“ direkt (Runde 2);
+//     Fertig-Seite: nur der Weg, der zum Gerät passt, ohne Liste der Teile, „Diese Stellen melden sich bei Ihnen“ zugeklappt; Teil A der Datei ohne Tabelle für Blätter am Bildschirm.
 //   - Screenshots je Seite nach tools/cache/anmeldung-test/e2e/
 //
 // Aufruf: node tools/anmeldung-test/e2e.mjs [--ohne-desktop] [--nur-sprache] [--nur=pruefeHeimweg,…]
@@ -64,12 +80,14 @@
 // Ausgabe: eine Zeile je Prüfung, am Ende Zusammenfassung; Exit 0 nur, wenn alles bestanden ist.
 
 import { createRequire } from "node:module";
+import { createServer } from "node:http";
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import puppeteer from "puppeteer-core";
 import { starteTestserver } from "./testserver.mjs";
+import { pruefeZugangImBrowser, pruefeUebergabeImBrowser, pruefeUmgebungshinweisImBrowser, pruefeUmgebungshinweisSprachen } from "./zugang-browser.mjs";
 import { pruefeEinfacheSprache, fehlendeSchluessel, ladeWoerterbuch, pruefeAbgabeWortlaut, ABGABE_AUSNAHMEN_OBERFLAECHE } from "./sprache-check.mjs";
 
 const require = createRequire(import.meta.url);
@@ -238,8 +256,9 @@ async function neueSeite(browser, server, vp, name, optionen) {
   });
   page.__st = st;
   if (o.vorLaden) await o.vorLaden(page);
-  await page.goto(server.basis + "/anmeldung/" + (o.abfrage || ""), { waitUntil: "networkidle0" });
-  await page.waitForSelector("#anmeldung[data-bereit]", { timeout: 10000 });
+  // o.url: eine andere Seite (die Hülle im Test mit dem Rahmen); sie wartet nicht auf den Assistenten.
+  await page.goto(o.url || server.basis + "/anmeldung/" + (o.abfrage || ""), { waitUntil: "networkidle0" });
+  if (!o.url) await page.waitForSelector("#anmeldung[data-bereit]", { timeout: 10000 });
   return page;
 }
 
@@ -494,6 +513,16 @@ async function laufe(page, ctx) {
     await seitenPruefungen(page, ctx, s, kennung, vorherige !== null);
     if (vorherige === null) await kopfPruefen(page, ctx, s); // Anfang des Laufs ("start")
     if (s.schritt === "pruefen") ctx.pruefenDom = await hinweiseImDom(page);
+    else if (s.schritt !== "fertig") {
+      // Kennungen der Hinweise, die auf einer Seite mit einer Frage standen (offen oder im Aufklapper): Auf der Fertig-Seite stehen sie nicht noch einmal.
+      const d = await hinweiseImDom(page);
+      if (!ctx.hinweiseGesehen) ctx.hinweiseGesehen = new Set();
+      // Eine Warnung oder Frist, die hier nur im Aufklapper stand (es stand schon ein Kasten offen), gilt nicht als gesehen (U-07): Die Fertig-Seite zeigt sie offen.
+      for (const x of d.offenSchluessel) ctx.hinweiseGesehen.add(x);
+      d.aufklapperSchluessel.forEach((x, i) => {
+        if (!["warnung", "frist"].includes(d.aufklapperArten[i])) ctx.hinweiseGesehen.add(x);
+      });
+    }
     if (ctx.proSeite) await ctx.proSeite(page, s, kennung);
     if (s.schritt === "fertig") break;
     if (ctx.modus === "eingabe") await fuelleSeite(page, ctx.profil);
@@ -624,34 +653,59 @@ async function hinweiseImDom(page) {
       inZuGesehen: imAufklapper.filter(zuSehen).length,
       ueberschriften: d ? Array.from(d.querySelectorAll("h3, h4")).map((x) => x.textContent.replace(/[\u2066-\u2069]/g, "").trim()) : [],
       vereinKaesten: d ? Array.from(d.querySelectorAll(".anm-weitere__gruppe .anm-hinweiskasten")).map((b) => b.getAttribute("data-hinweis-art")) : [],
+      // "Diese Stellen melden sich bei Ihnen": seit P3 Teil b ein zugeklappter Bereich (details[data-weiterleitung])
+      weiterleitung: (() => {
+        const w = document.querySelector("#anmeldung details[data-weiterleitung]");
+        return { vorhanden: !!w, zu: w ? !w.open : null, titel: w ? w.querySelector("summary").textContent.replace(/[\u2066-\u2069]/g, "").trim() : null, punkte: w ? w.querySelectorAll("li").length : 0, sichtbar: w ? Array.from(w.querySelectorAll("li")).filter(zuSehen).length : 0 };
+      })(),
     };
   });
 }
 
-// Auf 'pruefen' und 'fertig': offen nur Warnungen und Fristen, alles andere zugeklappt unter
-// "Weitere Hinweise (n)", die Summe stimmt mit e.hinweise überein.
-// `grenze`: höchste erlaubte Zahl offener Kästen (nur wo die Aufgabe eine nennt).
-function hinweiseAuswerten(name, dom, e, grenze) {
-  if (!dom || !e) return ok(name + ": Hinweise gemessen", false, "keine Messung");
-  const gesamt = e.hinweise.length;
+// P3 Teil b (STILREGELN Nr. 3 und 5): Auf 'pruefen' stehen keine Hinweise (S2); die Familie prüft nur ihre Angaben.
+function hinweiseAufPruefseite(name, dom) {
+  if (!dom) return ok(name + ": Hinweise gemessen", false, "keine Messung");
+  ok(
+    name + ": keine Hinweise, kein 'Weitere Hinweise' und keine Stellen, die sich melden",
+    dom.offenArten.length === 0 && !dom.aufklapperVorhanden && dom.aufklapperAnzahl === 0 && !dom.weiterleitung.vorhanden,
+    JSON.stringify({ offen: dom.offenArten, aufklapper: dom.aufklapperAnzahl, weiterleitung: dom.weiterleitung.vorhanden })
+  );
+}
+
+// Auf 'fertig': Was die Familie schon bei ihrer Frage gesehen hat (`gesehen`), steht nicht noch einmal da; was zu keiner Frage gehört, steht
+// hier: offen nur Warnungen und Fristen, alles andere zugeklappt unter "Weitere Hinweise (n)". Kein Hinweis geht verloren: Jeder steht bei seiner
+// Frage oder hier. `grenze`: höchste erlaubte Zahl offener Kästen (nur wo die Aufgabe eine nennt).
+function hinweiseAufFertigseite(name, dom, e, grenze, gesehen) {
+  if (!dom || !e || !gesehen) return ok(name + ": Hinweise gemessen", false, "keine Messung");
+  const gesamt = e.hinweise.map((x) => x.key);
+  const hier = [...dom.offenSchluessel, ...dom.aufklapperSchluessel];
   const nurWichtig = dom.offenArten.every((x) => x === "warnung" || x === "frist");
-  const uebrig = gesamt - dom.offenSchluessel.length;
   ok(
     name + ": offen stehen nur Warnungen und Fristen" + (grenze ? ", höchstens " + grenze + " Kästen" : ""),
     nurWichtig && (!grenze || dom.offenSichtbar <= grenze),
     dom.offenSichtbar + " offen: " + (dom.offenArten.join(", ") || "keiner")
   );
-  const schluesselOk = new Set([...dom.offenSchluessel, ...dom.aufklapperSchluessel]).size === gesamt;
+  const doppelt = hier.filter((x) => gesehen.has(x));
+  ok(name + ": kein Hinweis steht noch einmal da, der schon bei seiner Frage stand", doppelt.length === 0, doppelt.join(", ") || hier.length + " Hinweise hier, " + gesehen.size + " bei den Fragen");
+  const verloren = gesamt.filter((x) => !gesehen.has(x) && !hier.includes(x));
+  ok(name + ": kein Hinweis geht verloren (jeder steht bei seiner Frage oder hier)", verloren.length === 0, verloren.join(", ") || gesamt.length + " Hinweise: " + (gesamt.length - hier.length) + " bei den Fragen, " + hier.length + " hier");
+  const uebrig = dom.aufklapperAnzahl;
   ok(
-    name + ": Aufklapper 'Weitere Hinweise (" + uebrig + ")' ist zu und enthält alle übrigen (Summe = " + gesamt + " Hinweise)",
-    dom.aufklapperVorhanden && dom.aufklapperZu === true && dom.aufklapperTitel === "Weitere Hinweise (" + uebrig + ")" && dom.aufklapperZahl === uebrig && dom.aufklapperAnzahl === uebrig && dom.inZuGesehen === 0 && dom.offenSchluessel.length + dom.aufklapperSchluessel.length === gesamt && schluesselOk,
-    "offen (mit Kennung) " + dom.offenSchluessel.length + " + Aufklapper " + dom.aufklapperAnzahl + " = " + (dom.offenSchluessel.length + dom.aufklapperAnzahl) + ", e.hinweise " + gesamt + "; Titel '" + dom.aufklapperTitel + "'"
+    name + ": Aufklapper 'Weitere Hinweise (n)' ist zu, die Zahl im Titel stimmt mit den Kästen darin überein" + (uebrig ? " (n = " + uebrig + ")" : " (keiner nötig)"),
+    uebrig === 0 ? !dom.aufklapperVorhanden : dom.aufklapperVorhanden && dom.aufklapperZu === true && dom.aufklapperTitel === "Weitere Hinweise (" + uebrig + ")" && dom.aufklapperZahl === uebrig && dom.inZuGesehen === 0,
+    "Aufklapper " + dom.aufklapperAnzahl + ", Titel '" + dom.aufklapperTitel + "', zu: " + dom.aufklapperZu
   );
-  const offenArt = e.hinweise.filter((x) => x.art === "offen").length;
+  const offenArt = e.hinweise.filter((x) => x.art === "offen" && hier.includes(x.key)).length;
   ok(
     name + ": 'offen'-Hinweise im Aufklapper unter der Überschrift 'Das klärt der Verein'",
     offenArt === 0 ? !dom.ueberschriften.includes("Das klärt der Verein") : dom.ueberschriften.includes("Das klärt der Verein") && dom.vereinKaesten.length === offenArt && dom.vereinKaesten.every((x) => x === "offen"),
-    offenArt + " Hinweise der Art 'offen'; Überschriften: " + (dom.ueberschriften.join(" | ") || "keine")
+    offenArt + " Hinweise der Art 'offen' hier; Überschriften: " + (dom.ueberschriften.join(" | ") || "keine")
+  );
+  const w = e.weiterleitung || [];
+  ok(
+    name + ": 'Diese Stellen melden sich bei Ihnen' steht zugeklappt (" + w.length + " Zeilen)",
+    w.length === 0 ? !dom.weiterleitung.vorhanden : dom.weiterleitung.vorhanden && dom.weiterleitung.zu === true && dom.weiterleitung.punkte === w.length && dom.weiterleitung.sichtbar === 0 && !/[:\uff1a]$/.test(dom.weiterleitung.titel),
+    JSON.stringify(dom.weiterleitung)
   );
 }
 
@@ -746,6 +800,7 @@ async function ergebnisPruefen(page, ctx, dateien) {
     teileAnzeige: document.querySelectorAll("#anmeldung .anm-ergebnis > .anm-block > .anm-liste-punkte > li").length,
     teileTexte: Array.from(document.querySelectorAll("#anmeldung .anm-ergebnis > .anm-block > .anm-liste-punkte > li")).map((li) => li.textContent.replace(/\s+/g, " ").trim()),
     infoZeile: ((document.querySelector("#anmeldung .anm-ergebnis > .anm-hinweis") || {}).textContent || "").trim(),
+    seitenText: (document.getElementById("anmeldung") || {}).innerText || "",
     attrappe: window.__attrappePdf || null,
   }));
   return daten;
@@ -886,7 +941,7 @@ async function pruefeGetrennteEltern(browser, server, dateien) {
   if (bildschirm) {
     ok("Getrennte Eltern (unterschriften, Modus bildschirm): drei Felder: Elternteil, anderer Elternteil und Kind (in dieser Reihenfolge)", felderGetrennt.map((f) => f.wer).join(",") === "sorgeberechtigte,sorgeberechtigte_2,spieler", felderGetrennt.map((f) => f.wer).join(","));
     const zweites = felderGetrennt.find((f) => f.wer === "sorgeberechtigte_2") || {};
-    ok("Getrennte Eltern (unterschriften, Modus bildschirm): Feld des anderen Elternteils heißt „Unterschrift: der andere Elternteil“, mit Hinweis ohne „freiwillig“ im Titel", zweites.titel === "Unterschrift: der andere Elternteil" && zweites.zusatz === "Der andere Elternteil unterschreibt hier selbst. Oder er unterschreibt später mit Stift im Ausdruck.", JSON.stringify(zweites));
+    ok("Getrennte Eltern (unterschriften, Modus bildschirm): Feld des anderen Elternteils heißt „Unterschrift: der andere Elternteil“, mit Hinweis ohne „freiwillig“ im Titel", zweites.titel === "Unterschrift: der andere Elternteil" && zweites.zusatz === "Der andere Elternteil unterschreibt hier selbst. Oder später mit Stift im Ausdruck.", JSON.stringify(zweites));
   } else {
     ok("Getrennte Eltern (unterschriften, Modus stift): nur ein Unterschriftsfeld (der Elternteil), kein Feld für den anderen Elternteil und das Kind", felderGetrennt.map((f) => f.wer).join(",") === "sorgeberechtigte", felderGetrennt.map((f) => f.wer).join(","));
   }
@@ -894,10 +949,14 @@ async function pruefeGetrennteEltern(browser, server, dateien) {
   await unterschreiben(page, { touch: false });
   await klickeWeiter(page, su);
   const pr = await kaesten(page);
-  ok("Getrennte Eltern (pruefen, " + modus + "): der Hinweis des Regelwerks 'Bitte fragen Sie den anderen Elternteil …' steht weiterhin auf der Prüfseite", pr.some((x) => x.key === "getrennt_zustimmung"), JSON.stringify(pr.map((x) => x.key || x.label)));
+  // P3 Teil b (S2): Die Prüfseite zeigt keine Hinweise. Der Hinweis des Regelwerks hat keine Seite mit einer Frage (der Kasten auf 'sorge/recht' und
+  // 'unterschriften' sagt dasselbe); er steht offen auf der Fertig-Seite.
+  ok("Getrennte Eltern (pruefen, " + modus + "): die Prüfseite zeigt keinen Hinweiskasten (P3 Teil b)", pr.length === 0, JSON.stringify(pr.map((x) => x.key || x.label)));
   await klickeWeiter(page, await stand(page));
   const ctx = { name: "getrennte-eltern" + (bildschirm ? "" : "-stift"), vp: MOBIL };
   const daten = await ergebnisPruefen(page, ctx, dateien);
+  const fertigKaesten = daten ? await kaesten(page) : [];
+  ok("Getrennte Eltern (fertig, " + modus + "): der Hinweis des Regelwerks 'Bitte fragen Sie den anderen Elternteil …' steht offen auf der Fertig-Seite", fertigKaesten.some((x) => x.key === "getrennt_zustimmung" && x.label === "Achtung"), JSON.stringify(fertigKaesten.map((x) => x.key || x.label)));
   if (daten) {
     const a = daten.attrappe && daten.attrappe.a;
     ok("Getrennte Eltern (" + modus + "): a.sorge = getrennt_bei_mir und andererElternteilEinverstanden ist nicht wahr", !!a && a.sorge === "getrennt_bei_mir" && a.andererElternteilEinverstanden !== true, a && JSON.stringify({ sorge: a.sorge, einverstanden: a.andererElternteilEinverstanden }));
@@ -907,7 +966,7 @@ async function pruefeGetrennteEltern(browser, server, dateien) {
     if (pdf) {
       const t = ohneLeer(pdfText(pdf.pfad));
       if (bildschirm) {
-        ok("Getrennte Eltern (Modus bildschirm): der andere Elternteil hat unterschrieben, im PDF steht keine Stift-Markierung „zweiter Elternteil (nötig)“; Teil A nennt „Der zweite Elternteil (nötig)“", !t.includes("zweiter Elternteil (nötig)") && t.includes("Der zweite Elternteil (nötig)"), "");
+        ok("Getrennte Eltern (Modus bildschirm): der andere Elternteil hat unterschrieben, im PDF steht keine Stift-Markierung „zweiter Elternteil (nötig)“; Teil A nennt die Zeile nicht mehr (nur noch Blätter mit Stift, D1)", !t.includes("zweiter Elternteil (nötig)") && !t.includes("Der zweite Elternteil (nötig)"), "");
         ok("Getrennte Eltern (Modus bildschirm): Teil A: alles am Bildschirm unterschrieben, Laufzettel: Satz zu den Blättern des Verbands ohne Ausnahme", t.includes("Sie haben alles am Bildschirm unterschrieben.") && t.includes("Alle Unterschriften der Familie sind am Bildschirm geleistet, auch auf den Blättern des Verbands (Entscheidung der Jugendleitung vom 11.10.2026)."), "");
       } else {
         ok("Getrennte Eltern (Modus stift): das PDF markiert die Stelle „zweiter Elternteil (nötig)“", t.includes("zweiter Elternteil (nötig)"), "");
@@ -934,6 +993,8 @@ async function pruefeGetrennteEltern(browser, server, dateien) {
     if (daten3) {
       const fertigText = await p3.$eval("#anmeldung", (e) => e.innerText.replace(/\s+/g, " "));
       ok("Getrennte Eltern (Modus bildschirm): die Fertig-Seite sagt „Einige Unterschriften fehlen noch.“ (nicht „alles am Bildschirm unterschrieben“)", fertigText.includes("Einige Unterschriften fehlen noch. Das sind die blauen Markierungen im PDF.") && !fertigText.includes("Sie haben alles am Bildschirm unterschrieben."), fertigText.slice(fertigText.indexOf("So geht es weiter"), fertigText.indexOf("So geht es weiter") + 200));
+      // U-16: Die offene Stelle liegt im Aufnahmeantrag, der mit der Datei geht: Foto oder Scan in derselben E-Mail (Fertig-Seite und Teil A)
+      ok("Getrennte Eltern (Modus bildschirm, U-16): die Fertig-Seite sagt hinter „Einige Unterschriften fehlen noch.“: „Fotografieren oder scannen Sie die unterschriebenen Blätter. Schicken Sie sie in derselben E-Mail mit.“", fertigText.includes("Einige Unterschriften fehlen noch. Das sind die blauen Markierungen im PDF. Unterschreiben Sie dort mit Stift. Was Sie ausdrucken müssen, steht in Teil A der Datei. Fotografieren oder scannen Sie die unterschriebenen Blätter. Schicken Sie sie in derselben E-Mail mit."), fertigText.slice(fertigText.indexOf("So geht es weiter"), fertigText.indexOf("So geht es weiter") + 420));
       const pdf3 = await pdfHerunterladenUndPruefen(browser, server, p3, "Getrennte Eltern (ohne Unterschrift des anderen Elternteils)", daten3, { satzungOffen: false });
       if (pdf3) {
         const t3 = ohneLeer(pdfText(pdf3.pfad));
@@ -941,6 +1002,7 @@ async function pruefeGetrennteEltern(browser, server, dateien) {
         ok("Getrennte Eltern (Modus bildschirm): Teil A: „Einige Unterschriften fehlen noch.“ und der Aufnahmeantrag steht unter „Ausdrucken müssen Sie nur:“", t3.includes("Einige Unterschriften fehlen noch. Unterschreiben Sie diese an den blauen Markierungen mit Stift.") && /Ausdrucken müssen Sie nur:.*Aufnahmeantrag/.test(t3), "");
         // Das Feld des Kindes blieb auch leer: Der Antrag auf Spielerlaubnis bleibt ohne Markierung für das Kind und steht nicht unter „Ausdrucken müssen Sie nur:“; der Laufzettel nennt beides
         const druck3 = (t3.match(/Ausdrucken müssen Sie nur:(.*?)Schicken Sie die Datei per E-Mail/) || [])[1] || "";
+        ok("Getrennte Eltern (Modus bildschirm, U-16): Teil A: nach „Ausdrucken müssen Sie nur:“ und vor dem Schritt zur E-Mail steht „Fotografieren oder scannen Sie die unterschriebenen Blätter. Schicken Sie sie in derselben E-Mail mit.“", druck3.includes("Fotografieren oder scannen Sie die unterschriebenen Blätter. Schicken Sie sie in derselben E-Mail mit.") && t3.indexOf("Fotografieren oder scannen Sie die unterschriebenen Blätter. Schicken Sie sie in derselben E-Mail mit.") < t3.indexOf("Schicken Sie die Datei per E-Mail"), druck3.slice(-160));
         ok("Getrennte Eltern (Modus bildschirm): der Antrag auf Spielerlaubnis steht nicht unter „Ausdrucken müssen Sie nur:“, das leere Feld des Kindes bekommt keine Markierung", !/Antrag auf Spielerlaubnis/.test(druck3) && (pdfText(pdf3.pfad, pdfAntragSeite(pdf3.pfad)).match(/Hier mit Stift unterschreiben/g) || []).length === 1, druck3.slice(0, 200));
         ok("Getrennte Eltern (Modus bildschirm): der Laufzettel sagt „… außer an den Stift-Stellen … und an der Unterschriftszeile des Kindes …“ und „Das Kind hat den Antrag nicht unterschrieben. …“", t3.includes(LAUFZETTEL_HFV_REST_KIND) && t3.includes(LAUFZETTEL_KIND_LEER), "");
       }
@@ -1030,8 +1092,8 @@ async function pruefeUnterschriftenModus(browser, server, dateien) {
       ok("Modus bildschirm: zwei Felder: Elternteil und Kind (Spielerin oder Spieler), in dieser Reihenfolge", d.felder.map((f) => f.wer).join(",") === "sorgeberechtigte,spieler", d.felder.map((f) => f.wer).join(","));
       const kind = d.felder.find((f) => f.wer === "spieler") || {};
       ok("Modus bildschirm: das Feld des Kindes heißt „Unterschrift von Mila (freiwillig)“", kind.titel === "Unterschrift von Mila (freiwillig)", kind.titel);
-      ok("Modus bildschirm: Hinweis am Feld nur noch „Kann Ihr Kind schon schreiben? Dann unterschreibt es hier selbst.“ (ohne den Satz zum Ausdruck mit Stift)", kind.zusatz === "Kann Ihr Kind schon schreiben? Dann unterschreibt es hier selbst." && !/Stift|Ausdruck/.test(kind.zusatz), kind.zusatz);
-      ok("Modus bildschirm: die Wahl heißt „Am Bildschirm“ (ohne „wo es erlaubt ist“), der Hinweis nennt auch die Blätter für den Fußball-Verband", d.wahl[0] && d.wahl[0].wert === "bildschirm" && d.wahl[0].text === "Am Bildschirm Sie unterschreiben alles hier mit dem Finger. Auch die Blätter für den Fußball-Verband." && !/wo es erlaubt ist/.test(d.wahl.map((w) => w.text).join(" ")), JSON.stringify(d.wahl));
+      ok("Modus bildschirm: Hinweis am Feld nur noch „Kann Ihr Kind schreiben? Dann unterschreibt es selbst.“ (ohne den Satz zum Ausdruck mit Stift)", kind.zusatz === "Kann Ihr Kind schreiben? Dann unterschreibt es selbst." && !/Stift|Ausdruck/.test(kind.zusatz), kind.zusatz);
+      ok("Modus bildschirm: die Wahl heißt „Am Bildschirm“ (ohne „wo es erlaubt ist“), der Hinweis nennt auch die Blätter für den Fußball-Verband", d.wahl[0] && d.wahl[0].wert === "bildschirm" && d.wahl[0].text === "Am Bildschirm Mit dem Finger, auch für den Fußball-Verband." && !/wo es erlaubt ist/.test(d.wahl.map((w) => w.text).join(" ")), JSON.stringify(d.wahl));
       ok("Modus bildschirm: kein Block „Diese Seiten unterschreiben Sie mit Stift“ und keine Frage „Wann unterschreiben Sie diese Blätter?“", !d.stiftTitel && !d.hfvFrage, JSON.stringify({ stiftTitel: d.stiftTitel, hfvFrage: d.hfvFrage }));
       ok("Modus bildschirm: Sicht des Vereins nennt den Schalter bei den Blättern des Verbands", d.vereinssicht.some((z) => /^hfv_antrag: nicht_erlaubt \(Schalter unterschriftHfv: bildschirm\)/.test(z)) && d.vereinssicht.some((z) => /^aufnahmeantrag: erlaubt – /.test(z)), d.vereinssicht.map((z) => z.slice(0, 60)).join(" | "));
       // Nur der Elternteil unterschreibt: Weiter geht trotzdem (das Feld des Kindes ist freiwillig)
@@ -1068,7 +1130,9 @@ async function pruefeUnterschriftenModus(browser, server, dateien) {
           ok("Modus bildschirm, Kind ohne Unterschrift: Laufzettel sagt „… außer an der Unterschriftszeile des Kindes im Antrag auf Spielerlaubnis“, nicht „Alle Unterschriften … geleistet“", t.includes(LAUFZETTEL_HFV_KIND) && !t.includes("Alle Unterschriften der Familie sind am Bildschirm geleistet") && !t.includes("außer an den Stift-Stellen"), "");
           const antragNr = pdfAntragSeite(pdfOhne.pfad);
           ok("Modus bildschirm, Kind ohne Unterschrift: Antrag auf Spielerlaubnis Seite 1 trägt nur die Markierung des Vereins, keine für das Kind", antragNr > 0 && (pdfText(pdfOhne.pfad, antragNr).match(/Hier mit Stift unterschreiben/g) || []).length === 1, "Seite " + antragNr);
-          ok("Modus bildschirm, Kind ohne Unterschrift: Teil A, Tabelle „Nicht unterschrieben (freiwillig)“ für die Zeile des Kindes", /Nicht unterschrieben \(freiwillig\)/.test(t) && !/Mit Stift, nach dem Ausdrucken/.test(t), "");
+          // P3 Teil b (D1): Teil A nennt unter „Wo unterschreiben Sie?“ nur noch Blätter mit Stift. Die leere, freiwillige Zeile des Kindes braucht keine Zeile
+          // (nichts zu tun; der Laufzettel sagt es dem Verein); ist alles am Bildschirm erledigt, entfällt der ganze Abschnitt.
+          ok("Modus bildschirm, Kind ohne Unterschrift: Teil A ohne Abschnitt „Wo unterschreiben Sie?“ (alles am Bildschirm erledigt, die Zeile des Kindes ist freiwillig und braucht keine Zeile)", !t.includes("Wo unterschreiben Sie?") && !/Nicht unterschrieben \(freiwillig\)/.test(t) && !/Mit Stift, nach dem Ausdrucken/.test(t), "");
           PDF_ERGEBNISSE.set("modus-bildschirm-kind-leer", Object.assign({}, pdfOhne, { antrag }));
         }
       }
@@ -1080,7 +1144,7 @@ async function pruefeUnterschriftenModus(browser, server, dateien) {
       const page = await seiteMitBeispiel(browser, server, MOBIL, "modus-bildschirm-karneval", "karneval-kind", null);
       const su = await geheBis(page, "unterschriften");
       const d = await unterschriftenDom(page);
-      ok("Modus bildschirm, Karneval Kind (keine Blätter des Verbands): ein Feld (Elternteil), die Wahl „Am Bildschirm“ nennt nur Vereinsunterlagen, nicht den Fußball-Verband", su.schritt === "unterschriften" && d.felder.map((f) => f.wer).join(",") === "sorgeberechtigte" && d.wahl[0].text === "Am Bildschirm Vereinsunterlagen unterschreiben Sie hier mit dem Finger." && !/Fußball-Verband/.test(d.wahl[0].text), JSON.stringify({ felder: d.felder.map((f) => f.wer), wahl: d.wahl[0] && d.wahl[0].text }));
+      ok("Modus bildschirm, Karneval Kind (keine Blätter des Verbands): ein Feld (Elternteil), die Wahl „Am Bildschirm“ sagt nur „mit dem Finger“, nennt nicht den Fußball-Verband", su.schritt === "unterschriften" && d.felder.map((f) => f.wer).join(",") === "sorgeberechtigte" && d.wahl[0].text === "Am Bildschirm Sie unterschreiben hier mit dem Finger." && !/Fußball-Verband/.test(d.wahl[0].text), JSON.stringify({ felder: d.felder.map((f) => f.wer), wahl: d.wahl[0] && d.wahl[0].text }));
       await page.close();
     }
 
@@ -1143,6 +1207,7 @@ async function pruefeUnterschriftenModus(browser, server, dateien) {
         ok("Modus bildschirm, Wechsel Hessen (Feld des Kindes leer): das PDF hat den Antrag auf Spielerlaubnis und die Abmeldung beim alten Verein", antragNr > 0 && abmeldungNr > 0, "Antrag Seite " + antragNr + ", Abmeldung Seite " + abmeldungNr);
         ok("Modus bildschirm, Wechsel Hessen (Feld des Kindes leer): im Antrag nur die Markierung des Vereins, bei der Abmeldung die Markierung für das Kind", antragNr > 0 && abmeldungNr > 0 && markierungen(w.pdf.pfad, antragNr) === 1 && markierungen(w.pdf.pfad, abmeldungNr) === 1, "Antrag " + (antragNr ? markierungen(w.pdf.pfad, antragNr) : "?") + ", Abmeldung " + (abmeldungNr ? markierungen(w.pdf.pfad, abmeldungNr) : "?"));
         ok("Modus bildschirm, Wechsel Hessen (Feld des Kindes leer): Fertig-Seite „Einige Unterschriften fehlen noch.“ (wegen der Abmeldung), nicht „alles am Bildschirm unterschrieben“", w.fertigText.includes("Einige Unterschriften fehlen noch. Das sind die blauen Markierungen im PDF.") && !w.fertigText.includes("Sie haben alles am Bildschirm unterschrieben."), "");
+        ok("Modus bildschirm, Wechsel Hessen (Feld des Kindes leer, U-16): kein Satz zu Foto oder Scan in derselben E-Mail, weder auf der Fertig-Seite noch in Teil A (die Abmeldung geht per Einschreiben an den alten Verein)", !w.fertigText.includes("Fotografieren oder scannen Sie die unterschriebenen Blätter") && !t.includes("Schicken Sie sie in derselben E-Mail mit"), "");
         const druckListe = (t.match(/Ausdrucken müssen Sie nur:(.*?)Schicken Sie die Datei per E-Mail/) || [])[1] || "";
         ok("Modus bildschirm, Wechsel Hessen (Feld des Kindes leer): Teil A „Einige Unterschriften fehlen noch.“, die Abmeldung mit Stift und Einschreiben, der Antrag nicht unter „Ausdrucken müssen Sie nur:“", t.includes("Einige Unterschriften fehlen noch. Unterschreiben Sie diese an den blauen Markierungen mit Stift.") && t.includes("Unterschreiben Sie es mit Stift. Schicken Sie es selbst als Einschreiben an den alten Verein.") && !/Antrag auf Spielerlaubnis/.test(druckListe), druckListe.slice(0, 160));
         ok("Modus bildschirm, Wechsel Hessen (Feld des Kindes leer): Laufzettel „… außer an den Stift-Stellen … und an der Unterschriftszeile des Kindes …“, „Das Kind hat den Antrag nicht unterschrieben. …“ und die Meldung zur Abmeldung", t.includes(LAUFZETTEL_HFV_REST_KIND) && t.includes(LAUFZETTEL_KIND_LEER) && t.includes("Abmeldung beim alten Verein Seite 1: Die Unterschrift der Spielerin oder des Spielers wurde am Bildschirm nicht geleistet (freiwillig)."), "");
@@ -1195,16 +1260,60 @@ async function pruefeSatzung(browser, server, dateien) {
   // Namen der Papiere: alle stammen aus den Regeltexten (formulare, unterschriften)
   const deRegeln = (await import(pathToFileURL(path.join(ROOT, "assets", "js", "anmeldung", "texte", "de-regeln.js")).href)).default;
   const erlaubteNamen = new Set([...Object.values(deRegeln.formulare || {}), ...Object.values(deRegeln.unterschriften || {})]);
-  const namen = await page.evaluate(() => ({
-    giltTitel: Array.from(document.querySelectorAll("#anmeldung .anm-unterschrift .anm-unterschrift__gilt > p")).map((e) => e.textContent.replace(/\s+/g, " ").trim()),
-    giltFelder: document.querySelectorAll("#anmeldung .anm-unterschrift").length,
-    gilt: Array.from(document.querySelectorAll("#anmeldung .anm-unterschrift .anm-unterschrift__gilt > ul > li")).map((e) => e.textContent.replace(/\s+/g, " ").trim()),
-    stift: Array.from(document.querySelectorAll("#anmeldung .anm-unterschriften ul.anm-liste-punkte li")).map((e) => e.textContent.replace(/\s+/g, " ").trim()),
-  }));
-  const giltPunkte = namen.gilt;
-  const fremd = [...giltPunkte, ...namen.stift].filter((n) => !erlaubteNamen.has(n));
-  ok("Papiernamen: 'Diese Unterschrift gilt für:' (Liste, ein Blatt je Zeile) und die Liste der Stift-Blätter nennen nur Namen aus den Regeltexten (" + (giltPunkte.length + namen.stift.length) + " Namen)", giltPunkte.length > 0 && namen.stift.length > 0 && fremd.length === 0, fremd.join(" | ") || namen.stift.join(" | "));
-  ok("'Diese Unterschrift gilt für:' steht über einer Liste mit einem Blatt je Zeile, bei jedem Unterschriftsfeld (kein Satz mit Aufzählung, keine Zeile mit mehreren Namen)", namen.giltTitel.length === namen.giltFelder && namen.giltTitel.every((t) => t === "Diese Unterschrift gilt für:") && giltPunkte.every((n) => !/, /.test(n.replace(/\([^)]*\)/g, "")) && n.split(/\s+/).length <= 12), namen.giltTitel.join(" | ") + " – " + giltPunkte.join(" | "));
+  // P3 Runde 2 (S7): Gilt eine Unterschrift nur für ein Blatt (n = 1), steht die Zeile direkt da („Diese Unterschrift gilt für: <Blatt>“, ein Absatz); ab zwei Blättern
+  // (n ≥ 2) ist es der zugeklappte Bereich „Diese Unterschrift gilt für (n)“ mit einer Zeile je Blatt.
+  const namen = await page.evaluate(() => {
+    const norm = (e) => e.textContent.replace(/\s+/g, " ").trim();
+    const felder = Array.from(document.querySelectorAll("#anmeldung .anm-unterschrift")).map((f) => {
+      const g = f.querySelector(".anm-unterschrift__gilt");
+      const liste = !!g && g.tagName === "DETAILS";
+      const lis = liste ? Array.from(g.querySelectorAll(":scope > ul > li")) : [];
+      return {
+        wer: f.getAttribute("data-unterschrift"),
+        art: g ? g.tagName.toLowerCase() : null,
+        zu: liste && !g.open,
+        summary: liste ? norm(g.querySelector(":scope > summary")) : null,
+        punkte: lis.map(norm),
+        sichtbarePunkte: lis.filter((e) => e.checkVisibility()).length,
+        text: g ? norm(g) : "",
+        sichtbar: !!g && g.checkVisibility(),
+        kennzeichen: g ? g.getAttribute("data-gilt-fuer") : null,
+        beschreibtGilt: !!g && !!g.id && (f.getAttribute("aria-describedby") || "").split(/\s+/).includes(g.id),
+      };
+    });
+    return {
+      felder,
+      stift: Array.from(document.querySelectorAll("#anmeldung .anm-unterschriften ul.anm-liste-punkte li")).map((e) => e.textContent.replace(/\s+/g, " ").trim()),
+    };
+  });
+  const GILT = "Diese Unterschrift gilt für";
+  const mehrere = namen.felder.filter((f) => f.art === "details");
+  const eines = namen.felder.filter((f) => f.art === "p");
+  // der Blattname der Zeile mit einem Blatt: der Text hinter „Diese Unterschrift gilt für: “
+  const einBlatt = (f) => f.text.slice((GILT + ": ").length);
+  // B-1: Bei einem Blatt steht statt des Doppelpunkts im Blattnamen („Titel: Person“) ein Gedankenstrich; erlaubt sind beide Schreibweisen des Namens.
+  const giltPunkte = [...mehrere.flatMap((f) => f.punkte), ...eines.map(einBlatt)];
+  const fremd = [...giltPunkte, ...namen.stift].filter((n) => !erlaubteNamen.has(n) && ![...erlaubteNamen].some((e) => e.replace(": ", " \u2013 ") === n));
+  ok("Papiernamen: 'Diese Unterschrift gilt für' (eine Zeile je Blatt) und die Liste der Stift-Blätter nennen nur Namen aus den Regeltexten (" + (giltPunkte.length + namen.stift.length) + " Namen)", giltPunkte.length > 0 && namen.stift.length > 0 && fremd.length === 0, fremd.join(" | ") || namen.stift.join(" | "));
+  ok("'Diese Unterschrift gilt für {n} Blätter' (D-07) steht ab zwei Blättern zugeklappt über einer Liste mit einem Blatt je Zeile (n = Zahl der Zeilen), bei jedem Unterschriftsfeld mit mehreren Blättern (kein Satz mit Aufzählung, keine Zeile mit mehreren Namen)",
+    mehrere.length > 0 && mehrere.every((f) => f.punkte.length >= 2 && f.summary === GILT + " " + f.punkte.length + " Blätter" && f.kennzeichen === String(f.punkte.length) && f.zu && f.sichtbarePunkte === 0 && f.beschreibtGilt) &&
+      giltPunkte.every((n) => !/, /.test(n.replace(/\([^)]*\)/g, "")) && n.split(/\s+/).length <= 12), mehrere.map((f) => f.summary).join(" | "));
+  ok("'Diese Unterschrift gilt für: <Blatt>' steht bei einem Blatt (n = 1) direkt da, ohne Aufklappen, ohne „(1)“ und mit nur einem Doppelpunkt (B-1: „Antrag auf Spielerlaubnis – Spielerin oder Spieler“); das Feld verweist mit aria-describedby auf diese Zeile (Feld des Kindes)",
+    eines.length > 0 && eines.every((f) => f.wer === "spieler" && f.sichtbar && f.text.startsWith(GILT + ": ") && einBlatt(f).length > 0 && !/\(\d+\)/.test(f.text) && (f.text.match(/:/g) || []).length === 1 && f.kennzeichen === "1" && f.beschreibtGilt), eines.map((f) => f.wer + ": " + f.text).join(" | "));
+  ok("'Diese Unterschrift gilt für': jedes Unterschriftsfeld hat die Zeile (n = 1) oder den Bereich (n ≥ 2), nie beides", namen.felder.length > 0 && namen.felder.every((f) => f.art === "p" || f.art === "details") && mehrere.length + eines.length === namen.felder.length, namen.felder.map((f) => f.wer + ":" + f.art).join(", "));
+  // Der Klick auf die Beschriftung öffnet die Liste; ein zweiter Klick schließt sie (Tastatur: Eingabetaste und Leertaste öffnen ein <details> von selbst)
+  const ersteGilt = "#anmeldung .anm-unterschrift details.anm-unterschrift__gilt > summary";
+  await page.click(ersteGilt);
+  const offenGilt = await page.$eval("#anmeldung .anm-unterschrift details.anm-unterschrift__gilt", (d) => ({ offen: d.open, sichtbar: Array.from(d.querySelectorAll("li")).filter((e) => e.checkVisibility()).length, punkte: d.querySelectorAll("li").length }));
+  ok("'Diese Unterschrift gilt für (n)': ein Klick öffnet die Liste, alle Blätter sind zu lesen", offenGilt.offen && offenGilt.sichtbar === offenGilt.punkte && offenGilt.punkte > 0, JSON.stringify(offenGilt));
+  await page.click(ersteGilt);
+  // Foto des Feldes des Kindes mit der Zeile für ein Blatt (n = 1)
+  const kindFeld = await page.$('#anmeldung .anm-unterschrift[data-unterschrift="spieler"]');
+  if (kindFeld) {
+    await kindFeld.evaluate((e) => e.scrollIntoView({ block: "center" }));
+    await kindFeld.screenshot({ path: path.join(AUSGABE, MOBIL.name, "unterschriften-kinderfeld-gilt-fuer-eins.png") });
+    protokoll.screenshots++;
+  }
   // O26 (Jugendleitung, 08.10.2026): Ein Elternteil reicht. Das Beispiel "kind-neu" hat "Beide Eltern": trotzdem nur ein Feld für die Eltern,
   // kein zweites, freiwilliges, und kein Text dazu.
   const eltern = await page.evaluate(() => ({
@@ -1361,8 +1470,8 @@ async function pruefeNamenLatein(browser, server, dateien, beispiele) {
   await feld("sorgeberechtigte.0.vorname", "den Namen mit lateinischen Buchstaben", "Sorgeberechtigte, Vorname");
   await feld("sorgeberechtigte.0.nachname", "den Namen mit lateinischen Buchstaben", "Sorgeberechtigte, Nachname");
   await geheBis(seite, "kontakt", "anschrift");
-  await feld("anschrift.strasse", "die Anschrift mit lateinischen Buchstaben", "Anschrift, Straße");
-  await feld("anschrift.ort", "die Anschrift mit lateinischen Buchstaben", "Anschrift, Ort");
+  await feld("anschrift.strasse", "die Adresse mit lateinischen Buchstaben", "Anschrift, Straße");
+  await feld("anschrift.ort", "die Adresse mit lateinischen Buchstaben", "Anschrift, Ort");
   await geheBis(seite, "zahlung", "inhaber");
   await klickeEtikett(seite, '#anmeldung input[data-pfad="zahlung.kontoinhaber"][data-wert="andere"]');
   await tippe(seite, '#anmeldung input[data-pfad="zahlung.kiVorname"]', "Anna");
@@ -1373,8 +1482,8 @@ async function pruefeNamenLatein(browser, server, dateien, beispiele) {
   await tippe(seite, '#anmeldung input[data-pfad="zahlung.kiOrt"]', "Frankfurt am Main");
   await feld("zahlung.kiVorname", "den Namen mit lateinischen Buchstaben", "Kontoinhaber, Vorname");
   await feld("zahlung.kiNachname", "den Namen mit lateinischen Buchstaben", "Kontoinhaber, Nachname");
-  await feld("zahlung.kiStrasse", "die Anschrift mit lateinischen Buchstaben", "Kontoinhaber, Straße");
-  await feld("zahlung.kiOrt", "die Anschrift mit lateinischen Buchstaben", "Kontoinhaber, Ort");
+  await feld("zahlung.kiStrasse", "die Adresse mit lateinischen Buchstaben", "Kontoinhaber, Straße");
+  await feld("zahlung.kiOrt", "die Adresse mit lateinischen Buchstaben", "Kontoinhaber, Ort");
   await geheBis(seite, "notfall", "kontakt");
   await feld("notfall.name", "den Namen mit lateinischen Buchstaben", "Notfallkontakt");
   await seite.close();
@@ -1453,17 +1562,20 @@ async function pruefeHeimweg(browser, server, dateien, beispiele) {
   ok("Heimweg: eigener Schritt im Abschnitt 'unterlagen', gleich nach 'einwilligungen' und vor 'notfall'", seitenModul.ABSCHNITT_VON.heimweg === "unterlagen" && reihenfolge.indexOf("heimweg") === reihenfolge.indexOf("einwilligungen") + 1 && reihenfolge.indexOf("notfall") === reihenfolge.indexOf("heimweg") + 1, reihenfolge.join(" › "));
   ok("Karneval: den Schritt 'karneval' gibt es nicht mehr (keine Seite, kein Abschnitt, keine Reihenfolge)", !("karneval" in seitenModul.SEITEN) && !("karneval" in seitenModul.ABSCHNITT_VON) && !reihenfolge.includes("karneval") && Object.keys(seitenModul.SEITEN).length === 26, Object.keys(seitenModul.SEITEN).length + " Seiten");
   ok("Heimweg: die Seite hat genau eine Teilseite und die Pflichtprüfung meldet ohne Antwort 'Bitte wählen Sie eine Antwort.'", JSON.stringify(seitenModul.SEITEN.heimweg.teile({ a: {} })) === JSON.stringify(["haupt"]) && seitenModul.SEITEN.heimweg.pruefe({ a: { heimweg: null }, t: (p) => T(p) }, "haupt").length === 1 && seitenModul.SEITEN.heimweg.pruefe({ a: { heimweg: "allein" }, t: (p) => T(p) }, "haupt").length === 0 && seitenModul.SEITEN.heimweg.pruefe({ a: { heimweg: "abholen" }, t: (p) => T(p) }, "haupt").length === 0 && seitenModul.SEITEN.heimweg.pruefe({ a: { heimweg: "egal" }, t: (p) => T(p) }, "haupt")[0].meldung === "Bitte wählen Sie eine Antwort.", "");
+  // M1 (11.10.2026) gab die Texte vor („genau so oder gleichwertig kurz“); P3 Teil b (12.10.2026, freigegeben) kürzt sie: Der Titel sagt die Frage, die
+  // zwei Antworten brauchen keine Zusatzzeile, der Satz zum Ändern steht auf dem Blatt in der Datei (Unterlage U41: „Ich kann diese Erklärung
+  // jederzeit ändern. Dann sage ich dem Trainer Bescheid.“, der Wortlaut dort bleibt unverändert).
   const SOLL = {
-    titel: "Darf Ihr Kind nach dem Training allein nach Hause?",
-    absaetze: ["Während des Trainings passt der Verein auf Ihr Kind auf.", "Sagen Sie uns: Wie kommt Ihr Kind danach nach Hause?", "Sie können das jederzeit ändern. Sagen Sie es dann dem Trainer."],
+    titel: "Darf Ihr Kind allein nach Hause gehen?",
+    absaetze: ["Während des Trainings passt der Verein auf Ihr Kind auf."],
     karten: [
-      { wert: "allein", titel: "Allein nach Hause", hinweis: "Mein Kind darf nach dem Training allein nach Hause gehen." },
-      { wert: "abholen", titel: "Wird abgeholt", hinweis: "Mein Kind wartet, bis es abgeholt wird." },
+      { wert: "allein", titel: "Allein nach Hause", hinweis: "" },
+      { wert: "abholen", titel: "Wird abgeholt", hinweis: "" },
     ],
   };
-  ok("Heimweg: die Texte im Wörterbuch (Titel, Hinweis, beide Optionen, Satz zum Ändern) stimmen wörtlich",
-    T("heimweg.titel") === SOLL.titel && T("heimweg.hinweis") === SOLL.absaetze.slice(0, 2).join("\n") && T("heimweg.aendern") === SOLL.absaetze[2] &&
-    T("heimweg.allein") === SOLL.karten[0].titel && T("heimweg.alleinHinweis") === SOLL.karten[0].hinweis && T("heimweg.abholen") === SOLL.karten[1].titel && T("heimweg.abholenHinweis") === SOLL.karten[1].hinweis &&
+  ok("Heimweg: die Texte im Wörterbuch (Titel, Hinweis, beide Optionen) stimmen wörtlich; Zusatzzeilen und Satz zum Ändern sind entfallen",
+    T("heimweg.titel") === SOLL.titel && T("heimweg.hinweis") === SOLL.absaetze[0] && T("heimweg.aendern") === undefined &&
+    T("heimweg.allein") === SOLL.karten[0].titel && T("heimweg.alleinHinweis") === undefined && T("heimweg.abholen") === SOLL.karten[1].titel && T("heimweg.abholenHinweis") === undefined &&
     T("pruefen.zeilen.heimweg") === "Heimweg" && T("pruefen.werte.heimweg.allein") === "Allein nach Hause" && T("pruefen.werte.heimweg.abholen") === "Wird abgeholt",
     "");
   ok("Karneval: die Texte der entfallenen Fragen (Gruppe, Turnier, Abendauftritte, Abholung, Uhrzeit, Zuschlag) stehen nicht mehr im Wörterbuch",
@@ -1492,8 +1604,8 @@ async function pruefeHeimweg(browser, server, dateien, beispiele) {
         weiter: (w.querySelector('[data-aktion="weiter"]') || {}).textContent,
       };
     });
-    ok("Heimweg: Frage, Hinweis und Satz zum Ändern wie vorgegeben", inhalt.titel === SOLL.titel && JSON.stringify(inhalt.absaetze) === JSON.stringify(SOLL.absaetze), JSON.stringify(inhalt.absaetze));
-    ok("Heimweg: zwei Antworten 'Allein nach Hause' und 'Wird abgeholt' mit ihren Hinweisen; die Antwort aus dem Beispiel ist gewählt", JSON.stringify(inhalt.karten.map((x) => ({ wert: x.wert, titel: x.titel, hinweis: x.hinweis }))) === JSON.stringify(SOLL.karten) && inhalt.karten.map((x) => x.gewaehlt).join() === "false,true", JSON.stringify(inhalt.karten));
+    ok("Heimweg: Frage und Hinweis wie vorgegeben (kein Satz zum Ändern mehr)", inhalt.titel === SOLL.titel && JSON.stringify(inhalt.absaetze) === JSON.stringify(SOLL.absaetze), JSON.stringify(inhalt.absaetze));
+    ok("Heimweg: zwei Antworten 'Allein nach Hause' und 'Wird abgeholt' ohne Zusatzzeile; die Antwort aus dem Beispiel ist gewählt", JSON.stringify(inhalt.karten.map((x) => ({ wert: x.wert, titel: x.titel, hinweis: x.hinweis }))) === JSON.stringify(SOLL.karten) && inhalt.karten.map((x) => x.gewaehlt).join() === "false,true", JSON.stringify(inhalt.karten));
     ok("Heimweg: Pflichtfrage (Auswahlgruppe mit aria-required), Abschnitt 'Unterlagen' ist markiert, Knopf 'Weiter'", inhalt.pflicht === "true" && inhalt.rolle === "radiogroup" && inhalt.abschnitt === "unterlagen" && inhalt.weiter === "Weiter", JSON.stringify({ pflicht: inhalt.pflicht, rolle: inhalt.rolle, abschnitt: inhalt.abschnitt, weiter: inhalt.weiter }));
     ok("Heimweg: keine Uhrzeit und kein Feld für einen Namen auf der Seite", (await page.$$('#anmeldung input[type="text"], #anmeldung textarea')).length === 0, "");
     fs.mkdirSync(path.join(AUSGABE, MOBIL.name), { recursive: true });
@@ -1591,7 +1703,7 @@ async function pruefeHeimweg(browser, server, dateien, beispiele) {
       if (pdf) {
         const text = ohneLeer(pdfText(pdf.pfad));
         ok("Heimweg: das PDF hat das Blatt 'Heimweg nach dem Training' mit beiden Sätzen", text.includes("Heimweg nach dem Training") && text.includes("Mein Kind darf nach dem Training allein nach Hause gehen.") && text.includes("Mein Kind wird nach dem Training abgeholt. Es wartet am Trainingsort."), "");
-        ok("Heimweg: das PDF nennt auf dem Laufzettel die Kopie an das Trainerteam und in Teil A die Zeile des Blatts", text.includes("Heimweg nach dem Training: Kopie an das Trainerteam.") && /Heimweg nach dem Training\s+Eine Person mit Sorgerecht\s+Am Bildschirm erledigt/.test(ohneLeer(pdfText(pdf.pfad, 1)) + " " + ohneLeer(pdfText(pdf.pfad, 2))), "");
+        ok("Heimweg: das PDF nennt auf dem Laufzettel die Kopie an das Trainerteam; Teil A nennt die Zeile des Blatts nicht mehr unter „Wo unterschreiben Sie?“ (am Bildschirm erledigt; P3 Teil b, D1)", text.includes("Heimweg nach dem Training: Kopie an das Trainerteam.") && !/Heimweg nach dem Training\s+Eine Person mit Sorgerecht\s+Am Bildschirm erledigt/.test(ohneLeer(pdfText(pdf.pfad, 1)) + " " + ohneLeer(pdfText(pdf.pfad, 2))), "");
         ok("Heimweg: kein Blatt zu Auftritten am Abend im PDF", !/Auftritte am Abend|Erziehungsbeauftragung/.test(text), "");
       }
     }
@@ -1739,7 +1851,8 @@ async function pruefeFahrtenSatz(browser, server, beispiele) {
 // Attest: Hochladen heißt "habe"; danach nennt der Schritt 'unterschriften' die Erlaubnis für das Attest.
 async function pruefeAttestImPlan(browser, server, dateien) {
   console.log("\n=== Runde 3: Attest im Unterschriftenplan ===");
-  const gilt = (page) => page.evaluate(() => Array.from(document.querySelectorAll("#anmeldung .anm-unterschrift")).map((e) => e.innerText.replace(/\s+/g, " ")).join(" || "));
+  // textContent: Die Liste "Diese Unterschrift gilt für (n)" ist zugeklappt (P3 Teil b); innerText ließe sie weg.
+  const gilt = (page) => page.evaluate(() => Array.from(document.querySelectorAll("#anmeldung .anm-unterschrift")).map((e) => e.textContent.replace(/\s+/g, " ")).join(" || "));
   // ohne Attest
   const ohne = await seiteMitBeispiel(browser, server, MOBIL, "attest-ohne", "wechsel-hessen", null);
   await geheBis(ohne, "unterschriften");
@@ -1858,7 +1971,7 @@ async function statischeRunde4() {
   ok("Neue Texte (Runde 4) stehen im Wörterbuch: drei Meldungen zur Schrift und der Knopf 'Vorführung' im Namensraum demo", ["fehler.lateinischVerein", "fehler.lateinischText", "fehler.lateinischNummer", "demo.vorfuehrung"].every((x) => typeof T(x) === "string" && T(x).length > 0) && T("demo.vorfuehrung") === "Vorführung", "");
   ok("Getrennte Eltern: der Text des einen Kastens ist der vom Orchestrator festgelegte (drei kurze Absätze, Stand 07.10.2026; Modus „stift“)", T("sorge.zweiterMitStift") === "Hat der andere Elternteil zugestimmt? Dann setzen Sie den Haken.\nWenn nicht: Er unterschreibt den Aufnahmeantrag auch.\nDas geht nur mit Stift. Im PDF ist die Stelle markiert.", JSON.stringify(T("sorge.zweiterMitStift")));
   ok("Getrennte Eltern: der Text des Kastens im Modus „bildschirm“ (M9, 11.10.2026): drei kurze Absätze, am Bildschirm oder mit Stift im Ausdruck", T("sorge.zweiterAmBildschirm") === "Hat der andere Elternteil zugestimmt? Dann setzen Sie den Haken.\nWenn nicht: Er unterschreibt den Aufnahmeantrag auch.\nDas geht am Bildschirm. Oder mit Stift im Ausdruck.", JSON.stringify(T("sorge.zweiterAmBildschirm")));
-  ok("M9: neue Texte zum Schalter stehen im Wörterbuch (Wahl, Feld des Kindes und des anderen Elternteils, Prüfseite, Fertig-Seite)", ["unterschriften.weg.bildschirmAlles", "unterschriften.weg.bildschirmAllesHinweis", "unterschriften.person.spielerHinweis", "unterschriften.person.zweiteEltern", "unterschriften.person.zweiteHinweis", "pruefen.werte.mitStift", "pruefen.werte.nichtUnterschriebenFreiwillig", "pruefen.werte.unterschriftWeg.bildschirmAlles", "fertig.unterschriftRest"].every((x) => T(x) !== undefined) && T("unterschriften.person.spieler").kind === "Unterschrift von {name}" && T("unterschriften.person.spielerHinweis").kind === "Kann Ihr Kind schon schreiben? Dann unterschreibt es hier selbst." && T("unterschriften.person.spielerHinweis").selbst === "Sie sind noch nicht 18. Unterschreiben Sie hier auch selbst." && T("pruefen.werte.nichtUnterschriebenFreiwillig") === "Nicht unterschrieben (freiwillig)" && !/Stift|Ausdruck/.test(JSON.stringify(T("unterschriften.person.spielerHinweis"))), "");
+  ok("M9: neue Texte zum Schalter stehen im Wörterbuch (Wahl, Feld des Kindes und des anderen Elternteils, Prüfseite, Fertig-Seite)", ["unterschriften.weg.bildschirmAlles", "unterschriften.weg.bildschirmAllesHinweis", "unterschriften.person.spielerHinweis", "unterschriften.person.zweiteEltern", "unterschriften.person.zweiteHinweis", "pruefen.werte.mitStift", "pruefen.werte.nichtUnterschriebenFreiwillig", "pruefen.werte.unterschriftWeg.bildschirmAlles", "fertig.unterschriftRest"].every((x) => T(x) !== undefined) && T("unterschriften.person.spieler").kind === "Unterschrift von {name}" && T("unterschriften.person.spielerHinweis").kind === "Kann Ihr Kind schreiben? Dann unterschreibt es selbst." && T("unterschriften.person.spielerHinweis").selbst === "Sie sind unter 18? Unterschreiben Sie auch selbst." && T("pruefen.werte.nichtUnterschriebenFreiwillig") === "Nicht unterschrieben (freiwillig)" && !/Stift|Ausdruck/.test(JSON.stringify(T("unterschriften.person.spielerHinweis"))), "");
 }
 
 // Latein-Prüfung für alle Freitextfelder, die ins PDF gehen: je Feldgruppe ein Fall (hier jedes Feld einzeln).
@@ -1866,7 +1979,7 @@ async function pruefeFreitextLatein(browser, server) {
   console.log("\n=== Runde 4: lateinische Schrift in allen Freitextfeldern, die ins PDF gehen ===");
   const MELDUNG = {
     verein: "Bitte schreiben Sie die Angaben zum Verein mit lateinischen Buchstaben.",
-    anschrift: "Bitte schreiben Sie die Anschrift mit lateinischen Buchstaben.",
+    anschrift: "Bitte schreiben Sie die Adresse mit lateinischen Buchstaben.",
     text: "Bitte schreiben Sie mit lateinischen Buchstaben.",
     nummer: "Bitte schreiben Sie die Nummer mit den Ziffern 0 bis 9.",
   };
@@ -2200,13 +2313,12 @@ async function main() {
             // Zeigt die Ergebnisseite, was der PDF-Baustein geliefert hat (Teile, Seitenzahl)?
             const erg = daten.attrappe.ergebnis;
             const teile = Array.isArray(erg.teile) ? erg.teile : [];
-            ok("Profil " + id + " (" + vp.name + "): Ergebnisseite nennt die Teile der Datei und die Seitenzahl", daten.teileAnzeige === teile.length && new RegExp("^" + erg.seiten + " Seiten").test(daten.infoZeile), "angezeigt: " + daten.teileAnzeige + " Teil(e), '" + daten.infoZeile + "'; geliefert: " + (teile.map((x) => x.teil).join("") || "keine") + ", " + erg.seiten + " Seiten");
-            // Die Titel stehen im Wörterbuch (fertig.teilTitel.A/B/C), mit Buchstaben; die Seitenbereiche kommen aus erzeugePdf().
-            const titel = { A: "Teil A – Für Sie", B: "Teil B – Für den Verein", C: "Teil C – Vertraulich" };
-            ok("Profil " + id + " (" + vp.name + "): Teile heißen 'Teil A – Für Sie', 'Teil B – Für den Verein', 'Teil C – Vertraulich', dazu die Seiten aus pdf.js", teile.length > 0 && daten.teileTexte.length === teile.length && teile.every((x, i) => daten.teileTexte[i] === titel[x.teil] + " (Seite " + x.vonSeite + " bis " + x.bisSeite + ")"), daten.teileTexte.join(" | "));
+            // P3 Teil b (S5): Die Fertig-Seite zeigt die Seitenzahl (und die Größe), aber keine Liste der Teile mehr („Das steht in der Datei“):
+            // Teil A der Datei beginnt mit derselben Übersicht. Welche Teile die Datei hat, prüft der PDF-Test (Teil A, Laufzettel, Trennblatt).
+            ok("Profil " + id + " (" + vp.name + "): Ergebnisseite nennt die Seitenzahl und zeigt keine Liste der Teile (S5)", daten.teileAnzeige === 0 && new RegExp("^" + erg.seiten + " Seiten").test(daten.infoZeile) && !/Das steht in der Datei/.test(daten.seitenText || ""), "angezeigt: " + daten.teileAnzeige + " Teil(e), '" + daten.infoZeile + "'; geliefert: " + (teile.map((x) => x.teil).join("") || "keine") + ", " + erg.seiten + " Seiten");
           }
           if (daten) {
-            // Hinweis-Kästen auf 'pruefen' und 'fertig': offen nur Warnungen und Fristen, alles andere zugeklappt.
+            // Hinweis-Kästen: 'pruefen' ohne Hinweise; 'fertig' ohne Wiederholung (offen nur Warnungen und Fristen, alles andere zugeklappt).
             // Für das Beispiel kind-neu gilt zusätzlich: höchstens 4 offene Kästen.
             const regeln = await ladeRegeln();
             const befund = (daten.attrappe && daten.attrappe.a) || beispiele.beispielAntworten(id, HEUTE, server.konfig);
@@ -2215,9 +2327,9 @@ async function main() {
             const pdf = await pdfHerunterladenUndPruefen(browser, server, page, "Profil " + id + " (" + vp.name + ")", daten, { satzungOffen: false });
             if (pdf) PDF_ERGEBNISSE.set(id + "|" + vp.name, pdf);
             const domFertig = await hinweiseImDom(page);
-            hinweiseAuswerten("Profil " + id + " (" + vp.name + ") auf 'fertig'", domFertig, e, grenze);
-            hinweiseAuswerten("Profil " + id + " (" + vp.name + ") auf 'pruefen'", ctx.pruefenDom, e, grenze);
-            if (id === "kind-neu") {
+            hinweiseAufFertigseite("Profil " + id + " (" + vp.name + ") auf 'fertig'", domFertig, e, grenze, ctx.hinweiseGesehen);
+            hinweiseAufPruefseite("Profil " + id + " (" + vp.name + ") auf 'pruefen'", ctx.pruefenDom);
+            if (id === "kind-neu" && domFertig.aufklapperVorhanden) {
               // Der Aufklapper öffnet sich per Klick: alle übrigen Kästen werden sichtbar.
               await page.click("#anmeldung details.anm-weitere > summary");
               const offenDom = await hinweiseImDom(page);
@@ -2410,7 +2522,7 @@ async function eingabeLaeufe(browser, server, dateien, beispiele, alleSchritte) 
       // M10: Am Rechner zeigt die Fertig-Seite den Abschnitt zum Schicken der Datei per E-Mail; ohne „Datei teilen“ nur den Weg über das Herunterladen, ohne Überschrift
       const senden = await leseSenden(page);
       const teilenDa = !!(await page.$('#anmeldung [data-aktion="teilen"]:not([hidden])'));
-      ok("Eingabe Kind neu (Rechner): die Fertig-Seite zeigt den Abschnitt „So schicken Sie die Datei an den Verein“ mit der Adresse der Geschäftsstelle und " + (teilenDa ? "beiden Wegen" : "nur dem Weg über das Herunterladen (ohne Überschrift)"), !!senden && senden.titel === "So schicken Sie die Datei an den Verein" && senden.adresse === konfig.verein.mail && senden.wege.length === (teilenDa ? 2 : 1) && (teilenDa || (senden.wege[0].art === "computer" && senden.wege[0].titel === null)), senden && senden.wege.map((w) => w.art + ":" + w.titel).join(", "));
+      ok("Eingabe Kind neu (Rechner): die Fertig-Seite zeigt den Abschnitt „So schicken Sie die Datei an den Verein“ mit der Adresse der Geschäftsstelle und nur dem Weg über das Herunterladen (ohne Überschrift; P3 Teil b)", !!senden && senden.titel === "So schicken Sie die Datei an den Verein" && senden.adresse === konfig.verein.mail && senden.wege.length === 1 && senden.wege[0].art === "computer" && senden.wege[0].titel === null, senden && senden.wege.map((w) => w.art + ":" + w.titel).join(", "));
     }
     await speicherPruefung(page, "Eingabe Kind neu");
 
@@ -2436,7 +2548,7 @@ async function eingabeLaeufe(browser, server, dateien, beispiele, alleSchritte) 
     protokoll.profile.push({ name: "eingabe-geschwister", viewport: vp.name, modus: "eingabe", seiten: r2.besucht, datei: daten2 && daten2.dateiname });
 
     // Alle Angaben löschen
-    await page.click('#anmeldung [data-aktion="loeschen"]');
+    await page.click('#anmeldung .anm-fuss [data-aktion="loeschen-alles"]');
     await page.waitForSelector("dialog.anm-dialog--loeschen[open]", { timeout: 3000 });
     await page.click('[data-aktion="loeschen-ja"]');
     await page.waitForFunction(() => document.getElementById("anmeldung").dataset.schritt === "start", { timeout: 5000 });
@@ -2632,7 +2744,10 @@ async function pdfHerunterladenUndPruefen(browser, server, page, name, daten, er
 async function prueflistePruefen(page) {
   // Die Prüfseite ist Teil des Durchlaufs; hier nur die Bedienelemente am Ende.
   const knoepfe = await page.$$eval("#anmeldung .anm-ergebnis [data-aktion]", (l) => l.map((e) => e.getAttribute("data-aktion")));
-  ok("Ergebnisseite: Herunterladen, Ansehen, weitere Person und Löschen sind da", ["herunterladen", "ansehen", "weitere-person", "loeschen"].every((a) => knoepfe.includes(a)), knoepfe.join(", "));
+  ok("Ergebnisseite: Herunterladen, Ansehen und weitere Person sind da; „Alle Angaben löschen“ steht nicht noch einmal im Block (B-2), sondern nur in der Fußzeile", ["herunterladen", "ansehen", "weitere-person"].every((a) => knoepfe.includes(a)) && !knoepfe.includes("loeschen"), knoepfe.join(", "));
+  const fussLoeschen = await page.$eval('#anmeldung .anm-fuss [data-aktion="loeschen-alles"]', (e) => e.checkVisibility()).catch(() => false);
+  const weitere = await page.$eval("#anmeldung .anm-block:has([data-aktion='weitere-person'])", (b) => ({ knoepfe: b.querySelectorAll("button, a").length, hinweis: (b.querySelector(".anm-knoepfe + .anm-hinweis") || { textContent: "" }).textContent.trim() })).catch(() => null);
+  ok("Ergebnisseite (B-2): die Fußzeile bietet „Alle Angaben löschen“ an; im Block steht unter dem einen Knopf „Weitere Person anmelden“ der Satz „Wir übernehmen Adresse, Kontakt, Eltern und Zahlung.“", fussLoeschen && !!weitere && weitere.knoepfe === 1 && weitere.hinweis === "Wir übernehmen Adresse, Kontakt, Eltern und Zahlung.", JSON.stringify(weitere));
 }
 
 async function fotoDownloadPruefen(browser, page) {
@@ -2709,13 +2824,28 @@ async function pruefeSpielrechtImmer(browser, server, dateien, beispiele) {
       return {
         titel: (w.querySelector("#anm-titel") || {}).textContent.trim(),
         hinweise: Array.from(w.querySelectorAll("p.anm-hinweis")).map((p) => p.textContent.trim()),
+        hinweiseSichtbar: Array.from(w.querySelectorAll("p.anm-hinweis")).filter((p) => p.checkVisibility()).map((p) => p.textContent.trim()),
         karten: Array.from(w.querySelectorAll('input[data-pfad="spielerpass"]')).map((i) => i.getAttribute("data-wert")),
-        text: w.innerText,
+        jaZusatz: ((w.querySelector('label[for="' + ((w.querySelector('input[data-pfad="spielerpass"][data-wert="ja"]') || {}).id || "") + '"] .anm-karte__hinweis') || {}).textContent || "").trim(),
+        mehr: (() => {
+          const d = w.querySelector("details[data-mehr]");
+          const gruppe = w.querySelector('fieldset[data-feld="spielerpass"]');
+          return d ? { zu: !d.open, titel: d.querySelector("summary").textContent.trim(), saetze: Array.from(d.querySelectorAll("p")).map((p) => p.textContent.trim()), sichtbar: Array.from(d.querySelectorAll("p")).filter((p) => p.checkVisibility()).length, nachAntworten: !!gruppe && !!(gruppe.compareDocumentPosition(d) & Node.DOCUMENT_POSITION_FOLLOWING) } : null;
+        })(),
+        text: w.textContent,
         abschnitt: (document.querySelector('.anm-abschnitte__punkt[aria-current="step"]') || { getAttribute: () => null }).getAttribute("data-abschnitt"),
       };
     });
-    ok("Spielrecht immer (Kind): die Seite 'spielerpass' zeigt die Frage zum Spielerpass und darunter die drei Sätze zum Spielrecht",
-      inhalt.titel === "Hatte Ihr Kind schon einmal einen Spielerpass?" && SOLL.every((satz) => inhalt.hinweise.includes(satz)) && inhalt.hinweise.indexOf(SOLL[0]) > inhalt.hinweise.indexOf("Ein Spielerpass ist der Ausweis für Spiele in einem Verein."), inhalt.hinweise.join(" | "));
+    // P3 Teil b (S8, S9): Vor den Antworten steht nur die Erklärung des Spielerpasses; „Auch ein Spielerpass aus dem Ausland zählt.“ steht als Zusatzzeile unter „Ja“; die drei
+    // Sätze zum Spielrecht stehen zugeklappt unter „Mehr erfahren“ (unter den Antworten).
+    ok("Spielrecht immer (Kind): die Seite 'spielerpass' zeigt die Frage und die Erklärung; die drei Sätze zum Spielrecht stehen zugeklappt unter 'Mehr erfahren' (unter den Antworten)",
+      inhalt.titel === "Hatte Ihr Kind schon einmal einen Spielerpass?" && inhalt.hinweiseSichtbar.includes("Ein Spielerpass ist der Ausweis für Spiele in einem Verein.") && SOLL.every((satz) => !inhalt.hinweiseSichtbar.includes(satz)) &&
+        !!inhalt.mehr && inhalt.mehr.zu && inhalt.mehr.titel === "Mehr erfahren" && JSON.stringify(inhalt.mehr.saetze) === JSON.stringify(SOLL) && inhalt.mehr.sichtbar === 0 && inhalt.mehr.nachAntworten, JSON.stringify({ sichtbar: inhalt.hinweiseSichtbar, mehr: inhalt.mehr }));
+    ok("Spielrecht immer (Kind): unter „Ja“ steht die Zusatzzeile „Auch ein Spielerpass aus dem Ausland zählt.“ (statt des Absatzes vor der Frage)", inhalt.jaZusatz === "Auch ein Spielerpass aus dem Ausland zählt." && !inhalt.hinweise.includes("Auch wenn es nur trainiert hat. Auch im Ausland."), inhalt.jaZusatz);
+    await page.click("#anmeldung details[data-mehr] > summary");
+    const mehrOffen = await page.$eval("#anmeldung details[data-mehr]", (d) => ({ offen: d.open, sichtbar: Array.from(d.querySelectorAll("p")).filter((p) => p.checkVisibility()).length }));
+    ok("Spielrecht immer (Kind): ein Klick auf 'Mehr erfahren' zeigt die drei Sätze zum Spielrecht", mehrOffen.offen && mehrOffen.sichtbar === 3, JSON.stringify(mehrOffen));
+    await page.click("#anmeldung details[data-mehr] > summary");
     ok("Spielrecht immer (Kind): drei Antworten (Ja, Nein, Weiß nicht), Abschnitt 'Fußball oder Karneval' markiert", JSON.stringify(inhalt.karten) === JSON.stringify(["ja", "nein", "weiss_nicht"]) && inhalt.abschnitt === "fussballKarneval", JSON.stringify(inhalt.karten) + " " + inhalt.abschnitt);
     ok("Spielrecht immer (Kind): auf der Seite steht nichts mehr von der früheren Frage und Antwort", !ALT.test(inhalt.text), ALT.test(inhalt.text) ? inhalt.text.slice(0, 300) : "");
     const dom = await hinweiseImDom(page);
@@ -2741,7 +2871,7 @@ async function pruefeSpielrechtImmer(browser, server, dateien, beispiele) {
     const s = await geheBis(page, "spielerpass", "haupt");
     const hinweise = s.schritt === "spielerpass" ? await page.$$eval("#anmeldung p.anm-hinweis", (l) => l.map((x) => x.textContent.trim())) : [];
     const titel = s.schritt === "spielerpass" ? await page.$eval("#anm-titel", (e) => e.textContent.trim()) : "";
-    ok("Spielrecht immer (Erwachsene): die Seite 'spielerpass' zeigt dieselben drei Sätze zum Spielrecht", s.schritt === "spielerpass" && titel === "Hatten Sie schon einmal einen Spielerpass?" && SOLL.every((satz) => hinweise.includes(satz)), titel + " | " + hinweise.join(" | "));
+    ok("Spielrecht immer (Erwachsene): die Seite 'spielerpass' hat dieselben drei Sätze zum Spielrecht (zugeklappt unter 'Mehr erfahren')", s.schritt === "spielerpass" && titel === "Hatten Sie schon einmal einen Spielerpass?" && SOLL.every((satz) => hinweise.includes(satz)), titel + " | " + hinweise.join(" | "));
     const dom = await hinweiseImDom(page);
     ok("Spielrecht immer (Erwachsene): der Hinweis für Kinder 'ohne Spielrecht kein Spiel' fehlt", !dom.offenSchluessel.includes("ohne_spielrecht_kein_spiel") && !dom.aufklapperSchluessel.includes("ohne_spielrecht_kein_spiel"), JSON.stringify({ offen: dom.offenSchluessel, aufklapper: dom.aufklapperSchluessel }));
     await page.close();
@@ -2765,6 +2895,162 @@ async function pruefeSpielrechtImmer(browser, server, dateien, beispiele) {
   }
 }
 
+// ---------- P3 Teil b (12.10.2026): weniger Text, einfachere Wörter ----------
+
+// Olgay (12.10.2026): „achte … auf einfache Wortwahl und nicht zu viel Text, teilweise wirkt es ganz schön überladen.“ Freigegeben ist der Vorschlag
+// aus pruefung/p3/VORSCHLAG.md (Stand 12.10.2026, mit den Änderungen aus pakete/P3b-freigabe.md). Diese Prüfung hält fest, was dort entschieden ist:
+// gestrichene Texte fehlen in allen vier Sprachen, neue stehen in allen vier, „Mehr erfahren“, „Andere Beitragsgruppe“ und die Seiten ohne Kasten.
+const P3_GESTRICHEN = [
+  "wer.kindHinweis", "wer.selbstHinweis", "wer.mehrere", "name.vornameHinweis", "geburt.datum.ortHinweis", "abteilung.fussballHinweis", "abteilung.beidesHinweis",
+  "mannschaft.alter", "mannschaft.klasse", "mannschaft.klasseHerren", "spielerpass.hinweis", "abmeldung.mitgliedschaft.hinweis", "abmeldung.mitgliedschaft.kuendigenHinweis",
+  "abmeldung.spiele.hinweis", "abmeldung.freigabe.jaHinweis", "beitrag.gruppe.vorschlagKopf", "beitrag.gruppe.andere", "einwilligungen.fotos.jaHinweis",
+  "einwilligungen.fotos.medienHinweis", "heimweg.alleinHinweis", "heimweg.abholenHinweis", "heimweg.aendern", "unterschriften.satzung.pflicht", "unterschriften.hierTitel",
+  "unterschriften.satzung.titel", "fertig.senden.einleitung", "fertig.senden.handyTitel", "fertig.senden.computerTitel", "fertig.teileTitel", "fertig.teil", "pruefen.hinweiseTitel",
+  "ausland.hinweis", "kontakt.erreichen.emailHinweis", "sorge.personen.hinweis", "spielerfoto.fotoHinweis", "spielerfoto.dateiHinweis", "alterVerein.verbandHinweis", "nachweise.art.pflicht",
+];
+const P3_NEU = ["allgemein.mehrErfahren", "spielerpass.jaHinweis", "beitrag.gruppe.andereGruppe"];
+
+async function pruefeKuerzungenP3(browser, server, dateien, beispiele) {
+  console.log("\n=== P3 Teil b: weniger Text (Kürzungen, „Mehr erfahren“, „Andere Beitragsgruppe“) ===");
+  const hole = (o, pfad) => pfad.split(".").reduce((x, sch) => (x === undefined || x === null ? undefined : x[sch]), o);
+  const woerter = {};
+  for (const sprache of ["de", "en", "tr", "ar"]) woerter[sprache] = (await import(pathToFileURL(path.join(ROOT, "assets", "js", "anmeldung", "texte", sprache + "-oberflaeche.js")).href)).default;
+  for (const sprache of ["de", "en", "tr", "ar"]) {
+    const uebrig = P3_GESTRICHEN.filter((x) => hole(woerter[sprache], x) !== undefined);
+    ok("Kürzungen (" + sprache + "): die " + P3_GESTRICHEN.length + " gestrichenen Texte stehen nicht mehr im Wörterbuch", uebrig.length === 0, uebrig.join(", "));
+    const fehlt = P3_NEU.filter((x) => typeof hole(woerter[sprache], x) !== "string" || !hole(woerter[sprache], x).trim());
+    ok("Kürzungen (" + sprache + "): die neuen Texte (Mehr erfahren, Zusatzzeile unter „Ja“ beim Spielerpass, Andere Beitragsgruppe) stehen im Wörterbuch", fehlt.length === 0, fehlt.join(", "));
+  }
+  const T = (pfad) => hole(woerter.de, pfad);
+  ok("Kürzungen: die deutschen Texte der neuen Schlüssel und der geänderten Titel (freigegeben am 12.10.2026)",
+    T("allgemein.mehrErfahren") === "Mehr erfahren" && T("spielerpass.jaHinweis") === "Auch ein Spielerpass aus dem Ausland zählt." && T("beitrag.gruppe.andereGruppe") === "Andere Beitragsgruppe" &&
+      T("heimweg.titel") === "Darf Ihr Kind allein nach Hause gehen?" && T("zahlung.inhaber.anschriftGleich") === "Wohnt an derselben Adresse" && T("spielerfoto.datei") === "Ich wähle ein Foto aus" &&
+      T("notfall.bogen.hinweis") === "Er ist freiwillig.\nEr hilft bei Allergien und Krankheiten.\nNur Trainer und Betreuer sehen ihn.",
+    "");
+  ok("Kürzungen: der Wortlaut der Datenschutz-Texte und der Einwilligungen bleibt (Titel der Frage zu den Fotos und zum Verband, Sätze zu Freiwilligkeit)",
+    T("einwilligungen.fotos.hinweis") === "Sie entscheiden frei. Sie können das später ändern." && T("einwilligungen.hfv.hinweis") === "Beides ist freiwillig. Sie können das später ändern." && T("einwilligungen.fahrten.hinweis") === "Beides ist freiwillig. Sie können das später ändern." &&
+      T("einwilligungen.hfv.titel") === "Was darf der Fußball-Verband veröffentlichen?" && T("fertig.teilC") === "Teil C enthält Gesundheitsdaten. Der Verein bewahrt ihn getrennt auf.",
+    "");
+
+  // ---- A: Beitrag (O1): nur der Vorschlag steht offen, die anderen Gruppen unter „Andere Beitragsgruppe“ ----
+  {
+    const page = await seiteMitBeispiel(browser, server, MOBIL, "p3-beitrag", "kind-neu", null);
+    const s = await geheBis(page, "beitrag", "gruppe");
+    ok("Beitrag (O1): Seite 'beitrag/gruppe' erreicht", s.schritt === "beitrag" && s.teil === "gruppe", s.schritt + "/" + s.teil);
+    const lesen = () => page.evaluate(() => {
+      const w = document.getElementById("anmeldung");
+      const gruppe = w.querySelector('fieldset[data-feld="beitrag.gruppe"]');
+      const karten = (wurzel) => Array.from(wurzel.querySelectorAll("label.anm-karte")).map((l) => ({ wert: l.querySelector("input").getAttribute("data-wert"), titel: l.querySelector(".anm-karte__titel").textContent.replace(/\s+/g, " ").trim(), zusatz: ((l.querySelector(".anm-karte__hinweis") || {}).textContent || "").trim(), gewaehlt: l.querySelector("input").checked, sichtbar: l.checkVisibility() }));
+      const d = gruppe.querySelector("details[data-weitere-karten]");
+      return {
+        offen: karten(gruppe.querySelector(":scope > .anm-karten")),
+        weitere: d ? { zu: !d.open, titel: d.querySelector("summary").textContent.trim(), karten: karten(d) } : null,
+        gruppen: gruppe.querySelectorAll('input[type="radio"]').length,
+        namen: new Set(Array.from(gruppe.querySelectorAll('input[type="radio"]')).map((i) => i.name)).size,
+        text: w.textContent.replace(/\s+/g, " "),
+        scroll: [document.documentElement.scrollWidth, window.innerWidth],
+      };
+    });
+    let d = await lesen();
+    const vorschlagWert = d.offen[0] && d.offen[0].wert;
+    ok("Beitrag (O1): genau eine Gruppe steht offen da, vorgewählt und mit dem Zusatz „Vorschlag“", d.offen.length === 1 && d.offen[0].gewaehlt && d.offen[0].sichtbar && d.offen[0].zusatz === "Vorschlag", JSON.stringify(d.offen));
+    ok("Beitrag (O1): die anderen Gruppen stehen in einem zugeklappten Bereich „Andere Beitragsgruppe“ und sind nicht zu sehen", !!d.weitere && d.weitere.zu && d.weitere.titel === "Andere Beitragsgruppe" && d.weitere.karten.length >= 2 && d.weitere.karten.every((x) => !x.sichtbar && !x.gewaehlt), JSON.stringify(d.weitere && { zu: d.weitere.zu, titel: d.weitere.titel, n: d.weitere.karten.length }));
+    ok("Beitrag (O1): alle Karten bilden eine Auswahl (ein Name, höchstens eine gewählt) und die Seite hat die Zeilen „Wir schlagen vor“ und „Sie können eine andere Gruppe wählen.“ nicht mehr", d.namen === 1 && d.gruppen === d.offen.length + d.weitere.karten.length && !/Wir schlagen vor|andere Gruppe wählen/.test(d.text), d.gruppen + " Karten; " + d.namen + " Name(n)");
+    // Tastatur: Fokus auf die Beschriftung, Eingabetaste öffnet, noch einmal schließt
+    const summary = "#anmeldung details[data-weitere-karten] > summary";
+    await page.focus(summary);
+    await page.keyboard.press("Enter");
+    d = await lesen();
+    ok("Beitrag (O1): die Eingabetaste auf „Andere Beitragsgruppe“ öffnet den Bereich, alle anderen Gruppen sind zu sehen", d.weitere.zu === false && d.weitere.karten.every((x) => x.sichtbar), JSON.stringify(d.weitere.karten.map((x) => x.sichtbar)));
+    const klein = await kleineTippflaechen(page);
+    ok("Beitrag (O1): Tippflächen mindestens 44 px, kein Querscrollen bei 390 px", klein.length === 0 && d.scroll[0] <= d.scroll[1], klein.slice(0, 3).join(" | ") + " " + d.scroll.join(" gegen "));
+    await axePruefen(page, "390x844 beitrag/gruppe mit geöffnetem „Andere Beitragsgruppe“ (P3 Teil b)");
+    fs.mkdirSync(path.join(AUSGABE, MOBIL.name), { recursive: true });
+    await page.screenshot({ path: path.join(AUSGABE, MOBIL.name, "beitrag-andere-gruppe-offen.png"), fullPage: false });
+    protokoll.screenshots++;
+    // eine andere Gruppe wählen: Die Wahl gilt für die ganze Auswahl (die Vorschlags-Karte ist danach nicht mehr gewählt)
+    const andere = d.weitere.karten[0];
+    await klickeEtikett(page, '#anmeldung input[data-pfad="beitrag.gruppe"][data-wert="' + andere.wert + '"]');
+    d = await lesen();
+    const gewaehlt = [...d.offen, ...d.weitere.karten].filter((x) => x.gewaehlt);
+    ok("Beitrag (O1): wer eine andere Gruppe antippt, wählt sie; die bisherige ist nicht mehr gewählt", gewaehlt.length === 1 && gewaehlt[0].wert === andere.wert, JSON.stringify(gewaehlt.map((x) => x.titel)));
+    // Prüfseite zeigt die gewählte Gruppe; „Ändern“ führt zurück: Die gewählte Gruppe steht jetzt offen da, der Vorschlag im zugeklappten Bereich
+    const sp = await geheBis(page, "pruefen", "haupt");
+    const zeilen = sp.schritt === "pruefen" ? await pruefZeilen(page) : [];
+    const beitragsZeile = zeilen.find((z) => z.label === "Beitrag");
+    const bezeichnung = (server.konfig.anmeldung.beitragsgruppen[andere.wert] || {}).bezeichnung || "";
+    ok("Beitrag (O1): die Prüfseite nennt die gewählte Gruppe", !!bezeichnung && !!beitragsZeile && beitragsZeile.wert.includes(bezeichnung), JSON.stringify(beitragsZeile) + " – gewählt: " + andere.wert + " (" + bezeichnung + ")");
+    await page.click('#anmeldung button[aria-label="Beitrag ändern"]');
+    await page.waitForFunction(() => document.getElementById("anmeldung").dataset.schritt === "beitrag", { timeout: 5000 });
+    d = await lesen();
+    // (Der Zusatz „Vorschlag“ steht nur, solange die Familie nicht selbst gewählt hat; das war schon vorher so.)
+    ok("Beitrag (O1): nach „Ändern“ steht die gewählte Gruppe offen da; der frühere Vorschlag steht im zugeklappten Bereich", d.offen.length === 1 && d.offen[0].wert === andere.wert && d.offen[0].gewaehlt && !!d.weitere && d.weitere.zu && d.weitere.karten.some((x) => x.wert === vorschlagWert && !x.sichtbar && !x.gewaehlt), JSON.stringify({ offen: d.offen.map((x) => x.titel), imBereich: d.weitere && d.weitere.karten.map((x) => x.wert), vorschlagWert }));
+    ok("Beitrag (O1): keine Fehler in der Konsole", page.__st.konsole.length === 0, page.__st.konsole.slice(0, 3).join(" | "));
+    await page.close();
+  }
+
+  // ---- B: Leistungen (S9): die Beispiele stehen offen, die Begründung zugeklappt unter „Mehr erfahren“ ----
+  {
+    const page = await seiteMitBeispiel(browser, server, MOBIL, "p3-leistungen", "kind-neu", null);
+    const s = await geheBis(page, "leistungen", "haupt");
+    const d = await page.evaluate(() => {
+      const w = document.getElementById("anmeldung");
+      const mehr = w.querySelector("details[data-mehr]");
+      const gruppe = w.querySelector('fieldset[data-feld="leistungen"]');
+      return {
+        sichtbar: Array.from(w.querySelectorAll("p.anm-hinweis")).filter((p) => p.checkVisibility()).map((p) => p.textContent.trim()),
+        mehr: mehr ? { zu: !mehr.open, titel: mehr.querySelector("summary").textContent.trim(), saetze: Array.from(mehr.querySelectorAll("p")).map((p) => p.textContent.trim()), nachAntworten: !!(gruppe.compareDocumentPosition(mehr) & Node.DOCUMENT_POSITION_FOLLOWING) } : null,
+      };
+    });
+    ok("Leistungen (S9): die Beispiele („Zum Beispiel Grundsicherungsgeld, …“) stehen offen; die Begründung („Dann zahlt das Amt oft den Beitrag. Das heißt Bildung und Teilhabe.“) steht zugeklappt unter „Mehr erfahren“",
+      s.schritt === "leistungen" && d.sichtbar.some((x) => /^Zum Beispiel Grundsicherungsgeld/.test(x)) && !d.sichtbar.some((x) => /Dann zahlt das Amt oft den Beitrag/.test(x)) && !!d.mehr && d.mehr.zu && d.mehr.titel === "Mehr erfahren" &&
+        JSON.stringify(d.mehr.saetze) === JSON.stringify(["Dann zahlt das Amt oft den Beitrag.", "Das heißt Bildung und Teilhabe."]) && d.mehr.nachAntworten, JSON.stringify(d));
+    await page.close();
+  }
+
+  // ---- C: Mannschaft (S6): der Satz des Regelwerks steht als Absatz, kein Kasten, keine Zeilen zu Alter und Altersklasse ----
+  {
+    const page = await seiteMitBeispiel(browser, server, MOBIL, "p3-mannschaft", "kind-neu", null);
+    const s = await geheBis(page, "mannschaft", "haupt");
+    const d = await page.evaluate(() => {
+      const w = document.getElementById("anmeldung");
+      return { kaesten: w.querySelectorAll(".anm-hinweiskasten").length, gross: Array.from(w.querySelectorAll("p.anm-text--gross")).map((p) => p.textContent.trim()), text: w.textContent.replace(/\s+/g, " ") };
+    });
+    ok("Mannschaft (S6): ein Satz als großer Absatz („Das Kind passt zur Mannschaft …“), kein Kasten, nichts zu Alter, Jahrgang und Altersklasse", s.schritt === "mannschaft" && d.kaesten === 0 && d.gross.length === 1 && /^Das Kind passt zur Mannschaft /.test(d.gross[0]) && !/Jahre alt|Jahrgang|passt zur [A-Z]-Jugend/.test(d.text), JSON.stringify(d.gross) + " | Kästen: " + d.kaesten);
+    await page.close();
+  }
+
+  // ---- D: Abteilung und Spielerfoto: Zusatzzeilen nur, wo sie etwas erklären ----
+  {
+    const page = await seiteMitBeispiel(browser, server, MOBIL, "p3-abteilung", "kind-neu", null);
+    const s = await geheBis(page, "abteilung", "haupt");
+    const zusatz = await page.$$eval('#anmeldung input[data-pfad="abteilung"]', (l) => l.map((i) => ({ wert: i.getAttribute("data-wert"), zusatz: ((document.querySelector('label[for="' + i.id + '"] .anm-karte__hinweis') || {}).textContent || "").trim() })));
+    ok("Abteilung (T06, T07): nur „Karneval“ und „Nur unterstützen“ tragen eine Zusatzzeile", s.schritt === "abteilung" && JSON.stringify(zusatz) === JSON.stringify([{ wert: "fussball", zusatz: "" }, { wert: "karneval", zusatz: "Tanzen bei den Schnauzern" }, { wert: "beides", zusatz: "" }, { wert: "passiv", zusatz: "Ihr Kind ist Mitglied. Es macht keinen Sport." }]), JSON.stringify(zusatz)); // U-02: Beispiel „kind-neu“ = „Mein Kind“ (bei „Ich selbst“ steht „Sie sind Mitglied …“, geprüft in pruefeSeitenP6)
+    const sf = await geheBis(page, "spielerfoto", "haupt");
+    const foto = await page.$$eval('#anmeldung input[data-pfad="spielerfoto.weg"]', (l) => l.map((i) => ({ wert: i.getAttribute("data-wert"), titel: document.querySelector('label[for="' + i.id + '"] .anm-karte__titel').textContent.trim(), zusatz: ((document.querySelector('label[for="' + i.id + '"] .anm-karte__hinweis') || {}).textContent || "").trim() })));
+    ok("Spielerfoto (T67 bis T69): „Ich mache jetzt ein Foto“, „Ich wähle ein Foto aus“, „Der Verein macht das Foto“ (nur diese mit der Zusatzzeile „Beim ersten Training.“)", sf.schritt === "spielerfoto" && JSON.stringify(foto) === JSON.stringify([{ wert: "foto", titel: "Ich mache jetzt ein Foto", zusatz: "" }, { wert: "datei", titel: "Ich wähle ein Foto aus", zusatz: "" }, { wert: "verein", titel: "Der Verein macht das Foto", zusatz: "Beim ersten Training." }]), JSON.stringify(foto));
+    await page.close();
+  }
+
+  // ---- E: Unterschriften: Satzung ohne Überschrift und ohne Zusatzzeile am Bildschirm; keine Überschrift „Diese Unterschriften geben Sie hier ab“ ----
+  {
+    const page = await seiteMitBeispiel(browser, server, MOBIL, "p3-satzung", "kind-neu", null);
+    const s = await geheBis(page, "unterschriften", "haupt");
+    const lesen = () => page.evaluate(() => {
+      const w = document.getElementById("anmeldung");
+      const haken = w.querySelector('input[data-pfad="satzung"]');
+      const zeile = haken.closest("label").querySelector(".anm-karte__hinweis");
+      return { ueberschriften: Array.from(w.querySelectorAll("h3")).map((h) => h.textContent.trim()), beschreibt: haken.getAttribute("aria-describedby"), zeile: zeile ? zeile.textContent.trim() : null, erklaerung: (w.querySelector(".anm-satzung > p.anm-hinweis") || {}).textContent };
+    });
+    let d = await lesen();
+    ok("Unterschriften (T56, T57, T70): am Bildschirm keine Überschrift „Die Satzung des Vereins“ und keine „Diese Unterschriften geben Sie hier ab“, kein Zusatz am Haken (die Fehlerzeile sagt, was fehlt)", s.schritt === "unterschriften" && !d.ueberschriften.includes("Die Satzung des Vereins") && !d.ueberschriften.includes("Diese Unterschriften geben Sie hier ab") && d.zeile === null && d.beschreibt === null && d.erklaerung === "Die Satzung sind die Regeln des Vereins.", JSON.stringify(d));
+    await klickeEtikett(page, '#anmeldung input[data-pfad="unterschriftWeg"][data-wert="papier"]');
+    d = await lesen();
+    ok("Unterschriften (T56): auf dem Papierweg sagt die Zusatzzeile am Haken, was zu tun ist, und der Haken hängt an ihr (aria-describedby)", d.zeile === "Freiwillig. Ohne Haken kreuzen Sie es im Ausdruck von Hand an." && !!d.beschreibt, JSON.stringify(d));
+    await page.close();
+  }
+}
+
 // ---------- Einzelprüfungen ----------
 
 async function einzelpruefungen(browser, server, dateien, beispiele) {
@@ -2775,7 +3061,10 @@ async function einzelpruefungen(browser, server, dateien, beispiele) {
     ["pruefeTastatur", () => pruefeTastatur(browser, server)],
     ["pruefeHilfe", () => pruefeHilfe(browser, server)],
     ["pruefeSprachwahlOben", () => pruefeSprachwahlOben(browser, server)],
-    ["pruefeAppModus", () => pruefeAppModus(browser, server, dateien)],
+    ["pruefeZugang", () => pruefeZugang(browser, server)],
+    ["pruefeUebergabe", () => pruefeUebergabe(browser, server)],
+    ["pruefeUmgebungshinweis", () => pruefeUmgebungshinweis(browser, server)],
+    ["pruefeCodeNichtImPdf", () => pruefeCodeNichtImPdf(browser, server, dateien)],
     ["pruefeUebersetzbareDaten", () => pruefeUebersetzbareDaten(browser, server)],
     ["pruefeHinweiseAufSeiten", () => pruefeHinweiseAufSeiten(browser, server, beispiele)],
     ["statischeRunde3", () => statischeRunde3(server)],
@@ -2788,6 +3077,7 @@ async function einzelpruefungen(browser, server, dateien, beispiele) {
     ["pruefeSonderzeichenPdf", () => pruefeSonderzeichenPdf(browser, server, dateien)],
     ["pruefeHeimweg", () => pruefeHeimweg(browser, server, dateien, beispiele)],
     ["pruefeSpielrechtImmer", () => pruefeSpielrechtImmer(browser, server, dateien, beispiele)],
+    ["pruefeKuerzungenP3", () => pruefeKuerzungenP3(browser, server, dateien, beispiele)],
     ["pruefeFahrtenSatz", () => pruefeFahrtenSatz(browser, server, beispiele)],
     ["pruefeAttestImPlan", () => pruefeAttestImPlan(browser, server, dateien)],
     ["pruefeSprache", () => pruefeSprache(browser, server)],
@@ -2800,6 +3090,7 @@ async function einzelpruefungen(browser, server, dateien, beispiele) {
     ["pruefeBerichtsseite", () => pruefeBerichtsseite(browser, server, beispiele)],
     ["statischeM10", () => statischeM10(server)],
     ["pruefeMailAnVerein", () => pruefeMailAnVerein(browser, server, dateien, beispiele)],
+    ["pruefeSeitenP6", () => pruefeSeitenP6(browser, server, dateien, beispiele)],
   ];
   const unbekannt = NUR.filter((n) => !alle.some(([name]) => name === n));
   if (unbekannt.length) throw new Error("--nur: unbekannte Einzelprüfung(en) " + unbekannt.join(", ") + " – möglich: " + alle.map(([name]) => name).join(", "));
@@ -2969,23 +3260,31 @@ async function pruefeTastatur(browser, server) {
   await page.close();
 }
 
-// Hinweise auf den Seiten mit einer Frage: höchstens 2 Kästen offen (nur Warnungen und Fristen),
-// alles andere unter "Weitere Hinweise (n)". Einmal an der echten Seite (Wechsel in Hessen,
-// Frage nach der Mitgliedschaft), einmal an regelHinweise() selbst mit erfundenen Hinweisen,
-// damit auch der Fall "mehr als 2 Warnungen" vorkommt.
+// Hinweise auf den Seiten mit einer Frage: höchstens 1 Kasten offen (nur Warnungen und Fristen),
+// alles andere unter "Weitere Hinweise (n)". Einmal an den echten Seiten (Wechsel in Hessen: die Fragen nach dem
+// Stand der Abmeldung, nach dem Weg und nach der Mitgliedschaft), einmal an regelHinweise() selbst mit erfundenen
+// Hinweisen, damit auch der Fall "mehr als 2 Warnungen" vorkommt.
 async function pruefeHinweiseAufSeiten(browser, server, beispiele) {
-  // (a) echte Seite
+  // (a) echte Seiten
   const seite = await seiteMitBeispiel(browser, server, MOBIL, "hinweise-seite", "wechsel-hessen", null);
-  const s = await geheBis(seite, "abmeldung", "mitgliedschaft");
-  ok("Hinweise auf einer Frageseite: Seite 'abmeldung/mitgliedschaft' erreicht", s.schritt === "abmeldung" && s.teil === "mitgliedschaft", s.schritt + "/" + s.teil);
+  // U-07: Auf „Ist Ihr Kind beim alten Verein abgemeldet?“ stehen zwei Warnungen: eine offen, die zweite zugeklappt (sie steht danach offen auf der Fertig-Seite)
+  const sSt = await geheBis(seite, "abmeldung", "status");
+  const domSt = await hinweiseImDom(seite);
+  ok("Hinweise auf der Frageseite 'abmeldung/status' (U-07): zwei Warnungen, die erste offen, die zweite zugeklappt unter „Weitere Hinweise (1)“", sSt.schritt === "abmeldung" && sSt.teil === "status" && domSt.offenArten.join() === "warnung" && domSt.aufklapperArten.join() === "warnung" && domSt.aufklapperTitel === "Weitere Hinweise (1)" && domSt.aufklapperZu === true, JSON.stringify({ offen: domSt.offenSchluessel, aufklapper: domSt.aufklapperSchluessel, titel: domSt.aufklapperTitel }));
+  const s = await geheBis(seite, "abmeldung", "weg");
+  ok("Hinweise auf einer Frageseite: Seite 'abmeldung/weg' erreicht", s.schritt === "abmeldung" && s.teil === "weg", s.schritt + "/" + s.teil);
   const dom = await hinweiseImDom(seite);
   const alleArten = [...dom.offenArten, ...dom.aufklapperArten];
   ok(
-    "Hinweise auf einer Frageseite: höchstens 2 Kästen offen, nur Warnungen und Fristen; Infos im Aufklapper",
-    dom.offenSichtbar <= 2 && dom.offenArten.every((x) => x === "warnung" || x === "frist") && dom.aufklapperArten.includes("info") && dom.aufklapperZu === true && dom.aufklapperTitel === "Weitere Hinweise (" + dom.aufklapperAnzahl + ")" && alleArten.length >= 2,
+    "Hinweise auf einer Frageseite: höchstens 1 Kasten offen (P3 Teil b, STILREGELN Nr. 3), nur Warnungen und Fristen; Infos im Aufklapper",
+    dom.offenSichtbar <= 1 && dom.offenArten.every((x) => x === "warnung" || x === "frist") && dom.aufklapperArten.includes("info") && dom.aufklapperZu === true && dom.aufklapperTitel === "Weitere Hinweise (" + dom.aufklapperAnzahl + ")" && alleArten.length >= 2,
     "offen: " + (dom.offenArten.join(", ") || "keiner") + "; Aufklapper (" + dom.aufklapperAnzahl + "): " + dom.aufklapperArten.join(", ")
   );
   await seite.screenshot({ path: path.join(AUSGABE, MOBIL.name, "hinweise-frageseite.png"), fullPage: false });
+  // U-06: Der Hinweis „In unserem Verein können Sie nur zum Jahresende kündigen“ (kuendigung_jahresende) meint den eigenen Verein und steht nicht bei der Frage zum alten Verein
+  const sMg = await geheBis(seite, "abmeldung", "mitgliedschaft");
+  const domMg = await hinweiseImDom(seite);
+  ok("Hinweise auf der Frageseite 'abmeldung/mitgliedschaft' (U-06): nur der Kasten „kuendigung_extra“ steht da, der Hinweis zur Kündigung zum Jahresende nicht", sMg.teil === "mitgliedschaft" && domMg.offenSchluessel.join() === "kuendigung_extra" && !domMg.aufklapperVorhanden && !domMg.aufklapperSchluessel.includes("kuendigung_jahresende"), JSON.stringify({ offen: domMg.offenSchluessel, aufklapper: domMg.aufklapperSchluessel }));
   await seite.close();
 
   // (b) regelHinweise() mit erfundenen Hinweisen: drei Warnungen, eine Info und ein 'offen' für eine Seite
@@ -3015,8 +3314,8 @@ async function pruefeHinweiseAufSeiten(browser, server, beispiele) {
     return { voll: beschreibe(voll), nurInfo: beschreibe(nurInfo), keine: keine.length };
   });
   ok(
-    "regelHinweise(): bei 3 Warnungen, 1 Info und 1 'offen' zwei Kästen offen, die anderen drei im Aufklapper",
-    r.voll.offen.length === 2 && r.voll.offen.every((x) => x.startsWith("warnung:")) && r.voll.aufklapper.length === 1 && r.voll.aufklapper[0].kaesten === 3 && r.voll.aufklapper[0].zu && /Weitere Hinweise \(3\)/.test(r.voll.aufklapper[0].titel),
+    "regelHinweise(): bei 3 Warnungen, 1 Info und 1 'offen' ein Kasten offen (die erste Warnung), die anderen vier im Aufklapper",
+    r.voll.offen.length === 1 && r.voll.offen.every((x) => x.startsWith("warnung:")) && r.voll.aufklapper.length === 1 && r.voll.aufklapper[0].kaesten === 4 && r.voll.aufklapper[0].zu && /Weitere Hinweise \(4\)/.test(r.voll.aufklapper[0].titel),
     JSON.stringify(r.voll)
   );
   ok(
@@ -3025,6 +3324,37 @@ async function pruefeHinweiseAufSeiten(browser, server, beispiele) {
     JSON.stringify(r.nurInfo)
   );
   ok("regelHinweise(): ohne passenden Hinweis bleibt die Seite leer (kein Aufklapper)", r.keine === 0, String(r.keine));
+
+  // (c) U-06, U-07, U-08 (12.10.2026): Was auf der Frageseite nur zugeklappt stand, geht für die Fertig-Seite nicht verloren; der Hinweis zur Kündigung zum Jahresende
+  // gehört nicht zur Frage beim alten Verein; die Fertig-Seite zeigt keinen Kasten „Frist“ ohne Frist
+  const u = await page.evaluate(async () => {
+    const basis = "/assets/js/anmeldung/";
+    const [ende, wb, hilfen] = await Promise.all([import(basis + "seiten-ende.js"), import(basis + "texte/de-oberflaeche.js"), import(basis + "hilfen.js")]);
+    const get = (o, p) => p.split(".").reduce((x, s) => (x === undefined ? undefined : x[s]), o);
+    const neuK = () => ({ t: (p, w) => hilfen.ersetzePlatzhalter(get(wb.default, p), w || {}), rt: (bereich, key) => "Text zu " + key, formatDatum: (x) => x, weitereOffen: new Map() });
+    const beschreibe = (knoten) => ({
+      offen: knoten.filter((x) => x.matches && x.matches(".anm-hinweiskasten")).map((x) => x.getAttribute("data-hinweis-art") + ":" + x.getAttribute("data-hinweis-key")),
+      zu: knoten.filter((x) => x.tagName === "DETAILS").flatMap((x) => Array.from(x.querySelectorAll(".anm-hinweiskasten")).map((b) => b.getAttribute("data-hinweis-key"))),
+    });
+    const k7 = neuK();
+    const e7 = { hinweise: [{ art: "warnung", key: "abmeldung_nach_letztem_spiel" }, { art: "warnung", key: "nie_zwei_vereine" }, { art: "info", key: "abmeldung_unklar" }] };
+    const frage = beschreibe(ende.regelHinweise(k7, e7, "abmeldung/status"));
+    const gezeigt = Array.from(k7.gezeigteHinweise).sort();
+    const fertig7 = beschreibe(ende.regelHinweise(k7, e7));
+    const k6 = neuK();
+    const e6 = { hinweise: [{ art: "info", key: "kuendigung_extra" }, { art: "info", key: "kuendigung_jahresende" }] };
+    const bei6 = beschreibe(ende.regelHinweise(k6, e6, "abmeldung/mitgliedschaft"));
+    const fertig6 = beschreibe(ende.regelHinweise(k6, e6));
+    const fristKaesten = (key, extra) => ende.regelHinweise(neuK(), { hinweise: [], frist: { key, werte: {}, unsicher: false, ...(extra || {}) } }).filter((x) => x.getAttribute && x.getAttribute("data-hinweis-art") === "frist").length;
+    return { frage, gezeigt, fertig7, bei6, fertig6, kein: fristKaesten("frist_kein_spiel"), ohne: fristKaesten("frist_ohne_zusage"), neu: fristKaesten("frist_neu", { pflichtspieleAb: "2026-10-12" }) };
+  });
+  ok("regelHinweise() (U-07): bei zwei Warnungen auf einer Frageseite steht die erste offen, die zweite zugeklappt; nur die offene und die Info gelten als gesehen",
+    JSON.stringify(u.frage.offen) === '["warnung:abmeldung_nach_letztem_spiel"]' && u.frage.zu.sort().join() === "abmeldung_unklar,nie_zwei_vereine" && u.gezeigt.join() === "abmeldung_nach_letztem_spiel,abmeldung_unklar", JSON.stringify({ frage: u.frage, gezeigt: u.gezeigt }));
+  ok("regelHinweise() (U-07): die Fertig-Seite zeigt die zugeklappte Warnung („nie_zwei_vereine“) offen, die offene Warnung und die Info stehen dort nicht noch einmal",
+    JSON.stringify(u.fertig7.offen) === '["warnung:nie_zwei_vereine"]' && u.fertig7.zu.length === 0, JSON.stringify(u.fertig7));
+  ok("regelHinweise() (U-06): „kuendigung_jahresende“ steht nicht bei der Frage zum alten Verein („abmeldung/mitgliedschaft“), sondern erscheint auf der Fertig-Seite unter „Weitere Hinweise“",
+    u.bei6.zu.join() === "kuendigung_extra" && u.fertig6.zu.join() === "kuendigung_jahresende" && u.fertig6.offen.length === 0, JSON.stringify({ bei: u.bei6, fertig: u.fertig6 }));
+  ok("regelHinweise() (U-08): auf der Fertig-Seite kein Kasten „Frist“ für „frist_kein_spiel“ und „frist_ohne_zusage“, aber für eine Frist mit Datum („frist_neu“)", u.kein === 0 && u.ohne === 0 && u.neu === 1, JSON.stringify({ kein: u.kein, ohne: u.ohne, neu: u.neu }));
   await page.close();
 }
 
@@ -3037,11 +3367,24 @@ async function pruefeHilfe(browser, server) {
     const d = document.querySelector("dialog.anm-dialog--hilfe");
     return {
       tel: Array.from(d.querySelectorAll('a[href^="tel:"]')).map((a) => a.getAttribute("href")),
+      // U-12: Zwischen „Anrufen:“ und der Nummer steht ein festes Leerzeichen; im Knopf (Flex) fällt ein gewöhnliches am Ende des Textes weg
+      telAbstand: (() => {
+        const a = d.querySelector('a[href^="tel:"]');
+        const nr = a && a.querySelector(".anm-tel");
+        const text = a && Array.from(a.childNodes).find((n) => n.nodeType === 3);
+        if (!nr || !text) return null;
+        // Lücke zwischen dem Doppelpunkt (ohne das letzte Zeichen, das Leerzeichen) und der Nummer
+        const r = document.createRange();
+        r.setStart(text, 0);
+        r.setEnd(text, Math.max(0, text.textContent.length - 1));
+        return { zeichen: text.textContent.slice(-2), luecke: Math.round(nr.getBoundingClientRect().left - r.getBoundingClientRect().right) };
+      })(),
       mails: Array.from(d.querySelectorAll('a[href^="mailto:"]')).map((a) => a.getAttribute("href").replace("mailto:", "")),
       text: d.innerText,
       titelFokus: !!document.activeElement && d.contains(document.activeElement),
     };
   });
+  ok("Hilfe (U-12): im Knopf „Anrufen“ steht hinter dem Doppelpunkt ein festes Leerzeichen, zwischen Wort und Nummer ist eine sichtbare Lücke (mindestens 3 px)", !!h.telAbstand && h.telAbstand.zeichen === ":\u00a0" && h.telAbstand.luecke >= 3, JSON.stringify(h.telAbstand));
   ok("Hilfe: Telefon der Geschäftsstelle stimmt mit der Vereinskonfiguration", h.tel.includes("tel:" + konfig.verein.tel_geschaeftsstelle.replace(/\D/g, "")), h.tel.join(","));
   ok("Hilfe: Mail der Geschäftsstelle stimmt mit der Vereinskonfiguration; Jugendleitung und Karneval sind da", h.mails.includes(konfig.verein.mail) && h.mails.includes("jugendleitung@sportfreunde04.de") && h.mails.includes("karnevalabteilung@sportfreunde04.de"), h.mails.join(", "));
   ok("Hilfe: Satz zum Übersetzen mitbringen", /Übersetzen mitbringen/.test(h.text), "");
@@ -3212,15 +3555,17 @@ async function pruefeArabischDurchlauf(browser, server, dateien) {
   await page.select("#anm-sprache", "ar");
   await page.waitForFunction(() => document.getElementById("anmeldung").getAttribute("dir") === "rtl", { timeout: 5000 });
   const roh = [];
-  const sammel = { gilt: "", giltPunkte: 0, pruefzeilen: [], pruefDom: [] };
+  const sammel = { gilt: "", giltPunkte: 0, giltTitel: "", pruefzeilen: [], pruefDom: [] };
   const ctx = neuerKontext({
     name: "arabisch-durchlauf", vp: MOBIL, modus: "beispiel", gesehen: gesehenFuer(MOBIL), touch: true, axeNeu: false, dateien,
     proSeite: async (p, s, kennung) => {
       const liste = await ungeschuetzterErsatztext(p);
       if (liste.length) roh.push(kennung + ": " + liste.slice(0, 2).join(" | "));
       if (s.schritt === "unterschriften") {
-        sammel.gilt = await p.$eval("#anmeldung .anm-unterschrift", (e) => e.innerText.replace(/\s+/g, " "));
+        // textContent: Die Liste steht seit P3 Teil b zugeklappt unter "Diese Unterschrift gilt für (n)"
+        sammel.gilt = await p.$eval("#anmeldung .anm-unterschrift", (e) => e.textContent.replace(/\s+/g, " "));
         sammel.giltPunkte = await p.$eval("#anmeldung .anm-unterschrift", (e) => e.querySelectorAll(".anm-unterschrift__gilt li").length);
+        sammel.giltTitel = await p.$eval("#anmeldung .anm-unterschrift .anm-unterschrift__gilt > summary", (e) => e.textContent.replace(/\s+/g, " ").trim());
       }
       if (s.schritt === "pruefen") {
         sammel.pruefzeilen = await p.$$eval("#anmeldung .anm-pruefzeile__wert", (l) => l.map((e) => e.textContent.replace(/\s+/g, " ").trim()));
@@ -3239,7 +3584,11 @@ async function pruefeArabischDurchlauf(browser, server, dateien) {
   const fotoName = (arRegeln.unterschriften || {})["aufnahmeantrag.s3.unterschrift"];
   ok("Arabisch-Durchlauf: 'Gilt für' nennt die Papiere mit den arabischen Namen aus ar-regeln.js (zum Beispiel '" + fotoName + "')", !!fotoName && ohneIso(sammel.gilt).includes(ohneIso(fotoName)), ohneIso(sammel.gilt).slice(0, 200));
   // Aufzählungen: Trenner der Sprache (liste.trenner = "، "). Das steht in ar-oberflaeche.js erst nach der Nachrunde von AP-5.
-  ok("Arabisch-Durchlauf: 'Diese Unterschrift gilt für:' steht als Liste (ein Blatt je Zeile), keine Aufzählung in einer Zeile", sammel.giltPunkte >= 2 && !/, /.test(ohneIso(sammel.gilt).replace(/\([^)]*\)/g, "")), sammel.giltPunkte + " Zeilen; " + ohneIso(sammel.gilt).slice(0, 120));
+  ok("Arabisch-Durchlauf: 'Diese Unterschrift gilt für (n)' steht als Liste (ein Blatt je Zeile), keine Aufzählung in einer Zeile", sammel.giltPunkte >= 2 && !/, /.test(ohneIso(sammel.gilt).replace(/\([^)]*\)/g, "")), sammel.giltPunkte + " Zeilen; " + ohneIso(sammel.gilt).slice(0, 120));
+  // D-07: Die Beschriftung ist der arabische Text giltFuerBlaetter mit der Zahl der Blätter (westliche Ziffern)
+  const arOb = (await import(pathToFileURL(path.join(ROOT, "assets", "js", "anmeldung", "texte", "ar-oberflaeche.js")).href)).default;
+  const arBeschriftung = ohneIso(arOb.unterschriften.giltFuerBlaetter).replace("{n}", String(sammel.giltPunkte));
+  ok("Arabisch-Durchlauf: die Beschriftung des zugeklappten Bereichs heißt „" + arBeschriftung + "“ (Text giltFuerBlaetter mit der Zahl der Blätter, D-07)", ohneIso(sammel.giltTitel) === arBeschriftung, sammel.giltTitel);
   ok("Arabisch-Durchlauf: auf der Prüfseite trägt jeder Wert die Richtung der Sprache (dir=rtl) und kein <bdi> umschließt einen arabischen Wert ganz", sammel.pruefDom.length > 0 && sammel.pruefDom.every((z) => z.dir === "rtl" && z.css === "rtl" && !z.ganzesBdi), JSON.stringify(sammel.pruefDom.filter((z) => z.dir !== "rtl" || z.ganzesBdi).slice(0, 2)));
   weich("Arabisch-Durchlauf: auf der Prüfseite trennt das arabische Komma die Teile einer Aufzählung (zum Beispiel Geburtsort und Land), kein deutsches Ersatz-Komma", sammel.pruefzeilen.some((z) => z.includes("،")) && !sammel.pruefzeilen.some((z) => /\u2066,\s*\u2069/.test(z)), sammel.pruefzeilen.filter((z) => /,|،/.test(z)).slice(0, 2).join(" | "));
   const daten = await ergebnisPruefen(page, ctx, dateien);
@@ -3303,114 +3652,131 @@ async function pruefeSprachwahlOben(browser, server) {
   await page.close();
 }
 
-// App-Modus (?app=1, wie bei den übrigen Seiten): Rahmen der Begleitseite weg, Hinweis "Im Browser öffnen" oben auf dem Startschritt und auf
-// der Fertig-Seite, Fehler beim Speichern oder Teilen werden abgefangen. Der Assistent selbst bleibt gleich: dieselben Schritte bis "fertig".
-async function pruefeAppModus(browser, server, dateien) {
-  console.log("\n=== N-A2: App-Modus (?app=1) bei 390 x 844 ===");
-  const vorher = async (page) => {
-    // Teilen schlägt fehl (Browser der App erlaubt es nicht); das Speichern prüft der Test weiter unten gezielt
-    await page.evaluateOnNewDocument(() => {
-      Object.defineProperty(navigator, "canShare", { value: () => true, configurable: true });
-      Object.defineProperty(navigator, "share", { value: () => Promise.reject(new DOMException("nicht erlaubt", "NotAllowedError")), configurable: true });
-    });
+// ---------- P1 (12.10.2026): Zugang mit Code vom Probetraining, Übergabe in den Browser ----------
+// Die Prüfungen selbst stehen in zugang-browser.mjs (dieselben für die Begleitseite hier und für die Live-Seite im Paket, e2e-paket.mjs).
+// Der Testserver setzt die Prüfwerte zur Laufzeit (server.setzeZugang): Standard ist eine leere Liste, so hängt kein anderer Test an dem,
+// was in data/anmeldung.json steht. Im ausgelieferten Code gibt es dafür keine Hintertür.
+
+function zugangUmgebung(browser, server) {
+  return {
+    name: "Begleitseite",
+    oeffne: (vp, name, o) => neueSeite(browser, server, vp, name, o || {}),
+    setzeZugang: (liste) => server.setzeZugang(liste),
+    testCode: server.testCode,
+    testPruefwert: server.testPruefwert,
+    fremderPruefwert: server.fremderPruefwert,
+    ok,
+    axe: async (page, name) => {
+      const sauber = await axePruefen(page, name);
+      if (sauber) ok(name + ": axe-core ohne Verstöße critical/serious", true);
+      return sauber;
+    },
+    foto: async (page, dateiname, o) => {
+      const vp = page.viewport().width >= 1000 ? DESKTOP : MOBIL;
+      await page.screenshot({ path: path.join(AUSGABE, vp.name, "p1-" + dateiname), ...(o || {}) });
+      protokoll.screenshots++;
+    },
+    zugangModul: server.basis + "/assets/js/anmeldung/zugang.js",
+    probetrainingZiel: "../ws/mitglied-werden.html#probetraining",
+    geschaeftsstelle: server.konfig.verein.mail,
+    beispiele: true,
+    weiterImErstenBildschirm: false,
+    browserBasis: server.basis + "/anmeldung/",
+    huelle: (vp, name, o) => huelleOeffnen(browser, server, vp, name, o || {}),
+    neuesFensterOeffnen: true,
+    woerterbuch: async (code) => (await import(pathToFileURL(path.join(ROOT, "assets", "js", "anmeldung", "texte", code + "-oberflaeche.js")).href)).default,
+    sprachen: ["de", "en", "tr", "ar"],
   };
-  const normal = await neueSeite(browser, server, MOBIL, "app-modus-kontrolle", { vorLaden: vorher });
+}
+
+// Die Hülle der Website im Kleinen (Zusätze zu P1): eine Seite auf einem anderen Port (also eine andere Herkunft) mit einem <iframe> ohne allow-Angaben
+// auf die Seite des Assistenten, wie src/huelle/huelle.html es mit #showFrame macht. Ergebnis: { aussen: Seite, rahmen: Frame, schliessen() }.
+async function huelleOeffnen(browser, server, vp, name, o) {
+  const innen = server.basis + "/anmeldung/" + (o.abfrage || "");
+  const html = `<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Hülle (Test)</title></head><body style="margin:0"><iframe id="showFrame" title="Inhalt" src="${innen.replace(/&/g, "&amp;")}" style="display:block;border:0;width:100%;height:${vp.hoehe}px"></iframe></body></html>`;
+  const aussenServer = createServer((req, res) => {
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+    res.end(html);
+  });
+  await new Promise((fertig) => aussenServer.listen(0, "127.0.0.1", fertig));
+  const aussenBasis = "http://127.0.0.1:" + aussenServer.address().port + "/";
+  const page = await neueSeite(browser, server, vp, name, { url: aussenBasis, vorLaden: o.vorLaden });
+  const rahmen = page.frames().find((f) => f !== page.mainFrame());
+  await rahmen.waitForSelector("#anmeldung[data-bereit]", { timeout: 10000 });
+  return {
+    aussen: page,
+    rahmen,
+    aussenBasis,
+    schliessen: async () => {
+      await page.close();
+      // Chrome hält Verbindungen offen: erst alle schließen, sonst wartet close() ewig
+      if (typeof aussenServer.closeAllConnections === "function") aussenServer.closeAllConnections();
+      await new Promise((fertig) => aussenServer.close(fertig));
+    },
+  };
+}
+
+async function pruefeZugang(browser, server) {
+  await pruefeZugangImBrowser(zugangUmgebung(browser, server));
+}
+
+// Übergabe in den Browser (?app=1): Der Assistent läuft in der App nie. Dazu die Kontrolle ohne ?app=1 (Rahmen der Begleitseite sichtbar,
+// der Assistent läuft) und: Mit ?app=1 fehlen Kopfleiste und Fußnote der Begleitseite.
+async function pruefeUebergabe(browser, server) {
+  await pruefeUebergabeImBrowser(zugangUmgebung(browser, server));
+  console.log("\n=== P1: App-Modus der Begleitseite: Rahmen und Kontrolle ohne ?app=1 ===");
+  const normal = await neueSeite(browser, server, MOBIL, "app-modus-kontrolle");
   const kontrolle = await normal.evaluate(() => {
     const sicht = (e) => !!e && e.checkVisibility();
-    return { appKlasse: document.documentElement.classList.contains("app-modus"), kopf: sicht(document.querySelector(".begleit-kopf")), fuss: sicht(document.querySelector(".ws-fuss")), hinweis: sicht(document.querySelector("[data-anm-apphinweis]")) };
+    return { appKlasse: document.documentElement.classList.contains("app-modus"), kopf: sicht(document.querySelector(".begleit-kopf")), fuss: sicht(document.querySelector(".ws-fuss")), schritt: document.getElementById("anmeldung").dataset.schritt, uebergabe: !!document.querySelector('[data-aktion="im-browser-oeffnen"]') };
   });
-  ok("Ohne ?app=1: Rahmen der Begleitseite sichtbar, kein Hinweis für die App", !kontrolle.appKlasse && kontrolle.kopf && kontrolle.fuss && !kontrolle.hinweis, JSON.stringify(kontrolle));
+  ok("Ohne ?app=1: Rahmen der Begleitseite sichtbar, der Assistent läuft (Startschritt), keine Übergabe", !kontrolle.appKlasse && kontrolle.kopf && kontrolle.fuss && kontrolle.schritt === "start" && !kontrolle.uebergabe, JSON.stringify(kontrolle));
   await normal.close();
-
-  const page = await neueSeite(browser, server, MOBIL, "app-modus", { abfrage: "?app=1", vorLaden: vorher });
-  const d = await page.evaluate(() => {
+  const app = await neueSeite(browser, server, MOBIL, "app-modus-rahmen", { abfrage: "?app=1" });
+  const d = await app.evaluate(() => {
     const sicht = (e) => !!e && e.checkVisibility();
-    const r = (e) => e.getBoundingClientRect();
-    const hinweis = document.querySelector("[data-anm-apphinweis]");
-    const link = hinweis && hinweis.querySelector("a[data-anm-browserlink]");
-    const leiste = document.querySelector("[data-anm-sprachleiste]");
-    return {
-      appKlasse: document.documentElement.classList.contains("app-modus"),
-      kopf: sicht(document.querySelector(".begleit-kopf")),
-      fuss: sicht(document.querySelector(".ws-fuss")),
-      marke: (document.querySelector(".begleit-kopf__marke") || {}).textContent || "",
-      assistent: sicht(document.getElementById("anmeldung")),
-      h1: sicht(document.querySelector("h1")),
-      hinweisSichtbar: sicht(hinweis),
-      hinweisText: hinweis ? hinweis.textContent.replace(/\s+/g, " ").trim() : "",
-      hinweisUnten: hinweis ? Math.round(r(hinweis).bottom) : null,
-      hinweisVorAssistent: hinweis ? r(hinweis).bottom <= r(document.getElementById("anmeldung")).top : false,
-      link: link && { href: link.getAttribute("href"), target: link.getAttribute("target"), rel: link.getAttribute("rel"), text: link.textContent.trim() },
-      leisteSichtbar: sicht(leiste),
-      hoehe: window.innerHeight,
-      breite: document.documentElement.scrollWidth <= window.innerWidth,
-    };
+    return { appKlasse: document.documentElement.classList.contains("app-modus"), kopf: sicht(document.querySelector(".begleit-kopf")), fuss: sicht(document.querySelector(".ws-fuss")), h1: sicht(document.querySelector("h1")) };
   });
-  const ohneApp = server.basis + "/anmeldung/";
-  ok("App-Modus: Klasse app-modus am <html>, Kopfleiste „Begleitseite zum Prototyp“ mit Navigation und Fußnote „Begleitmaterial“ sind weg", d.appKlasse && !d.kopf && !d.fuss, JSON.stringify({ kopf: d.kopf, fuss: d.fuss }));
-  ok("App-Modus: der Assistent bleibt (Überschrift, Assistent, Sprachwahl) und es gibt kein Querscrollen", d.assistent && d.h1 && d.leisteSichtbar && d.breite, "");
-  ok("App-Modus: auf dem Startschritt oben der Hinweis zum Speichern der Datei (Einfache Sprache), sichtbar im ersten Bildschirm", d.hinweisSichtbar && /^In der App kann das Speichern der PDF-Datei manchmal nicht klappen\. Dann öffnen Sie die Anmeldung im Browser\./.test(d.hinweisText) && d.hinweisUnten <= d.hoehe && d.hinweisVorAssistent, d.hinweisText + " (unten " + d.hinweisUnten + ")");
-  ok("App-Modus: Link „Im Browser öffnen“ führt auf dieselbe Seite ohne ?app=1, neuer Tab, rel=noopener", !!d.link && d.link.href === ohneApp && !/app=1/.test(d.link.href) && d.link.target === "_blank" && /\bnoopener\b/.test(d.link.rel || "") && d.link.text === "Im Browser öffnen", JSON.stringify(d.link));
-  await page.screenshot({ path: path.join(AUSGABE, MOBIL.name, "app-start.png"), fullPage: false });
-  protokoll.screenshots++;
+  ok("Mit ?app=1: Klasse app-modus am <html>; Kopfleiste „Begleitseite zum Prototyp“ mit Navigation und Fußnote „Begleitmaterial“ sind weg; die Überschrift bleibt", d.appKlasse && !d.kopf && !d.fuss && d.h1, JSON.stringify(d));
+  await app.close();
+}
 
-  // Der Assistent selbst bleibt gleich: dieselben Schritte bis "fertig" wie ohne ?app=1
-  await ladeBeispielPerKnopf(page, "wechsel-hessen");
-  const ctxApp = neuerKontext({ name: "app-modus", vp: MOBIL, modus: "beispiel", gesehen: new Set(), touch: true, axeImmer: false, dateien });
-  const rApp = await laufe(page, ctxApp);
-  const pageN = await neueSeite(browser, server, MOBIL, "app-modus-normal", { vorLaden: vorher });
-  await ladeBeispielPerKnopf(pageN, "wechsel-hessen");
-  const ctxN = neuerKontext({ name: "app-modus-normal", vp: MOBIL, modus: "beispiel", gesehen: new Set(), touch: true, axeImmer: false, dateien });
-  const rN = await laufe(pageN, ctxN);
-  await pageN.close();
-  ok("App-Modus: bis „fertig“ dieselben Schritte wie ohne ?app=1 (" + rApp.besucht.length + " Seiten)", rApp.besucht[rApp.besucht.length - 1].startsWith("fertig") && JSON.stringify(rApp.besucht) === JSON.stringify(rN.besucht), rApp.besucht.length + " gegen " + rN.besucht.length);
-  const daten = await ergebnisPruefen(page, ctxApp, dateien);
-  ok("App-Modus: die Datei wird erstellt", !!daten, daten ? daten.dateiname : "");
-  const f = await page.evaluate(() => {
-    const h = document.querySelector("#anmeldung [data-app-hinweis]");
-    const link = h && h.querySelector("a");
-    return { da: !!h && h.checkVisibility(), text: h ? h.textContent.replace(/\s+/g, " ").trim() : "", href: link && link.getAttribute("href"), target: link && link.getAttribute("target"), rel: link && link.getAttribute("rel") };
-  });
-  ok("App-Modus (Fertig-Seite): knapper Hinweis „Klappt das Speichern nicht?“ mit Link „Im Browser öffnen“ ohne ?app=1", f.da && /^Klappt das Speichern nicht\? Dann öffnen Sie die Anmeldung im Browser\. Im Browser öffnen$/.test(f.text) && f.href === ohneApp && f.target === "_blank" && /\bnoopener\b/.test(f.rel || ""), JSON.stringify(f));
-  // Teilen schlägt fehl und Herunterladen schlägt fehl: Statt still nichts zu tun, kommt eine Meldung mit dem Link
-  const knoepfe = await page.evaluate(() => Array.from(document.querySelectorAll('#anmeldung .anm-ergebnis [data-aktion]')).filter((e) => !e.hidden).map((e) => e.getAttribute("data-aktion")));
-  ok("App-Modus (Fertig-Seite): Knöpfe zum Herunterladen und Teilen sind da (Teilen ist hier erlaubt gestellt)", knoepfe.includes("herunterladen") && knoepfe.includes("teilen"), knoepfe.join(","));
-  // M10: Der Link zum Mail-Programm bleibt in der App ein mailto:-Link wie auf den übrigen App-Seiten (kein ext://, kein ?app=1, kein target), auch nach einem Klick
-  const mail = await page.evaluate(() => {
-    const a = document.querySelector('#anmeldung [data-senden] a[data-aktion="mail-oeffnen"]');
-    if (!a) return null;
-    const vorher = a.getAttribute("href");
-    const sperre = (e) => e.preventDefault(); // die Navigation selbst verhindern: Der Test prüft nur, ob der Link umgeschrieben würde
-    document.addEventListener("click", sperre);
-    a.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
-    document.removeEventListener("click", sperre);
-    return { vorher, nachher: a.getAttribute("href"), target: a.getAttribute("target"), text: a.textContent.trim(), sichtbar: a.checkVisibility(), abschnitt: !!document.querySelector("#anmeldung [data-senden] [data-mail-adresse]") };
-  });
-  ok("App-Modus (Fertig-Seite): der Abschnitt „So schicken Sie die Datei an den Verein“ ist da; der Link „E-Mail an die Geschäftsstelle öffnen“ bleibt ein mailto:-Link (kein ext://, kein ?app=1, kein target), auch nach einem Klick", !!mail && mail.abschnitt && mail.sichtbar && /^mailto:/.test(mail.vorher) && mail.vorher === mail.nachher && mail.target === null && !/app=1|ext:/.test(mail.nachher) && mail.text === "E-Mail an die Geschäftsstelle öffnen", JSON.stringify(mail));
-  await page.evaluate(() => {
-    window.__anklickSperre = HTMLAnchorElement.prototype.click;
-    HTMLAnchorElement.prototype.click = function () { throw new Error("Speichern in der App nicht möglich"); };
-  });
-  const meldung = () => page.evaluate(() => { const st = document.querySelector("#anmeldung .anm-status"); const a = st && st.querySelector("a"); return { text: st ? st.textContent.replace(/\s+/g, " ").trim() : "", href: a && a.getAttribute("href"), target: a && a.getAttribute("target"), rel: a && a.getAttribute("rel") }; });
-  await page.click('#anmeldung [data-aktion="herunterladen"]');
-  const m1 = await meldung();
-  const hinweis1 = await page.evaluate(() => { const h = document.querySelector("#anmeldung [data-app-hinweis]"); return !!h && h.checkVisibility(); });
-  ok("App-Modus: Herunterladen schlägt fehl – Meldung „Das Speichern hat nicht geklappt“ mit Link „Im Browser öffnen“ (kein stilles Nichts); der kurze Hinweis darunter entfällt dann", /^Das Speichern hat nicht geklappt\. Öffnen Sie die Anmeldung im Browser\. Im Browser öffnen$/.test(m1.text) && m1.href === ohneApp && m1.target === "_blank" && /\bnoopener\b/.test(m1.rel || "") && !hinweis1, JSON.stringify(m1));
-  await page.evaluate(() => { document.querySelector("#anmeldung .anm-status").textContent = ""; });
-  await page.click('#anmeldung [data-aktion="teilen"]');
-  await page.waitForFunction(() => /nicht geklappt/.test((document.querySelector("#anmeldung .anm-status") || {}).textContent || ""), { timeout: 4000 }).catch(() => {});
-  const m2 = await meldung();
-  ok("App-Modus: Teilen und danach Speichern schlagen fehl – Meldung mit Link", /^Das Speichern hat nicht geklappt\./.test(m2.text) && m2.href === ohneApp, JSON.stringify(m2));
-  await page.evaluate(() => { HTMLAnchorElement.prototype.click = window.__anklickSperre; document.querySelector("#anmeldung .anm-status").textContent = ""; });
-  await page.click('#anmeldung [data-aktion="teilen"]');
-  await page.waitForFunction(() => /Teilen geht hier nicht/.test((document.querySelector("#anmeldung .anm-status") || {}).textContent || ""), { timeout: 4000 }).catch(() => {});
-  const m3 = await meldung();
-  const hinweis3 = await page.evaluate(() => { const h = document.querySelector("#anmeldung [data-app-hinweis]"); const a = h && h.querySelector("a"); return { sichtbar: !!h && h.checkVisibility(), href: a && a.getAttribute("href") }; });
-  ok("App-Modus: Teilen geht nicht, Speichern klappt – der Status nennt das, der kurze Hinweis mit dem Link zum Browser steht darunter", /^Teilen geht hier nicht\. Die Datei wurde stattdessen gespeichert\.$/.test(m3.text) && hinweis3.sichtbar && hinweis3.href === ohneApp, JSON.stringify({ m3, hinweis3 }));
-  await page.screenshot({ path: path.join(AUSGABE, MOBIL.name, "app-fertig.png"), fullPage: false });
-  protokoll.screenshots++;
-  ok("App-Modus: keine Fehler in der Konsole (außer dem gewollten Fehler beim Speichern)", page.__st.konsole.filter((t) => !/Datei nicht gespeichert|Speichern in der App nicht möglich/.test(t)).length === 0, page.__st.konsole.slice(0, 3).join(" | "));
-  await page.close();
+// Hinweis oben auf dem ersten Bildschirm, wenn die Seite in einem Rahmen oder im Browser einer anderen App läuft (Zusätze zu P1, 12.10.2026): Rahmen auf einem
+// anderen Port, User-Agent-Zeilen, Vorrang der App-Weiche, alle vier Sprachen. Die Prüfungen stehen in zugang-browser.mjs.
+async function pruefeUmgebungshinweis(browser, server) {
+  await pruefeUmgebungshinweisImBrowser(zugangUmgebung(browser, server));
+  await pruefeUmgebungshinweisSprachen(zugangUmgebung(browser, server));
+}
+
+// Der Code ist keine Angabe zur Person: Er steht nicht in den Antworten, die der PDF-Baustein bekommt, nicht im PDF und nicht im Speicher des Browsers.
+async function pruefeCodeNichtImPdf(browser, server, dateien) {
+  console.log("\n=== P1: der Code erreicht weder die Antworten noch das PDF ===");
+  server.setzeZugang([server.testPruefwert]);
+  try {
+    const page = await neueSeite(browser, server, MOBIL, "code-nicht-im-pdf", { abfrage: "?code=" + encodeURIComponent(server.testCode) });
+    ok("Link mit gültigem Code: Startschritt", (await stand(page)).schritt === "start");
+    await ladeBeispielPerKnopf(page, "kind-neu");
+    const ctx = neuerKontext({ name: "code-nicht-im-pdf", vp: MOBIL, modus: "beispiel", gesehen: new Set(), touch: true, axeImmer: false, dateien });
+    const r = await laufe(page, ctx);
+    ok("Mit Code im Link: das Beispiel „Kind neu“ läuft bis „fertig“ durch (" + r.besucht.length + " Seiten)", r.besucht[r.besucht.length - 1].startsWith("fertig"));
+    const daten = await ergebnisPruefen(page, ctx, dateien);
+    ok("Mit Code im Link: die Datei wird erstellt", !!daten);
+    if (daten) {
+      const norm = server.testCode.replace(/-/g, "");
+      const antworten = JSON.stringify(daten.attrappe && daten.attrappe.a);
+      ok("Der Code steht nicht in den Antworten, die der PDF-Baustein bekommt", !!antworten && !antworten.includes(server.testCode) && !antworten.includes(norm));
+      const pdf = await pdfHerunterladenUndPruefen(browser, server, page, "Code im Link", daten, { satzungOffen: false });
+      const text = pdf ? pdfText(pdf.pfad) : "";
+      ok("Der Code steht nicht im Text des PDF", !!pdf && text.length > 1000 && !text.includes(server.testCode) && !text.replace(/\s+/g, "").includes(norm), pdf ? pdf.seiten + " Seiten" : "kein PDF");
+      const rohBytes = pdf ? fs.readFileSync(pdf.pfad) : Buffer.alloc(0);
+      ok("Der Code steht nirgends in den Bytes des PDF (auch nicht in den Metadaten)", rohBytes.length > 0 && !rohBytes.includes(Buffer.from(norm)) && !rohBytes.includes(Buffer.from(server.testCode)));
+    }
+    const speicher = await page.evaluate(() => ({ ls: localStorage.length, ss: sessionStorage.length, cookie: document.cookie }));
+    ok("Im Speicher des Browsers steht nichts (localStorage, sessionStorage, Cookies)", speicher.ls === 0 && speicher.ss === 0 && speicher.cookie === "", JSON.stringify(speicher));
+    await page.close();
+  } finally {
+    server.setzeZugang([]);
+  }
 }
 
 // ---------- M10: Datei per E-Mail an die Geschäftsstelle (11.10.2026) ----------
@@ -3460,12 +3826,20 @@ async function statischeM10(server) {
   // Die Textschlüssel
   const de = await ladeWoerterbuch();
   const senden = (de.fertig && de.fertig.senden) || {};
-  const schluessel = ["titel", "einleitung", "handyTitel", "handy1", "handy2", "handy3", "computerTitel", "computer1", "computer2", "computer3", "adresseTitel", "kopieren", "kopiert", "kopierenFehler", "oeffnen", "anhang"];
+  // P3 Teil b: Es gibt keinen Satz unter der Überschrift (einleitung) und keine Überschriften der Wege (handyTitel, computerTitel) mehr
+  const schluessel = ["titel", "handy1", "handy2", "handy3", "computer1", "computer2", "computer3", "adresseTitel", "kopieren", "kopiert", "kopierenFehler", "oeffnen", "anhang"];
+  const entfallen = ["einleitung", "handyTitel", "computerTitel"].filter((k) => k in senden);
+  ok("Wörterbuch: fertig.senden hat keinen Satz unter der Überschrift und keine Überschriften der Wege mehr (einleitung, handyTitel, computerTitel entfallen)", entfallen.length === 0, entfallen.join(", "));
   const fehlt = schluessel.filter((k) => typeof senden[k] !== "string" || !senden[k].trim());
   ok("Wörterbuch: fertig.senden hat alle " + schluessel.length + " Texte", fehlt.length === 0, fehlt.join(", "));
   ok("Wörterbuch: die Schritte 1 nennen den Knopf als {knopf} (so passen sie immer zu den Knöpfen)", /\{knopf\}/.test(senden.handy1) && /\{knopf\}/.test(senden.computer1) && !/Datei teilen|Datei herunterladen/.test(senden.handy1 + senden.computer1), senden.handy1 + " | " + senden.computer1);
   ok("Wörterbuch: Titel „So schicken Sie die Datei an den Verein“, Knöpfe „Adresse kopieren“ und „E-Mail an die Geschäftsstelle öffnen“", senden.titel === "So schicken Sie die Datei an den Verein" && senden.kopieren === "Adresse kopieren" && senden.oeffnen === "E-Mail an die Geschäftsstelle öffnen", senden.titel + " | " + senden.kopieren + " | " + senden.oeffnen);
-  ok("Wörterbuch: der Weg am Handy nennt das Mail-Programm, der Weg am Computer den Anhang", /Mail-Programm/.test(senden.handy2) && /Hängen Sie die Datei an/.test(senden.computer2) && /Hängen Sie die Datei/.test(senden.anhang), senden.handy2 + " | " + senden.computer2 + " | " + senden.anhang);
+  ok("Wörterbuch: der Weg am Handy nennt das Mail-Programm, der Weg am Computer den Anhang", /Mail-Programm/.test(senden.handy2) && /Hängen Sie die Datei an/.test(senden.computer2) && /hängen Sie die Datei selbst an/.test(senden.anhang), senden.handy2 + " | " + senden.computer2 + " | " + senden.anhang);
+  // U-01 (12.10.2026): Am Handy zuerst die Adresse kopieren, dann die Datei teilen (die Datei hängt das Teilen schon an), dann die Adresse bei „An“ einfügen
+  ok("Wörterbuch (U-01): Weg am Handy: 1. Adresse kopieren, 2. Datei teilen, Mail-Programm wählen, Datei ist schon angehängt, 3. Adresse bei „An“ einfügen und senden",
+    senden.handy1 === "Tippen Sie unten auf „{knopf}“." && senden.handy2 === "Tippen Sie oben auf „{knopf}“. Wählen Sie Ihr Mail-Programm. Die Datei ist schon angehängt." && senden.handy3 === "Fügen Sie die Adresse bei „An“ ein. Senden Sie die E-Mail.", senden.handy1 + " | " + senden.handy2 + " | " + senden.handy3);
+  ok("Wörterbuch (U-01): der Hinweis beim Link nennt den Knopf als {knopf} und sagt, dass die Datei dort selbst angehängt wird („Bei „E-Mail an die Geschäftsstelle öffnen“ hängen Sie die Datei selbst an.“)", senden.anhang === "Bei „{knopf}“ hängen Sie die Datei selbst an." && senden.anhang.replace("{knopf}", senden.oeffnen).split(/\s+/).length <= 12, senden.anhang);
+  ok("Wörterbuch (D-06): letzter Punkt von „So geht es weiter“: „Danach prüft der Verein Ihre Anmeldung.“", de.fertig.danach === "Danach prüft der Verein Ihre Anmeldung.", String(de.fertig.danach));
   ok("Wörterbuch: der alte Text zum Abgeben im Verein (fertig.abgeben) ist entfallen, der Hinweis zu WhatsApp bleibt", de.fertig.abgeben === undefined && de.fertig.nichtWhatsapp === "Bitte schicken Sie die Datei nicht per WhatsApp. Sie enthält private Daten." && !/auf dem Handy mit/.test(JSON.stringify(de.fertig)), String(de.fertig.nichtWhatsapp));
   ok("Wörterbuch: ohne eingebauten Mailtext und ohne feste Adresse (beides steht in hilfen.js bzw. der Konfiguration)", !/Guten Tag|@sportfreunde04/.test(JSON.stringify(de.fertig)), "");
 
@@ -3520,6 +3894,59 @@ async function zeichneFertigNeu(page) {
   await page.waitForFunction(() => document.getElementById("anmeldung").dataset.schritt === "fertig" && document.querySelector('#anmeldung [data-status="fertig"]'), { timeout: 20000 });
 }
 
+// Paket P6 (12.10.2026): Texte und Hinweise auf einzelnen Seiten, im Durchlauf je Beispiel gemessen: „Nur unterstützen“ (U-02), der Hinweis zum Kinderreisepass (U-09),
+// der Aufklapper „Mehr erfahren“ unter den Nachweisen (U-10), „Sie haben wenig Geld?“ nicht doppelt (B-3)
+async function pruefeSeitenP6(browser, server, dateien, beispiele) {
+  console.log("\n=== Paket P6: einzelne Seiten (390 x 844) ===");
+  const de = await ladeWoerterbuch();
+  const sicht = (page) =>
+    page.evaluate(() => {
+      const wenig = Array.from(document.querySelectorAll("#anmeldung .anm-hinweis")).filter((p) => /wenig Geld/.test(p.textContent) && !p.closest("details"));
+      return wenig.length === 1 && wenig[0].checkVisibility();
+    });
+  const m = {};
+  for (const id of ["kind-neu", "herren-wechsel"]) {
+    const page = await neueSeite(browser, server, MOBIL, "p6-" + id);
+    await ladeBeispielPerKnopf(page, id);
+    const ctx = neuerKontext({ name: "p6-" + id, vp: MOBIL, modus: "beispiel", gesehen: new Set(), touch: true, axeImmer: false, dateien });
+    const d = (m[id] = { seiten: [] });
+    ctx.proSeite = async (p, s, kennung) => {
+      d.seiten.push(kennung);
+      if (kennung === "abteilung/haupt") d.abteilung = await p.$$eval("#anmeldung .anm-karte__hinweis", (l) => l.map((e) => e.textContent.trim()));
+      if (kennung === "pass/deutsch") d.pass = await p.$$eval("#anmeldung .anm-hinweis", (l) => l.map((e) => e.textContent.trim()));
+      if (kennung.startsWith("nachweise/")) d.nachweise = [...(d.nachweise || []), ...(await p.$$eval("#anmeldung section.anm-nachweis details > summary", (l) => l.map((e) => e.textContent.trim())))];
+      if (kennung === "leistungen/haupt") {
+        // B-3: bei „Nein“ steht die Zeile, bei „Ja“ steht sie nicht noch einmal (der Hinweis zum Beitragserlass beginnt mit demselben Satz); danach wieder die Antwort des Beispiels
+        const waehle = (wert) => p.evaluate((w) => document.querySelector('#anmeldung input[data-pfad="leistungen"][value="' + w + '"]').closest("label").click(), wert);
+        const vorher = await p.$eval('#anmeldung input[data-pfad="leistungen"]:checked', (e) => e.value).catch(() => "nein");
+        await waehle("nein");
+        const beiNein = await sicht(p);
+        await waehle("ja");
+        const beiJa = await sicht(p);
+        await waehle(vorher);
+        d.leistungen = { beiNein, beiJa };
+      }
+    };
+    await laufe(page, ctx);
+    await page.close();
+  }
+  const kind = m["kind-neu"];
+  const selbst = m["herren-wechsel"];
+  ok("Abteilung (U-02): „Nur unterstützen“ sagt bei „Mein Kind“ „" + de.abteilung.passivHinweis.kind + "“, bei „Ich selbst“ „" + de.abteilung.passivHinweis.selbst + "“", !!kind.abteilung && kind.abteilung.includes("Ihr Kind ist Mitglied. Es macht keinen Sport.") && !kind.abteilung.includes("Sie sind Mitglied. Sie machen keinen Sport.") && !!selbst.abteilung && selbst.abteilung.includes("Sie sind Mitglied. Sie machen keinen Sport.") && !selbst.abteilung.includes("Ihr Kind ist Mitglied. Es macht keinen Sport."), JSON.stringify({ kind: kind.abteilung, selbst: selbst.abteilung }));
+  ok("Pass (U-09): „Ein deutscher Kinderreisepass zählt auch.“ steht bei „Mein Kind“, nicht bei „Ich selbst“ (Seite „Haben Sie einen deutschen Pass oder Ausweis?“ erreicht)", !!kind.pass && !!selbst.pass && kind.pass.includes(de.pass.deutsch.hinweis) && !selbst.pass.includes(de.pass.deutsch.hinweis), JSON.stringify({ kind: kind.pass, selbst: selbst.pass }));
+  const nachweise = [...(kind.nachweise || []), ...(selbst.nachweise || [])];
+  ok("Nachweise (U-10): der Aufklapper unter den Unterlagen heißt „Mehr erfahren“ (nicht „Warum?“), er enthält auch „So bekommen Sie sie“ und „Wo?“", nachweise.length > 0 && nachweise.every((t) => t === de.allgemein.mehrErfahren) && de.nachweise.warum === undefined, JSON.stringify(nachweise));
+  // Wortlaut (U-03, U-04, U-05): „davor schon einmal“ statt „in den letzten 6 Monaten“; der Hinweis zum Trainer am Feld für Medikamente; im Englischen „the authorities“ für das Amt
+  const en = (await import(pathToFileURL(path.join(ROOT, "assets", "js", "anmeldung", "texte", "en-oberflaeche.js")).href)).default;
+  const w = de.abmeldung.wechsel;
+  ok("Texte (U-03, U-04, U-05): „Wechselte Ihr Kind davor schon einmal?“ (Hinweis: früherer Wechsel in den letzten 6 Monaten); Medikamente: „Sprechen Sie mit dem Trainer.“; Englisch „the authorities“ statt „the office“",
+    w.titel.kind === "Wechselte Ihr Kind davor schon einmal?" && w.titel.selbst === "Wechselten Sie davor schon einmal?" && w.hinweis === "Gemeint ist ein früherer Wechsel in den letzten 6 Monaten, nicht dieser." && w.hinweis.split(/\s+/).length <= 12 &&
+      de.notfall.gesundheit.medikamenteHinweis === "Zum Beispiel Asthmaspray oder Adrenalin-Pen. Sprechen Sie mit dem Trainer." && /Then the authorities often pay the membership fee\./.test(en.leistungen.hinweis) && !/the office often pays/.test(en.leistungen.hinweis),
+    JSON.stringify({ wechsel: w, medikamente: de.notfall.gesundheit.medikamenteHinweis }));
+  const leist = [kind.leistungen, selbst.leistungen].filter(Boolean);
+  ok("Leistungen (B-3): „Sie haben wenig Geld? Sprechen Sie mit uns.“ steht bei „Nein“ einmal da und bei „Ja“ nicht noch einmal neben dem Hinweis zum Beitragserlass", leist.length > 0 && leist.every((x) => x.beiNein === true && x.beiJa === false), JSON.stringify(leist));
+}
+
 // Fertig-Seite am Handy: der Abschnitt, die Adresse, Kopieren (mit und ohne Zwischenablage), der mailto-Link, die Reihenfolge der Wege, der Papierweg
 async function pruefeMailAnVerein(browser, server, dateien, beispiele) {
   console.log("\n=== M10: Fertig-Seite – Datei per E-Mail an die Geschäftsstelle (390 x 844) ===");
@@ -3528,6 +3955,7 @@ async function pruefeMailAnVerein(browser, server, dateien, beispiele) {
   const adresse = server.konfig.verein.mail;
   const profil = profilKindNeu(beispiele, server);
   const schritt = (vorlage, knopf) => vorlage.replace("{knopf}", knopf);
+  const anhangHinweis = T.senden.anhang.replace("{knopf}", T.senden.oeffnen);
   // Ein Handy-Browser, der Dateien teilen kann: Der Knopf „Datei teilen“ ist da, und der Abschnitt zeigt den Weg am Handy
   const mitTeilen = async (page) => {
     await page.evaluateOnNewDocument(() => {
@@ -3551,13 +3979,12 @@ async function pruefeMailAnVerein(browser, server, dateien, beispiele) {
   // 1. Der Abschnitt mit „Datei teilen“ und am Handy: beide Wege, der Weg am Handy zuerst
   let d = await leseSenden(page);
   ok("Fertig-Seite: der Abschnitt „So schicken Sie die Datei an den Verein“ ist da und sichtbar (Überschrift h3)", !!d && d.sichtbar && d.titel === "So schicken Sie die Datei an den Verein", d && d.titel);
-  ok("Fertig-Seite: kurzer Satz unter der Überschrift: „Schicken Sie die Datei per E-Mail an die Geschäftsstelle.“", !!d && d.einleitung === "Schicken Sie die Datei per E-Mail an die Geschäftsstelle.", d && d.einleitung);
+  ok("Fertig-Seite: kein Satz unter der Überschrift (die Überschrift „So schicken Sie die Datei an den Verein“ sagt schon, was zu tun ist; P3 Teil b)", !!d && d.einleitung === "", d && d.einleitung);
   const coarse = await page.evaluate(() => window.matchMedia("(pointer: coarse)").matches);
-  ok("Fertig-Seite: mit „Datei teilen“ zwei Wege (Am Handy, Am Computer), am Handy der Weg am Handy zuerst", !!d && d.wege.map((w) => w.art).join(",") === (coarse ? "handy,computer" : "computer,handy") && d.wege.every((w) => w.nummeriert && w.schritte.length === 3), d && d.wege.map((w) => w.art).join(",") + " (pointer coarse: " + coarse + ")");
+  ok("Fertig-Seite: mit „Datei teilen“ am Handy nur ein Weg (der Weg am Handy), nummeriert, drei Schritte, ohne Überschrift (P3 Teil b)", !!d && d.wege.length === 1 && d.wege[0].art === (coarse ? "handy" : "computer") && d.wege[0].titel === null && d.wege[0].nummeriert && d.wege[0].schritte.length === 3, d && d.wege.map((w) => w.art + ":" + w.titel).join(",") + " (pointer coarse: " + coarse + ")");
   const handy = d && d.wege.find((w) => w.art === "handy");
-  const computer = d && d.wege.find((w) => w.art === "computer");
-  ok("Weg am Handy: „Am Handy“ – Datei teilen, Mail-Programm wählen, an die Adresse schicken (drei Schritte, Knopf als „Datei teilen“)", !!handy && handy.titel === "Am Handy" && handy.schritte[0] === schritt(T.senden.handy1, T.teilen) && handy.schritte[0] === "Tippen Sie oben auf „Datei teilen“." && handy.schritte[1] === "Wählen Sie Ihr Mail-Programm." && handy.schritte[2] === "Schicken Sie die E-Mail an die Adresse unten.", handy && handy.schritte.join(" | "));
-  ok("Weg am Computer: „Am Computer“ – Datei herunterladen, E-Mail mit Anhang, an die Adresse schicken (Knopf als „Datei herunterladen“)", !!computer && computer.titel === "Am Computer" && computer.schritte[0] === "Klicken Sie oben auf „Datei herunterladen“." && /Hängen Sie die Datei an\./.test(computer.schritte[1]) && computer.schritte[2] === "Schicken Sie die E-Mail an die Adresse unten.", computer && computer.schritte.join(" | "));
+  ok("Weg am Handy (U-01): Adresse kopieren, Datei teilen und Mail-Programm wählen (Datei schon angehängt), Adresse bei „An“ einfügen (drei Schritte, Knöpfe „Adresse kopieren“ und „Datei teilen“, ohne Überschrift „Am Handy“)",
+    !!handy && handy.titel === null && handy.schritte.length === 3 && handy.schritte[0] === schritt(T.senden.handy1, T.senden.kopieren) && handy.schritte[0] === "Tippen Sie unten auf „Adresse kopieren“." && handy.schritte[1] === schritt(T.senden.handy2, T.teilen) && handy.schritte[1] === "Tippen Sie oben auf „Datei teilen“. Wählen Sie Ihr Mail-Programm. Die Datei ist schon angehängt." && handy.schritte[2] === "Fügen Sie die Adresse bei „An“ ein. Senden Sie die E-Mail.", handy && handy.schritte.join(" | "));
   // Die Knöpfe, auf die die Schritte zeigen, gibt es wirklich und heißen so
   const knoepfe = await page.$$eval('#anmeldung .anm-ergebnis > .anm-knoepfe [data-aktion]', (l) => l.filter((e) => !e.hidden).map((e) => ({ aktion: e.getAttribute("data-aktion"), text: e.textContent.trim() })));
   ok("Die Knöpfe „Datei teilen“ und „Datei herunterladen“ stehen über dem Abschnitt, mit der Beschriftung aus den Schritten", knoepfe.some((k) => k.aktion === "teilen" && k.text === "Datei teilen") && knoepfe.some((k) => k.aktion === "herunterladen" && k.text === "Datei herunterladen"), JSON.stringify(knoepfe));
@@ -3572,7 +3999,9 @@ async function pruefeMailAnVerein(browser, server, dateien, beispiele) {
   const soll = "mailto:" + adresse + "?subject=" + encodeURIComponent("Anmeldung " + profil.vorname + " " + profil.nachname) + "&body=Guten%20Tag%2C%0D%0A%0D%0Aanbei%20die%20Anmeldung%20als%20PDF.%0D%0A%0D%0AViele%20Gr%C3%BC%C3%9Fe";
   const z = d && d.link && /^mailto:([^?]*)\?subject=([^&]*)&body=([^&]*)$/.exec(d.link.href);
   ok("mailto-Link: An die Adresse der Geschäftsstelle, Betreff „Anmeldung " + profil.vorname + " " + profil.nachname + "“, Text „Guten Tag, anbei die Anmeldung als PDF. Viele Grüße“ (kodiert)", !!z && d.link.href === soll && z[1] === adresse && decodeURIComponent(z[2]) === "Anmeldung " + profil.vorname + " " + profil.nachname && decodeURIComponent(z[3]) === "Guten Tag,\r\n\r\nanbei die Anmeldung als PDF.\r\n\r\nViele Grüße", d && d.link && d.link.href);
-  ok("Hinweis zum Anhang: „Hängen Sie die Datei an die E-Mail an.“ steht beim Link; der Hinweis zu WhatsApp bleibt im Abschnitt", !!d && d.hinweise.includes(T.senden.anhang) && d.hinweise.includes("Bitte schicken Sie die Datei nicht per WhatsApp. Sie enthält private Daten."), d && d.hinweise.join(" | "));
+  ok("Hinweis zum Anhang (U-01): „Bei „E-Mail an die Geschäftsstelle öffnen“ hängen Sie die Datei selbst an.“ steht beim Link (am Handy); der Hinweis zu WhatsApp bleibt im Abschnitt", !!d && d.hinweise.includes(anhangHinweis) && anhangHinweis === "Bei „E-Mail an die Geschäftsstelle öffnen“ hängen Sie die Datei selbst an." && d.hinweise.includes("Bitte schicken Sie die Datei nicht per WhatsApp. Sie enthält private Daten."), d && d.hinweise.join(" | "));
+  // D-06: „So geht es weiter“ endet mit „Danach prüft der Verein Ihre Anmeldung.“
+  ok("Fertig-Seite (D-06): „So geht es weiter“ endet mit „Danach prüft der Verein Ihre Anmeldung.“ (genau einmal)", !!d && d.naechste.endsWith("Danach prüft der Verein Ihre Anmeldung.") && (d.naechste.match(/Danach prüft der Verein/g) || []).length === 1, d && d.naechste.slice(-120));
   // Alter Wortlaut weg, WhatsApp-Satz genau einmal
   ok("Der alte Wortlaut zum Abgeben im Verein ist von der Fertig-Seite verschwunden (auch „Geben Sie ihn getrennt ab“ und „Bringen Sie sie mit“; M11)", !!d && !/Bringen Sie die Datei auf dem Handy mit|Geben Sie die Unterlagen im Verein ab|Oder geben Sie sie ausgedruckt ab|getrennt ab\b|getrennt abgeben|Bringen Sie sie mit|im Verein ab\b/.test(d.seitenText), d ? (d.seitenText.match(/.{0,40}(getrennt ab|Bringen Sie sie mit|im Verein ab).{0,30}/) || [""])[0] : "");
   ok("Der Hinweis zu WhatsApp steht genau einmal auf der Fertig-Seite (im Abschnitt, nicht noch einmal unter „So geht es weiter“)", !!d && (d.seitenText.match(/nicht per WhatsApp/g) || []).length === 1 && !/WhatsApp/.test(d.naechste), d && String((d.seitenText.match(/nicht per WhatsApp/g) || []).length));
@@ -3625,7 +4054,10 @@ async function pruefeMailAnVerein(browser, server, dateien, beispiele) {
   });
   await zeichneFertigNeu(page);
   d = await leseSenden(page);
-  ok("Am Computer mit „Datei teilen“: zwei Wege, der Weg am Computer zuerst", !!d && d.wege.map((w) => w.art).join(",") === "computer,handy" && d.wege.every((w) => w.titel), d && d.wege.map((w) => w.art + ":" + w.titel).join(", "));
+  const computer = d && d.wege.find((w) => w.art === "computer");
+  ok("Am Computer mit „Datei teilen“: nur der Weg über das Herunterladen, ohne Überschrift (P3 Teil b)", !!d && d.wege.length === 1 && !!computer && computer.titel === null, d && d.wege.map((w) => w.art + ":" + w.titel).join(", "));
+  ok("Weg am Computer: Datei herunterladen, E-Mail mit Anhang, an die Adresse schicken (drei Schritte, Knopf als „Datei herunterladen“)", !!computer && computer.schritte[0] === schritt(T.senden.computer1, T.herunterladen) && computer.schritte[0] === "Klicken Sie oben auf „Datei herunterladen“." && /Hängen Sie die Datei an\./.test(computer.schritte[1]) && computer.schritte[2] === "Schicken Sie die E-Mail an die Adresse unten.", computer && computer.schritte.join(" | "));
+  ok("Am Computer (U-01): „Hängen Sie die Datei an“ steht nur einmal im Abschnitt (im zweiten Schritt); der Hinweis beim Link entfällt, der zu WhatsApp bleibt", !!d && !d.hinweise.includes(anhangHinweis) && !d.hinweise.some((x) => /hängen Sie die Datei/i.test(x)) && d.hinweise.includes("Bitte schicken Sie die Datei nicht per WhatsApp. Sie enthält private Daten."), d && d.hinweise.join(" | "));
   await page.evaluate(() => {
     Object.defineProperty(navigator, "canShare", { value: undefined, configurable: true });
   });
@@ -3697,7 +4129,9 @@ async function pruefeUebersetzbareDaten(browser, server) {
   const vorschlagEn = await en.$$eval("#anmeldung .anm-text--gross", (l) => l.map((k) => k.textContent.replace(/[⁦-⁩]/g, "").trim()));
   const beitragSeite = nachBeitragEn.schritt === "beitrag";
   ok("Beitragsgruppen (Englisch): die Auswahl nennt die Namen aus den Texten der Sprache; fehlt ein Name dort, gilt der Name aus den Daten", beitragSeite && kartenBeitragEn.some((t) => t.startsWith(grNamen.karneval_kinder)) && kartenBeitragEn.every((t) => Object.keys(grNamen).some((k) => t.startsWith(grNamen[k])) || Object.values(gruppen).some((g) => t.startsWith(g.bezeichnung))), kartenBeitragEn.join(" | "));
-  ok("Beitragsgruppen (Englisch): der Vorschlag oben nennt den Namen aus den Texten der Sprache", vorschlagEn.some((t) => t.includes(grNamen.karneval_kinder)), vorschlagEn.join(" | "));
+  // Seit P3 Teil b gibt es die Zeile „Wir schlagen vor: …“ nicht mehr (O1); der Vorschlag ist die vorgewählte, offen sichtbare Karte.
+  const vorgewaehltEn = await en.$eval('#anmeldung input[data-pfad="beitrag.gruppe"]:checked', (e) => e.closest("label").querySelector(".anm-karte__titel").textContent.replace(/[⁦-⁩]/g, "").trim()).catch(() => "");
+  ok("Beitragsgruppen (Englisch): die vorgewählte Gruppe (der Vorschlag, offen sichtbar) trägt den Namen aus den Texten der Sprache", vorgewaehltEn.startsWith(grNamen.karneval_kinder), vorgewaehltEn + (vorschlagEn.length ? " | " + vorschlagEn.join(" | ") : ""));
   await geheBis(en, "pruefen", "haupt");
   const zeileEn = await en.$$eval("#anmeldung .anm-pruefzeile", (l) => l.filter((z) => /fee|Fee|contribution/i.test(z.querySelector("dt").textContent)).map((z) => z.querySelector(".anm-pruefzeile__wert").textContent.replace(/[⁦-⁩]/g, "").replace(/\s+/g, " ").trim()));
   ok("Beitragsgruppen (Englisch): die Prüfseite nennt den Namen aus den Texten der Sprache", zeileEn.length > 0 && zeileEn.some((t) => t.includes(grNamen.karneval_kinder)), zeileEn.join(" | "));

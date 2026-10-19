@@ -33,16 +33,21 @@
 //     wenn beide auseinanderlaufen.
 //   - Karneval gehört nicht zur Anmeldung (Entscheidung vom 11.10.2026): keine Gruppenwahl, keine Turniere,
 //     keine Auftritte. Neu im Assistenten: das Blatt „Heimweg nach dem Training“. Beim Probetraining sind
-//     Nichtmitglieder nicht über den Verein versichert; der Assistent weist darauf hin.
+//     Nichtmitglieder nicht über den Verein versichert; Website und App weisen darauf hin (der Assistent seit P3 Teil b nicht mehr:
+//     Die Anmeldung gibt es erst nach dem Probetraining).
 //   - Paket M9 (11.10.2026, Jugendleitung): Die Familie unterschreibt alles am Bildschirm, auch die Blätter des
 //     Verbands (O68, O01). Ein Schalter in data/anmeldung.json (unterschriftHfv) stellt die Blätter des Verbands
 //     auf Stift zurück, falls der Verband widerspricht. Abschnitt 5 „Unterschrift“ beschreibt beide Wege.
 //   - Paket M11 (12.10.2026, Antworten der 1. Vorsitzenden vom 11.10.2026 und Entscheidung zu den Spielerpässen): O24, O25, O72 und O73 sind entschieden, O11 und O69
-//     geregelt; offen bleiben O45 und O67. Die Familie schickt die ganze Datei per E-Mail an die Geschäftsstelle, auch Teil C („Teil C –
+//     geregelt; offen bleiben O45 und O67 (seit dem 12.10.2026, Paket P1, auch sie entschieden: nichts ist mehr offen). Die Familie schickt die ganze Datei per E-Mail an die Geschäftsstelle, auch Teil C („Teil C –
 //     Vertraulich“); der Verein bewahrt ihn getrennt auf. Kein Server-Versand zum Start. Die Abschnitte 3, 4, 5, 9 und 13 sagen das so.
 //   - Paket M14 (12.10.2026, Entscheidung der 1. Vorsitzenden): Für Fußball beantragt der Verein immer das Spielrecht. Die Frage „Soll Ihr Kind
 //     bei Spielen mitmachen?“ und mit ihr der Schritt „spielen“ entfallen (26 statt 27 Schritte); die Erklärung zum Spielrecht steht kurz beim
 //     Spielerpass. Regelwerk Version 2026-10-12.1, Stand 12.10.2026. Die Abschnitte 1 („Kurz gesagt“), 3 (Assistent) und 4 (Fälle) sagen das so.
+//   - Paket P1 (12.10.2026, Entscheidung der 1. Vorsitzenden): Neue Mitglieder melden sich nur nach dem Probetraining an. Die Trainer geben der Familie
+//     einen Code, einen Link oder einen QR-Code; nur damit startet der Assistent, in Website und App (Abschnitte 1, 3, 9 und 13). In der App öffnet er im
+//     Browser (auf der Website in einem neuen Fenster; läuft er doch in einem Rahmen oder im Browser einer anderen App, steht oben ein Hinweis). O45 und O67 sind entschieden (die 1. Vorsitzende hat die Datenschutz-Texte freigegeben): Der Stand-Kasten und der Kurztext sagen, dass nichts
+//     mehr offen ist; die Zeilen der beiden Punkte stehen als „Entschieden“ in Abschnitt 10.
 //
 // Liegt wie /vorher-nachher/ und /app/ außerhalb der Hülle (docs/index.html) und
 // außerhalb der Workspace-Seiten (docs/ws/) – eigene Vorlage src/vorlagen/begleit.html,
@@ -57,7 +62,7 @@
 const PFAD = "../";
 const STAND_RECHERCHE = "29.09.2026";
 const STAND_ABGLEICH = "12.10.2026";
-const REGELWERK_VERSION = "2026-10-12.1";
+const REGELWERK_VERSION = "2026-10-19.1";
 const PROTOTYP = `${PFAD}anmeldung/`;
 
 // ---------- Stand der Punkte (data/anmeldung.json › offenePunkte, beim Bau gesetzt) ----------
@@ -424,7 +429,7 @@ function standKasten() {
     <ul class="konzept-zahlen" role="list" aria-label="Zahl der Punkte je Stand">
       ${zeilen}
     </ul>
-    ${p("Offen sind nur noch die Fragen im Excel an die 1. Vorsitzende.")}
+    ${p(z.offen > 0 ? "Offen sind nur noch die Fragen im Excel an die 1. Vorsitzende." : "Nichts ist mehr offen. Die 1. Vorsitzende hat am 12.10.2026 auch die letzten Punkte entschieden.")}
     ${p("Die Zeilen stehen in {a:entscheiden}, {a:hfv-fragen} und {a:karneval}. Offene und entschiedene Punkte stehen sichtbar. Alle anderen stehen darunter im Aufklapper.")}`,
     "stand"
   );
@@ -484,10 +489,13 @@ function kurzAbschnitt() {
   const inhalt = `${liste([
     "**Das Problem.** Der Aufnahmeantrag fragt vieles nicht ab, was der HFV für das Spielrecht braucht. Fehlende Angaben und Unterlagen müssen einzeln nachgefordert werden. Dazu sind Vereinsunterlagen von 2014 und 2021 veraltet. {a:warum}",
     "**Die Lösung.** Ein Assistent im Browser fragt Schritt für Schritt in Einfacher Sprache. Er bietet Übersetzungshilfe auf Englisch, Türkisch und Arabisch. Am Ende erzeugt er ein PDF mit allen Unterlagen. Ein Prototyp zum Ausprobieren liegt vor. {a:assistent}, {a:pdf}",
+    "**Der Zugang.** Neue Mitglieder melden sich nur nach dem Probetraining an. Wer dort war, bekommt einen Code, einen Link oder einen QR-Code. Nur damit startet der Assistent, in der Website und in der App. Das hat die 1. Vorsitzende am 12.10.2026 entschieden. {a:assistent}",
     "**Die Unterschrift.** Die Familie unterschreibt alles am Bildschirm, nachdem sie die Satzung gelesen hat. Das gilt auch für die Blätter des Verbands. Das hat die Jugendleitung am 11.10.2026 entschieden ({o:O68}). Widerspricht der Verband, stellen wir diese Blätter wieder auf Stift um. Es reicht ein Elternteil ({o:O26}). Das Kind und der andere Elternteil bei getrennt lebenden Eltern haben ein freiwilliges Feld. {a:unterschrift}",
     "**Das Spielrecht.** Für Fußball beantragt der Verein immer das Spielrecht. Die Frage „Soll Ihr Kind bei Spielen mitmachen?“ gibt es nicht mehr. Das hat die 1. Vorsitzende am 12.10.2026 entschieden. Die Erklärung steht kurz beim Spielerpass. {a:assistent}",
     "**Entschieden am 11.10.2026.** Die 1. Vorsitzende hat die Fragen beantwortet. Nichtmitglieder sind beim Probetraining nicht über den Verein versichert ({o:O27}). Die Mitgliedschaft beginnt am Tag der Anmeldung ({o:O30}). Es gibt keine Probemitgliedschaft ({o:O31}). {a:entscheiden}",
-    `**Noch offen: ${z.offen} ${z.offen === 1 ? "Punkt" : "Punkte"}.** Sie stehen im Excel an die 1. Vorsitzende. Zum Beispiel: Welche Rechtsgrundlage gilt für die Notfallkontakte ({o:O67})? Schreiben wir die Information zum Datenschutz in Einfacher Sprache ({o:O45})?`,
+    z.offen > 0
+      ? `**Noch offen: ${z.offen} ${z.offen === 1 ? "Punkt" : "Punkte"}.** Sie stehen im Excel an die 1. Vorsitzende.`
+      : "**Nichts mehr offen.** Die 1. Vorsitzende hat am 12.10.2026 die Texte zum Datenschutz freigegeben ({o:O45}) und die Rechtsgrundlage für die Notfallkontakte bestätigt ({o:O67}).",
     "**Die Datei geht per E-Mail.** Die Familie schickt die ganze Datei an die Geschäftsstelle, auch Teil C. Das hat die 1. Vorsitzende am 11.10.2026 entschieden ({o:O25}, {o:O73}). Es gibt keinen Versand über einen Server ({o:O72}). {a:datenschutz}",
     `**Beim HFV.** Der Assistent folgt den Vordrucken des HFV. Sonderfälle klärt das Passwesen im Einzelfall. ${zaehlSatz(hfv, "Fragen")} {a:hfv-fragen}`,
     "**Karneval.** Karneval gehört nicht zur Anmeldung im Assistenten. Die Karnevalabteilung klärt ihre Fragen selbst ({o:O28}). {a:karneval}",
@@ -538,6 +546,10 @@ function warumAbschnitt() {
 // Die sieben Abschnitte, die oben auf jeder Seite des Prototyps stehen (assets/js/anmeldung/seiten.js).
 const SCHRITTE = [
   [
+    "Zugang",
+    "Der Assistent startet nur mit einem Code. Die Familie bekommt ihn beim Probetraining: als Code, als Link oder als QR-Code auf einem Blatt der Trainer. Ohne gültigen Code ist die Seite „Anmeldung nach dem Probetraining“ der erste Bildschirm, mit der Sprachwahl oben und vor jeder persönlichen Frage. Ein Link mit Code überspringt sie. Der Code gilt für alle: Fußball, Karneval und passive Mitglieder. Passive Mitglieder bekommen ihn von der Geschäftsstelle. Nach dem richtigen Code steht er in der Adresse, damit Neuladen nicht noch einmal fragt.",
+  ],
+  [
     "Person",
     "Wer wird angemeldet: das Kind oder Sie selbst? Der Assistent fragt nach Name und Geburtsdatum. Daraus berechnet er Alter und Altersklasse. Gibt es für den Jahrgang keine Mannschaft, verweist er an die Jugendleitung ({o:O54}).",
   ],
@@ -563,7 +575,7 @@ const SCHRITTE = [
   ],
   [
     "Fertig",
-    "Die Familie prüft alle Angaben und ändert, was nicht stimmt. Dann baut der Assistent das PDF ({a:pdf}). Es zeigt auch, was noch fehlt und wie es weitergeht. Dort steht auch: Beim Probetraining sind Nichtmitglieder nicht über den Verein versichert.",
+    "Die Familie prüft alle Angaben und ändert, was nicht stimmt. Dann baut der Assistent das PDF ({a:pdf}). Es zeigt auch, was noch fehlt und wie es weitergeht.",
   ],
 ];
 
@@ -591,7 +603,8 @@ function assistentAbschnitt() {
       "**Hilfe-Knopf.** Auf jeder Seite steht an derselben Stelle ein Hilfe-Knopf mit den Kontaktdaten des Vereins. Die Geschäftsstelle hilft per Telefon und E-Mail. Feste Sprechzeiten gibt es nicht. {o:O52}",
       "**Ehrliche Grenzen.** Wo eine Regel nicht sicher ist, sagt der Assistent das: „Vielleicht nötig – der Verein sagt Ihnen Bescheid.“ Auf dem Laufzettel steht der Punkt dann als „klären“. Fristen schätzt der Assistent nur ({a:wartefristen}).",
       "**Nichts wird gesendet oder gespeichert.** Alle Angaben und Fotos bleiben im Browser. Fotos werden dort neu kodiert, das entfernt Standort- und Kameradaten. Ein Knopf löscht alle Angaben. Ob ein Zwischenstand gespeichert werden soll, entscheidet der Verein später. Die Beispiele im Prototyp nutzen nur erfundene Daten. Ihre Telefonnummern stammen aus der Liste der Bundesnetzagentur für Medien.",
-      "**Website und App aus einem Guss.** Der Assistent ist in Website und Vereins-App dieselbe Seite. In der App fällt nur der Begleitrahmen weg. Wie die Datei zum Verein kommt, ist entschieden: Es gibt keinen Server-Versand zum Start. Die Familie schickt die Datei selbst per E-Mail an die Geschäftsstelle ({o:O25}, {o:O72}). Klappt Speichern oder Teilen in der App nicht, hilft der Link „Im Browser öffnen“.",
+      "**Website und App aus einem Guss.** Der Assistent ist in Website und Vereins-App dieselbe Seite. In der App läuft er nicht in der Webansicht: Ein Link auf die Anmeldung öffnet den Browser. Dort klappen Speichern, Teilen und E-Mail sicher. Wird die Seite doch in der App geöffnet, zeigt sie nur den Knopf „Im Browser öffnen“. Auf der Website öffnet der Knopf „Jetzt anmelden“ ein neues Fenster, denn die Seiten der Website laufen in einem Rahmen, in dem Speichern und Teilen unsicher sind. Läuft der Assistent doch in einem Rahmen oder im Browser einer anderen App, zum Beispiel Facebook oder Instagram, steht oben ein Hinweis. Er bittet, die Anmeldung im Browser zu öffnen. Der Assistent bleibt dabei bedienbar. Wie die Datei zum Verein kommt, ist entschieden: Es gibt keinen Server-Versand zum Start. Die Familie schickt die Datei selbst per E-Mail an die Geschäftsstelle ({o:O25}, {o:O72}).",
+      "**Code und Blatt für die Trainer.** Ein Werkzeug setzt den Code und erzeugt ein Blatt mit QR-Code, Code und Link. Im Programm steht nur der Prüfwert (SHA-256), nie der Code. Der Prüfwert ist öffentlich. Ein langer, zufälliger Code lässt sich daraus nicht erraten. Der Code ist ein Zugang, kein Geheimnis: Er hält Anmeldungen ohne Probetraining auf, schützt aber nicht vor Weitergabe. Der Verein bewahrt den Code im Vereinsordner auf und wechselt ihn, wenn er bekannt wird.",
       "**Vorführung.** Der Knopf „Vorführung“ öffnet auf jeder Frageseite fünf Beispiele und die Sicht des Vereins. Ein Beispiel füllt alle Angaben aus. Die Sicht des Vereins zeigt bei Unterlagen und Fristen die Quelle. Der Knopf ist für die Vorführung gedacht, nicht für Familien.",
     ])}`;
   return abschnitt("assistent", inhalt);
@@ -625,10 +638,10 @@ function pdfAbschnitt() {
       ],
     })}
     ${liste([
-      "**Laufzettel.** Das Deckblatt für den Verein fasst den Fall zusammen. Es nennt Alter, Altersklasse, vorhandene und fehlende Unterlagen und die geschätzte Wartefrist. Dazu stehen dort alle Punkte, die der Verein klären muss. Auch das, was der Vorstand noch bestätigen muss: zum Beispiel die Bildschirm-Unterschrift und die Freigabe der Entwurfsblätter. Teil A für die Familie enthält keine Paragrafen. Die Quellen zeigt der Prototyp in der Sicht des Vereins.",
+      "**Laufzettel.** Das Deckblatt für den Verein fasst den Fall zusammen. Es nennt Alter, Altersklasse, vorhandene und fehlende Unterlagen und die geschätzte Wartefrist. Dazu stehen dort alle Punkte, die der Verein klären muss, zum Beispiel die Mandatsreferenz und der Abbuchungstermin. Die Bildschirm-Unterschrift steht als entschieden da. Nur die Begleitseite trägt den Entwurfsvermerk. Teil A für die Familie enthält keine Paragrafen. Die Quellen zeigt der Prototyp in der Sicht des Vereins.",
       "**Antrag auf Spielerlaubnis.** Das ist das offizielle, ausfüllbare PDF des Verbands. Der Assistent befüllt es. Die Felder des Vereins und die Bearbeitungsvermerke bleiben leer. Die Unterschriften der Familie stehen als Bild im Formular, auf Seite 3 mit dem Datum der Anmeldung. Blau markiert sind die Stellen für den Verein (Unterschrift und Stempel) und leer gebliebene Felder. Die Zeile des Kindes bleibt ohne Markierung, wenn das Kind nicht unterschreibt. Auf Seite 3 steht die freiwillige Erlaubnis für Name und Foto im Internet.",
       "**Attest vom Arzt.** Bei der Erstanmeldung Minderjähriger verlangt der Verband ein Attest (JO § 9 Nr. 1). Beim Vereinswechsel folgt der Assistent dem Vordruck des HFV ({o:O04}, {o:O05}). Hat die Familie ein Attest, kommt die Erlaubnis für das Attest mit ins PDF. Ist das Attest Pflicht und fehlt es, liegt die Vorlage für die Ärztin oder den Arzt bei. Auf dem Attest steht nur „keine Bedenken“. Diagnosen gehören nicht ins PDF.",
-      "**Notfall- und Gesundheitsbogen.** Er ist freiwillig und nur für Kinder. Die Familie nennt zuerst einen Notfallkontakt und wählt dann, ob sie einen Gesundheitsbogen ausfüllt. Mit Angaben zur Gesundheit gilt die ausdrückliche Einwilligung nach Art. 9 DSGVO. Ohne Angaben zeigt der Bogen nur die Notfallkontakte. Die Rechtsgrundlage dafür klärt der Vorstand ({o:O67}). Die Absprache zur Medikamentengabe unterschreiben eine Person mit Sorgerecht und der Trainer immer getrennt mit Stift.",
+      "**Notfall- und Gesundheitsbogen.** Er ist freiwillig und nur für Kinder. Die Familie nennt zuerst einen Notfallkontakt und wählt dann, ob sie einen Gesundheitsbogen ausfüllt. Mit Angaben zur Gesundheit gilt die ausdrückliche Einwilligung nach Art. 9 DSGVO. Ohne Angaben zeigt der Bogen nur die Notfallkontakte. Dafür gilt Art. 6 Abs. 1 lit. b DSGVO (Mitgliedschaft, Fürsorge im Training) und lit. f DSGVO (weitere Kontaktpersonen). Die 1. Vorsitzende hat das am 12.10.2026 freigegeben ({o:O67}). Die Absprache zur Medikamentengabe unterschreiben eine Person mit Sorgerecht und der Trainer immer getrennt mit Stift.",
       "**Heimweg nach dem Training.** Dieses Blatt gehört zu Teil B, wenn Minderjährige Fußball spielen oder tanzen. Die Eltern kreuzen an: allein nach Hause oder abgeholt. Das klärt die Aufsichtspflicht. Der Verein gibt eine Kopie an das Trainerteam. Ohne Antwort wird die Stelle zur Stift-Stelle.",
       "**Wasserzeichen.** Jede Kopie eines Nachweises trägt den Vermerk „KOPIE“ mit dem Zweck, dem Namen des Vereins und dem Datum. So lässt sich die Kopie nicht anders verwenden.",
       "**Spielerfoto.** Es steht auf einer eigenen Seite. Zusätzlich gibt es das Foto als JPG-Datei für den Upload in DFBnet.",
@@ -673,7 +686,7 @@ function unterschriftAbschnitt() {
       "**Satzung zuerst.** Vor der Bildschirm-Unterschrift liest die Familie die Satzung und setzt den Haken „Ich habe die Satzung gelesen.“ Der Haken ist Pflicht. Der Link führt auf die Satzung der Website, nicht auf die Adresse im Vordruck. Die Adresse im Vordruck ist defekt ({o:O66}). Auf dem Papierweg ist der Haken freiwillig. Dann kreuzt die Familie das Kästchen im Ausdruck von Hand an.",
       "**Ein Elternteil reicht.** Der Assistent zeigt nur ein Unterschriftsfeld für die Eltern, auch wenn beide Eltern das Sorgerecht haben. Das hat die Jugendleitung am 08.10.2026 entschieden ({o:O26}).",
       "**Zweiter Elternteil (nötig).** Das gilt nur, wenn die Eltern getrennt leben und der andere Elternteil nicht einverstanden ist. Dann muss auch er unterschreiben. Er hat ein eigenes Feld am Bildschirm. Das Feld ist freiwillig. Bleibt es leer, ist die Stelle im PDF mit Stift markiert, und der Laufzettel nennt es. Mit dem Schalter „stift“ gibt es kein Feld, er unterschreibt mit Stift. Grund ist die gemeinsame Vertretung nach § 1629 BGB: Ohne Zustimmung darf ein Elternteil nicht allein für beide handeln.",
-      "**Das Kind als Spielerin oder Spieler.** Der Antrag auf Spielerlaubnis und die Abmeldung beim alten Verein haben eine Zeile für die Spielerin oder den Spieler. Bei Minderjährigen zeigt der Assistent dafür ein freiwilliges Feld: „Kann Ihr Kind schon schreiben? Dann unterschreibt es hier selbst.“ Kleine Kinder können das noch nicht. Bleibt das Feld leer, bleibt die Zeile im Antrag auf Spielerlaubnis ohne Markierung. Teil A nennt das Blatt dann nicht bei „Ausdrucken müssen Sie nur“, die Prüfseite zeigt „Nicht unterschrieben (freiwillig)“, und der Laufzettel sagt: „Das Kind hat den Antrag nicht unterschrieben. Das Passwesen entscheidet, ob das nötig ist.“ Nur die Abmeldung beim alten Verein bekommt bei leerem Feld die Stift-Markierung, denn sie geht ohnehin auf Papier per Einschreiben. Ob ein kleines Kind unterschreiben muss, entscheidet das Passwesen im Einzelfall ({o:O11}).",
+      "**Das Kind als Spielerin oder Spieler.** Der Antrag auf Spielerlaubnis und die Abmeldung beim alten Verein haben eine Zeile für die Spielerin oder den Spieler. Bei Minderjährigen zeigt der Assistent dafür ein freiwilliges Feld: „Kann Ihr Kind schreiben? Dann unterschreibt es selbst.“ Kleine Kinder können das noch nicht. Bleibt das Feld leer, bleibt die Zeile im Antrag auf Spielerlaubnis ohne Markierung. Teil A nennt das Blatt dann nicht bei „Ausdrucken müssen Sie nur“, die Prüfseite zeigt „Nicht unterschrieben (freiwillig)“, und der Laufzettel sagt: „Das Kind hat den Antrag nicht unterschrieben. Das Passwesen entscheidet, ob das nötig ist.“ Nur die Abmeldung beim alten Verein bekommt bei leerem Feld die Stift-Markierung, denn sie geht ohnehin auf Papier per Einschreiben. Ob ein kleines Kind unterschreiben muss, entscheidet das Passwesen im Einzelfall ({o:O11}).",
       "**Keine leeren Erklärungsfelder.** Eine Bildschirm-Unterschrift steht nur unter Angaben, die schon dastehen. Auf den eigenen Blättern des Vereins steht „–“ oder ein Satz statt eines leeren Feldes. Fehlt auf dem Aufnahmeantrag eine Erklärung, zum Beispiel zu den Fotos, zur IBAN oder zur Liste der Familienmitglieder, wird die Stelle zur Stift-Stelle. So ergänzt nach der Unterschrift niemand etwas von Hand.",
       "**Datum.** Eine Unterschrift am Bildschirm trägt Ort und Datum der Anmeldung. Das gilt auch auf den Blättern des Verbands, wo der Vordruck ein Datumsfeld neben der Unterschrift hat.",
       "**Was auf Papier bleibt.** Teil A nennt nur Blätter, die wirklich auf Papier müssen. Das sind die Vorlage für die Ärztin oder den Arzt und die Abmeldung beim alten Verein (Einschreiben). Dazu kommen Stellen, an denen ein freiwilliges Feld leer blieb: der zweite Elternteil und das Kind bei der Abmeldung. Die leere Zeile des Kindes im Antrag auf Spielerlaubnis zählt nicht dazu. Sonst steht dort: „Sie müssen nichts ausdrucken.“",
@@ -1018,15 +1031,15 @@ function datenschutzAbschnitt() {
       "**Keine Ausweiskopien deutscher Kinder.** Wo eine Kopie nötig ist, schwärzen wir Zugangsnummer (CAN) und Seriennummer und weisen darauf hin. Es gibt keine automatische Texterkennung und keine strukturierte Speicherung von Ausweisdaten. Was man auf ausländischen Pässen schwärzen darf, klärt das Passwesen im Einzelfall ({o:O10}).",
       "**Wasserzeichen.** Kopien tragen den Vermerk „KOPIE“ mit dem Zweck, dem Namen des Vereins und dem Datum.",
       "**Attest getrennt.** Im Attest steht nur „keine Bedenken“. Es ist ein Gesundheitsdatum (Art. 9 DSGVO). Welche Rechtsgrundlage der HFV annimmt, klärt das Passwesen im Einzelfall ({o:O06}). Deshalb holen wir mit der Erlaubnis für das Attest eine ausdrückliche Einwilligung ein. Verlangt der Verband das Attest nicht, vernichtet der Verein es sofort.",
-      "**Notfall- und Gesundheitsbogen freiwillig.** Er liegt in Teil C, getrennt von den übrigen Unterlagen, und nur Trainer und Betreuer der Mannschaft sehen ihn. Mit Angaben zur Gesundheit gilt die ausdrückliche Einwilligung (Art. 9 Abs. 2 lit. a DSGVO). Ohne Angaben stehen nur die Notfallkontakte darauf. Die Rechtsgrundlage dafür klärt der Vorstand ({o:O67}). Die Absprache zur Medikamentengabe unterschreiben Eltern und Trainer getrennt mit Stift. Beim Austritt oder auf Widerruf wird alles gelöscht.",
-      "**Information zum Datenschutz.** Eine eigene Seite im PDF informiert nach Art. 13 DSGVO. Sie verweist auf die Information zum Datenschutz des HFV (Stand 20.01.2026). Der Assistent sieht eine Unterschrift zur Kenntnisnahme vor. Nach Art. 13 DSGVO genügt die Information ({o:O63}).",
+      "**Notfall- und Gesundheitsbogen freiwillig.** Er liegt in Teil C, getrennt von den übrigen Unterlagen, und nur Trainer und Betreuer der Mannschaft sehen ihn. Mit Angaben zur Gesundheit gilt die ausdrückliche Einwilligung (Art. 9 Abs. 2 lit. a DSGVO). Ohne Angaben stehen nur die Notfallkontakte darauf. Dafür gilt Art. 6 Abs. 1 lit. b DSGVO (Mitgliedschaft, Fürsorge im Training) und lit. f DSGVO (weitere Kontaktpersonen). Die 1. Vorsitzende hat das am 12.10.2026 freigegeben ({o:O67}). Die Absprache zur Medikamentengabe unterschreiben Eltern und Trainer getrennt mit Stift. Beim Austritt oder auf Widerruf wird alles gelöscht.",
+      "**Information zum Datenschutz.** Eine eigene Seite im PDF informiert nach Art. 13 DSGVO. Sie verweist auf die Information zum Datenschutz des HFV (Stand 20.01.2026). Der Assistent sieht eine Unterschrift zur Kenntnisnahme vor. Nach Art. 13 DSGVO genügt die Information ({o:O63}). Die 1. Vorsitzende hat die Texte der Information und der Einverständnisse am 12.10.2026 freigegeben ({o:O45}).",
       "**Rechtsgrundlagen.** Stammdaten und Foto für den Spielerpass sind ohne Einwilligung zulässig (Art. 6 Abs. 1 lit. b DSGVO). Eine Veröffentlichung braucht die Einwilligung. Ab 16 Jahren darf der Verband Name und Spielberichtsdaten aus berechtigtem Interesse veröffentlichen. Darauf und auf das Widerspruchsrecht weisen wir hin.",
       "**DFBnet.** Das Häkchen „Adressweitergabe“ setzen wir nicht. Es ist eine Einwilligung zu Werbung.",
     ])}
     <h3>Versand und Übergabe</h3>
     ${liste([
       "Die Familie schickt die ganze Datei per E-Mail an die Geschäftsstelle, auch Teil C. Das hat die 1. Vorsitzende am 11.10.2026 entschieden ({o:O25}, {o:O73}). Der Assistent sendet selbst nichts. Es gibt keinen Server-Versand ({o:O72}).",
-      "Der Assistent zeigt die Schritte am Handy und am Computer, die Adresse mit einem Knopf zum Kopieren und einen Link, der die E-Mail öffnet. Die Familie hängt die Datei selbst an. Der Assistent bittet, die Datei nicht per WhatsApp zu schicken.",
+      "Der Assistent zeigt die Schritte für das Gerät der Familie: am Handy mit „Datei teilen“, sonst am Computer mit „Datei herunterladen“. Dazu zeigt er die Adresse mit einem Knopf zum Kopieren und einen Link, der die E-Mail öffnet. Die Familie hängt die Datei selbst an. Der Assistent bittet, die Datei nicht per WhatsApp zu schicken.",
       "Der Verein bewahrt Teil C getrennt von den übrigen Unterlagen auf. Der 1. Kassierer prüft beim Erfassen, ob alles da ist ({o:O25}).",
       "Das Passwesen gibt die Spielerpässe in DFBnet ein: für die Jugend der 1. Kassierer, für die Herren der Spielausschuss Senioren ({o:O24}). Auch die Vollmacht für die Abmeldung gibt das Passwesen in DFBnet ein, am besten am Tag des Eingangs ({o:O69}).",
       "Zur Einordnung: Die Datenschutzkonferenz verlangt bei hohem Risiko Ende-zu-Ende-Verschlüsselung oder ein Webportal (Orientierungshilfe vom 16. Juni 2021). Der Verein hat sich für die E-Mail entschieden ({o:O73}).",
@@ -1044,7 +1057,6 @@ function datenschutzAbschnitt() {
       "Ein Verarbeitungsverzeichnis. Wegen der Gesundheitsdaten greift die Ausnahme für kleine Stellen nicht. Für den Start ist es nicht nötig. Wir prüfen es später ({o:O46}).",
       "Die Prüfung, ob ein Datenschutzbeauftragter nötig ist: ab 20 Personen, die in der Regel ständig automatisiert mit Daten umgehen (§ 38 BDSG). Trainer mit Listen oder Messenger-Gruppen zählen mit.",
       "Satzung § 23 überarbeiten. Sie verweist noch auf das BDSG.",
-      "Die Information zum Datenschutz in Einfacher Sprache schreiben und übersetzen. Die 1. Vorsitzende liest die neuen Texte einmal und gibt sie frei ({o:O45}).",
     ])}`;
   return abschnitt("datenschutz", inhalt);
 }
@@ -1106,17 +1118,9 @@ const KASSE = [
 
 // ----- Datenschutz und Vereinsunterlagen -----
 const DATENSCHUTZ = [
-  [
-    "O67",
-    "Welche Rechtsgrundlage gilt für die Notfallkontakte ohne Angaben zur Gesundheit: Art. 6 Abs. 1 lit. b oder lit. f DSGVO?",
-    "Art. 9 DSGVO (ausdrückliche Einwilligung) passt nur zur Fassung mit Angaben zur Gesundheit. Für die Fassung „nur Notfallkontakte“ braucht die Information zum Datenschutz eine eigene Rechtsgrundlage. Der Entwurf im PDF nennt beide: lit. b für Mitgliedschaft und Fürsorge im Training, lit. f (berechtigtes Interesse) für weitere Kontaktpersonen. Der Vorstand bestätigt die Wahl.",
-  ],
+  ["O67", "Welche Rechtsgrundlage gilt für die Notfallkontakte ohne Angaben zur Gesundheit: Art. 6 Abs. 1 lit. b oder lit. f DSGVO?"],
   ["O73", "Dürfen Gesundheitsdaten aus Teil C sowie Ausweis- und Passkopien per E-Mail an den Verein gehen?"],
-  [
-    "O45",
-    "Schreiben wir die Information zum Datenschutz in Einfacher Sprache, lassen sie übersetzen und vom Vorstand freigeben?",
-    "Im PDF tragen die Information zum Datenschutz, alle Einverständnisse und Erlaubnisse die Fußzeile „Entwurf – vom Vorstand zu prüfen“.",
-  ],
+  ["O45", "Schreiben wir die Information zum Datenschutz in Einfacher Sprache, lassen sie übersetzen und vom Vorstand freigeben?"],
   ["O46", "Legen wir ein Verarbeitungsverzeichnis an, prüfen den Datenschutzbeauftragten und passen Satzung § 23 an?"],
   ["O47", "Stellen wir das Schutzkonzept fertig? Platzhalter „XXX“, fehlende Anlagen und private Kontaktadressen sind zu ersetzen."],
   ["O48", "Ersetzen wir Info-Blatt, Unterlagenliste, Zusatzerklärung und den toten Satzungslink?"],
@@ -1145,7 +1149,7 @@ function entscheidenAbschnitt() {
       "Wer nur zum Probetraining kommt und kein Mitglied ist, hat über die Sportversicherung des LSB keinen persönlichen Unfall- und Haftpflichtschutz (ARAG-Merkblatt, Stand 01.01.2026). Die Haftpflicht des Vereins greift dagegen. Angebote für Nichtmitglieder gehören zur Mitgliederwerbung."
     )}
     ${p(
-      "Eine Versicherung für Nichtmitglieder ist zu teuer. Der Verein schließt sie nicht ab ({o:O27}). Assistent, Website und App weisen stattdessen darauf hin. Beim Probetraining ist man nicht über den Verein versichert."
+      "Eine Versicherung für Nichtmitglieder ist zu teuer. Der Verein schließt sie nicht ab ({o:O27}). Website und App weisen stattdessen darauf hin. Beim Probetraining ist man nicht über den Verein versichert. Der Assistent sagt es nicht mehr: Die Anmeldung gibt es erst nach dem Probetraining."
     )}
     ${p(
       "Die Mitgliedschaft beginnt am Tag der Anmeldung ({o:O30}). Es gibt keine Probemitgliedschaft ({o:O31}). Wer sich vor dem ersten Training anmeldet, ist ab diesem Tag Mitglied."
@@ -1304,7 +1308,7 @@ const EINFUEHRUNG = [
   ],
   [
     "Fragen und Entscheidungen klären",
-    "Die 1. Vorsitzende hat am 11.10.2026 geantwortet. Offen sind nur noch die Fragen im Excel an sie ({a:entscheiden}). Die Fragen zum HFV sind entschieden oder geregelt; Sonderfälle klärt das Passwesen im Einzelfall ({a:hfv-fragen}).",
+    "Die 1. Vorsitzende hat am 11.10.2026 und am 12.10.2026 geantwortet. Nichts ist mehr offen ({a:entscheiden}). Die Fragen zum HFV sind entschieden oder geregelt; Sonderfälle klärt das Passwesen im Einzelfall ({a:hfv-fragen}).",
   ],
   [
     "Texte prüfen und testen",
@@ -1312,7 +1316,7 @@ const EINFUEHRUNG = [
   ],
   [
     "Einbau auf Website und in der App",
-    "Der Assistent kommt auf die Website und in die App, in beiden gleich. Es gibt keinen Versand über einen Server ({o:O72}). Die Familie schickt die ganze Datei per E-Mail an die Geschäftsstelle ({o:O25}, {o:O73}, {a:datenschutz}).",
+    "Der Assistent kommt auf die Website und in die App, in beiden gleich. Die Trainer geben der Familie nach dem Probetraining einen Link oder QR-Code mit dem Code. In der App öffnet der Assistent im Browser. Es gibt keinen Versand über einen Server ({o:O72}). Die Familie schickt die ganze Datei per E-Mail an die Geschäftsstelle ({o:O25}, {o:O73}, {a:datenschutz}).",
   ],
   [
     "Vereinsunterlagen aktualisieren",

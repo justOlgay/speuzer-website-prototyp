@@ -50,6 +50,12 @@
       }
       if (url.hostname === location.hostname && /\/workspace\/web\//.test(url.pathname)) {
         var name = url.pathname.split("/").pop().replace(/\.html$/, "");
+        if (name === "anmeldung") {
+          url.searchParams.delete("app");
+          a.href = "ext://" + url.toString();
+          a.removeAttribute("target");
+          return;
+        }
         var modul = NAV[name] || (/^mannschaften-/.test(name) ? NAV.mannschaften : null) || (/^chronik/.test(name) ? NAV.chronik : null);
         if (modul && !url.hash) {
           a.href = "nav://" + modul;
@@ -98,7 +104,7 @@
 </main>
 <footer class="ws-fuss">
   <div data-nur-prototyp>
-  <p>Prototyp · Testumgebung, keine Live-Seite · Inhalte Stand Montag, 12. Oktober 2026</p>
+  <p>Prototyp · Testumgebung, keine Live-Seite · Inhalte Stand Montag, 19. Oktober 2026</p>
   </div>
 </footer>
 </body>

@@ -39,7 +39,7 @@ export default {
     titel: "Anmeldung (Entwurf)",
     beschreibung:
       "Entwurf des Anmelde-Assistenten für den FFV Sportfreunde 04. Sie melden sich Schritt für Schritt an. Am Ende bekommen Sie eine PDF-Datei.",
-    lead: "Wir fragen Schritt für Schritt. Am Ende bekommen Sie eine Datei mit allen Unterlagen.",
+    lead: "Wir fragen Schritt für Schritt.",
     assistentTitel: "Anmelde-Assistent",
     laedt: "Der Assistent wird geladen. Wenn nichts passiert, rufen Sie uns an: 069 736868.",
     ohneSkript: "Der Assistent braucht JavaScript. Bitte schalten Sie es ein. Oder rufen Sie uns an: 069 736868.",
@@ -64,6 +64,7 @@ export default {
     beispieleText: "Ein Beispiel füllt alle Angaben aus. Danach klicken Sie durch den Assistenten.",
     konzeptLink: "Zum Konzept für den Vorstand",
     beispielGeladen: "Beispiel geladen: {titel}.",
+    codeZuerst: "Bitte geben Sie zuerst den Code ein.",
     vereinTitel: "Für den Verein",
     quelle: "Quelle",
     regel: "Frist-Regel",
@@ -89,6 +90,7 @@ export default {
     ja: "Ja",
     nein: "Nein",
     weissNicht: "Das weiß ich nicht",
+    mehrErfahren: "Mehr erfahren",
     dasKind: "das Kind",
     diePerson: "die Person",
     entfernen: "Entfernen",
@@ -167,15 +169,37 @@ export default {
     schreiben: "E-Mail schreiben",
   },
 
-  // ---------- App ----------
-  // In der Vereins-App (Seite mit ?app=1) klappt Speichern oder Teilen der Datei manchmal nicht.
-  // Der Link "Im Browser öffnen" führt auf dieselbe Seite ohne ?app=1.
+  // ---------- Zugang und App ----------
+  // Code-Seite (Paket P1, 12.10.2026): erster Bildschirm, solange kein gültiger Code da ist. {link} steht für den Link,
+  // dessen Text im Schlüssel mit "Link" am Ende steht; so passt die Wortstellung in jeder Sprache.
+  // In der Vereins-App (Seite mit ?app=1) läuft der Assistent nie: Es steht nur die Übergabe in den Browser da.
+
+  code: {
+    titel: "Anmeldung nach dem Probetraining",
+    einleitung: "Bitte geben Sie den Code ein.\nSie bekommen ihn beim Probetraining.",
+    label: "Code",
+    fehlerLeer: "Bitte geben Sie den Code ein.",
+    fehlerFalsch: "Der Code stimmt nicht. Bitte prüfen Sie ihn.",
+    kein: "Noch kein Probetraining? {link}",
+    keinLink: "Probetraining vereinbaren",
+    passiv: "Passives Mitglied? Den Code bekommen Sie von der {link}.",
+    passivLink: "Geschäftsstelle",
+  },
 
   app: {
-    hinweisStart: "In der App kann das Speichern der PDF-Datei manchmal nicht klappen. Dann öffnen Sie die Anmeldung im Browser.",
-    hinweisFertig: "Klappt das Speichern nicht? Dann öffnen Sie die Anmeldung im Browser.",
-    fehler: "Das Speichern hat nicht geklappt. Öffnen Sie die Anmeldung im Browser.",
+    uebergabe: "Bitte öffnen Sie die Anmeldung im Browser.",
     browser: "Im Browser öffnen",
+  },
+
+  // Hinweis oben auf dem ersten Bildschirm (Code-Seite oder Start), wenn das Speichern der Datei vielleicht nicht klappt (Zusätze zu P1,
+  // 12.10.2026; umgebung.js). rahmen: Die Seite läuft im Rahmen einer anderen Seite (zum Beispiel in der Hülle der Vereinswebsite), der Link
+  // öffnet sie in einem neuen Fenster. inApp: Die Seite läuft im Browser einer anderen App (Facebook, Instagram …) oder in der
+  // Android-WebView; inAppSo sagt, wie man sie im Browser öffnet. Der Assistent bleibt bedienbar.
+  umgebung: {
+    rahmen: "Hier klappt das Speichern vielleicht nicht.",
+    rahmenLink: "In neuem Fenster öffnen",
+    inApp: "Bitte öffnen Sie die Anmeldung in einem Browser wie Safari oder Chrome. Hier klappt das Speichern vielleicht nicht.",
+    inAppSo: "Tippen Sie oben auf ⋯ und dann auf „Im Browser öffnen“.",
   },
 
   // ---------- Fehlermeldungen ----------
@@ -192,7 +216,7 @@ export default {
     // Namen: Meldung vom 29.09.2026 (Runde 3). Ort und Anschrift haben eigene Sätze.
     lateinisch: "Bitte schreiben Sie den Namen mit lateinischen Buchstaben, so wie im Pass.",
     lateinischOrt: "Bitte schreiben Sie den Ort mit lateinischen Buchstaben, so wie im Pass.",
-    lateinischAnschrift: "Bitte schreiben Sie die Anschrift mit lateinischen Buchstaben.",
+    lateinischAnschrift: "Bitte schreiben Sie die Adresse mit lateinischen Buchstaben.",
     // Runde 4: alle Freitextfelder, die ins PDF gehen. Verein: Name, Ort, Verband des alten Vereins;
     // Text: Beziehung, Gesundheitsangaben, Bank, BIC, E-Mail, Ort im Ausland; Nummer: Telefonnummern.
     lateinischVerein: "Bitte schreiben Sie die Angaben zum Verein mit lateinischen Buchstaben.",
@@ -278,18 +302,16 @@ export default {
 
   start: {
     titel: "Willkommen",
-    einleitung: "Hier melden Sie sich oder Ihr Kind beim Verein an.\nWir fragen Schritt für Schritt.",
-    ergebnis: "Am Ende bekommen Sie eine PDF-Datei.\nDas ist eine Datei zum Ansehen und Ausdrucken.\nSie enthält alle Unterlagen für den Verein.",
+    einleitung: "Hier melden Sie sich oder Ihr Kind an.",
+    ergebnis: "Am Ende schicken Sie uns eine Datei per E-Mail.",
     brauchenTitel: "Das brauchen Sie:",
     brauchen: [
       "Name und Geburtsdatum",
-      "Ihre Adresse, E-Mail und Telefonnummer",
+      "Adresse, E-Mail und Telefonnummer",
       "Für Lastschrift die IBAN (Bankkonto-Nummer)",
       "Ein Handy mit Kamera für Fotos von Unterlagen",
     ],
-    dauer: "Sie brauchen etwa 15 Minuten.",
-    datenschutz: "Ihre Angaben bleiben auf Ihrem Gerät.\nWir senden nichts ab.",
-    hilfe: "Sie brauchen Hilfe? Tippen Sie oben auf „Hilfe“.",
+    dauer: "Das dauert etwa 15 Minuten.",
     spracheTitel: "Sprache wählen",
     los: "Los geht’s",
   },
@@ -297,17 +319,13 @@ export default {
   wer: {
     titel: "Wer möchte Mitglied werden?",
     kind: "Mein Kind",
-    kindHinweis: "Sie füllen alles für Ihr Kind aus.",
     selbst: "Ich selbst",
-    selbstHinweis: "Sie melden sich selbst an.",
-    mehrere: "Sie möchten mehrere Personen anmelden?\nAm Ende können Sie die nächste Person anmelden.\nWir übernehmen dann Ihre Adresse und die Zahlung.",
   },
 
   name: {
     titel: { kind: "Wie heißt Ihr Kind?", selbst: "Wie heißen Sie?" },
     hinweis: "Schreiben Sie den Namen so wie im Pass.\nNutzen Sie lateinische Buchstaben.",
     vorname: "Vorname",
-    vornameHinweis: "Alle Vornamen, so wie im Pass.",
     nachname: "Nachname",
   },
 
@@ -316,7 +334,6 @@ export default {
       titel: { kind: "Wann und wo wurde Ihr Kind geboren?", selbst: "Wann und wo wurden Sie geboren?" },
       legende: "Geburtsdatum",
       ort: "Geburtsort",
-      ortHinweis: "Die Stadt oder der Ort.",
       land: "Geburtsland",
     },
     geschlecht: {
@@ -336,20 +353,15 @@ export default {
   abteilung: {
     titel: { kind: "Wo soll Ihr Kind mitmachen?", selbst: "Wo möchten Sie mitmachen?" },
     fussball: "Fußball",
-    fussballHinweis: "Training und Spiele",
     karneval: "Karneval",
     karnevalHinweis: "Tanzen bei den Schnauzern",
     beides: "Fußball und Karneval",
-    beidesHinweis: "Beides in einem Verein",
     passiv: "Nur unterstützen",
-    passivHinweis: "Sie sind Mitglied. Sie machen keinen Sport.",
+    passivHinweis: { kind: "Ihr Kind ist Mitglied. Es macht keinen Sport.", selbst: "Sie sind Mitglied. Sie machen keinen Sport." },
   },
 
   mannschaft: {
     titel: { kind: "Zu welcher Mannschaft passt Ihr Kind?", selbst: "Zu welcher Mannschaft passen Sie?" },
-    alter: "{name} ist {alter} Jahre alt. Das ist der Jahrgang {jahrgang}.",
-    klasse: "Das passt zur {klasse}-Jugend.",
-    klasseHerren: "Das passt zu den Herren.",
     mannschaften: "Mannschaften beim Verein: {namen}.",
     keine: "Für diesen Jahrgang hat der Verein keine eigene Mannschaft.",
     keineFolge: "Die Jugendleitung meldet sich bei Ihnen.",
@@ -358,10 +370,10 @@ export default {
 
   spielerpass: {
     titel: { kind: "Hatte Ihr Kind schon einmal einen Spielerpass?", selbst: "Hatten Sie schon einmal einen Spielerpass?" },
-    hinweis: { kind: "Auch wenn es nur trainiert hat. Auch im Ausland.", selbst: "Auch wenn Sie nur trainiert haben. Auch im Ausland." },
     erklaerung: "Ein Spielerpass ist der Ausweis für Spiele in einem Verein.",
     // Das Spielrecht beantragt der Verein immer (Entscheidung der 1. Vorsitzenden vom 12.10.2026); früher fragte der Schritt "spielen" danach.
     spielrecht: "Wer Fußball spielt, braucht ein Spielrecht vom Fußball-Verband.\nDas beantragt der Verein für Sie.\nDas dauert manchmal einige Wochen.",
+    jaHinweis: "Auch ein Spielerpass aus dem Ausland zählt.",
     weissNichtHinweis: "Der Verein prüft das für Sie.",
   },
 
@@ -375,13 +387,12 @@ export default {
     ort: "Ort des Vereins",
     land: "Land des Vereins",
     verband: "Fußball-Verband dort",
-    verbandHinweis: "Nur, wenn Sie ihn kennen.",
   },
 
   abmeldung: {
     status: {
       titel: { kind: "Ist Ihr Kind beim alten Verein abgemeldet?", selbst: "Sind Sie beim alten Verein abgemeldet?" },
-      hinweis: "Gemeint ist die Abmeldung als Spieler.\nDie Mitgliedschaft im alten Verein endet damit nicht.\nEine Mail an den alten Verein reicht nicht.\nDer Fußball-Verband braucht ein Einschreiben.\nOder Sie unterschreiben die Vollmacht für die Abmeldung.",
+      hinweis: "Gemeint ist die Abmeldung als Spieler.",
       einschreiben: "Ja, per Einschreiben",
       einschreibenHinweis: "Sie haben den Beleg von der Post.",
       formlos: "Ja, aber nur per Mail oder Nachricht",
@@ -392,27 +403,25 @@ export default {
     datum: {
       titel: "Wann haben Sie abgemeldet?",
       legende: "Datum der Abmeldung",
-      hinweis: "Bei einem Einschreiben zählt das Datum auf dem Beleg.",
+      hinweis: "Es zählt das Datum auf dem Beleg.",
     },
     weg: {
       titel: "Wie melden Sie ab?",
       vollmacht: "Mit einer Vollmacht",
-      vollmachtHinweis: "Sie unterschreiben die Vollmacht für die Abmeldung. Der Verein meldet dann ab.",
+      vollmachtHinweis: "Sie unterschreiben die Vollmacht. Der Verein meldet ab.",
       einschreiben: "Mit einem Einschreiben",
-      einschreibenHinweis: "Sie schicken das Einschreiben selbst an den alten Verein.",
+      einschreibenHinweis: "Sie schicken es selbst an den alten Verein.",
     },
     mitgliedschaft: {
       titel: { kind: "Bleibt Ihr Kind Mitglied im alten Verein?", selbst: "Bleiben Sie Mitglied im alten Verein?" },
-      hinweis: "Die Mitgliedschaft endet nicht von selbst.\nSie endet auch nicht mit der Abmeldung vom Spielen.",
       kuendigen: "Nein, ich kündige",
-      kuendigenHinweis: "Sie kündigen die Mitgliedschaft im alten Verein.",
       passiv: "Ja, als passives Mitglied",
-      passivHinweis: { kind: "Ihr Kind spielt dort nicht mehr. Es bleibt Mitglied.", selbst: "Sie spielen dort nicht mehr. Sie bleiben Mitglied." },
+      passivHinweis: { kind: "Es spielt dort nicht mehr. Es bleibt Mitglied.", selbst: "Sie spielen dort nicht mehr. Sie bleiben Mitglied." },
       weiss_nicht: "Das weiß ich nicht",
     },
     anschrift: {
       titel: "Wohin geht das Einschreiben an den alten Verein?",
-      hinweis: "Sie müssen nichts eintragen. Der Verein hilft Ihnen.\nWir tragen die Anschrift in die Abmeldung beim alten Verein ein.",
+      hinweis: "Wir tragen die Adresse in die Abmeldung ein.",
       empfaenger: "Name des Empfängers",
       empfaengerHinweis: "Zum Beispiel: Vorstand des Vereins",
       strasse: "Straße und Hausnummer",
@@ -420,7 +429,6 @@ export default {
     },
     spiele: {
       titel: "Wann war das letzte Spiel?",
-      hinweis: "Wenn Sie ein Datum nicht wissen, lassen Sie das Feld leer.",
       letztes: "Letztes Spiel",
       pflicht: "Letztes Spiel in Liga oder Pokal",
       pflichtHinweis: "Freundschaftsspiele zählen hier nicht.",
@@ -434,11 +442,10 @@ export default {
     freigabe: {
       titel: { kind: "Gibt der alte Verein Ihr Kind frei?", selbst: "Gibt der alte Verein Sie frei?" },
       hinweis: "Freigabe heißt: Der alte Verein ist mit dem Wechsel einverstanden.",
-      jaHinweis: "Der alte Verein hat zugestimmt.",
     },
     wechsel: {
-      titel: { kind: "Hat Ihr Kind in den letzten 6 Monaten schon gewechselt?", selbst: "Haben Sie in den letzten 6 Monaten schon gewechselt?" },
-      hinweis: "Gemeint ist ein Wechsel von einem Verein zu einem anderen.",
+      titel: { kind: "Wechselte Ihr Kind davor schon einmal?", selbst: "Wechselten Sie davor schon einmal?" },
+      hinweis: "Gemeint ist ein früherer Wechsel in den letzten 6 Monaten, nicht dieser.",
     },
   },
 
@@ -458,7 +465,6 @@ export default {
 
   ausland: {
     titel: { kind: "Hat Ihr Kind schon im Ausland gewohnt?", selbst: "Haben Sie schon im Ausland gewohnt?" },
-    hinweis: "Ausland heißt: nicht in Deutschland.",
     land: "Land",
     landHinweis: "Der letzte Wohnort vor Deutschland.",
     stadt: "Stadt",
@@ -467,9 +473,9 @@ export default {
   wohnen: {
     ort: {
       titel: { kind: "Wo lebt Ihr Kind?", selbst: "Wo leben Sie?" },
-      gemeinsam: { kind: "Mit mir an derselben Adresse", selbst: "Mit meinen Eltern an derselben Adresse" },
+      gemeinsam: { kind: "Mit mir an derselben Adresse", selbst: "Mit meinen Eltern" },
       gemeinsamHinweis: { kind: "Wir sind beim Amt unter derselben Adresse gemeldet.", selbst: "Wir sind beim Amt unter derselben Adresse gemeldet." },
-      nicht_gemeinsam: { kind: "In Deutschland, aber an einer anderen Adresse", selbst: "In Deutschland, aber nicht bei meinen Eltern" },
+      nicht_gemeinsam: { kind: "An einer anderen Adresse", selbst: "Nicht bei meinen Eltern" },
       nicht_gemeinsamHinweis: { kind: "Wir sind beim Amt unter verschiedenen Adressen gemeldet.", selbst: "Wir sind beim Amt unter verschiedenen Adressen gemeldet." },
       verwandte: "Bei Verwandten in Deutschland",
       ohne_eltern: "Ohne Eltern in Deutschland",
@@ -514,7 +520,6 @@ export default {
     zweiterAmBildschirm: "Hat der andere Elternteil zugestimmt? Dann setzen Sie den Haken.\nWenn nicht: Er unterschreibt den Aufnahmeantrag auch.\nDas geht am Bildschirm. Oder mit Stift im Ausdruck.",
     personen: {
       titel: { kind: "Wer entscheidet für {name}?", selbst: "Wer entscheidet für Sie?" },
-      hinweis: "Wir fragen später nach der Telefonnummer.",
       erste: { kind: "Ihre Angaben", selbst: "Erste Person" },
       zweite: "Zweite Person",
       rolle: "Wer ist das?",
@@ -530,15 +535,15 @@ export default {
 
   besonderes: {
     titel: "Gibt es etwas Besonderes?",
-    hinweis: "Kreuzen Sie an, was passt. Wenn nichts passt, gehen Sie weiter.",
+    hinweis: "Wenn nichts passt, gehen Sie weiter.",
     legende: "Was trifft zu?",
-    maedchen: "Ein Mädchen soll in einer Jungen-Mannschaft spielen.",
-    maedchenHinweis: "Das geht in der C- und B-Jugend. Die Eltern müssen zustimmen.",
-    herrenAushilfe: "Der Jugendliche soll auch bei den Herren aushelfen.",
-    herrenAushilfeHinweis: "Dafür braucht es die Zustimmung der Eltern und ein Attest.",
-    sonderspielrecht: "Es soll in einer jüngeren Altersklasse gespielt werden.",
-    sonderspielrechtHinweis: "Das geht zum Beispiel bei einer Behinderung. Dafür braucht es einen Antrag.",
-    frauHerren: "Eine Frau möchte in der Herren-Mannschaft spielen.",
+    maedchen: "Mädchen in einer Jungen-Mannschaft",
+    maedchenHinweis: "In der C- und B-Jugend müssen die Eltern zustimmen.",
+    herrenAushilfe: "Aushilfe bei den Herren",
+    herrenAushilfeHinweis: "Eltern müssen zustimmen. Dazu ein Attest.",
+    sonderspielrecht: "Spielen in einer jüngeren Altersklasse",
+    sonderspielrechtHinweis: "Zum Beispiel bei Behinderung. Mit Antrag.",
+    frauHerren: "Frau in der Herren-Mannschaft",
     frauHerrenHinweis: "Dafür braucht es einen Antrag beim Fußball-Verband.",
   },
 
@@ -553,7 +558,6 @@ export default {
       titel: "Wie erreichen wir Sie?",
       hinweisKind: "Bitte tragen Sie hier Ihre Daten als Elternteil ein.",
       email: "E-Mail",
-      emailHinweis: "Dorthin schicken wir wichtige Nachrichten.",
       mobil: "Handynummer",
       telefon: "Festnetznummer",
       telefonHinweis: "Bitte nennen Sie mindestens eine Telefonnummer.",
@@ -563,12 +567,11 @@ export default {
   beitrag: {
     gruppe: {
       titel: { kind: "Welchen Beitrag zahlen Sie für {name}?", selbst: "Welchen Beitrag zahlen Sie?" },
-      vorschlagKopf: "Wir schlagen vor: {gruppe}.",
       vorschlag: "Das kostet {jahr} Euro im Jahr.\nDas sind {monat} Euro im Monat.",
       vorschlagOhneMonat: "Das kostet {jahr} Euro im Jahr.",
       aufnahme: "Dazu kommt einmal eine Aufnahmegebühr von {betrag} Euro.",
-      andere: "Sie können eine andere Gruppe wählen.",
       legende: "Beitragsgruppe",
+      andereGruppe: "Andere Beitragsgruppe",
       proJahr: "{jahr} Euro im Jahr",
       doppel: "Sind Sie in Fußball und Karneval?\nFragen Sie nach einem eigenen Beitrag.",
       vorgeschlagen: "Vorschlag",
@@ -588,7 +591,7 @@ export default {
     },
     senator: {
       titel: "Möchten Sie Senator werden?",
-      hinweis: "Senatoren unterstützen die Karnevalabteilung.\nSie zahlen einen besonderen Beitrag.\nDer Vorstand entscheidet über den Antrag.",
+      hinweis: "Senatoren unterstützen die Karnevalabteilung.\nDer Vorstand entscheidet über den Antrag.",
       ja: "Ja, ich stelle den Antrag",
       nein: "Nein",
     },
@@ -599,7 +602,7 @@ export default {
     hinweis: "Zum Beispiel Grundsicherungsgeld, Sozialhilfe, Wohngeld, Kinderzuschlag oder Asylbewerberleistungen.\nDann zahlt das Amt oft den Beitrag.\nDas heißt Bildung und Teilhabe.",
     ja: "Ja",
     nein: "Nein",
-    jaHinweis: "Sprechen Sie mit uns. Wir stellen eine Bescheinigung aus.",
+    jaHinweis: "Wir stellen eine Bescheinigung aus.",
     wenigGeld: "Sie haben wenig Geld? Sprechen Sie mit uns.",
   },
 
@@ -607,7 +610,7 @@ export default {
     art: {
       titel: "Wie möchten Sie zahlen?",
       sepa: "Lastschrift (empfohlen)",
-      sepaHinweis: "Der Verein bucht den Beitrag einmal im Jahr ab.",
+      sepaHinweis: "Der Verein bucht einmal im Jahr ab.",
       rechnung: "Rechnung",
       rechnungHinweis: "Sie überweisen den Beitrag selbst.",
     },
@@ -618,7 +621,7 @@ export default {
       person: "Kontoinhaber",
       vorname: "Vorname",
       nachname: "Nachname",
-      anschriftGleich: "Die Person wohnt an derselben Adresse.",
+      anschriftGleich: "Wohnt an derselben Adresse",
       strasse: "Straße und Hausnummer",
       plz: "Postleitzahl",
       ort: "Ort",
@@ -626,7 +629,7 @@ export default {
     iban: {
       titel: "Wie lautet die IBAN?",
       iban: "IBAN",
-      ibanHinweis: "Die IBAN steht auf Ihrer Bankkarte.\nLeerzeichen sind egal.",
+      ibanHinweis: "Die IBAN steht auf Ihrer Bankkarte.",
       bank: "Name der Bank",
     },
   },
@@ -636,10 +639,8 @@ export default {
       titel: { kind: "Dürfen wir Fotos von Ihrem Kind zeigen?", selbst: "Dürfen wir Fotos von Ihnen zeigen?" },
       hinweis: "Sie entscheiden frei. Sie können das später ändern.",
       ja: "Ja",
-      jaHinweis: "Sie wählen gleich, wo.",
       nein: "Nein",
       medienLegende: "Wo dürfen wir Fotos zeigen?",
-      medienHinweis: "Wählen Sie mindestens eine Möglichkeit.",
       intern: "Im Verein: Aushänge und Rundbriefe",
       web: "Im Internet: Website, soziale Medien und Vereins-App",
       presse: "In der Zeitung: Berichte über den Verein",
@@ -670,13 +671,10 @@ export default {
 
   // Aufsichtspflicht (Entscheidung der 1. Vorsitzenden vom 11.10.2026): Minderjährige, die trainieren oder tanzen.
   heimweg: {
-    titel: "Darf Ihr Kind nach dem Training allein nach Hause?",
-    hinweis: "Während des Trainings passt der Verein auf Ihr Kind auf.\nSagen Sie uns: Wie kommt Ihr Kind danach nach Hause?",
+    titel: "Darf Ihr Kind allein nach Hause gehen?",
+    hinweis: "Während des Trainings passt der Verein auf Ihr Kind auf.",
     allein: "Allein nach Hause",
-    alleinHinweis: "Mein Kind darf nach dem Training allein nach Hause gehen.",
     abholen: "Wird abgeholt",
-    abholenHinweis: "Mein Kind wartet, bis es abgeholt wird.",
-    aendern: "Sie können das jederzeit ändern. Sagen Sie es dann dem Trainer.",
   },
 
   notfall: {
@@ -700,7 +698,7 @@ export default {
       allergien: "Allergien",
       erkrankungen: "Erkrankungen",
       medikamente: "Medikamente",
-      medikamenteHinweis: "Braucht Ihr Kind ein Notfall-Medikament? Zum Beispiel Asthmaspray oder einen Adrenalin-Pen. Sprechen Sie mit dem Trainer. Der Notfall- und Gesundheitsbogen in Teil C hat Zeilen dafür.",
+      medikamenteHinweis: "Zum Beispiel Asthmaspray oder Adrenalin-Pen. Sprechen Sie mit dem Trainer.",
       sonstiges: "Sonstiges",
     },
   },
@@ -709,9 +707,7 @@ export default {
     titel: "Wie bekommen wir das Foto für den Spielerpass?",
     hinweis: "Der Fußball-Verband braucht ein Foto von Kopf und Schultern.\nDas Gesicht muss gut zu sehen sein.",
     foto: "Ich mache jetzt ein Foto",
-    fotoHinweis: "Mit der Kamera vom Handy.",
-    datei: "Ich wähle ein Foto vom Gerät",
-    dateiHinweis: "Ein Foto, das Sie schon haben.",
+    datei: "Ich wähle ein Foto aus",
     verein: "Der Verein macht das Foto",
     vereinHinweis: "Beim ersten Training.",
     machen: "Foto machen",
@@ -724,7 +720,7 @@ export default {
 
   nachweise: {
     titel: "Welche Unterlagen haben Sie schon?",
-    hinweis: "Machen Sie ein Foto von jeder Unterlage, die Sie haben.\nWas fehlt, können Sie später nachreichen.\nDas Foto bleibt auf Ihrem Gerät.",
+    hinweis: "Machen Sie ein Foto von jeder Unterlage, die Sie haben.\nWas fehlt, schicken Sie später.",
     habe: "Habe ich",
     fehlt: "Fehlt noch",
     foto: "Foto machen",
@@ -735,12 +731,10 @@ export default {
     entfernt: "Datei entfernt.",
     vorschau: "Vorschau: {datei}",
     pdf: "PDF-Datei",
-    warum: "Warum?",
     wie: "So bekommen Sie sie:",
     wo: "Wo?",
     dateien: "Ihre Dateien:",
     art: {
-      pflicht: "Das ist nötig.",
       verein: "Der Verein möchte das.",
       freiwillig: "Das ist freiwillig.",
       nur_wenn: "Nötig, wenn es bei Ihnen zutrifft.",
@@ -753,28 +747,27 @@ export default {
     titel: "Wie möchten Sie unterschreiben?",
     weg: {
       bildschirm: "Am Bildschirm, wo es erlaubt ist",
-      bildschirmHinweis: "Vereinsunterlagen unterschreiben Sie hier mit dem Finger.",
+      bildschirmHinweis: "Sie unterschreiben hier mit dem Finger.",
       // Modus "bildschirm" (Entscheidung der Jugendleitung vom 11.10.2026): auch die Blätter für den Fußball-Verband
       bildschirmAlles: "Am Bildschirm",
-      bildschirmAllesHinweis: "Sie unterschreiben alles hier mit dem Finger. Auch die Blätter für den Fußball-Verband.",
+      bildschirmAllesHinweis: "Mit dem Finger, auch für den Fußball-Verband.",
       papier: "Ich unterschreibe alles auf Papier",
-      papierHinweis: "Sie drucken die Datei aus und unterschreiben mit Stift.",
+      papierHinweis: "Sie drucken aus und unterschreiben mit Stift.",
     },
     // Satzung (Aufnahmeantrag Seite 1: "Satzung zur Kenntnis genommen"). Der Link kommt
     // aus konfig.verein.satzungUrl (data/downloads.json), nie aus diesem Text.
     satzung: {
-      titel: "Die Satzung des Vereins",
       erklaerung: "Die Satzung sind die Regeln des Vereins.",
       link: "Satzung lesen",
       linkZusatz: "PDF, öffnet in einem neuen Tab",
       ohneLink: "Die Satzung finden Sie auf der Internetseite des Vereins.",
       label: "Ich habe die Satzung gelesen.",
-      pflicht: "Ohne Haken können Sie nicht am Bildschirm unterschreiben.",
       freiwillig: "Freiwillig. Ohne Haken kreuzen Sie es im Ausdruck von Hand an.",
     },
-    hierTitel: "Diese Unterschriften geben Sie hier ab",
     hierHinweis: "Zeichnen Sie mit Finger, Stift oder Maus.",
     giltFuer: "Diese Unterschrift gilt für:",
+    // Beschriftung des zugeklappten Bereichs ab zwei Blättern ({n} = Zahl der Blätter); bei einem Blatt steht giltFuer mit dem Blattnamen direkt da.
+    giltFuerBlaetter: "Diese Unterschrift gilt für {n} Blätter",
     person: {
       mitglied: { kind: "Unterschrift von {name}", selbst: "Ihre Unterschrift" },
       sorgeberechtigte: "Unterschrift von {person}",
@@ -783,12 +776,12 @@ export default {
       // Modus "bildschirm": freiwilliges Feld für das Kind als Spielerin oder Spieler (Antrag auf Spielerlaubnis, Abmeldung beim alten Verein)
       spieler: { kind: "Unterschrift von {name}", selbst: "Ihre Unterschrift" },
       spielerHinweis: {
-        kind: "Kann Ihr Kind schon schreiben? Dann unterschreibt es hier selbst.",
-        selbst: "Sie sind noch nicht 18. Unterschreiben Sie hier auch selbst.",
+        kind: "Kann Ihr Kind schreiben? Dann unterschreibt es selbst.",
+        selbst: "Sie sind unter 18? Unterschreiben Sie auch selbst.",
       },
       // Modus "bildschirm": Feld für den anderen Elternteil (getrennt lebende Eltern ohne Einverständnis)
       zweiteEltern: "Unterschrift: der andere Elternteil",
-      zweiteHinweis: "Der andere Elternteil unterschreibt hier selbst.\nOder er unterschreibt später mit Stift im Ausdruck.",
+      zweiteHinweis: "Der andere Elternteil unterschreibt hier selbst.\nOder später mit Stift im Ausdruck.",
       ersteSorge: "Ihre Unterschrift",
     },
     stand0: "Noch nicht unterschrieben",
@@ -810,7 +803,7 @@ export default {
 
   pruefen: {
     titel: "Stimmt alles?",
-    hinweis: "Prüfen Sie Ihre Angaben.\nMit „Ändern“ korrigieren Sie etwas.",
+    hinweis: "Mit „Ändern“ korrigieren Sie etwas.",
     weiter: "Alles stimmt – Datei erstellen",
     aendern: "Ändern",
     aendernLang: "{bereich} ändern",
@@ -908,7 +901,6 @@ export default {
       mitStift: "Nicht am Bildschirm – mit Stift im Ausdruck",
       betragJahr: "{gruppe}, {jahr} Euro im Jahr",
     },
-    hinweiseTitel: "Das sollten Sie wissen",
     // Sichtbar stehen nur Warnungen und Fristen; alles andere klappt hier auf.
     weitereHinweise: "Weitere Hinweise ({anzahl})",
     klaertVerein: "Das klärt der Verein",
@@ -937,8 +929,6 @@ export default {
     nochmal: "Noch einmal versuchen",
     datei: "Datei: {name}",
     info: "{seiten} Seiten, {groesse}",
-    teileTitel: "Das steht in der Datei:",
-    teil: "{titel} (Seite {von} bis {bis})",
     // Die Titel der Teile stehen hier, nicht in pdf.js: übersetzbar und mit Buchstaben (SCHNITTSTELLEN Abschnitt 9).
     teilTitel: {
       A: "Teil A – Für Sie",
@@ -960,16 +950,14 @@ export default {
       pdf: "Die Datei konnte nicht erstellt werden. Bitte versuchen Sie es noch einmal.",
     },
     // Die Datei per E-Mail an die Geschäftsstelle schicken (M10; Entscheidung der 1. Vorsitzenden vom 11.10.2026: kein Versand über
-    // einen Server). {knopf} ist die Beschriftung des Knopfes (herunterladen, teilen), damit die Schritte immer zu den Knöpfen passen.
+    // einen Server). {knopf} ist die Beschriftung des Knopfes, auf den der Schritt zeigt (herunterladen, teilen, Adresse kopieren, E-Mail öffnen),
+    // damit die Schritte immer zu den Knöpfen passen. Am Handy (U-01): 1. Adresse kopieren, 2. Datei teilen, 3. Adresse bei „An“ einfügen; „anhang“ steht nur am Handy.
     // Betreff und Text der E-Mail stehen auf Deutsch in hilfen.js (mailtoAnVerein); sie werden nicht übersetzt.
     senden: {
       titel: "So schicken Sie die Datei an den Verein",
-      einleitung: "Schicken Sie die Datei per E-Mail an die Geschäftsstelle.",
-      handyTitel: "Am Handy",
-      handy1: "Tippen Sie oben auf „{knopf}“.",
-      handy2: "Wählen Sie Ihr Mail-Programm.",
-      handy3: "Schicken Sie die E-Mail an die Adresse unten.",
-      computerTitel: "Am Computer",
+      handy1: "Tippen Sie unten auf „{knopf}“.",
+      handy2: "Tippen Sie oben auf „{knopf}“. Wählen Sie Ihr Mail-Programm. Die Datei ist schon angehängt.",
+      handy3: "Fügen Sie die Adresse bei „An“ ein. Senden Sie die E-Mail.",
       computer1: "Klicken Sie oben auf „{knopf}“.",
       computer2: "Schreiben Sie eine neue E-Mail. Hängen Sie die Datei an.",
       computer3: "Schicken Sie die E-Mail an die Adresse unten.",
@@ -978,7 +966,7 @@ export default {
       kopiert: "Die Adresse ist kopiert.",
       kopierenFehler: "Kopieren geht hier nicht. Die Adresse ist markiert. Kopieren Sie die Adresse selbst.",
       oeffnen: "E-Mail an die Geschäftsstelle öffnen",
-      anhang: "Hängen Sie die Datei an die E-Mail an.",
+      anhang: "Bei „{knopf}“ hängen Sie die Datei selbst an.",
     },
     naechsteTitel: "So geht es weiter",
     unterschriftTraining: "Die Blätter für den Fußball-Verband unterschreiben Sie beim ersten Training mit Stift.",
@@ -991,11 +979,15 @@ export default {
     unterschriftFertig: "Sie haben alles am Bildschirm unterschrieben. Was Sie ausdrucken müssen, steht in Teil A der Datei.",
     // Modus "bildschirm": ein freiwilliges Feld (Kind, anderer Elternteil) blieb leer
     unterschriftRest: "Einige Unterschriften fehlen noch. Das sind die blauen Markierungen im PDF.\nUnterschreiben Sie dort mit Stift. Was Sie ausdrucken müssen, steht in Teil A der Datei.",
+    // Steht dahinter, wenn eine offene Markierung auf einem Blatt liegt, das mit der Datei verschickt wird (nicht bei der Abmeldung beim alten Verein: Sie geht per Einschreiben).
+    unterschriftFoto: "Fotografieren oder scannen Sie die unterschriebenen Blätter. Schicken Sie sie in derselben E-Mail mit.",
     fehltTitel: "Diese Unterlagen fehlen noch:",
     fehltHinweis: "Schicken Sie sie per E-Mail nach, sobald Sie sie haben.",
     nichtWhatsapp: "Bitte schicken Sie die Datei nicht per WhatsApp. Sie enthält private Daten.",
     // Teil C geht mit der ganzen Datei per E-Mail an die Geschäftsstelle; der Verein bewahrt ihn getrennt auf (M11, O73)
     teilC: "Teil C enthält Gesundheitsdaten. Der Verein bewahrt ihn getrennt auf.",
+    // Letzter Punkt von „So geht es weiter“ (Entscheidung D-06, 12.10.2026)
+    danach: "Danach prüft der Verein Ihre Anmeldung.",
     weiterePerson: "Weitere Person anmelden",
     weiterePersonHinweis: "Wir übernehmen Adresse, Kontakt, Eltern und Zahlung.",
     neuePerson: "Sie melden jetzt die nächste Person an.",

@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mitglied werden – FFV Sportfreunde 04</title>
-<meta name="description" content="Mitglied beim FFV Sportfreunde 04 werden: Beiträge für Fußball und Karneval, Ablauf von Probetraining bis Spielerpass, Unterlagen zum Download und der Aufnahmeantrag.">
+<meta name="description" content="Mitglied beim FFV Sportfreunde 04 werden: Beiträge für Fußball und Karneval, Ablauf von Probetraining bis Spielerpass und die Anmeldung nach dem Probetraining.">
 <link rel="canonical" href="https://justolgay.github.io/speuzer-website-prototyp/ws/mitglied-werden.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="FFV Sportfreunde 04">
 <meta property="og:title" content="Mitglied werden – FFV Sportfreunde 04">
-<meta property="og:description" content="Mitglied beim FFV Sportfreunde 04 werden: Beiträge für Fußball und Karneval, Ablauf von Probetraining bis Spielerpass, Unterlagen zum Download und der Aufnahmeantrag.">
+<meta property="og:description" content="Mitglied beim FFV Sportfreunde 04 werden: Beiträge für Fußball und Karneval, Ablauf von Probetraining bis Spielerpass und die Anmeldung nach dem Probetraining.">
 <meta property="og:url" content="https://justolgay.github.io/speuzer-website-prototyp/ws/mitglied-werden.html">
 <meta property="og:image" content="https://justolgay.github.io/speuzer-website-prototyp/assets/og/standard.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -50,6 +50,12 @@
       }
       if (url.hostname === location.hostname && /\/workspace\/web\//.test(url.pathname)) {
         var name = url.pathname.split("/").pop().replace(/\.html$/, "");
+        if (name === "anmeldung") {
+          url.searchParams.delete("app");
+          a.href = "ext://" + url.toString();
+          a.removeAttribute("target");
+          return;
+        }
         var modul = NAV[name] || (/^mannschaften-/.test(name) ? NAV.mannschaften : null) || (/^chronik/.test(name) ? NAV.chronik : null);
         if (modul && !url.hash) {
           a.href = "nav://" + modul;
@@ -78,13 +84,22 @@
   else start();
 })();
 </script>
+<style>
+.aufklapper { margin-block: var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); }
+.aufklapper > summary { display: flex; align-items: center; gap: var(--sp-2); min-height: 48px; padding: var(--sp-2) var(--sp-4); cursor: pointer; font-weight: 700; color: var(--blau-800); list-style: none; }
+.aufklapper > summary::-webkit-details-marker { display: none; }
+.aufklapper > summary::before { content: ""; flex: none; width: .5em; height: .5em; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-45deg); transition: transform var(--t-kurz, .15s); }
+.aufklapper[open] > summary::before { transform: rotate(45deg); }
+.aufklapper > summary:focus-visible { outline: var(--fokus, 3px solid currentColor); outline-offset: 2px; border-radius: var(--r-md); }
+.aufklapper__inhalt { padding: 0 var(--sp-4) var(--sp-4); }
+</style>
 </head>
 <body class="ws ">
 <main id="inhalt">
 <section class="abschnitt seitenkopf">
   <div class="container">
     <h1>Mitglied werden</h1>
-    <p class="seitenkopf__lead">Erst die Fakten, dann der Antrag: Beiträge, Ablauf und Unterlagen auf einen Blick.</p>
+    <p class="seitenkopf__lead">Beiträge, Ablauf und Unterlagen auf einen Blick.</p>
   </div>
 </section>
 <section class="abschnitt">
@@ -98,8 +113,8 @@
         <thead>
           <tr>
             <th>Beitragsgruppe</th>
-            <th class="zahl"><span class="beitragstabelle__lang">monatlich</span><span class="beitragstabelle__kurz">mtl.</span></th>
-            <th class="zahl"><span class="beitragstabelle__lang">jährlich</span><span class="beitragstabelle__kurz">jährl.</span></th>
+            <th class="zahl"><span class="beitragstabelle__lang">monatlich</span><span class="beitragstabelle__kurz">Monat</span></th>
+            <th class="zahl"><span class="beitragstabelle__lang">jährlich</span><span class="beitragstabelle__kurz">Jahr</span></th>
           </tr>
         </thead>
         <tbody>
@@ -134,8 +149,8 @@
         <thead>
           <tr>
             <th>Beitragsgruppe</th>
-            <th class="zahl"><span class="beitragstabelle__lang">monatlich</span><span class="beitragstabelle__kurz">mtl.</span></th>
-            <th class="zahl"><span class="beitragstabelle__lang">jährlich</span><span class="beitragstabelle__kurz">jährl.</span></th>
+            <th class="zahl"><span class="beitragstabelle__lang">monatlich</span><span class="beitragstabelle__kurz">Monat</span></th>
+            <th class="zahl"><span class="beitragstabelle__lang">jährlich</span><span class="beitragstabelle__kurz">Jahr</span></th>
           </tr>
         </thead>
         <tbody>
@@ -199,11 +214,11 @@
 </section>
 <section class="abschnitt--hell abschnitt">
   <div class="container fluss">
-    <h2>So wirst du Mitglied</h2>
+    <h2>So werden Sie Mitglied</h2>
     <ol class="schritte" style="max-width:var(--inhalt);">
-      <li>
+      <li id="probetraining">
         <div class="schritt__inhalt">
-          <p>Probetraining vereinbaren (nur Fußball): E-Mail an die Jugendleitung mit Jahrgang und Vorerfahrung.</p>
+          <p>Probetraining vereinbaren: E-Mail an die Jugendleitung mit Jahrgang und Vorerfahrung.</p>
           <p class="meta">Beim Probetraining ist man noch nicht über den Verein versichert.</p>
           <p class="knopfzeile">
             <a class="knopf" href="mailto:jugendleitung@sportfreunde04.de?subject=Probetraining%20beim%20FFV%20Sportfreunde%2004&amp;body=Hallo%2C%0A%0Awir%20interessieren%20uns%20f%C3%BCr%20ein%20Probetraining.%0AJahrgang%20des%20Kindes%3A%20%0AVorerfahrung%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe">E-Mail an die Jugendleitung</a>
@@ -213,38 +228,32 @@
         </div>
       </li>
       <li>
-        <div class="schritt__inhalt" data-nur-web>
-          <p>Aufnahmeantrag online ausfüllen und am Bildschirm unterschreiben – daraus entsteht das fertige PDF für die E-Mail an die Geschäftsstelle.</p>
+        <div class="schritt__inhalt">
+          <p>Nach dem Probetraining bekommen Sie einen Code. Damit melden Sie sich hier an.</p>
           <p class="knopfzeile">
-            <a class="knopf" href="aufnahmeantrag.html">Online ausfüllen</a>
-            <a class="knopf knopf--sekundaer" href="https://cdn.appack.de/sportfreunde04/pdf/Vereinsanmeldung%20allgemein_NEU_9-2026%20%20(1).pdf" rel="noopener" target="_blank">PDF zum Ausdrucken</a>
-          </p>
-          <p class="meta">Lieber auf Papier? PDF ausdrucken, ausfüllen, unterschreiben und im Vereinsheim abgeben oder <a href="mailto:geschaeftsstelle@sportfreunde04.de?subject=Aufnahmeantrag&amp;body=Hallo%2C%0A%0Aanbei%20der%20ausgef%C3%BCllte%20und%20unterschriebene%20Aufnahmeantrag%20%28PDF%29.%0A%0AName%20des%20neuen%20Mitglieds%3A%20%0AAbteilung%20%28Fu%C3%9Fball%20oder%20Karneval%29%3A%20%0AMannschaft%20bzw.%20Gruppe%20%28falls%20bekannt%29%3A%20%0A%0AViele%20Gr%C3%BC%C3%9Fe">per E-Mail an die Geschäftsstelle senden</a>.</p>
-          <p class="meta">Die Mitgliedschaft beginnt am Tag der Anmeldung.</p>
-        </div>
-        <div class="schritt__inhalt" data-nur-app hidden>
-          <p>Aufnahmeantrag ausfüllen – online oder als PDF.</p>
-          <p class="knopfzeile">
-            <a class="knopf" href="https://appack.de/rest-api/drender/6a903758337cdc97f94f2655" target="_blank" rel="noopener">Aufnahmeantrag online ausfüllen</a>
-            <a class="knopf knopf--sekundaer" href="https://cdn.appack.de/sportfreunde04/pdf/Vereinsanmeldung%20allgemein_NEU_9-2026%20%20(1).pdf" rel="noopener" target="_blank">Aufnahmeantrag (PDF)</a>
+            <a class="knopf" href="anmeldung.html" target="_blank" rel="noopener">Jetzt anmelden</a>
           </p>
           <p class="meta">Die Mitgliedschaft beginnt am Tag der Anmeldung.</p>
         </div>
       </li>
-      <li><div class="schritt__inhalt"><p>Unterlagen abgeben: im Vereinsheim oder beim Trainerteam. Was dazugehört, steht unten.</p></div></li>
-      <li><div class="schritt__inhalt"><p>Spielerpass – nur Fußball: Der Verein beantragt die Spielerlaubnis beim HFV.</p></div></li>
+      <li><div class="schritt__inhalt"><p>Datei schicken: Am Ende schicken Sie die Datei per E-Mail an die Geschäftsstelle.</p></div></li>
+      <li><div class="schritt__inhalt"><p>Spielerpass – nur Fußball: Der Verein beantragt das Spielrecht (Erlaubnis zum Spielen) beim Hessischen Fußball-Verband.</p></div></li>
     </ol>
   </div>
 </section>
 <section class="abschnitt">
   <div class="container fluss">
     <h2>Unterlagen (Fußball)</h2>
-    <div class="raster raster--3">
+    <p class="inhalt">Die Anmeldung sagt Ihnen genau, was Sie brauchen.</p>
+    <details class="aufklapper">
+      <summary>Welche Unterlagen brauche ich?</summary>
+      <div class="aufklapper__inhalt">
+        <div class="raster raster--3">
       <div class="karte fluss">
       <span class="karte__titel">Neuanmeldung</span>
       <ul>
         <li>Aufnahmeantrag des Vereins (unterschrieben)</li>
-        <li>Antrag auf Spielerlaubnis beim Hessischen Fußball-Verband (nur Name und Unterschriften eintragen, den Rest füllt der Verein aus)</li>
+        <li>Antrag auf Spielerlaubnis beim Hessischen Fußball-Verband</li>
         <li>Einzugsermächtigung / SEPA-Lastschriftmandat</li>
         <li>Ärztliches Attest über die Sporttauglichkeit</li>
         <li>Kopie der Geburtsurkunde</li>
@@ -270,19 +279,13 @@
         <li>Kopie des Reisepasses</li>
         <li>Zusatzerklärung für Spieler zwischen 12 und 18 Jahren</li>
       </ul>
-      <p class="meta">Zusätzlich zu Neuanmeldung oder Vereinswechsel. Spieler aus den USA, Mexiko, Argentinien oder Brasilien benötigen ein weiteres Zusatzformular des HFV.</p>
+      <p class="meta">Zusätzlich zu Neuanmeldung oder Vereinswechsel. Spieler aus den USA, Mexiko, Argentinien oder Brasilien brauchen ein weiteres Formular. Es kommt vom Hessischen Fußball-Verband.</p>
     </div>
     </div>
+      </div>
+    </details>
     <h3 class="inhalt">Zum Herunterladen</h3>
     <ul class="downloads inhalt" role="list">
-      <li class="download">
-      <a href="https://cdn.appack.de/sportfreunde04/pdf/Info-Blatt-FFV-Sportfreunde-04%20(2).pdf" target="_blank" rel="noopener">Info-Blatt zur Anmeldung</a>
-      <span class="meta">PDF · 4 Seiten · 121 KB</span>
-    </li>
-      <li class="download">
-      <a href="https://cdn.appack.de/sportfreunde04/pdf/1_Wichtige%20Unterlagen%20die%20mitzubringen%20sind.pdf" target="_blank" rel="noopener">Wichtige Unterlagen, die mitzubringen sind</a>
-      <span class="meta">PDF · 1 Seite · 57 KB</span>
-    </li>
       <li class="download">
       <a href="https://cdn.appack.de/sportfreunde04/pdf/Zusatzerklrung_12-18%20(1).pdf" target="_blank" rel="noopener">Zusatzerklärung für Spieler zwischen 12 und 18 Jahren ohne deutsche Staatsangehörigkeit</a>
       <span class="meta">PDF · 1 Seite · 60 KB</span>
@@ -296,8 +299,8 @@
 </section>
 <section class="abschnitt--blau abschnitt abschnitt--eng">
   <div class="container fluss">
-    <h2>Fragen zur Mitgliedschaft?</h2>
-    <p>Die Geschäftsstelle hilft weiter. Oder möchtest du dich als Trainer, Betreuer oder Helfer <a href="verein-mach-mit.html">einbringen</a>?</p>
+    <h2>Fragen?</h2>
+    <p>Die Geschäftsstelle hilft. Oder möchten Sie sich als Trainer, Betreuer oder Helfer <a href="verein-mach-mit.html">einbringen</a>?</p>
     <p class="knopfzeile">
       <a class="knopf knopf--weiss" href="mailto:geschaeftsstelle@sportfreunde04.de?subject=Mitgliedschaft">E-Mail an die Geschäftsstelle</a>
     </p>
@@ -306,7 +309,7 @@
 </main>
 <footer class="ws-fuss">
   <div data-nur-prototyp>
-  <p>Prototyp · Testumgebung, keine Live-Seite · Inhalte Stand Montag, 12. Oktober 2026</p>
+  <p>Prototyp · Testumgebung, keine Live-Seite · Inhalte Stand Montag, 19. Oktober 2026</p>
   </div>
 </footer>
 </body>

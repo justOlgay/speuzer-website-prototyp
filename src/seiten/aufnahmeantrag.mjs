@@ -23,6 +23,12 @@
 // Workspace-Ordner web/ um). In der Vereins-App (?app=1) bleibt es beim
 // App-Formular (data-nur-app, siehe APP_MODUS_SKRIPT in hilfen.mjs).
 //
+// Livegang des Anmelde-Assistenten (Paket P1, Runde 2, 12.10.2026, Schalter ANMELDUNG_LIVE in hilfen.mjs): Neue Mitglieder melden sich nur noch
+// im Assistenten an, nach dem Probetraining. Die Seite „Aufnahmeantrag online“ ist dann eine Weiterleitung auf „Mitglied werden“ (Muster der alten
+// Seiten spielplan*/tabellen aus W6, src/vorlagen/weiterleitung.mjs: kurzer Satz, Link, meta refresh; in der App öffnet die Weiche den Link in der
+// App-Seite). Sie bleibt als Datei im Paket, damit alte Adressen nicht ins Leere laufen und die Datei im CMS beim Einspielen ersetzt wird. Ohne den
+// Schalter bleibt die Seite Zeichen für Zeichen, wie sie war (docs/ws/aufnahmeantrag.html).
+//
 // Nachbesserung 28.09.2026: Längenprüfung mit echten Zeichenbreiten
 // (data/aufnahmeantrag-schriftbreiten.json) – was nicht in mindestens 6 pt
 // ins Feld des Vereins-PDF passt, weist das Formular vorher ab; Pflichtfelder
@@ -35,7 +41,9 @@ import {
   AUFNAHMEANTRAG_MAILTO,
   AUFNAHMEANTRAG_ONLINE_MAILTO,
   AUFNAHMEANTRAG_VERSAND,
+  ANMELDUNG_LIVE,
 } from "../vorlagen/hilfen.mjs";
+import { weiterleitungsSeite } from "../vorlagen/weiterleitung.mjs";
 
 // Diese Seite liegt immer unter "/aufnahmeantrag/" (Tiefe 1), daher "../"
 // (siehe pfadZurWurzel() in tools/build.mjs).
@@ -537,6 +545,19 @@ function schrittPruefen(daten, datenschutzHref) {
 // ---------- Seite ----------
 
 export function seite(daten) {
+  if (ANMELDUNG_LIVE) {
+    return weiterleitungsSeite({
+      vonUrl: "/aufnahmeantrag/",
+      pfad: PFAD,
+      zuPfadTeil: "mitglied-werden/",
+      zuUrl: "/mitglied-werden/",
+      zuTitel: "Mitglied werden",
+      satz: "Die Anmeldung finden Sie jetzt bei „Mitglied werden“.",
+      linkText: "Weiter zu „Mitglied werden“",
+      beschreibung: "Diese Seite ist umgezogen. Die Anmeldung finden Sie jetzt bei „Mitglied werden“.",
+      kopfZusatz: APP_MODUS_SKRIPT,
+    });
+  }
   const felderDaten = daten["aufnahmeantrag-felder"];
   if (!felderDaten?.felder || !felderDaten?.quelle) {
     throw new Error("aufnahmeantrag.mjs: data/aufnahmeantrag-felder.json fehlt oder ist unvollständig");
