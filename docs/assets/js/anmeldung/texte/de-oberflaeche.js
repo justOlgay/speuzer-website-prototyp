@@ -184,6 +184,8 @@ export default {
     keinLink: "Probetraining vereinbaren",
     passiv: "Passives Mitglied? Den Code bekommen Sie von der {link}.",
     passivLink: "Geschäftsstelle",
+    // Link oben links, nur auf der Live-Seite (konfig.seiten.zurueck): zurück zur Seite „Mitglied werden“, auf der „Jetzt anmelden“ steht.
+    zurueck: "Zurück zu „Mitglied werden“",
   },
 
   app: {

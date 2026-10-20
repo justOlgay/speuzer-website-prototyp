@@ -108,7 +108,8 @@ export default {
   "kein": "No trial training yet? {link}",
   "keinLink": "Arrange a trial training",
   "passiv": "Passive member? You get the code from the {link}.",
-  "passivLink": "club office"
+  "passivLink": "club office",
+  "zurueck": "Back to the membership page (Mitglied werden)"
  },
  "app": {
   "uebergabe": "Please open the registration in the browser.",

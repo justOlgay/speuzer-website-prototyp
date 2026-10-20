@@ -108,7 +108,8 @@ export default {
   "kein": "لم تحضر تدريبًا تجريبيًا بعد؟ {link}",
   "keinLink": "احجز موعدًا لتدريب تجريبي",
   "passiv": "عضو داعم؟ تحصل على الرمز من {link}.",
-  "passivLink": "مكتب النادي"
+  "passivLink": "مكتب النادي",
+  "zurueck": "العودة إلى صفحة العضوية (⁦Mitglied werden⁩)"
  },
  "app": {
   "uebergabe": "يرجى فتح التسجيل في المتصفح.",

@@ -368,6 +368,22 @@
   text-decoration: underline;
 }
 
+a.anm-zurueck {
+  text-decoration: none;
+}
+
+a.anm-zurueck:hover,
+a.anm-zurueck:focus-visible {
+  color: var(--blau-700);
+}
+
+.anm-zurueck--seite {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: max-content;
+  line-height: 1.3;
+}
+
 .anm-sprache {
   display: flex;
 }

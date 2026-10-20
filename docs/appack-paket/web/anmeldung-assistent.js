@@ -339,11 +339,14 @@ async function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
 
   const meldung = h("p", { klasse: "anm-meldung", role: "status" });
   const zurueckKnopf = h("button", { type: "button", klasse: "anm-zurueck", "data-aktion": "zurueck" });
+
+  const seitenZurueck = h("a", { klasse: "anm-zurueck anm-zurueck--seite", "data-aktion": "zurueck-seite", hidden: true });
   const spracheEtikett = h("label", { klasse: "sr-only", for: "anm-sprache" });
   const spracheAuswahl = h("select", { id: "anm-sprache", klasse: "anm-sprache__auswahl", "data-aktion": "sprache" });
   const hilfeKnopf = h("button", { type: "button", klasse: "anm-hilfe", "data-aktion": "hilfe" });
   const kopf = h("header", { klasse: "anm-kopf" },
     zurueckKnopf,
+    seitenZurueck,
     h("div", { klasse: "anm-kopf__werkzeuge" }, h("div", { klasse: "anm-sprache" }, spracheEtikett, spracheAuswahl), hilfeKnopf));
   const abschnittTitel = h("p", { klasse: "sr-only", id: "anm-abschnitte-titel" });
   const abschnittListe = h("ol", { klasse: "anm-abschnitte__liste" }, ABSCHNITTE.map((id) => h("li", { klasse: "anm-abschnitte__punkt", "data-abschnitt": id })));
@@ -420,6 +423,17 @@ async function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
     zurueckKnopf.textContent = k.t("kopf.zurueck");
     zurueckKnopf.setAttribute("aria-label", k.t("kopf.zurueckLang"));
     zurueckKnopf.hidden = k.tiefe <= 0;
+
+    const seitenZiel = (konfig.seiten && konfig.seiten.zurueck) || "";
+    const mitSeitenZurueck = !!seitenZiel && k.schritt === "code" && !k.appModus();
+    seitenZurueck.hidden = !mitSeitenZurueck;
+    if (mitSeitenZurueck) {
+      seitenZurueck.setAttribute("href", seitenZiel);
+      seitenZurueck.textContent = k.t("code.zurueck");
+    } else {
+      seitenZurueck.removeAttribute("href");
+      seitenZurueck.textContent = "";
+    }
     hilfeKnopf.textContent = k.t("kopf.hilfe");
     spracheEtikett.textContent = k.t("kopf.sprache");
     spracheAuswahl.value = k.sprache;
@@ -671,6 +685,20 @@ async function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
 
   zurueckKnopf.addEventListener("click", () => {
     if (k.tiefe > 0) history.back();
+  });
+
+  const kommtVonDerselbenHerkunft = () => {
+    try {
+      return history.length > 1 && !!document.referrer && new URL(document.referrer).origin === location.origin;
+    } catch (e) {
+      return false;
+    }
+  };
+  seitenZurueck.addEventListener("click", (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (!kommtVonDerselbenHerkunft()) return;
+    e.preventDefault();
+    history.back();
   });
 
   window.addEventListener("popstate", (e) => {

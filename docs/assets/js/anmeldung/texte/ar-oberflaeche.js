@@ -245,6 +245,7 @@ export default {
     keinLink: "احجز موعدًا لتدريب تجريبي",
     passiv: "عضو داعم؟ تحصل على الرمز من {link}.",
     passivLink: "مكتب النادي",
+    zurueck: `العودة إلى صفحة العضوية (${D("Mitglied werden")})`,
   },
 
   app: {

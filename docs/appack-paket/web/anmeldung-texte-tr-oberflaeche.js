@@ -108,7 +108,8 @@ export default {
   "kein": "Henüz deneme antrenmanına katılmadınız mı? {link}",
   "keinLink": "Deneme antrenmanı için randevu alın",
   "passiv": "Pasif üye misiniz? Kodu {link} verir.",
-  "passivLink": "kulüp ofisi"
+  "passivLink": "kulüp ofisi",
+  "zurueck": "Üyelik sayfasına dönün (Mitglied werden)"
  },
  "app": {
   "uebergabe": "Lütfen kayıt sayfasını tarayıcıda açın.",

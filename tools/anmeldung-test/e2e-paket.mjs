@@ -35,6 +35,9 @@
 //     pruefeUebergabeImBrowser: anmeldung.html?app=1 zeigt nur die Übergabe „Im Browser öffnen“; der Knopf führt auf ext://https://cdn.appack.de/…/anmeldung.html
 //     (ohne app=1, mit code, falls einer in der Adresse steht).
 //     pruefeCodeSprachen: Code-Seite und Übergabe in jeder Sprache des Pakets (Arabisch von rechts nach links), Texte = Texte im Paket.
+//     pruefeSeitenZurueckImBrowser (B1, 19.10.2026): oben links auf der Code-Seite der Link „Zurück zu „Mitglied werden““ (nur Live-Seite): Ziel mitglied-werden.html, in allen Sprachen
+//     beschriftet, mindestens 44 px, Vereinsblau, mit Tastatur bedienbar; ohne Verlauf (neues Fenster) führt der Klick auf die Seite, mit Verlauf von derselben Herkunft geht er eine
+//     Seite zurück, mit fremdem Referrer führt er auf die Seite; nicht nach dem Code, nicht in der App (?app=1).
 //     pruefeUmgebungshinweisImBrowser / …Sprachen (Zusätze zu P1): Hinweis oben auf dem ersten Bildschirm, wenn die Seite in einem Rahmen (Testseite auf anderer Herkunft mit
 //     <iframe> ohne allow-Angaben, wie die Hülle der Website) oder im Browser einer anderen App (gesetzter User-Agent) läuft; Fotos rahmen-hinweis-390-de.png und inapp-hinweis-390-de.png.
 //   „Mitglied werden“ (P1): nur noch der Weg über den Assistenten. Schritt 2 sagt „Nach dem Probetraining bekommen Sie einen Code. Damit melden Sie sich hier an.“ und
@@ -77,7 +80,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import puppeteer from "puppeteer-core";
 import * as PDFLib from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
-import { MOBIL, DESKTOP, pruefeZugangImBrowser, pruefeUebergabeImBrowser, pruefeUmgebungshinweisImBrowser, pruefeUmgebungshinweisSprachen } from "./zugang-browser.mjs";
+import { MOBIL, DESKTOP, pruefeZugangImBrowser, pruefeUebergabeImBrowser, pruefeSeitenZurueckImBrowser, pruefeUmgebungshinweisImBrowser, pruefeUmgebungshinweisSprachen } from "./zugang-browser.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const AXE = fs.readFileSync(path.join(ROOT, "node_modules", "axe-core", "axe.min.js"), "utf8");
@@ -698,6 +701,20 @@ function zugangUmgebung(srv, browser, konfigLive) {
     },
     woerterbuch: async (code) => (await import(pathToFileURL(path.join(PAKET, "anmeldung-texte-" + code + "-oberflaeche.js")).href)).default,
     sprachen: konfigLive.sprachen,
+    // B1 (19.10.2026): Link „Zurück zu „Mitglied werden““ oben links auf der Code-Seite; er gilt nur für die Live-Seite (die Begleitseite hat kein seitenZurueck)
+    seitenZurueck: {
+      href: "mitglied-werden.html",
+      zielUrl: srv.basis + PREFIX + "mitglied-werden.html",
+      zielTitel: /^Mitglied werden/,
+      oeffneZielseite: (vp, name) => neueSeite(srv, browser, { name, vp, datei: "mitglied-werden.html" }),
+      // Erster Eintrag im Verlauf: die Testseite der Hülle (andere Herkunft). Danach, im selben Tab, der Assistent mit der Hülle als Referrer.
+      oeffneVonFremderHerkunft: async (vp, name) => {
+        const page = await neueSeite(srv, browser, { name, vp, huelleAbfrage: "" });
+        await page.goto(srv.basis + PREFIX + "anmeldung.html", { waitUntil: "networkidle0", referer: HUELLE_HOST + "/" });
+        await page.waitForSelector("#anmeldung[data-bereit]", { timeout: 15000 });
+        return page;
+      },
+    },
   };
 }
 
@@ -1400,7 +1417,7 @@ async function main() {
   ok("Konfiguration der Seite: live = true, Quellen für Schrift und Vordrucke als Module, kein Kapitel offenePunkte", konfigLive.live === true && !!konfigLive.quellen && !!konfigLive.quellen.schriftModul && Object.keys(konfigLive.quellen.vorlagenModule).length === 5 && !("offenePunkte" in konfigLive.anmeldung));
 
   const zugangKonfig = konfigLive.anmeldung.zugang;
-  ok("Konfiguration der Seite: Zugang mit Parameter „code“ und einer Liste von Prüfwerten (jeder ein SHA-256, 64 Hexzeichen klein; leer = keine Code-Abfrage), seiten.probetraining zeigt auf „Mitglied werden“", !!zugangKonfig && zugangKonfig.parameter === "code" && Array.isArray(zugangKonfig.pruefwerte) && zugangKonfig.pruefwerte.every((x) => /^[0-9a-f]{64}$/.test(x)) && konfigLive.seiten && konfigLive.seiten.probetraining === "mitglied-werden.html#probetraining", JSON.stringify({ zugang: zugangKonfig && { parameter: zugangKonfig.parameter, anzahl: (zugangKonfig.pruefwerte || []).length }, probetraining: konfigLive.seiten && konfigLive.seiten.probetraining }));
+  ok("Konfiguration der Seite: Zugang mit Parameter „code“ und einer Liste von Prüfwerten (jeder ein SHA-256, 64 Hexzeichen klein; leer = keine Code-Abfrage), seiten.probetraining zeigt auf „Mitglied werden“ (Schritt 1), seiten.zurueck (B1) auf die Seite „Mitglied werden“", !!zugangKonfig && zugangKonfig.parameter === "code" && Array.isArray(zugangKonfig.pruefwerte) && zugangKonfig.pruefwerte.every((x) => /^[0-9a-f]{64}$/.test(x)) && konfigLive.seiten && konfigLive.seiten.probetraining === "mitglied-werden.html#probetraining" && konfigLive.seiten.zurueck === "mitglied-werden.html", JSON.stringify({ zugang: zugangKonfig && { parameter: zugangKonfig.parameter, anzahl: (zugangKonfig.pruefwerte || []).length }, seiten: konfigLive.seiten }));
 
   const srv = await starteServer();
   const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: CHROME_ARGUMENTE });
@@ -1419,6 +1436,7 @@ async function main() {
     await abschnitt("Seite", () => pruefeSeite(srv, browser, konfigLive));
     await abschnitt("Zugang mit Code", () => pruefeZugangImBrowser(umgebung));
     await abschnitt("Übergabe in den Browser", () => pruefeUebergabeImBrowser(umgebung));
+    await abschnitt("Zurück zur Seite „Mitglied werden“ (B1)", () => pruefeSeitenZurueckImBrowser(umgebung));
     await abschnitt("Code-Seite und Übergabe in allen Sprachen", () => pruefeCodeSprachen(srv, browser, konfigLive));
     await abschnitt("Hinweis zur Umgebung (Rahmen, Browser anderer Apps)", () => pruefeUmgebungshinweisImBrowser(umgebung));
     await abschnitt("Hinweis zur Umgebung in allen Sprachen", () => pruefeUmgebungshinweisSprachen(umgebung));

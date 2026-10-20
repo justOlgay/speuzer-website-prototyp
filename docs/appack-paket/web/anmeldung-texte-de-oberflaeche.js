@@ -137,7 +137,8 @@ export default {
   "kein": "Noch kein Probetraining? {link}",
   "keinLink": "Probetraining vereinbaren",
   "passiv": "Passives Mitglied? Den Code bekommen Sie von der {link}.",
-  "passivLink": "Geschäftsstelle"
+  "passivLink": "Geschäftsstelle",
+  "zurueck": "Zurück zu „Mitglied werden“"
  },
  "app": {
   "uebergabe": "Bitte öffnen Sie die Anmeldung im Browser.",

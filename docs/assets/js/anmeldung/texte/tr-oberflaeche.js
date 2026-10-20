@@ -244,6 +244,7 @@ export default {
     keinLink: "Deneme antrenmanı için randevu alın",
     passiv: "Pasif üye misiniz? Kodu {link} verir.",
     passivLink: "kulüp ofisi",
+    zurueck: "Üyelik sayfasına dönün (Mitglied werden)",
   },
 
   app: {

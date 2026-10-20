@@ -122,7 +122,10 @@ function baueKonfig(daten, live = false) {
     stand: daten.anmeldung?.stand ?? String(daten.stand ?? "").slice(0, 10),
     // Ziele von Links der Code-Seite: „Probetraining vereinbaren“ führt zu „Mitglied werden“ (Schritt 1). Die Live-Seite liegt im Ordner
     // web/ neben mitglied-werden.html; die Begleitseite führt auf die Workspace-Seite in docs/ws/.
-    seiten: { probetraining: (live ? "" : PFAD + "ws/") + "mitglied-werden.html#probetraining" },
+    // zurueck (nur Live-Seite, B1, 19.10.2026): Ziel des Links „Zurück zu „Mitglied werden““ oben links auf der Code-Seite. Wer in einem
+    // neuen Fenster oder im Browser des Geräts (aus der App, per QR-Code) landet, hat keinen Verlauf und käme sonst nicht zurück. Die
+    // Begleitseite hat keine Seite „Mitglied werden“ im selben Ordner und bekommt den Link nicht (kein Schlüssel = kein Link).
+    seiten: { probetraining: (live ? "" : PFAD + "ws/") + "mitglied-werden.html#probetraining", ...(live ? { zurueck: "mitglied-werden.html" } : {}) },
   };
   if (live) {
     konfig.live = true;

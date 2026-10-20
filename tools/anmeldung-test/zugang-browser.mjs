@@ -2,6 +2,7 @@
 // Zwei Aufrufer, ein Satz Prüfungen: e2e.mjs (Begleitseite /anmeldung/ über den Testserver) und e2e-paket.mjs (Live-Seite
 // anmeldung.html im Paket). Jeder Aufrufer reicht ein Objekt `c` mit seiner Umgebung herein.
 // Ausgeführt werden: pruefeZugangImBrowser (Code-Seite, Link, SHA-256, Tastatur), pruefeUebergabeImBrowser (?app=1),
+// pruefeSeitenZurueckImBrowser (B1: der Link „Zurück zu „Mitglied werden““ oben links auf der Code-Seite, nur Live-Seite),
 // pruefeUmgebungshinweisImBrowser und pruefeUmgebungshinweisSprachen (Zusätze zu P1: der Hinweis oben auf dem ersten Bildschirm, wenn die Seite in einem
 // Rahmen oder im Browser einer anderen App läuft; Texte in allen Sprachen). Das Objekt `c`:
 //
@@ -25,6 +26,7 @@
 //                           die Live-Seite im Paket wird vom Test nur über abgefangene Anfragen ausgeliefert, dort prüft der Test nur die Attribute des Links
 //   c.woerterbuch(code)     das Wörterbuch der Oberfläche einer Sprache (Quelle oder Paket), für die erwarteten Texte
 //   c.sprachen              die Sprachen, die die Seite anbietet (["de", "en", "tr", "ar"])
+//   c.seitenZurueck         nur Live-Seite (B1): Ziel, Zieladresse und Hilfen zum Öffnen der Zielseite, siehe pruefeSeitenZurueckImBrowser; ohne: die Begleitseite hat den Link nicht
 //
 // Nichts hier steht im ausgelieferten Code: Die Prüfwerte setzt der Server der Aufrufer zur Laufzeit.
 
@@ -177,7 +179,7 @@ export async function pruefeZugangImBrowser(c) {
       ok(N + "Code-Seite: Knopf „Weiter“", d.weiterText === "Weiter", String(d.weiterText));
       ok(N + "Code-Seite: Sprachwahl oben, alle vier Knöpfe im ersten Bildschirm (390 x 844)", d.leisteSichtbar && JSON.stringify(d.sprachen) === JSON.stringify(["de", "en", "tr", "ar"]) && d.sprachenSichtbar, "unterste Kante " + d.leisteUnten + " von " + d.hoehe);
       ok(N + "Code-Seite: das Feld liegt im ersten Bildschirm" + (c.weiterImErstenBildschirm ? ", der Knopf „Weiter“ auch" : ""), d.eingabeUnten <= d.hoehe && (!c.weiterImErstenBildschirm || d.weiterUnten <= d.hoehe), "Feld unten " + d.eingabeUnten + ", Weiter unten " + d.weiterUnten + " von " + d.hoehe);
-      ok(N + "Code-Seite: keine Abschnitte, keine Fußzeile, kein Zurück, keine zweite Sprachauswahl in der Leiste des Assistenten", !d.abschnitte && !d.fuss && !d.zurueck && !d.sprachAuswahlImKopf, JSON.stringify({ abschnitte: d.abschnitte, fuss: d.fuss, zurueck: d.zurueck }));
+      ok(N + "Code-Seite: keine Abschnitte, keine Fußzeile, kein Knopf „Zurück“ (einen Schritt; der Link zur Seite „Mitglied werden“ ist ein anderes Element, siehe B1), keine zweite Sprachauswahl in der Leiste des Assistenten", !d.abschnitte && !d.fuss && !d.zurueck && !d.sprachAuswahlImKopf, JSON.stringify({ abschnitte: d.abschnitte, fuss: d.fuss, zurueck: d.zurueck }));
       const kein = d.links.find((l) => l.aktion === "probetraining");
       const passiv = d.links.find((l) => l.aktion === "code-anfragen");
       ok(N + "Code-Seite, klein darunter: „Noch kein Probetraining? Probetraining vereinbaren“ mit Link auf „Mitglied werden“ (Abschnitt Probetraining)", !!kein && kein.umgebung === "Noch kein Probetraining? Probetraining vereinbaren" && kein.text === "Probetraining vereinbaren" && kein.href === c.probetrainingZiel, JSON.stringify(kein));
@@ -518,6 +520,288 @@ export async function pruefeUebergabeImBrowser(c) {
       const tr = await page.evaluate(() => ({ titel: document.querySelector(".anm-titel").textContent, knopf: document.querySelector('a[data-aktion="im-browser-oeffnen"]').textContent.trim(), schritt: document.getElementById("anmeldung").dataset.schritt }));
       ok(N + "Übergabe: die Sprachwahl oben wirkt (Türkisch: „Lütfen kayıt sayfasını tarayıcıda açın.“ und „Tarayıcıda aç“)", tr.schritt === "uebergabe" && tr.titel === "Lütfen kayıt sayfasını tarayıcıda açın." && tr.knopf === "Tarayıcıda aç", JSON.stringify(tr));
       await page.close();
+    }
+  } finally {
+    c.setzeZugang([]);
+  }
+}
+
+// ---------- Zurück zur Seite „Mitglied werden“ (B1, 19.10.2026) ----------
+
+// Wer auf „Mitglied werden“ den Knopf „Jetzt anmelden“ antippt, landet in einem neuen Fenster (aus der App im Browser des Geräts, mit dem QR-Code direkt) auf
+// der Code-Seite der Live-Seite und hat dort keinen Verlauf. Darum steht oben links der Link „Zurück zu „Mitglied werden““ (assistent.js, seitenZurueck;
+// Ziel in der Konfiguration: seiten.zurueck). Er gilt nur für die Live-Seite und nur für die Code-Seite. c.seitenZurueck beschreibt die Live-Seite; fehlt es
+// (Begleitseite), prüft der Test, dass es den Link und das Ziel nicht gibt.
+//
+//   c.seitenZurueck.href                                  Ziel in der Konfiguration („mitglied-werden.html“)
+//   c.seitenZurueck.zielUrl                               dieselbe Adresse, wie der Browser sie auflöst
+//   c.seitenZurueck.zielTitel                             erwarteter Titel der Zielseite (RegExp)
+//   c.seitenZurueck.oeffneZielseite(vp, name)             öffnet die Zielseite (nicht den Assistenten) in einem neuen Tab: Ergebnis ist eine puppeteer-Seite
+//   c.seitenZurueck.oeffneVonFremderHerkunft(vp, name)    öffnet erst eine Seite fremder Herkunft und dann im selben Tab den Assistenten (Referrer: die fremde Seite)
+
+const SEITEN_LINK = '#anmeldung [data-aktion="zurueck-seite"]';
+
+// Wartet, bis die Seite auf der Adresse steht (nach dem Klick: Navigation über den Link oder history.back()).
+async function warteAufAdresse(page, url, timeout = 8000) {
+  const ende = Date.now() + timeout;
+  while (Date.now() < ende) {
+    if (page.url() === url) return true;
+    await warte(100);
+  }
+  return false;
+}
+
+// Wartet, bis das neue Dokument geladen ist, und liest dann Titel und Länge des Verlaufs.
+async function zielZustand(page) {
+  for (let i = 0; i < 40; i++) {
+    try {
+      const z = await page.evaluate(() => (document.readyState === "complete" ? { titel: document.title, verlauf: history.length, url: location.href } : null));
+      if (z) return z;
+    } catch (e) {
+      /* das alte Dokument wird gerade ersetzt */
+    }
+    await warte(150);
+  }
+  return null;
+}
+
+// Der Link „Zurück zu „Mitglied werden““ im DOM des Assistenten (er steht immer da, ist aber nur auf der Code-Seite der Live-Seite sichtbar und trägt sonst
+// weder Ziel noch Text), dazu Maße, Farbe, Pfeil, Verlauf und Referrer der Seite.
+async function seitenLinkZustand(page) {
+  return page.evaluate(() => {
+    const ohne = (s) => s.replace(/[⁠⁦-⁩‎‏‪-‮]/g, "").replace(/ /g, " ").replace(/\s+/g, " ").trim();
+    const rr = (e) => {
+      const x = e.getBoundingClientRect();
+      return { l: Math.round(x.left), r: Math.round(x.right), o: Math.round(x.top), u: Math.round(x.bottom), b: Math.round(x.width), h: Math.round(x.height) };
+    };
+    const w = document.getElementById("anmeldung");
+    const alle = Array.from(w.querySelectorAll('[data-aktion="zurueck-seite"]'));
+    const a = alle[0] || null;
+    const sichtbar = !!a && a.checkVisibility();
+    const hilfe = w.querySelector('[data-aktion="hilfe"]');
+    const titel = w.querySelector(".anm-titel");
+    const fokus = Array.from(w.querySelectorAll("a[href], button, input, select, textarea")).filter((e) => e.checkVisibility() && !e.closest("dialog"));
+    return {
+      schritt: w.dataset.schritt,
+      anzahl: alle.length,
+      sichtbar,
+      tag: a ? a.tagName.toLowerCase() : null,
+      text: a ? ohne(a.textContent) : "",
+      href: a ? a.getAttribute("href") : null,
+      aufgeloest: a && a.getAttribute("href") ? a.href : null,
+      target: a ? a.getAttribute("target") : null,
+      dir: w.getAttribute("dir"),
+      farbe: a ? getComputedStyle(a).color : null,
+      pfeil: a ? getComputedStyle(a, "::before").content : null,
+      box: sichtbar ? rr(a) : null,
+      hilfe: hilfe && hilfe.checkVisibility() ? rr(hilfe) : null,
+      titel: titel ? rr(titel) : null,
+      wurzel: rr(w),
+      fenster: { b: window.innerWidth, h: window.innerHeight },
+      querScroll: document.documentElement.scrollWidth > window.innerWidth,
+      verlauf: history.length,
+      referrer: document.referrer,
+      erstes: fokus[0] ? fokus[0].getAttribute("data-aktion") || fokus[0].getAttribute("data-pfad") || fokus[0].tagName.toLowerCase() : null,
+      konfigZiel: ((JSON.parse(document.getElementById("anmeldung-konfig").textContent).seiten) || {}).zurueck,
+    };
+  });
+}
+
+export async function pruefeSeitenZurueckImBrowser(c) {
+  const ok = c.ok;
+  const N = c.name + ": ";
+  const z = c.seitenZurueck || null;
+  console.log("\n=== B1: Zurück zur Seite „Mitglied werden“ auf der Code-Seite – " + c.name + " ===");
+  const code = c.testCode;
+  const DE = "Zurück zu „Mitglied werden“";
+  const SCHMAL = { name: "320x640", breite: 320, hoehe: 640, mobil: true };
+  try {
+    c.setzeZugang([c.testPruefwert]);
+
+    // ---- A. Begleitseite: Es gibt den Link nicht (kein Ziel in der Konfiguration, nichts sichtbar) ----
+    if (!z) {
+      for (const vp of [MOBIL, DESKTOP]) {
+        const page = await c.oeffne(vp, "seitenzurueck-aus-" + vp.name);
+        const d = await seitenLinkZustand(page);
+        ok(N + "Code-Seite (" + vp.name + "): erster Bildschirm „code“, aber kein Link „" + DE + "“ (nichts sichtbar, ohne Ziel und Text) und kein Ziel „zurueck“ in der Konfiguration", d.schritt === "code" && !d.sichtbar && d.href === null && d.text === "" && d.konfigZiel === undefined, JSON.stringify({ schritt: d.schritt, sichtbar: d.sichtbar, href: d.href, text: d.text, konfigZiel: d.konfigZiel }));
+        await page.close();
+      }
+      return;
+    }
+
+    // ---- B. Live-Seite ----
+    const texte = {};
+    for (const sprache of c.sprachen) texte[sprache] = ohneSteuer((await c.woerterbuch(sprache)).code.zurueck);
+
+    // B1. Aussehen und Platz: Handy, schmales Handy, Rechner
+    for (const vp of [MOBIL, SCHMAL, DESKTOP]) {
+      const page = await c.oeffne(vp, "seitenzurueck-" + vp.name);
+      const d = await seitenLinkZustand(page);
+      const n = N + "Code-Seite (" + vp.name + "): ";
+      ok(n + "oben links steht der Link „" + DE + "“ (ein <a> auf " + z.href + ", ohne target; die Konfiguration trägt dasselbe Ziel), über dem Titel, der erste bedienbare Teil im Assistenten",
+        d.schritt === "code" && d.anzahl === 1 && d.sichtbar && d.tag === "a" && d.text === DE && d.text === texte.de && d.href === z.href && d.aufgeloest === z.zielUrl && d.target === null && d.konfigZiel === z.href && d.box.o < d.titel.o && d.erstes === "zurueck-seite" && Math.abs(d.box.l - d.wurzel.l) <= 20,
+        JSON.stringify({ text: d.text, href: d.href, aufgeloest: d.aufgeloest, target: d.target, konfig: d.konfigZiel, box: d.box, erstes: d.erstes }));
+      ok(n + "mindestens 44 px hoch, ganz im Bild und im ersten Bildschirm, kein Querscrollen, steht mit „Hilfe“ in einer Zeile ohne sie zu überlappen",
+        d.box.h >= 44 && d.box.l >= 0 && d.box.r <= d.fenster.b && d.box.u <= d.fenster.h && !d.querScroll && !!d.hilfe && d.hilfe.o < d.box.u && d.hilfe.u > d.box.o && (d.box.r <= d.hilfe.l + 1 || d.hilfe.r <= d.box.l + 1),
+        JSON.stringify({ box: d.box, hilfe: d.hilfe, fenster: d.fenster, querScroll: d.querScroll }));
+      const farbe = /^rgb\((\d+), (\d+), (\d+)\)$/.exec(d.farbe || "");
+      ok(n + "Vereinsblau (rgb(31, 45, 190)), nicht rot; Pfeil ‹ vor dem Text wie bei „Zurück“ auf den Fragen", d.farbe === "rgb(31, 45, 190)" && !!farbe && Number(farbe[3]) > Number(farbe[1]) + 50 && /‹/.test(d.pfeil || ""), JSON.stringify({ farbe: d.farbe, pfeil: d.pfeil }));
+      if (vp === MOBIL) await c.axe(page, n + "mit dem Link");
+      await page.close();
+    }
+
+    // B2. Alle Sprachen: Text aus dem Wörterbuch, der deutsche Seitenname bleibt erkennbar (in Klammern), Schreibrichtung, Spiegelung bei Arabisch
+    for (const sprache of c.sprachen) {
+      const rtl = sprache === "ar";
+      const page = await c.oeffne(MOBIL, "seitenzurueck-" + sprache);
+      if (sprache !== "de") {
+        await page.click('[data-anm-sprachleiste] [data-sprache="' + sprache + '"]');
+        await page.waitForFunction((x) => document.getElementById("anmeldung").getAttribute("data-sprache") === x, { timeout: 8000 }, sprache);
+      }
+      const d = await seitenLinkZustand(page);
+      const n = N + "Sprache " + sprache + ": ";
+      ok(n + "Link „" + texte[sprache] + "“ (Text aus dem Wörterbuch), Schreibrichtung " + (rtl ? "rtl" : "ltr") + ", Ziel unverändert " + z.href, d.sichtbar && d.text === texte[sprache] && d.dir === (rtl ? "rtl" : "ltr") && d.href === z.href, JSON.stringify({ text: d.text, dir: d.dir, href: d.href }));
+      if (sprache !== "de") ok(n + "übersetzt (nicht der deutsche Wortlaut); die Zielseite ist deutsch, darum steht ihr Name am Ende in Klammern: (Mitglied werden)", d.text !== DE && d.text.endsWith("(Mitglied werden)"), d.text);
+      ok(n + "Pfeil " + (rtl ? "›" : "‹") + " am Anfang, Link " + (rtl ? "rechts, „Hilfe“ links" : "links, „Hilfe“ rechts") + ", mindestens 44 px hoch, ganz im Bild, kein Querscrollen",
+        d.sichtbar && !!d.hilfe && d.box.h >= 44 && d.box.l >= 0 && d.box.r <= d.fenster.b && !d.querScroll && new RegExp(rtl ? "\\u203A" : "\\u2039").test(d.pfeil || "") && (rtl ? Math.abs(d.box.r - d.wurzel.r) <= 20 && d.hilfe.r <= d.box.l + 1 : Math.abs(d.box.l - d.wurzel.l) <= 20 && d.box.r <= d.hilfe.l + 1),
+        JSON.stringify({ pfeil: d.pfeil, box: d.box, hilfe: d.hilfe, wurzel: d.wurzel }));
+      if (rtl) await c.axe(page, n + "Code-Seite mit dem Link");
+      await page.close();
+    }
+
+    // B3. Ohne Referrer von derselben Herkunft (direkter Aufruf, QR-Code): Der Link führt auf die Seite „Mitglied werden“. Hinweis: Eine Seite, die der Test mit
+    // browser.newPage() und goto öffnet, hat schon zwei Einträge im Verlauf (about:blank davor); darum zählen die Prüfungen die Einträge vor und nach dem Klick.
+    {
+      const page = await c.oeffne(MOBIL, "seitenzurueck-direkt");
+      const vorher = await seitenLinkZustand(page);
+      ok(N + "direkter Aufruf: kein Referrer; der Link ist ein echter Link auf die Seite (kein history.back, auch wenn der Verlauf Einträge hat)", vorher.referrer === "" && vorher.verlauf >= 1, JSON.stringify({ verlauf: vorher.verlauf, referrer: vorher.referrer }));
+      await page.click(SEITEN_LINK);
+      const da = await warteAufAdresse(page, z.zielUrl);
+      const nach = await zielZustand(page);
+      ok(N + "direkter Aufruf: der Klick öffnet die Seite „Mitglied werden“ (" + z.zielUrl + ") im selben Fenster, als neuer Eintrag im Verlauf", da && !!nach && z.zielTitel.test(nach.titel) && nach.verlauf === vorher.verlauf + 1, JSON.stringify({ url: page.url(), vorher: vorher.verlauf, nach }));
+      await page.close();
+    }
+
+    // B3b. Neues Fenster von „Mitglied werden“ (so öffnet „Jetzt anmelden“ die Code-Seite: target=_blank): Das Fenster hat keinen Verlauf (history.length 1), aber
+    // einen Referrer von derselben Herkunft. Ein echtes Fenster lässt sich hier nicht abfangen (die Anfragen laufen nur über die Seiten des Tests); darum stellt der Test diese
+    // zwei Angaben nach (history.length 1, Referrer = die Seite „Mitglied werden“). Eine Probe mit einem echten Fenster in Chrome ergab genau das (history.length 1, Referrer
+    // = die öffnende Seite, ohne opener). Würde der Link hier history.back() rufen, landete die Seite auf about:blank.
+    {
+      const nachgestellt = async (p) => p.evaluateOnNewDocument((ziel) => {
+        Object.defineProperty(history, "length", { get: () => 1, configurable: true });
+        Object.defineProperty(document, "referrer", { get: () => ziel, configurable: true });
+      }, z.zielUrl);
+      const page = await c.oeffne(MOBIL, "seitenzurueck-neues-fenster", { vorLaden: nachgestellt });
+      const vorher = await seitenLinkZustand(page);
+      ok(N + "neues Fenster von „Mitglied werden“ (nachgestellt): history.length 1, Referrer = die Seite „Mitglied werden“, Code-Seite mit Link", vorher.schritt === "code" && vorher.sichtbar && vorher.verlauf === 1 && vorher.referrer === z.zielUrl, JSON.stringify({ schritt: vorher.schritt, verlauf: vorher.verlauf, referrer: vorher.referrer }));
+      await page.click(SEITEN_LINK);
+      const da = await warteAufAdresse(page, z.zielUrl);
+      const nach = await zielZustand(page);
+      ok(N + "neues Fenster von „Mitglied werden“: der Klick führt auf die Seite „Mitglied werden“ (der Link, nicht history.back)", da && !!nach && z.zielTitel.test(nach.titel), JSON.stringify({ url: page.url(), titel: nach && nach.titel }));
+      await page.close();
+    }
+
+    // B4. Mit Verlauf von derselben Herkunft: „Mitglied werden“ im selben Fenster öffnen, dort „Jetzt anmelden“ (das echte Fenster öffnet ein neues; der Test bleibt im
+    // Fenster, damit es einen Verlauf gibt), dann den Link antippen: eine Seite zurück, ohne neuen Eintrag
+    {
+      const page = await z.oeffneZielseite(MOBIL, "seitenzurueck-verlauf");
+      const anmelden = 'a.knopf[href="anmeldung.html"]';
+      const knopf = await page.evaluate((sel) => {
+        const a = document.querySelector(sel);
+        if (!a) return null;
+        const t = a.getAttribute("target");
+        a.removeAttribute("target");
+        return { text: a.textContent.trim(), target: t };
+      }, anmelden);
+      ok(N + "Zielseite: der Knopf „Jetzt anmelden“ führt auf anmeldung.html und öffnet ein neues Fenster (target=_blank; der Test nimmt es weg, um im Fenster zu bleiben)", !!knopf && knopf.text === "Jetzt anmelden" && knopf.target === "_blank", JSON.stringify(knopf));
+      const davor = await page.evaluate(() => history.length);
+      await page.click(anmelden);
+      await page.waitForSelector("#anmeldung[data-bereit]", { timeout: 15000 });
+      const vorher = await seitenLinkZustand(page);
+      ok(N + "mit Verlauf: nach dem Klick auf „Jetzt anmelden“ steht die Code-Seite da, der Verlauf hat einen Eintrag mehr, der Referrer ist die Seite „Mitglied werden“ (dieselbe Herkunft)", vorher.schritt === "code" && vorher.sichtbar && vorher.verlauf === davor + 1 && vorher.verlauf > 1 && vorher.referrer === z.zielUrl, JSON.stringify({ schritt: vorher.schritt, davor, verlauf: vorher.verlauf, referrer: vorher.referrer }));
+      await page.click(SEITEN_LINK);
+      const da = await warteAufAdresse(page, z.zielUrl);
+      const nach = await zielZustand(page);
+      ok(N + "mit Verlauf: der Klick geht eine Seite zurück (history.back): wieder auf „Mitglied werden“, ohne neuen Eintrag im Verlauf (die Zahl der Einträge bleibt gleich)", da && !!nach && z.zielTitel.test(nach.titel) && nach.verlauf === vorher.verlauf, JSON.stringify({ url: page.url(), vorher: vorher.verlauf, nach }));
+      await page.close();
+    }
+
+    // B5. Mit Verlauf, aber die vorige Seite ist von fremder Herkunft (zum Beispiel die Hülle der Website): Der Link führt auf die Seite, nicht zurück zur fremden
+    {
+      const page = await z.oeffneVonFremderHerkunft(MOBIL, "seitenzurueck-fremd");
+      const vorher = await seitenLinkZustand(page);
+      let fremd = false;
+      try {
+        fremd = !!vorher.referrer && new URL(vorher.referrer).origin !== new URL(page.url()).origin;
+      } catch (e) {
+        fremd = false;
+      }
+      ok(N + "fremde Herkunft: Code-Seite mit Verlauf (mehr als ein Eintrag) und einem Referrer von einer anderen Herkunft", vorher.schritt === "code" && vorher.sichtbar && vorher.verlauf > 1 && fremd, JSON.stringify({ schritt: vorher.schritt, verlauf: vorher.verlauf, referrer: vorher.referrer }));
+      await page.click(SEITEN_LINK);
+      const da = await warteAufAdresse(page, z.zielUrl);
+      const nach = await zielZustand(page);
+      ok(N + "fremde Herkunft: der Klick öffnet die Seite „Mitglied werden“ als neuen Eintrag, er geht nicht zur fremden Seite zurück", da && !!nach && z.zielTitel.test(nach.titel) && nach.verlauf === vorher.verlauf + 1, JSON.stringify({ url: page.url(), vorher: vorher.verlauf, nach }));
+      await page.close();
+    }
+
+    // B6. Tastatur: Nach der Sprachwahl kommt der Link an die Reihe, vor „Hilfe“ und dem Feld „Code“; die Eingabetaste öffnet die Seite
+    {
+      const page = await c.oeffne(MOBIL, "seitenzurueck-tastatur");
+      await page.focus('[data-anm-sprachleiste] [data-sprache="' + c.sprachen[c.sprachen.length - 1] + '"]');
+      const reihe = [];
+      for (let i = 0; i < 3; i++) {
+        await page.keyboard.press("Tab");
+        reihe.push(await page.evaluate(() => {
+          const e = document.activeElement;
+          return e ? e.getAttribute("data-aktion") || e.getAttribute("data-pfad") || e.tagName.toLowerCase() : null;
+        }));
+      }
+      ok(N + "Tastatur: nach der Sprachwahl erreicht Tab den Link, danach „Hilfe“, danach das Feld „Code“", JSON.stringify(reihe) === JSON.stringify(["zurueck-seite", "hilfe", "zugang.code"]), JSON.stringify(reihe));
+      await page.focus(SEITEN_LINK);
+      await page.keyboard.press("Enter");
+      const da = await warteAufAdresse(page, z.zielUrl);
+      ok(N + "Tastatur: die Eingabetaste auf dem Link öffnet die Seite „Mitglied werden“", da, page.url());
+      await page.close();
+    }
+
+    // B7. Nur auf der Code-Seite: auch mit falschem ?code= (die Code-Seite mit Meldung) da; nicht nach dem Code (Startschritt, Fragen), nicht mit gültigem ?code=,
+    // nicht ohne Code-Abfrage, nicht in der App (?app=1)
+    {
+      const falsch = await c.oeffne(MOBIL, "seitenzurueck-code-falsch", { abfrage: "?code=" + encodeURIComponent("FALSCH-" + code.slice(-4)) });
+      const f = await seitenLinkZustand(falsch);
+      ok(N + "Link mit falschem ?code=: die Code-Seite mit Meldung hat den Link", f.schritt === "code" && f.sichtbar && f.text === DE, JSON.stringify({ schritt: f.schritt, sichtbar: f.sichtbar }));
+      await falsch.close();
+
+      const page = await c.oeffne(MOBIL, "seitenzurueck-nach-code");
+      await page.focus('[data-pfad="zugang.code"]');
+      await page.keyboard.type(code);
+      await page.click('#anmeldung [data-aktion="weiter"]');
+      await page.waitForFunction(() => document.getElementById("anmeldung").dataset.schritt === "start", { timeout: 8000 });
+      const start = await seitenLinkZustand(page);
+      await page.click('#anmeldung [data-aktion="weiter"]');
+      await page.waitForFunction(() => document.getElementById("anmeldung").dataset.schritt === "wer", { timeout: 6000 });
+      const wer = await seitenLinkZustand(page);
+      const schrittZurueck = await page.$eval('#anmeldung [data-aktion="zurueck"]', (e) => e.checkVisibility());
+      ok(N + "nach dem richtigen Code: auf dem Startschritt und auf der ersten Frage („wer“) kein Link (nichts sichtbar, ohne Ziel und Text); dort gilt „Zurück“ für einen Schritt",
+        start.schritt === "start" && !start.sichtbar && start.href === null && start.text === "" && wer.schritt === "wer" && !wer.sichtbar && wer.href === null && wer.text === "" && schrittZurueck === true,
+        JSON.stringify({ start: [start.sichtbar, start.href], wer: [wer.sichtbar, wer.href], schrittZurueck }));
+      await page.close();
+
+      const link = await c.oeffne(MOBIL, "seitenzurueck-code-link", { abfrage: "?code=" + encodeURIComponent(code) });
+      const l = await seitenLinkZustand(link);
+      ok(N + "Link mit gültigem ?code= (zum Beispiel aus dem QR-Code): Startschritt, kein Link „" + DE + "“", l.schritt === "start" && !l.sichtbar && l.href === null && l.text === "", JSON.stringify({ schritt: l.schritt, sichtbar: l.sichtbar }));
+      await link.close();
+
+      const app = await c.oeffne(MOBIL, "seitenzurueck-app", { abfrage: "?app=1" });
+      const a = await seitenLinkZustand(app);
+      ok(N + "?app=1 (Übergabe in den Browser): kein Link „" + DE + "“ (nichts sichtbar, ohne Ziel und Text)", a.schritt === "uebergabe" && !a.sichtbar && a.href === null && a.text === "", JSON.stringify({ schritt: a.schritt, sichtbar: a.sichtbar }));
+      await app.close();
+
+      c.setzeZugang([]);
+      const frei = await c.oeffne(MOBIL, "seitenzurueck-ohne-code");
+      const o = await seitenLinkZustand(frei);
+      ok(N + "ohne Code-Abfrage (leere Liste): Startschritt, kein Link", o.schritt === "start" && !o.sichtbar && o.href === null, JSON.stringify({ schritt: o.schritt, sichtbar: o.sichtbar }));
+      await frei.close();
     }
   } finally {
     c.setzeZugang([]);

@@ -420,6 +420,27 @@
   text-decoration: underline;
 }
 
+/* Code-Seite der Live-Seite (B1, 19.10.2026): „Zurück zu „Mitglied werden““ ist ein Link, kein Knopf (assistent.js, seitenZurueck). Er trägt
+   dieselben Stile wie „Zurück“ auf den Fragen (Vereinsblau, mindestens 44 px, Pfeil vor dem Text, in Arabisch gespiegelt), nur ohne die
+   Unterstreichung eines Links und mit gleichbleibender Farbe. */
+a.anm-zurueck {
+  text-decoration: none;
+}
+
+a.anm-zurueck:hover,
+a.anm-zurueck:focus-visible {
+  color: var(--blau-700);
+}
+
+/* Der Text ist in Englisch, Türkisch und Arabisch länger als im Deutschen: Er bricht in zwei Zeilen um, statt „Hilfe“ in eine eigene Zeile zu
+   schieben (flex-basis 0 hält beide in einer Zeile; max-width lässt den Link bei kurzem Text so schmal wie den Text). */
+.anm-zurueck--seite {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: max-content;
+  line-height: 1.3;
+}
+
 .anm-sprache {
   display: flex;
 }

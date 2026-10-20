@@ -64,6 +64,8 @@
 //     gegen crypto.subtle, mehrere und fremde Prüfwerte, Tastatur, axe, Sprache; die Vorführung ist kein Weg am Code vorbei. pruefeUebergabe: ?app=1 zeigt nur
 //     die Übergabe mit dem Knopf „Im Browser öffnen“ (ext:// plus dieselbe Seite ohne app=1, code bleibt). pruefeCodeNichtImPdf: Der Code steht weder in den
 //     Antworten noch im PDF noch im Speicher des Browsers.
+//   - B1 (19.10.2026): pruefeSeitenZurueck (Prüfungen in zugang-browser.mjs): Der Link „Zurück zu „Mitglied werden““ oben links auf der Code-Seite gilt nur für die Live-Seite
+//     (e2e-paket.mjs); auf der Begleitseite gibt es ihn nicht (kein Ziel „zurueck“ in der Konfiguration, nichts sichtbar, am Handy und am Rechner).
 //   - P1, Zusätze (12.10.2026): pruefeUmgebungshinweis (Prüfungen in zugang-browser.mjs): Hinweiskasten oben auf dem ersten Bildschirm (Code-Seite oder Start), wenn die Seite
 //     in einem Rahmen oder im Browser einer anderen App läuft. Oben im normalen Browser: kein Kasten. Im Rahmen: Testseite auf einem anderen Port mit einem <iframe> ohne allow-Angaben
 //     (wie die Hülle der Website), Hinweis mit dem Link „In neuem Fenster öffnen“ (target=_blank, gleiche Adresse, mit code), Sprachwechsel, auf den Fragen kein Kasten mehr.
@@ -87,7 +89,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import puppeteer from "puppeteer-core";
 import { starteTestserver } from "./testserver.mjs";
-import { pruefeZugangImBrowser, pruefeUebergabeImBrowser, pruefeUmgebungshinweisImBrowser, pruefeUmgebungshinweisSprachen } from "./zugang-browser.mjs";
+import { pruefeZugangImBrowser, pruefeUebergabeImBrowser, pruefeSeitenZurueckImBrowser, pruefeUmgebungshinweisImBrowser, pruefeUmgebungshinweisSprachen } from "./zugang-browser.mjs";
 import { pruefeEinfacheSprache, fehlendeSchluessel, ladeWoerterbuch, pruefeAbgabeWortlaut, ABGABE_AUSNAHMEN_OBERFLAECHE } from "./sprache-check.mjs";
 
 const require = createRequire(import.meta.url);
@@ -3063,6 +3065,7 @@ async function einzelpruefungen(browser, server, dateien, beispiele) {
     ["pruefeSprachwahlOben", () => pruefeSprachwahlOben(browser, server)],
     ["pruefeZugang", () => pruefeZugang(browser, server)],
     ["pruefeUebergabe", () => pruefeUebergabe(browser, server)],
+    ["pruefeSeitenZurueck", () => pruefeSeitenZurueck(browser, server)],
     ["pruefeUmgebungshinweis", () => pruefeUmgebungshinweis(browser, server)],
     ["pruefeCodeNichtImPdf", () => pruefeCodeNichtImPdf(browser, server, dateien)],
     ["pruefeUebersetzbareDaten", () => pruefeUebersetzbareDaten(browser, server)],
@@ -3739,6 +3742,12 @@ async function pruefeUebergabe(browser, server) {
   });
   ok("Mit ?app=1: Klasse app-modus am <html>; Kopfleiste „Begleitseite zum Prototyp“ mit Navigation und Fußnote „Begleitmaterial“ sind weg; die Überschrift bleibt", d.appKlasse && !d.kopf && !d.fuss && d.h1, JSON.stringify(d));
   await app.close();
+}
+
+// B1 (19.10.2026): Der Link „Zurück zu „Mitglied werden““ oben links auf der Code-Seite gilt nur für die Live-Seite (Paket, e2e-paket.mjs). Auf der Begleitseite gibt es ihn
+// nicht (kein Ziel „zurueck“ in der Konfiguration, nichts sichtbar); die Prüfung steht in zugang-browser.mjs (ohne c.seitenZurueck).
+async function pruefeSeitenZurueck(browser, server) {
+  await pruefeSeitenZurueckImBrowser(zugangUmgebung(browser, server));
 }
 
 // Hinweis oben auf dem ersten Bildschirm, wenn die Seite in einem Rahmen oder im Browser einer anderen App läuft (Zusätze zu P1, 12.10.2026): Rahmen auf einem

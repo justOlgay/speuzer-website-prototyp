@@ -219,6 +219,7 @@ export default {
     keinLink: "Arrange a trial training",
     passiv: "Passive member? You get the code from the {link}.",
     passivLink: "club office",
+    zurueck: "Back to the membership page (Mitglied werden)",
   },
 
   app: {

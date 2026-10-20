@@ -88,7 +88,7 @@
     ],
     "platz": "Vereinsplatz Mainzer Landstraße 480",
     "heimspiele": "Vereinsplatz, Mainzer Landstraße 480, 60326 Frankfurt am Main",
-    "trainer": ["Beyhun Gelberi", "Damin Porombka-Kepa"],
+    "trainer": ["Beyhun Gelberi", "Damian Porombka-Kepa"],
     "mail": "trainer_d_jugend@sportfreunde04.de",
     "fussballde_id": "011MIF9LDC000000VTVG0001VTR8C1K7",
     "csv": "D2",
@@ -128,8 +128,8 @@
     "kategorie": "Jugend",
     "gruppe": "Jugend",
     "jahrgang": "2016",
-    "staffel": "1. Kreisklasse · EJ Quali Gr. 08",
-    "spielbetrieb": "Qualifikationsrunde, Kreispokal; Hauptrunde ab Oktober",
+    "staffel": "1. Kreisliga · EJKL F",
+    "spielbetrieb": "Meisterschaft, Kreispokal",
     "training": [
       { "tag": "Montag", "von": "17:30", "bis": "19:00", "platz": "rechte Hälfte" },
       { "tag": "Mittwoch", "von": "17:30", "bis": "19:00", "platz": "Tor 3" },
@@ -153,8 +153,8 @@
     "kategorie": "Jugend",
     "gruppe": "Jugend",
     "jahrgang": "2017",
-    "staffel": "1. Kreisklasse · EJ Quali Gr. 18",
-    "spielbetrieb": "Qualifikationsrunde; Hauptrunde ab Oktober",
+    "staffel": "1. Kreisklasse · EJ KK F Gr. 6",
+    "spielbetrieb": "Meisterschaft",
     "training": [
       { "tag": "Montag", "von": "17:30", "bis": "19:00", "platz": "Tor 2" },
       { "tag": "Dienstag", "von": "16:30", "bis": "18:00", "platz": "rechte Hälfte" },
@@ -178,8 +178,8 @@
     "kategorie": "Jugend",
     "gruppe": "Jugend",
     "jahrgang": "2016/2017",
-    "staffel": "1. Kreisklasse · EJ Quali Gr. 22",
-    "spielbetrieb": "Qualifikationsrunde; Hauptrunde ab Oktober",
+    "staffel": "1. Kreisklasse · EJ KK F Gr. 10",
+    "spielbetrieb": "Meisterschaft",
     "training": [
       { "tag": "Montag", "von": "16:00", "bis": "17:30", "platz": "rechte Hälfte" },
       { "tag": "Mittwoch", "von": "16:00", "bis": "17:30", "platz": "rechte Hälfte" }
