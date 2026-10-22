@@ -393,8 +393,8 @@ export default {
   "beitrag_familie": "The club office checks who counts as family.",
   "senator": "The club office passes your application to the board.",
   "beitragserlass": "The club office talks with you about help with the fee.",
-  "herren_wechsel": "The match committee of the men’s team (Herren) checks your change and the deadlines.",
-  "frau_herren": "The match committee of the men’s team (Herren) makes the application for women in the men’s team."
+  "herren_wechsel": "The match committee for adult football (Spielausschuss Senioren) checks your change and the deadlines.",
+  "frau_herren": "The match committee for adult football (Spielausschuss Senioren) makes the application for women in the men’s team (Herren)."
  },
  "frist": {
   "frist_kein_spiel": "You do not need permission to play. So there is no waiting period for matches.",

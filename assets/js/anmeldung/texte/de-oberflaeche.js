@@ -913,7 +913,7 @@ export default {
       passwesen: "Passwesen (bearbeitet die Spielerpässe; erreichbar über die Geschäftsstelle)",
       geschaeftsstelle: "Geschäftsstelle",
       karneval: "Karnevalabteilung",
-      spielausschuss: "Spielausschuss der Herren (prüft Wechsel und Fristen; erreichbar über die Geschäftsstelle)",
+      spielausschuss: "Spielausschuss Senioren (prüft Wechsel und Fristen; erreichbar über die Geschäftsstelle)",
     },
     hinweisArt: {
       warnung: "Achtung",

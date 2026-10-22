@@ -914,7 +914,7 @@ export default {
    "passwesen": "مكتب بطاقات اللاعبين (⁦Passwesen⁩؛ يتولى معالجة بطاقات اللاعبين؛ يمكن الوصول إليه عبر مكتب النادي)",
    "geschaeftsstelle": "مكتب النادي (⁦Geschäftsstelle⁩)",
    "karneval": "قسم الكرنفال (⁦Karnevalabteilung⁩)",
-   "spielausschuss": "لجنة المباريات الخاصة بفريق ⁦Herren⁩ (⁦Spielausschuss⁩؛ تراجع الانتقالات والمهل؛ يمكن الوصول إليها عبر مكتب النادي)"
+   "spielausschuss": "لجنة المباريات الخاصة بفرق البالغين (⁦Spielausschuss Senioren⁩؛ تراجع الانتقالات والمهل؛ يمكن الوصول إليها عبر مكتب النادي)"
   },
   "hinweisArt": {
    "warnung": "تنبيه",

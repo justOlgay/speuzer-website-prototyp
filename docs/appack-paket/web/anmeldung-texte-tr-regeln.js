@@ -393,8 +393,8 @@ export default {
   "beitrag_familie": "Kulüp ofisi kimin aileden sayılacağını kontrol eder.",
   "senator": "Kulüp ofisi başvurunuzu yönetim kuruluna iletir.",
   "beitragserlass": "Kulüp ofisi sizinle aidat için yardım hakkında konuşur.",
-  "herren_wechsel": "Herren (yetişkin erkek) takımı maç komitesi geçişinizi ve süreleri kontrol eder.",
-  "frau_herren": "Herren (yetişkin erkek) takımı maç komitesi, kadınların Herren takımında oynaması için başvuruyu yapar."
+  "herren_wechsel": "Yetişkin takımlarının maç komitesi (Spielausschuss Senioren) geçişinizi ve süreleri kontrol eder.",
+  "frau_herren": "Yetişkin takımlarının maç komitesi (Spielausschuss Senioren), kadınların Herren takımında oynaması için başvuruyu yapar."
  },
  "frist": {
   "frist_kein_spiel": "Oynama iznine ihtiyacınız yok. Bu yüzden maçlar için bekleme süresi yok.",

@@ -954,7 +954,7 @@ export default {
       passwesen: `مكتب بطاقات اللاعبين (${D("Passwesen")}؛ يتولى معالجة بطاقات اللاعبين؛ يمكن الوصول إليه عبر مكتب النادي)`,
       geschaeftsstelle: `مكتب النادي (${D("Geschäftsstelle")})`,
       karneval: `قسم الكرنفال (${D("Karnevalabteilung")})`,
-      spielausschuss: `لجنة المباريات الخاصة بفريق ${D("Herren")} (${D("Spielausschuss")}؛ تراجع الانتقالات والمهل؛ يمكن الوصول إليها عبر مكتب النادي)`,
+      spielausschuss: `لجنة المباريات الخاصة بفرق البالغين (${D("Spielausschuss Senioren")}؛ تراجع الانتقالات والمهل؛ يمكن الوصول إليها عبر مكتب النادي)`,
     },
     hinweisArt: {
       warnung: "تنبيه",

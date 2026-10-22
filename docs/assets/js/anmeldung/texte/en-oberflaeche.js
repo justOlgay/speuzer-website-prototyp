@@ -928,7 +928,7 @@ export default {
       passwesen: "Player pass office (Passwesen; handles the player passes; reachable through the club office)",
       geschaeftsstelle: "Club office (Geschäftsstelle)",
       karneval: "Carnival department (Karnevalabteilung)",
-      spielausschuss: "Match committee of the men’s team (Spielausschuss der Herren; checks club changes and deadlines; reachable through the club office)",
+      spielausschuss: "Match committee for adult football (Spielausschuss Senioren; checks club changes and deadlines; reachable through the club office)",
     },
     hinweisArt: {
       warnung: "Attention",

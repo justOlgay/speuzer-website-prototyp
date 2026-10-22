@@ -9,7 +9,8 @@
 //      Producer, Title, Subject, Keywords noch einen XMP-Metadatenstrom.
 //   1a. Original (nur wenn vorhanden): Das Skript sucht die Originaldatei per SHA-256 in tools/cache/anmeldung-test/originale/,
 //      in den mit --originale genannten Ordnern und in $ANMELDUNG_ORIGINALE (Pfadliste) und prüft quelle_sha256 und
-//      quelle_bytes dagegen. Dazu: gleiche Seitenzahl, gleiche Formularfelder, gleiche Trailer-ID, kein Wert der
+//      quelle_bytes dagegen. Dazu: gleiche Seitenzahl, gleiche Formularfelder, gleiche Trailer-ID (bei einem Formular mit dem
+//      JSON-Feld korrektur nur die erste, permanente Kennung), kein Wert der
 //      entfernten Info-Felder in der Kopie, jede Seite bei 100 dpi pixelgleich. Ohne Original gibt es nur einen Hinweis.
 //   2. Felder: Feldliste der PDF (pdf-lib getForm().getFields()) gegen das JSON – Name, Typ, Seite,
 //      Rechteck, maximale Länge; keines fehlt, keines ist zu viel.
@@ -467,7 +468,12 @@ async function vergleicheMitOriginal(K, form, kopieDoc, kopieBytes, kopiePfad, o
   ok(dO.getPageCount() === kopieDoc.getPageCount(), `${K}: Seitenzahl der Kopie weicht vom Original ab`);
   const beschr = (f) => [f.name, f.typ, f.seite, f.rect.join(","), f.maxLaenge ?? "-"].join("|");
   ok(JSON.stringify(liesFelder(dO).map(beschr)) === JSON.stringify(liesFelder(kopieDoc).map(beschr)), `${K}: Formularfelder der Kopie weichen vom Original ab`);
-  ok(String(dO.context.trailerInfo.ID) === String(kopieDoc.context.trailerInfo.ID), `${K}: Trailer-ID der Kopie weicht vom Original ab`);
+  // Trailer-ID: streng gleich. Nur bei einem Formular mit dem Feld "korrektur" (Original nach der Lieferung korrigiert, Original und
+  // Kopie einzeln neu gespeichert, z. B. Aufnahmeantrag am 20.10.2026) wechselt die zweite Kennung; die erste (permanente) muss auch
+  // dann gleich sein. Seitenzahl, Felder, Info-Werte und Rendering werden in beiden Fällen gleich streng geprüft.
+  const idTeil = (doc, i) => { const id = doc.context.trailerInfo.ID; return typeof id?.get === "function" ? String(id.get(i)) : String(id); };
+  if (form.korrektur) ok(idTeil(dO, 0) === idTeil(kopieDoc, 0), `${K}: erste (permanente) Trailer-ID der Kopie weicht vom Original ab`);
+  else ok(String(dO.context.trailerInfo.ID) === String(kopieDoc.context.trailerInfo.ID), `${K}: Trailer-ID der Kopie weicht vom Original ab`);
   // Kein Wert der entfernten Info-Felder (auch nicht Teile eines Namens) darf in der Kopie stehen – roh, als UTF-16BE oder dekodiert
   const infoO = dO.context.trailerInfo.Info ? dO.context.lookup(dO.context.trailerInfo.Info, PDFDict) : undefined;
   const suchen = [];
@@ -495,7 +501,7 @@ async function vergleicheMitOriginal(K, form, kopieDoc, kopieBytes, kopiePfad, o
     ok(gl, `${K}: Seite ${p} weicht bei ${BILD_DPI} dpi vom Original ab`);
     if (gl) gleich++;
   }
-  console.log(`  Original verglichen: Seiten ${dO.getPageCount()}, Felder ${liesFelder(kopieDoc).length}, Trailer-ID gleich, ${suchen.length} Werte der Info-Felder nicht in der Kopie, ${gleich} von ${dO.getPageCount()} Seiten pixelgleich`);
+  console.log(`  Original verglichen: Seiten ${dO.getPageCount()}, Felder ${liesFelder(kopieDoc).length}, ${form.korrektur ? "erste Trailer-ID gleich (korrigierte Fassung)" : "Trailer-ID gleich"}, ${suchen.length} Werte der Info-Felder nicht in der Kopie, ${gleich} von ${dO.getPageCount()} Seiten pixelgleich`);
 }
 
 // ---------------------------------------------------------------------------------------------

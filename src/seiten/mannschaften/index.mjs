@@ -141,7 +141,7 @@ function trainingshinweisAbschnitt(daten) {
   // bleibt.
   return `<section class="abschnitt">
   <div class="container fluss">
-    <p class="meta" style="max-width:880px;">Alle Mannschaften trainieren auf dem Vereinsplatz an der Mainzer Landstraße 480 – nur die Herren auf der Bezirkssportanlage am&nbsp;Rebstock (SW&nbsp;Griesheim). Von November bis Februar trainieren G1, F1 und F2 in der Halle.</p>
+    <p class="meta" style="max-width:880px;">Alle Mannschaften trainieren auf dem Vereinsplatz an der Mainzer Landstraße 480 – nur die Herren auf der Bezirkssportanlage am&nbsp;Rebstock (SW&nbsp;Griesheim). Von November bis Februar trainieren G-Jugend, F1 und F2 in der Halle.</p>
     <div class="hinweis hinweis--info" style="max-width:880px;">
       <p style="margin:0;">${escapeHtml(verein.hinweise?.ferien ?? "")}</p>
     </div>
@@ -367,8 +367,8 @@ export function seite(daten) {
       // W10-Korrektur (web-1440-mannschaften Nr. 11/web-390-mannschaften
       // Nr. 17, bestätigt): "Kreis- und Gruppenliga" passte nicht zu den
       // Karten darunter – fünf der sieben Jugendteams (D2, D3, E1–E3) spielen
-      // in der 1. Kreisklasse, nur D1 in der Kreisliga A und die A-Jugend in
-      // der Gruppenliga.
+      // in der 1. Kreisklasse, nur D1 in der 1. Kreisliga (seit 20.10.2026, F6;
+      // vorher "Kreisliga A") und die A-Jugend in der Gruppenliga.
       satz: "Ligabetrieb von der Kreisklasse bis zur Gruppenliga, Spielplan und Tabellen live von FUSSBALL.DE.",
       slugs: ["a-jugend", "d1", "d2", "d3", "e1", "e2", "e3"],
     },

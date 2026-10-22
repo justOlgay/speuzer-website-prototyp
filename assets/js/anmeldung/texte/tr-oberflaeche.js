@@ -953,7 +953,7 @@ export default {
       passwesen: "Lisans birimi (Passwesen; oyuncu lisanslarıyla ilgilenir; kulüp ofisi üzerinden ulaşılabilir)",
       geschaeftsstelle: "Kulüp ofisi (Geschäftsstelle)",
       karneval: "Karnaval bölümü (Karnevalabteilung)",
-      spielausschuss: "Herren (yetişkin erkek) takımı maç komitesi (Spielausschuss; geçişleri ve süreleri kontrol eder; kulüp ofisi üzerinden ulaşılabilir)",
+      spielausschuss: "Yetişkin takımlarının maç komitesi (Spielausschuss Senioren; geçişleri ve süreleri kontrol eder; kulüp ofisi üzerinden ulaşılabilir)",
     },
     hinweisArt: {
       warnung: "Dikkat",

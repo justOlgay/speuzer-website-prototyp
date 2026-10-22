@@ -31,8 +31,11 @@ function escapeHtml(text) {
     .replaceAll('"', "&quot;");
 }
 
+// 20.10.2026 (S-8): Telefon-Link in internationaler Form (+49 …) wie im Original-Impressum; die sichtbare Schreibweise
+// ("069 736868", telefonAnzeige()) bleibt.
 function telHref(nummer) {
-  return "tel:" + String(nummer ?? "").replace(/[^\d+]/g, "");
+  const ziffern = String(nummer ?? "").replace(/[^\d+]/g, "");
+  return "tel:" + (/^0[1-9]/.test(ziffern) ? "+49" + ziffern.slice(1) : ziffern);
 }
 
 // Kommentare und Einrückung aus dem Stylesheet nehmen (wie minifiziereCss() in tools/build.mjs): Die Entwicklerkommentare

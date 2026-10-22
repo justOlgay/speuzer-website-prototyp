@@ -474,6 +474,13 @@ button.knopf {
     return String(text || "").replace(/ /g, " ");
   }
 
+  // 20.10.2026 (S-8): Telefon-Link in internationaler Form (+49 …) wie auf der
+  // Website; die sichtbare Schreibweise ("069 736868") bleibt.
+  function telHref(nummer) {
+    var ziffern = String(nummer || "").replace(/[^\d+]/g, "");
+    return "tel:" + (/^0[1-9]/.test(ziffern) ? "+49" + ziffern.slice(1) : ziffern);
+  }
+
   // ---------- Erreichbarkeit ----------
 
   var email = kontakt.email || VEREIN.mail || "";
@@ -483,12 +490,12 @@ button.knopf {
 
   var telefon = kontakt.phoneNumber || VEREIN.tel_geschaeftsstelle || "";
   var gsTelLink = document.getElementById("gs-tel-link");
-  gsTelLink.href = "tel:" + telefon.replace(/[^\d+]/g, "");
+  gsTelLink.href = telHref(telefon);
   gsTelLink.textContent = telefon;
 
   var telefonPlatzwart = VEREIN.tel_platzwart || "";
   var gsTelPlatzwartLink = document.getElementById("gs-tel-platzwart-link");
-  gsTelPlatzwartLink.href = "tel:" + telefonPlatzwart.replace(/[^\d+]/g, "");
+  gsTelPlatzwartLink.href = telHref(telefonPlatzwart);
   gsTelPlatzwartLink.textContent = telefonPlatzwart;
 
   // ---------- Ansprechpartner nach Anliegen (wie ansprechpartnerAbschnitt()

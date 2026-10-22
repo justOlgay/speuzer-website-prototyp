@@ -896,7 +896,12 @@ async function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
     const kontakte = k.tl("hilfe.kontakte").map((c) => {
       const zeile = [];
       // Die Rufnummer ist ein eigener Block von links nach rechts, auch im arabischen Satz ("069 736868").
-      if (c.tel) zeile.push(h("a", { klasse: "knopf", href: "tel:" + c.tel.replace(/\D/g, "") }, k.t("hilfe.anrufen") + ":\u00a0", h("span", { klasse: "anm-tel", dir: "ltr" }, c.tel)));
+      // 20.10.2026 (S-8): Der Link trägt die internationale Form (+49 …) wie die Seiten der Website; sichtbar bleibt "069 736868".
+      if (c.tel) {
+        const ziffern = c.tel.replace(/[^\d+]/g, "");
+        const telAdresse = /^0[1-9]/.test(ziffern) ? "+49" + ziffern.slice(1) : ziffern;
+        zeile.push(h("a", { klasse: "knopf", href: "tel:" + telAdresse }, k.t("hilfe.anrufen") + ":\u00a0", h("span", { klasse: "anm-tel", dir: "ltr" }, c.tel)));
+      }
       if (c.mail) {
         // Zwei Zeilen im Knopf: die Aufgabe und darunter die Adresse (mit Umbruchstellen vor "@" und vor Punkten).
         const adresse = [];

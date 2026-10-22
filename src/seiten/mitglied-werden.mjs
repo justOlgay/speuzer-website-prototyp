@@ -156,7 +156,7 @@ function gutZuWissenAbschnitt(beitraege) {
         <dd>Einmalig ${escapeHtml(String(beitraege.aufnahmegebuehr ?? ""))} €, wird mit dem ersten Beitrag eingezogen.</dd>
 
         <dt>Ohne SEPA-Lastschrift</dt>
-        <dd>${escapeHtml(String(beitraege.zuschlag_ohne_sepa ?? ""))} € zusätzlich pro Jahr.</dd>
+        <dd>${escapeHtml(String(beitraege.zuschlag_ohne_sepa ?? ""))} € zusätzlich pro Jahr (laut Info-Blatt).</dd>
 
         <dt>Fälligkeit</dt>
         <dd>${escapeHtml(mitGrossAnfang(mitSchlusspunkt(beitraege.faelligkeit)))}</dd>
@@ -203,7 +203,7 @@ function beitraegeAbschnitt(daten) {
     <h2>Beiträge</h2>
     ${karten}
     ${gutZuWissenAbschnitt(beitraege)}
-    <p class="meta">Beiträge laut Beitragsordnung 2026; verbindlich ist der Aufnahmeantrag.</p>
+    <p class="meta">Beiträge laut Beitragsübersicht (Stand 9/2026); verbindlich ist der Aufnahmeantrag.</p>
     ${beitragsuebersichtHtml}
   </div>
 </section>`;

@@ -1492,7 +1492,7 @@ function pruefeNA2(c) {
   } else ok(!/Erlaubnis zum Spielen\)/.test(ta), "Teil A: keine Erklärung von „Spielrecht“ ohne das Wort");
 
   // --- Ansprechstellen erklärt und erreichbar (sprache-8) ---
-  const stellen = { passwesen: "Passwesen (bearbeitet die Spielerpässe; erreichbar über die Geschäftsstelle):", spielausschuss: "Spielausschuss der Herren (prüft Wechsel und Fristen; erreichbar über die Geschäftsstelle):" };
+  const stellen = { passwesen: "Passwesen (bearbeitet die Spielerpässe; erreichbar über die Geschäftsstelle):", spielausschuss: "Spielausschuss Senioren (prüft Wechsel und Fristen; erreichbar über die Geschäftsstelle):" };
   for (const [an, label] of Object.entries(stellen)) {
     if (e.weiterleitung.some((w) => w.an === an)) ok(ta.includes(norm(label)), () => "Teil A nennt die Stelle „" + an + "“ mit Aufgabe und Weg über die Geschäftsstelle: " + label);
     else ok(!ta.includes(norm(label)), "Teil A nennt die Stelle „" + an + "“ nur, wenn sie sich meldet");

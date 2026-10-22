@@ -45,7 +45,8 @@ function logoEintrag(sponsor, daten) {
 
   const nameText = [sponsor.firma, sponsor.ort].filter(Boolean).join(", ");
   let href = sponsor.link ?? null;
-  if (href && !/^https?:\/\//i.test(href)) href = "http://" + href;
+  // 20.10.2026 (S-4): Adressen ohne Schema bekommen https:// (vorher http://, das erst über eine Weiterleitung auf https führte).
+  if (href && !/^https?:\/\//i.test(href)) href = "https://" + href;
 
   // vmapit: zusätzlicher Satz zur appack-Plattform unter dem Namen. W3,
   // Abschnitt 7: "bisherige Website" irritiert auf der aktuellen Website –
@@ -59,7 +60,7 @@ function logoEintrag(sponsor, daten) {
     ? `<a class="knopf--icon" href="${escapeHtml(href)}" rel="noopener" target="_blank">${ICON_WEBSITE}Website</a>`
     : "";
   const instagramKnopf = sponsor.instagram
-    ? `<a class="knopf--icon" href="${escapeHtml(`https://instagram.com/${String(sponsor.instagram).replace(/^@/, "")}`)}" rel="noopener" target="_blank">${ICON_INSTAGRAM}Instagram</a>`
+    ? `<a class="knopf--icon" href="${escapeHtml(`https://www.instagram.com/${String(sponsor.instagram).replace(/^@/, "")}`)}" rel="noopener" target="_blank">${ICON_INSTAGRAM}Instagram</a>`
     : "";
   const aktionenHtml =
     websiteKnopf || instagramKnopf

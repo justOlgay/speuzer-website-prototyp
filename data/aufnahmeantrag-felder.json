@@ -2,8 +2,8 @@
   "_beschreibung": "Feldpositionen für den Aufnahmeantrag (Vereinsanmeldung allgemein, Stand 9/2026). Koordinaten in PDF-Punkten, Ursprung unten links wie bei pdf-lib; 'seite' ist 1-basiert (pdf-lib: getPage(seite - 1)). Text: x/y = Anfang der Grundlinie (bei ausrichtung 'mitte': Mitte), breite = Platz auf der gedruckten Linie, breite_max = freier Platz bis zum nächsten gedruckten Element. kreuz/unterschrift: x/y = linke untere Ecke. zellen: je Zeichen eine Zellenmitte.",
   "quelle": {
     "url": "https://cdn.appack.de/sportfreunde04/pdf/Vereinsanmeldung%20allgemein_NEU_9-2026%20%20(1).pdf",
-    "sha256": "ce9c37c0f01b6cfffeb09f9c306d403e48ea2220b3f4178315a75ff245866edf",
-    "bytes": 217968,
+    "sha256": "ecc0541fb495639fed42ca98c5955bb7216590059b95728d6966487534a1ef9d",
+    "bytes": 229888,
     "seiten": 4,
     "seitenformat": {
       "breite": 595.32,

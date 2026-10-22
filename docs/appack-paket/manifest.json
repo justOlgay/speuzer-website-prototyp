@@ -7,8 +7,8 @@
   "dateien": [
     {
       "datei": "web/anmeldung.html",
-      "bytes": 100896,
-      "sha256": "fb4389d8b035e3527035ddcf234b960a8e5ea558fb4ab3681880204dbb6d16fd"
+      "bytes": 101425,
+      "sha256": "a4f50db54171ea9333495505b3a50323b1e3f80a80fa608ba43876dec9e1291b"
     },
     {
       "datei": "web/aufnahmeantrag.html",
@@ -17,8 +17,8 @@
     },
     {
       "datei": "web/datenschutz.html",
-      "bytes": 63877,
-      "sha256": "132ff352506646769b16bcb0a1a3a1c52e9e4db1016d94c19c048f47b3a27359"
+      "bytes": 62908,
+      "sha256": "a69b99d2ee7dc752531109b07cd453170a85715c525e196d5dd92af6021b2f51"
     },
     {
       "datei": "web/formular-gesendet.html",
@@ -27,13 +27,13 @@
     },
     {
       "datei": "web/impressum.html",
-      "bytes": 6782,
-      "sha256": "e3b57be64f13691eb21647910e7ea49984ef6148bc82a23bec533ac5e9479ae3"
+      "bytes": 6786,
+      "sha256": "88d6adcd526f6039c7ef30c3186725767c44fbdb73b65cd66e7aafd07676b07d"
     },
     {
       "datei": "web/kontakt.html",
-      "bytes": 11209,
-      "sha256": "b34ebf36b53a1b1655e09f5f7aac67e582d214271e60fff9f38f4b1d2e518edb"
+      "bytes": 11213,
+      "sha256": "02874ecb22bc7f46ce30591e44cb9ea02df782e9dc2ac6cd85e686d177e44dc0"
     },
     {
       "datei": "web/mannschaften-a-jugend.html",
@@ -42,8 +42,8 @@
     },
     {
       "datei": "web/mannschaften-d1.html",
-      "bytes": 15918,
-      "sha256": "9cade536b737b39e1805fc5de84a6fc1050628ec19faea4f6f3fbcdcc3b03f42"
+      "bytes": 15920,
+      "sha256": "fcd91cf2ea30a8aa85fc00c3be17739468f0c8a8c3990ddbfda6c9c50b089604"
     },
     {
       "datei": "web/mannschaften-d2.html",
@@ -57,8 +57,8 @@
     },
     {
       "datei": "web/mannschaften-e1.html",
-      "bytes": 16501,
-      "sha256": "6ae8a381e74c9f1a199e25a6fd1222aa68c7e8b8f65b0b32ae40d9bf1d60e8d0"
+      "bytes": 16502,
+      "sha256": "b32eec733aef70068ac89823239b821ce834e2ce00043148edb0f4e8d6961ecf"
     },
     {
       "datei": "web/mannschaften-e2.html",
@@ -72,18 +72,18 @@
     },
     {
       "datei": "web/mannschaften-f1.html",
-      "bytes": 12657,
-      "sha256": "94c05d7936a803dcb53536e18010b80ef4afaf4cf0d39343cef56a08e5353dd1"
+      "bytes": 12619,
+      "sha256": "06f0626c48cb11f3d11c12c478728a59e3f95658262cc9f4e40bb13629088cd7"
     },
     {
       "datei": "web/mannschaften-f2.html",
-      "bytes": 11580,
-      "sha256": "7b0d3388429cee256a97dc2f218dc6bea793002d647c8a9a4e0291b330386786"
+      "bytes": 11542,
+      "sha256": "76d482b0114398286d89b9b2294aab9e96a081b7b977ee3657a955c6fbf8d00b"
     },
     {
       "datei": "web/mannschaften-g-jugend.html",
-      "bytes": 11116,
-      "sha256": "46dc2f96302be1d41396a4bb2dfc8c8a8e5db492af1ed413a3f01f1485cabc5e"
+      "bytes": 11114,
+      "sha256": "5453b6e44846fd835eea980f2494ea40c8eebc0b84f07c6fa75f79b15daa3d6d"
     },
     {
       "datei": "web/mannschaften-herren.html",
@@ -92,13 +92,13 @@
     },
     {
       "datei": "web/mannschaften.html",
-      "bytes": 21258,
-      "sha256": "027fc6a15144f6842760159dfe16ca262181e07edf7ec3311a76647846557298"
+      "bytes": 21265,
+      "sha256": "8e6da5274837adf4e2a03ee095996914bd550c3efafad699089eeef705528683"
     },
     {
       "datei": "web/mitglied-werden.html",
-      "bytes": 14738,
-      "sha256": "c1e112bdd3993d074b382bc905b15a076f002103c6c79d43366dc625bc665f0d"
+      "bytes": 14769,
+      "sha256": "cc72477b764da8b536c2e9ebddc73954d305fcc44a97ca1fb4c8d14987669c0f"
     },
     {
       "datei": "web/shop.html",
@@ -178,7 +178,7 @@
     {
       "datei": "web/verein-downloads.html",
       "bytes": 8203,
-      "sha256": "61a6470cf2953bd19f7728bd5be3c0ece3443bcaab6f8d88cd119cf9236b21e8"
+      "sha256": "55353646e998bf512fc2b7da3caadeda456e5e42f217c33cd4e5c58d3f046edf"
     },
     {
       "datei": "web/verein-karneval.html",
@@ -192,13 +192,13 @@
     },
     {
       "datei": "web/verein-organigramm.html",
-      "bytes": 30615,
-      "sha256": "adbcce72fa5b479ced2ee793c95b204bc7986cd3fabc231778b9ad3ad67b2173"
+      "bytes": 30647,
+      "sha256": "39a47eec5dbe0dfa34e9b43911680ddf9ada5c8208e0020cd0bd99ccb217790a"
     },
     {
       "datei": "web/verein-sponsoren.html",
-      "bytes": 14466,
-      "sha256": "f94a8c38e8d533a2f1929b7d6811e28cd62221647e57b24065bf0083fb1e375e"
+      "bytes": 14471,
+      "sha256": "7d2a5091e1190ba091be8171a9aae0e9a6007835848ad842ab19bf9875fd2623"
     },
     {
       "datei": "web/verein-ueber-uns.html",
@@ -237,8 +237,8 @@
     },
     {
       "datei": "web/anmeldung-assistent.js",
-      "bytes": 35324,
-      "sha256": "7b6257baae7ba8130fc97547f08370965e76989838174c2f5d2c64658e6cb23e"
+      "bytes": 35471,
+      "sha256": "4ac6172856259583bf43a3f1b2997199adf2fb248cafaaf935b91c7b7120ad7a"
     },
     {
       "datei": "web/anmeldung-bausteine.js",
@@ -272,8 +272,8 @@
     },
     {
       "datei": "web/anmeldung-pdf.js",
-      "bytes": 145226,
-      "sha256": "1dd6e97af64aeeb6fe528781f7befb4549e71570d75e1a9ea6fcc81ab2ac08fa"
+      "bytes": 145173,
+      "sha256": "c0ea901815b787c86ad1c92b4dd1be9cc097ee60897eda79a8affb9cd0765f65"
     },
     {
       "datei": "web/anmeldung-regeln.js",
@@ -322,43 +322,43 @@
     },
     {
       "datei": "web/anmeldung-texte-ar-oberflaeche.js",
-      "bytes": 49610,
-      "sha256": "9941e10e48decd12ab9947aef16084fce2bf180da172ba8ff754c406b27e9108"
+      "bytes": 49622,
+      "sha256": "31bf5a310951e7e1f605ea086be508a09d39482de7f525e7009761b54b38f330"
     },
     {
       "datei": "web/anmeldung-texte-ar-regeln.js",
-      "bytes": 51119,
-      "sha256": "15cca4a37dc68f51a523b4ec57eff81685be7425487025fb8937d8bdb2646383"
+      "bytes": 51198,
+      "sha256": "9775d6c1ae6bf28581f39099b089da1016aa575212b24c3c9935707d782a721a"
     },
     {
       "datei": "web/anmeldung-texte-de-oberflaeche.js",
-      "bytes": 39242,
-      "sha256": "83aa57e8972cdc703d8a53edfc447d8c13c08ceaac2eaabc15533c3fc5b3d4a8"
+      "bytes": 39240,
+      "sha256": "d80dfa1ea4eb5a5aee3e1453e91489f5f2f56d30d824ed9e464e46e49db46636"
     },
     {
       "datei": "web/anmeldung-texte-de-regeln.js",
-      "bytes": 36824,
-      "sha256": "895ce85012a8d6b9859c3210792f98c2a7111ed52acc881dd7614147d968b317"
+      "bytes": 36820,
+      "sha256": "112113898f519d1b952433de17f472fc38ce545aafd750d40f7a65b34d64e010"
     },
     {
       "datei": "web/anmeldung-texte-en-oberflaeche.js",
-      "bytes": 37684,
-      "sha256": "18d2d1918b6dafbc870d498c1d9ee4a9241cab798fad81d27ea7053d97b25b45"
+      "bytes": 37681,
+      "sha256": "c55d2aec84b3dac28663b1f09673fe2d9b772db233e036148b1116c7935a3278"
     },
     {
       "datei": "web/anmeldung-texte-en-regeln.js",
-      "bytes": 38607,
-      "sha256": "f6ebdfdc2b8c75b67c826921e08087dc58268ada4fb98a08ce0016d4222431e2"
+      "bytes": 38648,
+      "sha256": "72cbc5d9e27a57f696f731a70ffe2af8ea46d697a05fb637c8076fda22e9360d"
     },
     {
       "datei": "web/anmeldung-texte-tr-oberflaeche.js",
-      "bytes": 39663,
-      "sha256": "8899648adcfcec1b82ebea5bb889a377ccce80fe4d27ca12ffd3999dcc349b25"
+      "bytes": 39664,
+      "sha256": "827f027b8165a54fad0c2837fd828516ff8ef42614eb7c04681371c53e1b3c4a"
     },
     {
       "datei": "web/anmeldung-texte-tr-regeln.js",
-      "bytes": 40056,
-      "sha256": "3fe92b35a48dd1c914fffec38f1221b453894be60f83f279c2b4554c8f61e51f"
+      "bytes": 40092,
+      "sha256": "cd9be92040d853a19395f747ed4cf748a036dae68ddba49d0fb7f8e66c2a59be"
     },
     {
       "datei": "web/anmeldung-umgebung.js",
@@ -377,8 +377,8 @@
     },
     {
       "datei": "web/anmeldung-vorlage-aufnahmeantrag.js",
-      "bytes": 273387,
-      "sha256": "0a14e9097a99aaf5ff6f1a80732cb7c1b4c7f2148ebe9ed0b180c8987c6538a4"
+      "bytes": 305146,
+      "sha256": "483f3727d288146ef037f3fbd2d3a2009e2b6a4fefdb37eefc42f6a00bf92b1f"
     },
     {
       "datei": "web/anmeldung-vorlage-einverstaendnis-senioren.js",

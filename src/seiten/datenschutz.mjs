@@ -50,6 +50,13 @@ function escapeHtml(text) {
     .replaceAll('"', "&quot;");
 }
 
+// 20.10.2026 (S-8): Telefon-Link in internationaler Form (+49 …) wie im Original-Impressum (derselbe Helfer wie in
+// impressum.mjs, kontakt.mjs und organigramm.mjs); die sichtbare Schreibweise ("069 736868") bleibt.
+function telHref(nummer) {
+  const ziffern = String(nummer ?? "").replace(/[^\d+]/g, "");
+  return "tel:" + (/^0[1-9]/.test(ziffern) ? "+49" + ziffern.slice(1) : ziffern);
+}
+
 // P9-Korrektur A3: h1 brach bei 390px mitten im Wort
 // ("DATENSCHUTZERKLÄRUN/G"). &shy; nach "Datenschutz" markiert die einzige
 // sprachlich saubere Trennstelle; zusammen mit hyphens:manual auf
@@ -245,7 +252,7 @@ function verantwortlicheStelleHtml(daten) {
       <dd><p style="margin:0;">${mailLink(verein.mail ?? "geschaeftsstelle@sportfreunde04.de")}</p></dd>
 
       <dt>Telefon</dt>
-      <dd><p style="margin:0;"><a href="tel:${escapeHtml(String(verein.tel_geschaeftsstelle ?? "").replace(/[^\d+]/g, ""))}">${escapeHtml(telefonAnzeige(verein.tel_geschaeftsstelle))}</a></p></dd>
+      <dd><p style="margin:0;"><a href="${escapeHtml(telHref(verein.tel_geschaeftsstelle))}">${escapeHtml(telefonAnzeige(verein.tel_geschaeftsstelle))}</a></p></dd>
 
       <dt>Website</dt>
       <dd>www.sportfreunde04.de</dd>

@@ -73,7 +73,7 @@ const STELLE_KLARTEXT = {
   passwesen: "Passwesen (bearbeitet die Spielerpässe; erreichbar über die Geschäftsstelle)",
   geschaeftsstelle: "Geschäftsstelle",
   karneval: "Karnevalabteilung",
-  spielausschuss: "Spielausschuss der Herren (prüft Wechsel und Fristen; erreichbar über die Geschäftsstelle)",
+  spielausschuss: "Spielausschuss Senioren (prüft Wechsel und Fristen; erreichbar über die Geschäftsstelle)",
 };
 
 export const TEXTE_TEIL_A = {
@@ -1773,7 +1773,7 @@ function seiteDatenschutz(K, S) {
   S.ueberschrift("4. An wen geben wir Daten weiter?", 3);
   S.liste(
     [
-      "Hessischer Fußball-Verband (HFV) und Deutscher Fußball-Bund (DFB) über das System DFBnet: für das Spielrecht und den Spielbetrieb. Der HFV ist dafür selbst verantwortlich. Seine Datenschutzinformation steht auf Seite 3 des Antrags auf Spielerlaubnis und unter hfv-online.de. Fragen dazu richten Sie an datenschutz@hfv-online.de. Bei einem Wechsel aus dem Ausland gibt der Verband Angaben über den DFB an den ausländischen Verband weiter.",
+      "Hessischer Fußball-Verband (HFV) und Deutscher Fußball-Bund (DFB) über das System DFBnet: für das Spielrecht und den Spielbetrieb. Der HFV ist dafür selbst verantwortlich. Die Datenschutzinformation des HFV finden Sie auf Seite 3 des Antrags auf Spielerlaubnis und auf hfv-online.de. Bei einem Wechsel aus dem Ausland gibt der Verband Angaben über den DFB an den ausländischen Verband weiter.",
       "Landessportbund Hessen und Sportversicherung: Wir melden jährlich den Mitgliederbestand (Bestandsmeldung). Darüber besteht der Versicherungsschutz.",
       "Kreditinstitut: beim Einzug des Beitrags per SEPA-Lastschrift.",
       "Trainerinnen, Trainer und Betreuer: nur die Angaben, die sie für Training und " + spieleWort(K) + " brauchen. Die Gesundheitsangaben aus dem Notfall- und Gesundheitsbogen und aus der Absprache zur Medikamentengabe sehen nur die Trainer und Betreuer der " + teamWort(K) + ".",
@@ -1807,7 +1807,7 @@ function seiteDatenschutz(K, S) {
   );
 
   S.ueberschrift("7. Beschwerde bei der Aufsichtsbehörde", 3);
-  S.absatz("Sie können sich bei der Datenschutzaufsicht beschweren: Der Hessische Beauftragte für Datenschutz und Informationsfreiheit, Gustav-Stresemann-Ring 1, 65189 Wiesbaden, datenschutz.hessen.de.", g);
+  S.absatz("Sie können sich bei der Datenschutzaufsicht beschweren: Der Hessische Beauftragte für Datenschutz und Informationsfreiheit, Wilhelmstraße 7, 65185 Wiesbaden, datenschutz.hessen.de.", g);
 
   S.ueberschrift("8. Müssen Sie die Daten angeben?", 3);
   S.absatz(
@@ -2382,7 +2382,7 @@ function seiteTeilA(K, S, plan) {
   const abteilung = text(K.a.abteilung);
   if (text(objekt(kt.jugendleitung).mail) && (stellen.has("jugendleitung") || ((abteilung === "fussball" || abteilung === "beides") && K.minderjaehrig))) kontakte.push([{ t: "Jugendleitung:", fett: true }, { t: kt.jugendleitung.mail }]);
   if (text(objekt(kt.karneval).mail) && (stellen.has("karneval") || abteilung === "karneval" || abteilung === "beides")) kontakte.push([{ t: "Karnevalabteilung:", fett: true }, { t: kt.karneval.mail }]);
-  if (text(objekt(kt.spielausschuss).mail) && stellen.has("spielausschuss")) kontakte.push([{ t: "Spielausschuss Herren:", fett: true }, { t: kt.spielausschuss.mail }]);
+  if (text(objekt(kt.spielausschuss).mail) && stellen.has("spielausschuss")) kontakte.push([{ t: "Spielausschuss Senioren:", fett: true }, { t: kt.spielausschuss.mail }]);
   S.liste(kontakte, { size: 10.5, nach: 3 });
 }
 

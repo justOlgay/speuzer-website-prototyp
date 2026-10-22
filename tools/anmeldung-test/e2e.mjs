@@ -3388,7 +3388,9 @@ async function pruefeHilfe(browser, server) {
     };
   });
   ok("Hilfe (U-12): im Knopf „Anrufen“ steht hinter dem Doppelpunkt ein festes Leerzeichen, zwischen Wort und Nummer ist eine sichtbare Lücke (mindestens 3 px)", !!h.telAbstand && h.telAbstand.zeichen === ":\u00a0" && h.telAbstand.luecke >= 3, JSON.stringify(h.telAbstand));
-  ok("Hilfe: Telefon der Geschäftsstelle stimmt mit der Vereinskonfiguration", h.tel.includes("tel:" + konfig.verein.tel_geschaeftsstelle.replace(/\D/g, "")), h.tel.join(","));
+  // 20.10.2026 (S-8): Der Link trägt die internationale Form (+49 …) wie die Seiten der Website; sichtbar bleibt "069 736868".
+  const telInternational = (nr) => { const z = String(nr).replace(/[^\d+]/g, ""); return "tel:" + (/^0[1-9]/.test(z) ? "+49" + z.slice(1) : z); };
+  ok("Hilfe: Telefon der Geschäftsstelle stimmt mit der Vereinskonfiguration (Link in der Form +49 …)", h.tel.includes(telInternational(konfig.verein.tel_geschaeftsstelle)) && h.tel.every((t) => /^tel:\+49\d+$/.test(t)), h.tel.join(","));
   ok("Hilfe: Mail der Geschäftsstelle stimmt mit der Vereinskonfiguration; Jugendleitung und Karneval sind da", h.mails.includes(konfig.verein.mail) && h.mails.includes("jugendleitung@sportfreunde04.de") && h.mails.includes("karnevalabteilung@sportfreunde04.de"), h.mails.join(", "));
   ok("Hilfe: Satz zum Übersetzen mitbringen", /Übersetzen mitbringen/.test(h.text), "");
   ok("Hilfe: Fokus liegt im Dialog", h.titelFokus, "");

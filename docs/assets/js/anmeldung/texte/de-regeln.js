@@ -430,8 +430,8 @@ export default {
     beitrag_familie: "Die Geschäftsstelle prüft, wer zur Familie zählt.",
     senator: "Die Geschäftsstelle gibt Ihren Antrag an den Vorstand.",
     beitragserlass: "Die Geschäftsstelle spricht mit Ihnen über Hilfe beim Beitrag.",
-    herren_wechsel: "Der Spielausschuss der Herren prüft Ihren Wechsel und die Fristen.",
-    frau_herren: "Der Spielausschuss der Herren stellt den Antrag für Frauen bei den Herren.",
+    herren_wechsel: "Der Spielausschuss Senioren prüft Ihren Wechsel und die Fristen.",
+    frau_herren: "Der Spielausschuss Senioren stellt den Antrag für Frauen bei den Herren.",
   },
 
   frist: {

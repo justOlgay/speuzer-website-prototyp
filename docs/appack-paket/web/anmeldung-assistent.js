@@ -771,7 +771,11 @@ async function baue(wurzel, konfig, regeln, deTexte, deRegelTexte) {
     const kontakte = k.tl("hilfe.kontakte").map((c) => {
       const zeile = [];
 
-      if (c.tel) zeile.push(h("a", { klasse: "knopf", href: "tel:" + c.tel.replace(/\D/g, "") }, k.t("hilfe.anrufen") + ":\u00a0", h("span", { klasse: "anm-tel", dir: "ltr" }, c.tel)));
+      if (c.tel) {
+        const ziffern = c.tel.replace(/[^\d+]/g, "");
+        const telAdresse = /^0[1-9]/.test(ziffern) ? "+49" + ziffern.slice(1) : ziffern;
+        zeile.push(h("a", { klasse: "knopf", href: "tel:" + telAdresse }, k.t("hilfe.anrufen") + ":\u00a0", h("span", { klasse: "anm-tel", dir: "ltr" }, c.tel)));
+      }
       if (c.mail) {
 
         const adresse = [];

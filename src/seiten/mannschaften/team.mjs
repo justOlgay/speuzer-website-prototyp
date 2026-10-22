@@ -133,8 +133,8 @@ function trainingVollListe(team) {
     .join(", ");
 }
 
-// Meta-description: voller Trainingsteil, sonst (wenn > 170 Zeichen) auf
-// "Training n-mal pro Woche" gekürzt (P3). Herren: "Senioren" statt Jahrgang.
+// Meta-description: voller Trainingsteil, sonst (wenn > 170 Zeichen oder bei Teams mit
+// Winterhalle, 20.10.2026 S-6) auf "Training n-mal pro Woche" gekürzt (P3). Herren: "Senioren" statt Jahrgang.
 // W9-Hinweis: bewusst NICHT jahrgangPraefix() (die enthält seit W9,
 // Abschnitt 1, ein geschütztes Leerzeichen als HTML-Entity "&nbsp;" und ist
 // schon escapeHtml()-sicher) – die Meta-description ist reiner Text, den
@@ -154,7 +154,10 @@ function beschreibung(team) {
   const bauen = (trainingTeil) =>
     `${team.name} des FFV Sportfreunde 04 (Frankfurt-Gallus): ${jahrgangTeil}, Training ${trainingTeil}, Ansprechpartner per Vereinsmail, ${schluss}`;
   let text = bauen(trainingVollListe(team));
-  if (text.length > 170) {
+  // 20.10.2026 (S-6, Olgay): Teams mit trainingHinweis (Winterhalle: F1, F2, G-Jugend) trainieren von November bis Februar an
+  // anderen Tagen in der Halle. Die Sommer-Wochentage in der Vorschau (Suchmaschine, Link-Vorschau) wären dann nur halb richtig:
+  // diese Teams bekommen immer "n-mal pro Woche", die Zeiten stehen im Seitentext.
+  if (team.trainingHinweis || text.length > 170) {
     const n = (team.training ?? []).length;
     text = bauen(`${n}-mal pro Woche`);
   }
