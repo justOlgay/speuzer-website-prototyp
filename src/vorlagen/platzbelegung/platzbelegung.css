@@ -5,7 +5,9 @@
    hellen Fassung, in Vereinsblau.
    Jede Art von Eintrag hat Beschriftung UND Muster, nie nur Farbe:
    Training voll, Spiel mit Rahmen, Kinderfestival gepunktet mit Doppelrahmen,
-   belegt kariert, frei gestrichelt mit Schrägstreifen. */
+   belegt kariert, frei ruhig: helle Fläche mit feiner durchgezogener Linie
+   (31.10.2026: früher dichte Schraffur und gestrichelter Rand, das war unruhig;
+   Training, Spiele und belegt sollen auffallen, nicht die freien Flächen). */
 
 /* hidden gilt auch gegen display-Regeln (Knöpfe, Raster) */
 .pb-abschnitt [hidden],
@@ -31,9 +33,9 @@
   --pb-be-fg: var(--ink);
   --pb-be-rand: var(--ink-2);
   --pb-fr-bg: var(--blau-50);
-  --pb-fr-strich: rgba(42, 59, 221, .16);
-  --pb-fr-fg: var(--blau-800);
-  --pb-fr-rand: var(--blau-600);
+  --pb-fr-fg: var(--ink-3);
+  --pb-fr-rand: #BCC3EE;
+  --pb-fr-hover: var(--blau-600);
 }
 
 /* === Laden und Fehler === */
@@ -41,7 +43,9 @@
 .pb-kasten { max-width: 40rem; }
 .pb-kasten p + p { margin-top: var(--sp-3); }
 
-/* === Wochenwahl === */
+/* === Wochenwahl und Umschalter Tag | Woche === */
+.pb-leiste { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3) var(--sp-4); }
+.pb-leiste .pb-wnav { flex: 1 1 auto; }
 .pb-wnav {
   display: flex;
   align-items: center;
@@ -52,6 +56,33 @@
   background: var(--surface);
   box-shadow: var(--sh-1);
 }
+/* Umschalter: nur ab 1100 px (darunter gibt es nur die Tagesansicht); Standard ist „Tag“ */
+.pb-ansichtwahl {
+  display: none;
+  flex: 0 0 auto;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  box-shadow: var(--sh-1);
+}
+.pb-umschalt {
+  appearance: none;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--blau-100);
+  color: var(--blau-800);
+  font-size: .8125rem;
+  font-weight: 600;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.pb-umschalt:hover { background: #D6DAF6; }
+.pb-umschalt[aria-pressed="true"] { background: var(--blau-700); color: var(--weiss); }
 .pb-wnav__knopf {
   flex: 0 0 44px;
   width: 44px;
@@ -97,8 +128,9 @@
 .pb-heute:hover { background: #D6DAF6; }
 .pb-heute-hinweis { margin-top: var(--sp-2); font-size: var(--fs-sm); color: var(--ink-2); }
 
-/* === Tagwahl (Handy) === */
+/* === Tagwahl (Standard bei jeder Breite; im Wochengitter ausgeblendet) === */
 .pb-tagwahl { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; margin-top: var(--sp-3); }
+.pb-ist-woche .pb-tagwahl { display: none; }
 .pb-tab {
   appearance: none;
   min-height: 52px;
@@ -278,12 +310,12 @@
   border: 2px solid var(--pb-be-rand);
 }
 :is(.pb-bl, .pb-sw)[data-typ="frei"] {
-  background: repeating-linear-gradient(-45deg, transparent 0 6px, var(--pb-fr-strich) 6px 7px), var(--pb-fr-bg);
+  background: var(--pb-fr-bg);
   color: var(--pb-fr-fg);
-  border: 1.5px dashed var(--pb-fr-rand);
+  border: 1px solid var(--pb-fr-rand);
 }
 .pb-bl[data-typ="frei"] { z-index: 1; cursor: pointer; }
-.pb-bl[data-typ="frei"]:hover { outline: 2px solid var(--pb-fr-rand); outline-offset: -3px; }
+.pb-bl[data-typ="frei"]:hover { border-color: var(--pb-fr-hover); box-shadow: inset 0 0 0 1px var(--pb-fr-hover); }
 .pb-bl:focus-visible { outline: 3px solid var(--blau-500); outline-offset: -3px; z-index: 12; }
 .pb-bl.aus { visibility: hidden; pointer-events: none; }
 .pb-fuss { margin-top: 6px; display: grid; gap: 4px; }
@@ -343,7 +375,7 @@
   line-height: 1.4;
 }
 .pb-hinweise .art { font-weight: 600; }
-.pb-legende { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px 12px; }
+.pb-legende { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px 12px; }
 .pb-legende li { display: flex; gap: 8px; align-items: center; font-size: .875rem; }
 .pb-sw { position: relative; flex: none; width: 34px; height: 22px; border-radius: 4px; overflow: hidden; }
 .pb-fussnote { margin-top: var(--sp-5); }
@@ -374,13 +406,35 @@
 .pb-dialog__aktionen { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-top: var(--sp-2); }
 .pb-dialog__aktionen .knopf { flex: 1 1 10rem; }
 
+/* === Ab 1100 px (wie BREITE_WOCHE im Skript): Umschalter Tag | Woche, größere Tagesansicht === */
+/* Die Tagesansicht ist nur so breit, dass die sechs Spuren nicht in die Breite zerfließen (1040 px: je Spur rund 160 px,
+   bei 1440 px mehr als 120 px); Tagwahl und Tagesansicht gleich breit. Die Schrift in den Blöcken ist mindestens 13 px
+   (Wochengitter wie bisher). Die Höhen über den Spuren setzt das Skript (GEOM.tagBreit), hier stehen nur Schriften und Breiten. */
 @media (min-width: 1100px) {
+  .pb-ansichtwahl { display: inline-flex; }
   .pb-ansicht { margin-top: var(--sp-5); }
   .pb-filter { grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-3) var(--sp-6); align-items: start; }
-  .pb-tagwahl { display: none; }
+  .pb-tagwahl { max-width: 1040px; gap: 6px; }
+  .pb-tab { min-height: 56px; }
+  .pb-tab b { font-size: 1rem; }
+  .pb-tab span { font-size: .875rem; }
+  .pb-tab i { font-size: .75rem; }
+  .pb-tagansicht { max-width: 1040px; }
+  .pb-tagansicht .pb-tag-titel { margin-bottom: var(--sp-3); font-size: 1.25rem; }
+  .pb-tagansicht .pb-tag-titel small { font-size: .8125rem; }
+  .pb-tagansicht .pb-zeile { font-size: .875rem; }
+  .pb-tagansicht .pb-notiz { font-size: .9375rem; }
+  .pb-tagansicht .pb-zeitleiste { grid-template-columns: 56px minmax(0, 1fr); }
+  .pb-tagansicht .pb-achse .pb-zl { right: 8px; font-size: .8125rem; }
+  .pb-tagansicht .pb-gruppen { font-size: .875rem; }
+  .pb-tagansicht .pb-lk { font-size: 1rem; }
+  .pb-tagansicht .pb-bl .tx { padding: 3px 6px; }
+  .pb-tagansicht .pb-bl .nm { font-size: .9375rem; }
+  .pb-tagansicht .pb-bl .zt,
+  .pb-tagansicht .pb-bl .ty { font-size: .8125rem; }
 }
 @media (prefers-reduced-motion: no-preference) {
-  .pb-wnav__knopf, .pb-heute, .pb-chip, .pb-tab { transition: background-color var(--t-kurz); }
+  .pb-wnav__knopf, .pb-heute, .pb-chip, .pb-tab, .pb-umschalt { transition: background-color var(--t-kurz); }
 }
 
 /* === App-Modus === */

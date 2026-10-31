@@ -10,6 +10,16 @@
 // Halle, Ferien und Feiertage, daraus die freien Zeiten je Platzteil. Es wird
 // nichts gebucht: „frei“ öffnet eine Anfrage per E-Mail an die Geschäftsstelle.
 //
+// Heimspiele (31.10.2026): Je nach dem Wert „feld“ in der Datei belegt ein Spiel
+// den ganzen Platz („ganz“, Tor 1 bis 4: Klasse D, A, Herren; gilt auch, wenn „feld“
+// fehlt) oder eine Hälfte („halb“: Klasse E, F, G; linke Hälfte = Tor 1 und 2,
+// rechte = Tor 3 und 4). Welche Hälfte, rechnet die Seite je Tag nach der Regel
+// in SCHNITTSTELLE.md (siehe haelfteWaehlen), unabhängig von Filtern und Ansicht.
+//
+// Ansicht: Standard ist ein Tag (Tagesansicht, bei jeder Breite). Ab 1100 px lässt
+// sich auf das Wochengitter umschalten (Umschalter „Tag | Woche“); darunter gibt
+// es nur die Tagesansicht.
+//
 // Alle Werte aus der Datei kommen nur über textContent oder DOM-Methoden auf
 // die Seite, nie als HTML. Kann die Datei nicht geladen werden oder ist sie
 // ungültig (andere Version, fehlende Teile), zeigt die Seite einen ruhigen
@@ -25,6 +35,12 @@
 
   // ---------- Einstellungen ----------
 
+  // Halbes Feld (E-, F- und G-Jugend): auf welcher Platzhälfte ein solches Spiel liegt, wenn beide Hälften gleich belegt sind:
+  // "links" (Tor 1 und 2) oder "rechts" (Tor 3 und 4). ANNAHME: Welche Hälfte die E-Jugend sonst nimmt, steht in keiner Quelle;
+  // "links zuerst" ist nur eine Voreinstellung und kann geändert werden. Gilt nur bei Gleichstand: sonst entscheidet die
+  // geringere Überlappung mit Training, „belegt“ und früheren Spielen (siehe haelfteWaehlen).
+  var HALBFELD_ZUERST = "links";
+
   var WARTEZEIT = 8000;       // ms für das Laden der Datei
   var APP = document.documentElement.classList.contains("app-modus");
   var MS = 864e5;
@@ -34,9 +50,17 @@
   var KAT = { training: "training", spiel: "spiele", festival: "spiele", belegt: "sonst", frei: "frei" };
   var TYPNAME = { training: "Training", spiel: "Spiel", festival: "Kinderfestival" };
   var GANZER_PLATZ = ["tor1", "tor2", "tor3", "tor4"];
-  var BREITE_WOCHE = "(min-width: 1100px)";
-  // Höhe über den Spuren und Minuten je Pixel (muss zum Stylesheet passen)
-  var GEOM = { tag: { pm: 1, kopf: 48 }, woche: { pm: 0.9, kopf: 93 } };
+  var LINKE_HAELFTE = ["tor1", "tor2"];
+  var RECHTE_HAELFTE = ["tor3", "tor4"];
+  var BREITE_WOCHE = "(min-width: 1100px)";   // ab hier: größere Tagesansicht und der Umschalter „Tag | Woche“
+  // Geometrie je Ansicht (muss zum Stylesheet passen). pm = Pixel je Minute, kopf = Höhe über den Spuren (Gruppen- und
+  // Spurnamen: gruppen + lanes, werden als Höhe gesetzt), zeit/typ = ab dieser Blockhöhe (px) steht die Zeit bzw. die dritte Zeile.
+  // tagBreit = Tagesansicht ab 1100 px (größere Schrift, mindestens 13 px in den Blöcken).
+  var GEOM = {
+    tag: { pm: 1, kopf: 48, gruppen: 20, lanes: 28, zeit: 34, typ: 58 },
+    tagBreit: { pm: 1.25, kopf: 64, gruppen: 26, lanes: 38, zeit: 50, typ: 68 },
+    woche: { pm: 0.9, kopf: 93, zeit: 34, typ: 58 }
+  };
 
   // ---------- Hilfen: DOM ----------
 
@@ -130,9 +154,10 @@
     if (!TEILE.length) throw new Error("teile");
     HALBE = TEILE.length >= 4 && GANZER_PLATZ.every(function (id, i) { return TEILE[i].id === id; });
 
+    // rang = Stelle der Mannschaft in der Datei (entscheidet bei gleichem Anstoß, wer zuerst eine Platzhälfte wählt)
     MA = Object.create(null);
-    d.mannschaften.forEach(function (m) {
-      if (m && typeof m.id === "string" && typeof m.kurz === "string") MA[m.id] = { id: m.id, kurz: m.kurz };
+    d.mannschaften.forEach(function (m, i) {
+      if (m && typeof m.id === "string" && typeof m.kurz === "string") MA[m.id] = { id: m.id, kurz: m.kurz, rang: i };
     });
 
     FREI = [];
@@ -186,6 +211,37 @@
   }
   function blockName(b) { return b.typ === "belegt" ? "belegt" : (b.typ === "frei" ? "frei" : MA[b.t].kurz); }
 
+  // ---------- Rechnen: Platzhälfte bei Spielen mit halbem Feld ----------
+
+  // Minuten, in denen [von, bis) die schon gesetzten Einträge auf den Spuren einer Hälfte überschneidet (jede Spur einzeln,
+  // jeder Eintrag für sich: Training, „belegt“ und früher gesetzte Spiele)
+  function ueberlappung(bl, spuren, von, bis) {
+    var summe = 0;
+    spuren.forEach(function (sp) {
+      bl.forEach(function (b) {
+        if (b.lanes.indexOf(sp) >= 0) summe += Math.max(0, Math.min(bis, b.bis) - Math.max(von, b.von));
+      });
+    });
+    return summe;
+  }
+  // Die Hälfte mit der kleineren Überlappung; bei Gleichstand die bevorzugte (HALBFELD_ZUERST)
+  function haelfteWaehlen(bl, von, bis, links, rechts) {
+    var l = ueberlappung(bl, links, von, bis), r = ueberlappung(bl, rechts, von, bis);
+    if (l === r) return HALBFELD_ZUERST === "rechts" ? "rechts" : "links";
+    return l < r ? "links" : "rechts";
+  }
+  // Reihenfolge der Spiele eines Tages auf unserem Platz: Anstoß, dann Stelle der Mannschaft in der Datei, dann Spielnummer als Text
+  function nrText(s) { return typeof s.nr === "string" ? s.nr : (zahl(s.nr) ? String(s.nr) : ""); }
+  function spielVor(a, b) {
+    var d = mi(a.z) - mi(b.z);
+    if (d) return d;
+    d = MA[a.t].rang - MA[b.t].rang;
+    if (d) return d;
+    var x = nrText(a), y = nrText(b);
+    return x < y ? -1 : (x > y ? 1 : 0);
+  }
+  function listeVon(name, rueckfall) { return Array.isArray(D.belegung && D.belegung[name]) ? D.belegung[name] : rueckfall; }
+
   var cache = {};
   function tagDaten(n) {
     if (cache[n]) return cache[n];
@@ -211,16 +267,23 @@
         if (x.tag === wt) neu({ typ: "belegt", t: null, von: x.von, bis: x.bis, lanes: x.lanes, platz: platzText(x.lanes) });
       });
     }
-    // Heimspiele: auf unserem Platz der ganze Platz (Tor 1 bis 4), Dauer geschätzt; sonst nur die Zeile „auf anderer Anlage“
-    var ganz = lanesVon(Array.isArray(D.belegung && D.belegung["ganzer Platz"]) ? D.belegung["ganzer Platz"] : GANZER_PLATZ);
+    // Heimspiele auf unserem Platz: der ganze Platz (Tor 1 bis 4; „ganz“, auch wenn „feld“ fehlt) oder eine Hälfte („halb“), Dauer und
+    // Feldteil geschätzt; alle anderen Heimspiele stehen nur in der Zeile „auf anderer Anlage“. Die Spiele kommen der Reihe nach
+    // (spielVor) und sehen Training, „belegt“ und die früher gesetzten Spiele des Tages.
+    var ganz = lanesVon(listeVon("ganzer Platz", GANZER_PLATZ));
+    var links = lanesVon(listeVon("linke Hälfte", LINKE_HAELFTE)), rechts = lanesVon(listeVon("rechte Hälfte", RECHTE_HAELFTE));
+    var spieleU = [];
     (SP[iso] || []).forEach(function (s) {
-      if (s.ort === "u") {
-        if (!ganz.length) return;
-        var v = mi(s.z), dauer = zahl(s.dauer) && s.dauer > 0 ? s.dauer : 90;
-        neu({ typ: s.w === "Kinderfestival" ? "festival" : "spiel", t: s.t, von: v, bis: v + dauer, lanes: ganz, platz: "ganzer Platz", spiel: s });
-      } else {
-        andere.push({ t: s.t, z: text(s.z), ort: text(s.ort) });
-      }
+      if (s.ort === "u") spieleU.push(s);
+      else andere.push({ t: s.t, z: text(s.z), ort: text(s.ort) });
+    });
+    spieleU.sort(spielVor);
+    spieleU.forEach(function (s) {
+      var v = mi(s.z), dauer = zahl(s.dauer) && s.dauer > 0 ? s.dauer : 90;
+      var halb = s.feld === "halb" && links.length > 0 && rechts.length > 0;
+      var lanes = halb ? (haelfteWaehlen(bl, v, v + dauer, links, rechts) === "links" ? links : rechts) : ganz;
+      if (!lanes.length) return;
+      neu({ typ: s.w === "Kinderfestival" ? "festival" : "spiel", t: s.t, von: v, bis: v + dauer, lanes: lanes, platz: platzText(lanes), spiel: s, halb: halb });
     });
     andere.sort(function (a, b) { return mi(a.z) - mi(b.z); });
     var fk = FENSTER[wt < 5 ? "werktag" : "wochenende"], f0 = fk[0], f1 = fk[1];
@@ -260,10 +323,12 @@
 
   // ---------- Zustand ----------
 
-  var state = { wk: 0, tag: 0, filter: "alle", heute: 0 };
+  // ansicht: "tag" (Standard) oder "woche"; das Wochengitter gibt es nur ab 1100 px, darunter immer einen Tag
+  var state = { wk: 0, tag: 0, filter: "alle", heute: 0, ansicht: "tag" };
   var gezeichnetBreite = 0;   // Fensterbreite beim letzten Zeichnen
   var mq = window.matchMedia ? window.matchMedia(BREITE_WOCHE) : { matches: false };
-  function modus() { return mq.matches ? "woche" : "tag"; }
+  function breit() { return mq.matches; }
+  function modus() { return mq.matches && state.ansicht === "woche" ? "woche" : "tag"; }
   function sichtbar(it) {
     var f = state.filter;
     if (f === "alle") return true;
@@ -369,12 +434,14 @@
     a.appendChild(body);
     return a;
   }
-  function laneKopf() {
+  function laneKopf(geo) {
     var kb = el("div", "pb-kopfblock");
     var g = el("div", "pb-gruppen"); g.setAttribute("aria-hidden", "true");
+    if (geo.gruppen) g.style.height = geo.gruppen + "px";   // Höhen der Köpfe kommen aus GEOM (die Achse richtet sich danach)
     g.appendChild(el("span", "g1", HALBE ? "linke Hälfte" : "")); g.appendChild(el("span", "g2", HALBE ? "rechte Hälfte" : "")); g.appendChild(el("span", "g3", ""));
     kb.appendChild(g);
     var lk = el("div", "pb-lk");
+    if (geo.lanes) lk.style.height = geo.lanes + "px";
     TEILE.forEach(function (t) { lk.appendChild(el("span", null, t.name)); });
     kb.appendChild(lk);
     return kb;
@@ -411,7 +478,7 @@
       if (kl) { tk.appendChild(document.createTextNode(" ")); tk.appendChild(el("small", null, kl)); }
       sec.appendChild(tk);
     }
-    sec.appendChild(laneKopf());
+    sec.appendChild(laneKopf(geo));
     var lanes = el("div", "pb-lanes"); lanes.style.height = ((f1 - f0) * geo.pm) + "px";
     for (var m = Math.ceil(f0 / 30) * 30; m < f1; m += 30) {
       var rl = el("div", "pb-rl" + (m % 60 === 0 ? " voll" : "")); rl.style.top = ((m - f0) * geo.pm) + "px"; lanes.appendChild(rl);
@@ -434,11 +501,12 @@
     if (lang * 12 * 0.58 + 8 > wpx) return "rot";
     return wpx < 84 ? "schmal" : "breit";
   }
-  function blockText(it, modus, hpx, wpx) {
+  function blockText(it, modus, hpx, wpx, geo) {
     var name = blockName(it), zeit = zt(it.von, it.bis);
     var typ = TYPNAME[it.typ] || "", tx = el("span", "tx");
     var nm = el("span", "nm", name);
-    if (it.typ === "spiel" || it.typ === "festival") nm.textContent = name + (modus.indexOf("rot") === 0 ? (it.typ === "spiel" ? " Spiel" : " Festival") : " · " + (it.typ === "festival" && wpx < 120 ? "Festival" : typ));
+    // Festival auf halbem Feld ist im Wochengitter nur rund 50 px breit: im Modus „schmal“ mit Trennstelle (Fes-tival), sonst passt das Wort nicht
+    if (it.typ === "spiel" || it.typ === "festival") nm.textContent = name + (modus.indexOf("rot") === 0 ? (it.typ === "spiel" ? " Spiel" : " Festival") : " · " + (it.typ === "festival" && wpx < 120 ? (modus === "schmal" ? "Fes\u00ADtival" : "Festival") : typ));
     if (modus === "rot1") {
       if (hpx < 20) return null;
       tx.appendChild(nm);
@@ -452,8 +520,8 @@
       if (hpx >= 40) { var z2 = el("span", "zt"); z2.appendChild(el("span", null, hm(it.von))); z2.appendChild(el("span", null, "–" + hm(it.bis))); tx.appendChild(z2); }
     } else {
       tx.appendChild(nm);
-      if (hpx >= 34) tx.appendChild(el("span", "zt", it.spiel ? hm(it.von) + "–ca. " + hm(it.bis) : zeit));
-      if (hpx >= 58) {
+      if (hpx >= geo.zeit) tx.appendChild(el("span", "zt", it.spiel ? hm(it.von) + "–ca. " + hm(it.bis) : zeit));
+      if (hpx >= geo.typ) {
         var zeile = it.typ === "training" ? (it.platz ? "Training · " + it.platz : "Training") : (it.spiel ? text(it.spiel.w) : (it.typ === "belegt" ? it.platz : ""));
         if (zeile) tx.appendChild(el("span", "ty", zeile));
       }
@@ -464,8 +532,8 @@
     var wann = WT[t.wt] + " " + tmj(t.n) + ", " + zt(it.von, it.bis) + " Uhr";
     if (it.typ === "frei") return "Frei: " + TEILE[it.lane].name + ", " + wann;
     if (it.typ === "belegt") return "belegt, " + platzText(it.lanes) + ", " + wann;
-    var s = blockName(it) + ", " + TYPNAME[it.typ] + ", " + platzText(it.lanes) + ", " + wann;
-    if (it.spiel) s += ", Dauer geschätzt";
+    var s = blockName(it) + ", " + TYPNAME[it.typ] + ", " + platzText(it.lanes) + (it.halb ? " (halbes Feld)" : "") + ", " + wann;
+    if (it.spiel) s += it.halb ? ", Dauer und Feldteil geschätzt" : ", Dauer geschätzt";
     return s;
   }
   function fuelleLanes(sp) {
@@ -487,7 +555,7 @@
         "px;z-index:" + (it.typ === "frei" ? 1 : (10 - breite));
       var label = beschriftung(it, t);
       blk.title = label;
-      var tx = blockText(it, md, hpx, wpx); if (tx) blk.appendChild(tx);
+      var tx = blockText(it, md, hpx, wpx, geo); if (tx) blk.appendChild(tx);
       if (it.typ === "frei") {
         // frei: Knopf (Tastatur und Bildschirmleser); öffnet die Anfrage
         blk.setAttribute("role", "button"); blk.tabIndex = 0; blk.setAttribute("aria-haspopup", "dialog");
@@ -505,7 +573,7 @@
     });
   }
   function baueEinzeltag(t) {
-    var geo = GEOM.tag, wrap = el("div");
+    var geo = breit() ? GEOM.tagBreit : GEOM.tag, wrap = el("div", "pb-tagansicht");
     var h2 = el("h2", "pb-tag-titel", WT[t.wt] + ", " + tmj(t.n));
     if (t.n === state.heute) { h2.appendChild(document.createTextNode(" ")); h2.appendChild(el("small", null, "heute")); }
     wrap.appendChild(h2);
@@ -545,7 +613,10 @@
       tb.setAttribute("aria-label", WT[t.wt] + ", " + tmj(t.n) + (t.n === state.heute ? ", heute" : "") + (t.status.k === "frei" ? ", " + t.status.name : ""));
     }
     Array.prototype.forEach.call(document.querySelectorAll(".pb-chip"), function (c) { c.setAttribute("aria-pressed", c.getAttribute("data-f") === state.filter ? "true" : "false"); });
+    Array.prototype.forEach.call(document.querySelectorAll(".pb-umschalt"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-ansicht") === state.ansicht ? "true" : "false"); });
     var host = $("pb-ansicht"), woche = modus() === "woche", ans = woche ? baueWoche(tage) : baueEinzeltag(tage[state.tag]);
+    // im Wochengitter braucht es die Tagwahl nicht (alle sieben Tage stehen da)
+    if (woche) $("pb").classList.add("pb-ist-woche"); else $("pb").classList.remove("pb-ist-woche");
     leeren(host); host.appendChild(ans.el);
     if (woche) { host.setAttribute("role", "group"); host.setAttribute("aria-label", "Belegung der Woche"); host.removeAttribute("aria-labelledby"); }
     else { host.setAttribute("role", "tabpanel"); host.setAttribute("aria-labelledby", "pb-tab-" + state.tag); host.removeAttribute("aria-label"); }
@@ -586,7 +657,7 @@
     else if (h > NAV1 + 6) { hin.hidden = false; hin.textContent = "Heute liegt nach dem Plan der Saison " + text(D.saison) + ". Gezeigt wird die letzte Woche."; setzeWoche(NAV1, 0); }
     else { hin.hidden = true; setzeWoche(mo(h), wtag(h)); }
   }
-  // Adresse #JJJJ-MM-TT öffnet diesen Tag (und seine Woche)
+  // Adresse #JJJJ-MM-TT öffnet die Tagesansicht dieses Tages (und seiner Woche). Der Umschalter „Tag | Woche“ ändert die Adresse nicht.
   function ausAdresse() {
     var h = (location.hash || "").replace(/^#/, "");
     if (!/^\d{4}-\d{2}-\d{2}$/.test(h)) return null;
@@ -597,6 +668,7 @@
     var n = ausAdresse();
     if (n === null) return false;
     $("pb-heute-hinweis").hidden = true;
+    state.ansicht = "tag";
     setzeWoche(mo(n), wtag(n));
     return true;
   }
@@ -624,6 +696,10 @@
       c.addEventListener("click", function () { state.filter = f; render(); });
       host.appendChild(c);
     }
+    // Umschalter „Tag | Woche“ (nur ab 1100 px sichtbar, siehe Stylesheet)
+    Array.prototype.forEach.call(document.querySelectorAll(".pb-umschalt"), function (b) {
+      b.addEventListener("click", function () { state.ansicht = b.getAttribute("data-ansicht") === "woche" ? "woche" : "tag"; render(); });
+    });
     [["alle", "Alle"], ["training", "Training"], ["spiele", "Spiele"], ["frei", "Frei"]].forEach(function (x) { chip($("pb-chips-art"), x[0], x[1], "Anzeigen: " + x[1]); });
     D.mannschaften.forEach(function (m) { if (m && MA[m.id]) chip($("pb-chips-team"), m.id, MA[m.id].kurz, "Mannschaft " + MA[m.id].kurz); });
     $("pb-zurueck").addEventListener("click", function () { setzeWoche(state.wk - 7); });
@@ -631,11 +707,11 @@
     $("pb-heute").addEventListener("click", heuteWoche);
     // Legende: jede Art mit ihrem Muster
     var lg = $("pb-legende");
-    [["training", "Training einer Mannschaft"], ["spiel", "Heimspiel auf unserem Platz (Dauer geschätzt)"], ["festival", "Kinderfestival"],
+    [["training", "Training einer Mannschaft"], ["spiel", "Heimspiel auf unserem Platz (Dauer und Feldteil geschätzt)"], ["festival", "Kinderfestival"],
      ["belegt", "belegt (andere Nutzung)"], ["frei", "frei (anklicken oder antippen: Platz anfragen)"]].forEach(function (x) {
       var li = el("li"), sw = el("span", "pb-sw"); sw.setAttribute("data-typ", x[0]); sw.setAttribute("aria-hidden", "true"); li.appendChild(sw); li.appendChild(document.createTextNode(x[1])); lg.appendChild(li);
     });
-    $("pb-stand").textContent = "Plan vom " + text(D.stand.plan) + " · Spielplan vom " + text(D.stand.spiele) + " · Spieldauer geschätzt";
+    $("pb-stand").textContent = "Plan vom " + text(D.stand.plan) + " · Spielplan vom " + text(D.stand.spiele) + " · Spieldauer und Feldteil geschätzt";
     if (mq.addEventListener) mq.addEventListener("change", render);
     else if (mq.addListener) mq.addListener(render);
     // Die Beschriftung der Einträge hängt von der Spurbreite ab: bei geänderter Fensterbreite neu zeichnen. Eine bloße

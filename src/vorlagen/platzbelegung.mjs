@@ -8,9 +8,11 @@
 // App-Seite).
 //
 // Was die Seite zeigt: wann welcher Platzteil auf unserer Anlage (Tor 1 bis 4,
-// Käfig, Court) belegt oder frei ist – Training, Heimspiele, andere Nutzung
-// („belegt“, ohne Angabe, wer), Halle, Ferien. Gebucht wird nichts: „frei“ öffnet
-// eine Anfrage per E-Mail an die Geschäftsstelle.
+// Käfig, Court) belegt oder frei ist – Training, Heimspiele (E-, F- und G-Jugend
+// auf einer Platzhälfte, die anderen auf dem ganzen Platz), andere Nutzung
+// („belegt“, ohne Angabe, wer), Halle, Ferien. Standard ist die Ansicht eines Tages;
+// ab 1100 px lässt sich auf das Wochengitter umschalten. Gebucht wird nichts: „frei“
+// öffnet eine Anfrage per E-Mail an die Geschäftsstelle.
 //
 // Daten zur Laufzeit: platzbelegung.json des Spielplan-Generators (GitHub Pages,
 // Schnittstelle Version 1, tools/cache/orchestrierung-platzbelegung/SCHNITTSTELLE.md).
@@ -115,12 +117,19 @@ export function platzbelegungInhalt(daten, { app = false } = {}) {
       </div>
 
       <div id="pb-inhalt" hidden>
-        <nav class="pb-wnav" aria-label="Wochenwahl">
-          <button id="pb-zurueck" type="button" class="pb-wnav__knopf" aria-label="Vorherige Woche">${SVG_KOPF} stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></button>
-          <p id="pb-titel" class="pb-wnav__titel" aria-live="polite"><strong>Diese Woche</strong><span>&nbsp;</span></p>
-          <button id="pb-vor" type="button" class="pb-wnav__knopf" aria-label="Nächste Woche">${SVG_KOPF} stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button>
-          <button id="pb-heute" type="button" class="pb-heute" aria-label="Zur heutigen Woche">Heute</button>
-        </nav>
+        <div class="pb-leiste">
+          <nav class="pb-wnav" aria-label="Wochenwahl">
+            <button id="pb-zurueck" type="button" class="pb-wnav__knopf" aria-label="Vorherige Woche">${SVG_KOPF} stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></button>
+            <p id="pb-titel" class="pb-wnav__titel" aria-live="polite"><strong>Diese Woche</strong><span>&nbsp;</span></p>
+            <button id="pb-vor" type="button" class="pb-wnav__knopf" aria-label="Nächste Woche">${SVG_KOPF} stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button>
+            <button id="pb-heute" type="button" class="pb-heute" aria-label="Zur heutigen Woche">Heute</button>
+          </nav>
+          <!-- Umschalter Tag | Woche: nur ab 1100 px sichtbar (darunter gibt es nur die Tagesansicht); Standard ist Tag -->
+          <div id="pb-ansichtwahl" class="pb-ansichtwahl" role="group" aria-label="Ansicht">
+            <button type="button" class="pb-umschalt" data-ansicht="tag" aria-pressed="true">Tag</button>
+            <button type="button" class="pb-umschalt" data-ansicht="woche" aria-pressed="false">Woche</button>
+          </div>
+        </div>
         <p id="pb-heute-hinweis" class="pb-heute-hinweis" hidden></p>
         <div id="pb-tagwahl" class="pb-tagwahl" role="tablist" aria-label="Wochentag"></div>
 
