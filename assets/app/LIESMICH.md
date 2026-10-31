@@ -582,12 +582,17 @@ oben) und landet dort unter
 | `Spielplan-App.html` | Spielplan &amp; Tabellen je Mannschaft, FUSSBALL.DE-Widgets live | „Übersicht aller Spiele" (`sportfreunde04_TextImage_1783345459688`) | `Tabelle-Spielplan-Uebersicht.tpl` (bzw. je nach Verlinkung `Spiele-Alle-Mannschaften.html`/`Spielplan-D-Jugend.html`/`Tabellen-D-Jugend.html`, siehe QA-Befund unten) | Seitenlink zurück auf `Tabelle-Spielplan-Uebersicht.tpl` |
 | `Geschaeftsstelle_v3.tpl` | Öffnungszeiten, Adresse/Anfahrt, Kontakt, Ansprechpartner | `sportfreunde04_TextImage_1780401660324` („Geschäftsstelle & Anfahrt") | `Geschäftsstelle.tpl` | Seitenlink zurück auf `Geschäftsstelle.tpl` |
 | `Ueber-uns_v3.tpl` | Vereinsgeschichte, Zahlen, Werte, Downloads | `sportfreunde04_TextImage_1784295208452` („Über uns") | `Über uns.html` | Seitenlink zurück auf `Über uns.html` |
+| `Platzbelegung-App.html` | Platzbelegung (31.10.2026): Belegung der Platzteile je Woche, freie Zeiten, Anfrage per E-Mail; dieselbe Seite wie `web/platzbelegung.html` (Quelle `src/vorlagen/platzbelegung.mjs`), liest `platzbelegung.json` des Spielplan-Generators | offen (noch kein Modul: bis dahin öffnet die Zeile „Platzbelegung“ in `Verein_v3.tpl` die Seite im Browser, `ext://`; mit einem Modul `PLATZBELEGUNG_APP_MODUL` in `src/vorlagen/hilfen.mjs` eintragen und `npm run tpl-bauen`) | – (neue Seite) | Zeile „Platzbelegung“ in `Verein_v3.tpl` entfernen (in `src/app/Verein_v3.html`, dann `npm run tpl-bauen`) |
 
 Wie bei Stufe C1: erst über einen zusätzlichen Menüpunkt/Tab testen, dann
 den jeweiligen Seitenlink in der Modulverwaltung umstellen (siehe „Erst
 testen, dann umschalten" oben). `Spielplan-App.html` zusätzlich in den
 Workspace hochladen (CMS → Workspace-Bereich → Datei hinzufügen/ersetzen),
 **bevor** das Modul umgestellt wird.
+`Platzbelegung-App.html` ebenfalls an die Workspace-Wurzel hochladen, bevor
+`Verein_v3.tpl` mit der neuen Zeile eingespielt wird; sie braucht `web/site.css`
+(Ordner `web`) und lädt die Belegung zur Laufzeit von GitHub Pages. Test:
+`node tools/platzbelegung-test/pruefen.mjs [--json <Datei>] [--fotos]`.
 
 ### Bauweise
 

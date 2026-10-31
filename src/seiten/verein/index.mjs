@@ -74,6 +74,8 @@ function derVereinAbschnitt() {
       // (tools/chronik-bauen.mjs) und liegt nur im appack-Workspace, nicht im
       // Repo – daher die absolute Adresse.
       zeile("Vereinschronik", "1904 bis 2026, Kapitel für Kapitel", "https://cdn.appack.de/sportfreunde04/workspace/web/chronik.html"),
+      // Platzbelegung (31.10.2026): Seite src/seiten/platzbelegung.mjs; in der App dieselbe Zeile in Verein_v3.html
+      zeile("Platzbelegung", "Wann welcher Platzteil belegt ist", `${PFAD}platzbelegung/`),
     ]),
     gruppe("Kontakt", [
       zeile("Vorstand", "Wer den Verein führt", `${PFAD}verein/vorstand/`),

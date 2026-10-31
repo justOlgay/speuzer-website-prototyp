@@ -1,0 +1,9 @@
+{
+  "_hinweis": "Konfiguration der Seite „Platzbelegung“ (src/vorlagen/platzbelegung.mjs, Website und App). Die Belegung selbst liest die Seite zur Laufzeit aus der Datei „quelle“ (Spielplan-Generator, Schnittstelle Version 1, GitHub Pages); hier steht nur, wo sie liegt und wie die Anfrage per E-Mail aussieht. Die Adresse der Geschäftsstelle steht in data/verein.json › mail. Platzhalter in der Anfrage: {platzteil}, {tag}, {zeit}.",
+  "quelle": "https://justolgay.github.io/speuzer-spielplan/platzbelegung.json",
+  "anzeigeAdresse": "Mainzer Landstraße",
+  "anfrage": {
+    "betreff": "Platzanfrage {platzteil}, {tag}, {zeit} Uhr",
+    "text": "Guten Tag,\n\nwir möchten diese Zeit anfragen:\nPlatzteil: {platzteil}\nTag: {tag}\nZeit: {zeit} Uhr (laut Plan frei)\nWofür:\nKontakt (Name, Telefon):\n\nViele Grüße"
+  }
+}

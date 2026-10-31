@@ -355,6 +355,15 @@ button.knopf {
     </span>
     <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
   </a>
+  <!-- 31.10.2026: Platzbelegung (App-Kopie Platzbelegung-App.html). Das Ziel setzt tpl-bauen.mjs: mit eingetragenem
+       Seitenmodul (PLATZBELEGUNG_APP_MODUL in src/vorlagen/hilfen.mjs) nav://…, bis dahin ext://… (Browser). -->
+  <a class="zeile" href="nav://sportfreunde04_TextImage_1786438458010">
+    <span class="zeile__text">
+      <span class="zeile__titel">Platzbelegung</span>
+      <span class="zeile__untertitel">Wann welcher Platzteil belegt ist</span>
+    </span>
+    <svg class="zeile__pfeil" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>
+  </a>
 </div>
 
 <h2 class="abschnittstitel">Kontakt</h2>

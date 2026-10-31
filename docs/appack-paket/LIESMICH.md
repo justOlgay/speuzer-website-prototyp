@@ -1,6 +1,6 @@
 # appack-Upload-Paket – Ordner "web" (W1)
 
-Stand: 2026-10-30. Erzeugt von `tools/appack-paket.mjs` (`npm run appack-paket`)
+Stand: 2026-10-31. Erzeugt von `tools/appack-paket.mjs` (`npm run appack-paket`)
 aus `docs/ws/*.html` und `docs/assets/css/site.css` (Ergebnis von
 `npm run build`). Dieses Paket liegt unter `dist/appack-paket/` und wird
 nicht committet.
@@ -183,7 +183,7 @@ hier nur dokumentiert (W3-Spezifikation Abschnitt 5), nicht umgesetzt:
 - Facebook-Link der Fußzeile zeigt auf eine andere Adresse als
   `kontakt.html` (Worksheet-Pflege, macht der Auftraggeber im CMS).
 
-## Dateien (81)
+## Dateien (82)
 
 - web/anmeldung.html
 - web/aufnahmeantrag.html
@@ -204,6 +204,7 @@ hier nur dokumentiert (W3-Spezifikation Abschnitt 5), nicht umgesetzt:
 - web/mannschaften-herren.html
 - web/mannschaften.html
 - web/mitglied-werden.html
+- web/platzbelegung.html
 - web/shop.html
 - web/spielplan-a-jugend.html
 - web/spielplan-d1.html

@@ -101,6 +101,11 @@
       "sha256": "cc72477b764da8b536c2e9ebddc73954d305fcc44a97ca1fb4c8d14987669c0f"
     },
     {
+      "datei": "web/platzbelegung.html",
+      "bytes": 59666,
+      "sha256": "c1e80c94a92991974e6a19c8c1776e12b8349a2aba88cbf6ff3d06b8c6d5f3de"
+    },
+    {
       "datei": "web/shop.html",
       "bytes": 6777,
       "sha256": "ba2d76ee0dab32b7e0eff5b29e498108e8afedcfa8849119e1d10be44069cb0a"
@@ -212,8 +217,8 @@
     },
     {
       "datei": "web/verein.html",
-      "bytes": 9508,
-      "sha256": "2e4a442aeff13753807cfbd88fc4a6b7ffefbf4527f5b2a4507ddabadbf13303"
+      "bytes": 9992,
+      "sha256": "9185c9a99407285857be85e8a61e61fc6f7765bfe9188b578908f797dda2a95e"
     },
     {
       "datei": "web/aufnahmeantrag-fontkit.js",

@@ -57,7 +57,9 @@ const AUSGESCHLOSSENE_DATEIEN = new Set(["styleguide.html"]);
 // Mit ANMELDUNG_LIVE (Livegang des Anmelde-Assistenten, M6) kommt anmeldung.html dazu: 42 und 41.
 // 11.10.2026 (M13): + verein-organigramm.html („Wer macht was“, immer gebaut, ohne Link bis ORGANIGRAMM_LIVE): 42 und
 // das Paket entsprechend 41; mit ANMELDUNG_LIVE 43 und 42.
-const ERWARTETE_WS_DATEIEN = 42 + (ANMELDUNG_LIVE ? 1 : 0);
+// 31.10.2026: + platzbelegung.html („Platzbelegung“, erreichbar über die Zeile auf verein.html): 43 und das Paket
+// entsprechend 42; mit ANMELDUNG_LIVE 44 und 43.
+const ERWARTETE_WS_DATEIEN = 43 + (ANMELDUNG_LIVE ? 1 : 0);
 
 // Skripte im Workspace-Ordner (28.09.2026, Aufnahmeantrag online): Anders
 // als Schriften und Bilder (GitHub Pages) liegen die Skripte der Seite

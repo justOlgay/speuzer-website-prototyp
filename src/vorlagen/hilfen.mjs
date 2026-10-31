@@ -874,6 +874,16 @@ export const APP_MODULE = {
   "chronik": "sportfreunde04_TextImage_1789020275334",
 };
 
+// Seitenmodul der App für die Seite „Platzbelegung“ (App-Kopie Platzbelegung-App.html an der Workspace-Wurzel,
+// Quelle src/vorlagen/platzbelegung.mjs). Neue Module lassen sich im CMS nicht anlegen: hier die Ref eines
+// vorhandenen, nicht angezeigten Moduls eintragen („sportfreunde04_TextImage_…“), dessen Seitenlink auf
+// Platzbelegung-App.html umgestellt wird, und mit npm run tpl-bauen neu bauen. Solange der Wert leer ist, öffnet
+// die Zeile „Platzbelegung“ der App-Seite Verein (src/app/Verein_v3.html) die App-Kopie im Browser (ext://).
+// Eingetragen (31.10.2026): das bisher nicht angezeigte Modul „Belegungsplan“ (Seitenlink Belegungsplan.tpl, Rückweg: Seitenlink
+// und Titel dort wieder auf Belegungsplan.tpl und „Belegungsplan“ zurückstellen); der Seitenlink wird erst beim Livegang umgestellt.
+// Bewusst nicht in APP_MODULE: sonst änderte sich das App-Skript aller Seiten, die es einbinden.
+export const PLATZBELEGUNG_APP_MODUL = "sportfreunde04_TextImage_1786438458010";
+
 // Öffnet die Vereins-App eine Website-Seite mit ?app=1 (z. B. „Beiträge,
 // Ablauf & Unterlagen“ aus dem App-Aufnahmeantrag, „Mach mit“ und „Shop“ aus
 // der App-Seite Verein), führen die Links zurück in die App-Seiten (nav://)

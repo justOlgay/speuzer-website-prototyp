@@ -17,6 +17,10 @@
 // Termine-App.html (28.09.2026) entsteht aus derselben Quelle wie die
 // Website-Seite web/termine.html (src/vorlagen/termine.mjs).
 //
+// Platzbelegung-App.html (31.10.2026) entsteht aus derselben Quelle wie die Website-Seite web/platzbelegung.html
+// (src/vorlagen/platzbelegung.mjs); das Ziel der Zeile „Platzbelegung“ auf der App-Seite Verein (Verein_v3.html, Platzhalter
+// __PLATZBELEGUNG_ZIEL__) kommt aus PLATZBELEGUNG_APP_MODUL in src/vorlagen/hilfen.mjs.
+//
 // Mitglied-werden-App.html (Livegang des Anmelde-Assistenten, Paket P1, 12.10.2026) entsteht aus derselben Quelle wie die
 // Website-Seite web/mitglied-werden.html (src/seiten/mitglied-werden.mjs, Fassung mit dem Assistenten), mit fest eingeschaltetem
 // App-Modus. Unabhängig vom Schalter ANMELDUNG_LIVE: Die Datei ist für den Tag des Livegangs gedacht.
@@ -30,6 +34,7 @@ import { fileURLToPath } from "node:url";
 import { termineAppSeite, termineDaten } from "../../src/vorlagen/termine.mjs";
 import { ANMELDUNG_LIVE, ORGANIGRAMM_LIVE } from "../../src/vorlagen/hilfen.mjs";
 import { mitgliedWerdenAppSeite } from "../../src/seiten/mitglied-werden.mjs";
+import { platzbelegungAppSeite, platzbelegungAppZiel } from "../../src/vorlagen/platzbelegung.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const SRC_APP = path.join(ROOT, "src", "app");
@@ -205,6 +210,8 @@ function datenPlatzhalter() {
     // Organigramm „Wer macht was“ (Schalter ORGANIGRAMM_LIVE): Zeile auf der Seite Verein, nur wenn die Website-Seite live ist. Ohne den Schalter bleibt
     // die Datei Byte für Byte wie vorher (der Platzhalter steht am Ende der Zeile davor und verschwindet).
     __ORGANIGRAMM_ZEILE__: ORGANIGRAMM_LIVE ? ORGANIGRAMM_ZEILE : "",
+    // Zeile „Platzbelegung“ auf der Seite Verein: nav://… mit eingetragenem Seitenmodul, bis dahin ext://… (öffnet den Browser).
+    __PLATZBELEGUNG_ZIEL__: platzbelegungAppZiel(),
   };
 }
 
@@ -291,6 +298,12 @@ function baueStatischeVorlage(name, titel, teile, braucheWorkbook) {
 function termineQuelldaten() {
   const laden = (datei) => JSON.parse(readFileSync(path.join(DATA_DIR, datei), "utf8"));
   return { termine: laden("termine.json"), teams: laden("teams.json"), verein: laden("verein.json") };
+}
+
+// Platzbelegung-App.html (31.10.2026): Konfiguration der Seite und Adresse der Geschäftsstelle wie beim Bau der Website.
+function platzbelegungQuelldaten() {
+  const laden = (datei) => JSON.parse(readFileSync(path.join(DATA_DIR, datei), "utf8"));
+  return { platzbelegung: laden("platzbelegung.json"), verein: laden("verein.json") };
 }
 
 const BLOCK_ANFANG = "// ==== Beginn: aus data/termine.json und data/teams.json (npm run tpl-bauen), nicht von Hand ändern ====";
@@ -387,6 +400,9 @@ function main() {
   writeFileSync(path.join(ZIEL_APP, "Termine-App.html"), termineApp, "utf8");
   console.log(`  assets/app/Termine-App.html geschrieben (${termineApp.length} Zeichen)`);
   aktualisiereStartseite(termineDatenQuelle);
+  const platzbelegungApp = platzbelegungAppSeite(platzbelegungQuelldaten());
+  writeFileSync(path.join(ZIEL_APP, "Platzbelegung-App.html"), platzbelegungApp, "utf8");
+  console.log(`  assets/app/Platzbelegung-App.html geschrieben (${platzbelegungApp.length} Zeichen)`);
   schreibeMitgliedWerdenApp();
 
   console.log("Fertig.");
