@@ -301,6 +301,20 @@ function zahlungDaten(k) {
   return k.a.zahlung;
 }
 
+// Hinweis unter „Rechnung“. Der Zuschlag ohne Lastschrift steht in den Daten (data/anmeldung.json › beitragInfo ›
+// zuschlagOhneLastschrift, Euro im Jahr; Entscheidung vom 30.10.2026) und kommt als {betrag} in den zweiten Satz, wie die
+// Aufnahmegebühr. Fehlt der Betrag in den Daten (oder ist er keine Zahl über 0), entfällt der Satz mit {betrag}: Dann steht nur
+// der erste Satz da, nie ein „{betrag}“ auf dem Bildschirm. Die Sätze enden an . ! ? oder dem arabischen Fragezeichen (ohne Lookbehind: ältere Browser).
+function rechnungHinweis(k) {
+  const info = (k.konfig.anmeldung && k.konfig.anmeldung.beitragInfo) || {};
+  const betrag = info.zuschlagOhneLastschrift;
+  const hatBetrag = typeof betrag === "number" && Number.isFinite(betrag) && betrag > 0;
+  const text = k.t("zahlung.art.rechnungHinweis", { betrag: hatBetrag ? betrag : undefined });
+  if (hatBetrag || typeof text !== "string" || !text.includes("{betrag}")) return text;
+  const saetze = text.match(/[^.!?\u061F]+(?:[.!?\u061F]+|$)\s*/g) || [text];
+  return saetze.filter((satz) => !satz.includes("{betrag}")).join("").trim();
+}
+
 export const zahlung = {
   id: "zahlung",
   teile(k) {
@@ -316,7 +330,7 @@ export const zahlung = {
             pfad: "zahlung.art",
             optionen: [
               { wert: "sepa", label: k.t("zahlung.art.sepa"), hinweis: k.t("zahlung.art.sepaHinweis") },
-              { wert: "rechnung", label: k.t("zahlung.art.rechnung"), hinweis: k.t("zahlung.art.rechnungHinweis") },
+              { wert: "rechnung", label: k.t("zahlung.art.rechnung"), hinweis: rechnungHinweis(k) },
             ],
           }),
         ],
@@ -468,6 +482,8 @@ export const einwilligungen = {
           h("div", { klasse: "anm-karten" },
             unter16 ? kaestchen(k, { pfad: "einwilligungen.hfvName", label: k.t("einwilligungen.hfv.name"), hinweis: k.t("einwilligungen.hfv.nameHinweis") }) : null,
             kaestchen(k, { pfad: "einwilligungen.hfvFoto", label: k.t("einwilligungen.hfv.foto"), hinweis: k.t("einwilligungen.hfv.fotoHinweis") })),
+          // Das Foto für den Spielerpass ist Pflicht und nicht öffentlich (30.10.2026): immer nach den Kästchen, auch ab 16, vor dem Satz ab 16.
+          h("p", { klasse: "anm-hinweis" }, k.t("einwilligungen.hfv.passfoto")),
           unter16 ? null : h("p", { klasse: "anm-hinweis" }, k.t("einwilligungen.hfv.ab16")),
         ],
       };

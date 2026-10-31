@@ -1,6 +1,6 @@
 import { h, absaetze, knopf, hinweisKasten, vereinsKasten } from "./anmeldung-bausteine.js";
 import { landName } from "./anmeldung-laender.js";
-import { sauber, gruppiereIban, kbText, zerlegeIso, mailtoAnVerein } from "./anmeldung-hilfen.js";
+import { sauber, gruppiereIban, kbText, zerlegeIso, mailtoAnVerein, mailTeilen } from "./anmeldung-hilfen.js";
 import { unterschriftenPlan, unterschriftTitel } from "./anmeldung-seiten-unterlagen.js";
 import { erstelleAnmeldungPdf, LadeFehler } from "./anmeldung-pdf-lader.js";
 
@@ -405,6 +405,19 @@ async function kopiereAdresse(element, text) {
   }
 }
 
+function kopiereBeimTeilen(adresse) {
+  try {
+    if (adresse && navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      const schreiben = Promise.resolve(navigator.clipboard.writeText(adresse)).then(() => true, () => false);
+      const frist = new Promise((fertig) => window.setTimeout(() => fertig(false), 2000));
+      return Promise.race([schreiben, frist]);
+    }
+  } catch (fehler) {
+
+  }
+  return Promise.resolve(false);
+}
+
 function sendenAbschnitt(k, optionen) {
   const adresse = geschaeftsstellenMail(k);
 
@@ -414,7 +427,9 @@ function sendenAbschnitt(k, optionen) {
         [1, 2, 3].map((i) => h("li", {}, k.t("fertig.senden." + art + i, { knopf: knoepfe[i - 1] || "" })))));
 
   const handyWeg = !!(optionen.teilen && optionen.handy);
-  const wege = handyWeg ? weg("handy", [k.t("fertig.senden.kopieren"), k.t("fertig.teilen")]) : weg("computer", [k.t("fertig.herunterladen")]);
+  const wege = handyWeg ? weg("handy", [k.t("fertig.teilen")]) : weg("computer", [k.t("fertig.herunterladen")]);
+
+  const mailLink = () => h("a", { klasse: "knopf knopf--sekundaer", href: mailtoAnVerein(adresse, k.a.vorname, k.a.nachname), "data-aktion": "mail-oeffnen" }, k.t("fertig.senden.oeffnen"));
 
   let adressBlock = null;
   if (adresse) {
@@ -435,15 +450,22 @@ function sendenAbschnitt(k, optionen) {
             status.textContent = k.t(geklappt ? "fertig.senden.kopiert" : "fertig.senden.kopierenFehler");
           },
         }),
-        h("a", { klasse: "knopf knopf--sekundaer", href: mailtoAnVerein(adresse, k.a.vorname, k.a.nachname), "data-aktion": "mail-oeffnen" }, k.t("fertig.senden.oeffnen"))),
-      status,
-
-      handyWeg ? h("p", { klasse: "anm-hinweis" }, k.t("fertig.senden.anhang", { knopf: k.t("fertig.senden.oeffnen") })) : null);
+        handyWeg ? null : mailLink()),
+      status);
   }
+
+  const rueckfall = handyWeg
+    ? h("details", { klasse: "anm-einzelheiten anm-senden__rueckfall", "data-rueckfall": "" },
+        h("summary", {}, k.t("fertig.senden.rueckfallTitel")),
+        h("div", { klasse: "anm-senden__rueckfall-inhalt" },
+          h("p", {}, k.t("fertig.senden.rueckfall")),
+          adresse ? h("div", { klasse: "anm-knoepfe" }, mailLink()) : null))
+    : null;
   return h("div", { klasse: "anm-senden", "data-senden": "" },
     h("h3", { klasse: "anm-zwischentitel" }, k.t("fertig.senden.titel")),
     h("div", { klasse: "anm-senden__wege" }, wege),
     adressBlock,
+    rueckfall,
     h("p", { klasse: "anm-hinweis anm-hinweis--achtung" }, k.t("fertig.nichtWhatsapp")));
 }
 
@@ -470,16 +492,19 @@ function ergebnisAnsicht(k, pdf) {
     sekundaer: true,
     aktion: "teilen",
     beiKlick: () => {
+
+      const kopiert = kopiereBeimTeilen(geschaeftsstellenMail(k));
       let versprechen;
       try {
-        versprechen = Promise.resolve(navigator.share({ files: [datei], title: pdf.ergebnis.dateiname }));
+        versprechen = Promise.resolve(navigator.share({ files: [datei], ...mailTeilen(k.a.vorname, k.a.nachname) }));
       } catch (fehler) {
         versprechen = Promise.reject(fehler);
       }
       versprechen
         .then(() => {
           k.gesichert = true;
-          zeigeStatus(k.t("fertig.geteilt"));
+
+          return kopiert.then((geklappt) => zeigeStatus(k.t(geklappt ? "fertig.geteiltMitAdresse" : "fertig.geteilt")));
         })
         .catch((fehler) => {
           if (fehler && fehler.name === "AbortError") return;

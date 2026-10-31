@@ -614,7 +614,9 @@ export default {
       sepa: "Lastschrift (empfohlen)",
       sepaHinweis: "Der Verein bucht einmal im Jahr ab.",
       rechnung: "Rechnung",
-      rechnungHinweis: "Sie überweisen den Beitrag selbst.",
+      // Der zweite Satz nennt den Zuschlag ohne Lastschrift ({betrag} aus data/anmeldung.json › beitragInfo › zuschlagOhneLastschrift,
+      // Euro im Jahr; Entscheidung vom 30.10.2026). Fehlt der Betrag in den Daten, zeigt die Seite nur den ersten Satz.
+      rechnungHinweis: "Sie überweisen den Beitrag selbst. Dazu kommen {betrag} Euro im Jahr.",
     },
     inhaber: {
       titel: "Wem gehört das Konto?",
@@ -649,12 +651,18 @@ export default {
       dokumentation: "In Festschriften und Chroniken",
     },
     hfv: {
-      titel: "Was darf der Fußball-Verband veröffentlichen?",
+      // Titel seit dem 30.10.2026: Der frühere Titel (was der Verband veröffentlichen darf) passte nicht, denn das Foto für den
+      // Spielerpass ist Pflicht. Die Zeile hinweis und die Texte der Kästchen (name bis fotoHinweis, ab16) sind von der
+      // 1. Vorsitzenden freigegeben (12.10.2026) und bleiben wörtlich.
+      titel: "Dürfen Name und Foto im Internet stehen?",
       hinweis: "Beides ist freiwillig. Sie können das später ändern.",
       name: "Der Name darf auf FUSSBALL.DE stehen.",
       nameHinweis: "Das gilt für Kinder unter 16 Jahren.",
       foto: "Das Foto darf im Internet stehen.",
       fotoHinweis: "Zum Beispiel auf FUSSBALL.DE.",
+      // Steht nach den Kästchen, auch bei Personen ab 16 (Vordruck des Fußball-Verbands, Seite 3: Das Foto für den digitalen
+      // Spielerpass ist zwingend erforderlich und öffentlich nicht zugänglich).
+      passfoto: "Das Foto für den Spielerpass ist Pflicht. Es ist nicht öffentlich.",
       ab16: "Ab 16 Jahren darf der Verband den Namen ohne Einwilligung zeigen. Sie können widersprechen.",
     },
     fahrten: {
@@ -943,6 +951,8 @@ export default {
     fotoSpeichern: "Spielerfoto als Bild speichern",
     gespeichert: "Die Datei wird gespeichert. Sie liegt meist im Ordner „Downloads“.",
     geteilt: "Geteilt.",
+    // MR-2 (30.10.2026): „Datei teilen“ legt die Adresse der Geschäftsstelle in die Zwischenablage; die Meldung nennt das nur, wenn es geklappt hat
+    geteiltMitAdresse: "Geteilt. Die Adresse ist kopiert.",
     teilenFehler: "Teilen geht hier nicht. Die Datei wurde stattdessen gespeichert.",
     fehler: {
       bibliothek: "Ein Programmteil lässt sich nicht laden. Bitte prüfen Sie die Internetverbindung.",
@@ -953,12 +963,13 @@ export default {
     },
     // Die Datei per E-Mail an die Geschäftsstelle schicken (M10; Entscheidung der 1. Vorsitzenden vom 11.10.2026: kein Versand über
     // einen Server). {knopf} ist die Beschriftung des Knopfes, auf den der Schritt zeigt (herunterladen, teilen, Adresse kopieren, E-Mail öffnen),
-    // damit die Schritte immer zu den Knöpfen passen. Am Handy (U-01): 1. Adresse kopieren, 2. Datei teilen, 3. Adresse bei „An“ einfügen; „anhang“ steht nur am Handy.
-    // Betreff und Text der E-Mail stehen auf Deutsch in hilfen.js (mailtoAnVerein); sie werden nicht übersetzt.
+    // damit die Schritte immer zu den Knöpfen passen. Am Handy (MR-2, 30.10.2026): 1. „Datei teilen“ tippen (das kopiert die Adresse), 2. Mail-Programm
+    // wählen (die Datei ist schon angehängt), 3. Adresse bei „An“ einfügen. Der Link zur E-Mail steht dort nur zugeklappt im Rückfall (rueckfallTitel, rueckfall).
+    // Betreff und Text der E-Mail stehen auf Deutsch in hilfen.js (mailtoAnVerein, mailTeilen); sie werden nicht übersetzt.
     senden: {
       titel: "So schicken Sie die Datei an den Verein",
-      handy1: "Tippen Sie unten auf „{knopf}“.",
-      handy2: "Tippen Sie oben auf „{knopf}“. Wählen Sie Ihr Mail-Programm. Die Datei ist schon angehängt.",
+      handy1: "Tippen Sie oben auf „{knopf}“. Die Adresse wird kopiert.",
+      handy2: "Wählen Sie Ihr Mail-Programm. Die Datei ist schon angehängt.",
       handy3: "Fügen Sie die Adresse bei „An“ ein. Senden Sie die E-Mail.",
       computer1: "Klicken Sie oben auf „{knopf}“.",
       computer2: "Schreiben Sie eine neue E-Mail. Hängen Sie die Datei an.",
@@ -968,7 +979,8 @@ export default {
       kopiert: "Die Adresse ist kopiert.",
       kopierenFehler: "Kopieren geht hier nicht. Die Adresse ist markiert. Kopieren Sie die Adresse selbst.",
       oeffnen: "E-Mail an die Geschäftsstelle öffnen",
-      anhang: "Bei „{knopf}“ hängen Sie die Datei selbst an.",
+      rueckfallTitel: "Teilen klappt nicht?",
+      rueckfall: "Laden Sie die Datei herunter. Öffnen Sie dann eine neue E-Mail. Hängen Sie die Datei selbst an.",
     },
     naechsteTitel: "So geht es weiter",
     unterschriftTraining: "Die Blätter für den Fußball-Verband unterschreiben Sie beim ersten Training mit Stift.",

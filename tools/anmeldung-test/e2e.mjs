@@ -75,6 +75,13 @@
 //     entfallen (P3_GESTRICHEN, P3_NEU im Wörterbuch); höchstens ein Hinweiskasten je Frage-Seite, die Prüfseite zeigt keine Hinweise, die Fertig-Seite wiederholt nicht, was bei der Frage stand;
 //     Beitrag: nur die vorgewählte Gruppe offen, die übrigen unter „Andere Beitragsgruppe“; „Mehr erfahren“ (Spielerpass, Leistungen); „Diese Unterschrift gilt für (n)“ ab zwei Blättern zugeklappt, bei einem Blatt die Zeile „Diese Unterschrift gilt für: Blatt“ direkt (Runde 2);
 //     Fertig-Seite: nur der Weg, der zum Gerät passt, ohne Liste der Teile, „Diese Stellen melden sich bei Ihnen“ zugeklappt; Teil A der Datei ohne Tabelle für Blätter am Bildschirm.
+//   - MR-1 (30.10.2026; pruefeBeitragHfvZuschlag, 390 x 844, vier Sprachen): Beitrag „Kinder und Jugendliche (Fußball bis A-Jugend)“ (nur Deutsch), die Seite zum Verband mit dem neuen Titel „Dürfen Name
+//     und Foto im Internet stehen?“ und dem Satz zum Foto für den Spielerpass nach den Kästchen (auch ab 16, vor dem Satz „Ab 16 Jahren …“), der Hinweis unter „Rechnung“ mit dem Zuschlag aus den
+//     Daten (beitragInfo.zuschlagOhneLastschrift), kein Zuschlag bei „Lastschrift“, ohne Betrag in den Daten nur der erste Satz (nie ein „{betrag}“); Bildschirmfotos hfv-/rechnung-<Sprache>.png (de, en).
+//   - MR-2 (30.10.2026; pruefeTeilenMitAdresse, statischeM10, pruefeMailAnVerein und e2e-sprachen.mjs): Am Handy mit „Datei teilen“ ist das Teilen der einzige sichtbare Weg. Der Klick legt die Adresse der
+//     Geschäftsstelle in die Zwischenablage (writeText zuerst, ohne await) und ruft sofort danach navigator.share mit der PDF-Datei, dem Betreff „Anmeldung Vorname Nachname“ und dem Text der E-Mail auf
+//     (Stellvertreter zeichnen die Aufrufe auf: Reihenfolge, selber Klick, Angaben; Meldung „Geteilt. Die Adresse ist kopiert.“ oder bei abgelehntem oder fehlendem writeText „Geteilt.“; Abbruch ohne Meldung;
+//     anderer Fehler: Datei gespeichert). Der Link zur E-Mail steht am Handy nur noch im zugeklappten Rückfall „Teilen klappt nicht?“; am Computer und am Handy ohne Teilen alles wie bisher.
 //   - Screenshots je Seite nach tools/cache/anmeldung-test/e2e/
 //
 // Aufruf: node tools/anmeldung-test/e2e.mjs [--ohne-desktop] [--nur-sprache] [--nur=pruefeHeimweg,…]
@@ -90,7 +97,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import puppeteer from "puppeteer-core";
 import { starteTestserver } from "./testserver.mjs";
 import { pruefeZugangImBrowser, pruefeUebergabeImBrowser, pruefeSeitenZurueckImBrowser, pruefeUmgebungshinweisImBrowser, pruefeUmgebungshinweisSprachen } from "./zugang-browser.mjs";
-import { pruefeEinfacheSprache, fehlendeSchluessel, ladeWoerterbuch, pruefeAbgabeWortlaut, ABGABE_AUSNAHMEN_OBERFLAECHE } from "./sprache-check.mjs";
+import { pruefeEinfacheSprache, fehlendeSchluessel, ladeWoerterbuch, pruefeAbgabeWortlaut, ABGABE_AUSNAHMEN_OBERFLAECHE, woerter as zaehleWoerter } from "./sprache-check.mjs";
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -2929,9 +2936,15 @@ async function pruefeKuerzungenP3(browser, server, dateien, beispiele) {
       T("heimweg.titel") === "Darf Ihr Kind allein nach Hause gehen?" && T("zahlung.inhaber.anschriftGleich") === "Wohnt an derselben Adresse" && T("spielerfoto.datei") === "Ich wähle ein Foto aus" &&
       T("notfall.bogen.hinweis") === "Er ist freiwillig.\nEr hilft bei Allergien und Krankheiten.\nNur Trainer und Betreuer sehen ihn.",
     "");
-  ok("Kürzungen: der Wortlaut der Datenschutz-Texte und der Einwilligungen bleibt (Titel der Frage zu den Fotos und zum Verband, Sätze zu Freiwilligkeit)",
+  // MR-1 (30.10.2026): Der Titel der Seite zum Verband heißt jetzt „Dürfen Name und Foto im Internet stehen?“ (das Foto für den Spielerpass ist Pflicht und nicht
+  // öffentlich: neuer Satz passfoto nach den Kästchen). Die Zeile hinweis und die Kästchentexte sind von der 1. Vorsitzenden freigegeben (12.10.2026) und bleiben wörtlich.
+  ok("Kürzungen: der Wortlaut der Datenschutz-Texte und der Einwilligungen bleibt (Sätze zu Freiwilligkeit, Kästchentexte zu Name und Foto); der Titel der Frage zum Verband seit dem 30.10.2026",
     T("einwilligungen.fotos.hinweis") === "Sie entscheiden frei. Sie können das später ändern." && T("einwilligungen.hfv.hinweis") === "Beides ist freiwillig. Sie können das später ändern." && T("einwilligungen.fahrten.hinweis") === "Beides ist freiwillig. Sie können das später ändern." &&
-      T("einwilligungen.hfv.titel") === "Was darf der Fußball-Verband veröffentlichen?" && T("fertig.teilC") === "Teil C enthält Gesundheitsdaten. Der Verein bewahrt ihn getrennt auf.",
+      T("einwilligungen.hfv.name") === "Der Name darf auf FUSSBALL.DE stehen." && T("einwilligungen.hfv.nameHinweis") === "Das gilt für Kinder unter 16 Jahren." &&
+      T("einwilligungen.hfv.foto") === "Das Foto darf im Internet stehen." && T("einwilligungen.hfv.fotoHinweis") === "Zum Beispiel auf FUSSBALL.DE." &&
+      T("einwilligungen.hfv.ab16") === "Ab 16 Jahren darf der Verband den Namen ohne Einwilligung zeigen. Sie können widersprechen." &&
+      T("einwilligungen.hfv.titel") === "Dürfen Name und Foto im Internet stehen?" && T("einwilligungen.hfv.passfoto") === "Das Foto für den Spielerpass ist Pflicht. Es ist nicht öffentlich." &&
+      T("fertig.teilC") === "Teil C enthält Gesundheitsdaten. Der Verein bewahrt ihn getrennt auf.",
     "");
 
   // ---- A: Beitrag (O1): nur der Vorschlag steht offen, die anderen Gruppen unter „Andere Beitragsgruppe“ ----
@@ -3094,6 +3107,8 @@ async function einzelpruefungen(browser, server, dateien, beispiele) {
     ["statischeM10", () => statischeM10(server)],
     ["pruefeMailAnVerein", () => pruefeMailAnVerein(browser, server, dateien, beispiele)],
     ["pruefeSeitenP6", () => pruefeSeitenP6(browser, server, dateien, beispiele)],
+    ["pruefeBeitragHfvZuschlag", () => pruefeBeitragHfvZuschlag(browser, server, beispiele)],
+    ["pruefeTeilenMitAdresse", () => pruefeTeilenMitAdresse(browser, server, dateien, beispiele)],
   ];
   const unbekannt = NUR.filter((n) => !alle.some(([name]) => name === n));
   if (unbekannt.length) throw new Error("--nur: unbekannte Einzelprüfung(en) " + unbekannt.join(", ") + " – möglich: " + alle.map(([name]) => name).join(", "));
@@ -3838,18 +3853,21 @@ async function statischeM10(server) {
   const de = await ladeWoerterbuch();
   const senden = (de.fertig && de.fertig.senden) || {};
   // P3 Teil b: Es gibt keinen Satz unter der Überschrift (einleitung) und keine Überschriften der Wege (handyTitel, computerTitel) mehr
-  const schluessel = ["titel", "handy1", "handy2", "handy3", "computer1", "computer2", "computer3", "adresseTitel", "kopieren", "kopiert", "kopierenFehler", "oeffnen", "anhang"];
-  const entfallen = ["einleitung", "handyTitel", "computerTitel"].filter((k) => k in senden);
-  ok("Wörterbuch: fertig.senden hat keinen Satz unter der Überschrift und keine Überschriften der Wege mehr (einleitung, handyTitel, computerTitel entfallen)", entfallen.length === 0, entfallen.join(", "));
+  // MR-2 (30.10.2026): neu rueckfallTitel und rueckfall (zugeklappter Rückfall am Handy); der Hinweis zum Anhang beim Link (anhang) entfällt
+  const schluessel = ["titel", "handy1", "handy2", "handy3", "computer1", "computer2", "computer3", "adresseTitel", "kopieren", "kopiert", "kopierenFehler", "oeffnen", "rueckfallTitel", "rueckfall"];
+  const entfallen = ["einleitung", "handyTitel", "computerTitel", "anhang"].filter((k) => k in senden);
+  ok("Wörterbuch: fertig.senden hat keinen Satz unter der Überschrift, keine Überschriften der Wege und keinen Hinweis zum Anhang mehr (einleitung, handyTitel, computerTitel, anhang entfallen)", entfallen.length === 0, entfallen.join(", "));
   const fehlt = schluessel.filter((k) => typeof senden[k] !== "string" || !senden[k].trim());
   ok("Wörterbuch: fertig.senden hat alle " + schluessel.length + " Texte", fehlt.length === 0, fehlt.join(", "));
   ok("Wörterbuch: die Schritte 1 nennen den Knopf als {knopf} (so passen sie immer zu den Knöpfen)", /\{knopf\}/.test(senden.handy1) && /\{knopf\}/.test(senden.computer1) && !/Datei teilen|Datei herunterladen/.test(senden.handy1 + senden.computer1), senden.handy1 + " | " + senden.computer1);
   ok("Wörterbuch: Titel „So schicken Sie die Datei an den Verein“, Knöpfe „Adresse kopieren“ und „E-Mail an die Geschäftsstelle öffnen“", senden.titel === "So schicken Sie die Datei an den Verein" && senden.kopieren === "Adresse kopieren" && senden.oeffnen === "E-Mail an die Geschäftsstelle öffnen", senden.titel + " | " + senden.kopieren + " | " + senden.oeffnen);
-  ok("Wörterbuch: der Weg am Handy nennt das Mail-Programm, der Weg am Computer den Anhang", /Mail-Programm/.test(senden.handy2) && /Hängen Sie die Datei an/.test(senden.computer2) && /hängen Sie die Datei selbst an/.test(senden.anhang), senden.handy2 + " | " + senden.computer2 + " | " + senden.anhang);
-  // U-01 (12.10.2026): Am Handy zuerst die Adresse kopieren, dann die Datei teilen (die Datei hängt das Teilen schon an), dann die Adresse bei „An“ einfügen
-  ok("Wörterbuch (U-01): Weg am Handy: 1. Adresse kopieren, 2. Datei teilen, Mail-Programm wählen, Datei ist schon angehängt, 3. Adresse bei „An“ einfügen und senden",
-    senden.handy1 === "Tippen Sie unten auf „{knopf}“." && senden.handy2 === "Tippen Sie oben auf „{knopf}“. Wählen Sie Ihr Mail-Programm. Die Datei ist schon angehängt." && senden.handy3 === "Fügen Sie die Adresse bei „An“ ein. Senden Sie die E-Mail.", senden.handy1 + " | " + senden.handy2 + " | " + senden.handy3);
-  ok("Wörterbuch (U-01): der Hinweis beim Link nennt den Knopf als {knopf} und sagt, dass die Datei dort selbst angehängt wird („Bei „E-Mail an die Geschäftsstelle öffnen“ hängen Sie die Datei selbst an.“)", senden.anhang === "Bei „{knopf}“ hängen Sie die Datei selbst an." && senden.anhang.replace("{knopf}", senden.oeffnen).split(/\s+/).length <= 12, senden.anhang);
+  ok("Wörterbuch: der Weg am Handy nennt das Mail-Programm, der Weg am Computer den Anhang, der Rückfall sagt, dass die Datei selbst angehängt wird", /Mail-Programm/.test(senden.handy2) && /Hängen Sie die Datei an/.test(senden.computer2) && /Hängen Sie die Datei selbst an/.test(senden.rueckfall), senden.handy2 + " | " + senden.computer2 + " | " + senden.rueckfall);
+  // MR-2 (30.10.2026): Am Handy: 1. „Datei teilen“ tippen, das kopiert die Adresse, 2. Mail-Programm wählen (die Datei ist schon angehängt), 3. Adresse bei „An“ einfügen und senden
+  ok("Wörterbuch (MR-2): Weg am Handy: 1. „Datei teilen“ tippen, die Adresse wird kopiert, 2. Mail-Programm wählen, Datei ist schon angehängt, 3. Adresse bei „An“ einfügen und senden",
+    senden.handy1 === "Tippen Sie oben auf „{knopf}“. Die Adresse wird kopiert." && senden.handy2 === "Wählen Sie Ihr Mail-Programm. Die Datei ist schon angehängt." && senden.handy3 === "Fügen Sie die Adresse bei „An“ ein. Senden Sie die E-Mail.", senden.handy1 + " | " + senden.handy2 + " | " + senden.handy3);
+  ok("Wörterbuch (MR-2): zugeklappter Rückfall „Teilen klappt nicht?“ mit „Laden Sie die Datei herunter. Öffnen Sie dann eine neue E-Mail. Hängen Sie die Datei selbst an.“; Meldung nach dem Teilen „Geteilt. Die Adresse ist kopiert.“ (sonst „Geteilt.“)",
+    senden.rueckfallTitel === "Teilen klappt nicht?" && senden.rueckfall === "Laden Sie die Datei herunter. Öffnen Sie dann eine neue E-Mail. Hängen Sie die Datei selbst an." && de.fertig.geteiltMitAdresse === "Geteilt. Die Adresse ist kopiert." && de.fertig.geteilt === "Geteilt.",
+    senden.rueckfallTitel + " | " + senden.rueckfall + " | " + de.fertig.geteiltMitAdresse);
   ok("Wörterbuch (D-06): letzter Punkt von „So geht es weiter“: „Danach prüft der Verein Ihre Anmeldung.“", de.fertig.danach === "Danach prüft der Verein Ihre Anmeldung.", String(de.fertig.danach));
   ok("Wörterbuch: der alte Text zum Abgeben im Verein (fertig.abgeben) ist entfallen, der Hinweis zu WhatsApp bleibt", de.fertig.abgeben === undefined && de.fertig.nichtWhatsapp === "Bitte schicken Sie die Datei nicht per WhatsApp. Sie enthält private Daten." && !/auf dem Handy mit/.test(JSON.stringify(de.fertig)), String(de.fertig.nichtWhatsapp));
   ok("Wörterbuch: ohne eingebauten Mailtext und ohne feste Adresse (beides steht in hilfen.js bzw. der Konfiguration)", !/Guten Tag|@sportfreunde04/.test(JSON.stringify(de.fertig)), "");
@@ -3857,6 +3875,28 @@ async function statischeM10(server) {
   // Die Adresse kommt aus der Konfiguration und steht nirgends fest im Code der Fertig-Seite
   const fest = ["hilfen.js", "seiten-ende.js"].filter((f) => /sportfreunde04\.de/i.test(fs.readFileSync(path.join(ROOT, "assets", "js", "anmeldung", f), "utf8")));
   ok("Adresse der Geschäftsstelle: steht nicht fest in hilfen.js und seiten-ende.js (sie kommt aus konfig.verein.mail)", fest.length === 0, fest.join(", "));
+
+  // MR-2 (30.10.2026): Betreff und Text für „Datei teilen“ stehen an einer Stelle (hilfen.js) und sind dieselben wie beim mailto-Link
+  const teilenDaten = hilfen.mailTeilen("Mila", "Mustermann");
+  ok("mailTeilen (Mila Mustermann): { title: „Anmeldung Mila Mustermann“, text: der Mailtext }, genau diese zwei Felder, gleicher Betreff und Text wie beim mailto-Link",
+    JSON.stringify(Object.keys(teilenDaten).sort()) === '["text","title"]' && teilenDaten.title === "Anmeldung Mila Mustermann" && teilenDaten.text === hilfen.MAIL_TEXT && teilenDaten.title === hilfen.mailBetreff("Mila", "Mustermann") &&
+      decodeURIComponent((/subject=([^&]*)/.exec(hilfen.mailtoAnVerein(adresse, "Mila", "Mustermann")) || [])[1] || "") === teilenDaten.title, JSON.stringify(teilenDaten));
+  ok("mailTeilen: ohne Namen nur „Anmeldung“, Namen am Rand und doppelte Leerzeichen werden bereinigt wie beim mailto-Link", hilfen.mailTeilen("", "").title === "Anmeldung" && hilfen.mailTeilen(undefined, null).title === "Anmeldung" && hilfen.mailTeilen("  Mila ", "Muster  mann").title === "Anmeldung Mila Muster mann", hilfen.mailTeilen("  Mila ", "Muster  mann").title);
+  // Reihenfolge im Quelltext: Im Klick auf „Datei teilen“ wird die Adresse zuerst zum Kopieren angestoßen (kopiereBeimTeilen, ohne await), sofort danach navigator.share aufgerufen;
+  // beides im selben Klick-Handler (navigator.share braucht die Nutzergeste). kopiereBeimTeilen ruft navigator.clipboard.writeText ohne await vorher auf.
+  // (Zeilenkommentare fallen weg: Sie nennen das Wort „await“ selbst.)
+  const quelleEnde = fs.readFileSync(path.join(ROOT, "assets", "js", "anmeldung", "seiten-ende.js"), "utf8").replace(/^\s*\/\/.*$/gm, "");
+  const klickStart = quelleEnde.indexOf('aktion: "teilen"');
+  const klickEnde = quelleEnde.indexOf(".then(", klickStart);
+  const klick = klickStart >= 0 && klickEnde > klickStart ? quelleEnde.slice(klickStart, klickEnde) : "";
+  const iKopieren = klick.indexOf("kopiereBeimTeilen(");
+  const iTeilen = klick.indexOf("navigator.share(");
+  ok("Quelltext (MR-2): im Klick auf „Datei teilen“ steht der Aufruf kopiereBeimTeilen() vor navigator.share(), ohne await dazwischen und ohne async-Handler",
+    iKopieren > 0 && iTeilen > iKopieren && !/\bawait\b/.test(klick.slice(0, iTeilen)) && !/\basync\b/.test(klick.slice(0, iTeilen)), "kopiereBeimTeilen bei " + iKopieren + ", navigator.share bei " + iTeilen);
+  const kopierStart = quelleEnde.indexOf("function kopiereBeimTeilen(");
+  const kopierText = kopierStart >= 0 ? quelleEnde.slice(kopierStart, quelleEnde.indexOf("\n}\n", kopierStart)) : "";
+  ok("Quelltext (MR-2): kopiereBeimTeilen ruft navigator.clipboard.writeText sofort auf (kein await davor), prüft Adresse und Schnittstelle und ist still (try/catch)",
+    /navigator\.clipboard\.writeText\(adresse\)/.test(kopierText) && !/\bawait\b/.test(kopierText) && /adresse && navigator\.clipboard && typeof navigator\.clipboard\.writeText === "function"/.test(kopierText) && /catch \(fehler\)/.test(kopierText), kopierText.slice(0, 80));
 }
 
 // Liest den Abschnitt „So schicken Sie die Datei an den Verein“ von der Fertig-Seite
@@ -3871,7 +3911,22 @@ const leseSenden = (page) =>
     const link = a.querySelector('a[data-aktion="mail-oeffnen"]');
     const status = a.querySelector("[data-mail-status]");
     const rb = (e) => (e ? e.getBoundingClientRect() : null);
+    // MR-2: der zugeklappte Rückfall am Handy mit „Datei teilen“ (details[data-rueckfall]) und alle Links zur E-Mail im Abschnitt
+    const rueckfall = a.querySelector("details[data-rueckfall]");
+    const mailLinks = Array.from(a.querySelectorAll('a[data-aktion="mail-oeffnen"]'));
     return {
+      rueckfall: rueckfall && {
+        offen: rueckfall.open,
+        klasse: rueckfall.className,
+        titel: ((rueckfall.querySelector("summary") || {}).textContent || "").trim(),
+        text: ((rueckfall.querySelector("p") || {}).textContent || "").trim(),
+        linkDrin: !!rueckfall.querySelector('a[data-aktion="mail-oeffnen"]'),
+        summaryHoehe: Math.round(rb(rueckfall.querySelector("summary")).height),
+        summarySichtbar: sicht(rueckfall.querySelector("summary")),
+      },
+      mailLinks: mailLinks.length,
+      mailLinksAusserhalbSichtbar: mailLinks.filter((l) => !l.closest("details[data-rueckfall]") && sicht(l)).length,
+      mailLinksSichtbar: mailLinks.filter((l) => sicht(l)).length,
       sichtbar: sicht(a),
       titel: (a.querySelector("h3") || {}).textContent || "",
       einleitung: ((a.querySelector(":scope > p.anm-text") || {}).textContent || "").trim(),
@@ -3966,7 +4021,6 @@ async function pruefeMailAnVerein(browser, server, dateien, beispiele) {
   const adresse = server.konfig.verein.mail;
   const profil = profilKindNeu(beispiele, server);
   const schritt = (vorlage, knopf) => vorlage.replace("{knopf}", knopf);
-  const anhangHinweis = T.senden.anhang.replace("{knopf}", T.senden.oeffnen);
   // Ein Handy-Browser, der Dateien teilen kann: Der Knopf „Datei teilen“ ist da, und der Abschnitt zeigt den Weg am Handy
   const mitTeilen = async (page) => {
     await page.evaluateOnNewDocument(() => {
@@ -3994,8 +4048,8 @@ async function pruefeMailAnVerein(browser, server, dateien, beispiele) {
   const coarse = await page.evaluate(() => window.matchMedia("(pointer: coarse)").matches);
   ok("Fertig-Seite: mit „Datei teilen“ am Handy nur ein Weg (der Weg am Handy), nummeriert, drei Schritte, ohne Überschrift (P3 Teil b)", !!d && d.wege.length === 1 && d.wege[0].art === (coarse ? "handy" : "computer") && d.wege[0].titel === null && d.wege[0].nummeriert && d.wege[0].schritte.length === 3, d && d.wege.map((w) => w.art + ":" + w.titel).join(",") + " (pointer coarse: " + coarse + ")");
   const handy = d && d.wege.find((w) => w.art === "handy");
-  ok("Weg am Handy (U-01): Adresse kopieren, Datei teilen und Mail-Programm wählen (Datei schon angehängt), Adresse bei „An“ einfügen (drei Schritte, Knöpfe „Adresse kopieren“ und „Datei teilen“, ohne Überschrift „Am Handy“)",
-    !!handy && handy.titel === null && handy.schritte.length === 3 && handy.schritte[0] === schritt(T.senden.handy1, T.senden.kopieren) && handy.schritte[0] === "Tippen Sie unten auf „Adresse kopieren“." && handy.schritte[1] === schritt(T.senden.handy2, T.teilen) && handy.schritte[1] === "Tippen Sie oben auf „Datei teilen“. Wählen Sie Ihr Mail-Programm. Die Datei ist schon angehängt." && handy.schritte[2] === "Fügen Sie die Adresse bei „An“ ein. Senden Sie die E-Mail.", handy && handy.schritte.join(" | "));
+  ok("Weg am Handy (MR-2): „Datei teilen“ tippen (kopiert die Adresse), Mail-Programm wählen (Datei schon angehängt), Adresse bei „An“ einfügen (drei Schritte, Knopf „Datei teilen“ im ersten Schritt, ohne Überschrift „Am Handy“)",
+    coarse === true && !!handy && handy.titel === null && handy.schritte.length === 3 && handy.schritte[0] === schritt(T.senden.handy1, T.teilen) && handy.schritte[0] === "Tippen Sie oben auf „Datei teilen“. Die Adresse wird kopiert." && handy.schritte[1] === T.senden.handy2 && handy.schritte[1] === "Wählen Sie Ihr Mail-Programm. Die Datei ist schon angehängt." && handy.schritte[2] === "Fügen Sie die Adresse bei „An“ ein. Senden Sie die E-Mail.", handy && handy.schritte.join(" | "));
   // Die Knöpfe, auf die die Schritte zeigen, gibt es wirklich und heißen so
   const knoepfe = await page.$$eval('#anmeldung .anm-ergebnis > .anm-knoepfe [data-aktion]', (l) => l.filter((e) => !e.hidden).map((e) => ({ aktion: e.getAttribute("data-aktion"), text: e.textContent.trim() })));
   ok("Die Knöpfe „Datei teilen“ und „Datei herunterladen“ stehen über dem Abschnitt, mit der Beschriftung aus den Schritten", knoepfe.some((k) => k.aktion === "teilen" && k.text === "Datei teilen") && knoepfe.some((k) => k.aktion === "herunterladen" && k.text === "Datei herunterladen"), JSON.stringify(knoepfe));
@@ -4005,12 +4059,22 @@ async function pruefeMailAnVerein(browser, server, dateien, beispiele) {
   ok("Adresse: von links nach rechts (dir=ltr) und mit einem Tipp ganz zu markieren (user-select: all)", !!d && d.adresseDir === "ltr" && d.adresseMarkierbar === "all", d && d.adresseDir + ", " + d.adresseMarkierbar);
   // 3. Knopf „Adresse kopieren“ und Link „E-Mail an die Geschäftsstelle öffnen“
   ok("Knopf „Adresse kopieren“ ist da (Button, sichtbar, mindestens 44 px hoch)", !!d && !!d.kopieren && d.kopieren.text === "Adresse kopieren" && d.kopieren.sichtbar && d.kopieren.typ === "button" && d.kopieren.hoehe >= 44 && d.kopieren.breite >= 44, JSON.stringify(d && d.kopieren));
-  ok("Link „E-Mail an die Geschäftsstelle öffnen“ ist da (sichtbar, mindestens 44 px hoch), ohne target und ohne ext://", !!d && !!d.link && d.link.text === "E-Mail an die Geschäftsstelle öffnen" && d.link.sichtbar && d.link.hoehe >= 44 && d.link.target === null && /^mailto:/.test(d.link.href), JSON.stringify(d && d.link));
+  // MR-2: Am Handy mit „Datei teilen“ steht der Link zur E-Mail nur noch im zugeklappten Rückfall „Teilen klappt nicht?“ (er hängt keine Datei an und hat die 1. Vorsitzende verwirrt)
+  ok("Rückfall (MR-2): „Teilen klappt nicht?“ ist ein zugeklappter Bereich (details.anm-einzelheiten[data-rueckfall]) mit dem Satz aus dem Wörterbuch; die Zusammenfassung ist sichtbar und mindestens 44 px hoch",
+    coarse === true && !!d && !!d.rueckfall && d.rueckfall.offen === false && /anm-einzelheiten/.test(d.rueckfall.klasse) && d.rueckfall.titel === T.senden.rueckfallTitel && d.rueckfall.titel === "Teilen klappt nicht?" &&
+      d.rueckfall.text === T.senden.rueckfall && d.rueckfall.text === "Laden Sie die Datei herunter. Öffnen Sie dann eine neue E-Mail. Hängen Sie die Datei selbst an." && d.rueckfall.summarySichtbar && d.rueckfall.summaryHoehe >= 44, JSON.stringify(d && d.rueckfall));
+  ok("Link zur E-Mail (MR-2): genau einer, er liegt im zugeklappten Rückfall und ist nicht sichtbar; außerhalb des Rückfalls ist kein Link zur E-Mail zu sehen",
+    !!d && d.mailLinks === 1 && !!d.link && !!d.rueckfall && d.rueckfall.linkDrin === true && d.link.sichtbar === false && d.mailLinksSichtbar === 0 && d.mailLinksAusserhalbSichtbar === 0, d && JSON.stringify({ alle: d.mailLinks, sichtbar: d.mailLinksSichtbar, aussen: d.mailLinksAusserhalbSichtbar, link: d.link && d.link.sichtbar }));
+  // Tipp auf „Teilen klappt nicht?“: Der Bereich klappt auf, der Link ist da
+  await page.click("#anmeldung details[data-rueckfall] > summary");
+  d = await leseSenden(page);
+  ok("Rückfall geöffnet (MR-2): der Link „E-Mail an die Geschäftsstelle öffnen“ ist sichtbar (mindestens 44 px hoch), ohne target und ohne ext://, mailto:", !!d && !!d.rueckfall && d.rueckfall.offen === true && !!d.link && d.link.text === "E-Mail an die Geschäftsstelle öffnen" && d.link.sichtbar && d.link.hoehe >= 44 && d.link.target === null && /^mailto:/.test(d.link.href), JSON.stringify(d && d.link));
   // mailto: An, Betreff „Anmeldung Vorname Nachname“ und der deutsche Text, richtig kodiert
   const soll = "mailto:" + adresse + "?subject=" + encodeURIComponent("Anmeldung " + profil.vorname + " " + profil.nachname) + "&body=Guten%20Tag%2C%0D%0A%0D%0Aanbei%20die%20Anmeldung%20als%20PDF.%0D%0A%0D%0AViele%20Gr%C3%BC%C3%9Fe";
   const z = d && d.link && /^mailto:([^?]*)\?subject=([^&]*)&body=([^&]*)$/.exec(d.link.href);
   ok("mailto-Link: An die Adresse der Geschäftsstelle, Betreff „Anmeldung " + profil.vorname + " " + profil.nachname + "“, Text „Guten Tag, anbei die Anmeldung als PDF. Viele Grüße“ (kodiert)", !!z && d.link.href === soll && z[1] === adresse && decodeURIComponent(z[2]) === "Anmeldung " + profil.vorname + " " + profil.nachname && decodeURIComponent(z[3]) === "Guten Tag,\r\n\r\nanbei die Anmeldung als PDF.\r\n\r\nViele Grüße", d && d.link && d.link.href);
-  ok("Hinweis zum Anhang (U-01): „Bei „E-Mail an die Geschäftsstelle öffnen“ hängen Sie die Datei selbst an.“ steht beim Link (am Handy); der Hinweis zu WhatsApp bleibt im Abschnitt", !!d && d.hinweise.includes(anhangHinweis) && anhangHinweis === "Bei „E-Mail an die Geschäftsstelle öffnen“ hängen Sie die Datei selbst an." && d.hinweise.includes("Bitte schicken Sie die Datei nicht per WhatsApp. Sie enthält private Daten."), d && d.hinweise.join(" | "));
+  ok("Hinweis zum Anhang (MR-2): der frühere Satz beim Link („Bei „E-Mail an die Geschäftsstelle öffnen“ hängen Sie die Datei selbst an.“) ist weg, der Satz steht jetzt im Rückfall; der Hinweis zu WhatsApp bleibt im Abschnitt",
+    !!d && !d.hinweise.some((x) => /hängen Sie die Datei selbst an/i.test(x)) && !/Bei „E-Mail an die Geschäftsstelle öffnen“ hängen Sie/.test(d.seitenText) && d.hinweise.includes("Bitte schicken Sie die Datei nicht per WhatsApp. Sie enthält private Daten."), d && d.hinweise.join(" | "));
   // D-06: „So geht es weiter“ endet mit „Danach prüft der Verein Ihre Anmeldung.“
   ok("Fertig-Seite (D-06): „So geht es weiter“ endet mit „Danach prüft der Verein Ihre Anmeldung.“ (genau einmal)", !!d && d.naechste.endsWith("Danach prüft der Verein Ihre Anmeldung.") && (d.naechste.match(/Danach prüft der Verein/g) || []).length === 1, d && d.naechste.slice(-120));
   // Alter Wortlaut weg, WhatsApp-Satz genau einmal
@@ -4053,7 +4117,7 @@ async function pruefeMailAnVerein(browser, server, dateien, beispiele) {
   await page.screenshot({ path: path.join(AUSGABE, MOBIL.name, "fertig-mail-an-verein.png"), fullPage: true });
   protokoll.screenshots++;
   // Tippflächen, axe-core, Konsole
-  const klein = (await kleineTippflaechen(page)).filter((k) => /Adresse kopieren|E-Mail an die Geschäftsstelle/.test(k));
+  const klein = (await kleineTippflaechen(page)).filter((k) => /Adresse kopieren|E-Mail an die Geschäftsstelle|Teilen klappt nicht/.test(k));
   ok("Tippflächen des Abschnitts mindestens 44 px", klein.length === 0, klein.join(" | "));
   const axeOk = await axePruefen(page, "M10 Fertig-Seite mit E-Mail-Abschnitt (390 px)");
   ok("axe-core: keine Verstöße critical/serious auf der Fertig-Seite mit dem Abschnitt", axeOk, "");
@@ -4068,7 +4132,9 @@ async function pruefeMailAnVerein(browser, server, dateien, beispiele) {
   const computer = d && d.wege.find((w) => w.art === "computer");
   ok("Am Computer mit „Datei teilen“: nur der Weg über das Herunterladen, ohne Überschrift (P3 Teil b)", !!d && d.wege.length === 1 && !!computer && computer.titel === null, d && d.wege.map((w) => w.art + ":" + w.titel).join(", "));
   ok("Weg am Computer: Datei herunterladen, E-Mail mit Anhang, an die Adresse schicken (drei Schritte, Knopf als „Datei herunterladen“)", !!computer && computer.schritte[0] === schritt(T.senden.computer1, T.herunterladen) && computer.schritte[0] === "Klicken Sie oben auf „Datei herunterladen“." && /Hängen Sie die Datei an\./.test(computer.schritte[1]) && computer.schritte[2] === "Schicken Sie die E-Mail an die Adresse unten.", computer && computer.schritte.join(" | "));
-  ok("Am Computer (U-01): „Hängen Sie die Datei an“ steht nur einmal im Abschnitt (im zweiten Schritt); der Hinweis beim Link entfällt, der zu WhatsApp bleibt", !!d && !d.hinweise.includes(anhangHinweis) && !d.hinweise.some((x) => /hängen Sie die Datei/i.test(x)) && d.hinweise.includes("Bitte schicken Sie die Datei nicht per WhatsApp. Sie enthält private Daten."), d && d.hinweise.join(" | "));
+  ok("Am Computer (U-01): „Hängen Sie die Datei an“ steht nur einmal im Abschnitt (im zweiten Schritt); der Hinweis beim Link entfällt, der zu WhatsApp bleibt", !!d && !d.hinweise.some((x) => /hängen Sie die Datei/i.test(x)) && d.hinweise.includes("Bitte schicken Sie die Datei nicht per WhatsApp. Sie enthält private Daten."), d && d.hinweise.join(" | "));
+  // MR-2 (v): Am Computer bleibt alles wie bisher: kein zugeklappter Rückfall, der Link zur E-Mail steht sichtbar neben dem Knopf zum Kopieren
+  ok("Am Computer (MR-2): kein Rückfall „Teilen klappt nicht?“; der Link zur E-Mail ist sichtbar (neben „Adresse kopieren“, mindestens 44 px hoch), mailto: wie bisher", !!d && d.rueckfall === null && d.mailLinks === 1 && d.mailLinksSichtbar === 1 && !!d.link && d.link.sichtbar && d.link.hoehe >= 44 && d.link.href === soll && !!d.kopieren && d.kopieren.sichtbar && !/Teilen klappt nicht/.test(d.seitenText), d && JSON.stringify({ rueckfall: d.rueckfall, links: d.mailLinks, sichtbar: d.mailLinksSichtbar }));
   await page.evaluate(() => {
     Object.defineProperty(navigator, "canShare", { value: undefined, configurable: true });
   });
@@ -4076,7 +4142,7 @@ async function pruefeMailAnVerein(browser, server, dateien, beispiele) {
   d = await leseSenden(page);
   const knopfTeilen = await page.$('#anmeldung [data-aktion="teilen"]:not([hidden])');
   ok("Ohne „Datei teilen“ (Knopf fehlt): nur der Weg über das Herunterladen, ohne Überschrift „Am Computer“ (er gilt auch am Handy)", !knopfTeilen && !!d && d.wege.length === 1 && d.wege[0].art === "computer" && d.wege[0].titel === null && d.wege[0].schritte.length === 3 && !/Datei teilen|Am Handy/.test(d.seitenText.slice(d.seitenText.indexOf("So schicken Sie die Datei an den Verein"))), d && d.wege.map((w) => w.art + ":" + w.titel).join(", "));
-  ok("Ohne „Datei teilen“ bleiben Adresse, Kopieren und mailto-Link", !!d && d.adresse === adresse && !!d.kopieren && !!d.link && d.link.href === soll, d && d.link && d.link.href);
+  ok("Ohne „Datei teilen“ bleiben Adresse, Kopieren und mailto-Link (sichtbar, ohne Rückfall)", !!d && d.adresse === adresse && !!d.kopieren && !!d.link && d.link.href === soll && d.link.sichtbar && d.rueckfall === null, d && d.link && d.link.href);
   ok("keine Fehler in der Konsole", page.__st.konsole.length === 0, page.__st.konsole.slice(0, 3).join(" | "));
   await page.close();
 
@@ -4335,6 +4401,430 @@ async function pruefeBerichtsseite(browser, server, beispiele) {
   }
   ok("Nach dem Ändern geht es zurück zur Prüfseite", st.schritt === "pruefen", st.schritt + "/" + st.teil);
   await page.close();
+}
+
+// ---------- MR-1 (30.10.2026): Beitragsbezeichnung, Seite „Dürfen Name und Foto im Internet stehen?“, Zuschlag bei „Rechnung“ ----------
+//
+// Entscheidung der Jugendleitung am 30.10.2026 nach den Anmerkungen der 1. Vorsitzenden (22.10.2026), geprüft in allen vier Sprachen am Handy (390 x 844):
+//   - Beitrag: Die Gruppe heißt auf Deutsch „Kinder und Jugendliche (Fußball bis A-Jugend)“; en, tr und ar bleiben („… including A-Jugend …“).
+//   - Seite einwilligungen/hfv: neuer Titel; nach den Kästchen (auch ab 16, vor dem Satz ab 16) der Satz passfoto („Das Foto für den Spielerpass ist Pflicht.
+//     Es ist nicht öffentlich.“); die Kästchentexte bleiben wörtlich.
+//   - Seite zahlung/art: Der Hinweis unter „Rechnung“ nennt den Zuschlag ohne Lastschrift mit dem Betrag aus den Daten (beitragInfo.zuschlagOhneLastschrift,
+//     Euro im Jahr). Die Karte „Lastschrift“ und die Seiten danach nennen ihn nicht. Fehlt der Betrag (oder ist er keine Zahl über 0), steht nur der erste Satz
+//     da, nie ein „{betrag}“.
+// Bildschirmfotos (hfv-<Sprache>.png, rechnung-<Sprache>.png) entstehen nur in Deutsch und Englisch.
+
+const MR1_SPRACHEN = ["de", "en", "tr", "ar"];
+// Text wie auf dem Bildschirm: ohne Isolate und Richtungszeichen, feste Leerzeichen als Leerzeichen, Leerraum gekürzt
+const mr1Norm = (x) => nfc(String(x)).replace(/[\u2060\u2066-\u2069\u200E\u200F\u202A-\u202E]/g, "").replace(/\u00A0/g, " ").replace(/\s+/g, " ").trim();
+const mr1Saetze = (text) => String(text).split(/(?<=[.!?\u061F])\s+/);
+const mr1MitBetrag = (text, betrag) => mr1Norm(String(text).replace(/\{betrag\}/g, String(betrag)));
+const mr1OhneBetrag = (text) => mr1Norm(mr1Saetze(text).filter((s) => !s.includes("{betrag}")).join(" "));
+const mr1Anzahl = (text, such) => (such ? String(text).split(such).length - 1 : 0);
+
+// Seite einwilligungen/hfv: Titel, Reihenfolge der Blöcke (Hinweis, Kästchen, Absätze) und ihre Texte
+const mr1LiesHfv = (page) =>
+  page.evaluate(() => {
+    const f = document.querySelector("#anmeldung form.anm-seite");
+    const bloecke = Array.from(f.children).filter((e) => e.classList.contains("anm-karten") || e.classList.contains("anm-hinweis"));
+    return {
+      titel: f.querySelector("#anm-titel").textContent,
+      reihenfolge: bloecke.map((e) => (e.classList.contains("anm-karten") ? "karten" : "hinweis")),
+      absaetze: bloecke.filter((e) => e.classList.contains("anm-hinweis")).map((e) => e.textContent),
+      kaesten: Array.from(f.querySelectorAll(".anm-karten label.anm-karte")).map((l) => ({
+        pfad: l.querySelector("input").getAttribute("data-pfad"),
+        titel: (l.querySelector(".anm-karte__titel") || {}).textContent || "",
+        hinweis: (l.querySelector(".anm-karte__hinweis") || {}).textContent || "",
+      })),
+      querscroll: document.documentElement.scrollWidth > window.innerWidth,
+    };
+  });
+
+// Seite zahlung/art: die Karten mit Wahl und Hinweis, der ganze Text der Seite
+const mr1LiesZahlung = (page) =>
+  page.evaluate(() => {
+    const f = document.querySelector("#anmeldung form.anm-seite");
+    return {
+      titel: f.querySelector("#anm-titel").textContent,
+      karten: Array.from(f.querySelectorAll('fieldset[data-feld="zahlung.art"] label.anm-karte')).map((l) => ({
+        wert: l.querySelector("input").getAttribute("data-wert"),
+        gewaehlt: l.querySelector("input").checked,
+        titel: l.querySelector(".anm-karte__titel").textContent,
+        hinweis: (l.querySelector(".anm-karte__hinweis") || {}).textContent || "",
+      })),
+      text: f.textContent,
+      querscroll: document.documentElement.scrollWidth > window.innerWidth,
+    };
+  });
+
+// Neue Seite in der Sprache, Beispiel geladen, bis zum Schritt (und Teil) durchgeklickt
+async function mr1ZurSeite(browser, server, code, beispielId, schritt, teil, name) {
+  const page = await neueSeite(browser, server, MOBIL, name);
+  if (code !== "de") {
+    await page.click('[data-anm-sprachleiste] button[data-sprache="' + code + '"]');
+    await page.waitForFunction((c) => document.getElementById("anmeldung").getAttribute("lang") === c, { timeout: 8000 }, code);
+    await warte(150);
+  }
+  await ladeBeispielPerKnopf(page, beispielId);
+  const s = await geheBis(page, schritt, teil);
+  return { page, s };
+}
+
+async function pruefeBeitragHfvZuschlag(browser, server, beispiele) {
+  console.log("\n=== MR-1: Beitragsbezeichnung, Seite „Name und Foto“, Zuschlag bei „Rechnung“ ===");
+  void beispiele;
+  const info = server.konfig.anmeldung.beitragInfo;
+  const betragDaten = info.zuschlagOhneLastschrift;
+  ok("Daten: beitragInfo.zuschlagOhneLastschrift ist 3 (Euro im Jahr); die Seite liest den Betrag aus den Daten, nicht aus dem Text", betragDaten === 3, String(betragDaten));
+  const textDatei = async (code, art) => (await import(pathToFileURL(path.join(ROOT, "assets", "js", "anmeldung", "texte", code + "-" + art + ".js")).href)).default;
+  const HFV_FOTOS = ["de", "en"];
+
+  for (const code of MR1_SPRACHEN) {
+    const dict = await textDatei(code, "oberflaeche");
+    const regeln = await textDatei(code, "regeln");
+    const hfv = dict.einwilligungen.hfv;
+    const art = dict.zahlung.art;
+    const kenn = "[" + code + "] ";
+    const fotoJa = HFV_FOTOS.includes(code);
+    const zuschlagVorlage = mr1Saetze(art.rechnungHinweis).find((x) => x.includes("{betrag}")) || "";
+    const zuschlagSatz = mr1MitBetrag(zuschlagVorlage, betragDaten);
+    const hinweisSoll = mr1MitBetrag(art.rechnungHinweis, betragDaten);
+
+    // ---- Beitrag, Zahlung (Kind neu, Fußball) ----
+    const { page, s: s0 } = await mr1ZurSeite(browser, server, code, "kind-neu", "beitrag", "gruppe", "mr1-" + code);
+    ok(kenn + "Beitrag: Seite 'beitrag/gruppe' erreicht", s0.schritt === "beitrag" && s0.teil === "gruppe", s0.schritt + "/" + s0.teil);
+    const gruppe = await page.evaluate(() => {
+      const t = document.querySelector('#anmeldung fieldset[data-feld="beitrag.gruppe"] label.anm-karte .anm-karte__titel');
+      return { name: t.childNodes[0].textContent, wert: document.querySelector('#anmeldung fieldset[data-feld="beitrag.gruppe"] label.anm-karte input').getAttribute("data-wert"), seite: document.getElementById("anmeldung").textContent };
+    });
+    const gruppeSoll = code === "de" ? "Kinder und Jugendliche (Fußball bis A-Jugend)" : mr1Norm(regeln.beitrag.gruppen.fussball_jugend);
+    ok(kenn + "Beitrag: Die Gruppe heißt „" + gruppeSoll + "“" + (code === "de" ? ", die frühere Schreibweise mit Komma nach „Fußball“ steht nirgends auf der Seite" : " (wie bisher, nennt die A-Jugend)"),
+      gruppe.wert === "fussball_jugend" && mr1Norm(gruppe.name) === mr1Norm(gruppeSoll) && (code === "de" ? !/\(Fußball,/.test(gruppe.seite) : /A-Jugend/.test(mr1Norm(gruppe.name))), JSON.stringify(gruppe.name));
+
+    const s1 = await geheBis(page, "zahlung", "art");
+    ok(kenn + "Zahlung: Seite 'zahlung/art' erreicht", s1.schritt === "zahlung" && s1.teil === "art", s1.schritt + "/" + s1.teil);
+    let z = await mr1LiesZahlung(page);
+    const karte = (wert) => z.karten.find((k) => k.wert === wert);
+    ok(kenn + "Zahlung: Karte „Rechnung“: Der Hinweis nennt den Zuschlag mit dem Betrag aus den Daten (" + betragDaten + "): „" + hinweisSoll + "“",
+      !!karte("rechnung") && mr1Norm(karte("rechnung").hinweis) === hinweisSoll && new RegExp("(^|[^0-9])" + betragDaten + "([^0-9]|$)").test(karte("rechnung").hinweis), JSON.stringify(karte("rechnung")));
+    ok(kenn + "Zahlung: Karte „Lastschrift“: der Hinweis wie bisher, ohne Betrag und ohne Satz zum Zuschlag",
+      !!karte("sepa") && karte("sepa").gewaehlt && mr1Norm(karte("sepa").hinweis) === mr1Norm(art.sepaHinweis) && !/\d/.test(karte("sepa").hinweis) && mr1Anzahl(mr1Norm(karte("sepa").titel + " " + karte("sepa").hinweis), zuschlagSatz) === 0, JSON.stringify(karte("sepa")));
+    ok(kenn + "Zahlung: Der Satz zum Zuschlag steht auf der Seite genau einmal, in der Karte „Rechnung“",
+      mr1Anzahl(mr1Norm(z.text), zuschlagSatz) === 1 && mr1Anzahl(mr1Norm(karte("rechnung").hinweis), zuschlagSatz) === 1, zuschlagSatz);
+    // „Rechnung“ wählen
+    await klickeEtikett(page, '#anmeldung input[data-pfad="zahlung.art"][data-wert="rechnung"]');
+    await warte(200);
+    z = await mr1LiesZahlung(page);
+    ok(kenn + "Zahlung: „Rechnung“ gewählt: Die Karte ist gewählt, der Hinweis nennt den Zuschlag (" + betragDaten + "), der Satz steht genau einmal da",
+      !!karte("rechnung") && karte("rechnung").gewaehlt && !karte("sepa").gewaehlt && mr1Norm(karte("rechnung").hinweis) === hinweisSoll && mr1Anzahl(mr1Norm(z.text), zuschlagSatz) === 1, JSON.stringify(z.karten));
+    ok(kenn + "Zahlung: kein Querscrollen bei 390 px, keine Rückfall-Textschlüssel auf der Seite", !z.querscroll && !/zahlung\.art\./.test(z.text), "");
+    if (fotoJa) {
+      await page.screenshot({ path: path.join(AUSGABE, MOBIL.name, "rechnung-" + code + ".png"), fullPage: true });
+      protokoll.screenshots++;
+    }
+    // zurück zu „Lastschrift“: Karte gewählt, kein Satz zum Zuschlag in der Karte; die Seiten danach (Konto, IBAN) nennen ihn nicht
+    await klickeEtikett(page, '#anmeldung input[data-pfad="zahlung.art"][data-wert="sepa"]');
+    await warte(200);
+    z = await mr1LiesZahlung(page);
+    ok(kenn + "Zahlung: „Lastschrift“ gewählt: Die Karte ist gewählt, ihr Hinweis nennt keinen Zuschlag", !!karte("sepa") && karte("sepa").gewaehlt && !karte("rechnung").gewaehlt && mr1Anzahl(mr1Norm(karte("sepa").hinweis), zuschlagSatz) === 0, JSON.stringify(karte("sepa")));
+    const folgen = [];
+    for (const teil of ["inhaber", "iban"]) {
+      const st = await geheBis(page, "zahlung", teil);
+      const text = mr1Norm(await page.$eval("#anmeldung form.anm-seite", (e) => e.textContent));
+      folgen.push(st.schritt + "/" + st.teil + (mr1Anzahl(text, zuschlagSatz) === 0 && !text.includes(mr1Norm(zuschlagVorlage.split("{betrag}")[0])) ? "" : " NENNT DEN ZUSCHLAG"));
+    }
+    ok(kenn + "Zahlung: Bei „Lastschrift“ nennen die Seiten danach (Konto, IBAN) keinen Zuschlag", folgen.join(", ") === "zahlung/inhaber, zahlung/iban", folgen.join(", "));
+
+    // ---- Seite zum Verband (Kind unter 16) ----
+    const s2 = await geheBis(page, "einwilligungen", "hfv");
+    ok(kenn + "Seite zum Verband: 'einwilligungen/hfv' erreicht", s2.schritt === "einwilligungen" && s2.teil === "hfv", s2.schritt + "/" + s2.teil);
+    const h = await mr1LiesHfv(page);
+    const titelSoll = mr1Norm(hfv.titel);
+    ok(kenn + "Seite zum Verband: Titel „" + titelSoll + "“, höchstens 8 Wörter" + (code === "de" ? ", kein „Fußball-Verband“ und kein „veröffentlichen“ mehr" : ""),
+      mr1Norm(h.titel) === titelSoll && zaehleWoerter(titelSoll).length <= 8 && /[?\u061F]$/.test(titelSoll) && (code !== "de" || (titelSoll === "Dürfen Name und Foto im Internet stehen?" && !/Fußball-Verband|veröffentlich/.test(titelSoll))), h.titel + " (" + zaehleWoerter(titelSoll).length + " Wörter)");
+    ok(kenn + "Seite zum Verband: nach den Kästchen steht der Satz zum Foto für den Spielerpass „" + mr1Norm(hfv.passfoto) + "“ (Reihenfolge: Hinweis, Kästchen, Satz)",
+      h.reihenfolge.join(",") === "hinweis,karten,hinweis" && h.absaetze.length === 2 && mr1Norm(h.absaetze[0]) === mr1Norm(hfv.hinweis) && mr1Norm(h.absaetze[1]) === mr1Norm(hfv.passfoto), JSON.stringify(h.reihenfolge) + " " + JSON.stringify(h.absaetze));
+    ok(kenn + "Seite zum Verband: die Kästchen (Name, Foto) und ihre Zusatzzeilen bleiben wörtlich",
+      h.kaesten.length === 2 && h.kaesten[0].pfad === "einwilligungen.hfvName" && mr1Norm(h.kaesten[0].titel) === mr1Norm(hfv.name) && mr1Norm(h.kaesten[0].hinweis) === mr1Norm(hfv.nameHinweis) &&
+        h.kaesten[1].pfad === "einwilligungen.hfvFoto" && mr1Norm(h.kaesten[1].titel) === mr1Norm(hfv.foto) && mr1Norm(h.kaesten[1].hinweis) === mr1Norm(hfv.fotoHinweis), JSON.stringify(h.kaesten));
+    const klein = await kleineTippflaechen(page);
+    ok(kenn + "Seite zum Verband: Tippflächen mindestens 44 px, kein Querscrollen bei 390 px", klein.length === 0 && !h.querscroll, klein.slice(0, 3).join(" | "));
+    if (fotoJa) {
+      await page.screenshot({ path: path.join(AUSGABE, MOBIL.name, "hfv-" + code + ".png"), fullPage: true });
+      protokoll.screenshots++;
+    }
+    ok(kenn + "keine Fehler in der Konsole", page.__st.konsole.length === 0, page.__st.konsole.slice(0, 3).join(" | "));
+    await page.close();
+  }
+
+  // ---- Seite zum Verband (Erwachsener, ab 16): der Satz zum Foto steht auch hier, nach dem Kästchen und vor dem Satz „Ab 16 Jahren …“ ----
+  for (const code of ["de", "en"]) {
+    const hfv = (await textDatei(code, "oberflaeche")).einwilligungen.hfv;
+    const kenn = "[" + code + ", ab 16] ";
+    const { page, s } = await mr1ZurSeite(browser, server, code, "herren-wechsel", "einwilligungen", "hfv", "mr1-ab16-" + code);
+    const h = await mr1LiesHfv(page);
+    ok(kenn + "Seite zum Verband erreicht (Erwachsener)", s.schritt === "einwilligungen" && s.teil === "hfv", s.schritt + "/" + s.teil);
+    ok(kenn + "Der Satz zum Foto für den Spielerpass steht nach dem Kästchen und vor dem Satz „Ab 16 Jahren …“ (Reihenfolge: Hinweis, Kästchen, Satz, Satz)",
+      h.reihenfolge.join(",") === "hinweis,karten,hinweis,hinweis" && h.absaetze.length === 3 && mr1Norm(h.absaetze[0]) === mr1Norm(hfv.hinweis) && mr1Norm(h.absaetze[1]) === mr1Norm(hfv.passfoto) && mr1Norm(h.absaetze[2]) === mr1Norm(hfv.ab16), JSON.stringify(h.reihenfolge) + " " + JSON.stringify(h.absaetze));
+    ok(kenn + "Nur das Kästchen zum Foto steht da (kein Kästchen zum Namen), Titel wie bei Kindern",
+      h.kaesten.length === 1 && h.kaesten[0].pfad === "einwilligungen.hfvFoto" && mr1Norm(h.kaesten[0].titel) === mr1Norm(hfv.foto) && mr1Norm(h.titel) === mr1Norm(hfv.titel), JSON.stringify(h.kaesten));
+    ok(kenn + "keine Fehler in der Konsole", page.__st.konsole.length === 0, page.__st.konsole.slice(0, 3).join(" | "));
+    await page.close();
+  }
+
+  // ---- Betrag aus den Daten: ein anderer Betrag erscheint im Satz; fehlt er (oder ist er keine Zahl über 0), steht nur der erste Satz da ----
+  const varianten = [
+    ["de", 7, "Betrag 7 in den Daten"],
+    ["de", undefined, "Betrag aus den Daten entfernt"],
+    ["de", 0, "Betrag 0 in den Daten"],
+    ["de", "drei", "Betrag „drei“ (keine Zahl) in den Daten"],
+    ["en", undefined, "Betrag aus den Daten entfernt"],
+    ["tr", undefined, "Betrag aus den Daten entfernt"],
+    ["ar", undefined, "Betrag aus den Daten entfernt"],
+  ];
+  for (const [code, wert, beschreibung] of varianten) {
+    const art = (await textDatei(code, "oberflaeche")).zahlung.art;
+    const kenn = "[" + code + ", " + beschreibung + "] ";
+    const vorlage = mr1Saetze(art.rechnungHinweis).find((x) => x.includes("{betrag}")) || "";
+    const festerTeil = mr1Norm(vorlage.split("{betrag}")[0]);
+    const alt = info.zuschlagOhneLastschrift;
+    try {
+      if (wert === undefined) delete info.zuschlagOhneLastschrift;
+      else info.zuschlagOhneLastschrift = wert;
+      const { page, s } = await mr1ZurSeite(browser, server, code, "kind-neu", "zahlung", "art", "mr1-daten-" + code);
+      const z = await mr1LiesZahlung(page);
+      const rechnung = z.karten.find((k) => k.wert === "rechnung");
+      const text = mr1Norm(z.text);
+      ok(kenn + "Zahlung: Seite erreicht, Karte „Rechnung“ da", s.schritt === "zahlung" && s.teil === "art" && !!rechnung, s.schritt + "/" + s.teil);
+      if (wert === 7) {
+        ok(kenn + "Zahlung: Der Hinweis nennt den Betrag aus den Daten („" + mr1MitBetrag(art.rechnungHinweis, 7) + "“), nicht den Betrag 3", !!rechnung && mr1Norm(rechnung.hinweis) === mr1MitBetrag(art.rechnungHinweis, 7) && !/(^|[^0-9])3([^0-9]|$)/.test(rechnung.hinweis), JSON.stringify(rechnung));
+      } else {
+        ok(kenn + "Zahlung: Es steht nur der erste Satz da („" + mr1OhneBetrag(art.rechnungHinweis) + "“), kein Satz zum Zuschlag",
+          !!rechnung && mr1Norm(rechnung.hinweis) === mr1OhneBetrag(art.rechnungHinweis) && festerTeil.length > 0 && !text.includes(festerTeil), JSON.stringify(rechnung));
+        ok(kenn + "Zahlung: Nirgends auf der Seite steht ein „{betrag}“ oder eine geschweifte Klammer", !/[{}]/.test(z.text), z.text.slice(0, 120));
+      }
+      ok(kenn + "keine Fehler in der Konsole", page.__st.konsole.length === 0, page.__st.konsole.slice(0, 3).join(" | "));
+      await page.close();
+    } finally {
+      if (alt === undefined) delete info.zuschlagOhneLastschrift;
+      else info.zuschlagOhneLastschrift = alt;
+    }
+  }
+  ok("Daten: Der Betrag in der Konfiguration des Testservers ist nach den Läufen wieder 3", info.zuschlagOhneLastschrift === 3, String(info.zuschlagOhneLastschrift));
+  ok("Keine Warnung „Text fehlt“ zu den Texten der Seiten zum Verband und zur Zahlungsart", ![...protokoll.textFehlt].some((t) => /einwilligungen\.hfv|zahlung\.art/.test(t)), [...protokoll.textFehlt].slice(0, 3).join(" | "));
+}
+
+// ---------- MR-2 (30.10.2026): „Datei teilen“ am Handy kopiert die Adresse und gibt Betreff und Text mit; der Link zur E-Mail steht nur im Rückfall ----------
+//
+// Anlass: Test der 1. Vorsitzenden am Android-Handy (22.10.2026). Der Link „E-Mail an die Geschäftsstelle öffnen“ öffnet die E-Mail ohne Datei (ein mailto-Link kann
+// nichts anhängen). Am Handy mit „Datei teilen“ ist das Teilen der einzige sichtbare Weg: Der Klick legt zuerst die Adresse der Geschäftsstelle in die Zwischenablage
+// (navigator.clipboard.writeText, ohne zu warten) und ruft sofort danach navigator.share auf, mit der PDF-Datei, dem Betreff „Anmeldung Vorname Nachname“ und dem Text der
+// E-Mail; beides im selben Klick (für navigator.share muss die Nutzergeste noch gelten). Diese Prüfung ersetzt navigator.canShare, navigator.share und navigator.clipboard
+// durch Stellvertreter, die jeden Aufruf aufzeichnen (Name, Angaben, Reihenfolge, ob er im Klick-Handler läuft, ob die Nutzergeste aktiv ist). Der Rückfall (zugeklappter
+// Bereich mit dem Link zur E-Mail) und der Weg am Computer stehen in pruefeMailAnVerein; die Texte in allen vier Sprachen in e2e-sprachen.mjs.
+
+async function pruefeTeilenMitAdresse(browser, server, dateien, beispiele) {
+  console.log("\n=== MR-2: „Datei teilen“ am Handy kopiert die Adresse und gibt Betreff und Text mit (390 x 844) ===");
+  const de = await ladeWoerterbuch();
+  const T = de.fertig;
+  const hilfen = await import(pathToFileURL(path.join(ROOT, "assets", "js", "anmeldung", "hilfen.js")).href);
+  const adresse = server.konfig.verein.mail;
+  const profil = profilKindNeu(beispiele, server);
+  const betreff = "Anmeldung " + profil.vorname + " " + profil.nachname;
+  const mailtoSoll = "mailto:" + adresse + "?subject=" + encodeURIComponent(betreff) + "&body=Guten%20Tag%2C%0D%0A%0D%0Aanbei%20die%20Anmeldung%20als%20PDF.%0D%0A%0D%0AViele%20Gr%C3%BC%C3%9Fe";
+
+  // Stellvertreter für Teilen und Zwischenablage; sie laufen vor der Seite. Verhalten je Aufruf über window.__verhalten.
+  const stellvertreter = async (page) => {
+    await page.evaluateOnNewDocument(() => {
+      window.__aufrufe = [];
+      window.__downloads = [];
+      window.__verhalten = { share: "ok", writeText: "ok" };
+      // window.event ist nur innerhalb des Klick-Handlers der Seite gesetzt: So zeigt sich, ob ein Aufruf nach einem await oder später kommt
+      const merke = (eintrag) =>
+        window.__aufrufe.push(Object.assign({ nr: window.__aufrufe.length, imKlick: !!(window.event && window.event.type === "click"), aktiv: !!(navigator.userActivation && navigator.userActivation.isActive) }, eintrag));
+      Object.defineProperty(navigator, "canShare", { value: () => true, configurable: true });
+      Object.defineProperty(navigator, "share", {
+        value: (daten) => {
+          merke({
+            name: "share",
+            titel: daten && daten.title,
+            text: daten && daten.text,
+            felder: Object.keys(daten || {}).sort(),
+            dateien: ((daten && daten.files) || []).map((f) => ({ name: f.name, typ: f.type, groesse: f.size, istFile: f instanceof File })),
+          });
+          const v = window.__verhalten.share;
+          if (v === "wirft") throw new Error("sofort geworfen");
+          if (v === "abbruch") return Promise.reject(new DOMException("Share canceled", "AbortError"));
+          if (v === "fehler") return Promise.reject(new DOMException("nicht erlaubt", "NotAllowedError"));
+          if (v === "spaet") return new Promise((fertig) => setTimeout(fertig, 300)); // die Person wählt noch ein Mail-Programm
+          return Promise.resolve();
+        },
+        configurable: true,
+      });
+      Object.defineProperty(navigator, "clipboard", {
+        get() {
+          if (window.__verhalten.writeText === "fehlt") return undefined;
+          return {
+            writeText: (text) => {
+              merke({ name: "writeText", text });
+              const v = window.__verhalten.writeText;
+              if (v === "wirft") throw new DOMException("nicht erlaubt", "NotAllowedError");
+              if (v === "ablehnen") return Promise.reject(new DOMException("nicht erlaubt", "NotAllowedError"));
+              if (v === "haengt") return new Promise(() => {});
+              // antwortet erst nach einer Weile (wie eine Zwischenablage, die sich Zeit lässt): Das Ende steht als eigener Eintrag in der Liste
+              if (v === "langsam") return new Promise((fertig) => setTimeout(() => { merke({ name: "writeText-fertig" }); fertig(); }, 80));
+              return Promise.resolve();
+            },
+          };
+        },
+        configurable: true,
+      });
+      // Das Speichern der Datei erkennen (Link mit download), ohne etwas herunterzuladen
+      document.addEventListener(
+        "click",
+        (e) => {
+          const a = e.target && e.target.closest && e.target.closest("a[download]");
+          if (a) {
+            window.__downloads.push({ name: a.getAttribute("download") });
+            e.preventDefault();
+          }
+        },
+        true
+      );
+    });
+  };
+
+  const page = await neueSeite(browser, server, MOBIL, "teilen-mit-adresse", { vorLaden: stellvertreter });
+  await ladeBeispielPerKnopf(page, "kind-neu");
+  const ctx = neuerKontext({ name: "teilen-mit-adresse", vp: MOBIL, modus: "beispiel", gesehen: new Set(), touch: true, axeImmer: false, dateien });
+  const r = await laufe(page, ctx);
+  const erreicht = r.besucht[r.besucht.length - 1].startsWith("fertig");
+  const daten = erreicht ? await ergebnisPruefen(page, ctx, dateien) : null;
+  ok("Fertig-Seite am Handy: bis „fertig“ durchgeklickt, Datei erstellt", erreicht && !!daten, r.besucht.length + " Seiten");
+  if (!daten) {
+    await page.close();
+    return;
+  }
+  const dateiname = ((/^Datei:\s*(.+)$/.exec(daten.dateiname.trim()) || [])[1] || "").trim();
+  ok("Dateiname der Fertig-Seite: Anmeldung_<Nachname>_<Vorname>.pdf (" + dateiname + ")", dateiname === "Anmeldung_" + profil.nachname + "_" + profil.vorname + ".pdf", daten.dateiname.trim());
+  const teilenKnopf = await page.$eval('#anmeldung [data-aktion="teilen"]', (e) => ({ da: !e.hidden, sekundaer: e.classList.contains("knopf--sekundaer"), text: e.textContent.trim() }));
+  ok("Der Knopf „Datei teilen“ ist da und am Handy der Hauptknopf (nicht sekundär)", teilenKnopf.da && !teilenKnopf.sekundaer && teilenKnopf.text === T.teilen, JSON.stringify(teilenKnopf));
+  // Bildschirmfotos der Fertig-Seite: von der Überschrift „Ihre Datei ist fertig“ bis zum Ende des Abschnitts „So schicken Sie die Datei an den Verein“
+  const fotoAbschnitt = async (seite, ziel, breite) => {
+    const r = await seite.evaluate(() => ({
+      oben: document.querySelector("#anm-titel").getBoundingClientRect().top + window.scrollY,
+      unten: document.querySelector("#anmeldung [data-senden]").getBoundingClientRect().bottom + window.scrollY,
+    }));
+    await seite.screenshot({ path: ziel, clip: { x: 0, y: Math.max(0, Math.round(r.oben) - 16), width: breite, height: Math.round(r.unten - r.oben) + 32 } });
+    protokoll.screenshots++;
+  };
+  // Am Handy: Rückfall zugeklappt (Schritte, Adressblock) und aufgeklappt (nach dem Pfeil, der sich dreht)
+  const fotoOrdner = path.join(AUSGABE, MOBIL.name);
+  fs.mkdirSync(fotoOrdner, { recursive: true });
+  await fotoAbschnitt(page, path.join(fotoOrdner, "handy-teilen-de.png"), MOBIL.breite);
+  await page.click("#anmeldung details[data-rueckfall] > summary");
+  await warte(500);
+  await fotoAbschnitt(page, path.join(fotoOrdner, "handy-rueckfall-offen-de.png"), MOBIL.breite);
+  await page.click("#anmeldung details[data-rueckfall] > summary");
+
+  // Ein Klick auf „Datei teilen“ mit dem angegebenen Verhalten der Stellvertreter. Rückgabe: Aufrufe, gespeicherte Dateien, Text der Statusmeldung unter den Knöpfen
+  const statusWahl = "#anmeldung .anm-ergebnis > p.anm-status";
+  const klicke = async (verhalten, wartenAufMeldung) => {
+    await page.evaluate((v, wahl) => {
+      window.__aufrufe.length = 0;
+      window.__downloads.length = 0;
+      window.__verhalten = v;
+      const s = document.querySelector(wahl);
+      if (s) s.textContent = "";
+    }, verhalten, statusWahl);
+    const fehlerVorher = page.__st.konsole.length;
+    await page.click('#anmeldung [data-aktion="teilen"]');
+    if (wartenAufMeldung) await page.waitForFunction((wahl) => (document.querySelector(wahl) || {}).textContent !== "", { timeout: 6000 }, statusWahl).catch(() => {});
+    else await warte(900);
+    const ergebnis = await page.evaluate((wahl) => ({ aufrufe: window.__aufrufe, downloads: window.__downloads, status: (document.querySelector(wahl) || {}).textContent || "" }), statusWahl);
+    ergebnis.neueFehler = page.__st.konsole.slice(fehlerVorher);
+    return ergebnis;
+  };
+  const namen = (x) => x.aufrufe.map((a) => a.name).join(",");
+
+  // (i) Alles klappt: genau ein writeText mit der Adresse, genau ein share mit der PDF-Datei, Betreff und Text; writeText zuerst, beide im selben Klick
+  for (const [bezeichnung, share, writeText] of [
+    ["die Person wählt das Mail-Programm erst nach einer Weile", "spaet", "ok"],
+    ["share antwortet sofort", "ok", "ok"],
+    ["die Zwischenablage antwortet erst nach einer Weile", "ok", "langsam"],
+  ]) {
+    const x = await klicke({ share, writeText }, true);
+    const w = x.aufrufe.find((a) => a.name === "writeText");
+    const s = x.aufrufe.find((a) => a.name === "share");
+    const beide = x.aufrufe.filter((a) => a.name === "writeText" || a.name === "share");
+    ok("Teilen (i, " + bezeichnung + "): genau ein writeText-Aufruf mit der Adresse der Geschäftsstelle (" + adresse + ") und genau ein share-Aufruf; writeText kommt zuerst", beide.length === 2 && beide.map((a) => a.name).join(",") === "writeText,share" && !!w && w.text === adresse, namen(x) + (w ? " | " + w.text : ""));
+    // share wartet nicht auf die Zwischenablage (kein await dazwischen): Bei langsamer Zwischenablage steht share vor dem Ende von writeText
+    if (writeText === "langsam") ok("Teilen (i, " + bezeichnung + "): share wartet nicht auf die Zwischenablage (Reihenfolge: writeText, share, dann erst das Ende von writeText)", namen(x) === "writeText,share,writeText-fertig", namen(x));
+    ok("Teilen (i, " + bezeichnung + "): beide Aufrufe laufen im selben Klick (im Klick-Handler, Nutzergeste aktiv)", !!w && !!s && w.imKlick === true && s.imKlick === true && w.aktiv === true && s.aktiv === true, JSON.stringify(x.aufrufe.map((a) => [a.name, a.imKlick, a.aktiv])));
+    ok("Teilen (i, " + bezeichnung + "): share bekommt genau eine PDF-Datei (Typ application/pdf, Name " + dateiname + ", nicht leer), Betreff „" + betreff + "“ und den Text der E-Mail; keine weiteren Felder",
+      !!s && JSON.stringify(s.felder) === '["files","text","title"]' && s.dateien.length === 1 && s.dateien[0].istFile === true && s.dateien[0].typ === "application/pdf" && s.dateien[0].name === dateiname && s.dateien[0].groesse > 1000 && s.titel === betreff && s.titel === hilfen.mailBetreff(profil.vorname, profil.nachname) && s.text === hilfen.MAIL_TEXT && s.text === "Guten Tag,\n\nanbei die Anmeldung als PDF.\n\nViele Grüße",
+      s ? JSON.stringify({ felder: s.felder, dateien: s.dateien, titel: s.titel, text: s.text }) : "kein share-Aufruf");
+    ok("Teilen (i, " + bezeichnung + "): die Meldung unter den Knöpfen sagt „" + T.geteiltMitAdresse + "“; die Datei wird nicht gespeichert; kein Fehler in der Konsole", x.status === T.geteiltMitAdresse && x.status === "Geteilt. Die Adresse ist kopiert." && x.downloads.length === 0 && x.neueFehler.length === 0, x.status + " | Downloads: " + x.downloads.length + " | " + x.neueFehler.join(" ; "));
+  }
+
+  // (ii) writeText lehnt ab, wirft, hängt oder fehlt: Das Teilen läuft trotzdem, die Meldung sagt nur „Geteilt.“, es gibt keinen Seitenfehler
+  for (const [bezeichnung, writeText, erwartet] of [
+    ["writeText lehnt ab (kein Zugriff auf die Zwischenablage)", "ablehnen", "writeText,share"],
+    ["writeText wirft sofort", "wirft", "writeText,share"],
+    ["writeText bleibt offen (hängt)", "haengt", "writeText,share"],
+    ["navigator.clipboard fehlt", "fehlt", "share"],
+  ]) {
+    const x = await klicke({ share: "ok", writeText }, true);
+    const s = x.aufrufe.find((a) => a.name === "share");
+    ok("Teilen (ii, " + bezeichnung + "): das Teilen läuft trotzdem (share mit Datei, Betreff und Text), Reihenfolge der Aufrufe: " + erwartet, namen(x) === erwartet && !!s && s.dateien.length === 1 && s.titel === betreff && s.text === hilfen.MAIL_TEXT, namen(x));
+    ok("Teilen (ii, " + bezeichnung + "): die Meldung sagt nur „" + T.geteilt + "“ (die Adresse ist nicht kopiert), kein Seitenfehler, die Datei wird nicht gespeichert", x.status === T.geteilt && x.status === "Geteilt." && x.neueFehler.length === 0 && x.downloads.length === 0, x.status + " | " + x.neueFehler.join(" ; ") + " | Downloads: " + x.downloads.length);
+  }
+
+  // (iii) share wird abgebrochen (AbortError): keine Meldung, keine Datei gespeichert; anderer Fehler: Datei gespeichert und „Teilen geht hier nicht“
+  {
+    const x = await klicke({ share: "abbruch", writeText: "ok" }, false);
+    ok("Teilen (iii, Abbruch durch die Person, AbortError): keine Meldung, keine Datei gespeichert, kein Seitenfehler (writeText und share wurden aufgerufen)", x.status === "" && x.downloads.length === 0 && x.neueFehler.length === 0 && namen(x) === "writeText,share", "Meldung: „" + x.status + "“ | Downloads: " + x.downloads.length + " | " + namen(x) + " | " + x.neueFehler.join(" ; "));
+  }
+  for (const [bezeichnung, share] of [["share lehnt mit einem anderen Fehler ab (NotAllowedError)", "fehler"], ["share wirft sofort", "wirft"]]) {
+    const x = await klicke({ share, writeText: "ok" }, true);
+    ok("Teilen (iii, " + bezeichnung + "): die Datei wird gespeichert (" + dateiname + ") und die Meldung sagt „" + T.teilenFehler + "“, kein Seitenfehler", x.status === T.teilenFehler && x.status === "Teilen geht hier nicht. Die Datei wurde stattdessen gespeichert." && x.downloads.length === 1 && x.downloads[0].name === dateiname && x.neueFehler.length === 0, x.status + " | Downloads: " + JSON.stringify(x.downloads) + " | " + x.neueFehler.join(" ; "));
+  }
+  ok("Teilen: keine Fehler in der Konsole (kein pageerror, keine ungefangene Ablehnung)", page.__st.konsole.length === 0, page.__st.konsole.slice(0, 3).join(" | "));
+  await page.close();
+
+  // (v) Am Computer (1280 px, Maus) bleibt alles wie bisher: Weg über das Herunterladen, kein Rückfall, der Link zur E-Mail sichtbar neben „Adresse kopieren“;
+  // der Browser kann Dateien teilen, der Knopf „Datei teilen“ ist da, aber nicht der Hauptknopf
+  {
+    const RECHNER = { name: "1280x900", breite: 1280, hoehe: 900, mobil: false };
+    fs.mkdirSync(path.join(AUSGABE, RECHNER.name), { recursive: true });
+    const pc = await neueSeite(browser, server, RECHNER, "teilen-rechner", { vorLaden: stellvertreter });
+    await ladeBeispielPerKnopf(pc, "kind-neu");
+    const ctxPc = neuerKontext({ name: "teilen-rechner", vp: RECHNER, modus: "beispiel", gesehen: new Set(), touch: false, axeImmer: false, dateien });
+    const rPc = await laufe(pc, ctxPc);
+    const erreichtPc = rPc.besucht[rPc.besucht.length - 1].startsWith("fertig");
+    const datenPc = erreichtPc ? await ergebnisPruefen(pc, ctxPc, dateien) : null;
+    ok("Fertig-Seite am Computer (1280 px): bis „fertig“ durchgeklickt, Datei erstellt", erreichtPc && !!datenPc, rPc.besucht.length + " Seiten");
+    if (datenPc) {
+      const dc = await leseSenden(pc);
+      const teilenPc = await pc.$eval('#anmeldung [data-aktion="teilen"]', (e) => ({ da: !e.hidden, sekundaer: e.classList.contains("knopf--sekundaer") }));
+      const schritt = (vorlage, knopf) => vorlage.replace("{knopf}", knopf);
+      ok("Computer (v): nur der Weg über das Herunterladen (drei Schritte, ohne Überschrift), die Schritte aus dem Wörterbuch", !!dc && dc.wege.length === 1 && dc.wege[0].art === "computer" && dc.wege[0].titel === null && dc.wege[0].schritte.length === 3 &&
+        dc.wege[0].schritte[0] === schritt(T.senden.computer1, T.herunterladen) && dc.wege[0].schritte[1] === T.senden.computer2 && dc.wege[0].schritte[2] === T.senden.computer3, dc && dc.wege.map((w) => w.art + ": " + w.schritte.join(" | ")).join("; "));
+      ok("Computer (v): kein Rückfall „Teilen klappt nicht?“; der Link zur E-Mail ist sichtbar (mindestens 44 px hoch) neben „Adresse kopieren“, mailto: wie bisher; der Knopf „Datei teilen“ ist da, aber nicht der Hauptknopf",
+        !!dc && dc.rueckfall === null && dc.mailLinks === 1 && dc.mailLinksSichtbar === 1 && !!dc.link && dc.link.sichtbar && dc.link.hoehe >= 44 && dc.link.href === mailtoSoll && !!dc.kopieren && dc.kopieren.sichtbar && teilenPc.da && teilenPc.sekundaer && !/Teilen klappt nicht/.test(dc.seitenText),
+        dc && JSON.stringify({ rueckfall: dc.rueckfall, links: dc.mailLinks, sichtbar: dc.mailLinksSichtbar, teilen: teilenPc }));
+      // Bildschirmfoto (vor dem Klick auf „Datei teilen“, ohne Meldung): der Weg am Computer, Adresse, „Adresse kopieren“ und der Link zur E-Mail nebeneinander
+      await fotoAbschnitt(pc, path.join(AUSGABE, RECHNER.name, "computer-de.png"), RECHNER.breite);
+      // Auch am Computer legt „Datei teilen“ die Adresse in die Zwischenablage und gibt Betreff und Text mit (derselbe Knopf)
+      await pc.evaluate(() => { window.__aufrufe.length = 0; });
+      await pc.click('#anmeldung [data-aktion="teilen"]');
+      await pc.waitForFunction((wahl) => (document.querySelector(wahl) || {}).textContent !== "", { timeout: 6000 }, "#anmeldung .anm-ergebnis > p.anm-status").catch(() => {});
+      const aufPc = await pc.evaluate(() => ({ aufrufe: window.__aufrufe.map((a) => a.name + (a.titel ? ":" + a.titel : "")), status: (document.querySelector("#anmeldung .anm-ergebnis > p.anm-status") || {}).textContent }));
+      ok("Computer: „Datei teilen“ (hier der zweite Knopf) kopiert ebenfalls die Adresse und gibt Betreff und Text mit; Meldung „" + T.geteiltMitAdresse + "“", aufPc.aufrufe.join(",") === "writeText,share:" + betreff && aufPc.status === T.geteiltMitAdresse, JSON.stringify(aufPc));
+    }
+    ok("Computer: keine Fehler in der Konsole", pc.__st.konsole.length === 0, pc.__st.konsole.slice(0, 3).join(" | "));
+    await pc.close();
+  }
 }
 
 main().catch((e) => {

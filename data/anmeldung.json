@@ -1,6 +1,6 @@
 {
-  "stand": "2026-10-19",
-  "version": "2026-10-19.1",
+  "stand": "2026-10-30",
+  "version": "2026-10-30.1",
   "hinweis": "Regelwerk des Anmelde-Assistenten. Alle Zahlen und Fristen stehen hier; regeln.js enthält die Logik. Nichts hier enthält Personendaten.",
   "saison": "2026/27",
   "zugang": {
@@ -356,7 +356,7 @@
   "beitragsgruppen": {
     "fussball_jugend": {
       "abteilung": "fussball",
-      "bezeichnung": "Kinder und Jugendliche (Fußball, mit A-Jugend)",
+      "bezeichnung": "Kinder und Jugendliche (Fußball bis A-Jugend)",
       "jahr": 108,
       "monat": 9,
       "aufnahmeantragFeld": "s1.fussball.jugendlicher",
@@ -438,11 +438,12 @@
   },
   "beitragInfo": {
     "aufnahmegebuehr": 20,
+    "zuschlagOhneLastschrift": 3,
     "teilhabePauschaleMonat": 15,
     "faelligkeit": "jährlich zum 1. Januar im Voraus, Abbuchung im ersten Quartal; bei Eintritt im Jahr anteilig mit der Aufnahme",
     "kuendigung": "nur zum Ende eines Kalenderjahres, per Einschreiben an die Postanschrift",
     "mitgliedschaftBeginn": "Tag der Anmeldung (Satzung § 6)",
-    "quelle": "Aufnahmeantrag FFV und Beitragsübersicht, Stand 2026-09 (Beitragsübersicht am 2026-10-11 geprüft); SGB II § 28 Abs. 7 (15 Euro im Monat bis 18 Jahre)"
+    "quelle": "Aufnahmeantrag FFV und Beitragsübersicht, Stand 2026-09 (Beitragsübersicht am 2026-10-11 geprüft); SGB II § 28 Abs. 7 (15 Euro im Monat bis 18 Jahre); Zuschlag ohne Lastschrift (3 Euro im Jahr): Info-Blatt; Zuschlag am 19.10.2026 von der 1. Vorsitzenden bestätigt"
   },
   "unterlagen": {
     "U01": {
@@ -1884,8 +1885,8 @@
       "betrifft": [
         "U05"
       ],
-      "status": "geregelt",
-      "entscheidung": "Der Zuschlag wird nicht mehr genannt. Er steht nicht in der aktuellen Beitragsübersicht.",
+      "status": "entschieden",
+      "entscheidung": "Der Zuschlag von 3 Euro im Jahr ohne Lastschrift gilt weiter (1. Vorsitzende, 19.10.2026: „lassen wir drin“). Der Assistent nennt ihn bei „Rechnung“ (Jugendleitung, 30.10.2026).",
       "quelle": "Recherche Anmelde-Assistent, Abschnitt 8 (Stand 2026-09-29)"
     },
     {

@@ -138,6 +138,10 @@ export function mailtoAnVerein(adresse, vorname, nachname) {
   return "mailto:" + sauber(adresse) + "?subject=" + kodiere(mailBetreff(vorname, nachname)) + "&body=" + kodiere(MAIL_TEXT);
 }
 
+export function mailTeilen(vorname, nachname) {
+  return { title: mailBetreff(vorname, nachname), text: MAIL_TEXT };
+}
+
 export const MAIL_BETREFF_CODE = "Code für die Anmeldung";
 
 export function mailtoCode(adresse) {

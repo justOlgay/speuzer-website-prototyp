@@ -360,6 +360,14 @@ gruppe("2  Stand der Punkte gegen data/anmeldung.json");
   pruefe("O68 und O01 sind entschieden: Kennzeichen „Entschieden“, nicht „offen“; O01 verweist auf O68, die Antwort der Passstelle und den Schalter",
     sichtbarMit("O01", [/Vorerst gilt O68/, /Antwort der Passstelle steht aus/, /unterschriftHfv/, /„stift“/]) &&
       ["O01", "O68"].every((id) => (nachId.get(id.toLowerCase()) || [])[0] && nachId.get(id.toLowerCase())[0].attrs["data-status"] === "entschieden"));
+  // MR-1 (30.10.2026): Der Zuschlag von 3 Euro im Jahr ohne Lastschrift gilt weiter (1. Vorsitzende, 19.10.2026); der Assistent nennt ihn bei „Rechnung“ (O38).
+  pruefe("O38: entschieden und sichtbar mit der Entscheidung (der Zuschlag von 3 Euro im Jahr gilt weiter, 1. Vorsitzende 19.10.2026, der Assistent nennt ihn bei „Rechnung“, Jugendleitung 30.10.2026; kein Personenname)",
+    sichtbarMit("O38", [/Zuschlag von 3 Euro im Jahr ohne Lastschrift gilt weiter/, /1\. Vorsitzende, 19\.10\.2026: „lassen wir drin“/, /nennt ihn bei „Rechnung“ \(Jugendleitung, 30\.10\.2026\)/]) &&
+      !/Olgay/.test(seiteText) &&
+      (nachId.get("o38") || [])[0].attrs["data-status"] === "entschieden");
+  pruefe("Irrtum „Die Erlaubnis für die Lastschrift (SEPA) gehört immer dazu“: Der Zuschlag steht im Info-Blatt, die 1. Vorsitzende hat ihn bestätigt, der Assistent nennt ihn bei „Rechnung“ (nicht mehr „nicht mehr genannt“)",
+    /Der Zuschlag von 3 € im Jahr ohne Lastschrift steht im Info-Blatt von 2014/.test(seiteText) && /Die 1\. Vorsitzende hat ihn am 19\.10\.2026 bestätigt/.test(seiteText) &&
+      /Der Assistent nennt ihn bei „Rechnung“/.test(seiteText) && !/nennt ihn nicht mehr|Zuschlag wird nicht mehr genannt/.test(seiteText));
 
   // 2.5 Kasten „Stand“ ganz oben: Datum, Gesamtzahl und Zahl je Stand kommen aus den Daten
   const kasten = alle(baum, (k) => k.attrs.id === "stand")[0];
@@ -555,6 +563,15 @@ gruppe("4  Endstand in den Abschnitten „Assistent“, „PDF“ und „Untersc
   kriterium("k  Versand und Übergabe: die ganze Datei geht per E-Mail an die Geschäftsstelle, auch Teil C; der Verein bewahrt Teil C getrennt auf; der 1. Kassierer prüft beim Erfassen; kein Server-Versand zum Start", D,
     [/Die Familie schickt die ganze Datei per E-Mail an die Geschäftsstelle, auch Teil C/, /1\. Vorsitzende am 11\.10\.2026/, /O25/, /O73/, /Der Verein bewahrt Teil C getrennt von den übrigen Unterlagen auf/,
       /1\. Kassierer prüft beim Erfassen, ob alles da ist/, /Kein automatischer Versand zum Start/, /O72/, /Spielausschuss Senioren/, /O24/, /Tag des Eingangs/, /O69/]);
+  // MR-2 (30.10.2026; Test der 1. Vorsitzenden am Android-Handy am 22.10.2026): Am Handy mit „Datei teilen“ ist das Teilen der einzige sichtbare Weg. Der Knopf kopiert die
+  // Adresse der Geschäftsstelle und gibt der Mail-App Betreff und Text mit; der Link zur E-Mail steht nur noch zugeklappt im Rückfall „Teilen klappt nicht?“. Computer und Handy ohne Teilen wie bisher.
+  kriterium("k  Versand am Handy: „Datei teilen“ ist der einzige sichtbare Weg, kopiert die Adresse und gibt Betreff und Text mit; der Link zur E-Mail steht nur zugeklappt im Rückfall „Teilen klappt nicht?“; Computer und Handy ohne Teilen wie bisher", D,
+    [/Am Handy mit „Datei teilen“ ist das Teilen der einzige sichtbare Weg/, /Seit dem 30\.10\.2026 kopiert der Knopf die Adresse der Geschäftsstelle selbst und gibt der Mail-App Betreff und Text mit/,
+      /fügt die Adresse bei „An“ ein/, /nur noch zugeklappt im Rückfall „Teilen klappt nicht\?“/, /Test der 1\. Vorsitzenden am Android-Handy am 22\.10\.2026: Ein Link kann keine Datei anhängen/,
+      /Am Computer und am Handy ohne Teilen zeigt der Assistent „Datei herunterladen“, die Adresse mit einem Knopf zum Kopieren und den Link, der die E-Mail öffnet/, /nicht per WhatsApp/]);
+  pruefe("k  die Seite beschreibt den alten Weg am Handy nicht mehr (zuerst Adresse kopieren, dann teilen, Link zur E-Mail neben dem Knopf zum Kopieren)",
+    !/am Handy mit „Datei teilen“, sonst am Computer/.test(seiteText) && !/Bei „E-Mail an die Geschäftsstelle öffnen“ hängen Sie die Datei selbst an/.test(seiteText),
+    ["die Seite beschreibt noch den alten Weg am Handy"]);
   kriterium("k  Teil B geht per E-Mail an die Geschäftsstelle, Teil C heißt „Vertraulich“ und liegt beim Verein getrennt", P,
     [/Geht per E-Mail an die Geschäftsstelle/, /Teil C – Vertraulich/, /Der Verein bewahrt ihn getrennt auf/, /Trennblatt: Was mit Teil C geschieht/]);
   pruefe("k  die Seite sagt nirgends mehr, die Familie gebe die Unterlagen im Verein ab, gebe Teil C getrennt ab, brauche einen Umschlag oder müsse auf den automatischen Versand warten",

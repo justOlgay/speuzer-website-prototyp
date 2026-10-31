@@ -62,7 +62,7 @@
 const PFAD = "../";
 const STAND_RECHERCHE = "29.09.2026";
 const STAND_ABGLEICH = "12.10.2026";
-const REGELWERK_VERSION = "2026-10-19.1";
+const REGELWERK_VERSION = "2026-10-30.1";
 const PROTOTYP = `${PFAD}anmeldung/`;
 
 // ---------- Stand der Punkte (data/anmeldung.json › offenePunkte, beim Bau gesetzt) ----------
@@ -899,7 +899,7 @@ const GELERNT = [
   ],
   [
     "Die Erlaubnis für die Lastschrift (SEPA) gehört immer dazu.",
-    "**Vereinssache, keine Pflicht des Verbands.** Ohne Erlaubnis für die Lastschrift bekommt die Familie eine Rechnung. Der Zuschlag von 3 € ohne Lastschrift steht im Info-Blatt von 2014. Im Aufnahmeantrag 9/2026 und in der Beitragsübersicht steht er nicht. Der Assistent nennt ihn nicht mehr ({o:O38}).",
+    "**Vereinssache, keine Pflicht des Verbands.** Ohne Erlaubnis für die Lastschrift bekommt die Familie eine Rechnung. Der Zuschlag von 3 € im Jahr ohne Lastschrift steht im Info-Blatt von 2014. Im Aufnahmeantrag 9/2026 und in der Beitragsübersicht steht er nicht. Die 1. Vorsitzende hat ihn am 19.10.2026 bestätigt. Der Assistent nennt ihn bei „Rechnung“ ({o:O38}).",
   ],
 ];
 
@@ -1039,7 +1039,7 @@ function datenschutzAbschnitt() {
     <h3>Versand und Übergabe</h3>
     ${liste([
       "Die Familie schickt die ganze Datei per E-Mail an die Geschäftsstelle, auch Teil C. Das hat die 1. Vorsitzende am 11.10.2026 entschieden ({o:O25}, {o:O73}). Der Assistent sendet selbst nichts. Es gibt keinen Server-Versand ({o:O72}).",
-      "Der Assistent zeigt die Schritte für das Gerät der Familie: am Handy mit „Datei teilen“, sonst am Computer mit „Datei herunterladen“. Dazu zeigt er die Adresse mit einem Knopf zum Kopieren und einen Link, der die E-Mail öffnet. Die Familie hängt die Datei selbst an. Der Assistent bittet, die Datei nicht per WhatsApp zu schicken.",
+      "Der Assistent zeigt die Schritte für das Gerät der Familie. Am Handy mit „Datei teilen“ ist das Teilen der einzige sichtbare Weg. Seit dem 30.10.2026 kopiert der Knopf die Adresse der Geschäftsstelle selbst und gibt der Mail-App Betreff und Text mit. Die Familie wählt ihr Mail-Programm und fügt die Adresse bei „An“ ein. Der Link zur E-Mail steht dort nur noch zugeklappt im Rückfall „Teilen klappt nicht?“. Anlass war der Test der 1. Vorsitzenden am Android-Handy am 22.10.2026: Ein Link kann keine Datei anhängen. Am Computer und am Handy ohne Teilen zeigt der Assistent „Datei herunterladen“, die Adresse mit einem Knopf zum Kopieren und den Link, der die E-Mail öffnet. Die Familie hängt die Datei dort selbst an. Der Assistent bittet, die Datei nicht per WhatsApp zu schicken.",
       "Der Verein bewahrt Teil C getrennt von den übrigen Unterlagen auf. Der 1. Kassierer prüft beim Erfassen, ob alles da ist ({o:O25}).",
       "Das Passwesen gibt die Spielerpässe in DFBnet ein: für die Jugend der 1. Kassierer, für die Herren der Spielausschuss Senioren ({o:O24}). Auch die Vollmacht für die Abmeldung gibt das Passwesen in DFBnet ein, am besten am Tag des Eingangs ({o:O69}).",
       "Zur Einordnung: Die Datenschutzkonferenz verlangt bei hohem Risiko Ende-zu-Ende-Verschlüsselung oder ein Webportal (Orientierungshilfe vom 16. Juni 2021). Der Verein hat sich für die E-Mail entschieden ({o:O73}).",

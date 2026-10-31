@@ -278,6 +278,16 @@ function zahlungDaten(k) {
   return k.a.zahlung;
 }
 
+function rechnungHinweis(k) {
+  const info = (k.konfig.anmeldung && k.konfig.anmeldung.beitragInfo) || {};
+  const betrag = info.zuschlagOhneLastschrift;
+  const hatBetrag = typeof betrag === "number" && Number.isFinite(betrag) && betrag > 0;
+  const text = k.t("zahlung.art.rechnungHinweis", { betrag: hatBetrag ? betrag : undefined });
+  if (hatBetrag || typeof text !== "string" || !text.includes("{betrag}")) return text;
+  const saetze = text.match(/[^.!?\u061F]+(?:[.!?\u061F]+|$)\s*/g) || [text];
+  return saetze.filter((satz) => !satz.includes("{betrag}")).join("").trim();
+}
+
 export const zahlung = {
   id: "zahlung",
   teile(k) {
@@ -293,7 +303,7 @@ export const zahlung = {
             pfad: "zahlung.art",
             optionen: [
               { wert: "sepa", label: k.t("zahlung.art.sepa"), hinweis: k.t("zahlung.art.sepaHinweis") },
-              { wert: "rechnung", label: k.t("zahlung.art.rechnung"), hinweis: k.t("zahlung.art.rechnungHinweis") },
+              { wert: "rechnung", label: k.t("zahlung.art.rechnung"), hinweis: rechnungHinweis(k) },
             ],
           }),
         ],
@@ -440,6 +450,8 @@ export const einwilligungen = {
           h("div", { klasse: "anm-karten" },
             unter16 ? kaestchen(k, { pfad: "einwilligungen.hfvName", label: k.t("einwilligungen.hfv.name"), hinweis: k.t("einwilligungen.hfv.nameHinweis") }) : null,
             kaestchen(k, { pfad: "einwilligungen.hfvFoto", label: k.t("einwilligungen.hfv.foto"), hinweis: k.t("einwilligungen.hfv.fotoHinweis") })),
+
+          h("p", { klasse: "anm-hinweis" }, k.t("einwilligungen.hfv.passfoto")),
           unter16 ? null : h("p", { klasse: "anm-hinweis" }, k.t("einwilligungen.hfv.ab16")),
         ],
       };

@@ -481,7 +481,7 @@ export default {
     // Namen der Beitragsgruppen (Schlüssel wie in data/anmeldung.json › beitragsgruppen). Auf Deutsch wortgleich mit
     // › bezeichnung; die Oberfläche nutzt diese Texte und fällt auf die Daten zurück, wenn ein Schlüssel fehlt.
     gruppen: {
-      fussball_jugend: "Kinder und Jugendliche (Fußball, mit A-Jugend)",
+      fussball_jugend: "Kinder und Jugendliche (Fußball bis A-Jugend)",
       fussball_erwachsene: "Erwachsene (Fußball)",
       fussball_passiv: "Passive, Frauen und Rentner ab 65 (Fußball)",
       fussball_familie: "Familienbeitrag (Fußball)",

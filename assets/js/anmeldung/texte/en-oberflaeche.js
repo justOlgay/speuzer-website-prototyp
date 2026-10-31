@@ -638,7 +638,7 @@ export default {
       sepa: "Direct debit (Lastschrift), recommended",
       sepaHinweis: "The club collects the fee once a year.",
       rechnung: "Invoice",
-      rechnungHinweis: "You transfer the membership fee yourself.",
+      rechnungHinweis: "You transfer the membership fee yourself. There is an extra charge of {betrag} euros a year.",
     },
     inhaber: {
       titel: "Who owns the account?",
@@ -673,12 +673,13 @@ export default {
       dokumentation: "In anniversary books and chronicles",
     },
     hfv: {
-      titel: "What may the Hessian Football Association (Hessischer Fußball-Verband, HFV) publish?",
+      titel: "May name and photo appear on the internet?",
       hinweis: "Both are voluntary. You can change this later.",
       name: "The name may appear on FUSSBALL.DE.",
       nameHinweis: "This applies to children under 16.",
       foto: "The photo may appear on the internet.",
       fotoHinweis: "For example on FUSSBALL.DE.",
+      passfoto: "The photo for the player pass (Spielerpass) is required. It is not public.",
       ab16: "From age 16 the association may show the name without consent. You can object.",
     },
     fahrten: {
@@ -958,6 +959,7 @@ export default {
     fotoSpeichern: "Save player photo as an image",
     gespeichert: "The file is being saved. It is usually in the “Downloads” folder.",
     geteilt: "Shared.",
+    geteiltMitAdresse: "Shared. The address is copied.",
     teilenFehler: "Sharing does not work here. The file was saved instead.",
     fehler: {
       bibliothek: "A part of the program cannot be loaded. Please check your internet connection.",
@@ -969,8 +971,8 @@ export default {
     // Send the file by email (M10); {knopf} is the label of the button. Subject and text of the email stay German (hilfen.js).
     senden: {
       titel: "How to send the file to the club",
-      handy1: "Tap “{knopf}” below.",
-      handy2: "Tap “{knopf}” above. Choose your email app. The file is already attached.",
+      handy1: "Tap “{knopf}” above. The address is copied.",
+      handy2: "Choose your email app. The file is already attached.",
       handy3: "Paste the address into “To”. Send the email.",
       computer1: "Click “{knopf}” above.",
       computer2: "Write a new email. Attach the file.",
@@ -980,7 +982,8 @@ export default {
       kopiert: "The address is copied.",
       kopierenFehler: "Copying does not work here. The address is selected. Copy it yourself.",
       oeffnen: "Open an email to the club office",
-      anhang: "With “{knopf}”, attach the file yourself.",
+      rueckfallTitel: "Sharing not working?",
+      rueckfall: "Download the file. Then open a new email. Attach the file yourself.",
     },
     naechsteTitel: "What happens next",
     unterschriftTraining: "You sign the pages for the Hessian Football Association (Hessischer Fußball-Verband, HFV) with a pen at the first training.",

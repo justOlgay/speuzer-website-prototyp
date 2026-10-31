@@ -148,9 +148,27 @@ async function neueSeite(browser, server, name, abfrage = "") {
   await page.setViewport({ width: MOBIL.breite, height: MOBIL.hoehe, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
   await page.evaluateOnNewDocument(UHR);
   // M10: Der Handy-Browser kann Dateien teilen (Web Share): Die Fertig-Seite zeigt „Datei teilen“ und den Weg am Handy (beide Wege des Abschnitts)
+  // MR-2 (30.10.2026): Stellvertreter für Teilen und Zwischenablage zeichnen die Aufrufe auf (window.__aufrufe): Der Klick auf „Datei teilen“ legt die
+  // Adresse in die Zwischenablage und gibt der Mail-App die Datei mit Betreff und Text (immer deutsch); die Meldung dazu steht in der Sprache.
   await page.evaluateOnNewDocument(() => {
+    window.__aufrufe = [];
     Object.defineProperty(navigator, "canShare", { value: () => true, configurable: true });
-    Object.defineProperty(navigator, "share", { value: () => Promise.resolve(), configurable: true });
+    Object.defineProperty(navigator, "share", {
+      value: (daten) => {
+        window.__aufrufe.push({ name: "share", titel: daten && daten.title, text: daten && daten.text, dateien: ((daten && daten.files) || []).map((f) => f.type) });
+        return Promise.resolve();
+      },
+      configurable: true,
+    });
+    Object.defineProperty(navigator, "clipboard", {
+      value: {
+        writeText: (text) => {
+          window.__aufrufe.push({ name: "writeText", text });
+          return Promise.resolve();
+        },
+      },
+      configurable: true,
+    });
   });
   const st = { name, konsole: [], warnungen: [], hosts: new Set(), antworten: [] };
   page.on("console", (m) => {
@@ -378,10 +396,12 @@ async function pruefeKeineTeilListe(page, dict, kennung) {
 }
 
 // M10 (11.10.2026): Ergebnisseite – der Abschnitt „So schicken Sie die Datei an den Verein“ trägt die Texte der Sprache: Überschrift, die Schritte (mit der
-// Beschriftung der Knöpfe aus dem Wörterbuch der Sprache), die Beschriftung der Knöpfe, den Hinweis zum Anhang. P3 Teil b: kein Satz unter der Überschrift, keine
+// Beschriftung der Knöpfe aus dem Wörterbuch der Sprache), die Beschriftung der Knöpfe. P3 Teil b: kein Satz unter der Überschrift, keine
 // Überschriften der Wege; es steht nur der Weg, der zum Gerät passt (am Handy mit „Datei teilen“ der Weg am Handy, sonst der Weg am Computer).
 // Die Adresse steht von links nach rechts (auch in Arabisch). Der mailto-Link bleibt in jeder Sprache deutsch: Betreff „Anmeldung Vorname Nachname“ und
 // der deutsche Text, richtig kodiert (die Geschäftsstelle liest Deutsch).
+// MR-2 (30.10.2026): Am Handy mit „Datei teilen“ steht der Link zur E-Mail nur im zugeklappten Rückfall („Teilen klappt nicht?“, mit dem Satz dazu); der Klick auf
+// „Datei teilen“ legt die Adresse in die Zwischenablage und gibt der Mail-App Datei, Betreff und Text (deutsch); die Meldung dazu steht in der Sprache.
 
 // Liest die Wege des Abschnitts: Art, Überschrift (null, wenn es keine gibt) und die Schritte
 const leseSendenWege = (page) =>
@@ -399,12 +419,12 @@ const leseSendenWege = (page) =>
   });
 
 // Prüft den einen Weg des Abschnitts: Art, keine Überschrift, drei Schritte in der Sprache; die Schritte nennen die Knöpfe mit ihrer Beschriftung aus dem Wörterbuch:
-// am Handy Schritt 1 „Adresse kopieren“ und Schritt 2 „Datei teilen“ (U-01, 12.10.2026), am Computer Schritt 1 „Datei herunterladen“
+// am Handy Schritt 1 „Datei teilen“ (MR-2, 30.10.2026: Der Klick kopiert die Adresse; davor U-01: „Adresse kopieren“ und „Datei teilen“), am Computer Schritt 1 „Datei herunterladen“
 function pruefeSendenWeg(d, dict, kennung, art, zusatz) {
   const F = dict.fertig;
   const S = F.senden;
   const o = ohneSteuer;
-  const knoepfe = art === "handy" ? [S.kopieren, F.teilen, ""] : [F.herunterladen, "", ""];
+  const knoepfe = art === "handy" ? [F.teilen, "", ""] : [F.herunterladen, "", ""];
   const w = d.wege[0];
   const soll = (i) => o(S[art + (i + 1)].replace("{knopf}", knoepfe[i]));
   ok(kennung + ": Abschnitt: nur der Weg " + (art === "handy" ? "am Handy" : "am Computer") + zusatz + ", ohne Überschrift, drei Schritte in der Sprache, mit der Beschriftung der Knöpfe „" + knoepfe.filter(Boolean).map(o).join("“, „") + "“",
@@ -424,6 +444,7 @@ async function pruefeSenden(page, dict, kennung, server, beispielId) {
     const text = (e) => (e ? e.textContent : null);
     const adresseEl = abschnitt.querySelector("[data-mail-adresse]");
     const link = abschnitt.querySelector('a[data-aktion="mail-oeffnen"]');
+    const rueckfall = abschnitt.querySelector("details[data-rueckfall]");
     return {
       adresse: text(adresseEl),
       adresseDir: adresseEl && adresseEl.getAttribute("dir"),
@@ -431,6 +452,9 @@ async function pruefeSenden(page, dict, kennung, server, beispielId) {
       kopieren: text(abschnitt.querySelector('button[data-aktion="adresse-kopieren"]')),
       linkText: text(link),
       href: link && link.getAttribute("href"),
+      linkSichtbar: !!link && link.checkVisibility(),
+      mailLinks: abschnitt.querySelectorAll('a[data-aktion="mail-oeffnen"]').length,
+      rueckfall: rueckfall && { offen: rueckfall.open, titel: text(rueckfall.querySelector("summary")), text: text(rueckfall.querySelector("p")), linkDrin: !!rueckfall.querySelector('a[data-aktion="mail-oeffnen"]') },
       hinweise: Array.from(abschnitt.querySelectorAll("p.anm-hinweis")).map((p) => p.textContent),
     };
   });
@@ -442,13 +466,46 @@ async function pruefeSenden(page, dict, kennung, server, beispielId) {
   // Die Seiten des Tests tun, als könne der Browser Dateien teilen (navigator.share): Am Handy steht der Weg über das Teilen, am Computer der Weg über das Herunterladen.
   pruefeSendenWeg(w, dict, kennung, w.handy ? "handy" : "computer", " (der Browser kann Dateien teilen; Gerät " + (w.handy ? "mit" : "ohne") + " Touch-Bedienung)");
   ok(kennung + ": Abschnitt: Adresse der Geschäftsstelle aus der Konfiguration, von links nach rechts (dir=ltr), mit der Beschriftung der Sprache", d.adresse === adresse && d.adresseDir === "ltr" && o(d.adressLabel) === o(S.adresseTitel), d.adresse + " (" + d.adresseDir + ")");
-  // U-01: Der Hinweis zum Anhang („Bei „…“ hängen Sie die Datei selbst an“) steht nur am Handy; am Computer steht „Datei anhängen“ schon im zweiten Schritt
-  const anhangSoll = o(S.anhang.replace("{knopf}", S.oeffnen));
-  const anhangDa = d.hinweise.map(o).includes(anhangSoll);
-  ok(kennung + ": Abschnitt: Knöpfe „" + o(S.kopieren) + "“ und „" + o(S.oeffnen) + "“ in der Sprache; Hinweis zum Anhang " + (w.handy ? "steht (am Handy)" : "entfällt (am Computer)"), o(d.kopieren) === o(S.kopieren) && o(d.linkText) === o(S.oeffnen) && anhangDa === !!w.handy, o(d.kopieren) + " | " + o(d.linkText) + " | " + d.hinweise.map(o).join(" / "));
+  // MR-2 (30.10.2026): Der Hinweis zum Anhang beim Link (S.anhang) gibt es nicht mehr; am Handy mit „Datei teilen“ steht der Link zur E-Mail nur im zugeklappten Rückfall
+  // („Teilen klappt nicht?“ mit dem Satz dazu), am Computer sichtbar neben „Adresse kopieren“.
+  ok(kennung + ": Abschnitt: Knöpfe „" + o(S.kopieren) + "“ und „" + o(S.oeffnen) + "“ in der Sprache; kein Hinweis zum Anhang beim Link mehr (Schlüssel anhang entfällt)", o(d.kopieren) === o(S.kopieren) && o(d.linkText) === o(S.oeffnen) && S.anhang === undefined && d.hinweise.length === 1 && o(d.hinweise[0]) === o(F.nichtWhatsapp), o(d.kopieren) + " | " + o(d.linkText) + " | " + d.hinweise.map(o).join(" / "));
+  if (w.handy) {
+    ok(kennung + ": Rückfall am Handy: zugeklappt, Zusammenfassung „" + o(S.rueckfallTitel) + "“ und Satz „" + o(S.rueckfall) + "“ in der Sprache, der Link zur E-Mail liegt darin und ist nicht zu sehen (der einzige Link zur E-Mail)",
+      !!d.rueckfall && d.rueckfall.offen === false && o(d.rueckfall.titel) === o(S.rueckfallTitel) && o(d.rueckfall.text) === o(S.rueckfall) && d.rueckfall.linkDrin === true && d.mailLinks === 1 && d.linkSichtbar === false,
+      d.rueckfall ? o(d.rueckfall.titel) + " | " + o(d.rueckfall.text) + " | offen: " + d.rueckfall.offen + ", Link sichtbar: " + d.linkSichtbar : "kein Rückfall");
+  } else {
+    ok(kennung + ": Computer: kein Rückfall, der Link zur E-Mail ist sichtbar", d.rueckfall === null && d.mailLinks === 1 && d.linkSichtbar === true, JSON.stringify({ rueckfall: d.rueckfall, sichtbar: d.linkSichtbar }));
+  }
   // Der Link bleibt deutsch, in jeder Sprache
   const soll = "mailto:" + adresse + "?subject=" + encodeURIComponent("Anmeldung " + a.vorname + " " + a.nachname) + "&body=Guten%20Tag%2C%0D%0A%0D%0Aanbei%20die%20Anmeldung%20als%20PDF.%0D%0A%0D%0AViele%20Gr%C3%BC%C3%9Fe";
   ok(kennung + ": mailto-Link bleibt deutsch (Betreff „Anmeldung " + a.vorname + " " + a.nachname + "“, deutscher Text, kodiert), ohne Steuerzeichen für die Schreibrichtung", d.href === soll && !/%E2%81|%E2%80/.test(d.href), d.href);
+  if (!w.handy) return;
+  // MR-2: Ein Klick auf „Datei teilen“ legt die Adresse in die Zwischenablage und gibt der Mail-App die Datei mit Betreff und Text (deutsch, in jeder Sprache gleich);
+  // die Meldung unter den Knöpfen steht in der Sprache („Geteilt. Die Adresse ist kopiert.“)
+  const statusWahl = "#anmeldung .anm-ergebnis > p.anm-status";
+  await page.evaluate((wahl) => {
+    window.__aufrufe.length = 0;
+    const s = document.querySelector(wahl);
+    if (s) s.textContent = "";
+  }, statusWahl);
+  await page.click('#anmeldung [data-aktion="teilen"]');
+  await page.waitForFunction((wahl) => (document.querySelector(wahl) || {}).textContent !== "", { timeout: 6000 }, statusWahl).catch(() => {});
+  const teilen = await page.evaluate((wahl) => ({ aufrufe: window.__aufrufe, status: (document.querySelector(wahl) || {}).textContent || "" }), statusWahl);
+  const sh = teilen.aufrufe.find((x) => x.name === "share");
+  const wt = teilen.aufrufe.find((x) => x.name === "writeText");
+  ok(kennung + ": „" + o(F.teilen) + "“: writeText mit der Adresse zuerst, dann share mit der PDF-Datei; Betreff „Anmeldung " + a.vorname + " " + a.nachname + "“ und Text bleiben deutsch",
+    teilen.aufrufe.map((x) => x.name).join(",") === "writeText,share" && !!wt && wt.text === adresse && !!sh && sh.dateien.length === 1 && sh.dateien[0] === "application/pdf" && sh.titel === "Anmeldung " + a.vorname + " " + a.nachname && sh.text === "Guten Tag,\n\nanbei die Anmeldung als PDF.\n\nViele Grüße",
+    JSON.stringify(teilen.aufrufe));
+  ok(kennung + ": Meldung nach dem Teilen in der Sprache: „" + o(F.geteiltMitAdresse) + "“", o(teilen.status) === o(F.geteiltMitAdresse) && F.geteiltMitAdresse !== F.geteilt, o(teilen.status));
+  // Rückfall öffnen: Der Link zur E-Mail ist da (Beschriftung der Sprache, mailto deutsch); danach wieder zuklappen
+  await page.click("#anmeldung details[data-rueckfall] > summary");
+  const offen = await page.evaluate(() => {
+    const l = document.querySelector('#anmeldung [data-senden] a[data-aktion="mail-oeffnen"]');
+    const r = l && l.getBoundingClientRect();
+    return { sichtbar: !!l && l.checkVisibility(), hoehe: r ? Math.round(r.height) : 0, text: l ? l.textContent : "", href: l ? l.getAttribute("href") : "" };
+  });
+  ok(kennung + ": Rückfall geöffnet: der Link „" + o(S.oeffnen) + "“ ist sichtbar (mindestens 44 px hoch), mailto: wie bisher", offen.sichtbar && offen.hoehe >= 44 && o(offen.text) === o(S.oeffnen) && offen.href === soll, JSON.stringify(offen));
+  await page.click("#anmeldung details[data-rueckfall] > summary");
 }
 
 // Der Browser kann keine Dateien teilen (kein „Datei teilen“): Nach dem Neuzeichnen der Fertig-Seite (zurück zur Prüfseite und wieder vor; die Datei bleibt) steht der

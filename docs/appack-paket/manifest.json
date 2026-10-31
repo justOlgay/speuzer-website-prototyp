@@ -7,8 +7,8 @@
   "dateien": [
     {
       "datei": "web/anmeldung.html",
-      "bytes": 101425,
-      "sha256": "a4f50db54171ea9333495505b3a50323b1e3f80a80fa608ba43876dec9e1291b"
+      "bytes": 101567,
+      "sha256": "1a01ffff674da911c25ffe5300a39a8d18a83bf5abd856b9b84d193943757659"
     },
     {
       "datei": "web/aufnahmeantrag.html",
@@ -257,8 +257,8 @@
     },
     {
       "datei": "web/anmeldung-hilfen.js",
-      "bytes": 5238,
-      "sha256": "15d43b38243058bb1397d953cd430f010f6d32ca86eca65cdf7e683fb703372d"
+      "bytes": 5358,
+      "sha256": "547e1ccc8afa97eb7ed1af53cbec1eaeb88d22118b7664acef52301490b18a34"
     },
     {
       "datei": "web/anmeldung-laender.js",
@@ -278,7 +278,7 @@
     {
       "datei": "web/anmeldung-regeln.js",
       "bytes": 53865,
-      "sha256": "41b15220053892c11fafd6c2289a775e5b82447cbc911b2ccbdc69c05aee2dda"
+      "sha256": "3a394880862822fe5fd7e341e2d5b5195cb5c52775131faffc2bc9481b97e7cf"
     },
     {
       "datei": "web/anmeldung-schrift.js",
@@ -287,8 +287,8 @@
     },
     {
       "datei": "web/anmeldung-seiten-ende.js",
-      "bytes": 26840,
-      "sha256": "5692ca0da12c0e8c5dcdc6221be93214e3b0eabcdb0d5821ab1b5a79b18b16d2"
+      "bytes": 27769,
+      "sha256": "954fe78d2c04549eef0a7dff4ae9195c3528071018dd5c16a75957f43d4ae1ba"
     },
     {
       "datei": "web/anmeldung-seiten-fussball.js",
@@ -307,8 +307,8 @@
     },
     {
       "datei": "web/anmeldung-seiten-verein.js",
-      "bytes": 25814,
-      "sha256": "25f7d3ff15a4b810fafc568fbd05f94104258072f1790f5995894a2fae2be793"
+      "bytes": 26465,
+      "sha256": "4e2d572d69180b62c587db05417e7248eef6ec64d7d1e925065362f233f4f73c"
     },
     {
       "datei": "web/anmeldung-seiten-zugang.js",
@@ -322,8 +322,8 @@
     },
     {
       "datei": "web/anmeldung-texte-ar-oberflaeche.js",
-      "bytes": 49622,
-      "sha256": "31bf5a310951e7e1f605ea086be508a09d39482de7f525e7009761b54b38f330"
+      "bytes": 49926,
+      "sha256": "8871d7e643a7b2318cfcbefb4c3a3febfae7d0a24549eb475c3214e312029e85"
     },
     {
       "datei": "web/anmeldung-texte-ar-regeln.js",
@@ -332,18 +332,18 @@
     },
     {
       "datei": "web/anmeldung-texte-de-oberflaeche.js",
-      "bytes": 39240,
-      "sha256": "d80dfa1ea4eb5a5aee3e1453e91489f5f2f56d30d824ed9e464e46e49db46636"
+      "bytes": 39501,
+      "sha256": "ccee6e59da41695570347ee0193ec2c06592ecfb40caebe031529d4900c9c4ea"
     },
     {
       "datei": "web/anmeldung-texte-de-regeln.js",
-      "bytes": 36820,
-      "sha256": "112113898f519d1b952433de17f472fc38ce545aafd750d40f7a65b34d64e010"
+      "bytes": 36819,
+      "sha256": "06d9065c6bf0eaca856d70c6ad02be071879c089348a8ec128be1ffabc431da5"
     },
     {
       "datei": "web/anmeldung-texte-en-oberflaeche.js",
-      "bytes": 37681,
-      "sha256": "c55d2aec84b3dac28663b1f09673fe2d9b772db233e036148b1116c7935a3278"
+      "bytes": 37907,
+      "sha256": "8b52306ea54dfde22fe7ecee28f7b90c80d271425d8fa578ae6f5dec4fc8e933"
     },
     {
       "datei": "web/anmeldung-texte-en-regeln.js",
@@ -352,8 +352,8 @@
     },
     {
       "datei": "web/anmeldung-texte-tr-oberflaeche.js",
-      "bytes": 39664,
-      "sha256": "827f027b8165a54fad0c2837fd828516ff8ef42614eb7c04681371c53e1b3c4a"
+      "bytes": 39868,
+      "sha256": "72f00f87f5d45439ade343a72eac5f984cb033e91c60af691003b332327fcd9d"
     },
     {
       "datei": "web/anmeldung-texte-tr-regeln.js",
@@ -407,8 +407,8 @@
     },
     {
       "datei": "web/anmeldung.css",
-      "bytes": 23464,
-      "sha256": "2d03cbc47d7dcd669a528f04121161055b501e245e4bfb282b499b891b83b931"
+      "bytes": 23646,
+      "sha256": "e9ec27f09276cc3ba577fe79a448bce55f63685b397cc14355e2b84f199a4e1e"
     }
   ]
 }

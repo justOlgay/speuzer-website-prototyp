@@ -1366,6 +1366,19 @@ a.anm-zurueck:focus-visible {
   flex: 1 1 14rem;
 }
 
+/* Rückfall am Handy mit "Datei teilen" (MR-2): zugeklappt unter der Adresse. Er sagt, was zu tun ist, wenn das Teilen nicht klappt,
+   und trägt den einzigen Link zur E-Mail. Der Aufklapper selbst ist ".anm-einzelheiten" (Pfeil, Tippfläche mindestens 44 px). */
+.anm-senden__rueckfall-inhalt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding-block-end: var(--sp-2);
+}
+
+.anm-senden__rueckfall-inhalt p {
+  margin: 0;
+}
+
 @media (min-width: 720px) {
   .anm-senden__wege {
     grid-template-columns: repeat(2, minmax(0, 1fr));

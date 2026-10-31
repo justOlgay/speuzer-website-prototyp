@@ -191,6 +191,13 @@ export function mailtoAnVerein(adresse, vorname, nachname) {
   return "mailto:" + sauber(adresse) + "?subject=" + kodiere(mailBetreff(vorname, nachname)) + "&body=" + kodiere(MAIL_TEXT);
 }
 
+// Betreff und Text für "Datei teilen" (navigator.share mit Datei; MR-2, 30.10.2026): Das Mail-Programm bekommt zur Datei denselben
+// deutschen Betreff und Text wie beim mailto-Link (Betreff "Anmeldung Vorname Nachname", Text MAIL_TEXT). Den Empfänger kann
+// navigator.share nicht übergeben; die Seite legt die Adresse der Geschäftsstelle deshalb beim Teilen in die Zwischenablage.
+export function mailTeilen(vorname, nachname) {
+  return { title: mailBetreff(vorname, nachname), text: MAIL_TEXT };
+}
+
 // ---------- E-Mail wegen des Codes ----------
 // Passive Mitglieder bekommen den Code von der Geschäftsstelle (Code-Seite, Paket P1). Der Link öffnet eine E-Mail an die Geschäftsstelle
 // mit einem deutschen Betreff, ohne Text und ohne Angaben zur Person.

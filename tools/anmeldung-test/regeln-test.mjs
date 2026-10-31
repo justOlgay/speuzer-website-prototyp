@@ -163,8 +163,14 @@ function testeDaten() {
     wahr("Beitragsgruppe " + key + ": Feld " + g.aufnahmeantragFeld + " im Aufnahmeantrag", !!felder[g.aufnahmeantragFeld]);
   });
   gleich("Beitrag: Aufnahmegebühr wie beitraege.json", cfg.beitragInfo.aufnahmegebuehr, beitraege.aufnahmegebuehr);
-  // Beitragsübersicht (am 11.10.2026 geprüft): kein Zuschlag ohne Lastschrift (er stand nur im Info-Blatt von 2014)
-  wahr("Beitrag: kein Zuschlag ohne Lastschrift mehr in den Regeldaten", !("zuschlagOhneSepa" in cfg.beitragInfo) && !("zuschlagOhneSepaBemerkung" in cfg.beitragInfo));
+  // Zuschlag ohne Lastschrift: Er steht nur im Info-Blatt von 2014, nicht in der Beitragsübersicht (am 11.10.2026 geprüft). Die 1. Vorsitzende hat ihn am
+  // 19.10.2026 bestätigt („lassen wir drin“); seit dem 30.10.2026 (MR-1, O38) nennt der Assistent ihn bei der Zahlungsart „Rechnung“. Der Betrag (Euro im Jahr)
+  // steht in beitragInfo.zuschlagOhneLastschrift und wird nur von der Seite „zahlung“ gelesen. Das Regelwerk (Unterlagen, Hinweise, Beitrag) kennt keinen Zuschlag.
+  gleich("Beitrag: Zuschlag ohne Lastschrift 3 Euro im Jahr (beitragInfo.zuschlagOhneLastschrift)", cfg.beitragInfo.zuschlagOhneLastschrift, 3);
+  wahr("Beitrag: die Quelle nennt den Zuschlag ohne Lastschrift (Info-Blatt, am 19.10.2026 von der 1. Vorsitzenden bestätigt)",
+    /Zuschlag ohne Lastschrift \(3 Euro im Jahr\): Info-Blatt; Zuschlag am 19\.10\.2026 von der 1\. Vorsitzenden bestätigt/.test(cfg.beitragInfo.quelle));
+  wahr("Beitrag: die früheren Schlüssel zuschlagOhneSepa und zuschlagOhneSepaBemerkung gibt es nicht", !("zuschlagOhneSepa" in cfg.beitragInfo) && !("zuschlagOhneSepaBemerkung" in cfg.beitragInfo));
+  gleich("Beitrag: Bezeichnung der Gruppe Fußball (Kinder und Jugendliche) seit dem 30.10.2026 „bis A-Jugend“ (die 1. Vorsitzende, 22.10.2026)", cfg.beitragsgruppen.fussball_jugend.bezeichnung, "Kinder und Jugendliche (Fußball bis A-Jugend)");
   gleich("Beitrag: Beginn der Mitgliedschaft", cfg.beitragInfo.mitgliedschaftBeginn, "Tag der Anmeldung (Satzung § 6)");
   // Kontakte: nur Vereinsadressen
   const verein = JSON.parse(lies("data/verein.json"));
@@ -265,10 +271,11 @@ function testeDaten() {
     cfg.offenePunkte.filter((o) => !STATUS_PUNKT.includes(o.status)).map((o) => o.id + ":" + o.status).join(","));
   // Stand nach M11 (12.10.2026, Antworten der 1. Vorsitzenden vom 11.10.2026 und Entscheidung zu den Spielerpässen): O24, O25, O72 und O73 sind entschieden,
   // O11 und O69 geregelt. Paket P1 (12.10.2026): Auch O45 und O67 sind entschieden (die 1. Vorsitzende hat die Datenschutz-Texte freigegeben); nichts ist mehr offen.
+  // MR-1 (30.10.2026): O38 ist entschieden (der Zuschlag ohne Lastschrift gilt weiter, der Assistent nennt ihn bei „Rechnung“); davor war O38 geregelt.
   const STAND_11_10 = {
-    entschieden: ["O01", "O24", "O25", "O26", "O27", "O30", "O31", "O45", "O65", "O66", "O67", "O68", "O72", "O73"],
+    entschieden: ["O01", "O24", "O25", "O26", "O27", "O30", "O31", "O38", "O45", "O65", "O66", "O67", "O68", "O72", "O73"],
     geregelt: ["O02", "O03", "O04", "O05", "O06", "O07", "O08", "O09", "O10", "O11", "O12", "O13", "O14", "O15", "O16",
-      "O17", "O18", "O19", "O20", "O21", "O22", "O23", "O32", "O33", "O34", "O37", "O38", "O39", "O40",
+      "O17", "O18", "O19", "O20", "O21", "O22", "O23", "O32", "O33", "O34", "O37", "O39", "O40",
       "O41", "O42", "O43", "O44", "O50", "O52", "O54", "O60", "O61", "O62", "O63", "O64", "O69", "O71"],
     entfaellt: ["O28", "O29", "O35", "O36", "O49", "O51", "O55", "O56", "O57"],
     vorgemerkt: ["O46", "O47", "O48", "O53", "O58", "O59", "O70"],
@@ -276,8 +283,13 @@ function testeDaten() {
   };
   Object.keys(STAND_11_10).forEach((status) =>
     gleich("Offene Punkte: Stand " + status + " (" + STAND_11_10[status].length + ")", cfg.offenePunkte.filter((o) => o.status === status).map((o) => o.id), STAND_11_10[status]));
-  gleich("Offene Punkte: Zahl je Stand (14 entschieden, 43 geregelt, 9 entfällt, 7 später, 0 offen; zusammen 73; seit M11 sind O24, O25, O72 und O73 entschieden, O11 und O69 geregelt, seit P1 auch O45 und O67)",
-    Object.keys(STAND_11_10).map((status) => cfg.offenePunkte.filter((o) => o.status === status).length), [14, 43, 9, 7, 0]);
+  gleich("Offene Punkte: Zahl je Stand (15 entschieden, 42 geregelt, 9 entfällt, 7 später, 0 offen; zusammen 73; seit M11 sind O24, O25, O72 und O73 entschieden, O11 und O69 geregelt, seit P1 auch O45 und O67, seit MR-1 auch O38)",
+    Object.keys(STAND_11_10).map((status) => cfg.offenePunkte.filter((o) => o.status === status).length), [15, 42, 9, 7, 0]);
+  // 30.10.2026 (MR-1, Entscheidung der Jugendleitung; die 1. Vorsitzende hat den Zuschlag am 19.10.2026 bestätigt): O38 ist entschieden. Der Wortlaut steht fest und wird so auf der Konzeptseite gezeigt.
+  const o38 = punkt("O38");
+  wahr("Offener Punkt O38: entschieden, ohne „stand“ (an kassierer, betrifft U05)", !!o38 && o38.status === "entschieden" && !("stand" in o38) && o38.an === "kassierer" && o38.betrifft.join(",") === "U05");
+  gleich("Offener Punkt O38: Entscheidung", o38.entscheidung,
+    "Der Zuschlag von 3 Euro im Jahr ohne Lastschrift gilt weiter (1. Vorsitzende, 19.10.2026: „lassen wir drin“). Der Assistent nennt ihn bei „Rechnung“ (Jugendleitung, 30.10.2026).");
   wahr("Offene Punkte: nur offene Punkte tragen „stand“ (nie leer), alle übrigen „entscheidung“ (nie leer), nie beides",
     cfg.offenePunkte.every((o) => o.status === "offen"
       ? typeof o.stand === "string" && o.stand.trim().length > 0 && !("entscheidung" in o)
@@ -329,8 +341,7 @@ function testeDaten() {
       punkt("O13").entscheidung === "Nicht nötig für den Start. Der Assistent nennt keine Bearbeitungszeiten." &&
       punkt("O48").entscheidung === "Satzungslink siehe O66. Die alten Info-Blätter später ersetzen." &&
       punkt("O58").entscheidung === "Zum 1. Januar 2027 prüfen.");
-  gleich("Daten: Stand und Version 19.10.2026 (Livegang; davor 2026-10-12.1 seit dem Wegfall der Frage zu den Spielen, Paket M14, und 2026-10-11.2 mit dem Schalter unterschriftHfv, Paket M9)", [cfg.stand, cfg.version], ["2026-10-19", "2026-10-19.1"]);
-  gleich("Offene Punkte: Kennungen O01 bis O73 lückenlos und in Reihenfolge", cfg.offenePunkte.map((o) => o.id), Array.from({ length: 73 }, (_, i) => "O" + String(i + 1).padStart(2, "0")));
+  gleich("Daten: Stand und Version 30.10.2026 (MR-1: Zuschlag bei „Rechnung“, Beitragsbezeichnung, Seite zu Name und Foto; davor 2026-10-19.1 seit dem Livegang, 2026-10-12.1 seit dem Wegfall der Frage zu den Spielen, Paket M14, und 2026-10-11.2 mit dem Schalter unterschriftHfv, Paket M9)", [cfg.stand, cfg.version], ["2026-10-30", "2026-10-30.1"]);  gleich("Offene Punkte: Kennungen O01 bis O73 lückenlos und in Reihenfolge", cfg.offenePunkte.map((o) => o.id), Array.from({ length: 73 }, (_, i) => "O" + String(i + 1).padStart(2, "0")));
   // Entscheidungen der 1. Vorsitzenden vom 11.10.2026: Heimweg (U41), Beginn der Mitgliedschaft (R15), Aufnahmegebühr (U35)
   const u41 = cfg.unterlagen.U41;
   wahr("Daten U41: Heimweg nach dem Training (verein, familie, anmeldung, formular_im_pdf, Formular heimweg, kein Nachweis)",
@@ -603,7 +614,8 @@ function testeFaelleUndRegeln() {
   });
   enthaeltNicht("Probetraining: kein Hinweis zur Versicherung bei aktiven Mitgliedern (Kind, Fußball)", e15.hinweise.map((h) => h.key), "probetraining_versicherung");
   gleich("Probetraining: der Text des Hinweises ist aus den Regeltexten entfernt", texte.hinweise.probetraining_versicherung, undefined);
-  // Aufnahmegebühr: für alle neuen Mitglieder (Fußball, Karneval, passiv), ohne „offen“; kein Zuschlag ohne Lastschrift
+  // Aufnahmegebühr: für alle neuen Mitglieder (Fußball, Karneval, passiv), ohne „offen“; Hinweise und Beitragsergebnis des Regelwerks nennen keinen Zuschlag
+  // ohne Lastschrift (den Satz auf der Seite „zahlung“ liefern Daten und Oberfläche, MR-1, 30.10.2026; Laufzettel und PDF nennen ihn nicht)
   ["fussball", "karneval", "beides", "passiv"].forEach((abt) => {
     const ee = R.auswerten(BAUSTEINE.erwachsen({ abteilung: abt, spielerpass: abt === "fussball" || abt === "beides" ? "nein" : null, zahlung: { art: "rechnung", kontoinhaber: null, iban: "" } }), konfig, HEUTE_STANDARD);
     const u35 = ee.unterlagen.find((u) => u.id === "U35");

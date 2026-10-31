@@ -663,7 +663,7 @@ export default {
       sepa: "Otomatik çekim (Lastschrift), önerilen",
       sepaHinweis: "Aidatı kulüp yılda bir kez hesaptan çeker.",
       rechnung: "Fatura",
-      rechnungHinweis: "Aidatı kendiniz havale edersiniz.",
+      rechnungHinweis: "Aidatı kendiniz havale edersiniz. Buna yılda {betrag} Euro eklenir.",
     },
     inhaber: {
       titel: "Hesap kimin?",
@@ -698,12 +698,13 @@ export default {
       dokumentation: "Yıldönümü kitapçıklarında ve kulüp tarihçelerinde",
     },
     hfv: {
-      titel: "Hessen Futbol Federasyonu (Hessischer Fußball-Verband, HFV) neleri yayımlayabilir?",
+      titel: "İsim ve fotoğraf internette görünebilir mi?",
       hinweis: "İkisi de isteğe bağlıdır. Bunu sonra değiştirebilirsiniz.",
       name: "İsim, FUSSBALL.DE sitesinde görünebilir.",
       nameHinweis: "Bu, 16 yaşından küçük çocuklar için geçerlidir.",
       foto: "Fotoğraf internette görünebilir.",
       fotoHinweis: "Örneğin FUSSBALL.DE sitesinde.",
+      passfoto: "Oyuncu lisansı (Spielerpass) için fotoğraf zorunludur. Fotoğraf herkese açık değildir.",
       ab16: "16 yaşından itibaren federasyon ismi onay almadan gösterebilir. İtiraz edebilirsiniz.",
     },
     fahrten: {
@@ -983,6 +984,7 @@ export default {
     fotoSpeichern: "Oyuncu fotoğrafını resim olarak kaydet",
     gespeichert: "Dosya kaydediliyor. Genellikle “İndirilenler” klasöründe bulunur.",
     geteilt: "Paylaşıldı.",
+    geteiltMitAdresse: "Paylaşıldı. Adres kopyalandı.",
     teilenFehler: "Burada paylaşma çalışmıyor. Bunun yerine dosya kaydedildi.",
     fehler: {
       bibliothek: "Programın bir parçası yüklenemiyor. Lütfen internet bağlantınızı kontrol edin.",
@@ -994,8 +996,8 @@ export default {
     // Dosyayı e-posta ile gönderme (M10); {knopf} düğmenin yazısıdır. E-postanın konusu ve metni Almanca kalır (hilfen.js).
     senden: {
       titel: "Dosyayı kulübe nasıl gönderirsiniz",
-      handy1: "Aşağıdaki “{knopf}” düğmesine dokunun.",
-      handy2: "Yukarıdaki “{knopf}” düğmesine dokunun. E-posta uygulamanızı seçin. Dosya zaten ekli.",
+      handy1: "Yukarıdaki “{knopf}” düğmesine dokunun. Adres kopyalanır.",
+      handy2: "E-posta uygulamanızı seçin. Dosya zaten ekli.",
       handy3: "Adresi “Kime” alanına yapıştırın. E-postayı gönderin.",
       computer1: "Yukarıdaki “{knopf}” düğmesine tıklayın.",
       computer2: "Yeni bir e-posta yazın. Dosyayı ekleyin.",
@@ -1005,7 +1007,8 @@ export default {
       kopiert: "Adres kopyalandı.",
       kopierenFehler: "Burada kopyalama çalışmıyor. Adres seçili. Adresi kendiniz kopyalayın.",
       oeffnen: "Kulüp ofisine yeni e-posta aç",
-      anhang: "“{knopf}” düğmesini kullanırsanız dosyayı kendiniz ekleyin.",
+      rueckfallTitel: "Paylaşma çalışmıyor mu?",
+      rueckfall: "Dosyayı indirin. Sonra yeni bir e-posta açın. Dosyayı kendiniz ekleyin.",
     },
     naechsteTitel: "Sonraki adımlar",
     unterschriftTraining: "Hessen Futbol Federasyonu (Hessischer Fußball-Verband, HFV) sayfalarını ilk antrenmanda kalemle imzalarsınız.",

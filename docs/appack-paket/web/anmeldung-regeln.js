@@ -1,4 +1,4 @@
-export const VERSION = "2026-10-19.1";
+export const VERSION = "2026-10-30.1";
 
 export const SCHLUESSEL = {
   hinweise: [

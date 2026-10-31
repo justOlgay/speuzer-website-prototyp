@@ -6,7 +6,7 @@
 
 import { h, absaetze, knopf, hinweisKasten, vereinsKasten } from "./bausteine.js";
 import { landName } from "./laender.js";
-import { sauber, gruppiereIban, kbText, zerlegeIso, mailtoAnVerein } from "./hilfen.js";
+import { sauber, gruppiereIban, kbText, zerlegeIso, mailtoAnVerein, mailTeilen } from "./hilfen.js";
 import { unterschriftenPlan, unterschriftTitel } from "./seiten-unterlagen.js";
 import { erstelleAnmeldungPdf, LadeFehler } from "./pdf-lader.js";
 
@@ -435,6 +435,10 @@ function naechsteSchritte(k, pdf) {
 // einen Server). Der Abschnitt zeigt die Schritte am Handy (Datei teilen) und am Computer (Datei herunterladen, E-Mail mit Anhang),
 // die Adresse groß, einen Knopf zum Kopieren und einen Link, der die E-Mail mit Betreff und Text öffnet. Betreff und Text sind
 // deutsch (hilfen.js); die Datei hängt die Familie selbst an.
+// MR-2 (30.10.2026; Test der 1. Vorsitzenden am Android-Handy am 22.10.2026: Der Link öffnet die E-Mail ohne Datei, ein mailto-Link kann
+// nichts anhängen): Am Handy mit "Datei teilen" ist das Teilen der einzige sichtbare Weg. Der Klick auf "Datei teilen" legt die Adresse
+// der Geschäftsstelle in die Zwischenablage und gibt der Mail-App die Datei mit Betreff und Text (ergebnisAnsicht). Der Link zur E-Mail
+// steht nur noch zugeklappt im Rückfall "Teilen klappt nicht?". Am Computer und am Handy ohne Teilen bleibt alles wie bisher.
 
 // Adresse der Geschäftsstelle aus der Konfiguration (konfig.verein.mail, sonst die Kontakte des Regelwerks), nie fest im Code.
 // Ist keine gültige Adresse da, entfällt der Adressblock; die Schritte bleiben.
@@ -469,6 +473,25 @@ async function kopiereAdresse(element, text) {
   }
 }
 
+// Legt die Adresse beim Klick auf "Datei teilen" in die Zwischenablage (MR-2). Das Teilen gibt der Mail-App die Datei, Betreff und Text,
+// aber keinen Empfänger; die Familie fügt die Adresse danach bei "An" ein. Die Funktion ist still: Fehlt die Adresse oder die
+// Schnittstelle, oder verweigert der Browser den Zugriff, passiert nichts (der Knopf "Adresse kopieren" bleibt als Hilfe). Sie wartet
+// nicht: Der Aufruf von navigator.clipboard.writeText steht VOR navigator.share, im selben Klick, ohne `await` dazwischen (navigator.share
+// braucht die Nutzergeste des Klicks). Rückgabe: ein Versprechen mit true (kopiert) oder false; es wird nie abgelehnt und hängt höchstens
+// 2 Sekunden (ein Browser, der den Aufruf offen lässt, gilt als "nicht kopiert").
+function kopiereBeimTeilen(adresse) {
+  try {
+    if (adresse && navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      const schreiben = Promise.resolve(navigator.clipboard.writeText(adresse)).then(() => true, () => false);
+      const frist = new Promise((fertig) => window.setTimeout(() => fertig(false), 2000));
+      return Promise.race([schreiben, frist]);
+    }
+  } catch (fehler) {
+    // kein Zugriff auf die Zwischenablage: still weiter
+  }
+  return Promise.resolve(false);
+}
+
 // `optionen.teilen`: Der Browser kann die Datei teilen (der Knopf "Datei teilen" ist da). `optionen.handy`: Gerät mit Touch-Bedienung.
 function sendenAbschnitt(k, optionen) {
   const adresse = geschaeftsstellenMail(k);
@@ -478,10 +501,13 @@ function sendenAbschnitt(k, optionen) {
       h("ol", { klasse: "anm-senden__schritte" },
         [1, 2, 3].map((i) => h("li", {}, k.t("fertig.senden." + art + i, { knopf: knoepfe[i - 1] || "" })))));
   // Nur der Weg, der zum Gerät passt (P3 Teil b): am Handy mit "Datei teilen" der Weg über das Teilen, sonst (Computer, oder Teilen
-  // geht nicht) der Weg über das Herunterladen. Er trägt keine Überschrift. Am Handy kopiert die Familie zuerst die Adresse (Schritt 1): Das
-  // Teilen gibt der Mail-App nur die Datei, keinen Empfänger; die Adresse fügt sie danach bei "An" ein (Schritt 3).
+  // geht nicht) der Weg über das Herunterladen. Er trägt keine Überschrift. Am Handy (MR-2) ist Schritt 1 der Knopf "Datei teilen": Sein Klick
+  // kopiert die Adresse (ergebnisAnsicht). Das Teilen gibt der Mail-App die Datei mit Betreff und Text, aber keinen Empfänger; die Adresse
+  // fügt die Familie danach bei "An" ein (Schritt 3).
   const handyWeg = !!(optionen.teilen && optionen.handy);
-  const wege = handyWeg ? weg("handy", [k.t("fertig.senden.kopieren"), k.t("fertig.teilen")]) : weg("computer", [k.t("fertig.herunterladen")]);
+  const wege = handyWeg ? weg("handy", [k.t("fertig.teilen")]) : weg("computer", [k.t("fertig.herunterladen")]);
+  // Der Link öffnet die E-Mail ohne Anhang. Er hat kein target: In der App öffnet sich das Mail-Programm wie bei den mailto-Links der übrigen App-Seiten.
+  const mailLink = () => h("a", { klasse: "knopf knopf--sekundaer", href: mailtoAnVerein(adresse, k.a.vorname, k.a.nachname), "data-aktion": "mail-oeffnen" }, k.t("fertig.senden.oeffnen"));
 
   let adressBlock = null;
   if (adresse) {
@@ -492,7 +518,7 @@ function sendenAbschnitt(k, optionen) {
     adressBlock = h("div", { klasse: "anm-senden__adressblock", "data-adressblock": "" },
       h("p", { klasse: "anm-senden__label" }, k.t("fertig.senden.adresseTitel")),
       h("p", { klasse: "anm-senden__adresse" }, adresseText),
-      // Der Link hat kein target: In der App öffnet sich das Mail-Programm wie bei den mailto-Links der übrigen App-Seiten.
+      // Am Handy mit "Datei teilen" steht der Link zur E-Mail nur im zugeklappten Rückfall (unten): Er hängt keine Datei an und hat Melli verwirrt.
       h("div", { klasse: "anm-knoepfe" },
         knopf(k.t("fertig.senden.kopieren"), {
           sekundaer: true,
@@ -502,16 +528,23 @@ function sendenAbschnitt(k, optionen) {
             status.textContent = k.t(geklappt ? "fertig.senden.kopiert" : "fertig.senden.kopierenFehler");
           },
         }),
-        h("a", { klasse: "knopf knopf--sekundaer", href: mailtoAnVerein(adresse, k.a.vorname, k.a.nachname), "data-aktion": "mail-oeffnen" }, k.t("fertig.senden.oeffnen"))),
-      status,
-      // Der Link öffnet die E-Mail ohne Anhang: Am Handy (Teilen hängt die Datei schon an) sagt dieser Satz, dass sie die Datei hier selbst anhängt.
-      // Am Computer steht "Hängen Sie die Datei an" schon im zweiten Schritt.
-      handyWeg ? h("p", { klasse: "anm-hinweis" }, k.t("fertig.senden.anhang", { knopf: k.t("fertig.senden.oeffnen") })) : null);
+        handyWeg ? null : mailLink()),
+      status);
   }
+  // Rückfall am Handy mit "Datei teilen" (MR-2): zugeklappt, damit der Teilen-Weg der einzige sichtbare Weg bleibt. Er sagt, was zu tun ist,
+  // wenn das Teilen nicht klappt (Datei herunterladen, neue E-Mail, Datei selbst anhängen), und bietet den Link zur E-Mail an.
+  const rueckfall = handyWeg
+    ? h("details", { klasse: "anm-einzelheiten anm-senden__rueckfall", "data-rueckfall": "" },
+        h("summary", {}, k.t("fertig.senden.rueckfallTitel")),
+        h("div", { klasse: "anm-senden__rueckfall-inhalt" },
+          h("p", {}, k.t("fertig.senden.rueckfall")),
+          adresse ? h("div", { klasse: "anm-knoepfe" }, mailLink()) : null))
+    : null;
   return h("div", { klasse: "anm-senden", "data-senden": "" },
     h("h3", { klasse: "anm-zwischentitel" }, k.t("fertig.senden.titel")),
     h("div", { klasse: "anm-senden__wege" }, wege),
     adressBlock,
+    rueckfall,
     h("p", { klasse: "anm-hinweis anm-hinweis--achtung" }, k.t("fertig.nichtWhatsapp")));
 }
 
@@ -538,16 +571,21 @@ function ergebnisAnsicht(k, pdf) {
     sekundaer: true,
     aktion: "teilen",
     beiKlick: () => {
+      // MR-2: Beides im selben Klick, in dieser Reihenfolge und ohne `await` dazwischen (navigator.share braucht die Nutzergeste des Klicks):
+      // zuerst die Adresse der Geschäftsstelle in die Zwischenablage (still, der Aufruf wartet nicht), sofort danach die Datei teilen, mit Betreff
+      // und Text der E-Mail (deutsch, hilfen.js). Den Empfänger übergibt das Teilen nicht; die Familie fügt die Adresse bei "An" ein.
+      const kopiert = kopiereBeimTeilen(geschaeftsstellenMail(k));
       let versprechen;
       try {
-        versprechen = Promise.resolve(navigator.share({ files: [datei], title: pdf.ergebnis.dateiname }));
+        versprechen = Promise.resolve(navigator.share({ files: [datei], ...mailTeilen(k.a.vorname, k.a.nachname) }));
       } catch (fehler) {
         versprechen = Promise.reject(fehler);
       }
       versprechen
         .then(() => {
           k.gesichert = true;
-          zeigeStatus(k.t("fertig.geteilt"));
+          // Die Meldung nennt die Adresse nur, wenn sie wirklich in der Zwischenablage liegt
+          return kopiert.then((geklappt) => zeigeStatus(k.t(geklappt ? "fertig.geteiltMitAdresse" : "fertig.geteilt")));
         })
         .catch((fehler) => {
           if (fehler && fehler.name === "AbortError") return;

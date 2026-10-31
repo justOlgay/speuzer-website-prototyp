@@ -1178,6 +1178,11 @@ async function pruefeAblaufInnen(srv, browser, profil, konfig, dateien, ablauf, 
       const abschnitt = document.querySelector("#anmeldung [data-senden]");
       const a = abschnitt && abschnitt.querySelector('a[data-aktion="mail-oeffnen"]');
       if (!a) return null;
+      // MR-2 (30.10.2026): Am Handy mit „Datei teilen“ liegt der Link im zugeklappten Rückfall „Teilen klappt nicht?“ und ist erst nach dem Öffnen zu sehen
+      // (der Browser dieses Tests kann Dateien teilen; im Handy-Fenster gilt „pointer: coarse“). Am Computer steht er sichtbar neben „Adresse kopieren“.
+      const rueckfall = a.closest("details[data-rueckfall]");
+      const imRueckfall = !!rueckfall;
+      if (rueckfall) rueckfall.open = true;
       const vorher = a.getAttribute("href");
       const sperre = (e) => e.preventDefault(); // die Navigation selbst verhindern: Der Test prüft nur, ob der Link umgeschrieben würde
       document.addEventListener("click", sperre);
@@ -1185,7 +1190,7 @@ async function pruefeAblaufInnen(srv, browser, profil, konfig, dateien, ablauf, 
       document.removeEventListener("click", sperre);
       const adr = abschnitt.querySelector("[data-mail-adresse]");
       const kopieren = abschnitt.querySelector('button[data-aktion="adresse-kopieren"]');
-      return { vorher, nachher: a.getAttribute("href"), target: a.getAttribute("target"), sichtbar: a.checkVisibility(), adresse: adr && adr.textContent, kopieren: !!kopieren && kopieren.checkVisibility() };
+      return { vorher, nachher: a.getAttribute("href"), target: a.getAttribute("target"), sichtbar: a.checkVisibility(), imRueckfall, adresse: adr && adr.textContent, kopieren: !!kopieren && kopieren.checkVisibility() };
     });
     const erwBetreff = "Anmeldung " + profil.vorname + " " + profil.nachname;
     const soll = "mailto:" + adresse + "?subject=" + encodeURIComponent(erwBetreff) + "&body=Guten%20Tag%2C%0D%0A%0D%0Aanbei%20die%20Anmeldung%20als%20PDF.%0D%0A%0D%0AViele%20Gr%C3%BC%C3%9Fe";

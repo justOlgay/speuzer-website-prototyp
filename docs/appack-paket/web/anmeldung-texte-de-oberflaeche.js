@@ -621,7 +621,7 @@ export default {
    "sepa": "Lastschrift (empfohlen)",
    "sepaHinweis": "Der Verein bucht einmal im Jahr ab.",
    "rechnung": "Rechnung",
-   "rechnungHinweis": "Sie überweisen den Beitrag selbst."
+   "rechnungHinweis": "Sie überweisen den Beitrag selbst. Dazu kommen {betrag} Euro im Jahr."
   },
   "inhaber": {
    "titel": "Wem gehört das Konto?",
@@ -658,12 +658,13 @@ export default {
    "dokumentation": "In Festschriften und Chroniken"
   },
   "hfv": {
-   "titel": "Was darf der Fußball-Verband veröffentlichen?",
+   "titel": "Dürfen Name und Foto im Internet stehen?",
    "hinweis": "Beides ist freiwillig. Sie können das später ändern.",
    "name": "Der Name darf auf FUSSBALL.DE stehen.",
    "nameHinweis": "Das gilt für Kinder unter 16 Jahren.",
    "foto": "Das Foto darf im Internet stehen.",
    "fotoHinweis": "Zum Beispiel auf FUSSBALL.DE.",
+   "passfoto": "Das Foto für den Spielerpass ist Pflicht. Es ist nicht öffentlich.",
    "ab16": "Ab 16 Jahren darf der Verband den Namen ohne Einwilligung zeigen. Sie können widersprechen."
   },
   "fahrten": {
@@ -971,6 +972,7 @@ export default {
   "fotoSpeichern": "Spielerfoto als Bild speichern",
   "gespeichert": "Die Datei wird gespeichert. Sie liegt meist im Ordner „Downloads“.",
   "geteilt": "Geteilt.",
+  "geteiltMitAdresse": "Geteilt. Die Adresse ist kopiert.",
   "teilenFehler": "Teilen geht hier nicht. Die Datei wurde stattdessen gespeichert.",
   "fehler": {
    "bibliothek": "Ein Programmteil lässt sich nicht laden. Bitte prüfen Sie die Internetverbindung.",
@@ -981,8 +983,8 @@ export default {
   },
   "senden": {
    "titel": "So schicken Sie die Datei an den Verein",
-   "handy1": "Tippen Sie unten auf „{knopf}“.",
-   "handy2": "Tippen Sie oben auf „{knopf}“. Wählen Sie Ihr Mail-Programm. Die Datei ist schon angehängt.",
+   "handy1": "Tippen Sie oben auf „{knopf}“. Die Adresse wird kopiert.",
+   "handy2": "Wählen Sie Ihr Mail-Programm. Die Datei ist schon angehängt.",
    "handy3": "Fügen Sie die Adresse bei „An“ ein. Senden Sie die E-Mail.",
    "computer1": "Klicken Sie oben auf „{knopf}“.",
    "computer2": "Schreiben Sie eine neue E-Mail. Hängen Sie die Datei an.",
@@ -992,7 +994,8 @@ export default {
    "kopiert": "Die Adresse ist kopiert.",
    "kopierenFehler": "Kopieren geht hier nicht. Die Adresse ist markiert. Kopieren Sie die Adresse selbst.",
    "oeffnen": "E-Mail an die Geschäftsstelle öffnen",
-   "anhang": "Bei „{knopf}“ hängen Sie die Datei selbst an."
+   "rueckfallTitel": "Teilen klappt nicht?",
+   "rueckfall": "Laden Sie die Datei herunter. Öffnen Sie dann eine neue E-Mail. Hängen Sie die Datei selbst an."
   },
   "naechsteTitel": "So geht es weiter",
   "unterschriftTraining": "Die Blätter für den Fußball-Verband unterschreiben Sie beim ersten Training mit Stift.",

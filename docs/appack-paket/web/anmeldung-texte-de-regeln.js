@@ -439,7 +439,7 @@ export default {
   "beitrag_senator": "Senatoren zahlen {jahr} Euro im Jahr. Der Vorstand entscheidet über die Aufnahme.",
   "beitrag_doppel": "Sind Sie in Fußball und Karneval? Fragen Sie nach einem eigenen Beitrag.",
   "gruppen": {
-   "fussball_jugend": "Kinder und Jugendliche (Fußball, mit A-Jugend)",
+   "fussball_jugend": "Kinder und Jugendliche (Fußball bis A-Jugend)",
    "fussball_erwachsene": "Erwachsene (Fußball)",
    "fussball_passiv": "Passive, Frauen und Rentner ab 65 (Fußball)",
    "fussball_familie": "Familienbeitrag (Fußball)",
