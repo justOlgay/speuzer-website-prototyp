@@ -48,6 +48,10 @@
 //     einen Code, einen Link oder einen QR-Code; nur damit startet der Assistent, in Website und App (Abschnitte 1, 3, 9 und 13). In der App öffnet er im
 //     Browser (auf der Website in einem neuen Fenster; läuft er doch in einem Rahmen oder im Browser einer anderen App, steht oben ein Hinweis). O45 und O67 sind entschieden (die 1. Vorsitzende hat die Datenschutz-Texte freigegeben): Der Stand-Kasten und der Kurztext sagen, dass nichts
 //     mehr offen ist; die Zeilen der beiden Punkte stehen als „Entschieden“ in Abschnitt 10.
+//   - Paket AP-E1 (04.11.2026, Wortlaut der 1. Vorsitzenden, Runde 2 nach der Entscheidung der Jugendleitung): Das Einverständnis für Fahrten und
+//     Messenger-Gruppe fragt ausdrücklich nach der Mitnahme im Auto durch Trainer, Betreuer und andere Erwachsene (zu Spielen und Veranstaltungen,
+//     nach den Regeln des Schutzkonzepts). Abschnitt 3 (Schritt „Unterlagen“) und der Abschnitt „Karneval“ sagen das so. Regelwerk Version
+//     2026-11-04.1; die Zahl der Punkte bleibt bei 73.
 //
 // Liegt wie /vorher-nachher/ und /app/ außerhalb der Hülle (docs/index.html) und
 // außerhalb der Workspace-Seiten (docs/ws/) – eigene Vorlage src/vorlagen/begleit.html,
@@ -62,7 +66,7 @@
 const PFAD = "../";
 const STAND_RECHERCHE = "29.09.2026";
 const STAND_ABGLEICH = "12.10.2026";
-const REGELWERK_VERSION = "2026-10-30.1";
+const REGELWERK_VERSION = "2026-11-04.1";
 const PROTOTYP = `${PFAD}anmeldung/`;
 
 // ---------- Stand der Punkte (data/anmeldung.json › offenePunkte, beim Bau gesetzt) ----------
@@ -567,7 +571,7 @@ const SCHRITTE = [
   ],
   [
     "Unterlagen",
-    "Die Familie entscheidet über die Erlaubnis für Fotos, die Erlaubnis für Name und Foto im Internet, Fahrten und Messenger-Gruppe. Bei Kindern klärt sie den Heimweg nach dem Training: allein oder abgeholt. Dann nennt sie einen Notfallkontakt und wählt, ob sie einen Gesundheitsbogen ausfüllt. Eine Liste zeigt „Habe ich“ und „Fehlt noch“. Die Familie fotografiert jeden Nachweis mit dem Handy oder wählt eine Datei. Auch das Spielerfoto entsteht hier.",
+    "Die Familie entscheidet über die Erlaubnis für Fotos, die Erlaubnis für Name und Foto im Internet, Fahrten und Messenger-Gruppe. Bei den Fahrten sagt sie, ob Trainer, Betreuer und andere Erwachsene ihr Kind im Auto mitnehmen dürfen: zu Spielen und Veranstaltungen, nach den Regeln des Schutzkonzepts. Bei Kindern klärt sie den Heimweg nach dem Training: allein oder abgeholt. Dann nennt sie einen Notfallkontakt und wählt, ob sie einen Gesundheitsbogen ausfüllt. Eine Liste zeigt „Habe ich“ und „Fehlt noch“. Die Familie fotografiert jeden Nachweis mit dem Handy oder wählt eine Datei. Auch das Spielerfoto entsteht hier.",
   ],
   [
     "Unterschrift",
@@ -1279,7 +1283,7 @@ function karnevalAbschnitt() {
       "**Aufnahmeantrag.** Der Assistent fragt nach Person, Kontakt, Beitrag und Zahlung, wie im Fußball. Es gibt kein HFV-Formular und kein Attest.",
       "**Keine Gruppenwahl.** Die Trainer ordnen die Kinder einer Gruppe zu ({o:O55}).",
       "**Heimweg nach dem Training.** Bei Minderjährigen sagen die Eltern, ob das Kind allein nach Hause darf. Das Blatt gilt für Fußball und Karneval.",
-      "**Notfall und Fahrten.** Der Notfall- und Gesundheitsbogen ist freiwillig. Das Einverständnis für Fahrten und Messenger-Gruppe gibt es auch im Karneval.",
+      "**Notfall und Fahrten.** Der Notfall- und Gesundheitsbogen ist freiwillig. Das Einverständnis für Fahrten und Messenger-Gruppe gibt es auch im Karneval. Die Mitnahme im Auto durch Trainer, Betreuer und andere Erwachsene gilt dort für Veranstaltungen des Vereins, nicht für Spiele.",
       "**Nicht im Assistenten:** Turniere, Auftritte am Abend, Kostüme und der Fastnachtszug. Der Assistent fragt dazu nichts ({o:O29}, {o:O35}, {o:O36}, {o:O56}).",
     ])}
     <h3>Was belegt ist</h3>

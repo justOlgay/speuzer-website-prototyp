@@ -641,9 +641,9 @@ export default {
   "fahrten": {
    "titel": "Yolculuklar ve mesajlar",
    "hinweis": "İkisi de isteğe bağlıdır. Bunu sonra değiştirebilirsiniz.",
-   "fahrten": "{name} maçlara ve turnuvalara araçla götürülebilir.",
-   "fahrtenKarneval": "{name} kulüp etkinliklerine araçla götürülebilir.",
-   "fahrtenHinweis": "Örneğin diğer ebeveynlerin arabalarıyla.",
+   "fahrten": "{name} antrenörler, takım sorumluları ve diğer yetişkinler tarafından kendi arabalarıyla götürülebilir.",
+   "fahrtenHinweis": "Örneğin diğer ebeveynlerin arabalarıyla. Bu, maçlara ve etkinliklere yapılan yolculuklar için geçerlidir. Kulübün koruma konseptinin (Schutzkonzept) kuralları geçerlidir.",
+   "fahrtenHinweisKarneval": "Örneğin diğer ebeveynlerin arabalarıyla. Bu, kulüp etkinliklerine yapılan yolculuklar için geçerlidir. Kulübün koruma konseptinin (Schutzkonzept) kuralları geçerlidir.",
    "messenger": "{name} takımın mesajlaşma grubuna katılabilir.",
    "messengerKarneval": "{name} grubun mesajlaşma grubuna katılabilir.",
    "messengerHinweis": "Orada tarihler ve anlaşmalar yer alır."
@@ -819,7 +819,7 @@ export default {
    "iban": "IBAN",
    "fotos": "Fotoğraflar",
    "hfv": "Hessen Futbol Federasyonu (HFV)",
-   "fahrten": "Yolculuklar",
+   "fahrten": "Antrenörler, takım sorumluları ve diğer yetişkinler tarafından arabayla götürülme",
    "messenger": "Mesajlaşma grubu",
    "heimweg": "Eve dönüş",
    "notfall": "Acil durum kişisi",
@@ -836,6 +836,10 @@ export default {
    "nein": "Hayır",
    "weissNicht": "Bilmiyorum",
    "satzungVonHand": "Hayır – elle işaretlersiniz",
+   "fahrten": {
+    "ja": "Evet, maçlara ve etkinliklere, kulübün koruma konseptinin (Schutzkonzept) kurallarına göre.",
+    "jaKarneval": "Evet, kulüp etkinliklerine, kulübün koruma konseptinin (Schutzkonzept) kurallarına göre."
+   },
    "heimweg": {
     "allein": "Eve tek başına",
     "abholen": "Biri gelip alır"

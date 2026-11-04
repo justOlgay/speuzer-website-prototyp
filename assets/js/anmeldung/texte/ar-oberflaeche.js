@@ -109,6 +109,11 @@
   Teil A, B, C (der Datei) = الجزء
   Abschnitte (der Anmeldung) = المراحل
   Computer = الكمبيوتر
+  Trainer = المدرب
+  Betreuer (Mannschaft) = المشرف
+  Schutzkonzept (des Vereins) = مفهوم الحماية الخاص بالنادي (Schutzkonzept)
+  Mitnahme im Auto (Einwilligung, Stand 04.11.2026) = الاصطحاب في السيارة
+  andere Erwachsene (Mitnahme im Auto) = البالغون الآخرون
 */
 
 // Deutsche Namen und Rufnummern im arabischen Text: Isolat für die Schreibrichtung von links nach rechts.
@@ -711,9 +716,9 @@ export default {
     fahrten: {
       titel: "الرحلات والرسائل",
       hinweis: "كلاهما اختياري. ويمكنك تغيير ذلك لاحقًا.",
-      fahrten: "يجوز للطفل {name} الذهاب مع الآخرين إلى المباريات والبطولات.",
-      fahrtenKarneval: "يجوز للطفل {name} الذهاب مع الآخرين إلى فعاليات النادي.",
-      fahrtenHinweis: "مثلًا في سيارات أولياء أمور آخرين.",
+      fahrten: "يجوز للمدربين والمشرفين والبالغين الآخرين اصطحاب الطفل {name} في سياراتهم.",
+      fahrtenHinweis: `مثلًا في سيارات أولياء أمور آخرين. ينطبق هذا على الرحلات إلى المباريات والفعاليات. وتسري قواعد مفهوم الحماية الخاص بالنادي (${D("Schutzkonzept")}).`,
+      fahrtenHinweisKarneval: `مثلًا في سيارات أولياء أمور آخرين. ينطبق هذا على الرحلات إلى فعاليات النادي. وتسري قواعد مفهوم الحماية الخاص بالنادي (${D("Schutzkonzept")}).`,
       messenger: "يجوز للطفل {name} الانضمام إلى مجموعة المراسلة الخاصة بالفريق.",
       messengerKarneval: "يجوز للطفل {name} الانضمام إلى مجموعة المراسلة الخاصة بالمجموعة.",
       messengerHinweis: "تُنشر هناك المواعيد والترتيبات.",
@@ -890,7 +895,7 @@ export default {
       iban: "IBAN",
       fotos: "الصور",
       hfv: `اتحاد ولاية هيسن لكرة القدم (${D("HFV")})`,
-      fahrten: "الرحلات",
+      fahrten: "اصطحاب الطفل في السيارة من قبل المدربين والمشرفين والبالغين الآخرين",
       messenger: "مجموعة المراسلة",
       heimweg: "العودة إلى البيت",
       notfall: "جهة الاتصال في الطوارئ",
@@ -907,6 +912,10 @@ export default {
       nein: "لا",
       weissNicht: "لا أعرف",
       satzungVonHand: "لا – ستضع العلامة بخط اليد",
+      fahrten: {
+        ja: `نعم، إلى المباريات والفعاليات، وفق قواعد مفهوم الحماية الخاص بالنادي (${D("Schutzkonzept")}).`,
+        jaKarneval: `نعم، إلى فعاليات النادي، وفق قواعد مفهوم الحماية الخاص بالنادي (${D("Schutzkonzept")}).`,
+      },
       heimweg: { allein: "العودة إلى البيت دون مرافق", abholen: "يأتي شخص لاصطحاب الطفل" },
       geschlecht: { m: "ذكر", w: "أنثى", d: `متنوع (${D("divers")})`, ohne_angabe: "غير محدد" },
       abteilung: { fussball: "كرة القدم", karneval: "الكرنفال", beides: "كرة القدم والكرنفال", passiv: "الدعم فقط" },

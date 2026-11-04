@@ -661,6 +661,15 @@ async function durchlauf(browser, server, sprache, beispiel, muster, txt) {
       const soll = String(vorlage || "").split("\n").map(ohneSteuer).filter(Boolean); // erst an den Zeilenumbrüchen trennen (ohneSteuer macht aus jedem Umbruch ein Leerzeichen)
       ok(kennung + ": Spielerpass-Seite mit der übersetzten Erklärung zum Spielrecht (3 Absätze, Schlüssel spielerpass.spielrecht), ohne den Block der früheren Frage", !!vorlage && soll.length === 3 && soll.every((t) => absaetze.includes(t)) && dict.spielen === undefined, absaetze.join(" | "));
     }
+    // Prüfseite (AP-E1, 04.11.2026): Die Zeile zur Mitnahme im Auto durch Trainer, Betreuer und andere Erwachsene steht in der Sprache; bei „Ja“ steht der Satz mit dem Wohin und den Regeln des
+    // Schutzkonzepts (nur Karneval ohne Fußball ohne Spiele), die frühere Zeile „Fahrten“ gibt es nicht mehr. In allen drei Beispielen ist das Kästchen gesetzt.
+    if (s.schritt === "pruefen") {
+      const zeilen = (await page.$$eval("#anmeldung .anm-pruefzeile", (l) => l.map((z) => ({ label: (z.querySelector("dt") || {}).textContent || "", wert: (z.querySelector(".anm-pruefzeile__wert") || {}).textContent || "" })))).map((z) => ({ label: ohneSteuer(z.label), wert: ohneSteuer(z.wert) }));
+      const labelSoll = ohneSteuer(dict.pruefen.zeilen.fahrten);
+      const wertSoll = ohneSteuer(dict.pruefen.werte.fahrten[beispiel.id === "karneval-kind" ? "jaKarneval" : "ja"]);
+      const zeile = zeilen.find((z) => z.label === labelSoll);
+      ok(kennung + ": Prüfseite: Zeile „" + labelSoll + "“ mit dem Satz zu „Ja“ in der Sprache (" + (beispiel.id === "karneval-kind" ? "Karneval: zu Veranstaltungen des Vereins" : "zu Spielen und Veranstaltungen") + ")", !!zeile && zeile.wert === wertSoll && /Schutzkonzept/.test(zeile.wert), JSON.stringify(zeile) + " | soll: " + wertSoll);
+    }
     // Fahrten und Nachrichten (M11, 12.10.2026): Karneval ohne Fußball sagt „Messenger-Gruppe der Gruppe“, die übrigen „… der Mannschaft“; beide Sätze stehen in der Sprache
     if (s.schritt === "einwilligungen" && s.teil === "fahrten") {
       const schluessel = beispiel.id === "karneval-kind" ? "messengerKarneval" : "messenger";
@@ -672,6 +681,21 @@ async function durchlauf(browser, server, sprache, beispiel, muster, txt) {
       }));
       const teile = ohneSteuer(vorlage || "").split("{name}").map((t) => t.trim());
       ok(kennung + ": Messenger-Satz in der Sprache (" + (beispiel.id === "karneval-kind" ? "Karneval: Gruppe" : "Fußball: Mannschaft") + ", Schlüssel " + schluessel + ")", !!vorlage && teile.length === 2 && messenger.length > 0 && messenger.includes(teile[1]) && (!teile[0] || messenger.includes(teile[0])), messenger);
+      // AP-E1 (04.11.2026): Mitnahme im Auto durch Trainer, Betreuer und andere Erwachsene: der Satz (fahrten) und die Zeile darunter (fahrtenHinweis, nur Karneval ohne Fußball fahrtenHinweisKarneval)
+      // stehen in der Sprache; die Zeile nennt das Schutzkonzept (in jeder Sprache mit dem deutschen Namen in Klammern)
+      const fahrtenWerte = await page.evaluate(() => {
+        const i = document.querySelector('#anmeldung input[data-pfad="einwilligungen.fahrten"]');
+        const l = i ? document.querySelector('label[for="' + i.id + '"]') : null;
+        const t = (e) => (e ? e.textContent : "");
+        return { satz: t(l && l.querySelector(".anm-karte__titel")), zeile: t(l && l.querySelector(".anm-karte__hinweis")) };
+      });
+      const hinweisSchluessel = beispiel.id === "karneval-kind" ? "fahrtenHinweisKarneval" : "fahrtenHinweis";
+      const fahrtenVorlage = dict.einwilligungen && dict.einwilligungen.fahrten && dict.einwilligungen.fahrten.fahrten;
+      const fahrtenZeile = dict.einwilligungen && dict.einwilligungen.fahrten && dict.einwilligungen.fahrten[hinweisSchluessel];
+      const fahrtenTeile = ohneSteuer(fahrtenVorlage || "").split("{name}").map((t) => t.trim());
+      const fahrtenSatz = ohneSteuer(fahrtenWerte.satz);
+      ok(kennung + ": Satz zur Mitnahme im Auto in der Sprache (Schlüssel fahrten)", !!fahrtenVorlage && fahrtenTeile.length === 2 && fahrtenSatz.length > 0 && (!fahrtenTeile[0] || fahrtenSatz.includes(fahrtenTeile[0])) && (!fahrtenTeile[1] || fahrtenSatz.includes(fahrtenTeile[1])), fahrtenSatz);
+      ok(kennung + ": Zeile unter dem Satz in der Sprache (Schlüssel " + hinweisSchluessel + "), mit dem Schutzkonzept in Klammern", !!fahrtenZeile && ohneSteuer(fahrtenWerte.zeile) === ohneSteuer(fahrtenZeile) && /\(\s*Schutzkonzept\s*\)/.test(ohneSteuer(fahrtenWerte.zeile)) === (code !== "de"), ohneSteuer(fahrtenWerte.zeile));
     }
     const r = await klickeWeiter(page, s);
     if (r.fehler.length) {

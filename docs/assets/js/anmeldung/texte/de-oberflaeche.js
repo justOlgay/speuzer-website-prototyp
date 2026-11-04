@@ -668,10 +668,16 @@ export default {
     fahrten: {
       titel: "Fahrten und Nachrichten",
       hinweis: "Beides ist freiwillig. Sie können das später ändern.",
-      fahrten: "{name} darf zu Spielen und Turnieren mitfahren.",
+      // Mitnahme im Auto (Einwilligung). Kernwortlaut, von der 1. Vorsitzenden am 04.11.2026 gebilligt: „Ja, mein Kind darf von Trainern und
+      // Betreuern des Vereins in deren Auto zu Spielen und Veranstaltungen mitgenommen werden, nach den Regeln des Schutzkonzepts.“
+      // Runde 2 (04.11.2026, Entscheidung der Jugendleitung): Die Einwilligung gilt allgemein, wie der Absatz zu Nr. 6.4 des Schutzkonzepts
+      // im PDF (Trainer, Betreuer und andere Erwachsene), nicht nur für Trainer und Betreuer. Wegen der Einfachen Sprache (höchstens 12 Wörter
+      // je Satz) steht die Aussage in Teilen: das Kästchen sagt, wer das Kind womit mitnimmt; die Zeile darunter nennt ein Beispiel, wohin
+      // und nach welchen Regeln. Dieselbe Aussage steht auf der Prüfseite (pruefen.werte.fahrten) und auf dem PDF-Blatt (pdf.js, seiteFahrten).
+      fahrten: "Trainer, Betreuer und andere Erwachsene dürfen {name} im Auto mitnehmen.",
+      fahrtenHinweis: "Zum Beispiel in Autos anderer Eltern. Das gilt für Fahrten zu Spielen und Veranstaltungen. Es gelten die Regeln des Schutzkonzepts.",
       // Nur Karneval (ohne Fußball): keine Spiele und Turniere (Entscheidung der 1. Vorsitzenden vom 11.10.2026)
-      fahrtenKarneval: "{name} darf zu Veranstaltungen des Vereins mitfahren.",
-      fahrtenHinweis: "Zum Beispiel in Autos anderer Eltern.",
+      fahrtenHinweisKarneval: "Zum Beispiel in Autos anderer Eltern. Das gilt für Fahrten zu Veranstaltungen des Vereins. Es gelten die Regeln des Schutzkonzepts.",
       messenger: "{name} darf in die Messenger-Gruppe der Mannschaft.",
       // Nur Karneval (ohne Fußball): Beim Karneval gibt es Gruppen, keine Mannschaften (M11, 12.10.2026)
       messengerKarneval: "{name} darf in die Messenger-Gruppe der Gruppe.",
@@ -855,7 +861,7 @@ export default {
       iban: "IBAN",
       fotos: "Fotos",
       hfv: "Fußball-Verband",
-      fahrten: "Fahrten",
+      fahrten: "Mitnahme im Auto durch Trainer, Betreuer und andere Erwachsene",
       messenger: "Messenger-Gruppe",
       heimweg: "Heimweg",
       notfall: "Notfallkontakt",
@@ -872,6 +878,11 @@ export default {
       nein: "Nein",
       weissNicht: "Weiß nicht",
       satzungVonHand: "Nein – Sie kreuzen es von Hand an",
+      // Antwort „Ja“ zur Mitnahme im Auto: wohin und nach welchen Regeln (nur Karneval ohne Fußball: keine Spiele, wie auf der Seite zur Fahrt)
+      fahrten: {
+        ja: "Ja, zu Spielen und Veranstaltungen, nach den Regeln des Schutzkonzepts.",
+        jaKarneval: "Ja, zu Veranstaltungen des Vereins, nach den Regeln des Schutzkonzepts.",
+      },
       heimweg: { allein: "Allein nach Hause", abholen: "Wird abgeholt" },
       geschlecht: { m: "Männlich", w: "Weiblich", d: "Divers", ohne_angabe: "Keine Angabe" },
       abteilung: { fussball: "Fußball", karneval: "Karneval", beides: "Fußball und Karneval", passiv: "Nur unterstützen" },

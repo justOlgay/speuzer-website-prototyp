@@ -641,9 +641,9 @@ export default {
   "fahrten": {
    "titel": "Trips and messages",
    "hinweis": "Both are voluntary. You can change this later.",
-   "fahrten": "{name} may travel to matches and tournaments.",
-   "fahrtenKarneval": "{name} may travel to club events.",
-   "fahrtenHinweis": "For example in the cars of other parents.",
+   "fahrten": "Coaches, team supervisors and other adults may take {name} in their car.",
+   "fahrtenHinweis": "For example in the cars of other parents. This applies to trips to matches and events. The rules of the club's safeguarding policy (Schutzkonzept) apply.",
+   "fahrtenHinweisKarneval": "For example in the cars of other parents. This applies to trips to club events. The rules of the club's safeguarding policy (Schutzkonzept) apply.",
    "messenger": "{name} may join the messenger group of the team.",
    "messengerKarneval": "{name} may join the messenger group of the group.",
    "messengerHinweis": "Dates and arrangements are posted there."
@@ -819,7 +819,7 @@ export default {
    "iban": "IBAN",
    "fotos": "Photos",
    "hfv": "Hessian Football Association (HFV)",
-   "fahrten": "Trips",
+   "fahrten": "Being taken in the car by coaches, team supervisors and other adults",
    "messenger": "Messenger group",
    "heimweg": "Way home",
    "notfall": "Emergency contact",
@@ -836,6 +836,10 @@ export default {
    "nein": "No",
    "weissNicht": "Do not know",
    "satzungVonHand": "No – you mark it by hand",
+   "fahrten": {
+    "ja": "Yes, to matches and events, under the rules of the club's safeguarding policy (Schutzkonzept).",
+    "jaKarneval": "Yes, to club events, under the rules of the club's safeguarding policy (Schutzkonzept)."
+   },
    "heimweg": {
     "allein": "Going home alone",
     "abholen": "Being picked up"

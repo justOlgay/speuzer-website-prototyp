@@ -488,18 +488,20 @@ export const einwilligungen = {
         ],
       };
     }
-    // Nur Karneval (ohne Fußball): keine Spiele und Turniere im Satz zur Fahrt (Entscheidung der 1. Vorsitzenden vom
-    // 11.10.2026) und die Messenger-Gruppe der Gruppe statt der Mannschaft (M11, 12.10.2026). Fußball und "beides" behalten die
-    // bisherigen Sätze. Das PDF-Blatt (pdf.js, seiteFahrten) folgt derselben Regel.
+    // Mitnahme im Auto durch Trainer, Betreuer und andere Erwachsene (04.11.2026): Das Kästchen nennt, wer das Kind mitnimmt; die Zeile
+    // darunter nennt ein Beispiel (Autos anderer Eltern), wohin und nach welchen Regeln (Schutzkonzept). Nur Karneval (ohne Fußball):
+    // keine Spiele und Turniere in dieser Zeile
+    // (Entscheidung der 1. Vorsitzenden vom 11.10.2026) und die Messenger-Gruppe der Gruppe statt der Mannschaft (M11, 12.10.2026).
+    // Fußball und "beides" behalten die Sätze mit "Spielen". Das PDF-Blatt (pdf.js, seiteFahrten) folgt derselben Regel.
     const nurKarneval = k.a.abteilung === "karneval";
-    const fahrtenSatz = nurKarneval ? "einwilligungen.fahrten.fahrtenKarneval" : "einwilligungen.fahrten.fahrten";
+    const fahrtenHinweis = nurKarneval ? "einwilligungen.fahrten.fahrtenHinweisKarneval" : "einwilligungen.fahrten.fahrtenHinweis";
     const messengerSatz = nurKarneval ? "einwilligungen.fahrten.messengerKarneval" : "einwilligungen.fahrten.messenger";
     return {
       titel: k.t("einwilligungen.fahrten.titel"),
       inhalt: [
         h("p", { klasse: "anm-hinweis" }, k.t("einwilligungen.fahrten.hinweis")),
         h("div", { klasse: "anm-karten" },
-          kaestchen(k, { pfad: "einwilligungen.fahrten", label: k.t(fahrtenSatz), hinweis: k.t("einwilligungen.fahrten.fahrtenHinweis") }),
+          kaestchen(k, { pfad: "einwilligungen.fahrten", label: k.t("einwilligungen.fahrten.fahrten"), hinweis: k.t(fahrtenHinweis) }),
           kaestchen(k, { pfad: "einwilligungen.messenger", label: k.t(messengerSatz), hinweis: k.t("einwilligungen.fahrten.messengerHinweis") })),
       ],
     };

@@ -277,7 +277,9 @@ function pruefBereiche(k) {
       z(Z("hfv"), [ein.hfvName ? k.t("einwilligungen.hfv.name") : "", ein.hfvFoto ? k.t("einwilligungen.hfv.foto") : ""].filter(Boolean).join(" ") || k.t("pruefen.werte.nein"), "einwilligungen", "hfv");
     }
     if (k.minderjaehrig()) {
-      z(Z("fahrten"), jaNein(k, ein.fahrten === true), "einwilligungen", "fahrten");
+      // Mitnahme im Auto durch Trainer, Betreuer und andere Erwachsene (04.11.2026): Bei „Ja“ steht auch, wohin und nach welchen Regeln (Schutzkonzept); nur
+      // Karneval ohne Fußball sagt „zu Veranstaltungen des Vereins“ statt „zu Spielen und Veranstaltungen“. „Nein“ bleibt kurz.
+      z(Z("fahrten"), ein.fahrten === true ? W(a.abteilung === "karneval" ? "fahrten.jaKarneval" : "fahrten.ja") : jaNein(k, false), "einwilligungen", "fahrten");
       z(Z("messenger"), jaNein(k, ein.messenger === true), "einwilligungen", "fahrten");
     }
   }

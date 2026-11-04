@@ -458,14 +458,14 @@ export const einwilligungen = {
     }
 
     const nurKarneval = k.a.abteilung === "karneval";
-    const fahrtenSatz = nurKarneval ? "einwilligungen.fahrten.fahrtenKarneval" : "einwilligungen.fahrten.fahrten";
+    const fahrtenHinweis = nurKarneval ? "einwilligungen.fahrten.fahrtenHinweisKarneval" : "einwilligungen.fahrten.fahrtenHinweis";
     const messengerSatz = nurKarneval ? "einwilligungen.fahrten.messengerKarneval" : "einwilligungen.fahrten.messenger";
     return {
       titel: k.t("einwilligungen.fahrten.titel"),
       inhalt: [
         h("p", { klasse: "anm-hinweis" }, k.t("einwilligungen.fahrten.hinweis")),
         h("div", { klasse: "anm-karten" },
-          kaestchen(k, { pfad: "einwilligungen.fahrten", label: k.t(fahrtenSatz), hinweis: k.t("einwilligungen.fahrten.fahrtenHinweis") }),
+          kaestchen(k, { pfad: "einwilligungen.fahrten", label: k.t("einwilligungen.fahrten.fahrten"), hinweis: k.t(fahrtenHinweis) }),
           kaestchen(k, { pfad: "einwilligungen.messenger", label: k.t(messengerSatz), hinweis: k.t("einwilligungen.fahrten.messengerHinweis") })),
       ],
     };

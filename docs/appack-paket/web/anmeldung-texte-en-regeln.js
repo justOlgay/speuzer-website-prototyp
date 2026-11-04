@@ -198,7 +198,7 @@ export default {
   },
   "U29": {
    "name": "Consent for trips and messenger group",
-   "kurz": "You allow trips to matches and the group in the messenger.",
+   "kurz": "You allow rides in the car and the group in the messenger.",
    "warum": "This is how the club protects the children.",
    "wie": "You tick what you allow. Then you sign.",
    "wo": "This sheet belongs to the part for the club."

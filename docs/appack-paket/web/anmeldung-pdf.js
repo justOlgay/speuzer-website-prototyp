@@ -1873,15 +1873,16 @@ function seiteFahrten(K, S) {
 
   const nurKarneval = text(K.a.abteilung) === "karneval";
   S.ueberschrift(nurKarneval ? "Fahrten zu Veranstaltungen des Vereins" : "Fahrten zu Spielen und Veranstaltungen", 2);
-  S.absatz("Das steht im Schutzkonzept des Vereins. Trainer, Betreuer und andere Erwachsene dürfen Kinder im privaten Auto fahren. Dann müssen mindestens zwei Kinder mitfahren. Die Fahrt läuft über vereinbarte Treffpunkte. Ausnahmen gibt es nur mit Ihrer dokumentierten Zustimmung.", g);
+  S.absatz("Das steht im Schutzkonzept des Vereins. Trainer, Betreuer und andere Erwachsene dürfen Kinder im privaten Auto mitnehmen. Dann müssen mindestens zwei Kinder mitfahren. Die Fahrt läuft über vereinbarte Treffpunkte. Ausnahmen gibt es nur mit Ihrer dokumentierten Zustimmung.", g);
+
   frage(
     "fahrten",
     ew.fahrten,
-    nurKarneval
-      ? "Ja, mein Kind darf zu Veranstaltungen des Vereins in Fahrgemeinschaften mitfahren."
-      : "Ja, mein Kind darf zu Spielen und Veranstaltungen in Fahrgemeinschaften mitfahren.",
-    "Nein, mein Kind fährt nicht in Fahrgemeinschaften mit.",
-    "Sie haben dazu nichts angegeben. Ihr Kind fährt dann nicht in Fahrgemeinschaften mit."
+    "Ja, Trainer, Betreuer und andere Erwachsene dürfen mein Kind im Auto mitnehmen. " +
+      (nurKarneval ? "Das gilt für Fahrten zu Veranstaltungen des Vereins." : "Das gilt für Fahrten zu Spielen und Veranstaltungen.") +
+      " Es gelten die Regeln des Schutzkonzepts.",
+    "Nein, kein Erwachsener darf mein Kind im Auto mitnehmen.",
+    "Sie haben dazu nichts angegeben. Erwachsene nehmen Ihr Kind dann nicht im Auto mit."
   );
   S.abstand(4);
   S.absatz("Bei Übernachtungen informiert der Verein die Eltern vorher.", { size: 9.5, farbe: FARBE.tinte2, nach: 6 });

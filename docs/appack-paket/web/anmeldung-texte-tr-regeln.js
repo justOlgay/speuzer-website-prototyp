@@ -198,7 +198,7 @@ export default {
   },
   "U29": {
    "name": "Yolculuklar ve mesajlaşma grubu için onay",
-   "kurz": "Maçlara araçla gitmeye ve mesajlaşma grubuna katılmaya izin verirsiniz.",
+   "kurz": "Arabayla götürülmeye ve mesajlaşma grubuna katılmaya izin verirsiniz.",
    "warum": "Kulüp çocukları böyle korur.",
    "wie": "İzin verdiklerinizi işaretlersiniz. Sonra imzalarsınız.",
    "wo": "Bu sayfa kulüp bölümüne aittir."

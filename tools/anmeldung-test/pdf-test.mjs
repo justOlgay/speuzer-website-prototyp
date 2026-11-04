@@ -32,6 +32,11 @@
 //    Karneval ohne Blatt zu Auftritten, ohne Gruppenname (stattdessen ein Satz), ohne Zuschlag im Laufzettel
 //  - M1, Runde 2 (11.10.2026): Blatt „Fahrten und Messenger“: nur Karneval ohne Fußball sagt „Veranstaltungen des Vereins“ (Überschrift und Satz,
 //    kein „Turnier“, keine Spiele), Fußball und „beides“ behalten „Spielen und Veranstaltungen“ (Sonderfall 13, dazu die Prüfung je Profil)
+//  - AP-E1 (04.11.2026, Runde 2): Blatt „Fahrten und Messenger“: Einwilligung zur Mitnahme im Auto durch Trainer, Betreuer und andere Erwachsene (Kernwortlaut der 1. Vorsitzenden,
+//    allgemein nach der Entscheidung der Jugendleitung) in drei Sätzen mit höchstens 12 Wörtern („Ja, Trainer, Betreuer und andere Erwachsene dürfen mein Kind im Auto mitnehmen.
+//    Das gilt für Fahrten zu Spielen und Veranstaltungen. Es gelten die Regeln des Schutzkonzepts.“; nur Karneval ohne Fußball „… zu Veranstaltungen des Vereins …“), „Nein“
+//    („kein Erwachsener darf …“) und „ohne Antwort“ („Erwachsene nehmen Ihr Kind dann nicht im Auto mit“) passend, der Absatz vor den Kästchen nennt Trainer, Betreuer und andere
+//    Erwachsene; kein Wort mehr zu Fahrgemeinschaften (Sonderfall 13, dazu die Prüfung je Profil)
 //  - M9 (11.10.2026): Schalter unterschriftHfv (Jugendleitung): Der Hauptlauf prüft den Stand der Daten („bildschirm“: alle Unterschriften der
 //    Familie am Bildschirm, auch auf den Blättern des Verbands, mit Datum der Anmeldung; freiwillige Felder für das Kind und den zweiten Elternteil,
 //    leer gelassen: der zweite Elternteil und das Kind bei der Abmeldung mit Stift-Markierung und Satz im Laufzettel; Teil A „Ausdrucken müssen Sie nur“; Satz im Laufzettel). Danach läuft ein Teil der
@@ -69,6 +74,7 @@ import fontkit from "@pdf-lib/fontkit";
 import { PROFILE, ladeKonfig, profil } from "./profile.mjs";
 import { auswerten } from "../../assets/js/anmeldung/regeln.js";
 import deRegeln from "../../assets/js/anmeldung/texte/de-regeln.js";
+import deOberflaeche from "../../assets/js/anmeldung/texte/de-oberflaeche.js";
 import { erzeugePdf, benoetigteVorlagen, dateiname, TEXTE_TEIL_A, begriffsErklaerer } from "../../assets/js/anmeldung/pdf.js";
 
 const WURZEL = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -770,12 +776,19 @@ const EIGENE_MIT_STELLE = [
   ["attest_einwilligung", "attest", "einwilligung"],
   ["notfall", "notfall", "unterschrift"],
 ];
+// Mitnahme im Auto (AP-E1, 04.11.2026; Kernwortlaut der 1. Vorsitzenden: „Ja, mein Kind darf von Trainern und Betreuern des Vereins in deren Auto zu Spielen und
+// Veranstaltungen mitgenommen werden, nach den Regeln des Schutzkonzepts.“; Runde 2: allgemein für Trainer, Betreuer und andere Erwachsene): drei Sätze mit höchstens
+// 12 Wörtern – wer nimmt das Kind womit mit, wohin, nach welchen Regeln. Die Oberfläche und die Prüfseite (e2e: pruefeFahrtenSatz) sagen dasselbe.
+const FAHRTEN_MITNAHME = "Ja, Trainer, Betreuer und andere Erwachsene dürfen mein Kind im Auto mitnehmen.";
+const FAHRTEN_REGELN = "Es gelten die Regeln des Schutzkonzepts.";
 const TEXT_FAHRTEN = {
-  fahrten: { ja: "Ja, mein Kind darf zu Spielen und Veranstaltungen in Fahrgemeinschaften mitfahren.", nein: "Nein, mein Kind fährt nicht in Fahrgemeinschaften mit.", ohne: "Sie haben dazu nichts angegeben. Ihr Kind fährt dann nicht in Fahrgemeinschaften mit." },
+  fahrten: { ja: FAHRTEN_MITNAHME + " Das gilt für Fahrten zu Spielen und Veranstaltungen. " + FAHRTEN_REGELN, nein: "Nein, kein Erwachsener darf mein Kind im Auto mitnehmen.", ohne: "Sie haben dazu nichts angegeben. Erwachsene nehmen Ihr Kind dann nicht im Auto mit." },
   messenger: { ja: "Ja, meine Telefonnummer darf in die Messenger-Gruppe der Mannschaft. Alle Mitglieder der Gruppe können sie sehen.", nein: "Nein, ich möchte nicht in die Messenger-Gruppe.", ohne: "Sie haben dazu nichts angegeben. Ihre Telefonnummer kommt dann nicht in die Messenger-Gruppe." },
 };
-// Fahrten: Wer nur im Karneval ist, liest keine Spiele (M1, Runde 2, 11.10.2026); Fußball und „beides“ behalten den bisherigen Satz.
-const FAHRTEN_KARNEVAL = { ueberschrift: "Fahrten zu Veranstaltungen des Vereins", ja: "Ja, mein Kind darf zu Veranstaltungen des Vereins in Fahrgemeinschaften mitfahren." };
+// Die Sätze vor den Kästchen: Was das Schutzkonzept zur Mitnahme sagt (Nr. 6.4): Trainer, Betreuer und andere Erwachsene (Runde 2; in Runde 1 standen nur Trainer und Betreuer da).
+const FAHRTEN_ERKLAERUNG = "Das steht im Schutzkonzept des Vereins. Trainer, Betreuer und andere Erwachsene dürfen Kinder im privaten Auto mitnehmen. Dann müssen mindestens zwei Kinder mitfahren. Die Fahrt läuft über vereinbarte Treffpunkte. Ausnahmen gibt es nur mit Ihrer dokumentierten Zustimmung.";
+// Fahrten: Wer nur im Karneval ist, liest keine Spiele (M1, Runde 2, 11.10.2026); Fußball und „beides“ lesen „Spielen und Veranstaltungen“.
+const FAHRTEN_KARNEVAL = { ueberschrift: "Fahrten zu Veranstaltungen des Vereins", ja: FAHRTEN_MITNAHME + " Das gilt für Fahrten zu Veranstaltungen des Vereins. " + FAHRTEN_REGELN };
 const FAHRTEN_SONST = { ueberschrift: "Fahrten zu Spielen und Veranstaltungen", ja: TEXT_FAHRTEN.fahrten.ja };
 const FAHRTEN_SATZ = (a) => (a.abteilung === "karneval" ? FAHRTEN_KARNEVAL : FAHRTEN_SONST);
 // Messenger-Gruppe: Wer nur im Karneval ist, liest „der Gruppe“ statt „der Mannschaft“ (M11, 12.10.2026); Fußball und „beides“ behalten den bisherigen Satz.
@@ -985,6 +998,9 @@ function pruefeEigeneSeiten(c) {
     ok(texte[seite - 1].includes(satz.ueberschrift) && !texte[seite - 1].includes(anderer.ueberschrift), () => "Fahrten: Überschrift „" + satz.ueberschrift + "“ (Abteilung " + a.abteilung + ")");
     ok(!/Turnier/.test(texte[seite - 1]), "Fahrten: das Blatt nennt keine Turniere");
     if (a.abteilung === "karneval") ok(!/Spiel/.test(texte[seite - 1]), "Fahrten bei Karneval ohne Fußball: das Blatt nennt keine Spiele");
+    // AP-E1 (04.11.2026, Runde 2): Mitnahme im Auto durch Trainer, Betreuer und andere Erwachsene; der Absatz vor den Kästchen nennt sie, und von Fahrgemeinschaften ist nicht mehr die Rede
+    ok(texte[seite - 1].includes(FAHRTEN_ERKLAERUNG), () => "Fahrten: der Absatz vor den Kästchen nennt Trainer, Betreuer und andere Erwachsene und die Regeln des Schutzkonzepts (Nr. 6.4)");
+    ok(!/Fahrgemeinschaft/.test(texte[seite - 1]), () => "Fahrten: kein Wort mehr zu Fahrgemeinschaften");
     for (const name of ["fahrten", "messenger"]) {
       const T = name === "fahrten" ? { ...TEXT_FAHRTEN.fahrten, ja: satz.ja } : { ...TEXT_FAHRTEN.messenger, ja: MESSENGER_JA(a) };
       const beantwortet = typeof ew[name] === "boolean";
@@ -2518,15 +2534,35 @@ async function sonderfaelle() {
     };
     const karneval = await probe("karneval-kind", null, "karneval");
     ok(karneval.b.a.abteilung === "karneval" && karneval.b.e.minderjaehrig === true && karneval.nr > 0, "Fahrten Karneval-Kind: Blatt vorhanden");
-    ok(karneval.t.includes("Fahrten zu Veranstaltungen des Vereins") && karneval.t.includes("Ja, mein Kind darf zu Veranstaltungen des Vereins in Fahrgemeinschaften mitfahren."), "Fahrten Karneval-Kind: Überschrift und Satz „… zu Veranstaltungen des Vereins …“");
+    ok(karneval.t.includes(FAHRTEN_KARNEVAL.ueberschrift) && karneval.t.includes(FAHRTEN_KARNEVAL.ja), "Fahrten Karneval-Kind: Überschrift und Sätze „Trainer, Betreuer und andere Erwachsene dürfen mein Kind im Auto mitnehmen. Das gilt für Fahrten zu Veranstaltungen des Vereins. Es gelten die Regeln des Schutzkonzepts.“");
     ok(!/Turnier/.test(karneval.t) && !/Spiel/.test(karneval.t) && !karneval.t.includes("Spielen und Veranstaltungen"), "Fahrten Karneval-Kind: kein „Turnier“ und keine Spiele auf dem Blatt");
     ok(!/Turnier/.test(karneval.alles), "Fahrten Karneval-Kind: im ganzen PDF kein „Turnier“");
     const fussball = await probe("kind-neu-deutsch-f", null, "fussball");
     ok(fussball.b.a.abteilung === "fussball" && fussball.nr > 0, "Fahrten Fußball-Kind: Blatt vorhanden");
-    ok(fussball.t.includes("Fahrten zu Spielen und Veranstaltungen") && fussball.t.includes("Ja, mein Kind darf zu Spielen und Veranstaltungen in Fahrgemeinschaften mitfahren.") && !fussball.t.includes("Veranstaltungen des Vereins"), "Fahrten Fußball-Kind: der bisherige Satz „… zu Spielen und Veranstaltungen …“");
+    ok(fussball.t.includes(FAHRTEN_SONST.ueberschrift) && fussball.t.includes(FAHRTEN_SONST.ja) && !fussball.t.includes("Veranstaltungen des Vereins"), "Fahrten Fußball-Kind: Sätze „Trainer, Betreuer und andere Erwachsene dürfen mein Kind im Auto mitnehmen. Das gilt für Fahrten zu Spielen und Veranstaltungen. Es gelten die Regeln des Schutzkonzepts.“");
+    // AP-E1: Die vier Teile des Wortlauts stehen auf dem Blatt: wer (Trainer, Betreuer und andere Erwachsene), was (im Auto mitnehmen), wohin (zu Spielen und Veranstaltungen), Regeln des Schutzkonzepts
+    ok(["Trainer, Betreuer und andere Erwachsene", "im Auto mitnehmen", "zu Spielen und Veranstaltungen", "Regeln des Schutzkonzepts"].every((teil) => fussball.t.includes(teil)), "Fahrten Fußball-Kind: das Blatt nennt Trainer, Betreuer und andere Erwachsene, die Mitnahme im Auto, Spiele und Veranstaltungen und die Regeln des Schutzkonzepts");
+    ok(!/Fahrgemeinschaft|Turnier/.test(fussball.t), "Fahrten Fußball-Kind: kein Wort mehr zu Fahrgemeinschaften und keine Turniere");
+    // AP-E1: Oberfläche, Prüfseite und PDF sagen dasselbe (nicht dreimal anders formuliert): Der Satz im Kästchen der Seite „Fahrten und Nachrichten“ ist der erste Satz
+    // des PDF-Kästchens (dort „Ja, …“ und „mein Kind“ statt des Namens), die Zeile darunter steht, ohne das Beispiel „Autos anderer Eltern“ (nur die Oberfläche nennt es),
+    // wörtlich als zweiter und dritter Satz im PDF-Kästchen, und der Wert der Prüfseite nennt dasselbe Wohin und dieselben Regeln. Die Konstanten oben stimmen mit dem
+    // fertigen PDF überein (Prüfungen darüber), die Oberfläche kommt aus den Texten.
+    {
+      const ob = deOberflaeche.einwilligungen.fahrten;
+      const pr = deOberflaeche.pruefen.werte.fahrten;
+      const BEISPIEL = "Zum Beispiel in Autos anderer Eltern. ";
+      const ohneBeispiel = (zeile) => (zeile.startsWith(BEISPIEL) ? zeile.slice(BEISPIEL.length) : zeile);
+      const wohin = (zeile) => (/Fahrten (zu .+?)\.(?: |$)/.exec(zeile) || [])[1];
+      ok(ob.fahrtenHinweis.startsWith(BEISPIEL) && ob.fahrtenHinweisKarneval.startsWith(BEISPIEL), "Oberfläche: die Zeile unter dem Kästchen beginnt mit dem Beispiel „Zum Beispiel in Autos anderer Eltern.“ (Fußball und Karneval)");
+      ok(FAHRTEN_MITNAHME === "Ja, " + ob.fahrten.replace("{name}", "mein Kind"), () => "Oberfläche und PDF: derselbe Satz im Kästchen („" + ob.fahrten + "“ und „" + FAHRTEN_MITNAHME + "“)");
+      ok(FAHRTEN_SONST.ja === FAHRTEN_MITNAHME + " " + ohneBeispiel(ob.fahrtenHinweis), "Oberfläche und PDF (Fußball, „beides“): die Zeile unter dem Kästchen (ohne das Beispiel) steht wörtlich als zweiter und dritter Satz im Kästchen des PDF");
+      ok(FAHRTEN_KARNEVAL.ja === FAHRTEN_MITNAHME + " " + ohneBeispiel(ob.fahrtenHinweisKarneval), "Oberfläche und PDF (nur Karneval): die Zeile unter dem Kästchen (ohne das Beispiel) steht wörtlich als zweiter und dritter Satz im Kästchen des PDF");
+      ok(pr.ja === "Ja, " + wohin(ob.fahrtenHinweis) + ", nach den Regeln des Schutzkonzepts." && pr.jaKarneval === "Ja, " + wohin(ob.fahrtenHinweisKarneval) + ", nach den Regeln des Schutzkonzepts.", () => "Prüfseite: Wert „" + pr.ja + "“ und „" + pr.jaKarneval + "“ nennen dasselbe Wohin und dieselben Regeln wie die Zeile unter dem Kästchen");
+      ok(/Trainer, Betreuer und andere Erwachsene/.test(deOberflaeche.pruefen.zeilen.fahrten) && /im Auto/.test(deOberflaeche.pruefen.zeilen.fahrten), "Prüfseite: die Beschriftung nennt Trainer, Betreuer und andere Erwachsene und das Auto");
+    }
     const beides = await probe("kind-neu-deutsch-f", "beides", "beides");
     ok(beides.b.a.abteilung === "beides" && beides.nr > 0, "Fahrten Kind in Fußball und Karneval: Blatt vorhanden");
-    ok(beides.t.includes("Fahrten zu Spielen und Veranstaltungen") && beides.t.includes("Ja, mein Kind darf zu Spielen und Veranstaltungen in Fahrgemeinschaften mitfahren.") && !beides.t.includes("Veranstaltungen des Vereins"), "Fahrten Kind in Fußball und Karneval: der bisherige Satz wie bei Fußball");
+    ok(beides.t.includes(FAHRTEN_SONST.ueberschrift) && beides.t.includes(FAHRTEN_SONST.ja) && !beides.t.includes("Veranstaltungen des Vereins"), "Fahrten Kind in Fußball und Karneval: die Sätze wie bei Fußball („… zu Spielen und Veranstaltungen …“)");
     // M11 (12.10.2026): Beim Karneval gibt es Gruppen, keine Mannschaften. Nur Karneval sagt „Messenger-Gruppe der Gruppe“ und „Trainer und Betreuer
     // der Gruppe“ (Messenger-Satz, Datenschutzinformation, Trennblatt, Notfallbogen); Fußball und „beides“ behalten „Mannschaft“. Die Oberfläche folgt
     // derselben Regel (e2e: pruefeFahrtenSatz).
@@ -2557,7 +2593,7 @@ async function sonderfaelle() {
     const gOhne = await baue(ohneAntwort, "fahrten-karneval-ohne-antwort.pdf");
     const nrOhne = gOhne.bericht.seiten.findIndex((x) => x.schluessel === "einverstaendnis_fahrten" && x.art === "eigen") + 1;
     const tOhne = nrOhne ? textSeiten(gOhne.pfad)[nrOhne - 1] : "";
-    ok(nrOhne > 0 && tOhne.includes("Fahrten zu Veranstaltungen des Vereins") && tOhne.includes("Sie haben dazu nichts angegeben. Ihr Kind fährt dann nicht in Fahrgemeinschaften mit.") && !/Turnier|Spiel/.test(tOhne), "Fahrten Karneval-Kind ohne Antwort: Überschrift ohne Spiele und der Satz statt der Kästchen");
+    ok(nrOhne > 0 && tOhne.includes("Fahrten zu Veranstaltungen des Vereins") && tOhne.includes(TEXT_FAHRTEN.fahrten.ohne) && !tOhne.includes(TEXT_FAHRTEN.fahrten.nein) && !tOhne.includes(FAHRTEN_MITNAHME) && !/Turnier|Spiel/.test(tOhne), "Fahrten Karneval-Kind ohne Antwort: Überschrift ohne Spiele und der Satz „Sie haben dazu nichts angegeben. Erwachsene nehmen Ihr Kind dann nicht im Auto mit.“ statt der Kästchen");
   }
 
   // 14. Laufzettel: der Block „Bearbeitung durch den Verein“ wird nie vom Seitenumbruch zerrissen, auch wenn der Laufzettel

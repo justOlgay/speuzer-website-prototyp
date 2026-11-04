@@ -39,6 +39,10 @@
 //     Prüfseite mit „Ändern“, nie bei Passiven und Erwachsenen, Antwort im PDF); kein Schritt „karneval“ mehr; kein Zuschlag ohne Lastschrift
 //   - M1, Runde 2 (11.10.2026): Satz zur Fahrt je Abteilung (nur Karneval: „… zu Veranstaltungen des Vereins …“, kein „Turnier“ auf den Seiten
 //     des Karneval-Kindes; Fußball und „beides“: „… zu Spielen und Turnieren …“); keine karnevalGruppen in der eingebetteten Konfiguration
+//   - AP-E1 (04.11.2026, Runde 2): Einwilligung zur Mitnahme im Auto durch Trainer, Betreuer und andere Erwachsene (pruefeFahrtenSatz): ein Satz für alle Abteilungen
+//     („Trainer, Betreuer und andere Erwachsene dürfen <Name> im Auto mitnehmen.“), darunter die Zeile mit dem Beispiel „Autos anderer Eltern“, dem Wohin und den Regeln
+//     des Schutzkonzepts (Fußball und „beides“: „zu Spielen und Veranstaltungen“, nur Karneval: „zu Veranstaltungen des Vereins“, ohne Spiele und Turniere); die Prüfseite
+//     zeigt „Mitnahme im Auto durch Trainer, Betreuer und andere Erwachsene“ mit dem Satz zu „Ja“ oder mit „Nein“
 //   - M9 (11.10.2026): Alles am Bildschirm unterschreiben, auch die Blätter des Verbands (Schalter unterschriftHfv, Jugendleitung). Der Hauptlauf prüft den
 //     Stand der Daten („bildschirm“): freiwilliges Feld für das Kind, zweiter Elternteil mit eigenem Feld, Weiter ohne die freiwilligen Felder, Prüfseite und
 //     Fertig-Seite, PDF mit den Sätzen in Teil A und im Laufzettel. pruefeUnterschriftenModus legt den Schalter im Testserver um (Test-Option hfv) und prüft
@@ -1659,7 +1663,7 @@ async function pruefeHeimweg(browser, server, dateien, beispiele) {
     ok("Heimweg: Prüfseite erreicht", sp.schritt === "pruefen", sp.schritt);
     let zeilen = await pruefZeilen(eingabe);
     let z = zeilen.find((x) => x.label === "Heimweg");
-    ok("Heimweg: die Prüfseite zeigt die Zeile 'Heimweg' mit 'Allein nach Hause'", !!z && z.wert === "Allein nach Hause", JSON.stringify(zeilen.filter((x) => /Heimweg|Notfall|Fahrten/.test(x.label))));
+    ok("Heimweg: die Prüfseite zeigt die Zeile 'Heimweg' mit 'Allein nach Hause'", !!z && z.wert === "Allein nach Hause", JSON.stringify(zeilen.filter((x) => /Heimweg|Notfall|Fahrten|Mitnahme/.test(x.label))));
     ok("Heimweg: die Prüfseite hat keine Zeilen mehr zu Karneval-Gruppe, Abendauftritten, Abholung und Zuschlag", !zeilen.some((x) => /Karneval-Gruppe|Abendauftritte|Wer holt ab|Zuschlag/.test(x.label + " " + x.wert)), "");
     await eingabe.$eval('#anmeldung button[aria-label="Heimweg ändern"]', (b) => b.scrollIntoView({ block: "center" }));
     await eingabe.screenshot({ path: path.join(AUSGABE, MOBIL.name, "pruefen-heimweg.png"), fullPage: false });
@@ -1754,22 +1758,39 @@ async function pruefeHeimweg(browser, server, dateien, beispiele) {
   }
 }
 
-// ---------- M1, Runde 2 (11.10.2026): Satz zur Fahrt je Abteilung, keine Karnevalgruppen in der Konfiguration ----------
+// ---------- M1, Runde 2 (11.10.2026) und AP-E1 (04.11.2026): Satz zur Fahrt je Abteilung, keine Karnevalgruppen in der Konfiguration ----------
 
-// Fußball und "beides" lesen "<Name> darf zu Spielen und Turnieren mitfahren.", wer nur im Karneval ist, liest "<Name> darf zu
-// Veranstaltungen des Vereins mitfahren." (Entscheidung der 1. Vorsitzenden: keine Turniere und Auftritte in der Karneval-Anmeldung).
-// Die Prüfseite zeigt nur die Zeile "Fahrten" mit Ja oder Nein, keinen Satz. Das PDF-Blatt prüft der pdf-test (Fahrten je Abteilung).
+// AP-E1 (04.11.2026): Einwilligung zur Mitnahme im Auto (Kernwortlaut von der 1. Vorsitzenden gebilligt; Runde 2: allgemein für Trainer, Betreuer und andere
+// Erwachsene, Entscheidung der Jugendleitung). Das Kästchen sagt in jeder Abteilung "Trainer, Betreuer und andere Erwachsene dürfen <Name> im Auto mitnehmen.";
+// die Zeile darunter nennt das Beispiel "Zum Beispiel in Autos anderer Eltern." und sagt, wohin und nach welchen Regeln: Fußball und "beides"
+// "Das gilt für Fahrten zu Spielen und Veranstaltungen. Es gelten die Regeln des Schutzkonzepts.", wer nur im Karneval ist "… zu Veranstaltungen des Vereins …"
+// (Entscheidung der 1. Vorsitzenden vom 11.10.2026: keine Spiele, Turniere und Auftritte in der Karneval-Anmeldung).
+// Die Prüfseite zeigt die Zeile "Mitnahme im Auto durch Trainer, Betreuer und andere Erwachsene" mit dem Satz zu „Ja“ (je Abteilung) oder mit „Nein“.
+// Das PDF-Blatt prüft der pdf-test (Fahrten je Abteilung).
 async function pruefeFahrtenSatz(browser, server, beispiele) {
-  console.log("\n=== M1 Runde 2: Satz zur Fahrt je Abteilung, keine Karnevalgruppen in der Konfiguration ===");
+  console.log("\n=== M1 Runde 2 und AP-E1: Mitnahme im Auto durch Trainer, Betreuer und andere Erwachsene, Satz zur Fahrt je Abteilung, keine Karnevalgruppen in der Konfiguration ===");
   const wb = await ladeWoerterbuch();
   const T = (pfad) => pfad.split(".").reduce((x, sch) => (x === undefined || x === null ? undefined : x[sch]), wb);
-  ok("Fahrten: das Wörterbuch hat den neuen Satz 'fahrtenKarneval' und behält den bisherigen Satz", T("einwilligungen.fahrten.fahrtenKarneval") === "{name} darf zu Veranstaltungen des Vereins mitfahren." && T("einwilligungen.fahrten.fahrten") === "{name} darf zu Spielen und Turnieren mitfahren.", "");
+  const MITNAHME = (name) => "Trainer, Betreuer und andere Erwachsene dürfen " + name + " im Auto mitnehmen.";
+  const BEISPIEL = "Zum Beispiel in Autos anderer Eltern.";
+  const ZEILE_SONST = BEISPIEL + " Das gilt für Fahrten zu Spielen und Veranstaltungen. Es gelten die Regeln des Schutzkonzepts.";
+  const ZEILE_KARNEVAL = BEISPIEL + " Das gilt für Fahrten zu Veranstaltungen des Vereins. Es gelten die Regeln des Schutzkonzepts.";
+  const PRUEF_LABEL = "Mitnahme im Auto durch Trainer, Betreuer und andere Erwachsene";
+  const PRUEF_JA_SONST = "Ja, zu Spielen und Veranstaltungen, nach den Regeln des Schutzkonzepts.";
+  const PRUEF_JA_KARNEVAL = "Ja, zu Veranstaltungen des Vereins, nach den Regeln des Schutzkonzepts.";
+  ok("Fahrten: das Wörterbuch hat den Satz zur Mitnahme im Auto (Trainer, Betreuer und andere Erwachsene) und je eine Zeile für Fußball und Karneval (mit dem Beispiel „Autos anderer Eltern“); den früheren Satz 'fahrtenKarneval' gibt es nicht mehr",
+    T("einwilligungen.fahrten.fahrten") === MITNAHME("{name}") && T("einwilligungen.fahrten.fahrtenHinweis") === ZEILE_SONST && T("einwilligungen.fahrten.fahrtenHinweisKarneval") === ZEILE_KARNEVAL && T("einwilligungen.fahrten.fahrtenKarneval") === undefined, "");
+  ok("Prüfseite: das Wörterbuch hat die Zeile 'Mitnahme im Auto …' mit dem Satz zu „Ja“ (Fußball und Karneval) und behält 'Nein'",
+    T("pruefen.zeilen.fahrten") === PRUEF_LABEL && T("pruefen.werte.fahrten.ja") === PRUEF_JA_SONST && T("pruefen.werte.fahrten.jaKarneval") === PRUEF_JA_KARNEVAL && T("pruefen.werte.nein") === "Nein", "");
   // M11 (12.10.2026): Beim Karneval gibt es Gruppen, keine Mannschaften: eigener Satz zur Messenger-Gruppe für Karneval ohne Fußball
   ok("Messenger: das Wörterbuch hat den Satz 'messengerKarneval' („… der Gruppe“) und behält den bisherigen Satz („… der Mannschaft“)", T("einwilligungen.fahrten.messengerKarneval") === "{name} darf in die Messenger-Gruppe der Gruppe." && T("einwilligungen.fahrten.messenger") === "{name} darf in die Messenger-Gruppe der Mannschaft.", "");
+  // Ohne Antwort gilt Nein: Die Standardantworten setzen weder die Mitnahme im Auto noch die Messenger-Gruppe (die Kästchen stehen beim ersten Aufruf leer)
+  const standard = (await import(pathToFileURL(path.join(ROOT, "assets", "js", "anmeldung", "antworten.js")).href)).neueAntworten("de");
+  ok("Fahrten: Standardantworten ohne Beispiel: Mitnahme im Auto und Messenger-Gruppe sind nicht gesetzt (ohne Antwort gilt Nein)", standard.einwilligungen.fahrten === false && standard.einwilligungen.messenger === false, JSON.stringify(standard.einwilligungen));
   ok("Konfiguration: die in die gebaute Seite eingebettete Konfiguration enthält keine karnevalGruppen mehr", !("karnevalGruppen" in server.konfig), Object.keys(server.konfig).join(", "));
   const vorname = (id) => beispiele.beispielAntworten(id, HEUTE, server.konfig).vorname;
   const VERBOTEN = /Turnier|Auftritt|Kostüm/;
-  // Satz des Kästchens "Fahrten" und der sichtbare Text der Seite
+  // Satz und Zeile des Kästchens "Fahrten" und der sichtbare Text der Seite
   const lesen = (page) =>
     page.evaluate(() => {
       const w = document.getElementById("anmeldung");
@@ -1777,14 +1798,18 @@ async function pruefeFahrtenSatz(browser, server, beispiele) {
       const l = i ? w.querySelector('label[for="' + i.id + '"]') : null;
       const im = w.querySelector('input[data-pfad="einwilligungen.messenger"]');
       const lm = im ? w.querySelector('label[for="' + im.id + '"]') : null;
+      const text = (e) => (e ? e.textContent.replace(/\s+/g, " ").trim() : null);
       return {
-        satz: l ? ((l.querySelector(".anm-karte__titel") || {}).textContent || "").trim() : null,
-        messenger: lm ? ((lm.querySelector(".anm-karte__titel") || {}).textContent || "").trim() : null,
+        satz: l ? text(l.querySelector(".anm-karte__titel")) : null,
+        zeile: l ? text(l.querySelector(".anm-karte__hinweis")) : null,
+        gesetzt: i ? i.checked : null,
+        messenger: lm ? text(lm.querySelector(".anm-karte__titel")) : null,
         seite: w.innerText.replace(/\s+/g, " "),
       };
     });
+  const zeileVon = (zeilen) => zeilen.find((x) => x.label === PRUEF_LABEL);
 
-  // ---- A: Karneval-Kind: der neue Satz; auf keiner Seite bis zur Prüfung steht etwas zu Turnieren, Auftritten oder Kostümen ----
+  // ---- A: Karneval-Kind: Satz und Zeile ohne Spiele und Turniere; auf keiner Seite bis zur Prüfung steht etwas zu Turnieren, Auftritten oder Kostümen ----
   {
     const page = await seiteMitBeispiel(browser, server, MOBIL, "fahrten-karneval", "karneval-kind", null);
     const besucht = [];
@@ -1803,9 +1828,11 @@ async function pruefeFahrtenSatz(browser, server, beispiele) {
       const r = await klickeWeiter(page, s);
       if (r.fehler.length || !r.gewechselt) break;
     }
-    const soll = vorname("karneval-kind") + " darf zu Veranstaltungen des Vereins mitfahren.";
+    const soll = MITNAHME(vorname("karneval-kind"));
     ok("Fahrten Karneval-Kind: die Seite 'Fahrten und Nachrichten' zeigt '" + soll + "'", !!fahrten && fahrten.satz === soll, fahrten ? fahrten.satz : "Seite nicht erreicht: " + besucht.map((x) => x.ort).join(" › "));
-    ok("Fahrten Karneval-Kind: der Satz nennt weder Spiele noch Turniere, und auf der Seite steht nichts zu Turnieren, Auftritten oder Kostümen", !!fahrten && !/Spiel|Turnier/.test(fahrten.satz) && !VERBOTEN.test(fahrten.seite), fahrten ? fahrten.satz : "");
+    ok("Fahrten Karneval-Kind: darunter steht '" + ZEILE_KARNEVAL + "' (zu Veranstaltungen des Vereins, Regeln des Schutzkonzepts)", !!fahrten && fahrten.zeile === ZEILE_KARNEVAL, fahrten ? String(fahrten.zeile) : "");
+    ok("Fahrten Karneval-Kind: weder Satz noch Zeile nennen Spiele oder Turniere, und auf der Seite steht nichts zu Turnieren, Auftritten oder Kostümen", !!fahrten && !/Spiel|Turnier/.test(fahrten.satz + " " + fahrten.zeile) && !VERBOTEN.test(fahrten.seite), fahrten ? fahrten.satz + " " + fahrten.zeile : "");
+    ok("Fahrten Karneval-Kind: der Satz nennt Trainer, Betreuer und andere Erwachsene und das Auto, die Zeile das Beispiel „Autos anderer Eltern“ und das Schutzkonzept", !!fahrten && /Trainer, Betreuer und andere Erwachsene/.test(fahrten.satz) && /im Auto mitnehmen/.test(fahrten.satz) && /Autos anderer Eltern/.test(fahrten.zeile) && /Schutzkonzepts/.test(fahrten.zeile) && !/Fahrgemeinschaft/.test(fahrten.satz + " " + fahrten.zeile), fahrten ? fahrten.satz + " " + fahrten.zeile : "");
     const sollMessengerK = vorname("karneval-kind") + " darf in die Messenger-Gruppe der Gruppe.";
     ok("Messenger Karneval-Kind: die Seite zeigt '" + sollMessengerK + "', auf der Seite steht kein „Mannschaft“ (M11)", !!fahrten && fahrten.messenger === sollMessengerK && !/Mannschaft/.test(fahrten.seite), fahrten ? fahrten.messenger : "Seite nicht erreicht");
     const treffer = besucht.filter((x) => VERBOTEN.test(x.seite)).map((x) => x.ort);
@@ -1813,45 +1840,62 @@ async function pruefeFahrtenSatz(browser, server, beispiele) {
     const letzte = besucht[besucht.length - 1];
     ok("Karneval-Kind: die Prüfseite ist erreicht", !!letzte && letzte.ort === "pruefen/haupt", letzte ? letzte.ort : "");
     const zeilen = await pruefZeilen(page);
-    const z = zeilen.find((x) => x.label === "Fahrten");
-    ok("Karneval-Kind: die Prüfseite zeigt die Zeile 'Fahrten' mit 'Ja', ohne Satz", !!z && z.wert === "Ja", JSON.stringify(z));
+    const z = zeileVon(zeilen);
+    ok("Karneval-Kind: die Prüfseite zeigt die Zeile '" + PRUEF_LABEL + "' mit '" + PRUEF_JA_KARNEVAL + "' (ohne Spiele)", !!z && z.wert === PRUEF_JA_KARNEVAL && !/Spiel|Turnier/.test(z.wert), JSON.stringify(z));
+    ok("Karneval-Kind: die Prüfseite hat die frühere Zeile 'Fahrten' nicht mehr", !zeilen.some((x) => x.label === "Fahrten"), JSON.stringify(zeilen.map((x) => x.label)));
     ok("Karneval-Kind: keine Fehler in der Konsole", page.__st.konsole.length === 0, page.__st.konsole.slice(0, 3).join(" | "));
     await page.close();
   }
 
-  // ---- B: Fußball-Kind (Beispiel 'Kind neu'): der bisherige Satz ----
+  // ---- B: Fußball-Kind (Beispiel 'Kind neu'): derselbe Satz, die Zeile mit „Spielen und Veranstaltungen“; Prüfseite mit „Ja“ und, nach dem Abwählen, mit „Nein“ ----
   {
     const page = await seiteMitBeispiel(browser, server, MOBIL, "fahrten-fussball", "kind-neu", null);
     const s = await geheBis(page, "einwilligungen", "fahrten");
     const l = await lesen(page);
-    const soll = vorname("kind-neu") + " darf zu Spielen und Turnieren mitfahren.";
+    const soll = MITNAHME(vorname("kind-neu"));
     ok("Fahrten Fußball-Kind: die Seite 'Fahrten und Nachrichten' zeigt '" + soll + "'", s.schritt === "einwilligungen" && s.teil === "fahrten" && l.satz === soll, s.schritt + "/" + s.teil + "; " + l.satz);
+    ok("Fahrten Fußball-Kind: darunter steht '" + ZEILE_SONST + "' (zu Spielen und Veranstaltungen, Regeln des Schutzkonzepts)", l.zeile === ZEILE_SONST, String(l.zeile));
+    ok("Fahrten Fußball-Kind: die Zeile nennt das Beispiel „Autos anderer Eltern“, kein „Fahrgemeinschaft“ und kein „Turnier“ auf der Seite", /Autos anderer Eltern/.test(l.zeile) && !/Fahrgemeinschaft/.test(l.seite) && !/Turnier/.test(l.seite), l.satz + " | " + l.zeile);
     ok("Messenger Fußball-Kind: der bisherige Satz '" + vorname("kind-neu") + " darf in die Messenger-Gruppe der Mannschaft.' (M11: unverändert)", l.messenger === vorname("kind-neu") + " darf in die Messenger-Gruppe der Mannschaft.", String(l.messenger));
     await page.screenshot({ path: path.join(AUSGABE, MOBIL.name, "fahrten-fussball.png"), fullPage: false });
     protokoll.screenshots++;
+    // Das Kästchen steht im Beispiel auf „Ja“: Die Prüfseite zeigt den Satz zu „Ja“; nach dem Abwählen zeigt sie „Nein“ (ohne Antwort gilt Nein)
+    ok("Fahrten Fußball-Kind: das Kästchen ist im Beispiel gesetzt (Ausgangslage für die Prüfseite)", l.gesetzt === true, String(l.gesetzt));
+    const pruefen = await geheBis(page, "pruefen");
+    const zJa = zeileVon(await pruefZeilen(page));
+    ok("Fußball-Kind: die Prüfseite zeigt die Zeile '" + PRUEF_LABEL + "' mit '" + PRUEF_JA_SONST + "'", pruefen.schritt === "pruefen" && !!zJa && zJa.wert === PRUEF_JA_SONST, JSON.stringify(zJa));
     await page.close();
+    const seite2 = await seiteMitBeispiel(browser, server, MOBIL, "fahrten-fussball-nein", "kind-neu", null);
+    await geheBis(seite2, "einwilligungen", "fahrten");
+    await klickeEtikett(seite2, '#anmeldung input[data-pfad="einwilligungen.fahrten"]');
+    const l2 = await lesen(seite2);
+    ok("Fahrten Fußball-Kind: nach einem Klick ist das Kästchen nicht mehr gesetzt", l2.gesetzt === false, String(l2.gesetzt));
+    const pruefen2 = await geheBis(seite2, "pruefen");
+    const zNein = zeileVon(await pruefZeilen(seite2));
+    ok("Fußball-Kind: ohne gesetztes Kästchen zeigt die Prüfseite die Zeile '" + PRUEF_LABEL + "' mit 'Nein' (ohne Antwort gilt Nein)", pruefen2.schritt === "pruefen" && !!zNein && zNein.wert === "Nein", JSON.stringify(zNein));
+    await seite2.close();
   }
 
-  // ---- C: Kind in Fußball und Karneval ("beides"): der bisherige Satz ----
+  // ---- C: Kind in Fußball und Karneval ("beides"): wie bei Fußball (Spielen und Veranstaltungen) ----
   {
     const page = await seiteMitBeispiel(browser, server, MOBIL, "fahrten-beides", "kind-neu", "abteilung");
     await klickeEtikett(page, '#anmeldung input[data-pfad="abteilung"][data-wert="beides"]');
     const s = await geheBis(page, "einwilligungen", "fahrten");
     const l = await lesen(page);
-    const soll = vorname("kind-neu") + " darf zu Spielen und Turnieren mitfahren.";
-    ok("Fahrten Kind in Fußball und Karneval: der bisherige Satz '" + soll + "'", s.schritt === "einwilligungen" && s.teil === "fahrten" && l.satz === soll, s.schritt + "/" + s.teil + "; " + l.satz);
+    const soll = MITNAHME(vorname("kind-neu"));
+    ok("Fahrten Kind in Fußball und Karneval: Satz '" + soll + "' und die Zeile mit „Spielen und Veranstaltungen“", s.schritt === "einwilligungen" && s.teil === "fahrten" && l.satz === soll && l.zeile === ZEILE_SONST, s.schritt + "/" + s.teil + "; " + l.satz + " | " + l.zeile);
     ok("Messenger Kind in Fußball und Karneval: der bisherige Satz '… der Mannschaft.' (M11: unverändert)", l.messenger === vorname("kind-neu") + " darf in die Messenger-Gruppe der Mannschaft.", String(l.messenger));
     await page.close();
   }
 
-  // ---- D: Abteilung in derselben Sitzung von Fußball auf Karneval gewechselt: der Satz folgt der Abteilung ----
+  // ---- D: Abteilung in derselben Sitzung von Fußball auf Karneval gewechselt: die Zeile folgt der Abteilung ----
   {
     const page = await seiteMitBeispiel(browser, server, MOBIL, "fahrten-wechsel", "kind-neu", "abteilung");
     await klickeEtikett(page, '#anmeldung input[data-pfad="abteilung"][data-wert="karneval"]');
     const s = await geheBis(page, "einwilligungen", "fahrten");
     const l = await lesen(page);
     const name = vorname("kind-neu");
-    ok("Fahrten, Abteilung auf Karneval gewechselt: der Satz heißt jetzt '… zu Veranstaltungen des Vereins …'", s.schritt === "einwilligungen" && s.teil === "fahrten" && l.satz === name + " darf zu Veranstaltungen des Vereins mitfahren.", s.schritt + "/" + s.teil + "; " + l.satz);
+    ok("Fahrten, Abteilung auf Karneval gewechselt: die Zeile heißt jetzt '… zu Veranstaltungen des Vereins …', der Satz bleibt", s.schritt === "einwilligungen" && s.teil === "fahrten" && l.satz === MITNAHME(name) && l.zeile === ZEILE_KARNEVAL, s.schritt + "/" + s.teil + "; " + l.satz + " | " + l.zeile);
     ok("Messenger, Abteilung auf Karneval gewechselt: der Satz heißt jetzt '… der Gruppe.' (M11)", l.messenger === name + " darf in die Messenger-Gruppe der Gruppe.", String(l.messenger));
     await page.close();
   }

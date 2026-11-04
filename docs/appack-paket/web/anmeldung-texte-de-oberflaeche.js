@@ -670,9 +670,9 @@ export default {
   "fahrten": {
    "titel": "Fahrten und Nachrichten",
    "hinweis": "Beides ist freiwillig. Sie können das später ändern.",
-   "fahrten": "{name} darf zu Spielen und Turnieren mitfahren.",
-   "fahrtenKarneval": "{name} darf zu Veranstaltungen des Vereins mitfahren.",
-   "fahrtenHinweis": "Zum Beispiel in Autos anderer Eltern.",
+   "fahrten": "Trainer, Betreuer und andere Erwachsene dürfen {name} im Auto mitnehmen.",
+   "fahrtenHinweis": "Zum Beispiel in Autos anderer Eltern. Das gilt für Fahrten zu Spielen und Veranstaltungen. Es gelten die Regeln des Schutzkonzepts.",
+   "fahrtenHinweisKarneval": "Zum Beispiel in Autos anderer Eltern. Das gilt für Fahrten zu Veranstaltungen des Vereins. Es gelten die Regeln des Schutzkonzepts.",
    "messenger": "{name} darf in die Messenger-Gruppe der Mannschaft.",
    "messengerKarneval": "{name} darf in die Messenger-Gruppe der Gruppe.",
    "messengerHinweis": "Dort stehen Termine und Absprachen."
@@ -848,7 +848,7 @@ export default {
    "iban": "IBAN",
    "fotos": "Fotos",
    "hfv": "Fußball-Verband",
-   "fahrten": "Fahrten",
+   "fahrten": "Mitnahme im Auto durch Trainer, Betreuer und andere Erwachsene",
    "messenger": "Messenger-Gruppe",
    "heimweg": "Heimweg",
    "notfall": "Notfallkontakt",
@@ -865,6 +865,10 @@ export default {
    "nein": "Nein",
    "weissNicht": "Weiß nicht",
    "satzungVonHand": "Nein – Sie kreuzen es von Hand an",
+   "fahrten": {
+    "ja": "Ja, zu Spielen und Veranstaltungen, nach den Regeln des Schutzkonzepts.",
+    "jaKarneval": "Ja, zu Veranstaltungen des Vereins, nach den Regeln des Schutzkonzepts."
+   },
    "heimweg": {
     "allein": "Allein nach Hause",
     "abholen": "Wird abgeholt"

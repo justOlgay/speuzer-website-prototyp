@@ -224,7 +224,7 @@ export default {
     },
     U29: {
       name: "Einverständnis für Fahrten und Messenger-Gruppe",
-      kurz: "Sie erlauben Fahrten zu Spielen und die Gruppe im Messenger.",
+      kurz: "Sie erlauben die Mitnahme im Auto und die Gruppe im Messenger.",
       warum: "Der Verein schützt so die Kinder.",
       wie: "Sie kreuzen an, was Sie erlauben. Dann unterschreiben Sie.",
       wo: "Das Blatt gehört zum Teil für den Verein.",
