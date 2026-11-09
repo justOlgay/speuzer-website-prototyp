@@ -41,12 +41,12 @@
     "vorstand": "vorstand@sportfreunde04.de"
   },
   "hinweise": {
-    "parken": "Der Parkplatz am Vereinsgelände ist wegen des Neubaus des Funktionsgebäudes voraussichtlich bis Ende Januar 2027 gesperrt. Der Zugang zum Gelände ist über den Hintereingang am „Haus der Jugend“ (Pavillon) möglich.",
-    "parken_quelle": "App-News vom 21.07.2026",
+    "parken": "Der Parkplatz am Vereinsgelände ist wegen der Bauarbeiten bis auf Weiteres gesperrt. Der Zugang zum Gelände ist über den Hintereingang am „Haus der Jugend“ (Pavillon) möglich.",
+    "parken_quelle": "Sportamt-Update vom 02.11.2026, Freigabe der 1. Vorsitzenden am 06.11.2026",
     "ferien": "In den Ferien und an Feiertagen steht kein Training im Kalender. Ob trotzdem trainiert wird, sagt das Trainerteam."
   },
   "oepnv": null,
-  "anfahrt_hinweis": "Zugang zum Vereinsgelände derzeit über den Hintereingang am „Haus der Jugend“ (Pavillon); der Parkplatz ist wegen des Neubaus bis voraussichtlich Ende Januar 2027 gesperrt.",
+  "anfahrt_hinweis": "Zugang zum Vereinsgelände derzeit über den Hintereingang am „Haus der Jugend“ (Pavillon); der Parkplatz ist wegen der Bauarbeiten bis auf Weiteres gesperrt.",
   "gruendung_jahr": 1904,
   "anzahl_mannschaften": 11,
   "karten": {

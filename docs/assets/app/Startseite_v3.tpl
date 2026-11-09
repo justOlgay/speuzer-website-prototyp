@@ -1679,7 +1679,7 @@ svg { display: block; flex: 0 0 auto; }
 
     <!-- HINWEIS: im CMS-Quelltext pflegen oder samt <aside> entfernen -->
     <aside class="hinweis-karte" aria-label="Hinweis">
-      <p><span class="p-schild" aria-hidden="true">P</span><strong class="hinweis__titel">Parkplatz wegen Neubau gesperrt.</strong> Zugang über den Hintereingang am „Haus&nbsp;der&nbsp;Jugend“ (Pavillon), voraussichtlich bis&nbsp;Ende&nbsp;Januar&nbsp;2027.</p>
+      <p><span class="p-schild" aria-hidden="true">P</span><strong class="hinweis__titel">Parkplatz wegen Neubau gesperrt.</strong> Zugang über den Hintereingang am „Haus&nbsp;der&nbsp;Jugend“ (Pavillon), bis&nbsp;auf&nbsp;Weiteres.</p>
     </aside>
 
     <div class="aktionen">
