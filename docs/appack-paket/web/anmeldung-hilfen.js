@@ -129,17 +129,19 @@ export function kbText(bytes) {
 export const MAIL_BETREFF = "Anmeldung";
 export const MAIL_TEXT = "Guten Tag,\n\nanbei die Anmeldung als PDF.\n\nViele Grüße";
 
+export const MAIL_TEXT_FOTO = "Guten Tag,\n\nanbei die Anmeldung als PDF und das Spielerfoto als Bild.\n\nViele Grüße";
+
 export function mailBetreff(vorname, nachname) {
   return [MAIL_BETREFF, sauber(vorname), sauber(nachname)].filter(Boolean).join(" ");
 }
 
-export function mailtoAnVerein(adresse, vorname, nachname) {
+export function mailtoAnVerein(adresse, vorname, nachname, mitFoto) {
   const kodiere = (text) => encodeURIComponent(String(text).replace(/\n/g, "\r\n"));
-  return "mailto:" + sauber(adresse) + "?subject=" + kodiere(mailBetreff(vorname, nachname)) + "&body=" + kodiere(MAIL_TEXT);
+  return "mailto:" + sauber(adresse) + "?subject=" + kodiere(mailBetreff(vorname, nachname)) + "&body=" + kodiere(mitFoto ? MAIL_TEXT_FOTO : MAIL_TEXT);
 }
 
-export function mailTeilen(vorname, nachname) {
-  return { title: mailBetreff(vorname, nachname), text: MAIL_TEXT };
+export function mailTeilen(vorname, nachname, mitFoto) {
+  return { title: mailBetreff(vorname, nachname), text: mitFoto ? MAIL_TEXT_FOTO : MAIL_TEXT };
 }
 
 export const MAIL_BETREFF_CODE = "Code für die Anmeldung";

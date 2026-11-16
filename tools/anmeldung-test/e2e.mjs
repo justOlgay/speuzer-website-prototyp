@@ -86,6 +86,11 @@
 //     Geschäftsstelle in die Zwischenablage (writeText zuerst, ohne await) und ruft sofort danach navigator.share mit der PDF-Datei, dem Betreff „Anmeldung Vorname Nachname“ und dem Text der E-Mail auf
 //     (Stellvertreter zeichnen die Aufrufe auf: Reihenfolge, selber Klick, Angaben; Meldung „Geteilt. Die Adresse ist kopiert.“ oder bei abgelehntem oder fehlendem writeText „Geteilt.“; Abbruch ohne Meldung;
 //     anderer Fehler: Datei gespeichert). Der Link zur E-Mail steht am Handy nur noch im zugeklappten Rückfall „Teilen klappt nicht?“; am Computer und am Handy ohne Teilen alles wie bisher.
+//   - AP-F1 (16.11.2026; pruefeFotoMitschicken, einzeln mit --nur=pruefeFotoMitschicken): Das Spielerfoto geht als eigene Bilddatei (JPG) in derselben E-Mail mit, wenn es eines gibt (Weg „Ich mache jetzt ein
+//     Foto“ oder „Ich wähle ein Foto aus“). Handy (390 x 844, Stellvertreter für canShare, share und Zwischenablage): „Datei und Foto teilen“ ist der Hauptknopf, ein Klick ruft share einmal mit zwei Dateien auf
+//     (PDF und Spielerfoto_<Nachname>_<Vorname>.jpg, Inhalt geprüft, dasselbe Bild wie im PDF), Betreff und Text mit dem Spielerfoto (hilfen.MAIL_TEXT_FOTO); nimmt canShare beide Dateien zusammen nicht an, ist der
+//     Knopf versteckt und es gilt der Weg am Computer. Computer (1280 x 900): vier Schritte, Knopf „Spielerfoto als Bild speichern“ lädt die JPG-Datei. Ohne Foto (auch nach „Der Verein macht das Foto“ bei schon
+//     hochgeladenem Bild): alles wie bisher. Texte in vier Sprachen (Wörterbuch; die Fertig-Seite in Englisch, Türkisch, Arabisch), Betreff und Text der E-Mail bleiben deutsch.
 //   - Screenshots je Seite nach tools/cache/anmeldung-test/e2e/
 //
 // Aufruf: node tools/anmeldung-test/e2e.mjs [--ohne-desktop] [--nur-sprache] [--nur=pruefeHeimweg,…]
@@ -3153,6 +3158,7 @@ async function einzelpruefungen(browser, server, dateien, beispiele) {
     ["pruefeSeitenP6", () => pruefeSeitenP6(browser, server, dateien, beispiele)],
     ["pruefeBeitragHfvZuschlag", () => pruefeBeitragHfvZuschlag(browser, server, beispiele)],
     ["pruefeTeilenMitAdresse", () => pruefeTeilenMitAdresse(browser, server, dateien, beispiele)],
+    ["pruefeFotoMitschicken", () => pruefeFotoMitschicken(browser, server, dateien, beispiele)],
   ];
   const unbekannt = NUR.filter((n) => !alle.some(([name]) => name === n));
   if (unbekannt.length) throw new Error("--nur: unbekannte Einzelprüfung(en) " + unbekannt.join(", ") + " – möglich: " + alle.map(([name]) => name).join(", "));
@@ -4869,6 +4875,512 @@ async function pruefeTeilenMitAdresse(browser, server, dateien, beispiele) {
     ok("Computer: keine Fehler in der Konsole", pc.__st.konsole.length === 0, pc.__st.konsole.slice(0, 3).join(" | "));
     await pc.close();
   }
+}
+
+// ---------- AP-F1 (16.11.2026): Das Spielerfoto geht als eigene Bilddatei (JPG) in derselben E-Mail mit ----------
+//
+// Anlass: Die Geschäftsstelle bekam aus einer Anmeldung das Spielerfoto nur als Seite im PDF und konnte es beim Verband nicht hochladen; sie braucht es als Bilddatei.
+// Gibt es ein Spielerfoto (Weg „Ich mache jetzt ein Foto“ oder „Ich wähle ein Foto aus“, nicht „Der Verein macht das Foto“), geht es als eigene JPG-Datei in derselben E-Mail mit:
+//   - Handy: Der Knopf „Datei und Foto teilen“ gibt der Mail-App zwei Dateien (PDF und Spielerfoto_<Nachname>_<Vorname>.jpg) in einem Klick, aber nur, wenn navigator.canShare
+//     beide Dateien zusammen annimmt; sonst ist der Knopf versteckt und es gilt der Weg am Computer. Der Text der E-Mail ist hilfen.MAIL_TEXT_FOTO, auch im Link zur E-Mail im Rückfall.
+//   - Computer: vier Schritte; Schritt 2 „Klicken Sie auch auf „Spielerfoto als Bild speichern“.“ (der Knopf foto-speichern lädt die JPG-Datei herunter).
+//   - Ohne Foto („Der Verein macht das Foto“, auch wenn vorher ein Bild hochgeladen wurde): alles wie bisher (drei Schritte, „Datei teilen“, ein PDF, hilfen.MAIL_TEXT).
+// Die Prüfung ersetzt navigator.canShare, share und clipboard durch Stellvertreter wie pruefeTeilenMitAdresse (Aufzeichnung der Aufrufe), liest dazu den Inhalt der geteilten Dateien
+// und prüft die Texte in allen vier Sprachen (Wörterbuch ohne Browser; die Fertig-Seite in Englisch, Türkisch und Arabisch mit 390 x 844).
+
+// Stellvertreter für canShare, share und Zwischenablage. canShare zeichnet auf, mit welchen Dateien es gefragt wird, und antwortet nach window.__canShareModus: „alle“ (jede Liste),
+// „eine“ (höchstens eine Datei), „nurPdf“ (nur PDF-Dateien), „keine“ (nie). share zeichnet Betreff, Text und Dateien auf und liest den Inhalt der Dateien (window.__inhalte, base64).
+// downloadsAbfangen: Klicks auf Links mit download werden aufgezeichnet (window.__downloads), nichts wird heruntergeladen.
+function fotoStellvertreter(downloadsAbfangen) {
+  return async (page) => {
+    await page.evaluateOnNewDocument((abfangen) => {
+      window.__aufrufe = [];
+      window.__downloads = [];
+      window.__inhalte = [];
+      window.__canShareFragen = [];
+      window.__canShareModus = "alle";
+      window.__verhalten = { share: "ok" };
+      const merke = (eintrag) =>
+        window.__aufrufe.push(Object.assign({ nr: window.__aufrufe.length, imKlick: !!(window.event && window.event.type === "click"), aktiv: !!(navigator.userActivation && navigator.userActivation.isActive) }, eintrag));
+      const lesen = (f) =>
+        new Promise((fertig) => {
+          const r = new FileReader();
+          r.onload = () => fertig({ name: f.name, typ: f.type, base64: String(r.result).split(",")[1] || "" });
+          r.onerror = () => fertig({ name: f.name, typ: f.type, base64: "" });
+          r.readAsDataURL(f);
+        });
+      Object.defineProperty(navigator, "canShare", {
+        value: (daten) => {
+          const liste = (daten && daten.files) || [];
+          window.__canShareFragen.push(liste.map((f) => f.type));
+          const modus = window.__canShareModus;
+          if (modus === "eine") return liste.length <= 1;
+          if (modus === "nurPdf") return liste.every((f) => f.type === "application/pdf");
+          if (modus === "keine") return false;
+          return true;
+        },
+        configurable: true,
+      });
+      Object.defineProperty(navigator, "share", {
+        value: (daten) => {
+          const liste = (daten && daten.files) || [];
+          merke({ name: "share", titel: daten && daten.title, text: daten && daten.text, felder: Object.keys(daten || {}).sort(), dateien: liste.map((f) => ({ name: f.name, typ: f.type, groesse: f.size, istFile: f instanceof File })) });
+          liste.forEach((f) => window.__inhalte.push(lesen(f)));
+          const v = window.__verhalten.share;
+          if (v === "abbruch") return Promise.reject(new DOMException("Share canceled", "AbortError"));
+          if (v === "fehler") return Promise.reject(new DOMException("nicht erlaubt", "NotAllowedError"));
+          return Promise.resolve();
+        },
+        configurable: true,
+      });
+      Object.defineProperty(navigator, "clipboard", {
+        value: {
+          writeText: (text) => {
+            merke({ name: "writeText", text });
+            return Promise.resolve();
+          },
+        },
+        configurable: true,
+      });
+      if (abfangen) {
+        document.addEventListener(
+          "click",
+          (e) => {
+            const a = e.target && e.target.closest && e.target.closest("a[download]");
+            if (a) {
+              window.__downloads.push({ name: a.getAttribute("download") });
+              e.preventDefault();
+            }
+          },
+          true
+        );
+      }
+    }, !!downloadsAbfangen);
+  };
+}
+
+// Die Knöpfe über dem Abschnitt „So schicken Sie die Datei an den Verein“ (Aktion, Beschriftung, sichtbar, sekundär)
+const leseKnoepfe = (page) =>
+  page.$$eval("#anmeldung .anm-ergebnis > .anm-knoepfe [data-aktion]", (l) =>
+    l.map((e) => ({ aktion: e.getAttribute("data-aktion"), text: e.textContent.trim(), sichtbar: !e.hidden && e.checkVisibility(), sekundaer: e.classList.contains("knopf--sekundaer") })));
+
+// Bildschirmfoto der Fertig-Seite von der Überschrift bis zum Ende des Abschnitts „So schicken Sie die Datei an den Verein“
+async function fotoAbschnittSenden(seite, ziel, breite) {
+  const r = await seite.evaluate(() => ({
+    oben: document.querySelector("#anm-titel").getBoundingClientRect().top + window.scrollY,
+    unten: document.querySelector("#anmeldung [data-senden]").getBoundingClientRect().bottom + window.scrollY,
+  }));
+  await seite.screenshot({ path: ziel, clip: { x: 0, y: Math.max(0, Math.round(r.oben) - 16), width: breite, height: Math.round(r.unten - r.oben) + 32 } });
+  protokoll.screenshots++;
+}
+
+// Ein Klick auf den Knopf „teilen“ mit dem angegebenen Verhalten von share. Ergebnis: Aufrufe, gespeicherte Dateien, Meldung unter den Knöpfen, Inhalt der geteilten Dateien, neue Konsolenfehler
+async function klickeTeilenMitFoto(page, verhalten, wartenAufMeldung) {
+  const statusWahl = "#anmeldung .anm-ergebnis > p.anm-status";
+  await page.evaluate((v, wahl) => {
+    window.__aufrufe.length = 0;
+    window.__downloads.length = 0;
+    window.__inhalte.length = 0;
+    window.__verhalten = v;
+    const s = document.querySelector(wahl);
+    if (s) s.textContent = "";
+  }, verhalten, statusWahl);
+  const fehlerVorher = page.__st.konsole.length;
+  await page.click('#anmeldung [data-aktion="teilen"]');
+  if (wartenAufMeldung) await page.waitForFunction((wahl) => (document.querySelector(wahl) || {}).textContent !== "", { timeout: 6000 }, statusWahl).catch(() => {});
+  else await warte(900);
+  const ergebnis = await page.evaluate(async (wahl) => ({
+    aufrufe: window.__aufrufe,
+    downloads: window.__downloads,
+    status: (document.querySelector(wahl) || {}).textContent || "",
+    inhalte: await Promise.all(window.__inhalte),
+  }), statusWahl);
+  ergebnis.neueFehler = page.__st.konsole.slice(fehlerVorher);
+  return ergebnis;
+}
+
+// Beispiel „Kind neu“ (schon geladen) bis zur Fertig-Seite. weg = "foto" („Ich mache jetzt ein Foto“) oder "datei" („Ich wähle ein Foto aus“) wählt den Weg und lädt das Testbild hoch;
+// weg = null lässt die Seite „spielerfoto“ unberührt (das Beispiel hat „Der Verein macht das Foto“). nachherVerein: danach „Der Verein macht das Foto“ wählen (das Bild bleibt im Speicher des Assistenten).
+async function zurFertigSeiteMitFoto(page, dateien, weg, nachherVerein) {
+  const wahl = async (w) => page.click('#anmeldung label[for="' + (await page.$eval('#anmeldung input[data-pfad="spielerfoto.weg"][data-wert="' + w + '"]', (e) => e.id)) + '"]');
+  const s = await geheBis(page, "spielerfoto", "haupt");
+  if (s.schritt !== "spielerfoto") return { fertig: false, detail: "Seite „spielerfoto“ nicht erreicht (Seite: " + s.schritt + ")" };
+  if (weg) {
+    await wahl(weg);
+    const feld = await page.$('#anmeldung input[data-aktion="spielerfoto-' + (weg === "foto" ? "machen" : "waehlen") + '"]');
+    await feld.uploadFile(dateien["foto-1600x1200.jpg"]);
+    await page.waitForFunction(() => { const i = document.querySelector("#anmeldung .anm-vorschau-foto"); return i && !i.hidden && i.complete && i.naturalWidth > 0; }, { timeout: 8000 });
+  }
+  if (nachherVerein) await wahl("verein");
+  const ende = await geheBis(page, "fertig");
+  if (ende.schritt !== "fertig") return { fertig: false, detail: "Fertig-Seite nicht erreicht (Seite: " + ende.schritt + "/" + ende.teil + ")" };
+  try {
+    await page.waitForFunction(() => document.querySelector('#anmeldung [data-status="fertig"], #anmeldung [data-status="fehler"]'), { timeout: 25000 });
+  } catch (e) {
+    return { fertig: false, detail: "Zeitüberschreitung beim Erstellen der Datei" };
+  }
+  const status = await page.$eval("#anmeldung [data-status]", (e) => e.getAttribute("data-status"));
+  const zeile = await page.$eval("#anmeldung [data-datei]", (e) => e.textContent.trim()).catch(() => "");
+  return { fertig: status === "fertig", detail: status === "fertig" ? zeile : "Status " + status, dateiname: ((/^Datei:\s*(.+)$/.exec(zeile) || [])[1] || "").trim() };
+}
+
+async function pruefeFotoMitschicken(browser, server, dateien, beispiele) {
+  console.log("\n=== AP-F1: Das Spielerfoto geht als eigene Bilddatei (JPG) in derselben E-Mail mit ===");
+  const de = await ladeWoerterbuch();
+  const T = de.fertig;
+  const S = T.senden;
+  const hilfen = await import(pathToFileURL(path.join(ROOT, "assets", "js", "anmeldung", "hilfen.js")).href);
+  const adresse = server.konfig.verein.mail;
+  const profil = profilKindNeu(beispiele, server);
+  const betreff = "Anmeldung " + profil.vorname + " " + profil.nachname;
+  const pdfName = "Anmeldung_" + profil.nachname + "_" + profil.vorname + ".pdf";
+  const fotoName = "Spielerfoto_" + profil.nachname + "_" + profil.vorname + ".jpg";
+  const MAIL_TEXT = "Guten Tag,\n\nanbei die Anmeldung als PDF.\n\nViele Grüße";
+  const MAIL_TEXT_FOTO = "Guten Tag,\n\nanbei die Anmeldung als PDF und das Spielerfoto als Bild.\n\nViele Grüße";
+  const textKodiert = "Guten%20Tag%2C%0D%0A%0D%0Aanbei%20die%20Anmeldung%20als%20PDF.%0D%0A%0D%0AViele%20Gr%C3%BC%C3%9Fe";
+  const textKodiertFoto = "Guten%20Tag%2C%0D%0A%0D%0Aanbei%20die%20Anmeldung%20als%20PDF%20und%20das%20Spielerfoto%20als%20Bild.%0D%0A%0D%0AViele%20Gr%C3%BC%C3%9Fe";
+  const mailtoSoll = "mailto:" + adresse + "?subject=" + encodeURIComponent(betreff) + "&body=" + textKodiert;
+  const mailtoSollFoto = "mailto:" + adresse + "?subject=" + encodeURIComponent(betreff) + "&body=" + textKodiertFoto;
+  const schritt = (vorlage, knopf) => vorlage.replace("{knopf}", knopf);
+  const ohneSteuer = (t) => String(t).replace(/[⁠⁦-⁩‎‏‪-‮]/g, "").replace(/ /g, " ").replace(/\s+/g, " ").trim();
+  const pdfDatei = { typ: "application/pdf", name: pdfName };
+  const fotoDatei = { typ: "image/jpeg", name: fotoName };
+
+  // ---- 1. Ohne Browser: Mailtext, mailto-Link, Betreff und Text zum Teilen, Wörterbuch in vier Sprachen ----
+  ok("Mailtext mit Foto (hilfen.js): MAIL_TEXT_FOTO nennt das Spielerfoto als Bild, ist deutsch und vom Text ohne Foto verschieden; MAIL_TEXT bleibt wie bisher",
+    hilfen.MAIL_TEXT_FOTO === MAIL_TEXT_FOTO && hilfen.MAIL_TEXT === MAIL_TEXT && hilfen.MAIL_TEXT_FOTO !== hilfen.MAIL_TEXT && /das Spielerfoto als Bild/.test(hilfen.MAIL_TEXT_FOTO), String(hilfen.MAIL_TEXT_FOTO).replace(/\n/g, " | "));
+  const einfachFoto = pruefeEinfacheSprache({ betreff: hilfen.MAIL_BETREFF, text: hilfen.MAIL_TEXT_FOTO });
+  ok("Mailtext mit Foto: Einfache Sprache (kein Satz über 12 Wörter, keine Abkürzungen)", einfachFoto.verstoesse.length === 0 && einfachFoto.anzahlSaetze >= 3, einfachFoto.anzahlSaetze + " Sätze, längster " + einfachFoto.laengster.woerter + " Wörter");
+  const mailtoFoto = hilfen.mailtoAnVerein(adresse, "Mila", "Mustermann", true);
+  ok("mailto mit Foto (Mila Mustermann): Betreff „Anmeldung Mila Mustermann“ und der Text mit dem Spielerfoto genau so kodiert; ohne vierten Wert (oder mit false) wie bisher",
+    mailtoFoto === "mailto:" + adresse + "?subject=Anmeldung%20Mila%20Mustermann&body=" + textKodiertFoto &&
+      hilfen.mailtoAnVerein(adresse, "Mila", "Mustermann") === "mailto:" + adresse + "?subject=Anmeldung%20Mila%20Mustermann&body=" + textKodiert &&
+      hilfen.mailtoAnVerein(adresse, "Mila", "Mustermann", false) === hilfen.mailtoAnVerein(adresse, "Mila", "Mustermann"), mailtoFoto);
+  for (const [name, vorname, nachname, erwBetreff] of [
+    ["Umlaute und ß", "Jörg", "Weiß-Mustermann", "Anmeldung Jörg Weiß-Mustermann"],
+    ["Zeichen mit Bedeutung in einer Adresse (& # ? % + =)", "A&B", "C#D?E%F+G=H", "Anmeldung A&B C#D?E%F+G=H"],
+    ["ohne Namen", "", "", "Anmeldung"],
+  ]) {
+    const href = hilfen.mailtoAnVerein(adresse, vorname, nachname, true);
+    const z = /^mailto:([^?]*)\?subject=([^&]*)&body=([^&]*)$/.exec(href);
+    ok("mailto mit Foto (" + name + "): An, Betreff und Text (mit Spielerfoto) stimmen nach dem Dekodieren, nur ASCII, kein eingeschmuggelter Zusatz",
+      !!z && z[1] === adresse && decodeURIComponent(z[2]) === erwBetreff && decodeURIComponent(z[3]) === MAIL_TEXT_FOTO.replace(/\n/g, "\r\n") && /^[\x21-\x7e]+$/.test(href) && !/[+&?#]/.test(z[2] + z[3]), href);
+  }
+  const teilenMit = hilfen.mailTeilen("Mila", "Mustermann", true);
+  const teilenOhne = hilfen.mailTeilen("Mila", "Mustermann", false);
+  ok("mailTeilen mit Foto: { title: „Anmeldung Mila Mustermann“, text: MAIL_TEXT_FOTO }, genau diese zwei Felder; ohne Foto (false oder ohne dritten Wert) der Text ohne Foto bei gleichem Betreff",
+    JSON.stringify(Object.keys(teilenMit).sort()) === '["text","title"]' && teilenMit.title === "Anmeldung Mila Mustermann" && teilenMit.text === hilfen.MAIL_TEXT_FOTO &&
+      teilenOhne.text === hilfen.MAIL_TEXT && hilfen.mailTeilen("Mila", "Mustermann").text === hilfen.MAIL_TEXT && teilenOhne.title === teilenMit.title, JSON.stringify(teilenMit));
+
+  // Wörterbuch: die fünf Texte für „mit Foto“ in Deutsch, Englisch, Türkisch und Arabisch
+  const woerterbuecher = { de };
+  for (const code of ["en", "tr", "ar"]) woerterbuecher[code] = (await import(pathToFileURL(path.join(ROOT, "assets", "js", "anmeldung", "texte", code + "-oberflaeche.js")).href)).default;
+  const fotoTexte = (w) => ({
+    "fertig.teilenMitFoto": w.fertig && w.fertig.teilenMitFoto,
+    "fertig.senden.handy2Foto": w.fertig && w.fertig.senden && w.fertig.senden.handy2Foto,
+    "fertig.senden.computerFoto": w.fertig && w.fertig.senden && w.fertig.senden.computerFoto,
+    "fertig.senden.computer2Foto": w.fertig && w.fertig.senden && w.fertig.senden.computer2Foto,
+    "fertig.senden.rueckfallFoto": w.fertig && w.fertig.senden && w.fertig.senden.rueckfallFoto,
+  });
+  for (const code of ["de", "en", "tr", "ar"]) {
+    const w = woerterbuecher[code];
+    const werte = fotoTexte(w);
+    const leer = Object.entries(werte).filter(([, v]) => typeof v !== "string" || !v.trim()).map(([k]) => k);
+    ok("Wörterbuch (" + code + "): fertig.teilenMitFoto, senden.handy2Foto, computerFoto, computer2Foto und rueckfallFoto sind nicht leer", leer.length === 0, leer.length ? "leer oder fehlt: " + leer.join(", ") : Object.values(werte).join(" | "));
+    const F = w.fertig || {};
+    const SS = F.senden || {};
+    ok("Wörterbuch (" + code + "): computerFoto nennt den Knopf als {knopf}; die Texte mit Foto sind eigene Texte (anders als die Texte ohne Foto: teilen, handy2, computer2, rueckfall)",
+      /\{knopf\}/.test(String(SS.computerFoto)) && F.teilenMitFoto !== F.teilen && SS.handy2Foto !== SS.handy2 && SS.computer2Foto !== SS.computer2 && SS.rueckfallFoto !== SS.rueckfall, SS.computerFoto);
+    ok("Wörterbuch (" + code + "): kein eingebauter Mailtext (der Text der E-Mail steht nur in hilfen.js, deutsch und für jede Sprache gleich)", !/Guten Tag|anbei die Anmeldung|Viele Grüße/.test(JSON.stringify(w.fertig)), "");
+    if (code !== "de") {
+      const deWerte = fotoTexte(de);
+      const gleich = Object.keys(werte).filter((k) => werte[k] === deWerte[k]);
+      ok("Wörterbuch (" + code + "): die Texte mit Foto sind übersetzt (nicht der deutsche Text)", gleich.length === 0, gleich.join(", "));
+    }
+  }
+  ok("Wörterbuch (de): die Texte mit Foto im Wortlaut („Datei und Foto teilen“, „Klicken Sie auch auf „{knopf}“.“ usw.)",
+    T.teilenMitFoto === "Datei und Foto teilen" && S.handy2Foto === "Wählen Sie Ihr Mail-Programm. Datei und Foto sind schon angehängt." && S.computerFoto === "Klicken Sie auch auf „{knopf}“." &&
+      S.computer2Foto === "Schreiben Sie eine neue E-Mail. Hängen Sie die Datei und das Foto an." && S.rueckfallFoto === "Laden Sie die Datei und das Spielerfoto herunter. Öffnen Sie dann eine neue E-Mail. Hängen Sie beides selbst an.",
+    [T.teilenMitFoto, S.handy2Foto, S.computerFoto, S.computer2Foto, S.rueckfallFoto].join(" | "));
+  const einfachTexte = pruefeEinfacheSprache({ teilenMitFoto: T.teilenMitFoto, handy2Foto: S.handy2Foto, computerFoto: S.computerFoto, computer2Foto: S.computer2Foto, rueckfallFoto: S.rueckfallFoto });
+  ok("Wörterbuch (de): Einfache Sprache für die Texte mit Foto (kein Satz über 12 Wörter, keine Abkürzungen)", einfachTexte.verstoesse.length === 0, einfachTexte.anzahlSaetze + " Sätze, längster " + einfachTexte.laengster.woerter + " Wörter");
+
+  // Prüft einen Klick auf den Knopf zum Teilen: writeText mit der Adresse zuerst, dann genau ein share im selben Klick; dessen Dateien, Betreff, Text und Felder
+  const pruefeShareAufruf = (bezeichnung, x, erwartet) => {
+    const w = x.aufrufe.filter((a) => a.name === "writeText");
+    const s = x.aufrufe.filter((a) => a.name === "share");
+    const reihe = x.aufrufe.map((a) => a.name).join(",");
+    ok(bezeichnung + ": genau ein writeText mit der Adresse (" + adresse + "), danach genau ein share; beide im selben Klick (Nutzergeste aktiv)",
+      reihe === "writeText,share" && w[0].text === adresse && w[0].imKlick === true && s[0].imKlick === true && w[0].aktiv === true && s[0].aktiv === true, JSON.stringify(x.aufrufe.map((a) => [a.name, a.imKlick, a.aktiv])));
+    const sh = s[0];
+    ok(bezeichnung + ": share bekommt " + erwartet.dateien.length + " Datei(en) (" + erwartet.dateien.map((d) => d.name).join(" und ") + ", je als File, nicht leer), Betreff „" + betreff + "“ und den Text „" + erwartet.text.replace(/\n/g, " | ") + "“; keine weiteren Felder",
+      !!sh && JSON.stringify(sh.felder) === '["files","text","title"]' && sh.dateien.length === erwartet.dateien.length &&
+        erwartet.dateien.every((d, i) => sh.dateien[i].istFile === true && sh.dateien[i].typ === d.typ && sh.dateien[i].name === d.name && sh.dateien[i].groesse > 1000) && sh.titel === betreff && sh.text === erwartet.text,
+      sh ? JSON.stringify({ felder: sh.felder, dateien: sh.dateien, titel: sh.titel, text: sh.text }) : "kein share-Aufruf");
+  };
+  // Prüft das Bild, das mitgeht: JPEG (FFD8), Format 3:4, 375 bis 750 Pixel breit, ohne EXIF
+  const jpegOk = (bytes) => {
+    const m = bytes.length > 2 ? jpegMasse(bytes) : null;
+    return bytes[0] === 0xff && bytes[1] === 0xd8 && !!m && Math.abs(m.breite / m.hoehe - 0.75) < 0.01 && m.breite >= 375 && m.breite <= 750 && !bytes.includes(Buffer.from("Exif")) && !bytes.includes(Buffer.from("GPS-TEST-MARKER"));
+  };
+  // Der Weg am Computer mit Foto: vier Schritte, die Knöpfe dazu, kein Rückfall, der Link zur E-Mail mit dem Text mit Foto
+  const computerMitFoto = async (page, kennung) => {
+    const dd = await leseSenden(page);
+    const kk = await leseKnoepfe(page);
+    const cw = dd && dd.wege[0];
+    ok(kennung + ": Weg am Computer mit vier Schritten, ohne Überschrift – 1. „Datei herunterladen“, 2. „Klicken Sie auch auf „Spielerfoto als Bild speichern“.“, 3. neue E-Mail, Datei und Foto anhängen, 4. an die Adresse schicken",
+      !!dd && dd.wege.length === 1 && cw.art === "computer" && cw.titel === null && cw.nummeriert && cw.schritte.length === 4 &&
+        cw.schritte[0] === schritt(S.computer1, T.herunterladen) && cw.schritte[0] === "Klicken Sie oben auf „Datei herunterladen“." &&
+        cw.schritte[1] === schritt(S.computerFoto, T.fotoSpeichern) && cw.schritte[1] === "Klicken Sie auch auf „Spielerfoto als Bild speichern“." &&
+        cw.schritte[2] === S.computer2Foto && cw.schritte[2] === "Schreiben Sie eine neue E-Mail. Hängen Sie die Datei und das Foto an." && cw.schritte[3] === S.computer3 && cw.schritte[3] === "Schicken Sie die E-Mail an die Adresse unten.",
+      dd && dd.wege.map((x) => x.art + ": " + x.schritte.join(" | ")).join("; "));
+    const fk = kk.find((x) => x.aktion === "foto-speichern");
+    const lk = kk.find((x) => x.aktion === "herunterladen");
+    const tk = kk.find((x) => x.aktion === "teilen");
+    ok(kennung + ": die Knöpfe, auf die die Schritte zeigen, gibt es und sie heißen so („Datei herunterladen“, „Spielerfoto als Bild speichern“); „Datei und Foto teilen“ ist nicht zu sehen",
+      !!fk && fk.sichtbar && fk.text === T.fotoSpeichern && fk.text === "Spielerfoto als Bild speichern" && !!lk && lk.sichtbar && lk.text === T.herunterladen && (!tk || !tk.sichtbar), JSON.stringify(kk));
+    ok(kennung + ": kein Rückfall „Teilen klappt nicht?“; der Link zur E-Mail ist sichtbar (mindestens 44 px hoch) und trägt den Text mit dem Spielerfoto (mailto)",
+      !!dd && dd.rueckfall === null && dd.mailLinks === 1 && !!dd.link && dd.link.sichtbar && dd.link.hoehe >= 44 && dd.link.href === mailtoSollFoto, dd && JSON.stringify({ rueckfall: dd.rueckfall, link: dd.link }));
+    return dd;
+  };
+
+  // ---- 2. Handy (390 x 844), Spielerfoto „Ich mache jetzt ein Foto“, canShare nimmt jede Liste von Dateien an ----
+  console.log("--- Handy mit Spielerfoto ---");
+  fs.mkdirSync(path.join(AUSGABE, MOBIL.name), { recursive: true });
+  const handy = await neueSeite(browser, server, MOBIL, "foto-mitschicken-handy", { vorLaden: fotoStellvertreter(true) });
+  await ladeBeispielPerKnopf(handy, "kind-neu");
+  const rH = await zurFertigSeiteMitFoto(handy, dateien, "foto", false);
+  ok("Handy mit Spielerfoto (Weg „Ich mache jetzt ein Foto“): bis „fertig“ durchgeklickt, Datei erstellt", rH.fertig, rH.detail);
+  if (rH.fertig) {
+    ok("Dateiname der Fertig-Seite: " + pdfName, rH.dateiname === pdfName, rH.detail);
+    const knoepfe = await leseKnoepfe(handy);
+    const teilenK = knoepfe.find((x) => x.aktion === "teilen");
+    ok("Handy mit Foto: der Knopf „" + T.teilenMitFoto + "“ ist da, sichtbar und der Hauptknopf (nicht sekundär)", !!teilenK && teilenK.sichtbar && !teilenK.sekundaer && teilenK.text === T.teilenMitFoto && teilenK.text === "Datei und Foto teilen", JSON.stringify(teilenK));
+    const fragen = await handy.evaluate(() => window.__canShareFragen);
+    ok("Handy mit Foto: canShare wird mit beiden Dateien zusammen gefragt (eine Liste mit PDF und JPG)", fragen.some((l) => l.length === 2 && l.includes("application/pdf") && l.includes("image/jpeg")), JSON.stringify(fragen));
+    const d = await leseSenden(handy);
+    const hw = d && d.wege[0];
+    ok("Weg am Handy mit Foto: drei Schritte ohne Überschrift – 1. „Datei und Foto teilen“ tippen (die Adresse wird kopiert), 2. Mail-Programm wählen (Datei und Foto sind schon angehängt), 3. Adresse bei „An“ einfügen",
+      !!d && d.wege.length === 1 && hw.art === "handy" && hw.titel === null && hw.nummeriert && hw.schritte.length === 3 &&
+        hw.schritte[0] === schritt(S.handy1, T.teilenMitFoto) && hw.schritte[0] === "Tippen Sie oben auf „Datei und Foto teilen“. Die Adresse wird kopiert." &&
+        hw.schritte[1] === S.handy2Foto && hw.schritte[1] === "Wählen Sie Ihr Mail-Programm. Datei und Foto sind schon angehängt." && hw.schritte[2] === S.handy3, d && d.wege.map((x) => x.art + ": " + x.schritte.join(" | ")).join("; "));
+    ok("Rückfall mit Foto: „" + S.rueckfallTitel + "“ ist zugeklappt, der Satz nennt Datei und Spielerfoto („…herunter… Hängen Sie beides selbst an.“), der Link zur E-Mail liegt darin",
+      !!d && !!d.rueckfall && d.rueckfall.offen === false && d.rueckfall.titel === S.rueckfallTitel && d.rueckfall.text === S.rueckfallFoto &&
+        d.rueckfall.text === "Laden Sie die Datei und das Spielerfoto herunter. Öffnen Sie dann eine neue E-Mail. Hängen Sie beides selbst an." && d.rueckfall.linkDrin === true && d.mailLinks === 1 && d.mailLinksSichtbar === 0, JSON.stringify(d && d.rueckfall));
+    ok("mailto-Link im Rückfall mit Foto: An die Adresse der Geschäftsstelle, Betreff „" + betreff + "“, Text mit dem Spielerfoto (kodiert und dekodiert)",
+      !!d && !!d.link && d.link.href === mailtoSollFoto && decodeURIComponent((/&body=([^&]*)$/.exec(d.link.href) || [])[1] || "") === MAIL_TEXT_FOTO.replace(/\n/g, "\r\n"), d && d.link && d.link.href);
+    await fotoAbschnittSenden(handy, path.join(AUSGABE, MOBIL.name, "foto-mitschicken-handy-de.png"), MOBIL.breite);
+    const klein = (await kleineTippflaechen(handy)).filter((x) => /Foto/.test(x));
+    ok("Tippflächen mit „Foto“ im Namen mindestens 44 px (Handy)", klein.length === 0, klein.join(" | "));
+    ok("axe-core: keine Verstöße critical/serious auf der Fertig-Seite mit Foto (Handy)", await axePruefen(handy, "AP-F1 Fertig-Seite mit Foto (390 px)"), "");
+
+    // (i) Alles klappt: zwei Dateien, PDF zuerst, dann das Foto; Inhalt der Dateien; dasselbe Bild wie im PDF
+    const x = await klickeTeilenMitFoto(handy, { share: "ok" }, true);
+    pruefeShareAufruf("Teilen mit Foto (Handy)", x, { dateien: [pdfDatei, fotoDatei], text: MAIL_TEXT_FOTO });
+    const pdfInhalt = x.inhalte.find((i) => i.typ === "application/pdf");
+    const fotoInhalt = x.inhalte.find((i) => i.typ === "image/jpeg");
+    const pdfBytes = pdfInhalt ? Buffer.from(pdfInhalt.base64, "base64") : Buffer.alloc(0);
+    const fotoBytes = fotoInhalt ? Buffer.from(fotoInhalt.base64, "base64") : Buffer.alloc(0);
+    ok("Teilen mit Foto: die erste Datei ist ein PDF (%PDF-), die zweite ein JPEG im Format 3:4 (375 bis 750 Pixel breit, ohne EXIF)", pdfBytes.subarray(0, 5).toString() === "%PDF-" && jpegOk(fotoBytes), "PDF " + pdfBytes.length + " Byte, Bild " + fotoBytes.length + " Byte " + (fotoBytes.length > 2 && jpegMasse(fotoBytes) ? JSON.stringify(jpegMasse(fotoBytes)) : "?"));
+    const imPdf = await handy.evaluate(() => (window.__attrappePdf && window.__attrappePdf.spielerfoto) || null);
+    ok("Teilen mit Foto: das Bild, das mitgeht, ist dasselbe wie die Seite im PDF (gleiche Größe in Byte wie das Spielerfoto, das der Assistent an den PDF-Baustein gibt)", !!imPdf && imPdf.typ === "image/jpeg" && imPdf.bytes === fotoBytes.length && fotoBytes.length > 1000, JSON.stringify(imPdf) + " | geteilt: " + fotoBytes.length + " Byte");
+    const geteiltPfad = path.join(AUSGABE, "geteilt-mit-foto.pdf");
+    fs.writeFileSync(geteiltPfad, pdfBytes);
+    const fotoSeiteH = pdfBytes.length > 1000 ? pdfSeiteMit(geteiltPfad, /Der Verein lädt es beim Verband hoch/) : 0;
+    ok("Teilen mit Foto: das geteilte PDF hat eine eigene Seite für das Spielerfoto (das Bild, das mitgeht, steht auch im PDF)", fotoSeiteH > 0, "Seite " + fotoSeiteH + " von " + (pdfBytes.length > 1000 ? pdfInfo(geteiltPfad).Pages : "?"));
+    ok("Teilen mit Foto: die Meldung unter den Knöpfen sagt „" + T.geteiltMitAdresse + "“; nichts wird gespeichert; kein Fehler in der Konsole", x.status === T.geteiltMitAdresse && x.status === "Geteilt. Die Adresse ist kopiert." && x.downloads.length === 0 && x.neueFehler.length === 0, x.status + " | Downloads: " + x.downloads.length + " | " + x.neueFehler.join(" ; "));
+    // (ii) Die Person bricht ab: keine Meldung, nichts gespeichert; ein anderer Fehler: die PDF-Datei wird gespeichert
+    const abbruch = await klickeTeilenMitFoto(handy, { share: "abbruch" }, false);
+    ok("Teilen mit Foto (Abbruch durch die Person, AbortError): keine Meldung, nichts gespeichert, kein Seitenfehler; share bekam beide Dateien", abbruch.status === "" && abbruch.downloads.length === 0 && abbruch.neueFehler.length === 0 && abbruch.aufrufe.some((a) => a.name === "share" && a.dateien.length === 2), "Meldung: „" + abbruch.status + "“ | Downloads: " + abbruch.downloads.length + " | " + abbruch.neueFehler.join(" ; "));
+    const fehler = await klickeTeilenMitFoto(handy, { share: "fehler" }, true);
+    ok("Teilen mit Foto (share lehnt ab, NotAllowedError): die PDF-Datei " + pdfName + " wird gespeichert, die Meldung sagt „" + T.teilenFehler + "“, kein Seitenfehler", fehler.status === T.teilenFehler && fehler.downloads.some((x2) => x2.name === pdfName) && fehler.neueFehler.length === 0, fehler.status + " | Downloads: " + JSON.stringify(fehler.downloads) + " | " + fehler.neueFehler.join(" ; "));
+
+    // (iii) canShare nimmt beide Dateien zusammen nicht an: kein Knopf zum Teilen, es gilt der Weg am Computer (vier Schritte); Fertig-Seite neu zeichnen, die Datei bleibt
+    for (const [modus, bezeichnung] of [["eine", "canShare lehnt zwei Dateien zusammen ab (nur eine Datei erlaubt)"], ["nurPdf", "canShare nimmt nur PDF-Dateien an (das Bild nicht)"]]) {
+      await handy.evaluate((m) => { window.__canShareModus = m; window.__canShareFragen.length = 0; }, modus);
+      await zeichneFertigNeu(handy);
+      const fragenB = await handy.evaluate(() => window.__canShareFragen);
+      const knoepfeB = await leseKnoepfe(handy);
+      const teilenB = knoepfeB.find((k) => k.aktion === "teilen");
+      ok("Handy, " + bezeichnung + ": der Knopf zum Teilen ist nicht zu sehen; canShare wurde mit PDF und JPG zusammen gefragt", (!teilenB || !teilenB.sichtbar) && fragenB.some((l) => l.length === 2 && l.includes("application/pdf") && l.includes("image/jpeg")), JSON.stringify({ knopf: teilenB, fragen: fragenB }));
+      await computerMitFoto(handy, "Handy, " + bezeichnung);
+    }
+    await fotoAbschnittSenden(handy, path.join(AUSGABE, MOBIL.name, "foto-mitschicken-handy-ohne-teilen-de.png"), MOBIL.breite);
+  }
+  ok("Handy mit Spielerfoto: keine Fehler in der Konsole (kein pageerror, keine ungefangene Ablehnung)", handy.__st.konsole.length === 0, handy.__st.konsole.slice(0, 3).join(" | "));
+  await handy.close();
+
+  // ---- 3. Computer (1280 x 900, Maus, kein navigator.share), Spielerfoto „Ich wähle ein Foto aus“ ----
+  console.log("--- Computer mit Spielerfoto ---");
+  {
+    const RECHNER = { name: "1280x900", breite: 1280, hoehe: 900, mobil: false };
+    fs.mkdirSync(path.join(AUSGABE, RECHNER.name), { recursive: true });
+    const pc = await neueSeite(browser, server, RECHNER, "foto-mitschicken-rechner", {
+      vorLaden: async (page) => {
+        await page.evaluateOnNewDocument(() => {
+          Object.defineProperty(navigator, "canShare", { value: undefined, configurable: true });
+          Object.defineProperty(navigator, "share", { value: undefined, configurable: true });
+        });
+      },
+    });
+    await ladeBeispielPerKnopf(pc, "kind-neu");
+    const rC = await zurFertigSeiteMitFoto(pc, dateien, "datei", false);
+    ok("Computer mit Spielerfoto (Weg „Ich wähle ein Foto aus“): bis „fertig“ durchgeklickt, Datei erstellt", rC.fertig, rC.detail);
+    if (rC.fertig) {
+      await computerMitFoto(pc, "Computer mit Foto");
+      await fotoAbschnittSenden(pc, path.join(AUSGABE, RECHNER.name, "foto-mitschicken-computer-de.png"), RECHNER.breite);
+      // Die zwei Dateien, die die Familie anhängt: das Foto (Knopf „Spielerfoto als Bild speichern“) und das PDF (Knopf „Datei herunterladen“)
+      const fotoPfad = await ladeDownload(browser, pc, "foto-speichern", ".jpg", "downloads-foto-mitschicken");
+      const meldung = await pc.$eval("#anmeldung .anm-ergebnis > p.anm-status", (e) => e.textContent).catch(() => "");
+      const fb = fotoPfad ? fs.readFileSync(fotoPfad) : Buffer.alloc(0);
+      ok("Computer mit Foto: der Knopf „Spielerfoto als Bild speichern“ lädt die Datei " + fotoName + " herunter (JPEG, Format 3:4, 375 bis 750 Pixel breit, ohne EXIF); die Meldung sagt „" + T.gespeichert + "“",
+        !!fotoPfad && path.basename(fotoPfad) === fotoName && fb.length > 1000 && jpegOk(fb) && meldung === T.gespeichert, (fotoPfad ? path.basename(fotoPfad) + ", " + fb.length + " Byte" : "kein Download") + " | " + meldung);
+      const pdfPfad = await ladeDownload(browser, pc, "herunterladen", ".pdf", "downloads-pdf-mitschicken");
+      ok("Computer mit Foto: der Knopf „Datei herunterladen“ lädt die Datei " + pdfName + " herunter (ein PDF)", !!pdfPfad && path.basename(pdfPfad) === pdfName && fs.readFileSync(pdfPfad).subarray(0, 5).toString() === "%PDF-", pdfPfad ? path.basename(pdfPfad) : "kein Download");
+    }
+    ok("Computer mit Spielerfoto: keine Fehler in der Konsole", pc.__st.konsole.length === 0, pc.__st.konsole.slice(0, 3).join(" | "));
+    await pc.close();
+  }
+
+  // ---- 4. Ohne Spielerfoto: alles wie bisher (drei Schritte, „Datei teilen“, ein PDF, MAIL_TEXT) ----
+  // a) das Beispiel unverändert („Der Verein macht das Foto“); b) ein Bild wurde hochgeladen, danach aber „Der Verein macht das Foto“ gewählt (das Bild bleibt im Speicher, geht aber nicht mit)
+  for (const [kennung, weg, nachherVerein] of [
+    ["Ohne Foto (Weg „Der Verein macht das Foto“)", null, false],
+    ["Bild hochgeladen, dann „Der Verein macht das Foto“ gewählt", "datei", true],
+  ]) {
+    console.log("--- " + kennung + " ---");
+    const p = await neueSeite(browser, server, MOBIL, "foto-mitschicken-ohne", { vorLaden: fotoStellvertreter(true) });
+    await ladeBeispielPerKnopf(p, "kind-neu");
+    const r = await zurFertigSeiteMitFoto(p, dateien, weg, nachherVerein);
+    ok(kennung + ": bis „fertig“ durchgeklickt, Datei erstellt", r.fertig, r.detail);
+    if (r.fertig) {
+      const kk = await leseKnoepfe(p);
+      const tk = kk.find((k) => k.aktion === "teilen");
+      ok(kennung + ": der Knopf „" + T.teilen + "“ (nicht „… und Foto …“) ist da und der Hauptknopf; der Knopf „Spielerfoto als Bild speichern“ fehlt", !!tk && tk.sichtbar && !tk.sekundaer && tk.text === T.teilen && tk.text === "Datei teilen" && !kk.some((k) => k.aktion === "foto-speichern"), JSON.stringify(kk));
+      const d = await leseSenden(p);
+      const hw = d && d.wege[0];
+      ok(kennung + ": Weg am Handy wie bisher (drei Schritte, „Datei teilen“; Schritt 2 „Die Datei ist schon angehängt.“, ohne „Foto“)",
+        !!d && d.wege.length === 1 && hw.art === "handy" && hw.schritte.length === 3 && hw.schritte[0] === schritt(S.handy1, T.teilen) && hw.schritte[1] === S.handy2 && hw.schritte[1] === "Wählen Sie Ihr Mail-Programm. Die Datei ist schon angehängt." && hw.schritte[2] === S.handy3 && !/Foto/.test(hw.schritte.join(" ")), d && d.wege.map((x) => x.art + ": " + x.schritte.join(" | ")).join("; "));
+      ok(kennung + ": Rückfall wie bisher (Satz ohne Foto) und der Link zur E-Mail mit dem Text ohne Foto", !!d && !!d.rueckfall && d.rueckfall.text === S.rueckfall && !/Foto/.test(d.rueckfall.text) && !!d.link && d.link.href === mailtoSoll, JSON.stringify(d && d.rueckfall) + " | " + (d && d.link && d.link.href));
+      const x = await klickeTeilenMitFoto(p, { share: "ok" }, true);
+      pruefeShareAufruf(kennung + ": Teilen", x, { dateien: [pdfDatei], text: MAIL_TEXT });
+      const imPdf = await p.evaluate(() => (window.__attrappePdf ? window.__attrappePdf.spielerfoto : "keine Aufzeichnung"));
+      ok(kennung + ": auch das PDF bekommt kein Spielerfoto (der PDF-Baustein bekommt null)", imPdf === null, JSON.stringify(imPdf));
+      await p.evaluate(() => { window.__canShareModus = "keine"; });
+      await zeichneFertigNeu(p);
+      const dc = await leseSenden(p);
+      const kc = await leseKnoepfe(p);
+      const cw = dc && dc.wege[0];
+      ok(kennung + ": Weg am Computer wie bisher (drei Schritte ohne „Foto“), kein Knopf „Spielerfoto als Bild speichern“, der Link zur E-Mail mit dem Text ohne Foto",
+        !!dc && dc.wege.length === 1 && cw.art === "computer" && cw.schritte.length === 3 && cw.schritte[0] === schritt(S.computer1, T.herunterladen) && cw.schritte[1] === S.computer2 && cw.schritte[2] === S.computer3 && !/Foto/.test(cw.schritte.join(" ")) &&
+          !kc.some((k) => k.aktion === "foto-speichern") && dc.rueckfall === null && !!dc.link && dc.link.href === mailtoSoll, dc && dc.wege.map((x2) => x2.art + ": " + x2.schritte.join(" | ")).join("; "));
+    }
+    ok(kennung + ": keine Fehler in der Konsole", p.__st.konsole.length === 0, p.__st.konsole.slice(0, 3).join(" | "));
+    await p.close();
+  }
+
+  // ---- 4b. Ein Bild wurde hochgeladen, danach aber die Abteilung auf Karneval gewechselt: Karneval hat kein Spielerfoto (kein Schritt „spielerfoto“, im PDF keine Seite dafür) ----
+  {
+    const kennung = "Bild hochgeladen, dann die Abteilung auf Karneval gewechselt";
+    console.log("--- " + kennung + " ---");
+    const p = await neueSeite(browser, server, MOBIL, "foto-mitschicken-karneval", { vorLaden: fotoStellvertreter(true) });
+    await ladeBeispielPerKnopf(p, "kind-neu");
+    const s0 = await geheBis(p, "spielerfoto", "haupt");
+    let fertigK = false;
+    let detailK = "Seite „spielerfoto“ nicht erreicht (Seite: " + s0.schritt + ")";
+    if (s0.schritt === "spielerfoto") {
+      await klickeEtikett(p, '#anmeldung input[data-pfad="spielerfoto.weg"][data-wert="datei"]');
+      await (await p.$('#anmeldung input[data-aktion="spielerfoto-waehlen"]')).uploadFile(dateien["foto-1600x1200.jpg"]);
+      await p.waitForFunction(() => { const i = document.querySelector("#anmeldung .anm-vorschau-foto"); return i && !i.hidden && i.complete && i.naturalWidth > 0; }, { timeout: 8000 });
+      const sp = await geheBis(p, "pruefen");
+      if (sp.schritt === "pruefen") {
+        await p.click('#anmeldung button[aria-label="Abteilung ändern"]');
+        await p.waitForFunction(() => document.getElementById("anmeldung").dataset.schritt === "abteilung", { timeout: 4000 });
+        await klickeEtikett(p, '#anmeldung input[data-pfad="abteilung"][data-wert="karneval"]');
+        const sz = await geheBis(p, "fertig");
+        detailK = "Seite nach dem Wechsel: " + sz.schritt + "/" + sz.teil;
+        if (sz.schritt === "fertig") {
+          await p.waitForFunction(() => document.querySelector('#anmeldung [data-status="fertig"], #anmeldung [data-status="fehler"]'), { timeout: 25000 }).catch(() => {});
+          fertigK = (await p.$eval("#anmeldung [data-status]", (e) => e.getAttribute("data-status")).catch(() => "")) === "fertig";
+          detailK = fertigK ? "Fertig-Seite erreicht" : "Fertig-Seite ohne Datei";
+        }
+      } else detailK = "Prüfseite nicht erreicht (Seite: " + sp.schritt + ")";
+    }
+    ok(kennung + ": bis „fertig“ durchgeklickt, Datei erstellt", fertigK, detailK);
+    if (fertigK) {
+      const kk = await leseKnoepfe(p);
+      const tk = kk.find((k) => k.aktion === "teilen");
+      const d = await leseSenden(p);
+      const hw = d && d.wege[0];
+      const imPdf = await p.evaluate(() => (window.__attrappePdf ? window.__attrappePdf.spielerfoto : "keine Aufzeichnung"));
+      // Befund 1 von AP-F1 (behoben am 16.11.2026): Die Fertig-Seite fragte nur nach dem Bild im Speicher und nach „nicht Verein“ (seiten-ende.js: mitFoto), nicht danach, ob es für diesen Fall ein
+      // Spielerfoto gibt (regeln.js: Unterlage U16 nur bei Fußball; pdf.js: keine Seite für das Foto ohne U16). Jetzt bindet mitFoto zusätzlich an U16.
+      ok(kennung + ": Karneval hat kein Spielerfoto – der Knopf heißt „" + T.teilen + "“ (nicht „… und Foto …“), es gibt keinen Knopf „Spielerfoto als Bild speichern“, die Schritte nennen kein Foto", !!tk && tk.text === T.teilen && !kk.some((k) => k.aktion === "foto-speichern") && !!d && !!hw && !/Foto/.test(hw.schritte.join(" ")),
+        JSON.stringify(kk) + " | " + (hw ? hw.schritte.join(" | ") : "kein Weg") + " | an den PDF-Baustein: " + JSON.stringify(imPdf));
+      // Das Bild, das mitgeht, muss auch im PDF stehen: Geht ein JPG mit, hat das PDF eine eigene Seite für das Spielerfoto
+      const geteilt = tk && tk.sichtbar ? await klickeTeilenMitFoto(p, { share: "ok" }, true) : null;
+      const shK = geteilt && geteilt.aufrufe.find((a) => a.name === "share");
+      const bildGeht = !!shK && shK.dateien.some((x2) => x2.typ === "image/jpeg");
+      const pdfK = geteilt && geteilt.inhalte.find((i) => i.typ === "application/pdf");
+      let fotoSeite = -1;
+      if (pdfK) {
+        const pfadK = path.join(AUSGABE, "geteilt-karneval.pdf");
+        fs.writeFileSync(pfadK, Buffer.from(pdfK.base64, "base64"));
+        fotoSeite = pdfSeiteMit(pfadK, /Der Verein lädt es beim Verband hoch/);
+      }
+      ok(kennung + ": was als Bild mitgeht, steht auch im PDF (geht ein JPG mit, hat das PDF eine Seite für das Spielerfoto)", !bildGeht || fotoSeite > 0,
+        "geteilt: " + (shK ? shK.dateien.map((x2) => x2.name + " (" + x2.typ + ")").join(", ") : "nichts geteilt (Knopf zum Teilen nicht zu sehen)") + " | Seite für das Spielerfoto im PDF: " + (fotoSeite > 0 ? fotoSeite : "keine"));
+    }
+    ok(kennung + ": keine Fehler in der Konsole", p.__st.konsole.length === 0, p.__st.konsole.slice(0, 3).join(" | "));
+    await p.close();
+  }
+
+  // ---- 5. Die Fertig-Seite mit Foto in Englisch, Türkisch und Arabisch (390 x 844): die Texte der Sprache, Betreff und Text der E-Mail bleiben deutsch ----
+  for (const code of ["en", "tr", "ar"]) {
+    console.log("--- Sprache " + code + " mit Spielerfoto ---");
+    const L = woerterbuecher[code];
+    const F = L.fertig;
+    const SS = F.senden;
+    const kennung = "Sprache " + code + " mit Foto";
+    const seite = await neueSeite(browser, server, MOBIL, "foto-mitschicken-" + code, { vorLaden: fotoStellvertreter(true) });
+    await seite.click('[data-anm-sprachleiste] button[data-sprache="' + code + '"]');
+    await seite.waitForFunction((c) => document.getElementById("anmeldung").getAttribute("lang") === c, { timeout: 8000 }, code);
+    // Beispiel laden (die Meldung dazu steht in der Sprache, darum ohne Warten auf den deutschen Text)
+    await seite.$eval("[data-anm-werkzeuge]", (dd) => (dd.open = true));
+    await seite.click('[data-beispiel="kind-neu"]');
+    await warte(400);
+    await seite.$eval("[data-anm-werkzeuge]", (dd) => (dd.open = false));
+    const r = await zurFertigSeiteMitFoto(seite, dateien, "datei", false);
+    ok(kennung + ": bis „fertig“ durchgeklickt, Datei erstellt", r.fertig, r.detail);
+    if (r.fertig) {
+      const kk = await leseKnoepfe(seite);
+      const tk = kk.find((k) => k.aktion === "teilen");
+      ok(kennung + ": der Knopf zum Teilen heißt „" + ohneSteuer(F.teilenMitFoto) + "“ (Hauptknopf)", !!tk && tk.sichtbar && !tk.sekundaer && ohneSteuer(tk.text) === ohneSteuer(F.teilenMitFoto), JSON.stringify(tk));
+      const d = await leseSenden(seite);
+      const hw = d && d.wege[0];
+      ok(kennung + ": Weg am Handy: drei Schritte in der Sprache (Schritt 1 mit dem Knopf „" + ohneSteuer(F.teilenMitFoto) + "“, Schritt 2 mit Datei und Foto)",
+        !!d && d.wege.length === 1 && hw.art === "handy" && hw.schritte.length === 3 && ohneSteuer(hw.schritte[0]) === ohneSteuer(schritt(SS.handy1, F.teilenMitFoto)) && ohneSteuer(hw.schritte[1]) === ohneSteuer(SS.handy2Foto) && ohneSteuer(hw.schritte[2]) === ohneSteuer(SS.handy3),
+        d && d.wege.map((x) => x.art + ": " + x.schritte.map(ohneSteuer).join(" | ")).join("; "));
+      ok(kennung + ": Rückfall: der Satz „" + ohneSteuer(SS.rueckfallFoto) + "“ in der Sprache; der Link zur E-Mail bleibt deutsch (Betreff und Text mit dem Spielerfoto)", !!d && !!d.rueckfall && ohneSteuer(d.rueckfall.text) === ohneSteuer(SS.rueckfallFoto) && !!d.link && d.link.href === mailtoSollFoto, JSON.stringify(d && d.rueckfall) + " | " + (d && d.link && d.link.href));
+      const x = await klickeTeilenMitFoto(seite, { share: "ok" }, true);
+      pruefeShareAufruf(kennung + ": Teilen", x, { dateien: [pdfDatei, fotoDatei], text: MAIL_TEXT_FOTO });
+      ok(kennung + ": die Meldung nach dem Teilen steht in der Sprache („" + ohneSteuer(F.geteiltMitAdresse) + "“)", ohneSteuer(x.status) === ohneSteuer(F.geteiltMitAdresse) && x.neueFehler.length === 0, ohneSteuer(x.status) + " | " + x.neueFehler.join(" ; "));
+      await seite.evaluate(() => { window.__canShareModus = "eine"; });
+      await zeichneFertigNeu(seite);
+      const dc = await leseSenden(seite);
+      const kc = await leseKnoepfe(seite);
+      const cw = dc && dc.wege[0];
+      const fk = kc.find((k) => k.aktion === "foto-speichern");
+      ok(kennung + ": Weg am Computer: vier Schritte in der Sprache (Schritt 2 mit dem Knopf „" + ohneSteuer(F.fotoSpeichern) + "“, Schritt 3 mit Datei und Foto); der Knopf heißt so",
+        !!dc && dc.wege.length === 1 && cw.art === "computer" && cw.schritte.length === 4 && ohneSteuer(cw.schritte[0]) === ohneSteuer(schritt(SS.computer1, F.herunterladen)) && ohneSteuer(cw.schritte[1]) === ohneSteuer(schritt(SS.computerFoto, F.fotoSpeichern)) &&
+          ohneSteuer(cw.schritte[2]) === ohneSteuer(SS.computer2Foto) && ohneSteuer(cw.schritte[3]) === ohneSteuer(SS.computer3) && !!fk && fk.sichtbar && ohneSteuer(fk.text) === ohneSteuer(F.fotoSpeichern),
+        dc && dc.wege.map((x2) => x2.art + ": " + x2.schritte.map(ohneSteuer).join(" | ")).join("; "));
+      await fotoAbschnittSenden(seite, path.join(AUSGABE, MOBIL.name, "foto-mitschicken-computer-" + code + ".png"), MOBIL.breite);
+    }
+    ok(kennung + ": keine Fehler in der Konsole", seite.__st.konsole.length === 0, seite.__st.konsole.slice(0, 3).join(" | "));
+    await seite.close();
+  }
+  ok("AP-F1: keine Warnung „Text fehlt“ zur Laufzeit (Fertig-Seite mit Foto in Deutsch, Englisch, Türkisch, Arabisch)", protokoll.textFehlt.size === 0, Array.from(protokoll.textFehlt).slice(0, 3).join(" | "));
 }
 
 main().catch((e) => {

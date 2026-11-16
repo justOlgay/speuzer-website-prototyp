@@ -319,10 +319,11 @@ export const pruefen = {
   pruefe: () => [],
 };
 
-function dateiTeilen(k, datei, titel) {
-  if (!datei || typeof navigator.share !== "function" || typeof navigator.canShare !== "function") return false;
+function dateiTeilen(k, dateien) {
+  const liste = Array.isArray(dateien) ? dateien : [dateien];
+  if (!liste.length || liste.some((d) => !d) || typeof navigator.share !== "function" || typeof navigator.canShare !== "function") return false;
   try {
-    return navigator.canShare({ files: [datei] });
+    return navigator.canShare({ files: liste });
   } catch (e) {
     return false;
   }
@@ -421,16 +422,24 @@ function kopiereBeimTeilen(adresse) {
 
 function sendenAbschnitt(k, optionen) {
   const adresse = geschaeftsstellenMail(k);
+  const mitFoto = !!optionen.foto;
 
-  const weg = (art, knoepfe) =>
+  const schritt = (schluessel, knopfText) => h("li", {}, k.t("fertig.senden." + schluessel, { knopf: knopfText || "" }));
+  const weg = (art, schritte) =>
     h("div", { klasse: "anm-senden__weg", "data-weg": art },
-      h("ol", { klasse: "anm-senden__schritte" },
-        [1, 2, 3].map((i) => h("li", {}, k.t("fertig.senden." + art + i, { knopf: knoepfe[i - 1] || "" })))));
+      h("ol", { klasse: "anm-senden__schritte" }, schritte));
 
   const handyWeg = !!(optionen.teilen && optionen.handy);
-  const wege = handyWeg ? weg("handy", [k.t("fertig.teilen")]) : weg("computer", [k.t("fertig.herunterladen")]);
+  const wege = handyWeg
+    ? weg("handy", [schritt("handy1", optionen.teilenText || k.t("fertig.teilen")), schritt(mitFoto ? "handy2Foto" : "handy2"), schritt("handy3")])
+    : weg("computer", [
+        schritt("computer1", k.t("fertig.herunterladen")),
+        ...(mitFoto ? [schritt("computerFoto", k.t("fertig.fotoSpeichern"))] : []),
+        schritt(mitFoto ? "computer2Foto" : "computer2"),
+        schritt("computer3"),
+      ]);
 
-  const mailLink = () => h("a", { klasse: "knopf knopf--sekundaer", href: mailtoAnVerein(adresse, k.a.vorname, k.a.nachname), "data-aktion": "mail-oeffnen" }, k.t("fertig.senden.oeffnen"));
+  const mailLink = () => h("a", { klasse: "knopf knopf--sekundaer", href: mailtoAnVerein(adresse, k.a.vorname, k.a.nachname, mitFoto), "data-aktion": "mail-oeffnen" }, k.t("fertig.senden.oeffnen"));
 
   let adressBlock = null;
   if (adresse) {
@@ -459,7 +468,7 @@ function sendenAbschnitt(k, optionen) {
     ? h("details", { klasse: "anm-einzelheiten anm-senden__rueckfall", "data-rueckfall": "" },
         h("summary", {}, k.t("fertig.senden.rueckfallTitel")),
         h("div", { klasse: "anm-senden__rueckfall-inhalt" },
-          h("p", {}, k.t("fertig.senden.rueckfall")),
+          h("p", {}, k.t(mitFoto ? "fertig.senden.rueckfallFoto" : "fertig.senden.rueckfall")),
           adresse ? h("div", { klasse: "anm-knoepfe" }, mailLink()) : null))
     : null;
   return h("div", { klasse: "anm-senden", "data-senden": "" },
@@ -489,7 +498,22 @@ function ergebnisAnsicht(k, pdf) {
       if (speichereMitMeldung(pdf.ergebnis.bytes, "application/pdf", pdf.ergebnis.dateiname, k.t("fertig.gespeichert"))) k.gesichert = true;
     },
   });
-  const teilen = knopf(k.t("fertig.teilen"), {
+
+  const foto = k.bilder.spielerfoto;
+  const unterlagen = (k.ergebnis() || {}).unterlagen;
+  const brauchtFoto = Array.isArray(unterlagen) && unterlagen.some((u) => u && u.id === "U16");
+  const mitFoto = !!(brauchtFoto && foto && foto.bytes && foto.bytes.length && k.a.spielerfoto && k.a.spielerfoto.weg !== "verein");
+  let fotoDatei = null;
+  if (mitFoto) {
+    try {
+      fotoDatei = new File([foto.bytes], k.fotoDateiname(), { type: "image/jpeg", lastModified: Date.now() });
+    } catch (e) {
+      fotoDatei = null;
+    }
+  }
+  const teilDateien = mitFoto ? [datei, fotoDatei] : [datei];
+  const teilenText = k.t(mitFoto ? "fertig.teilenMitFoto" : "fertig.teilen");
+  const teilen = knopf(teilenText, {
     sekundaer: true,
     aktion: "teilen",
     beiKlick: () => {
@@ -497,7 +521,7 @@ function ergebnisAnsicht(k, pdf) {
       const kopiert = kopiereBeimTeilen(geschaeftsstellenMail(k));
       let versprechen;
       try {
-        versprechen = Promise.resolve(navigator.share({ files: [datei], ...mailTeilen(k.a.vorname, k.a.nachname) }));
+        versprechen = Promise.resolve(navigator.share({ files: teilDateien, ...mailTeilen(k.a.vorname, k.a.nachname, mitFoto) }));
       } catch (fehler) {
         versprechen = Promise.reject(fehler);
       }
@@ -514,7 +538,7 @@ function ergebnisAnsicht(k, pdf) {
         });
     },
   });
-  teilen.hidden = !dateiTeilen(k, datei);
+  teilen.hidden = !dateiTeilen(k, teilDateien);
 
   const handy = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
   if (!teilen.hidden && handy) {
@@ -523,8 +547,7 @@ function ergebnisAnsicht(k, pdf) {
     knoepfe.push(teilen, laden);
   } else knoepfe.push(laden, teilen);
   knoepfe.push(knopf(k.t("fertig.ansehen"), { sekundaer: true, aktion: "ansehen", beiKlick: () => ansehen(pdf.ergebnis.bytes) }));
-  const foto = k.bilder.spielerfoto;
-  if (foto && k.a.spielerfoto && k.a.spielerfoto.weg !== "verein") {
+  if (mitFoto) {
     knoepfe.push(knopf(k.t("fertig.fotoSpeichern"), {
       sekundaer: true,
       aktion: "foto-speichern",
@@ -539,7 +562,7 @@ function ergebnisAnsicht(k, pdf) {
     h("div", { klasse: "anm-knoepfe" }, knoepfe),
     status,
 
-    sendenAbschnitt(k, { teilen: !teilen.hidden, handy: !!handy }),
+    sendenAbschnitt(k, { teilen: !teilen.hidden, handy: !!handy, foto: mitFoto, teilenText }),
     h("h3", { klasse: "anm-zwischentitel" }, k.t("fertig.naechsteTitel")),
     naechsteSchritte(k, pdf.ergebnis),
     h("div", { klasse: "anm-block" },

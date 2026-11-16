@@ -178,6 +178,9 @@ export function kbText(bytes) {
 
 export const MAIL_BETREFF = "Anmeldung";
 export const MAIL_TEXT = "Guten Tag,\n\nanbei die Anmeldung als PDF.\n\nViele Grüße";
+// Mit Spielerfoto (16.11.2026): Das Foto geht als eigene Bilddatei (JPG) mit, nicht nur als Seite im PDF. Die Geschäftsstelle lädt das
+// Foto beim Verband hoch und braucht es als Bild.
+export const MAIL_TEXT_FOTO = "Guten Tag,\n\nanbei die Anmeldung als PDF und das Spielerfoto als Bild.\n\nViele Grüße";
 
 // "Anmeldung Vorname Nachname" (ohne Namen nur "Anmeldung")
 export function mailBetreff(vorname, nachname) {
@@ -185,17 +188,17 @@ export function mailBetreff(vorname, nachname) {
 }
 
 // mailto:-Adresse mit Betreff und Text. Betreff und Text sind als URL-Teile kodiert (Umlaute, Leerzeichen als %20, Zeilenumbrüche
-// als %0D%0A nach RFC 6068); die Adresse bleibt, wie sie ist.
-export function mailtoAnVerein(adresse, vorname, nachname) {
+// als %0D%0A nach RFC 6068); die Adresse bleibt, wie sie ist. `mitFoto`: Es gibt ein Spielerfoto als Bilddatei (Text MAIL_TEXT_FOTO).
+export function mailtoAnVerein(adresse, vorname, nachname, mitFoto) {
   const kodiere = (text) => encodeURIComponent(String(text).replace(/\n/g, "\r\n"));
-  return "mailto:" + sauber(adresse) + "?subject=" + kodiere(mailBetreff(vorname, nachname)) + "&body=" + kodiere(MAIL_TEXT);
+  return "mailto:" + sauber(adresse) + "?subject=" + kodiere(mailBetreff(vorname, nachname)) + "&body=" + kodiere(mitFoto ? MAIL_TEXT_FOTO : MAIL_TEXT);
 }
 
 // Betreff und Text für "Datei teilen" (navigator.share mit Datei; MR-2, 30.10.2026): Das Mail-Programm bekommt zur Datei denselben
-// deutschen Betreff und Text wie beim mailto-Link (Betreff "Anmeldung Vorname Nachname", Text MAIL_TEXT). Den Empfänger kann
-// navigator.share nicht übergeben; die Seite legt die Adresse der Geschäftsstelle deshalb beim Teilen in die Zwischenablage.
-export function mailTeilen(vorname, nachname) {
-  return { title: mailBetreff(vorname, nachname), text: MAIL_TEXT };
+// deutschen Betreff und Text wie beim mailto-Link (Betreff "Anmeldung Vorname Nachname", Text MAIL_TEXT, mit Spielerfoto MAIL_TEXT_FOTO).
+// Den Empfänger kann navigator.share nicht übergeben; die Seite legt die Adresse der Geschäftsstelle deshalb beim Teilen in die Zwischenablage.
+export function mailTeilen(vorname, nachname, mitFoto) {
+  return { title: mailBetreff(vorname, nachname), text: mitFoto ? MAIL_TEXT_FOTO : MAIL_TEXT };
 }
 
 // ---------- E-Mail wegen des Codes ----------

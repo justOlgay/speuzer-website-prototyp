@@ -262,8 +262,8 @@
     },
     {
       "datei": "web/anmeldung-hilfen.js",
-      "bytes": 5358,
-      "sha256": "547e1ccc8afa97eb7ed1af53cbec1eaeb88d22118b7664acef52301490b18a34"
+      "bytes": 5553,
+      "sha256": "4585d6b68610ac74de9eff1d20ace6fdc973afe6c16dcc11bf16d0ff9447aa0a"
     },
     {
       "datei": "web/anmeldung-laender.js",
@@ -292,8 +292,8 @@
     },
     {
       "datei": "web/anmeldung-seiten-ende.js",
-      "bytes": 27848,
-      "sha256": "a8c8606fc2c512a84cb2311ea0fb8142854d0e15552072e3a5ae1eacc48f714a"
+      "bytes": 28991,
+      "sha256": "a30ffe1e9409ec66df66e876ee1d417ee67f695727036a914c999a1203fbe785"
     },
     {
       "datei": "web/anmeldung-seiten-fussball.js",
@@ -327,8 +327,8 @@
     },
     {
       "datei": "web/anmeldung-texte-ar-oberflaeche.js",
-      "bytes": 50741,
-      "sha256": "796b9c78f5ba278ac1fe1a35fba8c9bb0a9f9c95bb6168405112a9b123066a17"
+      "bytes": 51280,
+      "sha256": "744b2859ee396cb1b96d0cc0ded2baa60d5d780f7ce95c908686c3fbc80daaea"
     },
     {
       "datei": "web/anmeldung-texte-ar-regeln.js",
@@ -337,8 +337,8 @@
     },
     {
       "datei": "web/anmeldung-texte-de-oberflaeche.js",
-      "bytes": 39962,
-      "sha256": "d6c5118e12932ed5e349e2020333775b81c4539f33cb8333fa525baf7f69ab2b"
+      "bytes": 40385,
+      "sha256": "fc249b1a97e3f835df67a2cbf9402f5b86669b0c8c12e35c16fea412ec7b8894"
     },
     {
       "datei": "web/anmeldung-texte-de-regeln.js",
@@ -347,8 +347,8 @@
     },
     {
       "datei": "web/anmeldung-texte-en-oberflaeche.js",
-      "bytes": 38467,
-      "sha256": "6086d4c01a081b365d7b11978ee3d880655e04b135f3f670d78a96ea56292392"
+      "bytes": 38819,
+      "sha256": "b17ff2e5a2dbaf259faeef0e7dd7b4224b4aa4c4eb9f11dac7c4be0b7b75223a"
     },
     {
       "datei": "web/anmeldung-texte-en-regeln.js",
@@ -357,8 +357,8 @@
     },
     {
       "datei": "web/anmeldung-texte-tr-oberflaeche.js",
-      "bytes": 40520,
-      "sha256": "be6fd61a0419a9a8482f6529401245ca33f11ace65fb32bd7cfd2da537c905ef"
+      "bytes": 40932,
+      "sha256": "3e760dfa529733a3dd606a036b7175aeec33aa57094b98be4e201555ea8a554e"
     },
     {
       "datei": "web/anmeldung-texte-tr-regeln.js",
