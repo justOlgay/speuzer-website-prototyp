@@ -294,7 +294,7 @@ button.knopf {
    gegründet", "Der Verein in Zahlen" jetzt mit denselben vier Werten wie die
    Website, "Kinder- und Jugendschutz" als eigener Abschnitt mit Personenkarte
    (wie Vorstand/Karneval) statt einer bloßen Verweiszeile. Zahlen
-   11/5 werden von
+   12/5 werden von
    tools/app-optik/tpl-bauen.mjs zur Bauzeit aus data/verein.json bzw.
    data/karneval.json eingesetzt, [{"name":"Melanie Seipp","funktion":"1. Vorsitzende","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-melanie-seipp","bytes":525138}},{"name":"Uwe Korndörfer","funktion":"2. Vorsitzender","mail":"geschaeftsstelle@sportfreunde04.de","foto":{"quelle":"vorstand-uwe-korndorfer","bytes":517113}},{"name":"Wolfgang Schirmer","funktion":"1. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-wolfgang-schirmer","bytes":495840}},{"name":"Bernhard Henrich","funktion":"2. Kassierer","mail":"kassierer@sportfreunde04.de","foto":{"quelle":"vorstand-bernhard-henrich","bytes":135549}},{"name":"Ralf Schwager","funktion":"1. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-ralf-schwager","bytes":112402}},{"name":"Olgay Özkan","funktion":"2. Jugendleiter","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-olgay-ozkan","bytes":60038}},{"name":"Marcel Hogg","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-marcel-hogg","bytes":125052}},{"name":"Vassilios Miamis","funktion":"Team Jugendleitung","mail":"jugendleitung@sportfreunde04.de","foto":{"quelle":"vorstand-vassilios-miamis","bytes":215395}},{"name":"Florian Müller","funktion":"Kinderschutzbeauftragter","mail":"kinderschutzbeauftragter@sportfreunde04.de","foto":{"quelle":"vorstand-florian-muller","bytes":69465}},{"name":null,"funktion":"Schriftführer","mail":null,"foto":null,"hinweis":"nicht besetzt"},{"name":"Sascha Stahl","funktion":"Sportliche Leitung Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Christine Rothe","funktion":"Spielausschuss Senioren","mail":"spielausschuss_senioren@sportfreunde04.de","foto":null},{"name":"Patrick Krösche","funktion":"Abteilungsleiter Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":{"quelle":"vorstand-patrick-krosche","bytes":221052}},{"name":"Sigrid Weber","funktion":"Kassiererin Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null},{"name":"Bettina Leven-Grieb","funktion":"Schriftführerin Karneval","mail":"karnevalabteilung@sportfreunde04.de","foto":null}] (Kinderschutzbeauftragter)
    wie auf den anderen Vereinsseiten (kein appack-FreeMarker-Ausdruck an
@@ -427,15 +427,19 @@ button.knopf {
 
 <div class="karte">
   <p>Gegründet wurde der Verein am 15.&nbsp;Mai 1904 als Frankfurter FC Britannia. Nach dem Ersten Weltkrieg erhielt er 1919 seinen heutigen Namen. Der sportliche Höhepunkt war die Saison 1955/56 in der 1.&nbsp;Amateurliga Hessen; seit den 1960er Jahren spielen die Sportfreunde in den Klassen des Fußballkreises Frankfurt.</p>
-  <!-- W9-Nachprüfung D-app Nr. 17: "elf"/"fünf" wörtlich wie
+  <!-- W9-Nachprüfung D-app Nr. 17: "zwölf"/"fünf" wörtlich wie
        src/seiten/verein/ueber-uns.mjs (nicht die __ANZAHL_…__-Platzhalter
        weiter unten in "Der Verein in Zahlen" – dort bleiben Ziffern, wie auf
        der Website). Heutiger Datenstand (data/verein.json/karneval.json):
-       11 Mannschaften, 5 Karnevalgruppen. -->
+       12 Mannschaften (seit 23.11.2026 mit der Soma, Entscheidung E4),
+       5 Karnevalgruppen.
+       Soma/freizeit, Entscheidung E3/E4 (23.11.2026): der Schlusssatz des
+       Absatzes unten nennt den Trainingsort der Soma, weil "Trainiert … auf
+       dem eigenen Platz" für sie nicht gilt – wörtlich wie auf der Website. -->
   <!-- W10, Auftrag D (app Nr. 7): "Mainzer Landstraße 480" mit geschütztem
        Leerzeichen zusammengehalten, wie auf Kontakt & Anfahrt – die
        Hausnummer stand sonst allein am Zeilenanfang. -->
-  <p>Heute stellt der Verein elf Fußballmannschaften – von der 1.&nbsp;Herrenmannschaft bis zur G&#8209;Jugend – und die Karnevalabteilung „Die Schnauzer“ mit fünf Gruppen. Trainiert und gespielt wird auf dem eigenen Platz an der Mainzer&nbsp;Landstraße&nbsp;480. Die Herren und die A&#8209;Jugend tragen ihre Heimspiele auf der Bezirkssportanlage am Rebstock (SW&nbsp;Griesheim), Am Römerhof 9, 60486&nbsp;Frankfurt am&nbsp;Main aus.</p>
+  <p>Heute stellt der Verein zwölf Fußballmannschaften – von der 1.&nbsp;Herrenmannschaft bis zur G&#8209;Jugend – und die Karnevalabteilung „Die Schnauzer“ mit fünf Gruppen. Trainiert und gespielt wird auf dem eigenen Platz an der Mainzer&nbsp;Landstraße&nbsp;480. Die Herren und die A&#8209;Jugend tragen ihre Heimspiele auf der Bezirkssportanlage am Rebstock (SW&nbsp;Griesheim), Am Römerhof 9, 60486&nbsp;Frankfurt am&nbsp;Main aus. Die Soma trainiert bei der SG&nbsp;1928 im Gallus.</p>
   <p class="leitsatz-quelle">Unser Leitsatz aus der Vereinsphilosophie</p>
   <p class="leitsatz">„Wir wollen nicht nur erfolgreiche Mannschaften entwickeln, sondern erfolgreiche Menschen und einen starken Verein für kommende Generationen.“</p>
   <p>Unsere Werte sind Gemeinschaft, Respekt, Wertschätzung, Verantwortung, Fairness, Entwicklung und Kinderschutz.</p>
@@ -469,7 +473,7 @@ button.knopf {
       <span class="zahl__label">gegründet</span>
     </div>
     <div class="zahl">
-      <span class="zahl__wert">11</span>
+      <span class="zahl__wert">12</span>
       <span class="zahl__label">Fußballmannschaften</span>
     </div>
     <div class="zahl">

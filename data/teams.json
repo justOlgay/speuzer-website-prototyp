@@ -24,6 +24,31 @@
     "beschreibung": "Das ist unsere 1. Herrenmannschaft, die in der Kreisliga A spielt."
   },
   {
+    "slug": "soma",
+    "name": "Soma (Sondermannschaft)",
+    "kurz": "Soma",
+    "kategorie": "Senioren",
+    "gruppe": "Senioren",
+    "freizeit": true,
+    "jahrgang": null,
+    "staffel": null,
+    "spielbetrieb": null,
+    "training": [{ "tag": "Donnerstag", "von": "19:00", "bis": null }],
+    "platz": "Sportanlage Ackermannwiese (SG 1928 Frankfurt)",
+    "heimspiele": "Sportanlage Ackermannwiese (SG 1928 Frankfurt), Herxheimerstraße 8, 60326 Frankfurt am Main",
+    "trainer": [],
+    "kontakte": [
+      { "name": "Uwe Löffler", "mail": "kamerun-1@web.de" },
+      { "name": "Martin Lux", "mail": "maddin.forever84@web.de" }
+    ],
+    "fussballde_id": null,
+    "csv": null,
+    "tabelle": false,
+    "kalender": null,
+    "trainingsKalender": null,
+    "beschreibung": "Das ist unsere Soma, die Sondermannschaft für Freizeitfußball. Trainiert wird ganzjährig. Neue Spieler sind jederzeit willkommen, am liebsten gesellige."
+  },
+  {
     "slug": "a-jugend",
     "name": "A-Jugend",
     "kurz": "A-Jugend",

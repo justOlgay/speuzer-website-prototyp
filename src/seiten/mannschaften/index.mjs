@@ -11,10 +11,11 @@ import {
   FUSSBALLDE_WIDGET_LADER,
   spieleKastenHtml,
   SPIELE_KASTEN_SKRIPT,
-  staffelLesbar,
+  staffelOderFreizeit,
   eMailSchreibenLink,
   deutscheAnfuehrungszeichen,
   teamNameHtml,
+  zeitText,
 } from "../../vorlagen/hilfen.mjs";
 // P15: gemeinsame Bausteine (ursprünglich Startseite, dort gelöscht – siehe
 // src/vorlagen/bausteine.mjs).
@@ -72,9 +73,11 @@ function jahrgangPraefix(team) {
 // Wiederverwendet die vorhandene (bisher ungenutzte) .karte__training-Klasse
 // aus P3. Tagesnamen ausgeschrieben (Entscheidung C), nowrap je Zeile über
 // ".karte__training li" (komponenten.css).
+// 23.11.2026 (Soma/freizeit, Entscheidung E2): die Zeit kommt aus zeitText() (hilfen.mjs) – ohne Ende (Soma) "ab 19:00 Uhr"
+// statt "19:00– Uhr", mit Ende wie bisher "von–bis Uhr".
 function trainingszeilenKarteHtml(team) {
   return (team.training ?? [])
-    .map((t) => `<li><strong>${escapeHtml(t.tag)}</strong> ${escapeHtml(t.von)}–${escapeHtml(t.bis)} Uhr</li>`)
+    .map((t) => `<li><strong>${escapeHtml(t.tag)}</strong> ${escapeHtml(zeitText(t))}</li>`)
     .join("\n      ");
 }
 
@@ -89,7 +92,9 @@ function trainingszeilenKarteHtml(team) {
 // volle Text "Zur Mannschaft ›" bleibt für Desktop-Karten erhalten.
 function teamKarte(team, { ohneKategoriePraefix = false } = {}) {
   const praefix = ohneKategoriePraefix ? "" : jahrgangPraefix(team);
-  const staffel = `<span class="team-unterzeile-staffel">${staffelLesbar(team.staffel)}</span>`;
+  // 23.11.2026 (Soma/freizeit, Entscheidung E2): ohne Staffel steht hier "Freizeitmannschaft" (staffelOderFreizeit()),
+  // nie ein leeres Segment.
+  const staffel = `<span class="team-unterzeile-staffel">${staffelOderFreizeit(team)}</span>`;
   const meta = praefix ? `<span class="team-unterzeile-jahrgang">${praefix}</span>${staffel}` : staffel;
   const training = trainingszeilenKarteHtml(team);
   return `<a class="karte karte--link team-karte" href="${PFAD}mannschaften/${team.slug}/">
@@ -139,9 +144,11 @@ function trainingshinweisAbschnitt(daten) {
   // Ferien-Hinweiskasten direkt darunter schon auf 880px begrenzt war –
   // gleiche Breite wie der Kasten, damit beide fluchten und der Satz lesbar
   // bleibt.
+  // 23.11.2026 (Soma, Entscheidung E3): "Alle Mannschaften trainieren auf dem Vereinsplatz" wäre für die Freizeitmannschaft
+  // Soma falsch – sie trainiert bei der SG 1928 im Gallus (zweite Ausnahme neben den Herren).
   return `<section class="abschnitt">
   <div class="container fluss">
-    <p class="meta" style="max-width:880px;">Alle Mannschaften trainieren auf dem Vereinsplatz an der Mainzer Landstraße 480 – nur die Herren auf der Bezirkssportanlage am&nbsp;Rebstock (SW&nbsp;Griesheim). Von November bis Februar trainieren G-Jugend, F1 und F2 in der Halle.</p>
+    <p class="meta" style="max-width:880px;">Alle Mannschaften trainieren auf dem Vereinsplatz an der Mainzer Landstraße 480 – nur die Herren auf der Bezirkssportanlage am&nbsp;Rebstock (SW&nbsp;Griesheim) und die Soma bei der SG&nbsp;1928 im Gallus. Von November bis Februar trainieren G-Jugend, F1 und F2 in der Halle.</p>
     <div class="hinweis hinweis--info" style="max-width:880px;">
       <p style="margin:0;">${escapeHtml(verein.hinweise?.ferien ?? "")}</p>
     </div>
@@ -300,8 +307,11 @@ function naechsteSpieleDesVereinsAbschnitt(daten) {
   // "Live von FUSSBALL.DE." angehängt (ein einziger Satz über dem Kasten,
   // wie spieleKastenHtml() es auf den Teamseiten schon macht), im
   // Prototyp-Modus unverändert vor der eingefrorenen Liste.
+  // 23.11.2026 (Soma, Entscheidung E4): "je Team" versprach Spielplan und Tabelle für jede Mannschaft. Die Freizeitmannschaft Soma
+  // hat beides nicht (bei Kinderfußball fehlt die Tabelle schon länger) – der Satz nennt deshalb nur die Ligateams. Wortlaut
+  // verbindlich und wie auf der App-Seite (src/app/Mannschaften-App.html).
   const einleitungssatz =
-    "Alle Spiele unserer Mannschaften der nächsten Tage. Spielplan und Tabelle je Team findest du auf der jeweiligen Mannschaftsseite.";
+    "Alle Spiele unserer Mannschaften der nächsten Tage. Spielplan und Tabelle der Ligateams findest du auf der jeweiligen Mannschaftsseite.";
   return `<section class="abschnitt">
   <div class="container fluss">
     <h2>Nächste Spiele des Vereins</h2>
@@ -320,13 +330,15 @@ function naechsteSpieleDesVereinsAbschnitt(daten) {
 export function seite(daten) {
   const teamNachSlug = Object.fromEntries((daten.teams ?? []).map((t) => [t.slug, t]));
 
+  // 23.11.2026 (Soma, Entscheidung E4): zwölf Mannschaften. "Jahrgang" und "Weg zum Spielplan" gelten nicht für jedes Team (die
+  // Freizeitmannschaft Soma hat weder Jahrgang noch Spielplan) – der Lead nennt nur, was für alle zwölf stimmt.
   const seitenkopf = `<section class="abschnitt seitenkopf">
   <div class="container">
     <h1>Mannschaften</h1>
     <!-- W9, Abschnitt 2: "Ansprechpartner" entfernt – die stehen nur auf den
          einzelnen Teamseiten, nicht auf dieser Übersicht (nichts versprechen,
          was die Seite nicht bietet). -->
-    <p class="seitenkopf__lead">Elf Fußballmannschaften von den Herren bis zur G-Jugend. Für jedes Team findest du hier Jahrgang, Trainingszeiten und den Weg zum Spielplan.</p>
+    <p class="seitenkopf__lead">Zwölf Fußballmannschaften von den Herren bis zur G-Jugend. Für jedes Team findest du hier die Trainingszeiten und den Weg zur Mannschaftsseite.</p>
   </div>
 </section>`;
 
@@ -350,8 +362,11 @@ export function seite(daten) {
       // W9-A-Nachprüfung (web-390 Nr. 32): "Kreisliga A" am Satzanfang
       // entfällt – die Liga steht schon direkt darüber in der Teamzeile
       // "Kreisliga A, Gruppe 1", ein zweites Mal im Gruppensatz wäre doppelt.
-      satz: "Heimspiele auf der Bezirkssportanlage am Rebstock (SW Griesheim).",
-      slugs: ["herren"],
+      // 23.11.2026 (Soma, Entscheidung E3): die Senioren sind jetzt zwei Teams – der Satz sagt für beide, wo sie sind: Heimspiele
+      // der Herren am Rebstock, Training der Soma (Freizeitmannschaft ohne Ligabetrieb) bei der SG 1928 im Gallus. Echte
+      // U+00A0-Zeichen wie oben.
+      satz: "Heimspiele der Herren auf der Bezirkssportanlage am Rebstock (SW Griesheim). Die Soma trainiert bei der SG 1928 im Gallus.",
+      slugs: ["herren", "soma"],
       // W3, Abschnitt 4: Sprungziel der Fußball-Abteilungskarte im Kopfbereich.
       id: "mannschaften-liste",
       // W9, Abschnitt 1: die Gruppenüberschrift "SENIOREN" nennt die
@@ -419,8 +434,10 @@ export function seite(daten) {
     // Muster von P2/verein/karneval.mjs: "von den Herren bis zur G-Jugend"
     // zu "von Herren bis G-Jugend" gekürzt (167 Zeichen), Wortlaut sonst
     // unverändert.
+    // 23.11.2026 (Soma, Entscheidung E4): zwölf statt elf, und so formuliert, dass nichts für die Freizeitmannschaft Soma falsch ist
+    // (kein Jahrgang, kein Spielplan, keine Tabelle): Spielplan & Tabellen nur bei den Ligateams. 167 Zeichen (Gate: 50–170).
     description:
-      "Alle elf Fußballmannschaften des FFV Sportfreunde 04 in Frankfurt-Gallus: Jahrgänge, Trainingszeiten, Ansprechpartner und Spielplan & Tabellen von Herren bis G-Jugend.",
+      "Zwölf Fußballmannschaften des FFV Sportfreunde 04 in Frankfurt-Gallus von Herren bis G-Jugend: Trainingszeiten, Ansprechpartner und Spielplan & Tabellen der Ligateams.",
     inhalt,
   };
 }

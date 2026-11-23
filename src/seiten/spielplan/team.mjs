@@ -6,6 +6,8 @@
 // laufen, leiten aber sofort weiter. Logik in src/vorlagen/weiterleitung.mjs
 // (gemeinsam mit spielplan/index.mjs und tabellen.mjs, keine doppelte
 // Logik).
+// 23.11.2026 (Soma, Entscheidung E7): Mannschaften mit "freizeit": true (Soma) hatten nie einen Spielplan auf der Website,
+// es gibt also auch keine alten Verweise, die weiterzuleiten wären – für sie entsteht keine Weiterleitungsseite.
 
 import { weiterleitungsSeite } from "../../vorlagen/weiterleitung.mjs";
 
@@ -24,5 +26,5 @@ function seiteFuerTeam(team) {
 }
 
 export function seiten(daten) {
-  return (daten.teams ?? []).map(seiteFuerTeam);
+  return (daten.teams ?? []).filter((team) => !team.freizeit).map(seiteFuerTeam);
 }

@@ -474,7 +474,8 @@ async function main() {
   // dann 40 (+ aufnahmeantrag.html), dann 41 (+ verein-organigramm.html, M13, 11.10.2026);
   // mit dem Assistenten (ANMELDUNG_LIVE) 42 (+ anmeldung.html);
   // 31.10.2026: + platzbelegung.html (Platzbelegung, Zeile auf verein.html): 42, mit dem Assistenten 43
-  const erwarteteSeiten = 42 + (MIT_ANMELDUNG ? 1 : 0);
+  // 23.11.2026: + mannschaften-soma.html (Soma, Freizeitmannschaft, ohne Weiterleitung spielplan-soma.html): 43, mit dem Assistenten 44
+  const erwarteteSeiten = 43 + (MIT_ANMELDUNG ? 1 : 0);
   if (seiten.length !== erwarteteSeiten) {
     console.error(`Erwartet ${erwarteteSeiten} Seiten in ${path.relative(ROOT, WEB_DIR)}/, gefunden ${seiten.length}.`);
     process.exit(1);

@@ -142,8 +142,11 @@ function testeDaten() {
   // Quellen der entfallenen Karneval-Unterlagen und -Gruppen stehen nicht mehr in der Liste
   wahr("Quellen: keine Quelle der entfallenen Turnier- und Gruppenregeln", !cfg.quellenStand.some((q) => /Tanzturnierordnung|RKK-Richtlinien|Die Schnauzer|Übungszeiten laut Abteilung/.test(q.quelle)));
   // Mannschaften stimmen mit teams.json überein (kein Auseinanderlaufen)
-  const teams = JSON.parse(lies("data/teams.json"));
-  gleich("Mannschaften: gleiche Anzahl wie teams.json", cfg.mannschaften.length, teams.length);
+  // 23.11.2026 (Soma, Entscheidung E6): Teams mit freizeit: true (Freizeitmannschaften ohne Ligabetrieb, bisher nur die Soma) gehören nicht in den
+  // Assistenten – Mitglieder der Soma melden sich über den Aufnahmeantrag – und fehlen deshalb mit Absicht in data/anmeldung.json › mannschaften.
+  // Nur sie sind von dieser Gleichheitsprüfung ausgenommen; jedes andere Team muss weiter dort stehen.
+  const teams = JSON.parse(lies("data/teams.json")).filter((t) => !t.freizeit);
+  gleich("Mannschaften: gleiche Anzahl wie teams.json (ohne Freizeitmannschaften)", cfg.mannschaften.length, teams.length);
   teams.forEach((t) => {
     const m = cfg.mannschaften.find((x) => x.slug === t.slug);
     wahr("Mannschaft " + t.slug + " vorhanden", !!m);

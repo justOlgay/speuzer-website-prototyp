@@ -183,6 +183,17 @@ export function staffelLesbar(staffel) {
   return `${ligaHtml}${gruppeHtml}`;
 }
 
+// ---------- Freizeitmannschaft (23.11.2026, Soma, Entscheidung E1/E2) ----------
+// data/teams.json "freizeit": true kennzeichnet eine Mannschaft ohne Ligabetrieb (Soma, Sondermannschaft): keine Staffel,
+// kein Spielplan, keine Tabelle, keine Trainer, dafür Ansprechpartner ("kontakte") und eine Trainingsanlage, die nicht dem
+// Verein gehört. Wo sonst die Staffel steht (Unterzeile der Teamseite, Teamkarte der Übersicht, "Weitere Mannschaften"),
+// steht dann diese Bezeichnung. Alle Zweige für solche Teams hängen an team.freizeit, nie an null-Prüfungen einzelner Felder.
+export const FREIZEIT_BEZEICHNUNG = "Freizeitmannschaft";
+
+export function staffelOderFreizeit(team) {
+  return team?.freizeit ? FREIZEIT_BEZEICHNUNG : staffelLesbar(team?.staffel);
+}
+
 // ---------- Team-Name geschützt (W9-A-Nachprüfung, neu_kaputt) ----------
 // Team-Karten (teamKarte() in index.mjs, "Weitere Mannschaften" in team.mjs)
 // bekamen durch die auf 260px erhöhte Mindestspurbreite von
@@ -446,7 +457,10 @@ export function deutscheAnfuehrungszeichen(text) {
 // "." danach (Umbruch "…04 / .de" sah falsch aus). .person__mail .mail
 // (overflow-wrap: anywhere) bleibt als Sicherheitsnetz für sehr lange lokale
 // Teile bestehen.
-export function mailLink(adresse, text) {
+// 23.11.2026 (Soma): optionaler dritter Parameter `betreff` für einen vorbereiteten Mailbetreff, URL-kodiert wie in
+// trainerMailtoHref() (mannschaften/team.mjs: "Soma: Anfrage über die Website" wird zu "Soma%3A%20Anfrage%20%C3%BCber…").
+// Ohne Betreff ist die Ausgabe unverändert.
+export function mailLink(adresse, text, betreff) {
   const anzeigeRoh = text ?? adresse ?? "";
   const anzeigeEscaped = escapeHtml(anzeigeRoh);
   const atIndex = anzeigeEscaped.indexOf("@");
@@ -456,7 +470,8 @@ export function mailLink(adresse, text) {
     const nachAt = anzeigeEscaped.slice(atIndex + 1);
     anzeige = `${vorAt}<wbr>@${nachAt}`;
   }
-  return `<a class="mail" href="mailto:${escapeHtml(adresse ?? "")}">${anzeige}</a>`;
+  const betreffTeil = betreff ? `?subject=${encodeURIComponent(betreff)}` : "";
+  return `<a class="mail" href="mailto:${escapeHtml(adresse ?? "")}${betreffTeil}">${anzeige}</a>`;
 }
 
 // ---------- E-Mail-Textlink "E-Mail schreiben ›" (W8) ----------
@@ -591,11 +606,22 @@ export function trainingsZeilen(team, teilOverride) {
     .map(
       (t) => `<li class="training">
       <span class="training__tag">${escapeHtml(t.tag)}</span>
-      <span class="training__zeit">${escapeHtml(t.von)}–${escapeHtml(t.bis)} Uhr</span>
+      <span class="training__zeit">${escapeHtml(zeitText(t))}</span>
       <span class="training__platz">${escapeHtml(t.platz ?? teil)}</span>
     </li>`
     )
     .join("\n    ");
+}
+
+// Trainingszeit einer Zeile aus data/teams.json "training": "17:00–18:30 Uhr", ohne Ende (bis fehlt, null oder leer; die Soma
+// trainiert "ab 19:00 Uhr", 23.11.2026, Entscheidung E2) "ab 19:00 Uhr". Für alle Teams mit Ende Byte für Byte wie vorher
+// (von–bis Uhr). Genutzt von trainingsZeilen() oben, von der Teamkarte der Übersicht (mannschaften/index.mjs) und von der
+// Meta-Description der Teamseite (mannschaften/team.mjs, bei den Ligateams mit uhr: false, also "Mo 17:00–18:30"); so
+// entsteht "19:00– Uhr" dort nirgends mehr. Liefert reinen Text: an HTML-Stellen mit escapeHtml() ausgeben.
+export function zeitText(t, { uhr = true } = {}) {
+  const hatEnde = String(t?.bis ?? "").trim() !== "";
+  const bereich = hatEnde ? `${t?.von ?? ""}–${t.bis}` : `ab ${t?.von ?? ""}`;
+  return uhr ? `${bereich} Uhr` : bereich;
 }
 
 // ---------- Teaser- und Absatz-Regel (P2-K4, ab P6 auch auf /news/) ----------
@@ -784,6 +810,23 @@ export function trainerZeileHtml(name, index, rolleText, bildHtml) {
         ${rolleText ? `<span class="person-mini__rolle meta">${escapeHtml(rolleText)}</span>` : ""}
       </span>
     </div>`;
+}
+
+// Ansprechpartner einer Freizeitmannschaft (Soma, 23.11.2026, Entscheidung E2): eine Listenzeile mit Name (fett) und der
+// Mailadresse als sichtbarem mailto-Link mit vorbereitetem Betreff. Bewusst ohne Porträt und ohne Initialen-Kreis (kein
+// data-trainer-foto, kein Vorstandsabgleich wie bei trainerZeileHtml()) und ohne Rollenangabe: Die Mail nennt sie
+// Ansprechpartner, nicht Trainer. Als <li>, damit der Link als Fließtext-Link gilt (Tippziel-Regel in tools/pruefen.mjs).
+// Umbruch langer Adressen: mailLink() setzt ein <wbr> vor das "@"; die vorhandene Klasse person__mail (Vorstandskarten,
+// Organigramm) erlaubt zusätzlich den Umbruch mitten im lokalen Teil (komponenten.css, ".person__mail .mail"), anders als
+// die Klasse trainerteam-adresse (white-space: nowrap), die hier bewusst nicht verwendet wird. Schriftgröße wie die Adresse
+// auf den übrigen Teamseiten (--fs-sm). Geprüft bis zu 45 Zeichen am Stück bei 320 px: tools/cache/orchestrierung-soma/ap1/.
+export function kontaktZeileHtml(kontakt, betreff) {
+  return `<li class="person-mini">
+      <span class="person-mini__text">
+        <span class="person-mini__name">${escapeHtml(kontakt?.name)}</span>
+        <span class="person__mail">${mailLink(kontakt?.mail, undefined, betreff)}</span>
+      </span>
+    </li>`;
 }
 
 // Einmal je Teamseite: lädt zur Laufzeit das Worksheet, sucht die zum

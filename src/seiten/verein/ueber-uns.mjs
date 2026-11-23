@@ -53,10 +53,13 @@ function geschichteAbschnitt(daten) {
   const philosophie = downloadEintrag(daten, "Vereinsphilosophie");
   const chronik = downloadEintrag(daten, "Vereinschronik");
 
+  // 23.11.2026 (Soma, Entscheidung E3/E4): "Über uns" nennt die Soma als Ausnahme vom eigenen Platz – sie trainiert bei der
+  // SG 1928 im Gallus, "Trainiert und gespielt wird auf dem eigenen Platz" stimmte mit ihr für ein Team nicht. Letzter Satz des
+  // zweiten Absatzes, Wortlaut wie auf der App-Seite (src/app/Ueber-uns_v3.html).
   return `<section class="abschnitt">
   <div class="container fluss">
     <p class="inhalt">Gegründet wurde der Verein am 15.&nbsp;Mai 1904 als Frankfurter FC Britannia. Nach dem Ersten Weltkrieg erhielt er 1919 seinen heutigen Namen. Der sportliche Höhepunkt war die Saison 1955/56 in der 1.&nbsp;Amateurliga Hessen; seit den 1960er Jahren spielen die Sportfreunde in den Klassen des Fußballkreises Frankfurt.</p>
-    <p class="inhalt">Heute stellt der Verein elf Fußballmannschaften – von der 1.&nbsp;Herrenmannschaft bis zur G‑Jugend – und die Karnevalabteilung „Die Schnauzer“ mit fünf Gruppen. Trainiert und gespielt wird auf dem eigenen Platz an der Mainzer Landstraße 480. Die Herren und die A‑Jugend tragen ihre Heimspiele auf der Bezirkssportanlage am Rebstock (SW Griesheim), Am Römerhof 9, 60486&nbsp;Frankfurt am&nbsp;Main aus.</p>
+    <p class="inhalt">Heute stellt der Verein zwölf Fußballmannschaften – von der 1.&nbsp;Herrenmannschaft bis zur G‑Jugend – und die Karnevalabteilung „Die Schnauzer“ mit fünf Gruppen. Trainiert und gespielt wird auf dem eigenen Platz an der Mainzer Landstraße 480. Die Herren und die A‑Jugend tragen ihre Heimspiele auf der Bezirkssportanlage am Rebstock (SW Griesheim), Am Römerhof 9, 60486&nbsp;Frankfurt am&nbsp;Main aus. Die Soma trainiert bei der SG&nbsp;1928 im Gallus.</p>
     <blockquote class="zitat inhalt">
       <p class="zitat__label meta">Unser Leitsatz aus der Vereinsphilosophie</p>
       <p class="zitat__text">„Wir wollen nicht nur erfolgreiche Mannschaften entwickeln, sondern erfolgreiche Menschen und einen starken Verein für kommende Generationen.“</p>
@@ -79,7 +82,7 @@ function geschichteAbschnitt(daten) {
 function zahlenAbschnitt() {
   const zahlen = [
     ["1904", "gegründet"],
-    ["11", "Fußballmannschaften"],
+    ["12", "Fußballmannschaften"],
     ["5", "Karnevalgruppen"],
     ["2", "Abteilungen"],
   ];
@@ -141,7 +144,7 @@ export function seite(daten) {
     url: "/verein/ueber-uns/",
     title: "Über uns",
     description:
-      "Über uns: seit 1904 im Frankfurter Gallus, elf Fußballmannschaften, Karnevalabteilung Die Schnauzer, Werte und Kinderschutz des FFV Sportfreunde 04",
+      "Über uns: seit 1904 im Frankfurter Gallus, zwölf Fußballmannschaften, Karnevalabteilung Die Schnauzer, Werte und Kinderschutz des FFV Sportfreunde 04",
     inhalt,
   };
 }

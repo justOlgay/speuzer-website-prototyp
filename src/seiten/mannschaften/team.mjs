@@ -1,6 +1,10 @@
 // Teamseiten /mannschaften/<slug>/ (P3) – eine Seite je Mannschaft aus
 // data/teams.json: Training, nächste Spiele, Ansprechpartner, Heimspiele,
 // Kalender-Abos, Verweis auf weitere Mannschaften derselben Gruppe.
+// 23.11.2026 (Soma, Entscheidung E1/E2): Mannschaften mit "freizeit": true (Freizeit-
+// Sondermannschaft ohne Ligabetrieb) bekommen die schlanke Fassung ohne Spielbetrieb:
+// Training, Ansprechpartner mit eigener Mailadresse und die Karte "Trainingsort", siehe
+// hauptspalteFreizeit() und seitenspalteFreizeit().
 
 import {
   mailLink,
@@ -19,6 +23,10 @@ import {
   staffelLesbar,
   platzAufgeteilt,
   teamNameHtml,
+  zeitText,
+  staffelOderFreizeit,
+  FREIZEIT_BEZEICHNUNG,
+  kontaktZeileHtml,
 } from "../../vorlagen/hilfen.mjs";
 // W9, Abschnitt 7: bild() wird hier direkt importiert (nicht über hilfen.mjs,
 // das bewusst ohne Abhängigkeit zu bild.mjs bleibt, siehe Kopf dieser Datei)
@@ -90,6 +98,12 @@ function routePlanenUrl(adresse) {
 // Herren und A-Jugend spielen ihre Heimspiele am Römerhof (Anlage SW
 // Griesheim), alle anderen auf dem Vereinsplatz Mainzer Landstraße 480.
 function routeUrl(team, verein) {
+  // 23.11.2026 (Soma/freizeit, Entscheidung E2): eine Freizeitmannschaft trainiert auf fremder Anlage – die Route führt zur
+  // Anschrift der Anlage aus team.heimspiele ("Platzname, Straße Nr., PLZ Ort", ohne den Platznamen), nie zum Vereinsplatz.
+  if (team.freizeit) {
+    const teile = String(team.heimspiele ?? "").split(", ").map((t) => t.trim());
+    return routePlanenUrl(teile.length === 3 ? `${teile[1]}, ${teile[2]}` : String(team.heimspiele ?? ""));
+  }
   if ((team.heimspiele ?? "").includes("Römerhof")) {
     return routePlanenUrl("Am Römerhof 9, 60486 Frankfurt am Main");
   }
@@ -112,7 +126,9 @@ function adresseDreizeiligHtml(adresse) {
     return `<p>${escapeHtml(adresse ?? "")}</p>`;
   }
   const [platz, strasse, plzOrt] = teile;
-  const platzHtml = escapeHtml(platz).replace(/SW Griesheim/, "SW&nbsp;Griesheim");
+  // 23.11.2026 (Soma): "SG 1928" (Sportanlage Ackermannwiese, SG 1928 Frankfurt) wie "SW Griesheim" zusammenhalten, sonst
+  // bricht die Zeile auf dem Handy zwischen "(SG" und "1928 Frankfurt)".
+  const platzHtml = escapeHtml(platz).replace(/SW Griesheim/, "SW&nbsp;Griesheim").replace(/SG 1928/, "SG&nbsp;1928");
   const plzOrtHtml = escapeHtml(plzOrt)
     .replace(/^(\d{5})\s/, "$1&nbsp;")
     .replace(/\sam\s(Main)\b/, "&nbsp;am&nbsp;$1");
@@ -129,7 +145,7 @@ function trainerMailtoHref(team) {
 
 function trainingVollListe(team) {
   return (team.training ?? [])
-    .map((t) => `${TAG_KUERZEL[t.tag] ?? t.tag} ${t.von}–${t.bis}`)
+    .map((t) => `${TAG_KUERZEL[t.tag] ?? t.tag} ${zeitText(t, { uhr: false })}`)
     .join(", ");
 }
 
@@ -143,6 +159,13 @@ function trainingVollListe(team) {
 function beschreibung(team) {
   const j = jahrgangText(team);
   const jahrgangTeil = j === "Senioren" ? j : `Jahrgang ${j}`;
+  // 23.11.2026 (Soma/freizeit, Entscheidung E2): eigene, sachliche Fassung ohne Liga-, Jahrgangs- und Kinderfestival-Aussage
+  // (beim Spielbetrieb ist nichts belegt). Trainingstage als Adverb ("donnerstags ab 19:00 Uhr"), "Ansprechpartner per
+  // E-Mail" statt "per Vereinsmail": die zwei Ansprechpartner haben eigene Adressen. Die Länge prüft tools/pruefen.mjs (50–170).
+  if (team.freizeit) {
+    const zeiten = (team.training ?? []).map((t) => `${String(t.tag).toLowerCase()}s ${zeitText(t)}`).join(", ");
+    return `${team.name} des FFV Sportfreunde 04 (Frankfurt-Gallus): Freizeitfußball für ${jahrgangTeil}, Training ${zeiten}, Ansprechpartner per E-Mail.`;
+  }
   // W9-A-Nachprüfung (mannschaften-f1-1440-01.png): Kinderfußball (F1, F2,
   // G-Jugend) hat laut Seite ausdrücklich weder Ligaspielplan noch Tabelle
   // (siehe kinderfestivalAbschnitt() unten) – die Meta-description endete
@@ -205,6 +228,10 @@ const GENERATOR_BASIS = "https://justolgay.github.io/speuzer-spielplan/";
 // hervorgehobene nächste Spiel.
 function generatorIframe(team, daten) {
   const gruppe = GRUPPE_JE_TEAM[team.slug];
+  // 23.11.2026 (Soma/freizeit, Entscheidung E2): ohne Eintrag in GRUPPE_JE_TEAM stünde "app-undefined.html?einzeln" (404) in
+  // der Seite. Freizeitmannschaften zeigen nie einen Generator-Plan (siehe hauptspalteFreizeit()); bei jedem anderen Team
+  // ohne Eintrag bricht der Bau ab, statt den kaputten Verweis still auszuliefern.
+  if (!gruppe) throw new Error(`generatorIframe(): kein Eintrag für "${team.slug}" in GRUPPE_JE_TEAM`);
   // Team-Vorauswahl des Generators: #<Reiter> öffnet den Reiter des Teams.
   const reiter = daten.widgets?.[team.slug]?.reiter ?? "";
   // W9-A, Entscheidung 8 (w9-gemeinsam.md): "?einzeln" zeigt nur dieses Team
@@ -423,6 +450,13 @@ function spieleUndTabelleInhalt(team, daten) {
 // Jahrgang). Beide Segmente sind eigene Blockelemente (siehe
 // .team-unterzeile-jahrgang/.team-unterzeile-staffel in komponenten.css).
 function unterzeileTeam(team) {
+  // 23.11.2026 (Soma/freizeit, Entscheidung E2, nach der Sichtprüfung geändert): nur "Freizeitmannschaft" in einem Segment, wie bei
+  // den Herren, deren Unterzeile nur die Staffel nennt – der Kicker darüber ("Mannschaft · Senioren") nennt die Kategorie
+  // schon, sonst stünde "Senioren" doppelt. Keine leere Unterzeile (es gibt keine Staffel) und kein "Jahrgang …". Dasselbe
+  // Sicherheitsnetz wie beim Staffel-Segment unten (team-unterzeile-staffel).
+  if (team.freizeit) {
+    return `<span class="team-unterzeile-staffel">${FREIZEIT_BEZEICHNUNG}</span>`;
+  }
   // W9-A-Nachprüfung (tools/pruefen.mjs, 320px, mannschaften-f1): das Staffel-
   // Segment in ein eigenes Sicherheitsnetz-Span verpackt (siehe
   // .team-unterzeile-staffel in komponenten.css) – die Segmente sind jetzt
@@ -470,7 +504,23 @@ function seitenkopfAbschnitt(team) {
 
 // ---------- Hauptspalte: Training + Nächste Spiele ----------
 
+// 23.11.2026 (Soma/freizeit, Entscheidung E2): Hauptspalte einer Freizeitmannschaft – nur das Training. Der Platz steht
+// ausgeschrieben in der Trainingszeile (team.platz hat keinen Komma-getrennten Platzteil; platzAufgeteilt() würde bei einer
+// Adresse die Straße als Platzteil in jede Zeile setzen), die Anschrift in der Karte "Trainingsort" (seitenspalteFreizeit()).
+// Es entfallen: die Zeile "Trainingsort: …" (stünde doppelt), der Ferienhinweis (Soma trainiert ganzjährig, "sagt das
+// Trainerteam" stimmt nicht), "Nächste Spiele", Spiele/Tabelle/Kinderfestivals samt Generator-iframe (zum Spielbetrieb
+// ist nichts belegt) und die Hallen-Zeile (trainingHinweis).
+function hauptspalteFreizeit(team) {
+  return `<div class="fluss">
+    <h2>Training</h2>
+    <ul class="trainings" role="list">
+    ${trainingsZeilen(team, team.platz)}
+    </ul>
+  </div>`;
+}
+
 function hauptspalte(team, daten) {
+  if (team.freizeit) return hauptspalteFreizeit(team);
   const verein = daten.verein ?? {};
 
   // W9-A, Entscheidung 9 (w9-gemeinsam.md): überall dieselbe graue Zeile
@@ -566,7 +616,40 @@ function trainerVorstandsBildHtml(name, index, daten, pfad) {
 
 // ---------- Seitenspalte: Ansprechpartner, Heimspiele, Kalender ----------
 
+// Karte mit der dreizeiligen Anschrift und dem Knopf "Route planen" – gemeinsam für "Heimspiele", "Unser Platz" und (seit
+// 23.11.2026, Soma/freizeit, Entscheidung E2) "Trainingsort"; den Titel gibt der Aufruf vor.
+function ortAbschnitt(titel, team, verein) {
+  return `<h2>${titel}</h2>
+    <div class="karte fluss">
+      ${adresseDreizeiligHtml(team.heimspiele)}
+      <p class="knopfzeile knopfzeile--voll">
+        <a class="knopf knopf--sekundaer" href="${escapeHtml(routeUrl(team, verein))}" rel="noopener" target="_blank">Route planen</a>
+      </p>
+    </div>`;
+}
+
+// 23.11.2026 (Soma/freizeit, Entscheidung E2): Seitenspalte einer Freizeitmannschaft. "Ansprechpartner" statt "Trainerteam":
+// je Kontakt aus team.kontakte Name und die eigene Mailadresse als sichtbarer mailto-Link (Betreff "Soma: Anfrage über die
+// Website"), ohne Sammelknopf "E-Mail an das Trainerteam", ohne "Die Nachricht geht an:" und ohne Porträts (kein
+// trainerVorstandsBildHtml()). Danach die Karte "Trainingsort" mit der Route zur Anlage (team.heimspiele, siehe routeUrl()).
+// Kein Kalender-Abo (kein Kalender), kein "Heimspiele"/"Unser Platz" (der Vereinsplatz ist nicht der Trainingsort).
+function seitenspalteFreizeit(team, daten) {
+  const verein = daten.verein ?? {};
+  const betreff = `${team.kurz}: Anfrage über die Website`;
+  const kontakte = (team.kontakte ?? []).map((k) => kontaktZeileHtml(k, betreff)).join("\n        ");
+  return `<aside class="fluss">
+    <h2>Ansprechpartner</h2>
+    <div class="karte fluss">
+      <ul class="person-mini-liste" role="list">
+        ${kontakte}
+      </ul>
+    </div>
+    ${ortAbschnitt("Trainingsort", team, verein)}
+  </aside>`;
+}
+
 function seitenspalte(team, daten) {
+  if (team.freizeit) return seitenspalteFreizeit(team, daten);
   const verein = daten.verein ?? {};
   // W7, Abschnitt 3: Trainer als Zeilen mit Porträt (Initialen statisch
   // gebaut, echte Fotos lädt trainerFotosSkript() zur Laufzeit nach – siehe
@@ -612,13 +695,7 @@ function seitenspalte(team, daten) {
   // Ort), siehe adresseDreizeiligHtml() unten (Prüfbefunde
   // web-390-mannschaften Nr. 17, quervergleich Nr. 28).
   const heimspieleTitel = team.tabelle ? "Heimspiele" : "Unser Platz";
-  const heimspieleAbschnitt = `<h2>${heimspieleTitel}</h2>
-    <div class="karte fluss">
-      ${adresseDreizeiligHtml(team.heimspiele)}
-      <p class="knopfzeile knopfzeile--voll">
-        <a class="knopf knopf--sekundaer" href="${escapeHtml(routeUrl(team, verein))}" rel="noopener" target="_blank">Route planen</a>
-      </p>
-    </div>`;
+  const heimspieleAbschnitt = ortAbschnitt(heimspieleTitel, team, verein);
 
   // W10, Entscheidung E: "Kalender abonnieren" jetzt zwei Listenzeilen mit
   // "›" OHNE Karte (vorher Karte mit zwei Textlinks) – wie in der App und
@@ -656,8 +733,8 @@ function seitenspalte(team, daten) {
 // ----------
 
 // P4, Korrektur A2 / W9, Abschnitt 10: feste Reihenfolge nach Alter wie auf
-// der Übersicht (Herren, A, D1, D2, D3, E1, E2, E3, F1, F2, G – exakt die
-// Reihenfolge in data/teams.json, geprüft). Nachbarn zuerst: sortiert nach
+// der Übersicht (Herren, Soma, A, D1, D2, D3, E1, E2, E3, F1, F2, G – exakt die
+// Reihenfolge in data/teams.json, geprüft; Soma seit 23.11.2026 hinter den Herren). Nachbarn zuerst: sortiert nach
 // Abstand des Index zum aktuellen Team (aufsteigend, stabil – bei gleichem
 // Abstand bleibt die Array-Reihenfolge erhalten, das bringt "vorheriges vor
 // nächstes" bei Gleichstand), dann die ersten vier. W9-Korrektur: die frühere
@@ -703,7 +780,9 @@ function weitereMannschaftenAbschnitt(team, daten) {
   // A, Gruppe 1"), wie schon auf der eigenen Übersichtskarte derselben
   // Mannschaft. jahrgangPraefix(t) gäbe hier sonst wörtlich "Senioren" aus
   // (siehe jahrgangPraefix() oben).
-  const weitereMetaHtml = (t) => (t.kategorie === "Senioren" ? staffelLesbar(t.staffel) : jahrgangPraefix(t));
+  // 23.11.2026 (Soma/freizeit, Entscheidung E2): Die Soma hat keine Staffel – ihre Zeile zeigt "Freizeitmannschaft"
+  // (staffelOderFreizeit()), nie eine leere Meta-Zeile.
+  const weitereMetaHtml = (t) => (t.kategorie === "Senioren" ? staffelOderFreizeit(t) : jahrgangPraefix(t));
   const karten = andere
     .map(
       (t) => `<a class="karte karte--link team-karte team-karte--zeile" href="${PFAD}mannschaften/${t.slug}/">

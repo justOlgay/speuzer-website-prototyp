@@ -7,9 +7,15 @@ Daten und Demodaten-Resten. Zusätzlich (07.10.2026): private Namen aus der loka
 gitignorierten Liste tools/cache/pii-namen.txt (eine Zeile je Name, # = Kommentar) in
 allen Textdateien des Repos außer tools/cache/, .git/ und node_modules/ – die Namen selbst
 stehen nie in der Ausgabe. Gibt bei jedem Treffer "Datei:Zeile: Treffer" aus.
-Exit 1 bei mindestens einem Treffer, Exit 0 wenn sauber.
+Freigaben (23.11.2026): Eine E-Mail-Adresse außerhalb der erlaubten Domains ist nur zugelassen, wenn
+ihr SHA-256 (Adresse in Kleinbuchstaben, UTF-8) in tools/pii-freigaben.json steht. Die Datei ist
+Pflicht, alle übrigen Regeln gelten unverändert.
+Exit 1 bei mindestens einem Treffer, Exit 2 bei fehlender oder ungültiger Freigabeliste,
+Exit 0 wenn sauber.
 """
 
+import hashlib
+import json
 import re
 import sys
 from pathlib import Path
@@ -98,6 +104,16 @@ ERLAUBTE_EMAIL_DOMAINS = ("sportfreunde04.de", "example.org", "example.com", "ex
 # Fußball-Verbands, genannt in der Datenschutzinformation des
 # Anmelde-Assistenten (assets/js/anmeldung/pdf.js). Keine Privatperson.
 ERLAUBTE_EMAIL_ADRESSEN = {"info@vmapit.de", "ffvsportfreunde04@t-online.de", "datenschutz@hfv-online.de"}
+# Freigegebene Privatadressen (23.11.2026, Soma): Olgay Özkan hat die Veröffentlichung der beiden
+# Ansprechpartner-Adressen der Soma (Freizeitmannschaft, Seite mannschaften-soma.html; private Adressen auf
+# web.de) ausdrücklich erlaubt (Chat, 23.11.2026; Quelle: Mail von Melanie Seipp vom 22.11.2026). Die
+# Freigabe gilt nur für genau diese beiden Adressen und öffnet weder web.de noch eine andere Domain. Damit
+# in tools/ keine weitere Fundstelle der Adressen entsteht, steht in tools/pii-freigaben.json nur der
+# SHA-256 der Adresse in Kleinbuchstaben (UTF-8), je Eintrag mit Vermerk zu Freigabe und Ort. Die Datei ist
+# Pflicht: fehlt sie oder ist sie ungültig, endet das Gate mit Exit 2 (nie stillschweigend ohne Freigaben).
+FREIGABELISTE = ROOT / "tools" / "pii-freigaben.json"
+FREIGEGEBENE_HASHES = set()  # füllt main() aus der Freigabeliste
+FREIGEGEBENE_VORKOMMEN = {}  # SHA-256 -> Zahl der zugelassenen Vorkommen (nur für die Hinweiszeile)
 
 VERBOTENE_DATEINAMEN_TEILE = ["WhatsApp", "IMG-2026", "IMG-2025", "IMG-2024"]
 
@@ -167,6 +183,12 @@ def pruefe_zeile(pfad_rel, zeilennr, zeile, treffer):
             domain == d or domain.endswith("." + d) for d in ERLAUBTE_EMAIL_DOMAINS
         )
         if not erlaubt:
+            # Freigabe per Hash (tools/pii-freigaben.json): nur die genaue Adresse, Groß-/Kleinschreibung egal.
+            pruefsumme = hashlib.sha256(adresse.lower().encode("utf-8")).hexdigest()
+            erlaubt = pruefsumme in FREIGEGEBENE_HASHES
+            if erlaubt:
+                FREIGEGEBENE_VORKOMMEN[pruefsumme] = FREIGEGEBENE_VORKOMMEN.get(pruefsumme, 0) + 1
+        if not erlaubt:
             treffer.append((pfad_rel, zeilennr, f"E-Mail außerhalb der erlaubten Domains: '{adresse}'"))
 
     for text in VERBOTENE_TEXTE:
@@ -205,8 +227,43 @@ def pruefe_private_namen(treffer):
                 treffer.append((str(pfad.relative_to(ROOT)), zeilennr, "privater Name aus pii-namen.txt"))
 
 
+def lade_freigaben():
+    """Liest tools/pii-freigaben.json (Liste von Objekten mit sha256, freigabe, ort) und gibt die freigegebenen
+    SHA-256 zurück. Fehlt die Datei oder ist sie ungültig, endet das Gate mit Exit 2."""
+    name = str(FREIGABELISTE.relative_to(ROOT))
+
+    def abbruch(grund):
+        print(f"pii-check: Freigabeliste {name} {grund}. Gate abgebrochen (Exit 2).", file=sys.stderr)
+        sys.exit(2)
+
+    if not FREIGABELISTE.is_file():
+        abbruch("fehlt")
+    try:
+        eintraege = json.loads(FREIGABELISTE.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        abbruch(f"ist nicht lesbar oder kein gültiges JSON ({type(exc).__name__})")
+    if not isinstance(eintraege, list):
+        abbruch("muss eine Liste von Objekten sein")
+    hashes = set()
+    for nr, eintrag in enumerate(eintraege, start=1):
+        if not isinstance(eintrag, dict) or set(eintrag) != {"sha256", "freigabe", "ort"}:
+            abbruch(f"Eintrag {nr}: erwartet ein Objekt mit genau den Feldern sha256, freigabe und ort")
+        pruefsumme, freigabe, ort = eintrag["sha256"], eintrag["freigabe"], eintrag["ort"]
+        if not isinstance(pruefsumme, str) or not re.fullmatch(r"[0-9a-f]{64}", pruefsumme):
+            abbruch(f"Eintrag {nr}: sha256 muss aus genau 64 Hex-Zeichen in Kleinbuchstaben bestehen")
+        if not all(isinstance(text, str) and text.strip() for text in (freigabe, ort)):
+            abbruch(f"Eintrag {nr}: freigabe und ort müssen Text enthalten")
+        if "@" in freigabe or "@" in ort:
+            abbruch(f"Eintrag {nr}: keine Adresse im Klartext, nur der Hash")
+        if pruefsumme in hashes:
+            abbruch(f"Eintrag {nr}: sha256 steht doppelt in der Liste")
+        hashes.add(pruefsumme)
+    return hashes
+
+
 def main():
     treffer = []
+    FREIGEGEBENE_HASHES.update(lade_freigaben())
     pruefe_private_namen(treffer)
 
     for ordnername in DURCHSUCHTE_ORDNER:
@@ -232,6 +289,8 @@ def main():
             for zeilennr, zeile in enumerate(inhalt.splitlines(), start=1):
                 pruefe_zeile(pfad_rel, zeilennr, zeile, treffer)
 
+    print(f"pii-check: Freigabeliste {FREIGABELISTE.relative_to(ROOT)}: {len(FREIGEGEBENE_HASHES)} Adressen (SHA-256), "
+          f"{sum(FREIGEGEBENE_VORKOMMEN.values())} Vorkommen zugelassen.")
     if treffer:
         print(f"pii-check: {len(treffer)} Treffer gefunden\n")
         for datei, zeile, text in treffer:

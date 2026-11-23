@@ -59,7 +59,9 @@ const AUSGESCHLOSSENE_DATEIEN = new Set(["styleguide.html"]);
 // das Paket entsprechend 41; mit ANMELDUNG_LIVE 43 und 42.
 // 31.10.2026: + platzbelegung.html („Platzbelegung“, erreichbar über die Zeile auf verein.html): 43 und das Paket
 // entsprechend 42; mit ANMELDUNG_LIVE 44 und 43.
-const ERWARTETE_WS_DATEIEN = 43 + (ANMELDUNG_LIVE ? 1 : 0);
+// 23.11.2026: + mannschaften-soma.html (Soma, Freizeitmannschaft; eine Weiterleitung spielplan-soma.html gibt es nicht): 44
+// und das Paket entsprechend 43; mit ANMELDUNG_LIVE 45 und 44.
+const ERWARTETE_WS_DATEIEN = 44 + (ANMELDUNG_LIVE ? 1 : 0);
 
 // Skripte im Workspace-Ordner (28.09.2026, Aufnahmeantrag online): Anders
 // als Schriften und Bilder (GitHub Pages) liegen die Skripte der Seite
@@ -771,12 +773,15 @@ ausschließlich Live-Inhalt: FUSSBALL.DE-Widgets für die Vereinsspiele
 und die Spiele der Saison je Team (\`mannschaften-<team>.html\`, Typen
 \`next-match\`/\`team-matches\`, IDs aus \`data/widgets.json\`) sowie die
 Tabellen (ebenfalls \`mannschaften-<team>.html\`, Typ \`table\`). Das betrifft
-acht der elf Mannschaften; nur die drei Teams ohne FUSSBALL.DE-Widget (F1,
-F2, G-Jugend – Kinderfußball, kein Ligabetrieb) behalten die
-\`<iframe>\`-Einbettung der Gruppen-Seite des Spielplan-Generators
+acht der zwölf Mannschaften; von den vier Teams ohne FUSSBALL.DE-Widget
+behalten nur die drei Kinderfußball-Teams (F1, F2, G-Jugend, kein
+Ligabetrieb) die \`<iframe>\`-Einbettung der Gruppen-Seite des
+Spielplan-Generators
 (\`https://justolgay.github.io/speuzer-spielplan/app-<gruppe>.html\`) auch im
 Live-Paket, auf \`mannschaften-<team>.html\` wie bisher auf
-\`spielplan-<team>.html\`. Die früheren Seiten \`spielplan.html\`,
+\`spielplan-<team>.html\`. Die Soma (Freizeitmannschaft, kein Ligabetrieb) hat
+weder Widget noch Spielplan: \`mannschaften-soma.html\` bleibt ohne Einbettung,
+\`spielplan-soma.html\` gibt es nicht. Die früheren Seiten \`spielplan.html\`,
 \`spielplan-<team>.html\` und \`tabellen.html\` sind seit W6 schlanke
 Weiterleitungen (\`<meta http-equiv="refresh">\`) auf die jeweilige
 Mannschaftsseite (siehe \`src/vorlagen/weiterleitung.mjs\`) – sie bleiben unter

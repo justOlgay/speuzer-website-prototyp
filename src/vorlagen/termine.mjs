@@ -7,8 +7,9 @@
 // App-Kopfleiste).
 //
 // Daten zur Bauzeit: data/termine.json (API, Token, Kalender, trainingsfreie
-// Zeiten), data/teams.json (Mannschaften, regelmäßige Zeiten,
-// trainingHinweis), data/verein.json (Kalender-Abos, Ferienhinweis).
+// Zeiten), data/teams.json (Mannschaften ohne die Freizeitmannschaften,
+// regelmäßige Zeiten, trainingHinweis), data/verein.json (Kalender-Abos,
+// Ferienhinweis).
 
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -56,6 +57,15 @@ function kalenderNamen(team) {
   return [...new Set(namen.map(normName).filter(Boolean))];
 }
 
+// Mannschaften der Terminseite: Freizeitmannschaften (team.freizeit, derzeit die
+// Soma) haben weder Spielplan noch Kalender (keine .ics, fremde Anlage) und
+// stehen hier nicht – weder als Pille noch im Datenblock, in den Abo-Links oder im
+// Wochenplan (Entscheidung E5, 23.11.2026); ihre Trainingszeit steht auf der
+// Mannschaftsseite. Alle übrigen Teams bleiben in der Reihenfolge von data/teams.json.
+function termineTeams(daten) {
+  return (daten.teams ?? []).filter((team) => !team.freizeit);
+}
+
 // Datenblock für termine.js (__TERMINE_DATEN__). Nur öffentliche Angaben:
 // kein Trainername, keine Mailadresse.
 export function termineDaten(daten) {
@@ -71,7 +81,7 @@ export function termineDaten(daten) {
     kalenderansicht: `https://shorturl.appack.de/${termine.komponente}`,
     module: { mannschaften: APP_MODULE.mannschaften },
     abo: { spiele: `${basis}alle.ics`, training: `${basis}training-alle.ics` },
-    mannschaften: (daten.teams ?? []).map((team) => {
+    mannschaften: termineTeams(daten).map((team) => {
       const p = pille(team);
       const teil = team.slug === "herren" ? "Rebstock" : platzAufgeteilt(team).teil;
       return {
@@ -118,7 +128,7 @@ function platzhalterTraining() {
 }
 
 function pillenHtml(daten) {
-  const knoepfe = (daten.teams ?? []).map((team) => {
+  const knoepfe = termineTeams(daten).map((team) => {
     const p = pille(team);
     return `<button type="button" class="ts-pille" data-team="${escapeHtml(team.slug)}" aria-pressed="false" aria-label="${escapeHtml(team.name)}" title="${escapeHtml(team.name)}">${escapeHtml(p.kurz)}${p.lang ? `<span class="ts-lang">${escapeHtml(p.lang)}</span>` : ""}</button>`;
   });

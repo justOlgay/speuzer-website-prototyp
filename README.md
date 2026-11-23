@@ -158,6 +158,8 @@ npm run pruefen   Prüft die gebauten Seiten (Layout, Semantik, Kontrast, Links,
                   gesondert die Hülle (Menü, Rahmenmaße, Fußbereich, kein horizontales
                   Scrollen – siehe pruefeHuelle() in tools/pruefen.mjs)
 npm run pii       Prüft data/, src/ und docs/ auf personenbezogene Daten
+                  (einzeln freigegebene Adressen stehen nur als SHA-256 in tools/pii-freigaben.json,
+                  die Datei ist Pflicht; fehlt sie oder ist sie ungültig, endet das Gate mit Exit 2)
 npm run daten     Lädt Spielplan und Tabellen neu ein (spiele.csv, fussball.de)
 npm run bilder    Erzeugt responsive Bildvarianten (AVIF/WebP/JPEG) aus assets/bilder/quelle/
 npm run serve     Startet einen lokalen Server für docs/ (Port 4173)

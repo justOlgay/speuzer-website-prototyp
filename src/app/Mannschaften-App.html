@@ -1,7 +1,10 @@
 <h1 class="visually-hidden">Mannschaften</h1>
 
 <div id="listenansicht">
-  <p class="seitenkopf-lead">Elf Fußballmannschaften von den Herren bis zur G&#8209;Jugend. Für jedes Team findest du hier Jahrgang, Trainingszeiten und den Weg zum Spielplan.</p>
+  <!-- Soma/freizeit, Entscheidung E2 und E4 (23.11.2026): zwölf Mannschaften, und der zweite Satz nennt nur,
+       was für alle zwölf stimmt (die Soma hat keinen Ligabetrieb) – wörtlich wie der Lead der Website-Übersicht
+       (seite() in mannschaften/index.mjs). -->
+  <p class="seitenkopf-lead">Zwölf Fußballmannschaften von den Herren bis zur G&#8209;Jugend. Für jedes Team findest du hier die Trainingszeiten und den Weg zur Mannschaftsseite.</p>
 
   <div id="filterleiste" class="filterleiste" hidden>
     <button type="button" class="tag filter-knopf filter-knopf--aktiv" data-gruppe="">Alle</button>
@@ -22,8 +25,10 @@
        direkt über dem Ferienhinweis, wortgleich inklusive geschützter
        Leerzeichen. Sichtbarkeit folgt derselben Regel wie der Ferienhinweis
        darunter (ausgeblendet, wenn der Filter "Zusatzangebote" keine
-       Mannschaften zeigt). -->
-  <p id="mannschaften-trainingsort-hinweis" class="team-karte__untertitel" hidden>Alle Mannschaften trainieren auf dem Vereinsplatz an der Mainzer Landstraße 480 – nur die Herren auf der Bezirkssportanlage am&nbsp;Rebstock (SW&nbsp;Griesheim). Von November bis Februar trainieren G-Jugend, F1 und F2 in der Halle.</p>
+       Mannschaften zeigt).
+       Soma/freizeit, Entscheidung E2 (23.11.2026): die Soma trainiert bei der
+       SG 1928 im Gallus, nicht auf dem Vereinsplatz. -->
+  <p id="mannschaften-trainingsort-hinweis" class="team-karte__untertitel" hidden>Alle Mannschaften trainieren auf dem Vereinsplatz an der Mainzer Landstraße 480 – nur die Herren auf der Bezirkssportanlage am&nbsp;Rebstock (SW&nbsp;Griesheim) und die Soma bei der SG&nbsp;1928 im Gallus. Von November bis Februar trainieren G-Jugend, F1 und F2 in der Halle.</p>
 
   <!-- W10, Auftrag D (Entscheidung C, quervergleich Nr. 3): Ferienhinweis
        auch auf der Übersicht (vorher nur auf den Teamseiten). -->
@@ -58,7 +63,10 @@
   <!-- W10, Auftrag D (quervergleich Nr. 17, Entscheidung 12): "Live von
        FUSSBALL.DE." fehlte auf der App-Übersicht, die Website-Übersicht
        nennt die Quelle an derselben Stelle. -->
-  <p class="team-karte__untertitel">Alle Spiele unserer Mannschaften der nächsten Tage. Spielplan und Tabelle je Team findest du auf der jeweiligen Mannschaftsseite. Live von FUSSBALL.DE.</p>
+  <!-- Soma/freizeit, Entscheidung E4 (23.11.2026): Spielplan und Tabelle gibt es
+       nur bei den Ligateams (die Soma hat keinen Ligabetrieb) – Satz wie der
+       Untertitel dieses Abschnitts auf der Website-Übersicht. -->
+  <p class="team-karte__untertitel">Alle Spiele unserer Mannschaften der nächsten Tage. Spielplan und Tabelle der Ligateams findest du auf der jeweiligen Mannschaftsseite. Live von FUSSBALL.DE.</p>
   <div id="verein-spiele-inhalt">
     <p class="team-karte__untertitel">Spiele werden von FUSSBALL.DE geladen …</p>
   </div>
@@ -107,9 +115,9 @@
     </div>
   </div>
 
-  <h2 class="abschnittstitel">Kalender abonnieren</h2>
+  <h2 id="kalender-titel" class="abschnittstitel">Kalender abonnieren</h2>
   <div id="kalender-zeile" class="liste"></div>
-  <p class="team-karte__untertitel" style="margin-top:var(--sp-2);">Einmal abonnieren – Verlegungen kommen automatisch&nbsp;an.</p>
+  <p id="kalender-hinweis" class="team-karte__untertitel" style="margin-top:var(--sp-2);">Einmal abonnieren – Verlegungen kommen automatisch&nbsp;an.</p>
 
   <h2 id="weitere-mannschaften-titel" class="abschnittstitel" hidden>Weitere Mannschaften</h2>
   <!-- W10, Auftrag D (Entscheidung E): Listenzeilen statt Karten (wie
@@ -142,7 +150,16 @@
    Ansprechpartner-Worksheet, Feld ansImg, per Namensgleichheit) und die
    Logos der Fußballschulen (Übersicht-Worksheet, sliderImage1/
    categoryImage, per Namensgleichheit) – Personenfotos/Logos bleiben damit
-   ausschließlich zur Laufzeit geladen, nie im Repo. */
+   ausschließlich zur Laufzeit geladen, nie im Repo.
+   Soma/freizeit, Entscheidung E2 (23.11.2026): Teams ohne Ligabetrieb
+   (data/teams.json "freizeit": true, derzeit die Soma) zeigen als Unterzeile
+   (Liste, Kopf der Teamseite, "Weitere Mannschaften") nur
+   "Freizeitmannschaft", Training ohne Ende ("ab 19:00 Uhr") mit der Anlage
+   in der Trainingszeile, den Abschnitt "Ansprechpartner" statt des
+   Trainerblocks und die Karte "Trainingsort" mit Route zur Anschrift der
+   Anlage; es entfallen die graue Ortszeile, die Ligazeile, der Ferienhinweis
+   und die Termin-Abos. Alle Zweige hängen an team.freizeit, die übrigen
+   Teams laufen unverändert. */
 
 .visually-hidden {
   position: absolute;
@@ -510,6 +527,21 @@ a.team-karte--link {
   overflow-wrap: break-word;
 }
 
+/* Soma/freizeit, Entscheidung E2 (23.11.2026): E-Mail-Adresse unter dem Namen
+   im Abschnitt "Ansprechpartner" – unterstrichen wie die Adresse im
+   Trainerblock, etwas höhere Tippfläche (nur so breit wie der Text), lange
+   Adressen brechen um. */
+.person-mini__mail {
+  align-self: flex-start;
+  padding-block: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--blau-800);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+
 .icon-knopf {
   display: inline-flex;
   align-items: center;
@@ -835,6 +867,13 @@ a.team-karte--link {
     return liga + gruppe;
   }
 
+  // Soma/freizeit, Entscheidung E2 (23.11.2026, Unterzeile geändert): ein Team
+  // ohne Ligabetrieb hat keine Staffel; an ihrer Stelle steht diese Bezeichnung
+  // (wie FREIZEIT_BEZEICHNUNG in src/vorlagen/hilfen.mjs) – in der Liste, im
+  // Kopf der Teamseite und in "Weitere Mannschaften" gleich, ohne "Senioren · "
+  // davor: wie bei den Herren steht die Kategorie nur in der Gruppe der Liste.
+  var FREIZEIT_BEZEICHNUNG = "Freizeitmannschaft";
+
   // W9-Nachprüfung D-app Nr. 1 / W10, Auftrag D (Entscheidung A): Unterzeile
   // Teamseite/Teamkarte wie unterzeileTeam() in
   // src/seiten/mannschaften/team.mjs – Herren nur die Staffel (kein
@@ -842,6 +881,7 @@ a.team-karte--link {
   // Jahrgang, Zeile 2 Liga/Gruppe) – vorher ein Trenner " · ", der am
   // Zeilenende umbrach (quervergleich Nr. 15, app Nr. 14).
   function unterzeileZeilen(team) {
+    if (team.freizeit) return [FREIZEIT_BEZEICHNUNG];
     var staffel = staffelLesbar(team.staffel);
     return team.kategorie === "Senioren" ? [staffel] : [jahrgangPraefix(team), staffel];
   }
@@ -900,7 +940,9 @@ a.team-karte--link {
     tag.textContent = t.tag + " ";
     var zeit = document.createElement("span");
     zeit.className = "zeitspanne";
-    zeit.textContent = t.von + "–" + t.bis + " Uhr";
+    // Soma/freizeit, Entscheidung E2 (23.11.2026): ohne Ende "ab 19:00 Uhr" (wie zeitText() in
+    // src/vorlagen/hilfen.mjs), mit Ende wie bisher "von–bis Uhr".
+    zeit.textContent = t.bis ? t.von + "–" + t.bis + " Uhr" : "ab " + t.von + " Uhr";
     li.appendChild(tag);
     li.appendChild(zeit);
     if (platz) {
@@ -1234,7 +1276,8 @@ a.team-karte--link {
       el.textContent = adresse || "";
       return;
     }
-    var platz = teile[0].replace(/SW Griesheim/, "SW Griesheim");
+    // Soma/freizeit (23.11.2026): auch "SG 1928" bleibt zusammen.
+    var platz = teile[0].replace(/SW Griesheim/, "SW Griesheim").replace(/SG 1928/, "SG 1928");
     var strasse = teile[1];
     var plzOrt = teile[2]
       .replace(/^(\d{5}) /, "$1 ")
@@ -1254,6 +1297,13 @@ a.team-karte--link {
   }
 
   function routeUrlFuerTeam(team) {
+    // Soma/freizeit, Entscheidung E2 (23.11.2026): Route zur Anschrift der
+    // Trainingsanlage (Straße und PLZ Ort aus der Angabe "Platzname, Straße Nr.,
+    // PLZ Ort"), nicht zum Vereinsplatz.
+    if (team.freizeit) {
+      var anlage = String(team.heimspiele || "").split(", ");
+      return googleMapsUrl(anlage.length > 1 ? anlage.slice(1).join(", ") : anlage[0]);
+    }
     if ((team.heimspiele || "").indexOf("Römerhof") !== -1) {
       return googleMapsUrl("Am Römerhof 9, 60486 Frankfurt am Main");
     }
@@ -1307,7 +1357,9 @@ a.team-karte--link {
     textSpan.appendChild(titel);
     var untertitel = document.createElement("span");
     untertitel.className = "zeile__untertitel";
-    untertitel.textContent = jahrgangPraefix(t);
+    // Soma/freizeit, Entscheidung E2: Art der Mannschaft statt der Altersangabe
+    // (wie staffelOderFreizeit() in der Website-Zeile).
+    untertitel.textContent = t.freizeit ? FREIZEIT_BEZEICHNUNG : jahrgangPraefix(t);
     textSpan.appendChild(untertitel);
     a.appendChild(textSpan);
     a.appendChild(baueChevronSvg("zeile__pfeil"));
@@ -1396,6 +1448,52 @@ a.team-karte--link {
     adresseSpan.appendChild(adresseLink);
   }
 
+  // ---------- Ansprechpartner (Soma/freizeit, Entscheidung E2, 23.11.2026) ----------
+  // Ein Team ohne Ligabetrieb hat keine Trainer, sondern Ansprechpartner
+  // (data/teams.json "kontakte": [{ name, mail }]). Der Trainerblock des Markups
+  // wird dafür umgebaut: Überschrift "Ansprechpartner", je Kontakt Name und
+  // E-Mail-Link mit Betreff, ohne Foto und ohne Initialen-Kreis, kein
+  // Sammelknopf und keine Sammeladresse – wie auf der Website.
+
+  function renderKontakte(team) {
+    var titel = document.getElementById("trainerteam-titel");
+    var liste = document.getElementById("trainerteam-liste");
+    var karte = liste.parentNode;
+    var kontakte = team.kontakte || [];
+
+    if (!kontakte.length) {
+      titel.remove();
+      karte.remove();
+      return;
+    }
+    titel.textContent = "Ansprechpartner";
+    liste.innerHTML = "";
+    liste.style.marginBottom = "0";
+
+    kontakte.forEach(function (kontakt) {
+      var reihe = document.createElement("div");
+      reihe.className = "person-mini";
+      var text = document.createElement("span");
+      text.className = "person-mini__text";
+      var nameEl = document.createElement("span");
+      nameEl.className = "person-mini__name";
+      nameEl.textContent = kontakt.name;
+      text.appendChild(nameEl);
+      if (kontakt.mail) {
+        var mailLink = document.createElement("a");
+        mailLink.className = "person-mini__mail";
+        mailLink.href = "mailto:" + kontakt.mail + "?subject=" + encodeURIComponent(team.kurz + ": Anfrage über die App");
+        mailLink.textContent = kontakt.mail;
+        text.appendChild(mailLink);
+      }
+      reihe.appendChild(text);
+      liste.appendChild(reihe);
+    });
+
+    document.getElementById("trainerteam-mail-knopf").parentNode.remove();
+    document.getElementById("trainerteam-hinweis").remove();
+  }
+
   // ---------- Training (W9, Auftrag D, Entscheidung 9: eine graue Zeile
   // "Trainingsort: …" für alle Teams gleich, darunter die Tabelle mit dem
   // Platzteil je Zeile, keine zusätzlichen blauen Ortskästen mehr für
@@ -1406,6 +1504,10 @@ a.team-karte--link {
   // team.platz) – Trainingsort wie im Hinweiskasten, Zeilen nur "Rebstock"
   // (w9-d, Abschnitt "Mannschaften-App"). Alle anderen Teams: team.platz
   // ist "Ort, Platzteil" (wie platzAufgeteilt() in src/vorlagen/hilfen.mjs).
+  // Soma/freizeit (23.11.2026): team.platz nennt nur die Anlage ohne Komma
+  // ("Sportanlage Ackermannwiese (SG 1928 Frankfurt)"), es gibt also keinen
+  // Platzteil – die Anlage selbst (ort) steht in der Trainingszeile, die
+  // Straße in der Karte "Trainingsort".
   function trainingsortUndTeil(team) {
     if (team.slug === "herren") {
       // W10, Auftrag D (app Nr. 16): "am Rebstock" geschützt – ohne das
@@ -1423,14 +1525,23 @@ a.team-karte--link {
     var stelle = trainingsortUndTeil(team);
 
     var trainingsort = document.getElementById("detail-trainingsort");
-    trainingsort.textContent = stelle.ort ? "Trainingsort: " + stelle.ort + "." : "";
+    if (team.freizeit) {
+      // Soma/freizeit, Entscheidung E2 (23.11.2026): wie auf der Website steht
+      // die Anlage ausgeschrieben in jeder Trainingszeile; die graue Zeile
+      // "Trainingsort: …" würde sie doppeln, die Anschrift steht in der Karte
+      // "Trainingsort".
+      trainingsort.remove();
+    } else {
+      trainingsort.textContent = stelle.ort ? "Trainingsort: " + stelle.ort + "." : "";
+    }
 
     var liste = document.getElementById("detail-training-liste");
     liste.innerHTML = "";
     (team.training || []).forEach(function (t) {
       // Platzteil je Trainingstag (data/teams.json training[].platz, aus der
       // Platzaufteilung 26/27), sonst der gemeinsame Teil (Herren: "Rebstock").
-      liste.appendChild(baueTrainingszeile(t, t.platz || stelle.teil));
+      // Soma/freizeit: statt eines Platzteils die ganze Anlage.
+      liste.appendChild(baueTrainingszeile(t, t.platz || (team.freizeit ? stelle.ort : stelle.teil)));
     });
 
     var trainingsHinweis = document.getElementById("detail-trainingshinweis");
@@ -1438,6 +1549,9 @@ a.team-karte--link {
     trainingsHinweis.hidden = !team.trainingHinweis;
 
     document.getElementById("detail-ferienhinweis").textContent = (VEREIN && VEREIN.hinweise && VEREIN.hinweise.ferien) || "";
+    // Soma/freizeit, Entscheidung E2 (23.11.2026): ohne Vereinskalender und ohne
+    // Trainer gilt der Ferienhinweis nicht, der Kasten entfällt.
+    if (team.freizeit) document.getElementById("detail-ferienhinweis").parentNode.remove();
   }
 
   // W10, Auftrag D (Entscheidung B): Sätze der bloßen Form "Das ist unsere
@@ -1474,7 +1588,9 @@ a.team-karte--link {
     // W9, Auftrag D (Entscheidung 8): Zeile "Spielbetrieb: …" entfällt bei
     // Kinderfußball (F1, F2, G-Jugend) – der Abschnitt "Kinderfestivals"
     // erklärt den Spielbetrieb dort bereits.
-    if (istKinderfussball) {
+    // Soma/freizeit, Entscheidung E2 (23.11.2026): auch ein Team ohne
+    // Ligabetrieb hat keine solche Zeile.
+    if (istKinderfussball || team.freizeit) {
       spielbetriebEl.hidden = true;
     } else {
       spielbetriebEl.hidden = false;
@@ -1521,21 +1637,36 @@ a.team-karte--link {
       inhalt.appendChild(baueAbschnitt("Kinderfestivals", kinderfestivalKarte));
     }
 
-    renderTrainerteam(team, uebersicht, ansprechpartner);
+    // Soma/freizeit, Entscheidung E2 (23.11.2026): Ansprechpartner statt Trainerblock.
+    if (team.freizeit) {
+      renderKontakte(team);
+    } else {
+      renderTrainerteam(team, uebersicht, ansprechpartner);
+    }
 
     // W9, Auftrag D (Entscheidung 8): Karte "Heimspiele" heißt bei
     // Kinderfußball "Unser Platz" (dort finden keine Heimspiele, sondern
     // Kinderfestivals statt).
-    document.getElementById("detail-heimspiele-titel").textContent = istKinderfussball ? "Unser Platz" : "Heimspiele";
+    // Soma/freizeit, Entscheidung E2 (23.11.2026): bei einem Team ohne
+    // Ligabetrieb heißt sie "Trainingsort" und zeigt die Anschrift der Anlage.
+    document.getElementById("detail-heimspiele-titel").textContent = team.freizeit ? "Trainingsort" : (istKinderfussball ? "Unser Platz" : "Heimspiele");
     fuelleAdresseDreizeilig(document.getElementById("detail-heimspiele"), team.heimspiele);
     document.getElementById("detail-route-knopf").href = routeUrlFuerTeam(team);
 
-    // W9, Auftrag D (Entscheidung 7): Linktexte ohne Teamnamen – die Seite
-    // nennt das Team schon (Titel/Unterzeile).
+    // Soma/freizeit, Entscheidung E2 (23.11.2026): ein Team ohne Ligabetrieb hat
+    // keine Vereinskalender – Überschrift, Zeilen und Hinweis entfallen ganz.
     var kalenderZeile = document.getElementById("kalender-zeile");
-    kalenderZeile.innerHTML = "";
-    kalenderZeile.appendChild(baueKalenderLink("Spielplan abonnieren", KALENDER_BASIS + team.kalender));
-    kalenderZeile.appendChild(baueKalenderLink("Trainingszeiten abonnieren", KALENDER_BASIS + team.trainingsKalender));
+    if (team.freizeit) {
+      ["kalender-titel", "kalender-zeile", "kalender-hinweis"].forEach(function (id) {
+        document.getElementById(id).remove();
+      });
+    } else {
+      // W9, Auftrag D (Entscheidung 7): Linktexte ohne Teamnamen – die Seite
+      // nennt das Team schon (Titel/Unterzeile).
+      kalenderZeile.innerHTML = "";
+      kalenderZeile.appendChild(baueKalenderLink("Spielplan abonnieren", KALENDER_BASIS + team.kalender));
+      kalenderZeile.appendChild(baueKalenderLink("Trainingszeiten abonnieren", KALENDER_BASIS + team.trainingsKalender));
+    }
 
     var weitere = weitereMannschaften(team);
     var weitereTitel = document.getElementById("weitere-mannschaften-titel");
@@ -1583,8 +1714,10 @@ a.team-karte--link {
   // W10, Auftrag D (Entscheidung C, quervergleich Nr. 2): dieselben drei
   // Gruppen samt Erklärsätzen wie die Übersicht der Website (gruppen in
   // src/seiten/mannschaften/index.mjs, dort wörtlich übernommen).
+  // Soma/freizeit, Entscheidung E2 und E3 (23.11.2026): der Satz der Gruppe
+  // "Senioren" gilt für beide Teams, Herren und Soma.
   var GRUPPEN_UEBERSICHT = [
-    { gruppe: "Senioren", titel: "Senioren", satz: "Heimspiele auf der Bezirkssportanlage am Rebstock (SW Griesheim)." },
+    { gruppe: "Senioren", titel: "Senioren", satz: "Heimspiele der Herren auf der Bezirkssportanlage am Rebstock (SW Griesheim). Die Soma trainiert bei der SG 1928 im Gallus." },
     { gruppe: "Jugend", titel: "Jugend", satz: "Ligabetrieb von der Kreisklasse bis zur Gruppenliga, Spielplan und Tabellen live von FUSSBALL.DE." },
     { gruppe: "Kinderfußball", titel: "Kinderfußball", satz: "Kinderfestivals statt Ligabetrieb, keine Tabellen." }
   ];

@@ -37,13 +37,13 @@
     },
     {
       "datei": "web/mannschaften-a-jugend.html",
-      "bytes": 14842,
-      "sha256": "e706195e4fe17598fa34fac8e04b8501ff3615ad71b8799a73f193bcbf6eeca2"
+      "bytes": 14853,
+      "sha256": "28d6936aad4e36a0af0602d13257da910acef36d9039ac217e102a2459347811"
     },
     {
       "datei": "web/mannschaften-d1.html",
-      "bytes": 15920,
-      "sha256": "fcd91cf2ea30a8aa85fc00c3be17739468f0c8a8c3990ddbfda6c9c50b089604"
+      "bytes": 15904,
+      "sha256": "eb5285c60c13cc4c43668d1696333ab0b2dd32fe63aef30ef036162c978c9e43"
     },
     {
       "datei": "web/mannschaften-d2.html",
@@ -87,13 +87,18 @@
     },
     {
       "datei": "web/mannschaften-herren.html",
-      "bytes": 14822,
-      "sha256": "25c90d5304090c82f56d2ce779cc00bfc912a7fe67408ee82381b8526a9dd43a"
+      "bytes": 14833,
+      "sha256": "5b8a696d3a127a6c0dc66ff7779040d29aae12839991a39fcd96217c98a47ec8"
+    },
+    {
+      "datei": "web/mannschaften-soma.html",
+      "bytes": 6376,
+      "sha256": "981cee75d957d39eab880f1b7563bc769c723f2ab862dabb820fe9871dc86545"
     },
     {
       "datei": "web/mannschaften.html",
-      "bytes": 21265,
-      "sha256": "8e6da5274837adf4e2a03ee095996914bd550c3efafad699089eeef705528683"
+      "bytes": 21932,
+      "sha256": "c6a60e4685762814b419b4205ef398b6bde1850e5db5863914ed1876ca00ece5"
     },
     {
       "datei": "web/mitglied-werden.html",
@@ -207,8 +212,8 @@
     },
     {
       "datei": "web/verein-ueber-uns.html",
-      "bytes": 7602,
-      "sha256": "d4c323f32d41692eb5d28286c6ae6285b36ad034d32a7211e74572a7a1634557"
+      "bytes": 7662,
+      "sha256": "6767a08f10ff15a49d2d214585c0ea5729feb0ff2c2515e2b5aaac8bd44c75b6"
     },
     {
       "datei": "web/verein-vorstand.html",
