@@ -304,7 +304,9 @@ export function pruefeKonfig(konfig) {
     if (bez.has(b.id)) fehler(`bezahlung: id „${b.id}“ kommt doppelt vor`);
     bez.add(b.id);
   }
-  if (!Array.isArray(konfig.mannschaften) || konfig.mannschaften.length === 0) fehler("mannschaften fehlen");
+  // Eine leere Liste bricht den Bau nicht ab (die Auswahl bleibt leer, src/seiten/bestellung.mjs warnt): Die Mannschaften prüft die
+  // Trainerseite mit eigener Meldung (Fall „leere Liste der Mannschaften“ in tools/anmeldung-test/trainer-e2e-paket.mjs).
+  if (!Array.isArray(konfig.mannschaften)) fehler("mannschaften fehlen");
   const slugs = new Set();
   for (const m of konfig.mannschaften) {
     if (!/^[a-z0-9-]+$/.test(String(m.slug || "")) || !m.name) fehler("mannschaften: slug und name sind nötig");

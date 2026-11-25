@@ -39,6 +39,7 @@ export function baueKonfig(daten) {
   const { _hinweis, ...rest } = roh;
   const teams = Array.isArray(daten.teams) ? daten.teams : [];
   const konfig = { ...rest, mannschaften: teams.map((t) => ({ slug: t.slug, name: t.name })) };
+  if (konfig.mannschaften.length === 0) console.warn("Bestellseite: data/teams.json enthält keine Mannschaften – die Auswahl auf der Seite bleibt leer.");
   pruefeKonfig(konfig);
   return konfig;
 }
