@@ -2,32 +2,44 @@
   Bestellseite für Trainer (Prototyp) – reine Funktionen ohne DOM.
 
   Aus den Eingaben einer Trainerin oder eines Trainers entsteht hier alles, was die Seite braucht:
-  Prüfung der Eingaben (Liste der Lücken), Zusammenfassung je Artikel, Variante und Größe,
+  Prüfung der Eingaben (Liste der Lücken), Zusammenfassung je Artikel, Variante, Aufdruck und Größe, Preise,
   Betreff, Mailtext, mailto-Adresse und Bestell-Nr. Die Uhrzeit wird immer als Parameter
   übergeben (Date), damit alles ohne Browser testbar ist (tools/bestellung-test/).
 
   Die Seite (seite.js) benutzt dieselben Funktionen für Vorschau, Prüfung und Senden:
   Was in „Mail ansehen“ steht, ist genau der Text, der im Mailprogramm ankommt.
 
-  Datengrundlage: data/bestellung.json (Katalog, Größen, Schnellwahl, Teambedarf, Bezahlung,
-  Einstellungen) plus die Mannschaften aus data/teams.json. Beides kommt als „konfig“ in die Seite
-  (src/seiten/bestellung.mjs › baueKonfig). Es stehen nur Preise für Eltern bzw. Spieler darin.
+  Datengrundlage: data/bestellung.json (Katalog mit möglichen und vorausgewählten Aufdrucken, Größen, Schnellwahl,
+  Teambedarf, Bezahlung, Einstellungen) plus die Mannschaften aus data/teams.json. Beides kommt als „konfig“ in die
+  Seite (src/seiten/bestellung.mjs › baueKonfig). Darin stehen KEINE Preise: Die Preise laut Angebot liegen verschlüsselt
+  im Paket data/bestellung-preise.enc.json (zugang.js). Erst nach dem Entschlüsseln kommen sie mit mitPreisen() als
+  konfig.preise dazu; alle Preisfunktionen rechnen in ganzen Cent damit.
+
+  Rechnung (Cent, ganze Zahlen):
+    Grundpreis = Math.round(Listenpreis × (100 − Rabatt in Prozent) / 100)
+    Stückpreis = Grundpreis + Summe der Zuschläge der gewählten Aufdrucke
+  Ist der Listenpreis eines Artikels null (Regenjacke), heißt es „Preis auf Anfrage“: Das Stück zählt bei den Teilen
+  mit, aber nicht in Summen.
 
   Aufbau der Eingaben („bestellung“, so liegt auch der Entwurf auf dem Gerät):
     {
       team: "d3",                    // slug der Mannschaft
       name: "Lena Beispiel", tel: "", bis: "2027-01-15",
+      lieferName: null,              // Name für die Lieferung; null = folgt „Dein Name“ (noch nicht geändert)
+      lieferStrasse: "Beispielweg 12", lieferOrt: "60439 Frankfurt",
       personen: [ { id: "p1", name: "Mia", nummer: "7", groesse: "140",
-                    artikel: { trikot: { groesse: "" }, "praesi-hose": { groesse: "152" } },
-                    initialen: null } ],          // artikel: ausgewählte Artikel, groesse "" = Vorauswahl
+                    artikel: { trikot: { groesse: "", aufdrucke: ["W", "V", "ZG"] }, "praesi-hose": { groesse: "152", aufdrucke: [] } },
+                    initialen: null } ],          // artikel: ausgewählte Artikel, groesse "" = Vorauswahl, aufdrucke = gewählte Kürzel
       zaehler: 1,                    // für neue Personen-Nummern (p1, p2, …)
       teambedarf: { baelle: { n: 10, details: "Größe 4" } },
       sonstiges: "",
-      bezahlung: { kleidung: ["eltern", "sponsor"], kleidungSponsor: "Autohaus Beispiel",   // je Block eine Liste von ids in Katalogreihenfolge
-                   teambedarf: ["vereinskasse"], teambedarfSponsor: "" },                // (Entwürfe aus der ersten Fassung haben hier einen Text)
+      bezahlung: { kleidung: ["eltern", "sponsor"], teambedarf: ["vereinskasse"] },      // je Block eine Liste von ids in Katalogreihenfolge
+      sponsor: { firma: "Autohaus Beispiel", ansprechpartner: "", email: "", telefon: "", anschrift: "" },
       hinweisBezahlung: "", hinweis: "",
       bestellNr: "", status: ""      // status: "" | "mail" | "kopiert" (nach dem ersten erfolgreichen Senden)
     }
+  Entwürfe aus den ersten Fassungen (ein Text statt einer Liste bei der Bezahlung, „kleidungSponsor“ und „teambedarfSponsor“,
+  keine Aufdrucke je Artikel, keine Lieferanschrift) lädt bereinigeEntwurf mit den Standard-Aufdrucken und übernimmt den Sponsor.
 */
 
 // ---------- Konstanten ----------
@@ -40,15 +52,27 @@ export const SCHLUSSZEILE = "Erstellt mit der Bestellseite für Trainer (Prototy
 // Platzhalter in der Vorschau, solange etwas fehlt. In einer Mail, die gesendet werden darf (keine Lücken), kommt er nie vor.
 export const FEHLT = "(fehlt noch)";
 
+export const PREIS_AUF_ANFRAGE = "Preis auf Anfrage";
+
+// Kürzel des Aufdrucks mit dem Sponsorlogo: Er löst den Block „Sponsor“ aus und wird für die Geschäftsstelle gezählt.
+export const SPONSOR_AUFDRUCK = "SP";
+
 // Längen der Eingabefelder (maxlength in der Seite, Kürzung beim Laden eines Entwurfs).
 export const GRENZEN = {
   besteller: 60,
   tel: 30,
+  lieferName: 60,
+  strasse: 60,
+  ort: 60,
   person: 40,
   nummer: 2,
   initialen: 4,
   details: 100,
-  sponsor: 80,
+  firma: 80,
+  ansprechpartner: 60,
+  sponsorEmail: 80,
+  sponsorTel: 30,
+  anschrift: 300,
   sonstiges: 600,
   hinweis: 400,
   personen: 60,
@@ -56,7 +80,8 @@ export const GRENZEN = {
 };
 
 const GRUPPEN = ["kinder", "erwachsene"];
-const EINZELDRUCK = ["nummer", "name-nummer", "initialen"];
+// Was ein Aufdruck von der Person braucht (Spalte „druckdaten“ in data/bestellung.json)
+const DRUCKDATEN = ["nummer", "name", "initialen"];
 
 // ---------- Texthilfen ----------
 
@@ -104,13 +129,18 @@ export function ganzzahl(wert) {
   return Math.min(n, GRENZEN.anzahl);
 }
 
-// Betrag in Cent als Text: ganze Euro „120 €“, mit Nachkommastellen „12,50 €“, Tausenderpunkt ab 1.000 €.
+// Betrag in Cent als Text, immer mit zwei Nachkommastellen und Komma, ab 1.000 € mit Tausenderpunkt: „3,05 €“, „7,00 €“, „1.234,56 €“.
+// Beträge sind hier nie negativ (die Preisdaten werden vorher geprüft).
 export function formatEuro(cent) {
-  const c = Math.round(Number(cent) || 0);
+  const c = Math.max(0, Math.round(Number(cent) || 0));
   const euro = Math.floor(c / 100);
   const rest = c % 100;
-  const mitPunkt = String(euro).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  return (rest === 0 ? mitPunkt : mitPunkt + "," + zweistellig(rest)) + " €";
+  return String(euro).replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "," + zweistellig(rest) + " €";
+}
+
+// Zahl mit Komma als Dezimalzeichen („40“, „12,5“), für den Rabatt in Prozent.
+export function zahlDe(n) {
+  return String(n).replace(".", ",");
 }
 
 // „2027-01-15“ › „15.01.2027“; alles, was kein echtes Datum ist, ergibt "".
@@ -160,6 +190,50 @@ export function verbindeDeutsch(teile) {
   return teile.slice(0, -1).join(", ") + " und " + teile[teile.length - 1];
 }
 
+// ---------- Lieferanschrift ----------
+
+// „60439 Frankfurt“ › { plz: "60439", ort: "Frankfurt" }; alles ohne fünf Ziffern am Anfang und einen Ort danach ergibt null.
+export function parseOrt(text) {
+  const m = /^(\d{5})\s*(\p{L}.*)$/u.exec(einzeilig(text));
+  return m ? { plz: m[1], ort: m[2].trim() } : null;
+}
+
+// Der Name für die Lieferung: der eigene Eintrag, solange er nicht geändert wurde (null) der Name des Bestellers.
+export function lieferNameWert(bestellung) {
+  const eigener = bestellung ? bestellung.lieferName : null;
+  return einzeilig(eigener === null || eigener === undefined ? bestellung && bestellung.name : eigener);
+}
+
+// Die Lieferanschrift, wie sie in die Mail kommt (eine Zeile je Teil, leer bleibt leer). ort steht als „PLZ Ort“, wenn er gültig ist.
+export function lieferAnschrift(bestellung) {
+  const ortRoh = einzeilig(bestellung && bestellung.lieferOrt);
+  const o = parseOrt(ortRoh);
+  return {
+    name: lieferNameWert(bestellung),
+    strasse: einzeilig(bestellung && bestellung.lieferStrasse),
+    ort: o ? o.plz + " " + o.ort : ortRoh,
+    ortGueltig: o !== null,
+  };
+}
+
+// ---------- Sponsor ----------
+
+// Die Angaben zum Sponsor, bereinigt (einzeilig, die Anschrift mehrzeilig ohne Leerzeilen: Im Block „Sponsor“ der Mail sähe eine Leerzeile
+// wie sein Ende aus). Entwürfe aus den ersten Fassungen kennen nur einen Namen je Block (bezahlung.kleidungSponsor,
+// bezahlung.teambedarfSponsor): Er wird die Firma, bei zwei Namen gewinnt die Kleidung.
+export function sponsorDaten(bestellung) {
+  const s = bestellung && bestellung.sponsor && typeof bestellung.sponsor === "object" ? bestellung.sponsor : {};
+  const b = (bestellung && bestellung.bezahlung) || {};
+  const alteFirma = [b.kleidungSponsor, b.teambedarfSponsor].map(einzeilig).find((x) => x !== "") || "";
+  return {
+    firma: einzeilig(s.firma) || alteFirma,
+    ansprechpartner: einzeilig(s.ansprechpartner),
+    email: einzeilig(s.email),
+    telefon: einzeilig(s.telefon),
+    anschrift: mehrzeilig(s.anschrift).split("\n").filter((zeile) => zeile !== "").join("\n"),
+  };
+}
+
 // ---------- Katalog ----------
 
 const KATALOG_CACHE = new WeakMap();
@@ -185,6 +259,7 @@ function baueKatalog(konfig) {
   const gruppeNachGroesse = new Map();
   for (const g of GRUPPEN) for (const w of leiter[g]) gruppeNachGroesse.set(String(w), g);
   const veredelungen = konfig.veredelungen || {};
+  const namen = konfig.aufdruckNamen || {};
   if (!Array.isArray(konfig.artikel) || konfig.artikel.length === 0) fehler("artikel fehlt");
 
   const artikel = [];
@@ -218,19 +293,6 @@ function baueKatalog(konfig) {
     }
     const gruppenImArtikel = new Set(groessen.map((e) => e.gruppe));
 
-    // Preise (Euro in der Datei, Cent hier): eine Zahl für alle oder je Gruppe
-    const preisCent = {};
-    if (typeof roh.preis === "number") {
-      for (const g of [...GRUPPEN, "alle"]) preisCent[g] = Math.round(roh.preis * 100);
-    } else if (roh.preis && typeof roh.preis === "object") {
-      for (const g of GRUPPEN) {
-        if (typeof roh.preis[g] === "number") preisCent[g] = Math.round(roh.preis[g] * 100);
-      }
-    }
-    for (const g of gruppenImArtikel) {
-      if (typeof preisCent[g] !== "number" || !(preisCent[g] >= 0)) fehler(`${id}: Preis für „${g}“ fehlt`);
-    }
-
     // Lieferant: eine Bezeichnung für alle Größen oder je Gruppe eine
     const lieferant = [];
     const l = roh.lieferant || {};
@@ -248,13 +310,30 @@ function baueKatalog(konfig) {
       if (!lieferant.some((v) => v.fuer === g || v.fuer === "alle")) fehler(`${id}: Lieferantenbezeichnung für „${g}“ fehlt`);
     }
 
-    // Veredelungen als Text, in der Reihenfolge der Datei
-    const druck = (roh.veredelung || []).map((code) => {
-      if (!veredelungen[code]) fehler(`${id}: Veredelung „${code}“ ist nicht in veredelungen erklärt`);
-      return String(veredelungen[code]);
-    });
-    const einzeldruck = roh.einzeldruck || null;
-    if (einzeldruck !== null && !EINZELDRUCK.includes(einzeldruck)) fehler(`${id}: einzeldruck „${einzeldruck}“ unbekannt`);
+    // Aufdrucke: welche möglich sind (Reihenfolge der Anzeige), welche vorausgewählt sind, was ein Aufdruck von der Person braucht
+    const auf = roh.aufdrucke && typeof roh.aufdrucke === "object" ? roh.aufdrucke : {};
+    const moeglich = Array.isArray(auf.moeglich) ? auf.moeglich.map(String) : [];
+    const standardRoh = Array.isArray(auf.standard) ? auf.standard.map(String) : [];
+    if (new Set(moeglich).size !== moeglich.length) fehler(`${id}: aufdrucke.moeglich enthält ein Kürzel doppelt`);
+    if (new Set(standardRoh).size !== standardRoh.length) fehler(`${id}: aufdrucke.standard enthält ein Kürzel doppelt`);
+    for (const code of moeglich) {
+      if (!veredelungen[code]) fehler(`${id}: Aufdruck „${code}“ ist nicht in veredelungen erklärt`);
+      if (typeof namen[code] !== "string" || !namen[code]) fehler(`${id}: Aufdruck „${code}“ hat keinen Namen in aufdruckNamen`);
+    }
+    for (const code of standardRoh) {
+      if (!moeglich.includes(code)) fehler(`${id}: Standard-Aufdruck „${code}“ ist nicht in aufdrucke.moeglich`);
+    }
+    const druckdaten = roh.druckdaten && typeof roh.druckdaten === "object" ? roh.druckdaten : {};
+    for (const [code, art] of Object.entries(druckdaten)) {
+      if (!moeglich.includes(code)) fehler(`${id}: druckdaten „${code}“ ist nicht in aufdrucke.moeglich`);
+      if (!DRUCKDATEN.includes(art)) fehler(`${id}: druckdaten „${code}“: „${art}“ unbekannt (nummer, name oder initialen)`);
+    }
+    const druckTexte = {};
+    const aufdruckNamen = {};
+    for (const code of moeglich) {
+      druckTexte[code] = String(veredelungen[code]);
+      aufdruckNamen[code] = String(namen[code + ":" + druckdaten[code]] || namen[code]);
+    }
 
     const eintrag = {
       id,
@@ -263,14 +342,16 @@ function baueKatalog(konfig) {
       beschreibung: String(roh.beschreibung || ""),
       groessen,
       groessenNachWert: nachWert,
+      gruppen: [...gruppenImArtikel],
       gruppiert,
       einheitsgroesse: roh.einheitsgroesse === true,
       vorauswahl: roh.vorauswahl && typeof roh.vorauswahl === "object" ? roh.vorauswahl : {},
       hinweis: String(roh.hinweis || ""),
-      preisCent,
       lieferant,
-      druck,
-      einzeldruck,
+      aufdrucke: { moeglich, standard: moeglich.filter((c) => standardRoh.includes(c)) },
+      druckdaten: { ...druckdaten },
+      druckTexte,
+      aufdruckNamen,
     };
     for (const wert of Object.values(eintrag.vorauswahl)) {
       if (!nachWert.has(wert)) fehler(`${id}: Vorauswahl „${wert}“ ist keine Größe des Artikels`);
@@ -292,8 +373,11 @@ export function pruefeKonfig(konfig) {
   const einst = konfig.einstellungen || {};
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(einst.empfaenger || ""))) fehler("einstellungen.empfaenger ist keine Mailadresse");
   if (typeof einst.pruefmodus !== "boolean") fehler("einstellungen.pruefmodus muss true oder false sein");
-  if (!einst.preisstand) fehler("einstellungen.preisstand fehlt");
   if (!einst.lieferant) fehler("einstellungen.lieferant fehlt");
+  for (const code of Object.keys(konfig.veredelungen || {})) {
+    if (typeof (konfig.aufdruckNamen || {})[code] !== "string") fehler(`aufdruckNamen.${code} fehlt (Name des Aufdrucks für die Auswahl)`);
+  }
+  if (!(konfig.veredelungen || {})[SPONSOR_AUFDRUCK]) fehler(`veredelungen.${SPONSOR_AUFDRUCK} fehlt (Sponsorlogo)`);
   for (const s of konfig.schnellwahl || []) {
     if (!s.id || !s.titel) fehler("schnellwahl: id und titel fehlen");
     for (const id of s.artikel || []) if (!k.nachId.has(id)) fehler(`schnellwahl ${s.id}: Artikel „${id}“ gibt es nicht`);
@@ -323,6 +407,141 @@ export function pruefeKonfig(konfig) {
   return true;
 }
 
+// ---------- Preise (nach dem Entschlüsseln) ----------
+
+// Euro als Zahl › ganze Cent; null, wenn es kein Betrag von mindestens 0 € mit höchstens zwei Nachkommastellen ist.
+function alsCent(wert) {
+  if (typeof wert !== "number" || !Number.isFinite(wert) || wert < 0) return null;
+  const c = Math.round(wert * 100);
+  return Math.abs(wert * 100 - c) < 1e-6 ? c : null;
+}
+
+// Prüft die entschlüsselten Preisdaten gegen den Katalog: Liste der Probleme (leer = alles da). Die Meldungen nennen nur Schlüssel, nie Werte.
+//   { rabattProzent, veredelungPreis: { W, V, … }, uvp: { <artikel>: { kinder, erwachsene } | { alle } | null }, stand: "JJJJ-MM-TT", quelle }
+// Beträge in Euro. Ein Artikel mit uvp null hat „Preis auf Anfrage“. Weitere Felder (etwa Prüfsummen) werden ignoriert.
+export function pruefePreise(konfig, roh) {
+  const probleme = [];
+  if (!roh || typeof roh !== "object" || Array.isArray(roh)) return ["Die Preisdaten sind kein Objekt."];
+  const k = katalogVon(konfig);
+  const r = roh.rabattProzent;
+  if (typeof r !== "number" || !Number.isFinite(r) || r < 0 || r >= 100) probleme.push("rabattProzent fehlt oder liegt nicht zwischen 0 und 100");
+  if (!datumDe(roh.stand)) probleme.push("stand fehlt oder ist kein Datum (Form JJJJ-MM-TT)");
+  if (typeof roh.quelle !== "string" || einzeilig(roh.quelle) === "") probleme.push("quelle fehlt");
+  const v = roh.veredelungPreis && typeof roh.veredelungPreis === "object" ? roh.veredelungPreis : {};
+  const codes = [...new Set(k.artikel.flatMap((a) => a.aufdrucke.moeglich))];
+  for (const code of codes) {
+    if (alsCent(v[code]) === null) probleme.push(`veredelungPreis.${code} fehlt oder ist kein Betrag in Euro (höchstens zwei Nachkommastellen)`);
+  }
+  const u = roh.uvp && typeof roh.uvp === "object" ? roh.uvp : {};
+  for (const a of k.artikel) {
+    if (!Object.prototype.hasOwnProperty.call(u, a.id)) {
+      probleme.push(`uvp.${a.id} fehlt (null heißt: ${PREIS_AUF_ANFRAGE})`);
+      continue;
+    }
+    if (u[a.id] === null) continue;
+    for (const gruppe of a.gruppen) {
+      const wert = u[a.id] && typeof u[a.id] === "object" ? u[a.id][gruppe] : undefined;
+      if (alsCent(wert) === null) probleme.push(`uvp.${a.id}.${gruppe} fehlt oder ist kein Betrag in Euro (höchstens zwei Nachkommastellen)`);
+    }
+  }
+  return probleme;
+}
+
+// Die Konfiguration mit den Preisen (konfig.preise, alles in Cent). Wirft einen Fehler, wenn die Preisdaten nicht zum Katalog passen.
+// Die übergebene Konfiguration bleibt unverändert (es entsteht ein neues Objekt).
+export function mitPreisen(konfig, roh) {
+  const probleme = pruefePreise(konfig, roh);
+  if (probleme.length) throw new Error("Preisdaten: " + probleme.join("; "));
+  const k = katalogVon(konfig);
+  const uvpCent = {};
+  for (const a of k.artikel) {
+    const u = roh.uvp[a.id];
+    uvpCent[a.id] = u === null ? null : Object.fromEntries(a.gruppen.map((g) => [g, alsCent(u[g])]));
+  }
+  const zuschlagCent = {};
+  for (const code of new Set(k.artikel.flatMap((a) => a.aufdrucke.moeglich))) zuschlagCent[code] = alsCent(roh.veredelungPreis[code]);
+  return { ...konfig, preise: { rabattProzent: roh.rabattProzent, uvpCent, zuschlagCent, stand: roh.stand, quelle: einzeilig(roh.quelle) } };
+}
+
+// Listenpreis (UVP) in Cent für eine Größengruppe; null bei „Preis auf Anfrage“ oder ohne Preisdaten.
+export function listenpreisCent(konfig, artikelId, gruppe) {
+  const u = konfig.preise && konfig.preise.uvpCent[artikelId];
+  return u && typeof u[gruppe] === "number" ? u[gruppe] : null;
+}
+
+// Grundpreis in Cent: Listenpreis minus Rabatt, gerundet auf ganze Cent.
+export function grundpreisCent(konfig, artikelId, gruppe) {
+  const liste = listenpreisCent(konfig, artikelId, gruppe);
+  return liste === null ? null : Math.round((liste * (100 - konfig.preise.rabattProzent)) / 100);
+}
+
+// Summe der Zuschläge der Aufdrucke (Kürzel) in Cent.
+export function zuschlagSumme(konfig, codes) {
+  const z = (konfig.preise && konfig.preise.zuschlagCent) || {};
+  return codes.reduce((s, c) => s + (typeof z[c] === "number" ? z[c] : 0), 0);
+}
+
+// Hat der Artikel keinen Listenpreis („Preis auf Anfrage“)?
+export function istAufAnfrage(konfig, artikelId) {
+  return !!konfig.preise && konfig.preise.uvpCent[artikelId] === null;
+}
+
+// Preis eines Artikels in einer Größe mit den gewählten Aufdrucken (Kürzel):
+//   null                                                   Größe fehlt oder gehört nicht zum Artikel, oder es gibt keine Preisdaten
+//   { anfrage: true, zuschlagCent }                        Preis auf Anfrage
+//   { anfrage: false, listeCent, grundCent, zuschlagCent, cent }
+export function stueckpreis(konfig, artikelId, groesse, aufdrucke) {
+  const a = katalogVon(konfig).nachId.get(artikelId);
+  const e = a ? a.groessenNachWert.get(String(groesse || "")) : null;
+  if (!e || !konfig.preise) return null;
+  const zuschlag = zuschlagSumme(konfig, aufdrucke || a.aufdrucke.standard);
+  if (istAufAnfrage(konfig, artikelId)) return { anfrage: true, zuschlagCent: zuschlag };
+  const liste = listenpreisCent(konfig, artikelId, e.gruppe);
+  const grund = grundpreisCent(konfig, artikelId, e.gruppe);
+  return { anfrage: false, listeCent: liste, grundCent: grund, zuschlagCent: zuschlag, cent: grund + zuschlag };
+}
+
+// Stückpreis für die Anzeige. Ohne Größe: gleicher Preis für alle Größen › „5,05 €“, sonst „ab 5,05 €“; ohne Aufdrucke-Angabe zählen die
+// Standard-Aufdrucke des Artikels. Ohne Listenpreis: „Preis auf Anfrage“. Ohne Preisdaten: "".
+export function preisText(konfig, artikelId, groesse, aufdrucke) {
+  const a = katalogVon(konfig).nachId.get(artikelId);
+  if (!a || !konfig.preise) return "";
+  if (istAufAnfrage(konfig, artikelId)) return PREIS_AUF_ANFRAGE;
+  const codes = aufdrucke || a.aufdrucke.standard;
+  const genau = stueckpreis(konfig, artikelId, groesse, codes);
+  if (genau) return formatEuro(genau.cent);
+  const zuschlag = zuschlagSumme(konfig, codes);
+  const werte = [...new Set(a.groessen.map((e) => grundpreisCent(konfig, artikelId, e.gruppe) + zuschlag))];
+  return werte.length === 1 ? formatEuro(werte[0]) : "ab " + formatEuro(Math.min(...werte));
+}
+
+// Die kleine Zeile unter dem Stückpreis: „Listenpreis <UVP> € − <Rabatt> % = <Grundpreis> € · Aufdrucke + <Zuschläge> €“. Ohne Größe oder Preisdaten "".
+export function preisZeile(konfig, artikelId, groesse, aufdrucke) {
+  const codes = aufdrucke || katalogVon(konfig).nachId.get(artikelId).aufdrucke.standard;
+  const s = stueckpreis(konfig, artikelId, groesse, codes);
+  if (!s) return "";
+  if (s.anfrage) return PREIS_AUF_ANFRAGE;
+  let text = `Listenpreis ${formatEuro(s.listeCent)} − ${zahlDe(konfig.preise.rabattProzent)} % = ${formatEuro(s.grundCent)}`;
+  if (codes.length) text += ` · Aufdrucke + ${formatEuro(s.zuschlagCent)}`;
+  return text;
+}
+
+// Zuschlag hinter einem Aufdruck-Kästchen: „+ <Zuschlag> €“. Ohne Preisdaten "".
+export function zuschlagText(konfig, code) {
+  const z = konfig.preise && konfig.preise.zuschlagCent[code];
+  return typeof z === "number" ? "+ " + formatEuro(z) : "";
+}
+
+// Eine Summe mit dem Hinweis auf Stücke ohne Preis: „<Summe> €“ oder „<Summe> € (ohne Regenjacke, Preis auf Anfrage)“.
+export function summeText(cent, ohnePreis) {
+  return formatEuro(cent) + (ohnePreis && ohnePreis.length ? ` (ohne ${verbindeDeutsch(ohnePreis)}, ${PREIS_AUF_ANFRAGE})` : "");
+}
+
+// „Preise laut <Quelle>“ (die Quelle steht in den Preisdaten, etwa Angebot, Lieferant und Datum); ohne Preisdaten nur „Preise laut Angebot“.
+export function preisQuelle(konfig) {
+  return "Preise laut " + (konfig.preise && konfig.preise.quelle ? konfig.preise.quelle : "Angebot");
+}
+
 // ---------- Antworten zur Bezahlung ----------
 
 // Die gewählten Antworten eines Blocks (Kleidung, Teambedarf) als Liste von ids in Katalogreihenfolge, jede id einmal.
@@ -333,7 +552,21 @@ export function bezahlungIds(konfig, wert) {
   return (konfig.bezahlung || []).map((o) => o.id).filter((id) => roh.includes(id));
 }
 
-// ---------- Größen, Preise, Vorauswahl ----------
+// Gehört zu dieser Antwort ein Sponsor (Eintrag „mitName“ in data/bestellung.json)?
+function istSponsorAntwort(konfig, id) {
+  const o = (konfig.bezahlung || []).find((x) => x.id === id);
+  return !!o && o.mitName === true;
+}
+
+// Der Block „Sponsor“ ist nötig, sobald bei der Kleidung oder beim Teambedarf (die gewählt sind) „Sponsor“ angehakt ist
+// oder ein gewähltes Stück das Sponsorlogo trägt. z ist die Zusammenfassung der Bestellung.
+export function sponsorAktiv(konfig, bestellung, z) {
+  const b = (bestellung && bestellung.bezahlung) || {};
+  const angehakt = (wahl) => bezahlungIds(konfig, wahl).some((id) => istSponsorAntwort(konfig, id));
+  return (z.hatKleidung && angehakt(b.kleidung)) || (z.hatTeambedarf && angehakt(b.teambedarf)) || z.sponsorStuecke > 0;
+}
+
+// ---------- Größen, Vorauswahl, Aufdrucke ----------
 
 // „kinder“ oder „erwachsene“ für eine Größe der Person ("" bei allem anderen).
 export function gruppeDerGroesse(konfig, groesse) {
@@ -372,47 +605,52 @@ export function artikelGroesse(konfig, person, artikelId) {
   return vorauswahlGroesse(konfig, artikelId, person && person.groesse);
 }
 
-// Preis (Cent) eines Artikels in einer Größe; null, wenn die Größe fehlt oder nicht zum Artikel gehört.
-export function preisCent(konfig, artikelId, groesse) {
+// Die Aufdrucke (Kürzel, in der Reihenfolge von aufdrucke.moeglich), die für einen Artikel der Person gelten: ihre eigene Wahl,
+// ohne eigene Wahl (alter Entwurf) die Standard-Aufdrucke des Artikels. Eine leere Liste heißt: nichts drauf.
+export function artikelAufdrucke(konfig, person, artikelId) {
   const a = katalogVon(konfig).nachId.get(artikelId);
-  const e = a ? a.groessenNachWert.get(String(groesse || "")) : null;
-  return e ? a.preisCent[e.gruppe] : null;
+  if (!a) return [];
+  const wahl = person && person.artikel ? person.artikel[artikelId] : null;
+  if (wahl && Array.isArray(wahl.aufdrucke)) return a.aufdrucke.moeglich.filter((c) => wahl.aufdrucke.includes(c));
+  return a.aufdrucke.standard.slice();
 }
 
-// Preis für die Anzeige. Ohne Größe: gleicher Preis für alle › „20 €“, sonst „ab 30 €“.
-export function preisText(konfig, artikelId, groesse) {
-  const cent = preisCent(konfig, artikelId, groesse);
-  if (cent !== null) return formatEuro(cent);
+// Was die gewählten Aufdrucke von der Person brauchen: { name, nummer, initialen } (Wahrheitswerte).
+export function druckBedarf(konfig, artikelId, aufdrucke) {
   const a = katalogVon(konfig).nachId.get(artikelId);
-  if (!a) return "";
-  const werte = [...new Set(a.groessen.map((e) => a.preisCent[e.gruppe]))];
-  return werte.length === 1 ? formatEuro(werte[0]) : "ab " + formatEuro(Math.min(...werte));
+  const arten = new Set((aufdrucke || []).map((c) => (a ? a.druckdaten[c] : undefined)));
+  return { name: arten.has("name"), nummer: arten.has("nummer"), initialen: arten.has("initialen") };
 }
 
-// Schnellwahl auf eine Person anwenden: schaltet die Artikel der Schnellwahl ein (nichts wird abgewählt).
+// Schnellwahl auf eine Person anwenden: schaltet die Artikel der Schnellwahl mit ihren Standard-Aufdrucken ein
+// (nichts wird abgewählt, schon gewählte Artikel behalten ihre Größe und ihre Aufdrucke).
 export function schnellwahlAnwenden(konfig, person, schnellwahlId) {
   const s = (konfig.schnellwahl || []).find((x) => x.id === schnellwahlId);
   if (!s) return person;
+  const k = katalogVon(konfig);
   if (!person.artikel || typeof person.artikel !== "object") person.artikel = {};
-  for (const id of s.artikel) if (!person.artikel[id]) person.artikel[id] = { groesse: "" };
+  for (const id of s.artikel) if (!person.artikel[id]) person.artikel[id] = { groesse: "", aufdrucke: k.nachId.get(id).aufdrucke.standard.slice() };
   return person;
 }
 
 // ---------- Zusammenfassung ----------
 
 // Alles, was aus den Eingaben folgt, in einer Form, die Prüfung, Mailtext und Seite gemeinsam benutzen:
-//   personen   Personen mit mindestens einem Artikel: zeilen (Artikel, Größe, abweichend von der Vorauswahl, Cent), Summe, Teile
-//   bloecke    Zeilen für den Lieferanten: je Artikel und Variante (Kinder, Erwachsene, „alle“) die Menge je Größe
-//   druck      Stücke mit Einzeldruck (sortiert: Katalog, Größe, Nummer, Name)
-//   teile, summeCent, hatKleidung
+//   personen   Personen mit mindestens einem Artikel: zeilen (Artikel, Größe, abweichend von der Vorauswahl, Aufdrucke, was die Aufdrucke
+//              brauchen, Stückpreis in Cent oder „auf Anfrage“), Summe, Stücke ohne Preis, Teile
+//   bloecke    Zeilen für den Lieferanten: je Artikel, Variante (Kinder, Erwachsene, „alle“) und Aufdruck-Kombination die Menge je Größe
+//   druck      Stücke, deren Aufdrucke Daten brauchen (sortiert: Katalog, Größe, Nummer, Name)
+//   teile, summeCent, ohnePreis (Artikel ohne Preis), sponsorStuecke (Stücke mit Sponsorlogo), hatKleidung
 //   teambedarf (Anzahl > 0), sonstiges, hatTeambedarf
 export function zusammenfassung(konfig, bestellung) {
   const k = katalogVon(konfig);
   const personen = [];
   const bloeckeNachSchluessel = new Map();
   const druck = [];
+  const ohnePreisIds = new Set();
   let teile = 0;
   let summeCent = 0;
+  let sponsorStuecke = 0;
 
   (bestellung.personen || []).forEach((p, index) => {
     const gewaehlt = k.artikel.filter((a) => p.artikel && p.artikel[a.id]);
@@ -420,31 +658,43 @@ export function zusammenfassung(konfig, bestellung) {
     const nummer = pruefeNummer(p.nummer);
     const name = einzeilig(p.name);
     const zeilen = [];
+    const ohnePerson = new Set();
     let personCent = 0;
     for (const a of gewaehlt) {
       const groesse = artikelGroesse(konfig, p, a.id);
       const auto = vorauswahlGroesse(konfig, a.id, p.groesse);
       const eintrag = a.groessenNachWert.get(groesse) || null;
-      const cent = eintrag ? a.preisCent[eintrag.gruppe] : 0;
+      const aufdrucke = artikelAufdrucke(konfig, p, a.id);
+      const bedarf = druckBedarf(konfig, a.id, aufdrucke);
       const variante = eintrag ? a.lieferant.find((v) => v.fuer === eintrag.gruppe || v.fuer === "alle") : null;
-      zeilen.push({ artikel: a, groesse, abweichend: groesse !== auto, cent, variante });
-      personCent += cent;
+      const preis = eintrag ? stueckpreis(konfig, a.id, groesse, aufdrucke) : null;
+      const anfrage = !!preis && preis.anfrage;
+      const cent = anfrage ? null : preis ? preis.cent : 0;
+      zeilen.push({ artikel: a, groesse, abweichend: groesse !== auto, aufdrucke, bedarf, variante, anfrage, cent, preis });
+      if (cent === null) {
+        ohnePerson.add(a.id);
+        ohnePreisIds.add(a.id);
+      } else {
+        personCent += cent;
+      }
       teile += 1;
+      if (aufdrucke.includes(SPONSOR_AUFDRUCK)) sponsorStuecke += 1;
       if (!eintrag) continue;
-      const schluessel = a.id + "|" + variante.fuer;
+      const schluessel = [a.id, variante.fuer, aufdrucke.join(",")].join("|");
       let block = bloeckeNachSchluessel.get(schluessel);
       if (!block) {
-        block = { artikel: a, variante, menge: 0, mengen: new Map() };
+        block = { artikel: a, variante, aufdrucke, menge: 0, mengen: new Map() };
         bloeckeNachSchluessel.set(schluessel, block);
       }
       block.menge += 1;
       block.mengen.set(groesse, (block.mengen.get(groesse) || 0) + 1);
-      if (a.einzeldruck) {
+      if (bedarf.name || bedarf.nummer || bedarf.initialen) {
         druck.push({
           artikel: a,
           variante,
           groesse,
           groesseIndex: eintrag.index,
+          bedarf,
           nummer: nummer.art === "ok" ? nummer.wert : "",
           name,
           initialen: einzeilig(effektiveInitialen(p)),
@@ -461,20 +711,31 @@ export function zusammenfassung(konfig, bestellung) {
       groesse: String(p.groesse || ""),
       zeilen,
       summeCent: personCent,
+      ohnePreis: k.artikel.filter((a) => ohnePerson.has(a.id)).map((a) => a.anzeige),
       teile: zeilen.length,
     });
   });
 
-  // Blöcke für den Lieferanten: Katalogreihenfolge, je Variante erst Kinder, dann Erwachsene; Größen in Leiterreihenfolge
+  // Blöcke für den Lieferanten: Katalogreihenfolge, je Artikel erst Kinder, dann Erwachsene; innerhalb einer Variante die Kombination mit
+  // mehr Aufdrucken zuerst, bei gleich vielen die mit den früheren Kürzeln in aufdrucke.moeglich; Größen in Leiterreihenfolge
   const bloecke = [];
+  const kombination = (a, codes) => codes.map((c) => a.aufdrucke.moeglich.indexOf(c));
   for (const a of k.artikel) {
     for (const v of a.lieferant) {
-      const block = bloeckeNachSchluessel.get(a.id + "|" + v.fuer);
-      if (!block) continue;
-      const groessen = [...block.mengen.entries()]
-        .sort((x, y) => a.groessenNachWert.get(x[0]).index - a.groessenNachWert.get(y[0]).index)
-        .map(([wert, menge]) => ({ wert, menge }));
-      bloecke.push({ artikel: a, variante: v, menge: block.menge, groessen });
+      const liste = [...bloeckeNachSchluessel.values()].filter((b) => b.artikel === a && b.variante === v);
+      liste.sort((x, y) => {
+        if (x.aufdrucke.length !== y.aufdrucke.length) return y.aufdrucke.length - x.aufdrucke.length;
+        const kx = kombination(a, x.aufdrucke);
+        const ky = kombination(a, y.aufdrucke);
+        for (let i = 0; i < kx.length; i++) if (kx[i] !== ky[i]) return kx[i] - ky[i];
+        return 0;
+      });
+      for (const block of liste) {
+        const groessen = [...block.mengen.entries()]
+          .sort((x, y) => a.groessenNachWert.get(x[0]).index - a.groessenNachWert.get(y[0]).index)
+          .map(([wert, menge]) => ({ wert, menge }));
+        bloecke.push({ artikel: a, variante: v, aufdrucke: block.aufdrucke, menge: block.menge, groessen });
+      }
     }
   }
 
@@ -501,6 +762,8 @@ export function zusammenfassung(konfig, bestellung) {
     druck,
     teile,
     summeCent,
+    ohnePreis: k.artikel.filter((a) => ohnePreisIds.has(a.id)).map((a) => a.anzeige),
+    sponsorStuecke,
     hatKleidung: teile > 0,
     teambedarf,
     sonstiges,
@@ -511,34 +774,47 @@ export function zusammenfassung(konfig, bestellung) {
 // ---------- Prüfung: Liste der Lücken ----------
 
 // Was fehlt, bevor die Bestellung gesendet werden darf? Liste von { feld, text } in der Reihenfolge der Seite (leer = alles da).
-// „feld“ nennt das Eingabefeld, zu dem die Seite springt: team, name, leer, p:<id>:name|groesse|nummer|initialen|a:<artikel>,
-// bezahlung:kleidung|teambedarf, sponsor:kleidung|teambedarf. Personen ohne Artikel zählen nicht.
+// „feld“ nennt das Eingabefeld, zu dem die Seite springt: team, name, lieferName, lieferStrasse, lieferOrt, leer,
+// p:<id>:name|groesse|nummer|initialen|a:<artikel>, bezahlung:kleidung|teambedarf, sponsor:firma. Personen ohne Artikel zählen nicht.
+// Bei einer doppelten Rückennummer nennt „felder“ zusätzlich alle beteiligten Nummernfelder (die Seite markiert sie).
+// Name, Nummer und Initialen einer Person sind nur Pflicht, wenn ein gewählter Aufdruck sie braucht.
 export function pruefeBestellung(konfig, bestellung) {
   const luecken = [];
-  const melde = (feld, text) => luecken.push({ feld, text });
+  const melde = (feld, text, felder) => luecken.push(felder ? { feld, text, felder } : { feld, text });
   const z = zusammenfassung(konfig, bestellung);
 
   if (!(konfig.mannschaften || []).some((m) => m.slug === bestellung.team)) melde("team", "Bitte wähle deine Mannschaft aus");
   if (einzeilig(bestellung.name) === "") melde("name", "Bitte trage deinen Namen ein");
+
+  // Lieferanschrift: Folgt der Name der Lieferung noch „Dein Name“ (null), meldet schon „Dein Name“ die Lücke.
+  const anschrift = lieferAnschrift(bestellung);
+  const eigenerLieferName = bestellung.lieferName !== null && bestellung.lieferName !== undefined;
+  if (eigenerLieferName && anschrift.name === "") melde("lieferName", "Bitte gib den Namen für die Lieferung an");
+  if (anschrift.strasse === "") melde("lieferStrasse", "Bitte gib Straße und Hausnummer für die Lieferung an");
+  if (!anschrift.ortGueltig) melde("lieferOrt", "Bitte PLZ und Ort angeben (z. B. 60439 Frankfurt)");
+
   if (!z.hatKleidung && !z.hatTeambedarf) {
     melde("leer", "Du hast noch nichts ausgewählt: Füge eine Person mit Kleidung hinzu oder wähle Teambedarf");
   }
 
+  const artikelMit = (p, art) => p.zeilen.filter((x) => x.bedarf[art]).map((x) => x.artikel.anzeige);
   for (const p of z.personen) {
     const id = p.person.id;
-    if (p.name === "") melde(`p:${id}:name`, `Bei ${p.label} fehlt der Name`);
+    const brauchtName = artikelMit(p, "name");
+    if (brauchtName.length && p.name === "") melde(`p:${id}:name`, `Bei ${p.label} fehlt der Name (${brauchtName.join(", ")})`);
     if (gruppeDerGroesse(konfig, p.groesse) === "") melde(`p:${id}:groesse`, `Bei ${p.label} fehlt die Größe`);
     const nummer = pruefeNummer(p.person.nummer);
-    const brauchtNummer = p.zeilen
-      .filter((x) => x.artikel.einzeldruck === "nummer" || x.artikel.einzeldruck === "name-nummer")
-      .map((x) => x.artikel.anzeige);
-    if (nummer.art === "ungueltig") {
-      melde(`p:${id}:nummer`, `Bei ${p.label} ist die Rückennummer ungültig (nur 1 bis 99)`);
-    } else if (nummer.art === "leer" && brauchtNummer.length) {
-      melde(`p:${id}:nummer`, `Bei ${p.label} fehlt die Rückennummer (${brauchtNummer.join(", ")})`);
+    const brauchtNummer = artikelMit(p, "nummer");
+    if (brauchtNummer.length) {
+      if (nummer.art === "ungueltig") {
+        melde(`p:${id}:nummer`, `Bei ${p.label} ist die Rückennummer ungültig (nur 1 bis 99)`);
+      } else if (nummer.art === "leer") {
+        melde(`p:${id}:nummer`, `Bei ${p.label} fehlt die Rückennummer (${brauchtNummer.join(", ")})`);
+      }
     }
-    if (p.zeilen.some((x) => x.artikel.einzeldruck === "initialen") && einzeilig(effektiveInitialen(p.person)) === "") {
-      melde(`p:${id}:initialen`, `Bei ${p.label} fehlen die Initialen (${p.zeilen.filter((x) => x.artikel.einzeldruck === "initialen").map((x) => x.artikel.anzeige).join(", ")})`);
+    const brauchtInitialen = artikelMit(p, "initialen");
+    if (brauchtInitialen.length && einzeilig(effektiveInitialen(p.person)) === "") {
+      melde(`p:${id}:initialen`, `Bei ${p.label} fehlen die Initialen (${brauchtInitialen.join(", ")})`);
     }
     // Größe je Artikel: nur wenn die Größe der Person gewählt ist, aber ein Artikel trotzdem keine bekommt
     if (gruppeDerGroesse(konfig, p.groesse) !== "") {
@@ -548,19 +824,37 @@ export function pruefeBestellung(konfig, bestellung) {
     }
   }
 
-  // Mindestens eine Antwort je Block; ist „Sponsor“ (eine Antwort mit Namen) dabei, gehört der Name dazu.
-  // Ein Name bei abgewähltem Sponsor bleibt im Entwurf, zählt aber nicht.
-  const pruefeBezahlung = (block, anzeigeFrage, anzeigeKlammer, wahl, sponsor) => {
-    const gewaehlt = bezahlungIds(konfig, wahl);
-    if (gewaehlt.length === 0) {
-      melde(`bezahlung:${block}`, `Bitte wähle, wer ${anzeigeFrage} zahlt`);
-    } else if (gewaehlt.some((id) => konfig.bezahlung.find((o) => o.id === id).mitName) && einzeilig(sponsor) === "") {
-      melde(`sponsor:${block}`, `Bitte trage den Namen des Sponsors ein (${anzeigeKlammer})`);
+  // Doppelte Rückennummern: nur unter Personen, deren Aufdrucke die Nummer brauchen. Gleicher Name (getrimmt, ohne Groß- und
+  // Kleinschreibung) heißt: dasselbe Kind, keine Lücke. Personen ohne Namen zählen als verschieden („Person 1“, „Person 2“).
+  const nachNummer = new Map();
+  for (const p of z.personen) {
+    const n = pruefeNummer(p.person.nummer);
+    if (n.art !== "ok" || artikelMit(p, "nummer").length === 0) continue;
+    if (!nachNummer.has(n.wert)) nachNummer.set(n.wert, []);
+    nachNummer.get(n.wert).push(p);
+  }
+  for (const [nr, liste] of nachNummer) {
+    const verschieden = new Map();
+    for (const p of liste) {
+      const schluessel = p.name === "" ? "\u0000" + p.index : p.name.toLocaleLowerCase("de");
+      if (!verschieden.has(schluessel)) verschieden.set(schluessel, p);
     }
+    if (verschieden.size < 2) continue;
+    const namen = [...verschieden.values()].map((p) => p.label);
+    const felder = liste.map((p) => `p:${p.person.id}:nummer`);
+    melde(felder[felder.length - 1], `Die Rückennummer ${nr} ist doppelt (${verbindeDeutsch(namen)})`, felder);
+  }
+
+  // Mindestens eine Antwort je Block.
+  const pruefeBezahlung = (block, frage, wahl) => {
+    if (bezahlungIds(konfig, wahl).length === 0) melde(`bezahlung:${block}`, `Bitte wähle, wer ${frage} zahlt`);
   };
   const b = bestellung.bezahlung || {};
-  if (z.hatKleidung) pruefeBezahlung("kleidung", "die Kleidung", "Kleidung", b.kleidung, b.kleidungSponsor);
-  if (z.hatTeambedarf) pruefeBezahlung("teambedarf", "den Teambedarf", "Teambedarf", b.teambedarf, b.teambedarfSponsor);
+  if (z.hatKleidung) pruefeBezahlung("kleidung", "die Kleidung", b.kleidung);
+  if (z.hatTeambedarf) pruefeBezahlung("teambedarf", "den Teambedarf", b.teambedarf);
+
+  // Sponsor: nötig bei angehaktem „Sponsor“ oder einem Stück mit Sponsorlogo; die Firma ist Pflicht.
+  if (sponsorAktiv(konfig, bestellung, z) && sponsorDaten(bestellung).firma === "") melde("sponsor:firma", "Bitte trage die Firma des Sponsors ein");
 
   return luecken;
 }
@@ -597,23 +891,26 @@ export function mailtoLink(empfaenger, betreff, text) {
 }
 
 // Die Antworten eines Blocks in Katalogreihenfolge, deutsch verbunden: „Eltern bzw. Spieler und Sponsor (Autohaus Beispiel)“.
-// Eine Antwort mit Namen (Sponsor) steht immer mit dem Namen in Klammern, auch allein; den Namen gibt es nur bei angehaktem Sponsor.
-function bezahlText(konfig, wahl, sponsor) {
-  const name = einzeilig(sponsor);
+// Eine Antwort mit Sponsor (Eintrag „mitName“) steht immer mit der Firma in Klammern, auch allein; die Firma kommt aus dem Block „Sponsor“.
+function bezahlText(konfig, wahl, firma) {
   return verbindeDeutsch(
     bezahlungIds(konfig, wahl).map((id) => {
       const opt = konfig.bezahlung.find((o) => o.id === id);
-      return opt.mitName && name ? `${opt.text} (${name})` : opt.text;
+      return opt.mitName && firma ? `${opt.text} (${firma})` : opt.text;
     })
   );
 }
 
+// Eine Zeile „Druckdaten je Stück“: Name, Nummer, Initialen, soweit die Aufdrucke des Stücks sie brauchen.
 function druckText(d) {
   const nr = d.nummer === "" ? FEHLT : d.nummer;
   const name = d.name === "" ? FEHLT : d.name;
   const ini = d.initialen === "" ? FEHLT : d.initialen;
-  const form = d.artikel.einzeldruck === "nummer" ? `Nr. ${nr}` : d.artikel.einzeldruck === "name-nummer" ? `Name „${name}“, Nr. ${nr}` : `Initialen „${ini}“`;
-  return `- ${d.artikel.anzeige} ${d.variante.nr}, Gr. ${d.groesse}: ${form}`;
+  const teile = [];
+  if (d.bedarf.name) teile.push(`Name „${name}“`);
+  if (d.bedarf.nummer) teile.push(`Nr. ${nr}`);
+  if (d.bedarf.initialen) teile.push(`Initialen „${ini}“`);
+  return `- ${d.artikel.anzeige} ${d.variante.nr}, Gr. ${d.groesse}: ${teile.join(", ")}`;
 }
 
 // Betreff, Text und mailto-Adresse der Bestellung. Der Text hat \n als Zeilenumbruch (im mailto werden daraus \r\n).
@@ -628,6 +925,8 @@ export function baueMail(konfig, bestellung, jetzt) {
   const tel = einzeilig(bestellung.tel);
   const bis = datumDe(bestellung.bis);
   const b = bestellung.bezahlung || {};
+  const anschrift = lieferAnschrift(bestellung);
+  const sponsor = sponsorDaten(bestellung);
 
   // Betreff: [TEST] Bestellung D3-Jugend – 13 Teile, Teambedarf (D3-261125-1432)
   const inhalt = [];
@@ -644,13 +943,14 @@ export function baueMail(konfig, bestellung, jetzt) {
   if (einst.pruefmodus) zeilen.push("TEST – Prototyp: Bitte nichts beim Lieferanten bestellen.");
   zeilen.push("", "Mannschaft: " + (team ? team.name : FEHLT));
   zeilen.push("Bestellt von: " + besteller + (tel ? ", Tel. " + tel : ""));
+  zeilen.push("Lieferung an: " + [anschrift.name || FEHLT, anschrift.strasse || FEHLT, anschrift.ort || FEHLT].join(", "));
   if (bis) zeilen.push("Gebraucht bis: " + bis);
   if (z.hatKleidung) {
-    const t = bezahlText(konfig, b.kleidung, b.kleidungSponsor);
+    const t = bezahlText(konfig, b.kleidung, sponsor.firma);
     if (t) zeilen.push("Bezahlung Kleidung: " + t);
   }
   if (z.hatTeambedarf) {
-    const t = bezahlText(konfig, b.teambedarf, b.teambedarfSponsor);
+    const t = bezahlText(konfig, b.teambedarf, sponsor.firma);
     if (t) zeilen.push("Bezahlung Teambedarf: " + t);
   }
   zeilen.push(...beschrifteteZeilen("Hinweis zur Bezahlung: ", bestellung.hinweisBezahlung));
@@ -660,9 +960,10 @@ export function baueMail(konfig, bestellung, jetzt) {
   // 1. Kleidung für den Lieferanten (die Nummern der Teile bleiben fest: Teil 1 leitet Melli weiter, Teil 3 nie)
   if (z.hatKleidung) {
     zeilen.push(`== 1. KLEIDUNG FÜR DEN LIEFERANTEN (${einst.lieferant}) ==`, "Dieser Teil kann so weitergeleitet werden.", "");
+    zeilen.push("Lieferanschrift:", anschrift.name || FEHLT, anschrift.strasse || FEHLT, anschrift.ort || FEHLT, "");
     for (const block of z.bloecke) {
       zeilen.push(`${block.variante.bezeichnung} (${block.variante.nr})`);
-      if (block.artikel.druck.length) zeilen.push("Druck: " + block.artikel.druck.join(", "));
+      if (block.aufdrucke.length) zeilen.push("Druck: " + block.aufdrucke.map((c) => block.artikel.druckTexte[c]).join(", "));
       for (const g of block.groessen) {
         const bezeichnung = block.artikel.einheitsgroesse ? g.wert : "Gr. " + g.wert;
         zeilen.push(`- ${bezeichnung}: ${zahlwort(g.menge, "Stück", "Stück")}`);
@@ -682,15 +983,33 @@ export function baueMail(konfig, bestellung, jetzt) {
     zeilen.push(...beschrifteteZeilen("- Sonstiges: ", z.sonstiges), "");
   }
 
-  // 3. Nur intern: Zuordnung je Person mit den Preisen für Eltern bzw. Spieler
-  if (z.hatKleidung) {
-    zeilen.push("== 3. NUR INTERN – NICHT WEITERLEITEN ==", `Zuordnung je Person (Preise für Eltern bzw. Spieler, Stand ${einst.preisstand}):`);
-    for (const p of z.personen) {
-      const kopf = p.label + (p.nummer ? ", Nr. " + p.nummer : "") + (p.groesse ? ", Gr. " + p.groesse : "");
-      const artikel = p.zeilen.map((x) => x.artikel.anzeige + (x.abweichend && x.groesse ? ` (Gr. ${x.groesse})` : "")).join(", ");
-      zeilen.push(`- ${kopf}: ${artikel} = ${formatEuro(p.summeCent)}`);
+  // 3. Nur intern: Angaben zum Sponsor für die Geschäftsstelle, Zuordnung je Person mit den Preisen laut Angebot
+  const mitSponsor = sponsorAktiv(konfig, bestellung, z);
+  if (z.hatKleidung || mitSponsor) {
+    zeilen.push("== 3. NUR INTERN – NICHT WEITERLEITEN ==");
+    if (mitSponsor) {
+      zeilen.push("Sponsor (für die Geschäftsstelle):", "Firma: " + (sponsor.firma || FEHLT));
+      if (sponsor.ansprechpartner) zeilen.push("Ansprechpartner: " + sponsor.ansprechpartner);
+      if (sponsor.email) zeilen.push("E-Mail: " + sponsor.email);
+      if (sponsor.telefon) zeilen.push("Telefon: " + sponsor.telefon);
+      zeilen.push(...beschrifteteZeilen("Anschrift: ", sponsor.anschrift));
+      const zuschlag = zuschlagSumme(konfig, [SPONSOR_AUFDRUCK]);
+      if (z.sponsorStuecke > 0 && konfig.preise) {
+        zeilen.push(`Sponsorlogo: ${zahlwort(z.sponsorStuecke, "Stück", "Stück")} × ${formatEuro(zuschlag)} = ${formatEuro(z.sponsorStuecke * zuschlag)}`);
+      }
+      zeilen.push("");
     }
-    zeilen.push(`Summe Kleidung: ${formatEuro(z.summeCent)}`, "");
+    if (z.hatKleidung) {
+      zeilen.push(`Zuordnung je Person (${preisQuelle(konfig)}):`);
+      for (const p of z.personen) {
+        const kopf = p.label + (p.nummer ? ", Nr. " + p.nummer : "") + (p.groesse ? ", Gr. " + p.groesse : "");
+        const artikel = p.zeilen
+          .map((x) => x.artikel.anzeige + (x.abweichend && x.groesse ? ` (Gr. ${x.groesse})` : "") + " " + (x.anfrage ? `(${PREIS_AUF_ANFRAGE})` : formatEuro(x.cent)))
+          .join(", ");
+        zeilen.push(`- ${kopf}: ${artikel} = ${summeText(p.summeCent, p.ohnePreis)}`);
+      }
+      zeilen.push(`Summe Kleidung: ${summeText(z.summeCent, z.ohnePreis)}`, "");
+    }
   }
 
   zeilen.push("Viele Grüße", besteller, "", SCHLUSSZEILE);
@@ -712,11 +1031,15 @@ export function leererEntwurf() {
     name: "",
     tel: "",
     bis: "",
+    lieferName: null,
+    lieferStrasse: "",
+    lieferOrt: "",
     personen: [],
     zaehler: 0,
     teambedarf: {},
     sonstiges: "",
-    bezahlung: { kleidung: [], kleidungSponsor: "", teambedarf: [], teambedarfSponsor: "" },
+    bezahlung: { kleidung: [], teambedarf: [] },
+    sponsor: { firma: "", ansprechpartner: "", email: "", telefon: "", anschrift: "" },
     hinweisBezahlung: "",
     hinweis: "",
     bestellNr: "",
@@ -725,7 +1048,8 @@ export function leererEntwurf() {
 }
 
 // Macht aus gelesenen Daten (localStorage, evtl. alt, kaputt oder von Hand verändert) einen gültigen Entwurf:
-// unbekannte Felder fallen weg, Texte werden gekürzt, Größen und Auswahlen müssen zum Katalog passen.
+// unbekannte Felder fallen weg, Texte werden gekürzt, Größen, Aufdrucke und Auswahlen müssen zum Katalog passen.
+// Alte Entwürfe laden mit den Standard-Aufdrucken (keine Angabe heißt: Standard), der Sponsor aus den ersten Fassungen wird zur Firma.
 export function bereinigeEntwurf(roh, konfig) {
   const k = katalogVon(konfig);
   const e = leererEntwurf();
@@ -737,6 +1061,9 @@ export function bereinigeEntwurf(roh, konfig) {
   e.name = text(roh.name, GRENZEN.besteller);
   e.tel = text(roh.tel, GRENZEN.tel);
   e.bis = datumDe(roh.bis) ? roh.bis : "";
+  e.lieferName = typeof roh.lieferName === "string" ? text(roh.lieferName, GRENZEN.lieferName) : null;
+  e.lieferStrasse = text(roh.lieferStrasse, GRENZEN.strasse);
+  e.lieferOrt = text(roh.lieferOrt, GRENZEN.ort);
   e.sonstiges = text(roh.sonstiges, GRENZEN.sonstiges);
   e.hinweisBezahlung = text(roh.hinweisBezahlung, GRENZEN.hinweis);
   e.hinweis = text(roh.hinweis, GRENZEN.hinweis);
@@ -752,7 +1079,8 @@ export function bereinigeEntwurf(roh, konfig) {
       const wahl = objekt(q.artikel)[a.id];
       if (!wahl) continue;
       const g = typeof objekt(wahl).groesse === "string" ? wahl.groesse : "";
-      artikel[a.id] = { groesse: a.groessenNachWert.has(g) ? g : "" };
+      const codes = Array.isArray(objekt(wahl).aufdrucke) ? a.aufdrucke.moeglich.filter((c) => wahl.aufdrucke.includes(c)) : a.aufdrucke.standard.slice();
+      artikel[a.id] = { groesse: a.groessenNachWert.has(g) ? g : "", aufdrucke: codes };
     }
     e.personen.push({
       id,
@@ -785,11 +1113,19 @@ export function bereinigeEntwurf(roh, konfig) {
   // Bezahlung: je Block eine Liste von ids (Katalogreihenfolge). Entwürfe aus der ersten Fassung (ein Text je Block) laden mit:
   // "" › [], "eltern" › ["eltern"]; unbekannte ids fallen weg.
   const b = objekt(roh.bezahlung);
-  e.bezahlung = {
-    kleidung: bezahlungIds(konfig, b.kleidung),
-    kleidungSponsor: text(b.kleidungSponsor, GRENZEN.sponsor),
-    teambedarf: bezahlungIds(konfig, b.teambedarf),
-    teambedarfSponsor: text(b.teambedarfSponsor, GRENZEN.sponsor),
+  e.bezahlung = { kleidung: bezahlungIds(konfig, b.kleidung), teambedarf: bezahlungIds(konfig, b.teambedarf) };
+
+  // Sponsor: der Block „Sponsor“. Entwürfe mit „kleidungSponsor“ oder „teambedarfSponsor“ (ein Name je Block) werden zur Firma, bei zwei
+  // Namen gewinnt die Kleidung; eine eigene Firma im Block geht vor.
+  const s = objekt(roh.sponsor);
+  const alteFirma = [b.kleidungSponsor, b.teambedarfSponsor].map((v) => text(v, GRENZEN.firma)).find((v) => einzeilig(v) !== "") || "";
+  const eigeneFirma = text(s.firma, GRENZEN.firma);
+  e.sponsor = {
+    firma: einzeilig(eigeneFirma) !== "" ? eigeneFirma : alteFirma,
+    ansprechpartner: text(s.ansprechpartner, GRENZEN.ansprechpartner),
+    email: text(s.email, GRENZEN.sponsorEmail),
+    telefon: text(s.telefon, GRENZEN.sponsorTel),
+    anschrift: text(s.anschrift, GRENZEN.anschrift),
   };
 
   e.bestellNr = typeof roh.bestellNr === "string" && /^[A-Z0-9-]{1,40}-\d{6}-\d{4}$/.test(roh.bestellNr) ? roh.bestellNr : "";
