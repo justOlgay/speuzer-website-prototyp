@@ -573,8 +573,6 @@ function dateiname(name) {
   return String(name).split("_").flatMap((teil, i) => (i ? ["_", h("wbr"), teil] : [teil]));
 }
 
-const warte = (ms) => new Promise((ok) => window.setTimeout(ok, ms));
-
 function mailtoVerein(k) {
   const kodiere = (text) => encodeURIComponent(String(text).replace(/\n/g, "\r\n"));
   return "mailto:" + k.mail + "?subject=" + kodiere(mailBetreff(k)) + "&body=" + kodiere(k.text("fertig.mail.text"));
@@ -590,12 +588,9 @@ function ergebnisAnsicht(k) {
   const zeigeStatus = (text) => {
     status.textContent = text;
   };
-  const speichereAlle = async () => {
 
-    for (let i = 0; i < dateien.length; i++) {
-      if (i) await warte(400);
-      speichern(dateien[i].bytes, dateien[i].typ, dateien[i].name);
-    }
+  const speichereAlle = async () => {
+    dateien.forEach((d) => speichern(d.bytes, d.typ, d.name));
   };
   const laden = knopf(k.text("fertig.herunterladen"), {
     aktion: "herunterladen",

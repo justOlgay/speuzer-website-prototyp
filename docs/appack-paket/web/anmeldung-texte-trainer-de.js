@@ -25,7 +25,7 @@ export default {
    "fertig": "Fertig"
   },
   "fuss": {
-   "privat": "Alles bleibt auf deinem Gerät, bis du die Dateien selbst schickst. Die Seite sendet nichts.",
+   "privat": "Alles bleibt auf deinem Gerät, bis du die Datei selbst schickst. Die Seite sendet nichts.",
    "loeschen": "Alle Angaben löschen"
   }
  },
@@ -184,7 +184,7 @@ export default {
  },
  "notfall": {
   "titel": "Wer ist im Notfall für dich da?",
-  "hinweis": "Das Kontaktdatenblatt des Vereins fragt danach. Die Angaben gehen erst an den Verein, wenn du die Dateien selbst schickst. Sag der Person bitte Bescheid, dass du sie als Notfallkontakt angibst.",
+  "hinweis": "Das Kontaktdatenblatt des Vereins fragt danach. Die Angaben gehen erst an den Verein, wenn du die Datei selbst schickst. Sag der Person bitte Bescheid, dass du sie als Notfallkontakt angibst.",
   "name": "Name des Notfallkontakts",
   "beziehung": "Beziehung zu dir",
   "telefon": "Telefonnummer des Notfallkontakts",
@@ -208,7 +208,7 @@ export default {
   "anderes": "Anderes Foto wählen",
   "gespeichert": "Foto ist gespeichert.",
   "vorschauAlt": "Vorschau deines Passfotos",
-  "fussnote": "Das Foto geht als eigene Bilddatei mit der E-Mail mit.",
+  "fussnote": "Das Foto steht auf der letzten Seite deiner Datei.",
   "weiter": "Weiter"
  },
  "kodex": {
@@ -327,48 +327,48 @@ export default {
   "unterschriftAlt": "Deine Unterschrift",
   "kastenTitel": "Das solltest du wissen",
   "kastenText": "Dein Führungszeugnis bringst du persönlich zu {kurz}. Es wird nicht abgegeben.",
-  "weiter": "Alles stimmt – Dateien erstellen"
+  "weiter": "Alles stimmt – Datei erstellen"
  },
  "fertig": {
   "titel": "Dein Paket ist fertig",
-  "titelArbeit": "Wir erstellen deine Dateien",
+  "titelArbeit": "Wir erstellen deine Datei",
   "titelFehler": "Das hat nicht geklappt",
-  "arbeitet": "Einen Moment bitte. Die Dateien werden erstellt.",
+  "arbeitet": "Einen Moment bitte. Die Datei wird erstellt.",
   "nochmal": "Noch einmal versuchen",
   "paketTitel": "Das steht im Paket",
-  "teilen": "Dateien teilen",
-  "herunterladen": "Dateien herunterladen",
+  "teilen": "Datei teilen",
+  "herunterladen": "Datei herunterladen",
   "vorschau": "Vorschau",
-  "gespeichert": "Die Dateien werden gespeichert. Sie liegen meist im Ordner „Downloads“.",
+  "gespeichert": "Die Datei wird gespeichert. Sie liegt meist im Ordner „Downloads“. Zeigt dein Handy sie nur an, tippe dort auf „Teilen“.",
   "geteilt": "Geteilt.",
   "geteiltMitAdresse": "Geteilt. Die Adresse ist kopiert.",
-  "teilenFehler": "Teilen geht hier nicht. Die Dateien wurden stattdessen gespeichert.",
+  "teilenFehler": "Teilen geht hier nicht. Die Datei wurde stattdessen gespeichert.",
   "warnungTitel": "Bitte prüfen",
-  "warnung": "Bitte prüfe die Vorschau: In den Dateien fehlen vielleicht einzelne Zeichen.",
+  "warnung": "Bitte prüfe die Vorschau: In der Datei fehlen vielleicht einzelne Zeichen.",
   "fehler": {
    "bibliothek": "Ein Programmteil lässt sich nicht laden. Bitte prüfe die Internetverbindung.",
    "konfig": "Die Seite ist noch nicht ganz eingerichtet. Bitte schreib an {mail}.",
    "angaben": "Eine Angabe fehlt oder passt nicht. Bitte gehe zurück und prüfe deine Angaben.",
    "unterschrift": "Deine Unterschrift fehlt oder lässt sich nicht lesen. Bitte gehe zurück und unterschreibe noch einmal.",
    "foto": "Dein Passfoto fehlt oder lässt sich nicht lesen. Bitte gehe zurück und wähle das Foto noch einmal.",
-   "pdf": "Die Dateien konnten nicht erstellt werden. Bitte versuche es noch einmal."
+   "pdf": "Die Datei konnte nicht erstellt werden. Bitte versuche es noch einmal."
   },
   "fehlerTitel": "Achtung",
   "mail": {
    "betreff": "Trainerunterlagen {vorname} {nachname}",
-   "text": "Guten Tag,\n\nanbei meine Unterlagen für das Trainerteam: die Dateien als PDF und das Passfoto als Bild.\n\nViele Grüße"
+   "text": "Guten Tag,\n\nanbei meine Unterlagen für das Trainerteam als PDF.\n\nViele Grüße"
   },
-  "sendenTitel": "So schickst du die Dateien an den Verein",
+  "sendenTitel": "So schickst du die Datei an den Verein",
   "handy": "Am Handy",
   "handySchritte": [
-   "Tippe oben auf „Dateien teilen“.",
+   "Tippe oben auf „Datei teilen“.",
    "Wähle dein Mail-Programm.",
    "Schicke die E-Mail an die Adresse unten."
   ],
   "computer": "Am Computer",
   "computerSchritte": [
-   "Klicke oben auf „Dateien herunterladen“.",
-   "Schreibe eine neue E-Mail. Hänge die Dateien an.",
+   "Klicke oben auf „Datei herunterladen“.",
+   "Schreibe eine neue E-Mail. Hänge die Datei an.",
    "Schicke die E-Mail an die Adresse unten."
   ],
   "adresseTitel": "Die E-Mail-Adresse der Geschäftsstelle:",
@@ -376,7 +376,7 @@ export default {
   "kopiert": "Die Adresse ist kopiert.",
   "kopierenFehler": "Kopieren geht hier nicht. Die Adresse ist markiert. Kopiere die Adresse selbst.",
   "oeffnen": "E-Mail an die Geschäftsstelle öffnen",
-  "nichtWhatsapp": "Bitte schicke die Dateien nicht per WhatsApp. Sie enthalten persönliche Daten.",
+  "nichtWhatsapp": "Bitte schicke die Datei nicht per WhatsApp. Sie enthält persönliche Daten.",
   "weiterTitel": "So geht es weiter",
   "schritte": [
    {
@@ -396,10 +396,10 @@ export default {
    },
    {
     "wer": null,
-    "text": "Bis zum {frist} sollte alles erledigt sein: Dateien geschickt, Zeugnis gezeigt.",
+    "text": "Bis zum {frist} sollte alles erledigt sein: Datei geschickt, Zeugnis gezeigt.",
     "nur": null
    }
   ],
-  "fussnote": "Alles bleibt auf deinem Gerät, bis du die Dateien selbst schickst. Die Seite sendet nichts."
+  "fussnote": "Alles bleibt auf deinem Gerät, bis du die Datei selbst schickst. Die Seite sendet nichts."
  }
 };

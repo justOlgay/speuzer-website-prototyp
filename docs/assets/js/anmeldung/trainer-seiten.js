@@ -14,7 +14,7 @@
     zeugnis         erweitertes Führungszeugnis, Antrag auf Gebührenbefreiung
     unterschriften  Unterschrift, Ort und Datum, Satzung
     pruefen         Zusammenfassung mit „Ändern“
-    fertig          Dateien erstellen, teilen, herunterladen, so geht es weiter
+    fertig          Datei erstellen, teilen, herunterladen, so geht es weiter
 
   Eine Seite ist ein Objekt { id, abschnitt, voll?, ohneWeiter?, ohneLoeschen?, render(k), pruefe(k), vorPruefung?(k), beimVerlassen?(k) }:
     render(k)   liefert { titel, inhalt, weiterText?, nach? } (wie in seiten-person.js; nach steht hinter den Knöpfen)
@@ -637,8 +637,6 @@ function dateiname(name) {
   return String(name).split("_").flatMap((teil, i) => (i ? ["_", h("wbr"), teil] : [teil]));
 }
 
-const warte = (ms) => new Promise((ok) => window.setTimeout(ok, ms));
-
 // mailto-Adresse mit Betreff und Text (ohne Anhang: Ein Link kann keine Datei anhängen; die Person hängt sie selbst an)
 function mailtoVerein(k) {
   const kodiere = (text) => encodeURIComponent(String(text).replace(/\n/g, "\r\n"));
@@ -649,19 +647,17 @@ function mailBetreff(k) {
   return k.text("fertig.mail.betreff", { vorname: sauber(k.a.vorname), nachname: sauber(k.a.nachname) });
 }
 
-// Die Dateien sind da: Namen und Beschreibung, Knöpfe zum Teilen, Herunterladen und für die Vorschau, die Wege zum Verein.
+// Die Datei ist da: Name und Beschreibung, Knöpfe zum Teilen, Herunterladen und für die Vorschau, die Wege zum Verein.
 function ergebnisAnsicht(k) {
   const dateien = k.erzeugung.dateien;
   const status = h("p", { klasse: "anm-status", role: "status" });
   const zeigeStatus = (text) => {
     status.textContent = text;
   };
+  // Die Seite liefert genau eine Datei (trainer-pdf.js). Mehrere Downloads aus einem Klick gehen nicht zuverlässig: Safari am iPhone zeigt nur den
+  // ersten, Browser am Computer fragen nach, und beim Teilen nehmen Apps nicht immer alle Dateien (Fund vom 25.11.2026).
   const speichereAlle = async () => {
-    // Nacheinander mit kurzem Abstand: Browser (Safari) lassen sonst nur die erste von mehreren Dateien in einem Klick zu.
-    for (let i = 0; i < dateien.length; i++) {
-      if (i) await warte(400);
-      speichern(dateien[i].bytes, dateien[i].typ, dateien[i].name);
-    }
+    dateien.forEach((d) => speichern(d.bytes, d.typ, d.name));
   };
   const laden = knopf(k.text("fertig.herunterladen"), {
     aktion: "herunterladen",
@@ -677,7 +673,7 @@ function ergebnisAnsicht(k) {
     aktion: "teilen",
     beiKlick: () => {
       // Beides im selben Klick, in dieser Reihenfolge und ohne await dazwischen (navigator.share braucht die Nutzergeste): zuerst die Adresse
-      // der Geschäftsstelle in die Zwischenablage (still), sofort danach die Dateien teilen, mit Betreff und Text der E-Mail.
+      // der Geschäftsstelle in die Zwischenablage (still), sofort danach die Datei teilen, mit Betreff und Text der E-Mail.
       const kopiert = kopiereBeimTeilen(k.mail);
       let versprechen;
       try {
@@ -692,7 +688,7 @@ function ergebnisAnsicht(k) {
         })
         .catch(async (fehler) => {
           if (fehler && fehler.name === "AbortError") return;
-          // Teilen geht nicht: Die Dateien werden stattdessen gespeichert.
+          // Teilen geht nicht: Die Datei wird stattdessen gespeichert.
           await speichereAlle();
           k.gesichert = true;
           zeigeStatus(k.text("fertig.teilenFehler"));
@@ -718,7 +714,7 @@ function ergebnisAnsicht(k) {
     },
   }));
 
-  // Die Wege zum Verein: am Handy „Dateien teilen“, am Computer „Dateien herunterladen“ und eine neue E-Mail. Beide stehen da.
+  // Die Wege zum Verein: am Handy „Datei teilen“, am Computer „Datei herunterladen“ und eine neue E-Mail. Beide stehen da.
   const weg = (titel, schritte, art) =>
     h("div", { klasse: "anm-senden__weg", "data-weg": art },
       h("h4", { klasse: "anm-zwischentitel anm-zwischentitel--klein" }, titel),

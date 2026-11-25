@@ -55,8 +55,8 @@ export const T = {
     kontakt: "Kontaktdatenblatt",
     selbstauskunft: "Selbstauskunft, unterschrieben",
     kodex: "Verhaltenskodex, unterschrieben",
-    foto: "Passfoto (eigene Bilddatei)",
-    zeugnisBeantragen: "Erweitertes Führungszeugnis: Antrag auf Gebührenbefreiung liegt bei; Einsicht bei {kurz} steht aus", // EINSICHT
+    foto: "Passfoto (letzte Seite)",
+    zeugnisBeantragen: "Erweitertes Führungszeugnis: Antrag auf Gebührenbefreiung (vorletzte Seite); Einsicht bei {kurz} steht aus", // EINSICHT
     zeugnisVorhanden: "Erweitertes Führungszeugnis: liegt der Person vor; Einsicht bei {kurz} steht aus", // EINSICHT
     hinweis: "Die Unterschrift des Vereins auf dem Antrag auf Gebührenbefreiung fehlt noch.",
   },
@@ -83,7 +83,7 @@ export const T = {
     // Satz und Fundort wie auf dem Aufnahmeantrag des Vereins (vereinsanmeldung-9-2026.pdf, Seite 1); ohne den Zusatz zur Abmeldung,
     // den die Person am Bildschirm nicht bestätigt hat (Bildschirm 11: „Ich habe die Satzung zur Kenntnis genommen.“)
     satzung: "Ich habe die Satzung des Vereins (einsehbar unter www.sportfreunde04.de, Verein, Downloads) zur Kenntnis genommen.",
-    datenschutz: "Datenschutz: Wie der Verein meine Daten verarbeitet, steht in der Information nach Artikel 13 DSGVO am Ende dieser Datei.", // PRUEFEN_RECHT
+    datenschutz: "Datenschutz: Wie der Verein meine Daten verarbeitet, steht in der Information nach Artikel 13 DSGVO in dieser Datei.", // PRUEFEN_RECHT
     ortDatum: "{ort}, {datum}",
     ortDatumLabel: "Ort, Datum",
     unterschriftLabel: "Unterschrift",
@@ -211,7 +211,7 @@ export const T = {
       "Die Person, die du als Notfallkontakt nennst, informierst du bitte darüber, dass der Verein ihren Namen, ihre Beziehung zu dir und ihre Telefonnummer speichert (Art. 14 DSGVO). Sie kann sich mit Fragen zum Datenschutz an die Geschäftsstelle wenden.",
     entstehungTitel: "10. So entsteht deine Datei",
     entstehung:
-      "Die Seite für neue Trainer arbeitet nur in deinem Browser. Deine Angaben, dein Foto und deine Unterschrift werden nicht an einen Server übertragen. Der Verein erhält die Dateien erst, wenn du sie selbst per E-Mail schickst. Dein erweitertes Führungszeugnis lädst du nirgends hoch und schickst es nicht per E-Mail.",
+      "Die Seite für neue Trainer arbeitet nur in deinem Browser. Deine Angaben, dein Foto und deine Unterschrift werden nicht an einen Server übertragen. Der Verein erhält die Datei erst, wenn du sie selbst per E-Mail schickst. Dein erweitertes Führungszeugnis lädst du nirgends hoch und schickst es nicht per E-Mail.",
   },
 
   // ---------- Antrag auf Gebührenbefreiung (WORTLAUT_QUELLE: Brief des Vereins, ap1/texte.mjs › blaetter.antrag) ----------
@@ -244,12 +244,17 @@ export const T = {
     iA: "i.A.",
   },
 
-  // ---------- Dateien (WORTLAUT_QUELLE: Bildschirm 13 „Das steht im Paket“, ap1/AUFTRAG.md; 24.11.2026 vom Orchestrator um die
-  // Datenschutzinformation ergänzt, weil sie im Paket liegt) ----------
+  // ---------- Passfoto (letzte Seite der Datei; seit 25.11.2026 liegt das Foto in der PDF, nicht mehr als eigene Bilddatei) ----------
+  passfoto: {
+    titel: "Passfoto",
+    zeile: "Passfoto von {name}",
+  },
+
+  // ---------- Die eine Datei (Bildschirm 13 „Das steht im Paket“; 25.11.2026 auf eine Datei umgestellt: Safari am iPhone zeigt von mehreren
+  // Downloads nur den ersten, Browser am Computer fragen nach, und beim Teilen nehmen Apps nicht immer alle Dateien) ----------
   dateien: {
-    paket: "Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Verhaltenskodex, Datenschutzinformation",
-    antrag: "Antrag für dein Führungszeugnis",
-    foto: "Dein Passfoto",
+    mitAntrag: "Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Verhaltenskodex, Datenschutzinformation, Antrag für dein Führungszeugnis, Passfoto",
+    ohneAntrag: "Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Verhaltenskodex, Datenschutzinformation, Passfoto",
   },
 
   // ---------- Metadaten und Fuß ----------

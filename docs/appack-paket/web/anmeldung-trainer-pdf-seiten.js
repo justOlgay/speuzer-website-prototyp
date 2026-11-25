@@ -329,10 +329,21 @@ export function datenschutz(dok, d) {
   s.absatz(t.entstehung, g);
 }
 
-export function fusszeilen(dok, d) {
+export function passfoto(dok, d, foto) {
+  const t = T.passfoto;
+  const s = new Schreiber(dok, { kopf: kopfBauen(dok, t.titel) });
+  const seite = s.neueSeite();
+  const oben = s.y - 6;
+  const groesse = seite.foto(foto, RAND, oben, 170.1, 226.8);
+  seite.text(ersetzePlatzhalter(t.zeile, { name: d.name }), RAND, oben - groesse.h - 22, 11, { nutzer: true });
+}
+
+export function fusszeilen(dok, d, o) {
+  const ohne = (o && o.ohne) || [];
   const gesamt = dok.seiten.length;
   const links = ersetzePlatzhalter(T.fuss.links, { verein: d.verein.name, name: d.name });
   dok.seiten.forEach((seite, i) => {
+    if (ohne.includes(seite)) return;
     seite.text(links, RAND, FUSS_Y, 8, { farbe: FARBE.tinte3, fuss: true, nutzer: true });
     seite.textRechts(ersetzePlatzhalter(T.fuss.seite, { nr: i + 1, gesamt: gesamt }), A4[0] - RAND, FUSS_Y, 8, { farbe: FARBE.tinte3, fuss: true });
   });

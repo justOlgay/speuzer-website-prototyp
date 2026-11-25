@@ -4,7 +4,7 @@
   Eine öffentlich erreichbare Seite, die sich nur mit einem Code öffnet. Neue Trainer, Co-Trainer und Betreuer des FFV Sportfreunde 04
   erledigen darin alles in einem Zug am Handy: Angaben und Passfoto, Verhaltenskodex und Selbstauskunft bestätigen, den Antrag auf
   Gebührenbefreiung für das erweiterte Führungszeugnis ausgefüllt bekommen und am Bildschirm unterschreiben. Am Ende erzeugt die Seite
-  Dateien (Paket-PDF, Antrag als eigene PDF, Passfoto als JPG); die Person schickt sie selbst per E-Mail an die Geschäftsstelle. Nichts
+  EINE PDF-Datei (Paket, bei Bedarf der Antrag, zuletzt das Passfoto); die Person schickt sie selbst per E-Mail an die Geschäftsstelle. Nichts
   wird übertragen, es gibt kein Backend. Das Führungszeugnis selbst wird nie hochgeladen: Die Person zeigt es persönlich den Einsichtnehmenden.
 
   Aufbau und Aussehen wie der Anmelde-Assistent (assistent.js; dessen Dateien bleiben unverändert): gleiche Stylesheets (site.css,

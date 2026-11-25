@@ -5,8 +5,7 @@ import { T } from "./anmeldung-trainer-pdf-texte.js";
 const S = 10.5;
 const LH = 15.75;
 
-export async function baueAntrag(werkzeuge, d) {
-  const dok = await Dokument.neu(werkzeuge);
+export function zeichneAntrag(dok, d) {
   const t = T.antrag;
   const seite = dok.neueSeite();
   const s = new Schreiber(dok, { kopf: () => 0, unten: 20 });
@@ -110,7 +109,12 @@ export async function baueAntrag(werkzeuge, d) {
   const iaX = X0 + 62.4;
   const wIA = seite.text(t.iA, iaX, b, S, {});
   seite.linie(iaX + wIA + 8.5, b - 4.4, iaX + 235.3, b - 4.4, 1.1, FARBE.tinte);
+  return seite;
+}
 
+export async function baueAntrag(werkzeuge, d) {
+  const dok = await Dokument.neu(werkzeuge);
+  zeichneAntrag(dok, d);
   dok.setzeMetadaten({ titel: T.meta.titelAntrag, betreff: T.meta.betreffAntrag, ersteller: d.verein.name, heute: d.heute });
   return { bytes: await dok.speichern(), dok: dok };
 }

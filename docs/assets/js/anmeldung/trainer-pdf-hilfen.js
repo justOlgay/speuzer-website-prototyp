@@ -7,11 +7,12 @@
   - Text ist immer echter Text (ausgewählt und kopierbar), nie ein Bild. Fetter Text ist Füllung plus dünner Rand (die Schrift
     hat nur die normale Schnittstärke).
   - Zeichen außerhalb der Schrift werden zu „?“ und gemerkt (Dokument.ersetzt); nichts bricht still ab.
-  - Das Wappen ist Vektor (trainer-pdf-wappen.js). Das einzige Bild in den Dateien ist die Unterschrift der Person.
+  - Das Wappen ist Vektor (trainer-pdf-wappen.js). Bilder in der Datei: die Unterschrift der Person (PNG) und ihr Passfoto (JPEG,
+    unverändert, ohne neues Kodieren).
 
   Aufbau
-    Dokument    ein PDF mit eingebetteter Schrift; neueSeite(), bettePng(), setzeMetadaten(), speichern()
-    Seite       eine A4-Seite: text, linie, rechteck, kaestchen, kreis, haken, wappen, unterschrift
+    Dokument    ein PDF mit eingebetteter Schrift; neueSeite(), bettePng(), betteJpeg(), setzeMetadaten(), speichern()
+    Seite       eine A4-Seite: text, linie, rechteck, kaestchen, kreis, haken, wappen, unterschrift, foto
     Schreiber   Textfluss mit Seitenumbruch: absatz, ueberschrift, liste, tabelle, hinweisKasten, raster, unterschriftBlock
   Meldungen über Mängel (Text über dem Rand, Schrift unter 9 pt, Zeichen außerhalb der Schrift) stehen in dokument.probleme und
   dokument.ersetzt; der Test wertet sie aus.
@@ -128,6 +129,18 @@ export class Dokument {
       img = await this.doc.embedPng(bytes);
     } catch (e) {
       throw new TrainerPdfFehler("unterschrift-format", e && e.message);
+    }
+    return { img: img, breite: img.width, hoehe: img.height };
+  }
+
+  // Passfoto der Person (JPEG) einmal einbetten. pdf-lib übernimmt die Bytes des JPEG unverändert (DCTDecode), das Foto wird nicht neu kodiert.
+  async betteJpeg(bytes) {
+    if (!istJpeg(bytes)) throw new TrainerPdfFehler("foto-format", "kein JPEG");
+    let img;
+    try {
+      img = await this.doc.embedJpg(bytes);
+    } catch (e) {
+      throw new TrainerPdfFehler("foto-format", e && e.message);
     }
     return { img: img, breite: img.width, hoehe: img.height };
   }
@@ -262,6 +275,17 @@ export class Seite {
   unterschrift(sig, x, y, b, h) {
     const m = Math.min(b / sig.breite, h / sig.hoehe, UNTERSCHRIFT_PT_JE_PX);
     this.page.drawImage(sig.img, { x: x, y: y, width: sig.breite * m, height: sig.hoehe * m });
+  }
+
+  // Foto (betteJpeg) in einen Kasten: linke Kante bei x, Oberkante bei yOben, höchstens bMax breit und hMax hoch, im Seitenverhältnis
+  // des Fotos, mit dünnem Rand. Ergebnis: { b, h } der gezeichneten Größe.
+  foto(bild, x, yOben, bMax, hMax) {
+    const m = Math.min(bMax / bild.breite, hMax / bild.hoehe);
+    const b = bild.breite * m;
+    const h = bild.hoehe * m;
+    this.page.drawImage(bild.img, { x: x, y: yOben - h, width: b, height: h });
+    this.rechteck(x, yOben - h, b, h, { rand: FARBE.linie, randBreite: 0.85 });
+    return { b: b, h: h };
   }
 }
 

@@ -38,8 +38,8 @@ export const T = {
     kontakt: "Kontaktdatenblatt",
     selbstauskunft: "Selbstauskunft, unterschrieben",
     kodex: "Verhaltenskodex, unterschrieben",
-    foto: "Passfoto (eigene Bilddatei)",
-    zeugnisBeantragen: "Erweitertes Führungszeugnis: Antrag auf Gebührenbefreiung liegt bei; Einsicht bei {kurz} steht aus",
+    foto: "Passfoto (letzte Seite)",
+    zeugnisBeantragen: "Erweitertes Führungszeugnis: Antrag auf Gebührenbefreiung (vorletzte Seite); Einsicht bei {kurz} steht aus",
     zeugnisVorhanden: "Erweitertes Führungszeugnis: liegt der Person vor; Einsicht bei {kurz} steht aus",
     hinweis: "Die Unterschrift des Vereins auf dem Antrag auf Gebührenbefreiung fehlt noch.",
   },
@@ -64,7 +64,7 @@ export const T = {
     erklaerungenTitel: "Erklärungen",
 
     satzung: "Ich habe die Satzung des Vereins (einsehbar unter www.sportfreunde04.de, Verein, Downloads) zur Kenntnis genommen.",
-    datenschutz: "Datenschutz: Wie der Verein meine Daten verarbeitet, steht in der Information nach Artikel 13 DSGVO am Ende dieser Datei.",
+    datenschutz: "Datenschutz: Wie der Verein meine Daten verarbeitet, steht in der Information nach Artikel 13 DSGVO in dieser Datei.",
     ortDatum: "{ort}, {datum}",
     ortDatumLabel: "Ort, Datum",
     unterschriftLabel: "Unterschrift",
@@ -186,7 +186,7 @@ export const T = {
       "Die Person, die du als Notfallkontakt nennst, informierst du bitte darüber, dass der Verein ihren Namen, ihre Beziehung zu dir und ihre Telefonnummer speichert (Art. 14 DSGVO). Sie kann sich mit Fragen zum Datenschutz an die Geschäftsstelle wenden.",
     entstehungTitel: "10. So entsteht deine Datei",
     entstehung:
-      "Die Seite für neue Trainer arbeitet nur in deinem Browser. Deine Angaben, dein Foto und deine Unterschrift werden nicht an einen Server übertragen. Der Verein erhält die Dateien erst, wenn du sie selbst per E-Mail schickst. Dein erweitertes Führungszeugnis lädst du nirgends hoch und schickst es nicht per E-Mail.",
+      "Die Seite für neue Trainer arbeitet nur in deinem Browser. Deine Angaben, dein Foto und deine Unterschrift werden nicht an einen Server übertragen. Der Verein erhält die Datei erst, wenn du sie selbst per E-Mail schickst. Dein erweitertes Führungszeugnis lädst du nirgends hoch und schickst es nicht per E-Mail.",
   },
 
   antrag: {
@@ -216,10 +216,14 @@ export const T = {
     iA: "i.A.",
   },
 
+  passfoto: {
+    titel: "Passfoto",
+    zeile: "Passfoto von {name}",
+  },
+
   dateien: {
-    paket: "Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Verhaltenskodex, Datenschutzinformation",
-    antrag: "Antrag für dein Führungszeugnis",
-    foto: "Dein Passfoto",
+    mitAntrag: "Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Verhaltenskodex, Datenschutzinformation, Antrag für dein Führungszeugnis, Passfoto",
+    ohneAntrag: "Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Verhaltenskodex, Datenschutzinformation, Passfoto",
   },
 
   meta: {

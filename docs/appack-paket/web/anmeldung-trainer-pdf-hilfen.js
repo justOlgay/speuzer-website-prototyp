@@ -105,6 +105,17 @@ export class Dokument {
     return { img: img, breite: img.width, hoehe: img.height };
   }
 
+  async betteJpeg(bytes) {
+    if (!istJpeg(bytes)) throw new TrainerPdfFehler("foto-format", "kein JPEG");
+    let img;
+    try {
+      img = await this.doc.embedJpg(bytes);
+    } catch (e) {
+      throw new TrainerPdfFehler("foto-format", e && e.message);
+    }
+    return { img: img, breite: img.width, hoehe: img.height };
+  }
+
   setzeMetadaten(m) {
     const doc = this.doc;
     doc.setTitle(m.titel, { showInWindowTitleBar: true });
@@ -223,6 +234,15 @@ export class Seite {
   unterschrift(sig, x, y, b, h) {
     const m = Math.min(b / sig.breite, h / sig.hoehe, UNTERSCHRIFT_PT_JE_PX);
     this.page.drawImage(sig.img, { x: x, y: y, width: sig.breite * m, height: sig.hoehe * m });
+  }
+
+  foto(bild, x, yOben, bMax, hMax) {
+    const m = Math.min(bMax / bild.breite, hMax / bild.hoehe);
+    const b = bild.breite * m;
+    const h = bild.hoehe * m;
+    this.page.drawImage(bild.img, { x: x, y: yOben - h, width: b, height: h });
+    this.rechteck(x, yOben - h, b, h, { rand: FARBE.linie, randBreite: 0.85 });
+    return { b: b, h: h };
   }
 }
 
