@@ -105,12 +105,8 @@ const BEISPIEL = {
   seit: "2026-11-02",
   tage: ["di", "do", "sa"],
   notfall: { name: "Erika Mustermann", beziehung: "Partnerin", telefon: "0170 7654321" },
-  beruf: "Elektriker",
   erfahrung: "Drei Jahre Jugendtrainer bei einem anderen Verein (E-Jugend).",
-  ersteHilfe: "ja",
   ersteHilfeAm: "2025-05-12",
-  ersteHilfeBis: null,
-  sonstiges: "",
   foto: true,
   kodexGelesen: true,
   selbstauskunft: true,
@@ -204,13 +200,13 @@ const SOLL = {
     "Schön, dass du dabei bist",
     "Hier erledigst du alles, was der Verein von neuen Trainern und Betreuern braucht. Das dauert etwa zehn Minuten.",
     "So läuft es",
-    "Du trägst deine Angaben ein und machst ein Passfoto.",
+    "Du trägst deine Angaben ein. Ein Passfoto ist freiwillig.",
     "Du liest den Verhaltenskodex und bestätigst ihn und die Selbstauskunft.",
     "Du bekommst den Antrag für dein erweitertes Führungszeugnis, ausgefüllt und gebührenfrei.",
     "Du unterschreibst am Bildschirm und schickst alles per E-Mail an die Geschäftsstelle.",
     "Das brauchst du",
     "Dein Handy oder einen Computer",
-    "Ein Foto von dir (digital genügt)",
+    "Wenn du magst: ein Foto von dir (digital genügt)",
     "Deinen Finger oder die Maus zum Unterschreiben",
     "Gut zu wissen",
     "Im ersten Monat (Schnupperphase) bist du nie allein auf dem Platz: Ein gemeldeter Trainer des Vereins ist immer dabei.",
@@ -254,22 +250,20 @@ const SOLL = {
     "Name des Notfallkontakts",
     "Beziehung zu dir",
     "Telefonnummer des Notfallkontakts",
-    "Das Kontaktdatenblatt des Vereins fragt danach. Die Angaben gehen erst an den Verein, wenn du die Datei selbst schickst. Sag der Person bitte Bescheid, dass du sie als Notfallkontakt angibst.",
+    "Das ist freiwillig. Du kannst diese Seite überspringen. Wenn du einen Notfallkontakt angibst, brauchen wir alle drei Angaben. Die Angaben gehen erst an den Verein, wenn du die Datei selbst schickst. Sag der Person bitte Bescheid, dass du sie angibst.",
     "Weiter",
   ],
   erfahrung: [
     "Was bringst du mit?",
-    "Beruf oder Tätigkeit",
-    "Erfahrung als Trainer oder Betreuer (falls vorhanden)",
-    "Erste-Hilfe-Kurs",
-    "Ja, absolviert am",
-    "Nein, geplant bis",
-    "Sonstige Qualifikationen oder Fortbildungen (freiwillig)",
+    "Alles auf dieser Seite ist freiwillig. Du kannst sie überspringen.",
+    "Erfahrung und Qualifikationen",
+    "Zum Beispiel Trainerlizenz, frühere Vereine oder Fortbildungen.",
+    "Erste-Hilfe-Kurs absolviert am (freiwillig)",
     "Weiter",
   ],
   foto: [
     "Dein Passfoto",
-    "Für die internen Vereinsunterlagen. Ein digitales Foto genügt. Bitte von vorne, mit gut sichtbarem Gesicht.",
+    "Das Foto ist freiwillig. Es ist für die internen Vereinsunterlagen. Ein digitales Foto genügt. Bitte von vorne, mit gut sichtbarem Gesicht.",
     "Foto ist gespeichert",
     "Foto ist gespeichert.",
     "Anderes Foto wählen",
@@ -344,9 +338,8 @@ const SOLL = {
     "Wann kannst du",
     "Notfall",
     "Notfallkontakt",
-    "Erfahrung",
-    "Beruf",
-    "Erste Hilfe",
+    "Erfahrung und Qualifikationen",
+    "Erste-Hilfe-Kurs",
     "Unterlagen",
     "Passfoto",
     "Foto ist gespeichert",
@@ -375,9 +368,8 @@ const SOLL = {
     "02.11.2026",
     "Dienstag, Donnerstag, Samstag",
     "Erika Mustermann, Partnerin, 0170 7654321",
-    "Elektriker",
     "Drei Jahre Jugendtrainer bei einem anderen Verein (E-Jugend).",
-    "Ja, absolviert am 12.05.2025",
+    "Absolviert am 12.05.2025",
   ],
   fertig: [
     "Dein Paket ist fertig",
@@ -477,23 +469,27 @@ async function pruefeRegelnInNode() {
   fall("einsatz: „Seit wann“ vor Jahren", "einsatz", (a) => { a.seit = "2019-09-01"; }, []);
   fall("einsatz: „Seit wann“ leer", "einsatz", (a) => { a.seit = null; }, [{ feld: "seit", meldung: M.datumLeer }]);
   fall("einsatz: Tage sind keine Pflicht", "einsatz", (a) => { a.tage = []; }, []);
-  // notfall
-  fall("notfall: Name leer", "notfall", (a) => { a.notfall.name = ""; }, [{ feld: "notfall.name", meldung: M.notfallName }]);
-  fall("notfall: Beziehung leer", "notfall", (a) => { a.notfall.beziehung = ""; }, [{ feld: "notfall.beziehung", meldung: M.notfallBeziehung }]);
+  // notfall: freiwillig, alle drei Angaben oder keine (25.11.2026)
+  fall("notfall: alles leer ist in Ordnung (freiwillig)", "notfall", (a) => { a.notfall = { name: "", beziehung: "", telefon: "" }; }, []);
+  fall("notfall: nur Leerzeichen zählt als leer", "notfall", (a) => { a.notfall = { name: "  ", beziehung: " ", telefon: "   " }; }, []);
+  fall("notfall: nur der Name, der Rest fehlt", "notfall", (a) => { a.notfall = { name: "Erika Mustermann", beziehung: "", telefon: "" }; }, [{ feld: "notfall.beziehung", meldung: M.notfallBeziehung }, { feld: "notfall.telefon", meldung: M.notfallTelefon }]);
+  fall("notfall: nur das Telefon, der Rest fehlt", "notfall", (a) => { a.notfall = { name: "", beziehung: "", telefon: "0170 7654321" }; }, [{ feld: "notfall.name", meldung: M.notfallName }, { feld: "notfall.beziehung", meldung: M.notfallBeziehung }]);
+  fall("notfall: Name leer, Rest da", "notfall", (a) => { a.notfall.name = ""; }, [{ feld: "notfall.name", meldung: M.notfallName }]);
+  fall("notfall: Beziehung leer, Rest da", "notfall", (a) => { a.notfall.beziehung = ""; }, [{ feld: "notfall.beziehung", meldung: M.notfallBeziehung }]);
   fall("notfall: Telefon zu kurz", "notfall", (a) => { a.notfall.telefon = "0170"; }, [{ feld: "notfall.telefon", meldung: M.nummerKurz }]);
-  fall("notfall: Telefon leer", "notfall", (a) => { a.notfall.telefon = ""; }, [{ feld: "notfall.telefon", meldung: M.notfallTelefon }]);
-  // erfahrung
-  fall("erfahrung: Beruf leer", "erfahrung", (a) => { a.beruf = ""; }, [{ feld: "beruf", meldung: M.beruf }]);
-  fall("erfahrung: Erfahrung und Sonstiges leer", "erfahrung", (a) => { a.erfahrung = ""; a.sonstiges = ""; }, []);
-  fall("erfahrung: keine Antwort zum Kurs", "erfahrung", (a) => { a.ersteHilfe = null; a.ersteHilfeAm = null; }, [{ feld: "ersteHilfe", meldung: M.ersteHilfe }]);
-  fall("erfahrung: „ja“ mit Datum in der Zukunft", "erfahrung", (a) => { a.ersteHilfeAm = null; }, [{ feld: "ersteHilfeAm", meldung: M.datumZukunft }], () => ({ roh: { ersteHilfeAm: { t: "12", m: "05", j: "2027" } } }));
-  fall("erfahrung: „ja“ ohne Datum", "erfahrung", (a) => { a.ersteHilfeAm = null; }, [{ feld: "ersteHilfeAm", meldung: M.datumLeer }]);
-  fall("erfahrung: „nein“ mit geplantem Datum", "erfahrung", (a) => { a.ersteHilfe = "nein"; a.ersteHilfeAm = null; a.ersteHilfeBis = "2026-12-15"; }, []);
-  fall("erfahrung: „nein“ mit Datum in der Vergangenheit", "erfahrung", (a) => { a.ersteHilfe = "nein"; a.ersteHilfeAm = null; a.ersteHilfeBis = "2026-10-01"; }, [{ feld: "ersteHilfeBis", meldung: M.datumVergangenheit }]);
-  fall("erfahrung: „nein“ ohne Datum", "erfahrung", (a) => { a.ersteHilfe = "nein"; a.ersteHilfeAm = null; }, [{ feld: "ersteHilfeBis", meldung: M.datumLeer }]);
-  // foto, kodex, selbstauskunft, zeugnis, unterschriften
-  fall("foto: kein Foto", "foto", (a, c) => { c.medien.foto = null; }, [{ feld: "foto", meldung: M.foto }]);
-  fall("foto: leere Bytes", "foto", (a, c) => { c.medien.foto = new Uint8Array(0); }, [{ feld: "foto", meldung: M.foto }]);
+  fall("notfall: Telefon leer, Rest da", "notfall", (a) => { a.notfall.telefon = ""; }, [{ feld: "notfall.telefon", meldung: M.notfallTelefon }]);
+  // erfahrung: alles freiwillig (ein Textfeld und das Datum des Erste-Hilfe-Kurses; Beruf, Sonstiges und „geplant bis“ gibt es nicht mehr)
+  fall("erfahrung: alles leer ist in Ordnung (freiwillig)", "erfahrung", (a) => { a.erfahrung = ""; a.ersteHilfeAm = null; }, []);
+  fall("erfahrung: Kurs mit Datum", "erfahrung", (a) => { a.ersteHilfeAm = "2025-05-12"; }, []);
+  fall("erfahrung: Kursdatum in der Zukunft", "erfahrung", (a) => { a.ersteHilfeAm = null; }, [{ feld: "ersteHilfeAm", meldung: M.datumZukunft }], () => ({ roh: { ersteHilfeAm: { t: "12", m: "05", j: "2027" } } }));
+  fall("erfahrung: Kursdatum unvollständig", "erfahrung", (a) => { a.ersteHilfeAm = null; }, [{ feld: "ersteHilfeAm", meldung: M.datumUnvollstaendig }], () => ({ roh: { ersteHilfeAm: { t: "12", m: "", j: "" } } }));
+  fall("erfahrung: Kursdatum gibt es nicht", "erfahrung", (a) => { a.ersteHilfeAm = null; }, [{ feld: "ersteHilfeAm", meldung: M.datumUngueltig }], () => ({ roh: { ersteHilfeAm: { t: "31", m: "02", j: "2025" } } }));
+  fall("erfahrung: Kursdatum ganz leer im Rohtext ist in Ordnung", "erfahrung", (a) => { a.ersteHilfeAm = null; }, [], () => ({ roh: { ersteHilfeAm: { t: "", m: "", j: "" } } }));
+  fall("erfahrung: Zeichen außerhalb der Schrift im Textfeld", "erfahrung", (a) => { a.erfahrung = "Тренер"; }, [{ feld: "erfahrung", meldung: M.lateinischText }]);
+  // foto: freiwillig (25.11.2026), es gibt keine Regel mehr
+  fall("foto: kein Foto ist in Ordnung (freiwillig)", "foto", (a, c) => { c.medien.foto = null; }, []);
+  fall("foto: leere Bytes sind in Ordnung (freiwillig)", "foto", (a, c) => { c.medien.foto = new Uint8Array(0); }, []);
+  // kodex, selbstauskunft, zeugnis, unterschriften
   fall("kodex: nicht angekreuzt", "kodex", (a) => { a.kodexGelesen = false; }, [{ feld: "kodexGelesen", meldung: M.kodex }]);
   fall("selbstauskunft: nicht angekreuzt", "selbstauskunft", (a) => { a.selbstauskunft = false; }, [{ feld: "selbstauskunft", meldung: M.selbstauskunft }]);
   fall("zeugnis: keine Wahl", "zeugnis", (a) => { a.zeugnis = null; }, [{ feld: "zeugnis", meldung: M.zeugnis }]);
@@ -552,7 +548,9 @@ async function pruefeRegelnInNode() {
     ["Einsatz: Abteilung Karneval ist bei „nur Fußball“ ein Fehler an „abteilung“", (() => { const a = gut(); a.abteilung = "karneval"; a.mannschaft = GRUPPEN_KARNEVAL[0]; a.rolle = "trainer"; const c = ctxVoll(); c.konfig = { ...c.konfig, abteilungen: ["fussball"] }; return R.pruefeSeite("einsatz", a, c).map((f) => f.feld); })(), ["abteilung"]],
     ["Einsatz: Abteilung Fußball ist bei „nur Fußball“ in Ordnung", (() => { const a = gut(); const c = ctxVoll(); c.konfig = { ...c.konfig, abteilungen: ["fussball"] }; return R.pruefeSeite("einsatz", a, c).length; })(), 0],
     ["ersteOffeneSeite (alles gut)", R.ersteOffeneSeite(gut(), ctxVoll()), null],
-    ["ersteOffeneSeite (Notfall leer)", (() => { const a = gut(); a.notfall.name = ""; const r = R.ersteOffeneSeite(a, ctxVoll()); return r && r.seite; })(), "notfall"],
+    ["ersteOffeneSeite (Notfall leer ist kein Fehler)", (() => { const a = gut(); a.notfall = { name: "", beziehung: "", telefon: "" }; return R.ersteOffeneSeite(a, ctxVoll()); })(), null],
+    ["ersteOffeneSeite (Nachname leer)", (() => { const a = gut(); a.nachname = ""; const r = R.ersteOffeneSeite(a, ctxVoll()); return r && r.seite; })(), "person"],
+    ["ersteOffeneSeite (nur Notfallname, Rest fehlt)", (() => { const a = gut(); a.notfall = { name: "Erika", beziehung: "", telefon: "" }; const r = R.ersteOffeneSeite(a, ctxVoll()); return r && r.seite; })(), "notfall"],
   ];
   const rechenFehler = rechnen.filter(([, ist, soll]) => !gleich(ist, soll)).map(([n, ist, soll]) => `${n}: ${JSON.stringify(ist)} statt ${JSON.stringify(soll)}`);
   return { faelle, fehlt, rechnen: rechnen.length, rechenFehler };
@@ -932,19 +930,19 @@ async function fuelle(page, s, d, art) {
     await datum(page, "seit", d.seit);
     for (const t of d.tage) await kreuze(page, "tage", t);
   } else if (s === "notfall") {
-    await text(page, "notfall.name", d.notfall.name);
-    await text(page, "notfall.beziehung", d.notfall.beziehung);
-    await text(page, "notfall.telefon", d.notfall.telefon);
+    // freiwillig: nur, was in d steht
+    for (const f of ["name", "beziehung", "telefon"]) if (d.notfall && d.notfall[f]) await text(page, "notfall." + f, d.notfall[f]);
   } else if (s === "erfahrung") {
-    await text(page, "beruf", d.beruf);
-    await text(page, "erfahrung", d.erfahrung);
-    await karte(page, "ersteHilfe", d.ersteHilfe);
-    await datum(page, d.ersteHilfe === "ja" ? "ersteHilfeAm" : "ersteHilfeBis", d.ersteHilfe === "ja" ? d.ersteHilfeAm : d.ersteHilfeBis);
-    if (d.sonstiges) await text(page, "sonstiges", d.sonstiges);
+    // freiwillig: ein Textfeld und das Datum des Erste-Hilfe-Kurses
+    if (d.erfahrung) await text(page, "erfahrung", d.erfahrung);
+    if (d.ersteHilfeAm) await datum(page, "ersteHilfeAm", d.ersteHilfeAm);
   } else if (s === "foto") {
-    const eingabe = await page.$('#anmeldung input[data-aktion="foto-galerie"]');
-    await eingabe.uploadFile(path.join(TESTBILDER, "foto-3x4.jpg"));
-    await page.waitForSelector("#anmeldung .anm-vorschau-foto", { visible: true, timeout: 8000 });
+    // freiwillig: nur mit d.foto
+    if (d.foto) {
+      const eingabe = await page.$('#anmeldung input[data-aktion="foto-galerie"]');
+      await eingabe.uploadFile(path.join(TESTBILDER, "foto-3x4.jpg"));
+      await page.waitForSelector("#anmeldung .anm-vorschau-foto", { visible: true, timeout: 8000 });
+    }
   } else if (s === "kodex") {
     await kreuze(page, "kodexGelesen");
   } else if (s === "selbstauskunft") {
@@ -1545,7 +1543,7 @@ async function haupt() {
         await hp.click('[data-aktion="zurueck"]');
         await warteSchritt(hp, "pruefen");
       }
-      const erwartet = ["person", "person", "person", "person", "person", "einsatz", "einsatz", "einsatz", "einsatz", "einsatz", "notfall", "erfahrung", "erfahrung", "erfahrung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften", "unterschriften"];
+      const erwartet = ["person", "person", "person", "person", "person", "einsatz", "einsatz", "einsatz", "einsatz", "einsatz", "notfall", "erfahrung", "erfahrung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften", "unterschriften"];
       const istZiele = ziele.map((z) => z.split(" › ")[1]);
       if (!gleich(istZiele, erwartet)) fehler.push("Ändern-Ziele: " + ziele.join("; "));
       belege.push(`jede Zeile der Zusammenfassung hat „Ändern“ (${anzahl} Zeilen) und führt zur passenden Seite: ${ziele.map((z) => z.split(" › ")[1]).join(", ")}`);
@@ -1881,27 +1879,20 @@ async function haupt() {
       await datum(page, "seit", "2026-11-02");
       await weiter(page, "notfall");
       // Wechsel der Abteilung leert die Rolle (Torwarttrainer fiel weg): hier unverändert, weil nach Fußball zurück gewählt wurde
-      await erwarte("notfall leer", "notfall", [["notfall.name", M.notfallName], ["notfall.beziehung", M.notfallBeziehung], ["notfall.telefon", M.notfallTelefon]]);
+      // Der Notfallkontakt ist freiwillig (25.11.2026): Wer einen angibt, gibt alle drei Angaben an; alles leer ist in Ordnung (siehe die Läufe ohne freiwillige Angaben)
       await text(page, "notfall.name", "Erika Mustermann");
+      await erwarte("notfall: nur der Name", "notfall", [["notfall.beziehung", M.notfallBeziehung], ["notfall.telefon", M.notfallTelefon]]);
       await text(page, "notfall.beziehung", "Partnerin");
       await text(page, "notfall.telefon", "0170");
       await erwarte("notfall: Telefon zu kurz", "notfall", [["notfall.telefon", M.nummerKurz]]);
       await text(page, "notfall.telefon", "0170 7654321");
       await weiter(page, "erfahrung");
-      // erfahrung
-      await erwarte("erfahrung leer", "erfahrung", [["beruf", M.beruf], ["ersteHilfe", M.ersteHilfe]]);
-      await text(page, "beruf", "Elektriker");
-      await karte(page, "ersteHilfe", "ja");
+      // erfahrung: alles freiwillig; nur ein eingetragenes Kursdatum wird geprüft
       await datum(page, "ersteHilfeAm", "2027-05-12");
-      await erwarte("erfahrung: Kurs „ja“ mit Datum in der Zukunft", "erfahrung", [["ersteHilfeAm", M.datumZukunft]]);
-      await karte(page, "ersteHilfe", "nein");
-      await datum(page, "ersteHilfeBis", "2026-10-01");
-      await erwarte("erfahrung: Kurs „nein“ mit Datum in der Vergangenheit", "erfahrung", [["ersteHilfeBis", M.datumVergangenheit]]);
-      await datum(page, "ersteHilfeBis", "2026-12-15");
+      await erwarte("erfahrung: Kursdatum in der Zukunft", "erfahrung", [["ersteHilfeAm", M.datumZukunft]]);
+      await datum(page, "ersteHilfeAm", "2025-05-12");
       await weiter(page, "foto");
-      // Der Rest des Datums von „ja“ (2027-05-12) darf nicht mitgehen: Die Seite hat es beim Verlassen verworfen (siehe Aufruf unten)
-      // foto
-      await erwarte("foto leer", "foto", [["foto", M.foto]]);
+      // foto: freiwillig, hier mit Foto (der Weg ohne Foto steht in den Läufen ohne freiwillige Angaben)
       const eingabe = await page.$('#anmeldung input[data-aktion="foto-machen"]');
       await eingabe.uploadFile(path.join(TESTBILDER, "foto-3x4.jpg"));
       await page.waitForSelector("#anmeldung .anm-vorschau-foto", { visible: true, timeout: 8000 });
@@ -2063,9 +2054,10 @@ async function haupt() {
         leer.einsatz = await page.evaluate(() => ({ gewaehlt: Array.from(document.querySelectorAll("#anmeldung input[type=radio]:checked, #anmeldung input[type=checkbox]:checked")).length, auswahl: !!document.querySelector('#anmeldung select[data-pfad="mannschaft"]'), datum: Array.from(document.querySelectorAll("#anmeldung input[data-pfad^='seit.']")).map((e) => e.value) }));
         await fuelle(page, "einsatz", BEISPIEL);
         await weiter(page, "notfall");
+        leer.notfall = await page.$$eval("#anmeldung input[data-pfad^='notfall.']", (l) => l.filter((e) => e.value !== "").length);
         await fuelle(page, "notfall", BEISPIEL);
         await weiter(page, "erfahrung");
-        leer.erfahrung = await page.evaluate(() => ({ beruf: document.querySelector('[data-pfad="beruf"]').value, gewaehlt: document.querySelectorAll("#anmeldung input[type=radio]:checked").length }));
+        leer.erfahrung = await page.evaluate(() => ({ text: document.querySelector('[data-pfad="erfahrung"]').value, datum: Array.from(document.querySelectorAll("#anmeldung input[data-pfad^='ersteHilfeAm.']")).map((e) => e.value) }));
         await fuelle(page, "erfahrung", BEISPIEL);
         await weiter(page, "foto");
         leer.foto = await page.evaluate(() => ({ vorschau: document.querySelector("#anmeldung .anm-vorschau-foto").getClientRects().length > 0 }));
@@ -2081,7 +2073,7 @@ async function haupt() {
         await fuelle(page, "zeugnis", BEISPIEL);
         await weiter(page, "unterschriften");
         leer.unterschrift = await page.evaluate(() => ({ stand: document.querySelector("#anmeldung .anm-unterschrift__stand").textContent, satzung: document.querySelector('[data-pfad="satzung"]').checked }));
-        const gesamtLeer = leer.person.length === 0 && leer.einsatz.gewaehlt === 0 && !leer.einsatz.auswahl && leer.einsatz.datum.every((v) => v === "") && leer.erfahrung.beruf === "" && leer.erfahrung.gewaehlt === 0 && leer.foto.vorschau === false && leer.kodex === 0 && leer.selbst === 0 && leer.zeugnis === 0 && leer.unterschrift.stand === "Noch nicht unterschrieben" && !leer.unterschrift.satzung;
+        const gesamtLeer = leer.person.length === 0 && leer.einsatz.gewaehlt === 0 && !leer.einsatz.auswahl && leer.einsatz.datum.every((v) => v === "") && leer.notfall === 0 && leer.erfahrung.text === "" && leer.erfahrung.datum.every((v) => v === "") && leer.foto.vorschau === false && leer.kodex === 0 && leer.selbst === 0 && leer.zeugnis === 0 && leer.unterschrift.stand === "Noch nicht unterschrieben" && !leer.unterschrift.satzung;
         if (!gesamtLeer) fehler.push("nach dem Löschen nicht leer: " + JSON.stringify(leer));
         belege.push(`„Alle Angaben löschen“: Rückfrage („Nein, behalten“ ändert nichts); „Ja, alles löschen“ › Bildschirm „start“ mit „${meldung}“; danach sind alle Felder leer (Person, Einsatz, Notfall, Erfahrung, Foto, Kodex, Selbstauskunft, Zeugnis, Unterschrift, Satzung), die Warnung vor dem Verlassen entfällt (vorher: ${mitDaten ? "ja" : "nein"}, frisch: ${frisch ? "ja" : "nein"})`);
         // Neues Foto und Unterschrift nach dem Löschen kommen frisch an (nicht die alten Bytes): komplett durchlaufen, Attrappe prüft
@@ -2418,15 +2410,15 @@ async function haupt() {
           handy: "+49 170 / 123-4567 890 12",
           email: "maximilian.alexander.mustermann.musterfrau@beispiel-adresse.example.com",
           notfall: { name: lang(60, "Erika Mustermann-Musterfrau "), beziehung: lang(40, "Lebensgefährtin und Mutter "), telefon: "0170 7654321" },
-          beruf: lang(60, "Elektroniker für Energie- und Gebäudetechnik "),
-          erfahrung: lang(300, "Jugendtrainer bei einem anderen Verein, E-Jugend und D-Jugend, Torwarttraining, Turnierleitung, Elternarbeit. "),
-          sonstiges: lang(300, "DFB-Basislizenz, Fortbildung Kinderschutz, Schiedsrichterschein, Übungsleiter C Breitensport. "),
+          erfahrung: lang(300, "Jugendtrainer bei einem anderen Verein, E-Jugend und D-Jugend, Torwarttraining, Turnierleitung, Elternarbeit, DFB-Basislizenz, Fortbildung Kinderschutz. "),
         };
         const faelle = [
-          { name: "Beispiel (Fußball, Co-Trainer, Antrag)", d: BEISPIEL, antrag: true, suche: ["Mustermann", "Max", "D3-Jugend", "Elektriker", "Erika Mustermann", "Melanie Seipp", "02.12.2026"] },
+          { name: "Beispiel (Fußball, Co-Trainer, Antrag)", d: BEISPIEL, antrag: true, suche: ["Mustermann", "Max", "D3-Jugend", "Erika Mustermann", "Melanie Seipp", "02.12.2026", "12.05.2025"] },
           { name: "Torwarttrainer, Zeugnis vorhanden", d: { ...BEISPIEL, rolle: "torwarttrainer", zeugnis: "vorhanden" }, antrag: false, suche: ["Torwarttrainer", "D3-Jugend"] },
-          { name: "Karneval, Betreuer, Erste Hilfe geplant", d: { ...BEISPIEL, abteilung: "karneval", mannschaft: GRUPPEN_KARNEVAL[0], rolle: "betreuer", ersteHilfe: "nein", ersteHilfeAm: null, ersteHilfeBis: "2026-12-15" }, antrag: true, suche: ["Betreuer", GRUPPEN_KARNEVAL[0], "15.12.2026"] },
+          { name: "Karneval, Betreuer, ohne Erste-Hilfe-Angabe", d: { ...BEISPIEL, abteilung: "karneval", mannschaft: GRUPPEN_KARNEVAL[0], rolle: "betreuer", ersteHilfeAm: null }, antrag: true, suche: ["Betreuer", GRUPPEN_KARNEVAL[0]] },
           { name: "längste Eingaben (alle Felder an der Grenze)", d: BEISPIEL_LANG, antrag: true, suche: [] },
+          // 25.11.2026: Passfoto, Notfallkontakt, Erfahrung, Erste-Hilfe-Kurs und Wochentage sind freiwillig; die Datei entsteht auch ohne sie
+          { name: "ohne alle freiwilligen Angaben", d: { ...BEISPIEL, notfall: { name: "", beziehung: "", telefon: "" }, erfahrung: "", ersteHilfeAm: null, tage: [], foto: false }, antrag: true, ohneFreiwillige: true, suche: ["Mustermann", "D3-Jugend", "Melanie Seipp"] },
         ];
         for (const f of faelle) {
           const page = await neueSeite(browser, "standard", "?code=" + TESTCODE, { ohneStubs: false });
@@ -2434,6 +2426,14 @@ async function haupt() {
           const ziel = fs.mkdtempSync(path.join(downloads, "echt-"));
           await sitzung.send("Browser.setDownloadBehavior", { behavior: "allow", downloadPath: ziel, eventsEnabled: true });
           await bisPruefen(page, f.d, "maus");
+          if (f.ohneFreiwillige) {
+            // Zusammenfassung: Freiwilliges ohne Eintrag steht als „Nicht angegeben (freiwillig)“ da, das Pflichtige ist vollständig
+            const zeilen = await page.$$eval("#anmeldung .anm-pruefzeile", (l) => l.map((e) => e.querySelector("dt").textContent.trim() + ": " + e.querySelector(".anm-pruefzeile__wert").textContent.trim()));
+            const sollZeilen = ["Notfallkontakt: Nicht angegeben (freiwillig)", "Erfahrung und Qualifikationen: Nicht angegeben (freiwillig)", "Erste-Hilfe-Kurs: Nicht angegeben (freiwillig)", "Passfoto: Nicht angegeben (freiwillig)"];
+            const fehlenZeilen = sollZeilen.filter((x) => !zeilen.includes(x));
+            if (fehlenZeilen.length || zeilen.some((z) => /Noch offen/.test(z))) fehler.push(`${f.name}: Zusammenfassung ohne ${JSON.stringify(fehlenZeilen)} oder mit „Noch offen“: ${JSON.stringify(zeilen)}`);
+            belege.push(`  ${f.name}: Zusammenfassung zeigt die vier freiwilligen Angaben als „Nicht angegeben (freiwillig)“, nichts „Noch offen“`);
+          }
           if (f.antrag === true && f.d === BEISPIEL) {
             // Antrag ansehen (Bildschirm 10) mit dem echten Modul
             await page.click('[data-aktion="zurueck"]');
@@ -2493,12 +2493,21 @@ async function haupt() {
             const txt = (r.stdout || "").replace(/\s+/g, " ");
             const fehlen = f.suche.filter((x) => !txt.includes(x));
             if (fehlen.length) fehler.push(`${f.name}: in der Datei fehlen ${JSON.stringify(fehlen)}`);
-            // Der Brief (nur bei „beantragen“) steckt als vorletzte Seite in derselben Datei, zuletzt das Passfoto
+            // Der Brief (nur bei „beantragen“) steckt als vorletzte Seite in derselben Datei, zuletzt das Passfoto (ohne Passfoto ist er die letzte Seite)
             const mitBrief = f.d.zeugnis === "beantragen";
             if (mitBrief && (!txt.includes(f.d.nachname.slice(0, 20)) || !/Nr\. 2 Buchst\. a/.test(txt) || !/ANTRAG AUF GEBÜHRENBEFREIUNG/.test(txt))) fehler.push(`${f.name}: Brief in der Datei ohne Name oder ohne „Nr. 2 Buchst. a“`);
             if (!mitBrief && /ANTRAG AUF GEBÜHRENBEFREIUNG/.test(txt)) fehler.push(`${f.name}: Brief in der Datei, obwohl das Zeugnis vorhanden ist`);
-            if (!/Passfoto von /.test(txt)) fehler.push(`${f.name}: Seite „Passfoto von …“ fehlt in der Datei`);
-            textInfo = `Datei enthält ${f.suche.length - fehlen.length} von ${f.suche.length} gesuchten Angaben${mitBrief ? "; Brief mit Name und „Nr. 2 Buchst. a“" : "; kein Brief"}; Passfoto-Seite`;
+            // Das Deckblatt nennt die Seite des Briefs richtig: mit Passfoto „vorletzte“, ohne Passfoto „letzte Seite“ (Leserichtung, ohne -layout)
+            if (mitBrief) {
+              const deck = (spawnSync(pdftotext, ["-f", "1", "-l", "1", path.join(ziel, paket), "-"], { encoding: "utf8" }).stdout || "").replace(/\s+/g, " ");
+              const sollSeite = f.d.foto ? "vorletzte Seite" : "letzte Seite";
+              if (!deck.includes("Antrag auf Gebührenbefreiung (" + sollSeite + ")")) fehler.push(`${f.name}: Deckblatt nennt den Antrag nicht mit „(${sollSeite})“`);
+            }
+            // Das Passfoto ist freiwillig: Mit Foto steht die Seite „Passfoto von …“ am Ende, ohne Foto fehlt sie und das Deckblatt nennt es nicht abgegeben
+            if (f.d.foto && !/Passfoto von /.test(txt)) fehler.push(`${f.name}: Seite „Passfoto von …“ fehlt in der Datei`);
+            if (!f.d.foto && (/Passfoto von /.test(txt) || !/Passfoto: nicht abgegeben \(freiwillig\)/.test(txt))) fehler.push(`${f.name}: ohne Foto darf die Seite „Passfoto von …“ nicht da sein, das Deckblatt muss „nicht abgegeben“ sagen`);
+            if (f.ohneFreiwillige && (/Erika Mustermann|Partnerin/.test(txt) || /Ja, absolviert am:\s*\d/.test(txt))) fehler.push(`${f.name}: freiwillige Angaben stehen in der Datei, obwohl sie fehlen`);
+            textInfo = `Datei enthält ${f.suche.length - fehlen.length} von ${f.suche.length} gesuchten Angaben${mitBrief ? "; Brief mit Name und „Nr. 2 Buchst. a“" : "; kein Brief"}; ${f.d.foto ? "Passfoto-Seite" : "ohne Passfoto-Seite"}`;
           }
           belege.push(`${f.name}: ${anzeige.length} Dateien nach ${ms} ms (${anzeige.map((x) => x.split(" – ")[0]).join(", ")}); Anzeige = Rückgabe; Warnungen ${echt.warnungen.length} (Hinweiskasten ${warnkasten ? "ja" : "nein"}); heruntergeladen: ${gross.join(", ")}; ${textInfo}`);
           await schliesseSeite(page);

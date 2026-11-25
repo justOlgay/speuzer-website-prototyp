@@ -56,7 +56,10 @@ export const T = {
     selbstauskunft: "Selbstauskunft, unterschrieben",
     kodex: "Verhaltenskodex, unterschrieben",
     foto: "Passfoto (letzte Seite)",
-    zeugnisBeantragen: "Erweitertes Führungszeugnis: Antrag auf Gebührenbefreiung (vorletzte Seite); Einsicht bei {kurz} steht aus", // EINSICHT
+    fotoOffen: "Passfoto: nicht abgegeben (freiwillig)",
+    antragSeiteMitFoto: "vorletzte Seite", // der Brief steht vor dem Passfoto
+    antragSeiteOhneFoto: "letzte Seite", // ohne Passfoto ist der Brief die letzte Seite der Datei
+    zeugnisBeantragen: "Erweitertes Führungszeugnis: Antrag auf Gebührenbefreiung ({seite}); Einsicht bei {kurz} steht aus", // EINSICHT
     zeugnisVorhanden: "Erweitertes Führungszeugnis: liegt der Person vor; Einsicht bei {kurz} steht aus", // EINSICHT
     hinweis: "Die Unterschrift des Vereins auf dem Antrag auf Gebührenbefreiung fehlt noch.",
   },
@@ -102,17 +105,15 @@ export const T = {
     ort: "Ort",
     mobil: "Telefonnummer (mobil)",
     email: "E-Mail-Adresse",
-    notfallkontakt: "Notfallkontakt",
+    notfallkontakt: "Notfallkontakt (freiwillig)",
     notfallName: "Name des Notfallkontakts",
     notfallBeziehung: "Beziehung zum Trainer/Betreuer",
     notfallTelefon: "Telefonnummer des Notfallkontakts",
-    qualifikationen: "Berufliche/Trainerische Qualifikationen",
-    beruf: "Beruf oder Tätigkeit",
-    erfahrungen: "Erfahrungen als Trainer/Betreuer (falls vorhanden)",
-    ersteHilfe: "Erste-Hilfe-Kurs",
+    // Seit 25.11.2026 ein freiwilliger Abschnitt: ein Feld statt Beruf, Erfahrungen und sonstigen Qualifikationen, der Erste-Hilfe-Kurs nur als „Ja, absolviert am“
+    qualifikationen: "Erfahrung und Qualifikationen (freiwillig)",
+    erfahrungen: "Erfahrung als Trainer/Betreuer, Lizenzen, Fortbildungen",
+    ersteHilfe: "Erste-Hilfe-Kurs (freiwillig)",
     ersteHilfeJa: "Ja, absolviert am:",
-    ersteHilfeNein: "Nein, geplant bis:",
-    sonstiges: "Sonstige Qualifikationen oder Fortbildungen",
     verfuegbarkeit: "Verfügbarkeit (bitte ankreuzen)",
     anmerkungen: "Zusätzliche Informationen / Anmerkungen",
     unterschrift: "Unterschrift Trainer/Betreuer",
@@ -164,10 +165,10 @@ export const T = {
     datenTitel: "2. Welche Daten verarbeiten wir?",
     daten: [
       "Stammdaten: Name, Anschrift, Geburtsdatum, E-Mail-Adresse und Handynummer.",
-      "Angaben zum Einsatz: Abteilung, Mannschaft oder Gruppe, Rolle, Beginn der Tätigkeit und die Wochentage, an denen du kannst.",
-      "Notfallkontakt: Name, Beziehung und Telefonnummer einer Person, die wir im Notfall anrufen dürfen (Daten Dritter, siehe Punkt 9).",
-      "Angaben zu deiner Erfahrung: Beruf, Erfahrung als Trainer oder Betreuer, Erste-Hilfe-Kurs und weitere Qualifikationen.",
-      "Ein Passfoto für die internen Vereinsunterlagen.",
+      "Angaben zum Einsatz: Abteilung, Mannschaft oder Gruppe, Rolle, Beginn der Tätigkeit und, freiwillig, die Wochentage, an denen du kannst.",
+      "Notfallkontakt (freiwillig): Name, Beziehung und Telefonnummer einer Person, die wir im Notfall anrufen dürfen (Daten Dritter, siehe Punkt 9).",
+      "Angaben zu deiner Erfahrung (freiwillig): Erfahrung und Qualifikationen als Trainer oder Betreuer und das Datum deines Erste-Hilfe-Kurses.",
+      "Ein Passfoto für die internen Vereinsunterlagen (freiwillig).",
       "Selbstauskunft zur Kinder- und Jugendarbeit (Angaben zu Straftaten nach § 72a Absatz 1 Satz 1 SGB VIII) und Erklärung zum Verhaltenskodex.",
       "Erweitertes Führungszeugnis: nur das Datum der Einsicht, das Datum des Zeugnisses und die Angabe, ob eine einschlägige Verurteilung darin steht (ja oder nein). Das Zeugnis selbst bleibt bei dir.",
     ],
@@ -176,8 +177,8 @@ export const T = {
     zweck: [
       ["Mitgliedschaft (beitragsfrei), Organisation von Training und Betreuung, Kontakt zu dir (Anmeldung und Kontaktdatenblatt)", "Art. 6 Abs. 1 lit. b DSGVO (Mitgliedschaft)"],
       ["Planung deines Einsatzes (Mannschaft oder Gruppe, Rolle, Zeiten, Erfahrung)", "Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Organisation des Trainingsbetriebs)"],
-      ["Notfallkontakt", "Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse: im Notfall Angehörige erreichen)"],
-      ["Passfoto für die internen Vereinsunterlagen", "Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse, Widerspruch möglich)"],
+      ["Notfallkontakt (freiwillig)", "Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse: im Notfall Angehörige erreichen)"],
+      ["Passfoto für die internen Vereinsunterlagen (freiwillig)", "Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse, Widerspruch möglich)"],
       ["Selbstauskunft und Erklärung zum Verhaltenskodex (Schutz von Kindern und Jugendlichen)", "Art. 6 Abs. 1 lit. f in Verbindung mit Art. 10 DSGVO (berechtigtes Interesse am Schutz der Kinder; verlangt nach dem Schutzkonzept des Vereins)"],
       ["Einsicht in das erweiterte Führungszeugnis (nur die drei Vermerke)", "Art. 6 Abs. 1 lit. f in Verbindung mit Art. 10 DSGVO (berechtigtes Interesse am Schutz der Kinder); § 30a Abs. 3 BZRG; Umfang der Vermerke und Löschfrist auch nach § 72a Abs. 5 SGB VIII"],
       ["Antrag auf Gebührenbefreiung (Bestätigung deiner ehrenamtlichen Tätigkeit)", "Art. 6 Abs. 1 lit. f DSGVO (Aufforderung und Bestätigung nach § 30a Abs. 2 BZRG)"],
@@ -205,10 +206,10 @@ export const T = {
     beschwerde: "Du kannst dich bei der Datenschutzaufsicht beschweren: Der Hessische Beauftragte für Datenschutz und Informationsfreiheit, Wilhelmstraße 7, 65185 Wiesbaden, datenschutz.hessen.de.",
     pflichtTitel: "8. Musst du die Daten angeben?",
     pflicht:
-      "Pflicht sind: Name, Anschrift, Geburtsdatum, Handynummer, E-Mail-Adresse, die Angaben zum Einsatz, der Notfallkontakt, dein Beruf, die Angabe zum Erste-Hilfe-Kurs und das Passfoto. Ohne sie kann der Verein dich nicht aufnehmen und nicht als Trainer oder Betreuer einsetzen. Freiwillig sind die Wochentage, an denen du kannst, deine Erfahrung und weitere Qualifikationen. Der Verein verlangt die Selbstauskunft, die Erklärung zum Verhaltenskodex und die Einsicht in das erweiterte Führungszeugnis von allen neuen Trainern und Betreuern. Ohne sie kann er dich nicht in der Kinder- und Jugendarbeit einsetzen. Eine automatisierte Entscheidung einschließlich Profiling findet nicht statt.",
+      "Pflicht sind: Name, Anschrift, Geburtsdatum, Handynummer, E-Mail-Adresse und die Angaben zum Einsatz (Mannschaft oder Gruppe, Rolle, Beginn). Ohne sie kann der Verein dich nicht aufnehmen und nicht als Trainer oder Betreuer einsetzen. Freiwillig sind dein Passfoto, ein Notfallkontakt, deine Erfahrung und Qualifikationen, das Datum deines Erste-Hilfe-Kurses und die Wochentage, an denen du kannst. Der Verein verlangt die Selbstauskunft, die Erklärung zum Verhaltenskodex und die Einsicht in das erweiterte Führungszeugnis von allen neuen Trainern und Betreuern. Ohne sie kann er dich nicht in der Kinder- und Jugendarbeit einsetzen. Eine automatisierte Entscheidung einschließlich Profiling findet nicht statt.",
     dritteTitel: "9. Daten deines Notfallkontakts",
     dritte:
-      "Die Person, die du als Notfallkontakt nennst, informierst du bitte darüber, dass der Verein ihren Namen, ihre Beziehung zu dir und ihre Telefonnummer speichert (Art. 14 DSGVO). Sie kann sich mit Fragen zum Datenschutz an die Geschäftsstelle wenden.",
+      "Wenn du einen Notfallkontakt nennst, informierst du die Person bitte darüber, dass der Verein ihren Namen, ihre Beziehung zu dir und ihre Telefonnummer speichert (Art. 14 DSGVO). Sie kann sich mit Fragen zum Datenschutz an die Geschäftsstelle wenden.",
     entstehungTitel: "10. So entsteht deine Datei",
     entstehung:
       "Die Seite für neue Trainer arbeitet nur in deinem Browser. Deine Angaben, dein Foto und deine Unterschrift werden nicht an einen Server übertragen. Der Verein erhält die Datei erst, wenn du sie selbst per E-Mail schickst. Dein erweitertes Führungszeugnis lädst du nirgends hoch und schickst es nicht per E-Mail.",
@@ -252,9 +253,11 @@ export const T = {
 
   // ---------- Die eine Datei (Bildschirm 13 „Das steht im Paket“; 25.11.2026 auf eine Datei umgestellt: Safari am iPhone zeigt von mehreren
   // Downloads nur den ersten, Browser am Computer fragen nach, und beim Teilen nehmen Apps nicht immer alle Dateien) ----------
+  // Die Beschreibung setzt trainer-pdf.js aus diesen Teilen zusammen: basis, dazu der Antrag (nur bei „beantragen“) und das Passfoto (nur mit Foto).
   dateien: {
-    mitAntrag: "Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Verhaltenskodex, Datenschutzinformation, Antrag für dein Führungszeugnis, Passfoto",
-    ohneAntrag: "Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Verhaltenskodex, Datenschutzinformation, Passfoto",
+    basis: "Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Verhaltenskodex, Datenschutzinformation",
+    antrag: "Antrag für dein Führungszeugnis",
+    foto: "Passfoto",
   },
 
   // ---------- Metadaten und Fuß ----------

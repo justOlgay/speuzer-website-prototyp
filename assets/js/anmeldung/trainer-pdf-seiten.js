@@ -6,7 +6,7 @@
     selbstauskunft       Selbstauskunft und Selbstverpflichtung (Wortlaut ap3/BERICHT.md 3.3)
     kodex                Erklärung zum Verhaltenskodex (nur die Erklärung, kein Volltext)
     datenschutz          Information nach Art. 13 DSGVO
-    passfoto             das Passfoto der Person (letzte Seite der Datei)
+    passfoto             das Passfoto der Person (letzte Seite der Datei, nur wenn abgegeben; freiwillig)
     fusszeilen           „Seite x von y“ und Kennzeile auf allen Seiten (außer dem Brief, siehe trainer-pdf-antrag.js)
   Aussehen: A4, Wappen als Vektor, Liberation Sans, Vereinsblau, wie die Beispiel-Blätter (ap1/beispiele). Alle Texte stehen in
   trainer-pdf-texte.js.
@@ -116,8 +116,8 @@ export function deckblatt(dok, d) {
     { erledigt: true, text: t.kontakt },
     { erledigt: true, text: t.selbstauskunft },
     { erledigt: true, text: t.kodex },
-    { erledigt: true, text: t.foto },
-    { erledigt: false, text: ersetzePlatzhalter(d.zeugnis === "beantragen" ? t.zeugnisBeantragen : t.zeugnisVorhanden, { kurz: d.einsichtKurz }) },
+    { erledigt: !!d.hatFoto, text: d.hatFoto ? t.foto : t.fotoOffen },
+    { erledigt: false, text: ersetzePlatzhalter(d.zeugnis === "beantragen" ? t.zeugnisBeantragen : t.zeugnisVorhanden, { kurz: d.einsichtKurz, seite: d.hatFoto ? t.antragSeiteMitFoto : t.antragSeiteOhneFoto }) },
   ];
   const textX = x + 113.7;
   const textB = BREITE - 113.7 - 5.7;
@@ -231,28 +231,21 @@ export function kontaktdatenblatt(dok, d, sig) {
     { label: t.notfallTelefon, wert: d.notfall.telefon, s: 2 },
   ]);
 
+  // Erfahrung und Qualifikationen sowie der Erste-Hilfe-Kurs sind freiwillig: Ohne Angabe bleiben Feld und Kästchen leer.
   s.ueberschrift(t.qualifikationen, 4);
-  s.raster([{ label: t.beruf, wert: d.beruf, s: 6 }]);
   s.raster([{ label: t.erfahrungen, wert: d.erfahrung, s: 6, kasten: true }]);
 
-  // Erste-Hilfe-Kurs: zwei Möglichkeiten mit Datum
-  s.platz(12 + 2 * 24 + 10);
+  // Erste-Hilfe-Kurs: ein Kästchen „Ja, absolviert am“ mit Datum
+  s.platz(12 + 24 + 10);
   s.seite.text(t.ersteHilfe, s.x, s.y - 9 * 0.92, 9, { farbe: FARBE.tinte3 });
   s.y -= 9 * 1.22 + 4;
-  [
-    [d.ersteHilfe === "ja", t.ersteHilfeJa, d.ersteHilfeAm],
-    [d.ersteHilfe === "nein", t.ersteHilfeNein, d.ersteHilfeBis],
-  ].forEach(([an, label, datum]) => {
-    s.seite.kaestchen(s.x, s.y - 12.5, 12.5, an);
-    const lx = s.x + 12.5 + 6.8;
-    const breite = s.seite.text(label, lx, s.y - 10.5 * 0.92 - 1.2, 10.5, {});
-    const fx = lx + breite + 6.8;
-    s.seite.linie(fx, s.y - 14.5, fx + 96.4, s.y - 14.5, 0.9, FARBE.tinte);
-    if (datum) s.seite.text(datum, fx + 2.8, s.y - 10.5, 10.5, {});
-    s.y -= 24;
-  });
-  s.y -= 4;
-  s.raster([{ label: t.sonstiges, wert: d.sonstiges, s: 6, kasten: true }]);
+  s.seite.kaestchen(s.x, s.y - 12.5, 12.5, !!d.ersteHilfeAm);
+  const lx = s.x + 12.5 + 6.8;
+  const breite = s.seite.text(t.ersteHilfeJa, lx, s.y - 10.5 * 0.92 - 1.2, 10.5, {});
+  const fx = lx + breite + 6.8;
+  s.seite.linie(fx, s.y - 14.5, fx + 96.4, s.y - 14.5, 0.9, FARBE.tinte);
+  if (d.ersteHilfeAm) s.seite.text(d.ersteHilfeAm, fx + 2.8, s.y - 10.5, 10.5, {});
+  s.y -= 24 + 4;
 
   // Verfügbarkeit: vier Spalten zum Ankreuzen
   s.ueberschrift(t.verfuegbarkeit, 4);

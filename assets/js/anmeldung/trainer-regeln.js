@@ -9,16 +9,17 @@
   Kontext c: { heute (ISO), roh (Rohtext der Datumsfelder, siehe bausteine.js › datumFelder), medien ({ foto, unterschrift }),
                konfig, zugang ({ eingabe, geprueft, gueltig }, nur Seite „code“) }
 
-  Regeln (Stand 24.11.2026)
+  Regeln (Stand 25.11.2026: Pflicht ist nur, was die Unterlagen des Vereins zwingend verlangen; Olgays Kritik am Pflichtfeld „Beruf“)
     - Pflicht: Vorname, Nachname, Geburtsdatum, Straße, PLZ, Ort, Handynummer, E-Mail, Abteilung, Mannschaft (bei Karneval:
-      Gruppe), Rolle, „Seit wann“, Notfallkontakt (Name, Beziehung, Telefon), Beruf, Erste-Hilfe-Kurs mit Datum, Passfoto,
-      Verhaltenskodex und Selbstauskunft angekreuzt, Führungszeugnis gewählt, Unterschrift, Satzung angekreuzt.
-      Nicht Pflicht: „Wann kannst du?“, Erfahrung, sonstige Qualifikationen.
-    - PLZ: genau fünf Ziffern. E-Mail: wie im Anmelde-Assistenten (ein @, dahinter eine Domain mit Punkt). Handynummer und Telefon des Notfallkontakts:
-      nur Ziffern, Leerzeichen und + - /, mindestens 6 Ziffern.
+      Gruppe), Rolle, „Seit wann“, Verhaltenskodex und Selbstauskunft angekreuzt, Führungszeugnis gewählt, Unterschrift, Satzung angekreuzt.
+      Quellen: Checkliste für neue Trainer/Betreuer (Name, Anschrift, Telefon, E-Mail, Unterlagen), Aufnahmeantrag (Geburtsdatum), Brief des Vereins.
+    - Freiwillig: Passfoto, Notfallkontakt (alle drei Angaben oder keine), „Erfahrung und Qualifikationen“ (ein Textfeld), Datum des
+      Erste-Hilfe-Kurses, „Wann kannst du?“. Beruf, sonstige Qualifikationen und „geplant bis“ gibt es nicht mehr.
+    - PLZ: genau fünf Ziffern. E-Mail: wie im Anmelde-Assistenten (ein @, dahinter eine Domain mit Punkt). Handynummer und Telefon des Notfallkontakts
+      (wenn angegeben): nur Ziffern, Leerzeichen und + - /, mindestens 6 Ziffern.
     - Geburtsdatum: gültig, nicht in der Zukunft und zum Stichtag (heute) mindestens 18 Jahre alt.
     - „Seit wann“: gültiges Datum, höchstens drei Monate in der Zukunft (in der Vergangenheit ohne Grenze).
-    - Erste Hilfe: bei „ja“ ein Datum, das nicht in der Zukunft liegt; bei „nein“ das geplante Datum, nicht in der Vergangenheit.
+    - Erste Hilfe: ein Datum, das nicht in der Zukunft liegt, oder leer.
     - Alles, was in die Dateien geht, muss in lateinischen Buchstaben stehen (zeichen.js; die PDF-Schrift Liberation Sans kennt
       sonst das Zeichen nicht), wie im Anmelde-Assistenten.
 */
@@ -65,12 +66,8 @@ export function neueAntworten() {
     seit: null,
     tage: [],
     notfall: { name: "", beziehung: "", telefon: "" },
-    beruf: "",
     erfahrung: "",
-    ersteHilfe: null,
     ersteHilfeAm: null,
-    ersteHilfeBis: null,
-    sonstiges: "",
     foto: false,
     kodexGelesen: false,
     selbstauskunft: false,
@@ -250,8 +247,10 @@ const REGELN = {
     return f;
   },
 
+  // Notfallkontakt: freiwillig. Wer einen angibt, gibt alle drei Angaben an (Name, Beziehung, Telefon); alle leer ist in Ordnung.
   notfall(a) {
     const n = a.notfall || {};
+    if (!sauber(n.name) && !sauber(n.beziehung) && !sauber(n.telefon)) return [];
     return [
       ...pflichtText(n.name, "notfall.name", M.notfallName, "name"),
       ...pflichtText(n.beziehung, "notfall.beziehung", M.notfallBeziehung, "text"),
@@ -259,24 +258,17 @@ const REGELN = {
     ];
   },
 
+  // „Erfahrung und Qualifikationen“ und der Erste-Hilfe-Kurs sind freiwillig. Das Datum des Kurses darf fehlen; ist es eingetragen, muss es gültig
+  // sein und darf nicht in der Zukunft liegen.
   erfahrung(a, c) {
-    const f = [...pflichtText(a.beruf, "beruf", M.beruf, "text"), ...lateinFehler(a.erfahrung, "erfahrung", "text")];
-    if (a.ersteHilfe !== "ja" && a.ersteHilfe !== "nein") f.push(fehler("ersteHilfe", M.ersteHilfe));
-    else if (a.ersteHilfe === "ja") {
-      const p = datumProblem(c.roh && c.roh.ersteHilfeAm, a.ersteHilfeAm, c.heute, { zukunftErlaubt: false });
-      if (p) f.push(fehler("ersteHilfeAm", M[p]));
-    } else {
-      const p = datumProblem(c.roh && c.roh.ersteHilfeBis, a.ersteHilfeBis, c.heute, { zukunftErlaubt: true });
-      if (p) f.push(fehler("ersteHilfeBis", M[p]));
-      else if (a.ersteHilfeBis < c.heute) f.push(fehler("ersteHilfeBis", M.datumVergangenheit));
-    }
-    f.push(...lateinFehler(a.sonstiges, "sonstiges", "text"));
+    const f = [...lateinFehler(a.erfahrung, "erfahrung", "text")];
+    const p = datumProblem(c.roh && c.roh.ersteHilfeAm, a.ersteHilfeAm, c.heute, { zukunftErlaubt: false });
+    if (p && p !== "datumLeer") f.push(fehler("ersteHilfeAm", M[p]));
     return f;
   },
 
-  foto(a, c) {
-    return c.medien && c.medien.foto && c.medien.foto.length ? [] : [fehler("foto", M.foto)];
-  },
+  // Das Passfoto ist freiwillig (die Checkliste des Vereins nennt es, es ist aber nicht zwingend nötig).
+  foto: () => [],
 
   kodex(a) {
     return a.kodexGelesen === true ? [] : [fehler("kodexGelesen", M.kodex)];

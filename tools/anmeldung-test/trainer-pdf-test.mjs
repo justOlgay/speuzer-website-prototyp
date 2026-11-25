@@ -10,12 +10,13 @@
 //  K4   Wortlaute: Selbstauskunft (ap3/BERICHT.md 3.3), Brief (ap1/texte.mjs), Deckblatt, Löschfrist, vier Fälle der Einsichtnehmenden
 //       (eine Person als Standardfall, zwei, drei, leere Liste; Namensteil nur über trainer-einsicht.js, Sätze pronomenfrei)
 //  K5   Antrag ohne Vereinsunterschrift: kein Bild (pdfimages, pdf-lib), Unterzeichner aus der Konfiguration, leere Linie hinter „i.A.“
-//  K6   Unterschrift der Person auf genau vier Stellen; ohne Unterschrift oder ohne Foto ein Fehler mit klarer Meldung
+//  K6   Unterschrift der Person auf genau vier Stellen; ohne Unterschrift oder mit einem Foto, das kein JPEG ist, ein Fehler mit klarer Meldung
 //  K7   Karneval („Gruppe“ statt „Mannschaft“) und Rollen (Torwarttrainer)
 //  K8   Aussehen: Seiten als PNG; kein Wort über dem Rand (pdftotext -bbox), Schrift mindestens 9 pt außer Fußzeilen (pdftohtml)
 //  K9   keine echten Daten: nur die zwei Beispielnummern, keine Rufnummer des Vereins, keine Namen aus dem Umfeld des Auftrags
 //       (öffentliche nur als SHA-256, private aus der git-ignorierten Liste tools/cache/pii-namen.txt wie tools/pii-check.py)
 //  K10  Vorschau des Antrags = Brief in der Datei (Text und Bild der Seite)
+//  K15  freiwillige Angaben (Passfoto, Notfallkontakt, Erfahrung, Erste-Hilfe-Kurs): ohne sie entsteht die Datei ohne Fotoseite und mit leeren Feldern
 //  K14  Passfoto: letzte Seite, JPEG unverändert eingebettet (Bytes gleich), Größe 60 × 80 mm, Seitenzählung ohne Fußzeile auf dem Brief
 //  K11  Größe (höchstens 2 MB bei einem Foto von 600 × 800 Pixeln) und Zeit (höchstens 5 Sekunden)
 //  K12  Fristen, Sonderzeichen, sehr lange Angaben, Fehlerfälle, Metadaten, Wiederholbarkeit, Quelltext (kein DOM, keine Uhr, kein Name)
@@ -266,12 +267,8 @@ const BEISPIEL = {
   seit: "2026-11-02",
   tage: ["di", "do", "sa"],
   notfall: { name: "Erika Mustermann", beziehung: "Partnerin", telefon: "0170 7654321" },
-  beruf: "Elektriker",
   erfahrung: "Drei Jahre Jugendtrainer bei einem anderen Verein (E-Jugend).",
-  ersteHilfe: "ja",
   ersteHilfeAm: "2025-05-12",
-  ersteHilfeBis: null,
-  sonstiges: "",
   foto: true,
   kodexGelesen: true,
   selbstauskunft: true,
@@ -405,10 +402,11 @@ const SOLL_DECKBLATT = [
   "Passfoto (letzte Seite)",
 ];
 const BESCHREIBUNG = {
+  basis: "Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Verhaltenskodex, Datenschutzinformation",
   mitAntrag: "Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Verhaltenskodex, Datenschutzinformation, Antrag für dein Führungszeugnis, Passfoto",
   ohneAntrag: "Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Verhaltenskodex, Datenschutzinformation, Passfoto",
 };
-const DECK_ZEUGNIS_BEANTRAGEN = (kurz) => "Erweitertes Führungszeugnis: Antrag auf Gebührenbefreiung (vorletzte Seite); Einsicht bei " + kurz + " steht aus";
+const DECK_ZEUGNIS_BEANTRAGEN = (kurz, seite = "vorletzte Seite") => "Erweitertes Führungszeugnis: Antrag auf Gebührenbefreiung (" + seite + "); Einsicht bei " + kurz + " steht aus";
 // Pronomenfreie Sätze der Einsicht (GEMEINSAM.md 3), vorn mit dem Namensteil
 const EINSICHT_REST = "Das Zeugnis wird nur angeschaut: Es wird nicht mitgenommen und nicht kopiert. Notiert werden nur: Datum der Einsicht, Datum des Zeugnisses und ob eine einschlägige Verurteilung darin steht (ja oder nein).";
 const einsichtSatzPerson = (lang) => "Die Person zeigt das Zeugnis persönlich " + lang + ". " + EINSICHT_REST;
@@ -442,6 +440,7 @@ const bsp = await baue("beispiel");
   const vt = gesamtText(vorh.pfade["Trainerunterlagen_Mustermann_Max.pdf"]);
   wortlaut(vt, "Erweitertes Führungszeugnis: liegt der Person vor; Einsicht bei Melanie Seipp steht aus");
   fehltIn(vt, "Antrag auf Gebührenbefreiung (vorletzte Seite)", "vorhanden: Deckblatt nennt keinen Antrag in der Datei");
+  fehltIn(vt, "Antrag auf Gebührenbefreiung (letzte Seite)", "vorhanden: Deckblatt nennt auch keinen Antrag auf der letzten Seite");
   fehltIn(vt, "Die Unterschrift des Vereins auf dem Antrag auf Gebührenbefreiung fehlt noch.", "vorhanden: kein Hinweis auf die fehlende Vereinsunterschrift");
   fehltIn(vt, "ANTRAG AUF GEBÜHRENBEFREIUNG", "vorhanden: kein Brief in der Datei");
   ok(infoSeiten(vorh.pfade["Trainerunterlagen_Mustermann_Max.pdf"]).anzahl === 8, "vorhanden: sieben Seiten Paket und das Passfoto, kein Brief (8 Seiten)");
@@ -535,10 +534,13 @@ const antragText = gesamtText(antragPfad);
   const ds = paketSeiten.slice(5).join(" ");
   wortlaut(ds, "spätestens sechs Monate nach der letzten Ausübung deiner Tätigkeit (§ 30a Abs. 3 BZRG, § 72a Abs. 5 SGB VIII)", "Information zum Datenschutz: Löschfrist der Vermerke");
   wortlaut(ds, "Art. 6 Abs. 1 lit. f in Verbindung mit Art. 10 DSGVO", "Information zum Datenschutz: Art. 10 DSGVO bei Selbstauskunft und Einsicht");
-  wortlaut(ds, "Pflicht sind: Name, Anschrift, Geburtsdatum, Handynummer, E-Mail-Adresse, die Angaben zum Einsatz, der Notfallkontakt, dein Beruf, die Angabe zum Erste-Hilfe-Kurs und das Passfoto.", "Information zum Datenschutz: Pflichtangaben");
+  wortlaut(ds, "Pflicht sind: Name, Anschrift, Geburtsdatum, Handynummer, E-Mail-Adresse und die Angaben zum Einsatz (Mannschaft oder Gruppe, Rolle, Beginn).", "Information zum Datenschutz: Pflichtangaben");
+  wortlaut(ds, "Freiwillig sind dein Passfoto, ein Notfallkontakt, deine Erfahrung und Qualifikationen, das Datum deines Erste-Hilfe-Kurses und die Wochentage, an denen du kannst.", "Information zum Datenschutz: freiwillige Angaben");
+  fehltIn(ds, "dein Beruf", "Information zum Datenschutz: kein Beruf mehr");
+  fehltIn(ds, "Pflicht sind: Name, Anschrift, Geburtsdatum, Handynummer, E-Mail-Adresse, die Angaben zum Einsatz, der Notfallkontakt", "Information zum Datenschutz: Notfallkontakt ist keine Pflicht");
   // Information nach Art. 13: Bestandteile
   for (const s of ["Information zum Datenschutz", "nach Artikel 13 der Datenschutz-Grundverordnung (DSGVO)", "1. Wer ist verantwortlich?", "2. Welche Daten verarbeiten wir?", "3. Wofür verarbeiten wir die Daten, und auf welcher Rechtsgrundlage?", "4. An wen geben wir Daten weiter?", "5. Wie lange speichern wir die Daten?", "6. Deine Rechte", "7. Beschwerde bei der Aufsichtsbehörde", "8. Musst du die Daten angeben?", "9. Daten deines Notfallkontakts", "10. So entsteht deine Datei", "Art. 6 Abs. 1 lit. f DSGVO", "Art. 14 DSGVO", "Zweck Rechtsgrundlage"]) enthaelt(ds, s, "Art. 13");
-  wortlaut(ds, "Die Person, die du als Notfallkontakt nennst, informierst du bitte darüber, dass der Verein ihren Namen, ihre Beziehung zu dir und ihre Telefonnummer speichert (Art. 14 DSGVO).", "Information zum Datenschutz: Notfallkontakt als Daten Dritter");
+  wortlaut(ds, "Wenn du einen Notfallkontakt nennst, informierst du die Person bitte darüber, dass der Verein ihren Namen, ihre Beziehung zu dir und ihre Telefonnummer speichert (Art. 14 DSGVO).", "Information zum Datenschutz: Notfallkontakt als Daten Dritter");
   wortlaut(ds, "Dein erweitertes Führungszeugnis lädst du nirgends hoch und schickst es nicht per E-Mail.", "Information zum Datenschutz: Zeugnis wird nicht hochgeladen");
   wortlaut(ds, "Verantwortlich für die Verarbeitung deiner Daten ist der Frankfurter Fußballverein Sportfreunde 1904 e. V., vertreten durch den Vorstand.", "Information zum Datenschutz: Verantwortlicher aus der Konfiguration");
   wortlaut(ds, "Postanschrift: Postfach 190442, 60091 Frankfurt am Main", "Information zum Datenschutz: Anschrift aus der Konfiguration");
@@ -547,7 +549,8 @@ const antragText = gesamtText(antragPfad);
   const an = paketSeiten[seiteMit(paketSeiten, SEITENTITEL.anmeldung) - 1];
   for (const s of ["Beitragsgruppe Trainer/Betreuer, beitragsfrei", "Mannschaft D3-Jugend", "Rolle Co-Trainer", "Ich habe die Satzung des Vereins (einsehbar unter www.sportfreunde04.de, Verein, Downloads) zur Kenntnis genommen.", "Information nach Artikel 13 DSGVO in dieser Datei", "Frankfurt am Main, 24.11.2026 Ort, Datum"]) wortlaut(an, s, "Anmeldung");
   const ko = paketSeiten[seiteMit(paketSeiten, SEITENTITEL.kontakt) - 1];
-  for (const s of ["Persönliche Angaben", "Adresse", "Notfallkontakt", "Berufliche/Trainerische Qualifikationen", "Erfahrungen als Trainer/Betreuer (falls vorhanden)", "Erste-Hilfe-Kurs", "Ja, absolviert am: 12.05.2025", "Nein, geplant bis:", "Sonstige Qualifikationen oder Fortbildungen", "Verfügbarkeit (bitte ankreuzen)", "Montags", "Dienstags", "Mittwochs", "Donnerstags", "Freitags", "Samstags", "Sonntags", "Zusätzliche Informationen / Anmerkungen", "Unterschrift Trainer/Betreuer", "Datum 24.11.2026", "Max", "Mustermann", "14.03.1988", "Musterstraße 12", "60326", "0170 1234567", "max.mustermann@example.com", "Erika Mustermann", "Partnerin", "0170 7654321", "Elektriker", "Drei Jahre Jugendtrainer bei einem anderen Verein (E-Jugend)."]) wortlaut(ko, s, "Kontaktdatenblatt");
+  for (const s of ["Persönliche Angaben", "Adresse", "Notfallkontakt (freiwillig)", "Erfahrung und Qualifikationen (freiwillig)", "Erfahrung als Trainer/Betreuer, Lizenzen, Fortbildungen", "Erste-Hilfe-Kurs (freiwillig)", "Ja, absolviert am: 12.05.2025", "Verfügbarkeit (bitte ankreuzen)", "Montags", "Dienstags", "Mittwochs", "Donnerstags", "Freitags", "Samstags", "Sonntags", "Zusätzliche Informationen / Anmerkungen", "Unterschrift Trainer/Betreuer", "Datum 24.11.2026", "Max", "Mustermann", "14.03.1988", "Musterstraße 12", "60326", "0170 1234567", "max.mustermann@example.com", "Erika Mustermann", "Partnerin", "0170 7654321", "Drei Jahre Jugendtrainer bei einem anderen Verein (E-Jugend)."]) wortlaut(ko, s, "Kontaktdatenblatt");
+  for (const s of ["Beruf oder Tätigkeit", "Berufliche/Trainerische Qualifikationen", "Nein, geplant bis", "Sonstige Qualifikationen oder Fortbildungen"]) fehltIn(ko, s, "Kontaktdatenblatt: Feld gibt es seit 25.11.2026 nicht mehr");
   const kx = paketSeiten[seiteMit(paketSeiten, SEITENTITEL.kodex) - 1];
   for (const s of ["Der Verhaltenskodex gilt für alle, die im Verein mit Kindern und Jugendlichen arbeiten.", "Landessportbund Hessen und Sportjugend Hessen (aktuelle Fassung)", "Der vollständige Text ist nicht Teil dieser Datei.", "Ich habe den Verhaltenskodex gelesen und halte mich daran.", "Name Max Mustermann", "Frankfurt am Main, 24.11.2026 Ort, Datum"]) wortlaut(kx, s, "Kodex-Erklärung");
   // keine Behauptung zum Versicherungsschutz der Anmeldung (ap3/BERICHT.md A12)
@@ -615,7 +618,9 @@ const antragText = gesamtText(antragPfad);
     });
     const K = quelle.kontaktdatenblatt;
     for (const k of Object.keys(T.kontakt)) {
-      if (k === "ersteHilfeJa" || k === "ersteHilfeNein") continue; // der Test fügt den Doppelpunkt an (Datumsfeld)
+      if (k === "ersteHilfeJa") continue; // der Test fügt den Doppelpunkt an (Datumsfeld)
+      // Seit 25.11.2026 bewusst anders als im Entwurf: freiwillige Abschnitte, ein Feld statt Beruf, Erfahrungen und Sonstigem (Olgays Kritik an den Pflichtfeldern)
+      if (["notfallkontakt", "qualifikationen", "erfahrungen", "ersteHilfe"].includes(k)) continue;
       saetze += 1;
       ok(K[k] === T.kontakt[k], () => "Kontaktdatenblatt „" + k + "“ weicht von ap1/texte.mjs ab");
     }
@@ -712,7 +717,7 @@ kontext = "K6 Unterschrift der Person";
   await wirft(ohne({ unterschrift: null }), "unterschrift-fehlt", "Unterschrift", "ohne Unterschrift (null)");
   await wirft(ohne({ unterschrift: undefined }), "unterschrift-fehlt", "Unterschrift", "ohne Unterschrift (undefined)");
   await wirft(ohne({ unterschrift: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]) }), "unterschrift-format", "PNG", "Unterschrift kein PNG");
-  await wirft(ohne({ foto: null }), "foto-fehlt", "Foto", "ohne Foto");
+  // Das Passfoto ist freiwillig (25.11.2026): ohne Foto entsteht die Datei ohne Seite „Passfoto“ (K15)
   await wirft(ohne({ foto: SIG }), "foto-format", "JPEG", "Foto kein JPEG");
 }
 
@@ -852,6 +857,49 @@ kontext = "K10 Vorschau";
   await wirft(() => vorschauAntrag({ antworten: kopie(BEISPIEL), konfig: k3, heute: HEUTE, werkzeuge: WERKZEUGE }), "konfig", "verein.unterzeichner", "Vorschau ohne Unterzeichner");
 }
 
+// ============ K15: freiwillige Angaben ============
+kontext = "K15 freiwillige Angaben";
+{
+  // Olgays Kritik am Pflichtfeld „Beruf“ (25.11.2026): Pflicht ist nur, was die Unterlagen des Vereins zwingend verlangen. Passfoto, Notfallkontakt,
+  // Erfahrung und der Erste-Hilfe-Kurs sind freiwillig; die Datei entsteht auch ohne sie.
+  const ohneAlles = Object.assign(kopie(BEISPIEL), { notfall: { name: "", beziehung: "", telefon: "" }, erfahrung: "", ersteHilfeAm: null, tage: [], foto: false });
+  const r = await baue("freiwillig-leer", { antworten: ohneAlles, medien: { foto: null, unterschrift: SIG } });
+  ok(r.r.dateien.length === 1 && r.r.warnungen.length === 0, () => "ohne alle freiwilligen Angaben: eine Datei, keine Warnung: " + JSON.stringify(r.r.warnungen));
+  ok(r.r.dateien[0].beschreibung === BESCHREIBUNG.basis + ", Antrag für dein Führungszeugnis", () => "Beschreibung ohne Passfoto: " + r.r.dateien[0].beschreibung);
+  const t = seitenText(r.teile.gesamt);
+  ok(t.length === 8 && !t.some((x) => /Passfoto von/.test(x)), () => "acht Seiten (sieben Paket und der Brief), keine Seite „Passfoto“: " + t.length);
+  ok(t.every((x, i) => i === 7 || x.includes("Seite " + (i + 1) + " von 8")), "Fußzeile „Seite x von 8“ auf jeder Seite außer dem Brief");
+  const db = t[0];
+  wortlaut(db, "Passfoto: nicht abgegeben (freiwillig)", "Deckblatt: Passfoto nicht abgegeben");
+  fehltIn(db, "Passfoto (letzte Seite)", "Deckblatt ohne Foto: keine Seite „Passfoto“ angekündigt");
+  // Ohne Foto ist der Brief die LETZTE Seite; das Deckblatt darf ihn nicht „vorletzte Seite“ nennen (Fund vom 25.11.2026 beim Prüfskript der Live-Seite)
+  wortlaut(db, DECK_ZEUGNIS_BEANTRAGEN("Melanie Seipp", "letzte Seite"), "Deckblatt ohne Foto: der Antrag liegt auf der letzten Seite");
+  fehltIn(db, "vorletzte Seite", "Deckblatt ohne Foto: keine „vorletzte Seite“");
+  wortlaut(t[7], "ANTRAG AUF GEBÜHRENBEFREIUNG", "Seite 8 ohne Foto ist der Brief");
+  ok((db.match(/erledigt/g) || []).length === 4 && (db.match(/\boffen\b/g) || []).length === 2, "Deckblatt ohne Foto: viermal „erledigt“, zweimal „offen“");
+  const ko = t[seiteMit(t, SEITENTITEL.kontakt) - 1];
+  wortlaut(ko, "Notfallkontakt (freiwillig)", "Kontaktdatenblatt: Abschnitt bleibt als freiwillig gekennzeichnet");
+  wortlaut(ko, "Erfahrung und Qualifikationen (freiwillig)", "Kontaktdatenblatt: Abschnitt Erfahrung bleibt als freiwillig gekennzeichnet");
+  for (const x of ["Erika Mustermann", "Partnerin", "0170 7654321", "Drei Jahre Jugendtrainer", "12.05.2025"]) fehltIn(ko, x, "Kontaktdatenblatt: freiwillige Angabe steht nicht im Blatt");
+  ok(!/Ja, absolviert am: \d/.test(ko), "Erste-Hilfe-Kurs ohne Datum: kein Datum im Blatt");
+  ok(bilder(r.teile.gesamt).filter((x) => x.art === "image").length === 4, "vier Unterschriften, kein Foto in der Datei");
+  // ohne Foto und ohne Antrag: sieben Seiten, nur das Paket
+  const klein = await baue("freiwillig-klein", { antworten: Object.assign(kopie(ohneAlles), { zeugnis: "vorhanden" }), medien: { foto: undefined, unterschrift: SIG } });
+  const kt = seitenText(klein.teile.gesamt);
+  ok(kt.length === 7 && klein.r.dateien[0].beschreibung === BESCHREIBUNG.basis, () => "ohne Foto, ohne Antrag: sieben Seiten, Beschreibung nur das Paket: " + kt.length + " / " + klein.r.dateien[0].beschreibung);
+  // jede freiwillige Angabe für sich kommt in die Datei
+  const nurNotfall = await baue("freiwillig-notfall", { antworten: Object.assign(kopie(ohneAlles), { notfall: { name: "Erika Mustermann", beziehung: "Partnerin", telefon: "0170 7654321" } }), medien: { foto: null, unterschrift: SIG } });
+  const nt = seitenText(nurNotfall.teile.gesamt).join(" ");
+  ok(/Erika Mustermann/.test(nt) && /Partnerin/.test(nt) && /0170 7654321/.test(nt), "nur der Notfallkontakt: alle drei Angaben stehen im Blatt");
+  const nurErsteHilfe = await baue("freiwillig-ersthilfe", { antworten: Object.assign(kopie(ohneAlles), { ersteHilfeAm: "2025-05-12" }), medien: { foto: null, unterschrift: SIG } });
+  ok(/Ja, absolviert am: 12\.05\.2025/.test(seitenText(nurErsteHilfe.teile.gesamt).join(" ")), "nur der Erste-Hilfe-Kurs: Datum steht im Blatt");
+  const nurFoto = await baue("freiwillig-foto", { antworten: ohneAlles, medien: { foto: FOTO.bytes, unterschrift: SIG } });
+  const ft = seitenText(nurFoto.teile.gesamt);
+  ok(ft.length === 9 && /Passfoto von Max Mustermann/.test(ft[8]) && nurFoto.r.dateien[0].beschreibung === BESCHREIBUNG.mitAntrag, "nur das Foto: Seite „Passfoto“ und Beschreibung wie bisher");
+  // ein Foto, das kein JPEG ist, bleibt ein Fehler (nur das Foto ist freiwillig, nicht seine Gültigkeit)
+  await wirft(() => erzeugeDateien({ antworten: kopie(ohneAlles), medien: { foto: SIG, unterschrift: SIG }, konfig: kopie(KONFIG), heute: HEUTE, werkzeuge: WERKZEUGE }), "foto-format", "JPEG", "Foto kein JPEG");
+}
+
 // ============ K14: Passfoto ============
 kontext = "K14 Passfoto";
 {
@@ -967,12 +1015,8 @@ kontext = "K12 Sonderzeichen und lange Angaben";
     email: "maximilian.alexander.mueller-luedenscheidt-hohenlohe@sehr-lange-domain-der-firma.example.com",
     mannschaft: "1. Herrenmannschaft (Kreisliga A) Spielgemeinschaft Nord",
     erfahrung: "Zehn Jahre Jugendtrainer in verschiedenen Vereinen, Lizenz C und B, Fortbildungen zur Torwartschule, Koordination und Athletik. ".repeat(6).trim(),
-    sonstiges: "Schiedsrichterschein, Kinderschutz-Schulung, Erste-Hilfe-Ausbilder. ".repeat(4).trim(),
-    beruf: "Diplom-Ingenieur für Elektrotechnik und Informationstechnik mit Schwerpunkt Gebäudeautomation",
     notfall: { name: "Erika Mustermann-Müller-Lüdenscheidt", beziehung: "Lebenspartnerin und Mutter der gemeinsamen Kinder", telefon: "0170 7654321" },
-    ersteHilfe: "nein",
-    ersteHilfeAm: null,
-    ersteHilfeBis: "2027-03-31",
+    ersteHilfeAm: "2024-03-31",
   });
   const lg = await baue("lange-angaben", { antworten: lang });
   ok(lg.r.warnungen.length === 0, () => "lange Angaben ohne Warnung (Rand, 9 pt): " + JSON.stringify(lg.r.warnungen));
@@ -988,8 +1032,7 @@ kontext = "K12 Sonderzeichen und lange Angaben";
   const lt = gesamtText(lp);
   ok(lt.includes("maximilian.alexander.mueller-luedenscheidt-hohenlohe@sehr-lange-domain-der-firma.example.com") || lt.replace(/\s/g, "").includes("maximilian.alexander.mueller-luedenscheidt-hohenlohe@sehr-lange-domain-der-firma.example.com"), "lange E-Mail-Adresse vollständig im Text");
   ok(lt.replace(/\s/g, "").includes("Zehn Jahre Jugendtrainer in verschiedenen Vereinen".replace(/\s/g, "")) && lt.replace(/\s/g, "").includes(lang.erfahrung.replace(/\s/g, "")), "lange Erfahrung vollständig im Text");
-  ok(lt.replace(/\s/g, "").includes(lang.sonstiges.replace(/\s/g, "")), "lange „Sonstige Qualifikationen“ vollständig im Text");
-  ok(lt.includes("Nein, geplant bis: 31.03.2027"), "Erste-Hilfe-Kurs „Nein, geplant bis“ mit Datum");
+  ok(lt.includes("Ja, absolviert am: 31.03.2024"), "Erste-Hilfe-Kurs „Ja, absolviert am“ mit Datum");
   const seitenAnzahl = infoSeiten(lp).anzahl;
   ok(seitenAnzahl >= 9 && seitenAnzahl <= 11, () => "lange Angaben: " + seitenAnzahl + " Seiten (9 bis 11 erwartet: sieben bis neun Seiten Paket, Brief, Passfoto)");
   ok(infoSeiten(la).anzahl === 1, "lange Angaben: Antrag bleibt eine Seite");

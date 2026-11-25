@@ -110,15 +110,11 @@ const BEISPIEL = {
   seit: "2026-11-02",
   tage: ["di", "do", "sa"],
   notfall: { name: "Erika Mustermann", beziehung: "Partnerin", telefon: "0170 7654321" },
-  beruf: "Elektriker",
   erfahrung: "Drei Jahre Jugendtrainer bei einem anderen Verein (E-Jugend).",
-  ersteHilfe: "ja",
   ersteHilfeAm: "2025-05-12",
-  ersteHilfeBis: null,
-  sonstiges: "",
   zeugnis: "beantragen",
 };
-// zweiter Lauf: Karneval, Zeugnis vorhanden (kein Antrag), Erste Hilfe geplant
+// zweiter Lauf: Karneval, Zeugnis vorhanden (kein Antrag) und ohne die freiwilligen Angaben Notfallkontakt, Erfahrung, Erste-Hilfe-Kurs und Passfoto (25.11.2026)
 const BEISPIEL_KARNEVAL = {
   ...BEISPIEL,
   vorname: "Erika",
@@ -128,9 +124,10 @@ const BEISPIEL_KARNEVAL = {
   mannschaft: "Dreamboys",
   rolle: "betreuer",
   tage: ["di"],
-  ersteHilfe: "nein",
+  notfall: { name: "", beziehung: "", telefon: "" },
+  erfahrung: "",
   ersteHilfeAm: null,
-  ersteHilfeBis: "2027-01-31",
+  foto: false,
   zeugnis: "vorhanden",
 };
 const SCHRITTE = ["code", "start", "person", "einsatz", "notfall", "erfahrung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften", "pruefen", "fertig"];
@@ -407,19 +404,18 @@ async function fuelle(page, s, d) {
     await datum(page, "seit", d.seit);
     for (const t of d.tage) await kreuze(page, "tage", t);
   } else if (s === "notfall") {
-    await text(page, "notfall.name", d.notfall.name);
-    await text(page, "notfall.beziehung", d.notfall.beziehung);
-    await text(page, "notfall.telefon", d.notfall.telefon);
+    // freiwillig: nur, was in d steht
+    for (const f of ["name", "beziehung", "telefon"]) if (d.notfall && d.notfall[f]) await text(page, "notfall." + f, d.notfall[f]);
   } else if (s === "erfahrung") {
-    await text(page, "beruf", d.beruf);
-    await text(page, "erfahrung", d.erfahrung);
-    await karte(page, "ersteHilfe", d.ersteHilfe);
-    await datum(page, d.ersteHilfe === "ja" ? "ersteHilfeAm" : "ersteHilfeBis", d.ersteHilfe === "ja" ? d.ersteHilfeAm : d.ersteHilfeBis);
-    if (d.sonstiges) await text(page, "sonstiges", d.sonstiges);
+    if (d.erfahrung) await text(page, "erfahrung", d.erfahrung);
+    if (d.ersteHilfeAm) await datum(page, "ersteHilfeAm", d.ersteHilfeAm);
   } else if (s === "foto") {
-    const eingabe = await page.$('#anmeldung input[data-aktion="foto-galerie"]');
-    await eingabe.uploadFile(TESTBILD);
-    await page.waitForSelector("#anmeldung .anm-vorschau-foto", { visible: true, timeout: 8000 });
+    // freiwillig: ohne d.foto === false gibt es ein Foto
+    if (d.foto !== false) {
+      const eingabe = await page.$('#anmeldung input[data-aktion="foto-galerie"]');
+      await eingabe.uploadFile(TESTBILD);
+      await page.waitForSelector("#anmeldung .anm-vorschau-foto", { visible: true, timeout: 8000 });
+    }
   } else if (s === "kodex") {
     await kreuze(page, "kodexGelesen");
   } else if (s === "selbstauskunft") {
@@ -1060,7 +1056,7 @@ async function haupt() {
       const reihenfolge = await geheDurch(page, BEISPIEL_KARNEVAL, null);
       ok("zweiter Lauf (Karneval, Gruppe Dreamboys, Rolle Betreuer, Zeugnis vorhanden): alle Bildschirme bis „fertig“", JSON.stringify(reihenfolge) === JSON.stringify(SCHRITTE.slice(1)), reihenfolge.join(" › "));
       const korpus = await sichtbarerText(page);
-      ok("zweiter Lauf: „Dein Paket ist fertig“ mit der einen Datei, ohne Brief in der Beschreibung, Einsicht bei der Person aus der Konfiguration", /Dein Paket ist fertig/.test(korpus) && korpus.includes("Trainerunterlagen_Beispielfrau_Erika.pdf") && !korpus.includes("Antrag für dein Führungszeugnis") && !korpus.includes("Antrag_Gebuehrenbefreiung"), "");
+      ok("zweiter Lauf: „Dein Paket ist fertig“ mit der einen Datei, ohne Brief in der Beschreibung, Einsicht bei der Person aus der Konfiguration", /Dein Paket ist fertig/.test(korpus) && korpus.includes("Trainerunterlagen_Beispielfrau_Erika.pdf") && !korpus.includes("Antrag für dein Führungszeugnis") && !korpus.includes("Antrag_Gebuehrenbefreiung") && !/Passfoto/.test(korpus), "");
       await page.click('#anmeldung [data-aktion="teilen"]');
       await warte(500);
       const geteilt = await liesDateienAusSeite(page);
@@ -1068,6 +1064,7 @@ async function haupt() {
       for (const d of geteilt) fs.writeFileSync(path.join(AUSGABE, "dateien", d.name), Buffer.from(d.b64, "base64"));
       const pp = pdfPruefen(Buffer.from(geteilt.find((d) => d.name.startsWith("Trainerunterlagen")).b64, "base64"), "karneval.pdf");
       ok(`zweiter Lauf: Paket-PDF gültig; „Einsicht bei ${einsichtKurz}“ steht auf dem Deckblatt; Gruppe Dreamboys, kein Antrag auf Gebührenbefreiung angekündigt`, pp.gueltig && pp.text.includes(`Einsicht bei ${einsichtKurz}`) && /Dreamboys/.test(pp.text), "");
+      ok("zweiter Lauf ohne freiwillige Angaben: sieben Seiten (kein Brief, keine Seite „Passfoto“), Deckblatt „Passfoto: nicht abgegeben (freiwillig)“, kein Notfallkontakt im Blatt", pp.seiten === 7 && /Passfoto: nicht abgegeben \(freiwillig\)/.test(pp.text) && !/Passfoto von/.test(pp.text) && !/Erika Mustermann|Partnerin|0170 7654321/.test(pp.text), pp.seiten + " Seiten");
       ok("zweiter Lauf: Konsole und Netz sauber (keine Fehler, kein POST, kein fremder Host)", st.konsole.length === 0 && st.fremd.length === 0 && st.eigene.every((a) => a.methode === "GET" && !a.body), st.konsole.slice(0, 2).join(" | "));
       await schliesseSeite(page);
       srv.konfigAenderung = null;
