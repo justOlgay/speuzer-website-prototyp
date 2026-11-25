@@ -1,7 +1,7 @@
 export default {
  "seite": {
   "titel": "Neu im Trainerteam – FFV Sportfreunde 04",
-  "beschreibung": "Unterlagen für neue Trainer, Co-Trainer und Betreuer des FFV Sportfreunde 04: Angaben, Passfoto, Verhaltenskodex und Unterschrift in einem Zug. Zugang nur mit Code.",
+  "beschreibung": "Unterlagen für neue Trainer, Co-Trainer und Betreuer des FFV Sportfreunde 04: Angaben, Verhaltenskodex und Unterschrift in einem Zug. Zugang nur mit Code.",
   "h1": "Neu im Trainerteam",
   "lead": "Alle Unterlagen in einem Zug. Am Handy dauert das etwa zehn Minuten.",
   "assistentTitel": "Assistent für neue Trainer und Betreuer",
@@ -59,7 +59,6 @@ export default {
   "datumUnvollstaendig": "Bitte trage Tag, Monat und Jahr ein.",
   "datumUngueltig": "Dieses Datum gibt es nicht. Bitte prüfe es.",
   "datumZukunft": "Das Datum liegt in der Zukunft. Bitte prüfe es.",
-  "datumVergangenheit": "Das Datum liegt in der Vergangenheit. Bitte prüfe es.",
   "datumZuAlt": "Das Jahr liegt zu weit zurück. Bitte prüfe es.",
   "unter18": "Diese Seite ist für Erwachsene. Wenn du unter 18 bist, melde dich bitte bei der Geschäftsstelle.",
   "strasse": "Bitte trage Straße und Hausnummer ein.",
@@ -77,9 +76,6 @@ export default {
   "notfallName": "Bitte trage den Namen ein.",
   "notfallBeziehung": "Bitte trage ein, wer die Person für dich ist.",
   "notfallTelefon": "Bitte trage die Telefonnummer ein.",
-  "beruf": "Bitte trage deinen Beruf oder deine Tätigkeit ein.",
-  "ersteHilfe": "Bitte wähle eine Antwort.",
-  "foto": "Bitte füge ein Foto hinzu.",
   "kodex": "Bitte lies den Verhaltenskodex und setze den Haken.",
   "selbstauskunft": "Bitte setze den Haken. Trifft die Erklärung nicht auf dich zu, melde dich bitte bei der Geschäftsstelle.",
   "zeugnis": "Bitte wähle eine Antwort.",
@@ -118,7 +114,7 @@ export default {
   "text": "Hier erledigst du alles, was der Verein von neuen Trainern und Betreuern braucht. Das dauert etwa zehn Minuten.",
   "ablaufTitel": "So läuft es",
   "ablauf": [
-   "Du trägst deine Angaben ein und machst ein Passfoto.",
+   "Du trägst deine Angaben ein. Ein Passfoto ist freiwillig.",
    "Du liest den Verhaltenskodex und bestätigst ihn und die Selbstauskunft.",
    "Du bekommst den Antrag für dein erweitertes Führungszeugnis, ausgefüllt und gebührenfrei.",
    "Du unterschreibst am Bildschirm und schickst alles per E-Mail an die Geschäftsstelle."
@@ -126,7 +122,7 @@ export default {
   "brauchstTitel": "Das brauchst du",
   "brauchst": [
    "Dein Handy oder einen Computer",
-   "Ein Foto von dir (digital genügt)",
+   "Wenn du magst: ein Foto von dir (digital genügt)",
    "Deinen Finger oder die Maus zum Unterschreiben"
   ],
   "wissenTitel": "Gut zu wissen",
@@ -184,7 +180,7 @@ export default {
  },
  "notfall": {
   "titel": "Wer ist im Notfall für dich da?",
-  "hinweis": "Das Kontaktdatenblatt des Vereins fragt danach. Die Angaben gehen erst an den Verein, wenn du die Datei selbst schickst. Sag der Person bitte Bescheid, dass du sie als Notfallkontakt angibst.",
+  "hinweis": "Das ist freiwillig. Du kannst diese Seite überspringen. Wenn du einen Notfallkontakt angibst, brauchen wir alle drei Angaben. Die Angaben gehen erst an den Verein, wenn du die Datei selbst schickst. Sag der Person bitte Bescheid, dass du sie angibst.",
   "name": "Name des Notfallkontakts",
   "beziehung": "Beziehung zu dir",
   "telefon": "Telefonnummer des Notfallkontakts",
@@ -192,17 +188,15 @@ export default {
  },
  "erfahrung": {
   "titel": "Was bringst du mit?",
-  "beruf": "Beruf oder Tätigkeit",
-  "erfahrung": "Erfahrung als Trainer oder Betreuer (falls vorhanden)",
-  "ersteHilfe": "Erste-Hilfe-Kurs",
-  "ersteHilfeJa": "Ja, absolviert am",
-  "ersteHilfeNein": "Nein, geplant bis",
-  "sonstiges": "Sonstige Qualifikationen oder Fortbildungen",
+  "hinweis": "Alles auf dieser Seite ist freiwillig. Du kannst sie überspringen.",
+  "erfahrung": "Erfahrung und Qualifikationen",
+  "erfahrungHinweis": "Zum Beispiel Trainerlizenz, frühere Vereine oder Fortbildungen.",
+  "ersteHilfe": "Erste-Hilfe-Kurs absolviert am",
   "weiter": "Weiter"
  },
  "foto": {
   "titel": "Dein Passfoto",
-  "text": "Für die internen Vereinsunterlagen. Ein digitales Foto genügt. Bitte von vorne, mit gut sichtbarem Gesicht.",
+  "text": "Das Foto ist freiwillig. Es ist für die internen Vereinsunterlagen. Ein digitales Foto genügt. Bitte von vorne, mit gut sichtbarem Gesicht.",
   "machen": "Foto machen",
   "galerie": "Foto aus der Galerie wählen",
   "anderes": "Anderes Foto wählen",
@@ -304,9 +298,8 @@ export default {
    "seit": "Dabei seit",
    "tage": "Wann kannst du",
    "notfall": "Notfallkontakt",
-   "beruf": "Beruf",
-   "erfahrung": "Erfahrung",
-   "ersteHilfe": "Erste Hilfe",
+   "erfahrung": "Erfahrung und Qualifikationen",
+   "ersteHilfe": "Erste-Hilfe-Kurs",
    "foto": "Passfoto",
    "kodex": "Verhaltenskodex",
    "selbstauskunft": "Selbstauskunft",
@@ -321,8 +314,8 @@ export default {
    "zeugnis": "Antrag auf Gebührenbefreiung",
    "ja": "Ja",
    "offen": "Noch offen",
-   "ersteHilfeJa": "Ja, absolviert am {datum}",
-   "ersteHilfeNein": "Nein, geplant bis {datum}"
+   "nichtAngegeben": "Nicht angegeben (freiwillig)",
+   "ersteHilfe": "Absolviert am {datum}"
   },
   "unterschriftAlt": "Deine Unterschrift",
   "kastenTitel": "Das solltest du wissen",

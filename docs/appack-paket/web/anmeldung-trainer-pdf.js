@@ -24,11 +24,12 @@ export async function erzeugeDateien({ antworten, medien, konfig, heute, werkzeu
   try {
     const d = bereiteVor({ antworten, konfig, heute }, "paket");
     pruefeMedien(medien);
+    d.hatFoto = !!medien.foto;
     const wz = await ladeWerkzeuge(konfig, werkzeuge);
 
     const dok = await Dokument.neu(wz);
     const sig = await dok.bettePng(medien.unterschrift);
-    const foto = await dok.betteJpeg(medien.foto);
+    const foto = d.hatFoto ? await dok.betteJpeg(medien.foto) : null;
     deckblatt(dok, d);
     anmeldung(dok, d, sig);
     kontaktdatenblatt(dok, d, sig);
@@ -38,13 +39,13 @@ export async function erzeugeDateien({ antworten, medien, konfig, heute, werkzeu
 
     const ohneFuss = [];
     if (d.zeugnis === "beantragen") ohneFuss.push(zeichneAntrag(dok, d));
-    passfoto(dok, d, foto);
+    if (foto) passfoto(dok, d, foto);
     fusszeilen(dok, d, { ohne: ohneFuss });
     dok.setzeMetadaten({ titel: T.meta.titelPaket, betreff: T.meta.betreffPaket, ersteller: d.verein.name, heute: d.heute });
     const bytes = await dok.speichern();
 
     const teile = d.dateiteile.nachname + "_" + d.dateiteile.vorname;
-    const beschreibung = d.zeugnis === "beantragen" ? T.dateien.mitAntrag : T.dateien.ohneAntrag;
+    const beschreibung = [T.dateien.basis, d.zeugnis === "beantragen" ? T.dateien.antrag : "", d.hatFoto ? T.dateien.foto : ""].filter(Boolean).join(", ");
     const dateien = [{ name: "Trainerunterlagen_" + teile + ".pdf", typ: "application/pdf", bytes, beschreibung }];
     return { dateien, warnungen: warnungenVon(dok) };
   } catch (fehler) {

@@ -4,7 +4,7 @@ import { verarbeiteSpielerfoto, BildFehler } from "./anmeldung-bilder.js";
 import { unterschriftFeld } from "./anmeldung-unterschrift.js";
 import { pruefeCode, normalisiereCode } from "./anmeldung-zugang.js";
 import { einsichtNamen } from "./anmeldung-trainer-einsicht.js";
-import { karte, punktListe, nummerierteListe, mitLink, nurVorlesen, sichereUrl, blattSinnbildUrl, auswahlFeld, dateiKnopf, pflichtKaestchen, speichern, teilenMoeglich, kopiereAdresse, kopiereBeimTeilen, oeffneFensterSofort, zeigeInFenster } from "./anmeldung-trainer-bausteine.js";
+import { karte, punktListe, nummerierteListe, mitLink, sichereUrl, blattSinnbildUrl, auswahlFeld, dateiKnopf, pflichtKaestchen, speichern, teilenMoeglich, kopiereAdresse, kopiereBeimTeilen, oeffneFensterSofort, zeigeInFenster } from "./anmeldung-trainer-bausteine.js";
 import { pruefeSeite, ABTEILUNGEN, ROLLEN, WOCHENTAGE, abteilungenFuer, mannschaftenFuer, datumText, fristVon, schnupperWoerter } from "./anmeldung-trainer-regeln.js";
 
 export const REIHENFOLGE = ["code", "start", "person", "einsatz", "notfall", "erfahrung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften", "pruefen", "fertig"];
@@ -213,9 +213,9 @@ export const notfall = {
       weiterText: k.text("notfall.weiter"),
       inhalt: [
         ...absaetze(k.text("notfall.hinweis"), "anm-hinweis"),
-        textfeld(k, { pfad: "notfall.name", label: k.text("notfall.name"), maxlength: 60 }),
-        textfeld(k, { pfad: "notfall.beziehung", label: k.text("notfall.beziehung"), maxlength: 40 }),
-        textfeld(k, { pfad: "notfall.telefon", label: k.text("notfall.telefon"), typ: "tel", autocomplete: "off", maxlength: 30, ltr: true }),
+        textfeld(k, { pfad: "notfall.name", label: k.text("notfall.name"), maxlength: 60, pflicht: false }),
+        textfeld(k, { pfad: "notfall.beziehung", label: k.text("notfall.beziehung"), maxlength: 40, pflicht: false }),
+        textfeld(k, { pfad: "notfall.telefon", label: k.text("notfall.telefon"), typ: "tel", autocomplete: "off", maxlength: 30, ltr: true, pflicht: false }),
       ],
     };
   },
@@ -225,44 +225,19 @@ export const notfall = {
 export const erfahrung = {
   id: "erfahrung",
   abschnitt: "einsatz",
-  render(k) {
 
-    const ersteHilfe = kartenAuswahl(k, {
-      pfad: "ersteHilfe",
-      legende: k.text("erfahrung.ersteHilfe"),
-      optionen: [{ wert: "ja", label: k.text("erfahrung.ersteHilfeJa") }, { wert: "nein", label: k.text("erfahrung.ersteHilfeNein") }],
-    });
-    const [karteJa, karteNein] = ersteHilfe.querySelectorAll(".anm-karten > label.anm-karte");
-    const datumJa = datumFelder(k, { pfad: "ersteHilfeAm", legende: nurVorlesen(k.text("erfahrung.ersteHilfeJa")), hinweis: k.text("allgemein.datumHinweisJetzt") });
-    const datumNein = datumFelder(k, { pfad: "ersteHilfeBis", legende: nurVorlesen(k.text("erfahrung.ersteHilfeNein")), hinweis: k.text("allgemein.datumHinweisJetzt"), zukunftErlaubt: true });
-    karteJa.after(datumJa);
-    karteNein.after(datumNein);
-    k.aktualisierer.push(() => {
-      const ja = k.a.ersteHilfe === "ja";
-      const nein = k.a.ersteHilfe === "nein";
-      datumJa.disabled = !ja;
-      datumNein.disabled = !nein;
-      datumJa.classList.toggle("tr-datum-aus", !ja);
-      datumNein.classList.toggle("tr-datum-aus", !nein);
-    });
+  render(k) {
     return {
       titel: k.text("erfahrung.titel"),
       weiterText: k.text("erfahrung.weiter"),
       inhalt: [
-        textfeld(k, { pfad: "beruf", label: k.text("erfahrung.beruf"), maxlength: 60 }),
-        textfeld(k, { pfad: "erfahrung", label: k.text("erfahrung.erfahrung"), zeilen: 3, maxlength: 300, pflicht: false }),
-        ersteHilfe,
-        textfeld(k, { pfad: "sonstiges", label: k.text("erfahrung.sonstiges"), zeilen: 3, maxlength: 300, freiwillig: true }),
+        ...absaetze(k.text("erfahrung.hinweis"), "anm-hinweis"),
+        textfeld(k, { pfad: "erfahrung", label: k.text("erfahrung.erfahrung"), hinweis: k.text("erfahrung.erfahrungHinweis"), zeilen: 3, maxlength: 300, freiwillig: true }),
+        datumFelder(k, { pfad: "ersteHilfeAm", legende: k.text("erfahrung.ersteHilfe"), hinweis: k.text("allgemein.datumHinweisJetzt"), freiwillig: true }),
       ],
     };
   },
   pruefe: regelnFuer("erfahrung"),
-
-  beimVerlassen(k) {
-    const unbenutzt = k.a.ersteHilfe === "ja" ? "ersteHilfeBis" : "ersteHilfeAm";
-    k.a[unbenutzt] = null;
-    delete k.roh[unbenutzt];
-  },
 };
 
 export const foto = {
@@ -500,11 +475,9 @@ export const pruefen = {
       ? h("img", { klasse: "anm-vorschau-unterschrift", src: k.vorschauUrl("unterschrift", k.medien.unterschrift, "image/png"), alt: P("unterschriftAlt") })
       : k.text("unterschriften.stand0");
     const zeugnisText = a.zeugnis === "vorhanden" ? k.text("zeugnis.wahl.vorhanden") : a.zeugnis === "beantragen" ? P("werte.zeugnis") : P("werte.offen");
-    const ersteHilfe = a.ersteHilfe === "ja"
-      ? P("werte.ersteHilfeJa", { datum: datumText(a.ersteHilfeAm) })
-      : a.ersteHilfe === "nein"
-        ? P("werte.ersteHilfeNein", { datum: datumText(a.ersteHilfeBis) })
-        : P("werte.offen");
+
+    const nichtAngegeben = P("werte.nichtAngegeben");
+    const ersteHilfe = a.ersteHilfeAm ? P("werte.ersteHilfe", { datum: datumText(a.ersteHilfeAm) }) : nichtAngegeben;
     const an = a.anschrift || {};
     const n = a.notfall || {};
 
@@ -524,15 +497,14 @@ export const pruefen = {
         [P("zeilen.tage"), alsText(...WOCHENTAGE.filter((t) => (a.tage || []).includes(t)).map((t) => k.text("einsatz.wochentage." + t))), "einsatz"],
       ]],
       ["notfall", [
-        [P("zeilen.notfall"), alsText(n.name, n.beziehung, n.telefon), "notfall"],
+        [P("zeilen.notfall"), alsText(n.name, n.beziehung, n.telefon) || nichtAngegeben, "notfall"],
       ]],
       ["erfahrung", [
-        [P("zeilen.beruf"), a.beruf, "erfahrung"],
-        [P("zeilen.erfahrung"), a.erfahrung, "erfahrung"],
+        [P("zeilen.erfahrung"), sauber(a.erfahrung) || nichtAngegeben, "erfahrung"],
         [P("zeilen.ersteHilfe"), ersteHilfe, "erfahrung"],
       ]],
       ["unterlagen", [
-        [P("zeilen.foto"), offen(!!k.medien.foto, P("werte.foto")), "foto"],
+        [P("zeilen.foto"), k.medien.foto ? P("werte.foto") : nichtAngegeben, "foto"],
         [P("zeilen.kodex"), offen(a.kodexGelesen === true, P("werte.kodex")), "kodex"],
         [P("zeilen.selbstauskunft"), offen(a.selbstauskunft === true, P("werte.selbstauskunft")), "selbstauskunft"],
       ]],

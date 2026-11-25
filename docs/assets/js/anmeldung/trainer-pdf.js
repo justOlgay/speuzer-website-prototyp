@@ -10,8 +10,8 @@
         und beim Teilen nehmen Apps nicht immer alle Dateien):
         Trainerunterlagen_<Nachname>_<Vorname>.pdf   Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Erklärung zum
                                                       Verhaltenskodex, Information nach Art. 13 DSGVO, bei antworten.zeugnis ===
-                                                      "beantragen" der Antrag auf Gebührenbefreiung (vorletzte Seite, ohne Fußzeile),
-                                                      zuletzt das Passfoto (medien.foto, JPEG unverändert eingebettet)
+                                                      "beantragen" der Antrag auf Gebührenbefreiung (ohne Fußzeile), zuletzt, wenn
+                                                      medien.foto da ist (freiwillig), das Passfoto (JPEG unverändert eingebettet)
     vorschauAntrag({ antworten, konfig, heute, werkzeuge? }) → Uint8Array (der Antrag als eigenes PDF, gleicher Inhalt wie die Seite in der Datei)
   heute: „JJJJ-MM-TT“. werkzeuge: nur ohne Browser (Node-Test): { PDFLib, fontkit, schrift } (siehe trainer-pdf-lader.js); im Browser
   lädt trainer-pdf-lader.js pdf-lib, fontkit und die Schrift nach konfig.quellen, wie der Assistent.
@@ -59,11 +59,12 @@ export async function erzeugeDateien({ antworten, medien, konfig, heute, werkzeu
   try {
     const d = bereiteVor({ antworten, konfig, heute }, "paket");
     pruefeMedien(medien);
+    d.hatFoto = !!medien.foto; // Das Passfoto ist freiwillig: Ohne Foto gibt es keine Seite „Passfoto“, und das Deckblatt nennt es als nicht abgegeben.
     const wz = await ladeWerkzeuge(konfig, werkzeuge);
 
     const dok = await Dokument.neu(wz);
     const sig = await dok.bettePng(medien.unterschrift);
-    const foto = await dok.betteJpeg(medien.foto);
+    const foto = d.hatFoto ? await dok.betteJpeg(medien.foto) : null;
     deckblatt(dok, d);
     anmeldung(dok, d, sig);
     kontaktdatenblatt(dok, d, sig);
@@ -74,13 +75,13 @@ export async function erzeugeDateien({ antworten, medien, konfig, heute, werkzeu
     // das Bürgeramt. Die Seitenzählung („Seite x von y“) rechnet ihn mit.
     const ohneFuss = [];
     if (d.zeugnis === "beantragen") ohneFuss.push(zeichneAntrag(dok, d));
-    passfoto(dok, d, foto);
+    if (foto) passfoto(dok, d, foto);
     fusszeilen(dok, d, { ohne: ohneFuss });
     dok.setzeMetadaten({ titel: T.meta.titelPaket, betreff: T.meta.betreffPaket, ersteller: d.verein.name, heute: d.heute });
     const bytes = await dok.speichern();
 
     const teile = d.dateiteile.nachname + "_" + d.dateiteile.vorname;
-    const beschreibung = d.zeugnis === "beantragen" ? T.dateien.mitAntrag : T.dateien.ohneAntrag;
+    const beschreibung = [T.dateien.basis, d.zeugnis === "beantragen" ? T.dateien.antrag : "", d.hatFoto ? T.dateien.foto : ""].filter(Boolean).join(", ");
     const dateien = [{ name: "Trainerunterlagen_" + teile + ".pdf", typ: "application/pdf", bytes, beschreibung }];
     return { dateien, warnungen: warnungenVon(dok) };
   } catch (fehler) {

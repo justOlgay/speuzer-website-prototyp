@@ -1,6 +1,6 @@
 /*
   Antrag auf Gebührenbefreiung (Brief des Vereins), eine A4-Seite. zeichneAntrag setzt sie als Seite in die Datei der Trainerunterlagen
-  (trainer-pdf.js: vorletzte Seite, vor dem Passfoto); baueAntrag macht daraus ein eigenes PDF für die Vorschau „Antrag ansehen“.
+  (trainer-pdf.js: vorletzte Seite, vor dem Passfoto; ohne Passfoto die letzte Seite); baueAntrag macht daraus ein eigenes PDF für die Vorschau „Antrag ansehen“.
 
   Wortlaut und Aussehen wie ap1/beispiele/antrag-gebuehrenbefreiung (T.antrag in trainer-pdf-texte.js): Wappen oben links, Ort und
   Datum oben rechts, zwei Überschriften in Großbuchstaben, Anrede, vier Absätze im Blocksatz, die Angaben der Person (Name, Geburtsdatum,

@@ -105,13 +105,10 @@ export function bereiteVor(eingabe, art) {
     d.zeugnisJahre = Number.isInteger(k.zeugnisJahre) && k.zeugnisJahre > 0 ? k.zeugnisJahre : 0;
 
     const notfall = objekt(a.notfall);
+
     d.notfall = { name: text(notfall.name), beziehung: text(notfall.beziehung), telefon: text(notfall.telefon) };
-    d.beruf = text(a.beruf);
     d.erfahrung = text(a.erfahrung);
-    d.sonstiges = text(a.sonstiges);
-    d.ersteHilfe = text(a.ersteHilfe);
-    d.ersteHilfeAm = d.ersteHilfe === "ja" ? datumDe(a.ersteHilfeAm) : "";
-    d.ersteHilfeBis = d.ersteHilfe === "nein" ? datumDe(a.ersteHilfeBis) : "";
+    d.ersteHilfeAm = istIso(a.ersteHilfeAm) ? datumDe(a.ersteHilfeAm) : "";
     const tage = Array.isArray(a.tage) ? a.tage : [];
     d.tage = T.tage.map((x) => x[0]).filter((code) => tage.includes(code));
   }
@@ -147,6 +144,6 @@ export function pruefeMedien(medien) {
   const m = objekt(medien);
   if (!m.unterschrift) throw new TrainerPdfFehler("unterschrift-fehlt", "Die Unterschrift fehlt: Ohne Unterschrift entsteht keine Datei.");
   if (!istPng(m.unterschrift)) throw new TrainerPdfFehler("unterschrift-format", "Die Unterschrift ist kein PNG.");
-  if (!m.foto) throw new TrainerPdfFehler("foto-fehlt", "Das Passfoto fehlt: Ohne Foto entsteht keine Datei.");
-  if (!istJpeg(m.foto)) throw new TrainerPdfFehler("foto-format", "Das Passfoto ist kein JPEG.");
+
+  if (m.foto && !istJpeg(m.foto)) throw new TrainerPdfFehler("foto-format", "Das Passfoto ist kein JPEG.");
 }

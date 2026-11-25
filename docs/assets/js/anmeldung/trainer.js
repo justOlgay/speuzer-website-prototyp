@@ -65,9 +65,9 @@
 
   ---------- Zustand ----------
   { antworten, medien }: antworten hat die Felder von trainer-regeln.js › neueAntworten (vorname, nachname, geburtsdatum (ISO), anschrift
-  { strasse, plz, ort }, handy, email, abteilung, mannschaft, rolle, seit (ISO), tage[], notfall { name, beziehung, telefon }, beruf,
-  erfahrung, ersteHilfe "ja" | "nein", ersteHilfeAm, ersteHilfeBis, sonstiges, foto (Boolean), kodexGelesen, selbstauskunft,
-  zeugnis "beantragen" | "vorhanden", satzung); medien = { foto: Uint8Array | null (JPG, 3:4, höchstens 750 × 1000 Pixel),
+  { strasse, plz, ort }, handy, email, abteilung, mannschaft, rolle, seit (ISO), tage[], notfall { name, beziehung, telefon } (freiwillig, alle
+  drei oder keine), erfahrung (freiwillig, ein Textfeld), ersteHilfeAm (freiwillig, ISO oder null), foto (Boolean, freiwillig), kodexGelesen,
+  selbstauskunft, zeugnis "beantragen" | "vorhanden", satzung); medien = { foto: Uint8Array | null (JPG, 3:4, höchstens 750 × 1000 Pixel; freiwillig),
   unterschrift: Uint8Array | null (PNG, auf die Striche zugeschnitten) }.
   Wie im Anmelde-Assistenten (übernommen): Alles liegt nur im Arbeitsspeicher; nichts im Speicher des Browsers, keine Cookies, nichts wird
   gesendet (nur das Laden der eigenen Dateien der Seite). Beim Schließen oder Neuladen sind die Angaben weg; der Browser warnt davor, solange

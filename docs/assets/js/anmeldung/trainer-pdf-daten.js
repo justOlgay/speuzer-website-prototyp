@@ -7,7 +7,7 @@
     angaben        Angaben der Person fehlen oder sind ungültig (Detail: die Namen der Felder)
     konfig         Konfiguration unvollständig (Detail: die Namen der Felder)
     unterschrift-fehlt, unterschrift-format   medien.unterschrift fehlt oder ist kein PNG
-    foto-fehlt, foto-format                   medien.foto fehlt oder ist kein JPEG
+    foto-format                               medien.foto ist da, aber kein JPEG (das Foto ist freiwillig: ohne Foto entsteht die Datei ohne Fotoseite)
   Die Einsichtnehmenden prüft dieses Modul nicht: Eine leere Liste ergibt „dem Vorstand“ (trainer-einsicht.js).
 */
 
@@ -124,13 +124,10 @@ export function bereiteVor(eingabe, art) {
     d.zeugnisJahre = Number.isInteger(k.zeugnisJahre) && k.zeugnisJahre > 0 ? k.zeugnisJahre : 0;
 
     const notfall = objekt(a.notfall);
+    // Notfallkontakt, Erfahrung und Erste-Hilfe-Kurs sind freiwillig: Fehlt etwas, bleibt das Feld im Blatt leer.
     d.notfall = { name: text(notfall.name), beziehung: text(notfall.beziehung), telefon: text(notfall.telefon) };
-    d.beruf = text(a.beruf);
     d.erfahrung = text(a.erfahrung);
-    d.sonstiges = text(a.sonstiges);
-    d.ersteHilfe = text(a.ersteHilfe);
-    d.ersteHilfeAm = d.ersteHilfe === "ja" ? datumDe(a.ersteHilfeAm) : "";
-    d.ersteHilfeBis = d.ersteHilfe === "nein" ? datumDe(a.ersteHilfeBis) : "";
+    d.ersteHilfeAm = istIso(a.ersteHilfeAm) ? datumDe(a.ersteHilfeAm) : "";
     const tage = Array.isArray(a.tage) ? a.tage : [];
     d.tage = T.tage.map((x) => x[0]).filter((code) => tage.includes(code));
   }
@@ -167,6 +164,6 @@ export function pruefeMedien(medien) {
   const m = objekt(medien);
   if (!m.unterschrift) throw new TrainerPdfFehler("unterschrift-fehlt", "Die Unterschrift fehlt: Ohne Unterschrift entsteht keine Datei.");
   if (!istPng(m.unterschrift)) throw new TrainerPdfFehler("unterschrift-format", "Die Unterschrift ist kein PNG.");
-  if (!m.foto) throw new TrainerPdfFehler("foto-fehlt", "Das Passfoto fehlt: Ohne Foto entsteht keine Datei.");
-  if (!istJpeg(m.foto)) throw new TrainerPdfFehler("foto-format", "Das Passfoto ist kein JPEG.");
+  // Das Passfoto ist freiwillig (25.11.2026): Ohne Foto entsteht die Datei ohne die Seite „Passfoto“. Ist eines da, muss es ein JPEG sein.
+  if (m.foto && !istJpeg(m.foto)) throw new TrainerPdfFehler("foto-format", "Das Passfoto ist kein JPEG.");
 }

@@ -34,12 +34,8 @@ export function neueAntworten() {
     seit: null,
     tage: [],
     notfall: { name: "", beziehung: "", telefon: "" },
-    beruf: "",
     erfahrung: "",
-    ersteHilfe: null,
     ersteHilfeAm: null,
-    ersteHilfeBis: null,
-    sonstiges: "",
     foto: false,
     kodexGelesen: false,
     selbstauskunft: false,
@@ -201,6 +197,7 @@ const REGELN = {
 
   notfall(a) {
     const n = a.notfall || {};
+    if (!sauber(n.name) && !sauber(n.beziehung) && !sauber(n.telefon)) return [];
     return [
       ...pflichtText(n.name, "notfall.name", M.notfallName, "name"),
       ...pflichtText(n.beziehung, "notfall.beziehung", M.notfallBeziehung, "text"),
@@ -209,23 +206,13 @@ const REGELN = {
   },
 
   erfahrung(a, c) {
-    const f = [...pflichtText(a.beruf, "beruf", M.beruf, "text"), ...lateinFehler(a.erfahrung, "erfahrung", "text")];
-    if (a.ersteHilfe !== "ja" && a.ersteHilfe !== "nein") f.push(fehler("ersteHilfe", M.ersteHilfe));
-    else if (a.ersteHilfe === "ja") {
-      const p = datumProblem(c.roh && c.roh.ersteHilfeAm, a.ersteHilfeAm, c.heute, { zukunftErlaubt: false });
-      if (p) f.push(fehler("ersteHilfeAm", M[p]));
-    } else {
-      const p = datumProblem(c.roh && c.roh.ersteHilfeBis, a.ersteHilfeBis, c.heute, { zukunftErlaubt: true });
-      if (p) f.push(fehler("ersteHilfeBis", M[p]));
-      else if (a.ersteHilfeBis < c.heute) f.push(fehler("ersteHilfeBis", M.datumVergangenheit));
-    }
-    f.push(...lateinFehler(a.sonstiges, "sonstiges", "text"));
+    const f = [...lateinFehler(a.erfahrung, "erfahrung", "text")];
+    const p = datumProblem(c.roh && c.roh.ersteHilfeAm, a.ersteHilfeAm, c.heute, { zukunftErlaubt: false });
+    if (p && p !== "datumLeer") f.push(fehler("ersteHilfeAm", M[p]));
     return f;
   },
 
-  foto(a, c) {
-    return c.medien && c.medien.foto && c.medien.foto.length ? [] : [fehler("foto", M.foto)];
-  },
+  foto: () => [],
 
   kodex(a) {
     return a.kodexGelesen === true ? [] : [fehler("kodexGelesen", M.kodex)];
