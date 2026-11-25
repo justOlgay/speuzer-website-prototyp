@@ -186,7 +186,7 @@ hier nur dokumentiert (W3-Spezifikation Abschnitt 5), nicht umgesetzt:
 - Facebook-Link der Fußzeile zeigt auf eine andere Adresse als
   `kontakt.html` (Worksheet-Pflege, macht der Auftraggeber im CMS).
 
-## Dateien (83)
+## Dateien (99)
 
 - web/anmeldung.html
 - web/aufnahmeantrag.html
@@ -224,6 +224,7 @@ hier nur dokumentiert (W3-Spezifikation Abschnitt 5), nicht umgesetzt:
 - web/spielplan.html
 - web/tabellen.html
 - web/termine.html
+- web/trainerteam.html
 - web/verein-downloads.html
 - web/verein-karneval.html
 - web/verein-mach-mit.html
@@ -271,3 +272,42 @@ hier nur dokumentiert (W3-Spezifikation Abschnitt 5), nicht umgesetzt:
 - web/anmeldung-zeichen.js
 - web/anmeldung-zugang.js
 - web/anmeldung.css
+- web/anmeldung-texte-trainer-de.js
+- web/anmeldung-trainer-bausteine.js
+- web/anmeldung-trainer-einsicht.js
+- web/anmeldung-trainer-pdf-antrag.js
+- web/anmeldung-trainer-pdf-daten.js
+- web/anmeldung-trainer-pdf-hilfen.js
+- web/anmeldung-trainer-pdf-lader.js
+- web/anmeldung-trainer-pdf-seiten.js
+- web/anmeldung-trainer-pdf-texte.js
+- web/anmeldung-trainer-pdf-wappen.js
+- web/anmeldung-trainer-pdf.js
+- web/anmeldung-trainer-regeln.js
+- web/anmeldung-trainer-seiten.js
+- web/anmeldung-trainer.js
+- web/trainer.css
+
+## Seite „Neu im Trainerteam“ (Stufe 2; nur mit dem Schalter TRAINER_LIVE)
+
+Dieser Abschnitt steht nur im Paket, das mit dem Schalter `TRAINER_LIVE` (`src/vorlagen/hilfen.mjs`, verlangt `ANMELDUNG_LIVE`)
+gebaut wurde. Ohne den Schalter gibt es diese Dateien nicht, und das Paket ist Byte für Byte wie ohne die Seite.
+
+`trainerteam.html` ist eine öffentlich erreichbare Seite, die sich nur mit einem Code öffnet: Link `trainerteam.html?code=<CODE>` (Code, QR-Code und
+Blatt: `node tools/trainer-zugang.mjs`), sonst ist die Code-Seite der erste Bildschirm. Im Paket stehen nur die Prüfwerte (SHA-256) aus
+`data/trainer.json › zugang › pruefwerte` in der Konfiguration der Seite; ohne Prüfwert bricht der Bau ab. Neue Trainer, Co-Trainer und Betreuer
+erledigen darauf alles in einem Zug am Handy und schicken die erzeugten Dateien selbst per E-Mail an die Geschäftsstelle; die Seite überträgt und
+speichert nichts. Sie ist von keiner Seite verlinkt, nicht im Menü und nicht in der Sitemap (`noindex`). Alle Dateien liegen flach im Ordner `web`:
+
+- `trainer.css` – Stylesheet (ohne Kommentare)
+- 13 Module `anmeldung-trainer*.js` – Code der Seite (ES-Module; Einstieg `anmeldung-trainer.js`; ohne Kommentare, Importe auf diese
+  Namen umgeschrieben; `anmeldung-trainer-pdf.js` und seine Teile laden mit der Seite, nur die Schrift, pdf-lib und fontkit erst beim Erstellen der Dateien)
+- 1 Textmodul `anmeldung-texte-trainer-de.js`
+- geteilt mit dem Anmelde-Assistenten (liegen schon im Ordner, keine Doppelung): 11 Module (`anmeldung-bausteine.js`, `anmeldung-hilfen.js`, `anmeldung-zugang.js`, `anmeldung-unterschrift.js`, `anmeldung-laender.js`, `anmeldung-zeichen.js`, `anmeldung-bilder.js`, `anmeldung-pdf-lader.js`, `anmeldung-pdf.js`, `anmeldung-texte-de-regeln.js`, `anmeldung-regeln.js`),
+  `anmeldung-schrift.js`, `aufnahmeantrag-pdf-lib.js` und `aufnahmeantrag-fontkit.js`
+
+Reihenfolge beim Einspielen: erst `trainer.css`, `anmeldung-texte-trainer-de.js` und alle `anmeldung-trainer*.js`, zuletzt `trainerteam.html`. So ist
+nie eine Seite sichtbar, deren Dateien noch fehlen. Wechsel des Codes: neuen Prüfwert in `data/trainer.json` setzen (`--behalten` lässt den alten
+bis zum Wechsel gelten), neu bauen, `trainerteam.html` neu einspielen. Rückweg: `trainerteam.html`, `trainer.css`, `anmeldung-trainer*.js` und
+`anmeldung-texte-trainer-de.js` im CMS löschen; die Dateien des Assistenten bleiben. Prüfen nach dem Einspielen: `node tools/appack-paket-pruefen.mjs`
+für das Paket und der Abgleich der SHA-256 aus `manifest.json` mit den Dateien im CMS.

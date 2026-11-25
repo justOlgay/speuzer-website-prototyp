@@ -1,0 +1,61 @@
+/*
+  Seite „Neu im Trainerteam“ – Ergänzungen zum Stylesheet des Anmelde-Assistenten (anmeldung.css, site.css).
+
+  Das Aussehen kommt von den Klassen des Anmelde-Assistenten (anm-…, knopf, hinweis …); hier stehen nur die wenigen Stellen, die er
+  nicht kennt. Nur Tokens der Website (tokens.css): kein eigenes Farbschema, keine neuen Schriften, keine Verweise auf Dateien.
+  Präfix .tr-. Geladen nach anmeldung.css (Reihenfolge der <link>-Elemente: site.css, anmeldung.css, trainer.css).
+*/
+
+/* „Hilfe“: ein Hinweiskasten unter der Abschnittszeile (im Anmelde-Assistenten öffnet „Hilfe“ einen Dialog). */
+.tr-hilfe {
+  margin-block-start: var(--sp-3);
+}
+
+/* Mannschaft (Karneval: Gruppe) und Rolle hängen von der Abteilung ab und stehen in einer Hülle, die wie die Seite abstandet. Ohne
+   Abteilung ist sie leer und nimmt keinen Platz. */
+.tr-abhaengig {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+.tr-abhaengig:empty {
+  display: none;
+}
+
+/* Sinnbild des Antrags (A4 hochkant) in der Karte zum Antrag. */
+.tr-blatt-vorschau {
+  display: block;
+  width: 100%;
+  max-width: 11rem;
+  height: auto;
+  aspect-ratio: 210 / 297;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  box-shadow: var(--sh-1);
+}
+
+/* Fußnoten unter dem Inhalt (Foto, Kodex, Selbstauskunft, Zeugnis): gleichmäßig umbrechen, damit „E-Mail“ nicht am Bindestrich getrennt wird. */
+.tr-fussnote {
+  margin: 0;
+  text-wrap: balance;
+}
+
+/* Datum zur nicht gewählten Karte (Erste Hilfe): abgeblendet, die Eingabe ist gesperrt. */
+.tr-datum-aus {
+  opacity: 0.5;
+}
+
+/* Text nur für Screenreader und die Fehlerliste (wie .sr-only; bausteine.js › feldBezeichnung lässt .sr-only weg, diesen Text nimmt es mit). */
+.tr-nur-vorlesen {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

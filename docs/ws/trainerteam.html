@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neu im Trainerteam – FFV Sportfreunde 04</title>
+<meta name="description" content="Unterlagen für neue Trainer, Co-Trainer und Betreuer des FFV Sportfreunde 04: Angaben, Passfoto, Verhaltenskodex und Unterschrift in einem Zug. Zugang nur mit Code.">
+<link rel="canonical" href="https://justolgay.github.io/speuzer-website-prototyp/ws/trainerteam.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FFV Sportfreunde 04">
+<meta property="og:title" content="Neu im Trainerteam – FFV Sportfreunde 04">
+<meta property="og:description" content="Unterlagen für neue Trainer, Co-Trainer und Betreuer des FFV Sportfreunde 04: Angaben, Passfoto, Verhaltenskodex und Unterschrift in einem Zug. Zugang nur mit Code.">
+<meta property="og:url" content="https://justolgay.github.io/speuzer-website-prototyp/ws/trainerteam.html">
+<meta property="og:image" content="https://justolgay.github.io/speuzer-website-prototyp/assets/og/standard.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#191793">
+<link rel="icon" href="../assets/logo/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/logo/apple-touch-icon.png">
+<link rel="preload" href="../assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/css/site.css">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="../assets/css/anmeldung.css">
+<link rel="stylesheet" href="../assets/css/trainer.css">
+<script type="module">
+(async () => {
+  const wurzel = document.getElementById("anmeldung");
+  try {
+    const { startTrainer } = await import("../assets/js/anmeldung/trainer.js");
+    await startTrainer(wurzel, JSON.parse(document.getElementById("trainer-konfig").textContent));
+  } catch (fehler) {
+    console.error("Trainerseite: Start fehlgeschlagen", fehler);
+    wurzel.textContent = wurzel.getAttribute("data-ladefehler") || "";
+  }
+})();
+</script>
+</head>
+<body class="ws ">
+<main id="inhalt">
+<section class="abschnitt seitenkopf">
+  <div class="container">
+    <div class="anm-titelzeile">
+      <h1>Neu im Trainerteam</h1>
+    </div>
+    <p class="seitenkopf__lead">Alle Unterlagen in einem Zug. Am Handy dauert das etwa zehn Minuten.</p>
+  </div>
+</section>
+<section class="abschnitt anm-assistent-abschnitt" aria-labelledby="anm-assistent-titel">
+  <div class="container">
+    <h2 class="sr-only" id="anm-assistent-titel">Assistent für neue Trainer und Betreuer</h2>
+    <div class="anm" id="anmeldung" data-anm-wurzel data-ladefehler="Die Seite lässt sich nicht laden. Bitte schreib an geschaeftsstelle@sportfreunde04.de.">
+      <p class="anm-laden" data-anm-laden>Die Seite wird geladen. Wenn nichts passiert, schreib an geschaeftsstelle@sportfreunde04.de.</p>
+      <noscript><div class="hinweis hinweis--offen"><p>Diese Seite braucht JavaScript. Bitte schalte es ein. Oder schreib an geschaeftsstelle@sportfreunde04.de.</p></div></noscript>
+    </div>
+  </div>
+</section>
+<section class="abschnitt anm-rechtliches" lang="de">
+  <div class="container">
+    <p class="anm-rechtliches__zeile" dir="ltr"><a href="impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a></p>
+  </div>
+</section>
+<script type="application/json" id="trainer-konfig">{"live":true,"zugang":{"parameter":"code","pruefwerte":["e5a5939d0bd180fc462f9fedb5764938ebf4af452c8b8bb4b76a315efe014f4a"]},"verein":{"name":"FFV Sportfreunde 04","name_register":"Frankfurter Fußballverein Sportfreunde 1904 e. V.","mail":"geschaeftsstelle@sportfreunde04.de","ort":"Frankfurt am Main","anschrift":{"postfach":"Postfach 190442","postfachPlz":"60091","postfachOrt":"Frankfurt am Main","strasse":"Mainzer Landstraße 480","plz":"60326","ort":"Frankfurt am Main"},"unterzeichner":{"name":"Melanie Seipp","funktion":"Vorstand"},"satzungUrl":"https://cdn.appack.de/sportfreunde04/pdf/Satzung_Aktuell_2026.pdf","kodexUrl":"https://www.landessportbund-hessen.de/fileadmin/media/Schule_Bildung_Personalentwicklung/Verhaltenskodex/Verhaltenskodex_10-2023_Vers._2026_beschreibbar.pdf"},"einsicht":[{"name":"Melanie Seipp","funktion":"1. Vorsitzende"}],"abteilungen":["fussball"],"mannschaften":[{"abteilung":"fussball","name":"A-Jugend"},{"abteilung":"fussball","name":"D1-Jugend"},{"abteilung":"fussball","name":"D2-Jugend"},{"abteilung":"fussball","name":"D3-Jugend"},{"abteilung":"fussball","name":"E1-Jugend"},{"abteilung":"fussball","name":"E2-Jugend"},{"abteilung":"fussball","name":"E3-Jugend"},{"abteilung":"fussball","name":"F1-Jugend"},{"abteilung":"fussball","name":"F2-Jugend"},{"abteilung":"fussball","name":"G-Jugend (Bambinis)"}],"schnupperMonate":1,"zeugnisJahre":5}</script>
+</main>
+<footer class="ws-fuss">
+  <div data-nur-prototyp>
+  <p>Prototyp · Testumgebung, keine Live-Seite · Inhalte Stand Samstag, 31. Oktober 2026</p>
+  </div>
+</footer>
+</body>
+</html>

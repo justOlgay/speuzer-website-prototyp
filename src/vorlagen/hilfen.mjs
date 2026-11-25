@@ -108,7 +108,7 @@ export const ANMELDUNG_SPRACHEN_LIVE = ANMELDUNG_SPRACHEN_TEST.length
 // ohne die Seite; nur die neuen Dateien unter docs/assets/ (Kopien von assets/) kommen dazu. Der Schalter bleibt aus, bis Olgay den
 // Livegang freigibt; der Ablauf steht in tools/cache/orchestrierung-trainer/stufe2/ (UEBERGABE.md). Für einen Test-Bau setzt die
 // Umgebungsvariable TRAINER_LIVE=1 (an) bzw. TRAINER_LIVE=0 (aus) den Wert nur für diesen Bau – danach wieder ohne sie bauen.
-const TRAINER_LIVE_SCHALTER = false;
+const TRAINER_LIVE_SCHALTER = true; // 25.11.2026: an (Olgay); Rückweg: false und neu bauen
 const TRAINER_LIVE_TEST = globalThis.process?.env?.TRAINER_LIVE;
 export const TRAINER_LIVE =
   TRAINER_LIVE_TEST === "1" ? true : TRAINER_LIVE_TEST === "0" ? false : TRAINER_LIVE_SCHALTER;

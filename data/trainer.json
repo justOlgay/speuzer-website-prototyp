@@ -2,7 +2,9 @@
   "hinweis": "Konfiguration der Seite „Neu im Trainerteam“ (src/begleit/trainerteam.mjs, assets/js/anmeldung/trainer.js; die Seite entsteht nur mit dem Schalter TRAINER_LIVE in src/vorlagen/hilfen.mjs). Hier steht nur, was keine andere Datei kennt. Name, Registername, Anschrift, E-Mail-Adresse und Ort des Vereins (data/verein.json), die Adresse der Satzung (data/downloads.json), die Mannschaften (data/teams.json) und die Gruppen des Karnevals (data/karneval.json) leitet der Bau daraus ab; die Quellen für pdf-lib, fontkit und Schrift trägt tools/appack-paket.mjs ins Paket ein. Einsichtnehmende: Melanie Seipp allein (Entscheidung von Olgay Özkan vom 24.11.2026); die Liste bleibt erweiterbar, eine Vertretung kommt ohne Änderung am Code dazu. Unterzeichner des Antrags auf Gebührenbefreiung: wie bisher übernommen (der Antrag entsteht ohne Unterschrift des Vereins, der Verein unterschreibt von Hand). Stand 24.11.2026.",
   "zugang": {
     "parameter": "code",
-    "pruefwerte": [],
+    "pruefwerte": [
+      "e5a5939d0bd180fc462f9fedb5764938ebf4af452c8b8bb4b76a315efe014f4a"
+    ],
     "hinweis": "Zugang nur mit Code. Jeder Prüfwert ist der SHA-256 (hex, klein) des Codes ohne Leerzeichen und Bindestriche in Großbuchstaben. Mehrere Prüfwerte gelten nebeneinander. Leere Liste: Die Seite bleibt für jeden Code zu, und der Bau mit dem Schalter TRAINER_LIVE bricht ab. Setzen und prüfen mit tools/trainer-zugang.mjs. Der Code selbst steht nie in dieser Datei."
   },
   "verein": {
