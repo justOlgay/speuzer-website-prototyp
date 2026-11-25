@@ -21,6 +21,7 @@ import {
   artikelGroesse,
   baueMail,
   bereinigeEntwurf,
+  bezahlungIds,
   formatEuro,
   ganzzahl,
   initialenVorschlag,
@@ -319,13 +320,14 @@ function start() {
     for (const block of ["kleidung", "teambedarf"]) {
       const gruppe = $(`[data-bezahlung="${block}"]`);
       gruppe.hidden = !(block === "kleidung" ? z.hatKleidung : z.hatTeambedarf);
-      const wahl = zustand.bezahlung[block];
-      for (const r of gruppe.querySelectorAll('input[type="radio"]')) {
-        const an = r.value === wahl;
-        if (r.checked !== an) r.checked = an;
+      // Mehrere Antworten möglich; das Feld für den Namen gibt es nur bei angehaktem Sponsor (Antwort mit „mitName“).
+      // Ein Name bei abgewähltem Sponsor bleibt im Entwurf stehen, geht aber nicht in die Mail.
+      const gewaehlt = bezahlungIds(konfig, zustand.bezahlung[block]);
+      for (const haken of gruppe.querySelectorAll('input[type="checkbox"]')) {
+        const an = gewaehlt.includes(haken.value);
+        if (haken.checked !== an) haken.checked = an;
       }
-      const opt = konfig.bezahlung.find((o) => o.id === wahl);
-      $("[data-sponsor-feld]", gruppe).hidden = !(opt && opt.mitName);
+      $("[data-sponsor-feld]", gruppe).hidden = !konfig.bezahlung.some((o) => o.mitName && gewaehlt.includes(o.id));
     }
     el.bezahlungLeer.hidden = z.hatKleidung || z.hatTeambedarf;
   }
@@ -360,11 +362,20 @@ function start() {
       ui.lueckenHtml = "";
     }
     const felder = new Set(sichtbar ? luecken.map((l) => l.feld) : []);
+    const markiere = (knoten, an) => {
+      if (an && knoten.getAttribute("aria-invalid") !== "true") knoten.setAttribute("aria-invalid", "true");
+      if (!an && knoten.hasAttribute("aria-invalid")) knoten.removeAttribute("aria-invalid");
+    };
     for (const knoten of form.querySelectorAll("[data-schluessel]")) {
       if (knoten.tagName === "BUTTON") continue;
       const an = felder.has(knoten.dataset.schluessel);
-      if (an && knoten.getAttribute("aria-invalid") !== "true") knoten.setAttribute("aria-invalid", "true");
-      if (!an && knoten.hasAttribute("aria-invalid")) knoten.removeAttribute("aria-invalid");
+      if (knoten.tagName === "FIELDSET") {
+        // Antworten zur Bezahlung: Rahmen um die Gruppe, aria-invalid an den Kontrollkästchen (die Gruppe selbst trägt es nicht)
+        knoten.classList.toggle("bst-gruppe--luecke", an);
+        for (const haken of knoten.querySelectorAll('input[type="checkbox"]')) markiere(haken, an);
+      } else {
+        markiere(knoten, an);
+      }
     }
   }
 
@@ -426,8 +437,14 @@ function start() {
       ziel[teile[teile.length - 1]] = t.value;
       verarbeitet = true;
     } else if (t.dataset.bezWert !== undefined) {
+      // Antworten zur Bezahlung: alle angehakten Kästchen des Blocks, als Liste in Katalogreihenfolge (die Kästchen stehen in dieser Reihenfolge)
       const gruppe = t.closest("[data-bezahlung]");
-      if (gruppe && t.checked) zustand.bezahlung[gruppe.dataset.bezahlung] = t.value;
+      if (gruppe) {
+        zustand.bezahlung[gruppe.dataset.bezahlung] = bezahlungIds(
+          konfig,
+          [...gruppe.querySelectorAll('input[type="checkbox"]:checked')].map((haken) => haken.value)
+        );
+      }
       verarbeitet = true;
     } else if (t.closest("[data-person]")) {
       const p = person(t.closest("[data-person]").dataset.person);
@@ -500,7 +517,7 @@ function start() {
   function geheZuFeld(schluessel) {
     let ziel = form.querySelector(`[data-schluessel="${schluessel.replaceAll('"', '\\"')}"]`);
     if (!ziel) return;
-    if (ziel.tagName === "FIELDSET") ziel = ziel.querySelector("input:checked") || ziel.querySelector("input");
+    if (ziel.tagName === "FIELDSET") ziel = ziel.querySelector("input"); // Gruppe (Bezahlung): das erste Kästchen
     if (!ziel) return;
     ziel.scrollIntoView({ block: "center" });
     ziel.focus({ preventScroll: true });

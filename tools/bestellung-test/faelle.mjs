@@ -6,6 +6,8 @@
 //
 // Jeder Fall: { titel, jetzt (Date, Ortszeit), bestellung (Eingaben wie im Entwurf auf dem Gerät), ui (nur für den Browser-Test:
 // welche Schnellwahl je Person zuerst gedrückt wird), betreff, text }.
+// Die Antworten zur Bezahlung stehen als Listen von ids (bezahlung.kleidung, bezahlung.teambedarf); in diesen Fällen ist je Block
+// genau eine Antwort gewählt, die Mailzeile also „Bezahlung Kleidung: Eltern bzw. Spieler“ wie in der ersten Fassung.
 
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -71,7 +73,7 @@ export const FALL_A = {
     zaehler: 3,
     teambedarf: { baelle: { n: 10, details: "Größe 4" }, ballpumpe: { n: 1, details: "" } },
     sonstiges: "Ersatznetz für das kleine Tor",
-    bezahlung: { kleidung: "eltern", kleidungSponsor: "", teambedarf: "vereinskasse", teambedarfSponsor: "" },
+    bezahlung: { kleidung: ["eltern"], kleidungSponsor: "", teambedarf: ["vereinskasse"], teambedarfSponsor: "" },
     hinweisBezahlung: "Eltern zahlen bar bei mir",
   }),
   ui: { personen: [{ schnellwahl: "grundausstattung" }, {}, {}] },
@@ -155,7 +157,7 @@ export const FALL_B = {
     name: "Karim Beispiel",
     teambedarf: { huetchen: { n: 3, details: "Satz mit 40 Stück" }, trinkflaschen: { n: 1, details: "" } },
     sonstiges: "Zwei Ersatzbälle\nin Größe 3",
-    bezahlung: { kleidung: "", kleidungSponsor: "", teambedarf: "spenden", teambedarfSponsor: "" },
+    bezahlung: { kleidung: [], kleidungSponsor: "", teambedarf: ["spenden"], teambedarfSponsor: "" },
     hinweis: "Bitte bis zum Turnier",
   }),
   ui: { personen: [] },
@@ -190,7 +192,7 @@ export const FALL_C = {
     name: "Sven Beispiel",
     personen: [person("p1", "Jan Hüter", "1", "L", TORWARTSET)],
     zaehler: 1,
-    bezahlung: { kleidung: "vereinskasse", kleidungSponsor: "", teambedarf: "", teambedarfSponsor: "" },
+    bezahlung: { kleidung: ["vereinskasse"], kleidungSponsor: "", teambedarf: [], teambedarfSponsor: "" },
   }),
   ui: { personen: [{ schnellwahl: "torwartset" }] },
   betreff: "[TEST] Bestellung 1. Herrenmannschaft – 6 Teile (HERREN-261125-1807)",

@@ -13,6 +13,9 @@
 //     (Betreff, Text in „Mail ansehen“, mailto-Link), Senden (mailto abgefangen, Meldung, Bestell-Nr. bleibt), Text kopieren,
 //     Neuladen (Entwurf bleibt), „Neue Bestellung beginnen“ (Rückfrage, Entwurf leer, Absender bleibt), die Fälle (b) und (c)
 //   - Größen und Vorauswahl (Winterjacke ab 128, Stutzen, eigene Wahl), Initialen, Teambedarf, Bezahlung, Tastatur
+//   - Bezahlung als Mehrfachauswahl (Runde 2): Kontrollkästchen mit Hinweis unter der Legende, zwei Haken (Eltern + Sponsor) mit Sponsorname
+//     und die Mailzeile in „Mail ansehen“, Sponsor wieder abhaken (Feld und Name aus der Mail weg, Name bleibt im Entwurf), drei und vier
+//     Antworten in Katalogreihenfolge, Lücke ohne Haken (Sprung zum ersten Kästchen); alte Entwürfe mit Text statt Liste laden ohne Fehler
 //   - lange Bestellung (Hinweis, mailto nie gekürzt), Zwischenablage mit und ohne Rückfall
 //   - localStorage wirft Fehler (setItem, getItem, Zugriff selbst) und kaputte gespeicherte Daten: die Seite funktioniert
 //   - kein waagrechtes Scrollen bei 390 px, keine Konsolenfehler, Tippflächen mindestens 44 px, axe-core ohne Verstöße
@@ -72,6 +75,12 @@ function gleich(name, ist, soll) {
     }
   }
   pruefe(name, false, detail);
+}
+
+function gleichJson(name, ist, soll) {
+  const a = JSON.stringify(ist);
+  const b = JSON.stringify(soll);
+  pruefe(name, a === b, `ist ${a}\n          soll ${b}`);
 }
 
 function abschnitt(titel) {
@@ -253,10 +262,10 @@ async function fuelleFall(page, fall) {
   if (b.sonstiges) await page.type("#bst-sonstiges", b.sonstiges);
   for (const block of ["kleidung", "teambedarf"]) {
     const wahl = b.bezahlung[block];
-    if (!wahl) continue;
-    await page.click(`[data-bezahlung="${block}"] input[value="${wahl}"]`);
+    if (!wahl || wahl.length === 0) continue;
+    for (const id of wahl) await page.click(`[data-bezahlung="${block}"] input[value="${id}"]`);
     const sponsor = b.bezahlung[block + "Sponsor"];
-    if (sponsor) await tippe(page, `#bst-sponsor-${block}`, sponsor);
+    if (sponsor && wahl.includes("sponsor")) await tippe(page, `#bst-sponsor-${block}`, sponsor);
   }
   if (b.hinweisBezahlung) await page.type("#bst-hinweis-bezahlung", b.hinweisBezahlung);
   if (b.hinweis) await page.type("#bst-hinweis", b.hinweis);
@@ -676,7 +685,7 @@ async function ablaufLuecken(browser, server) {
     gleich("Lücken: Überschrift der Liste", await inhalt(page, ".bst-luecken__titel"), "Bitte ergänze noch:");
     gleich("Lücken: Fokus auf der ersten Lücke", await page.evaluate(() => document.activeElement.textContent.trim()), "Bei Mia fehlt die Rückennummer (Trikot, Präsi-Jacke)");
     gleich("Lücken: kein mailto ausgelöst, kein Kasten „gesendet“", String((await gesendet(page)).length) + "|" + String(await sichtbar(page, "[data-bst-gesendet]")), "0|false");
-    pruefe("Lücken: Felder mit Lücke tragen aria-invalid", await page.evaluate(() => ["p:p1:nummer", "p:p2:initialen", "p:p3:name"].every((s) => document.querySelector(`[data-schluessel="${s}"]`).getAttribute("aria-invalid") === "true") && document.querySelector('[data-schluessel="bezahlung:kleidung"]').getAttribute("aria-invalid") === "true"));
+    pruefe("Lücken: Felder mit Lücke tragen aria-invalid", await page.evaluate(() => ["p:p1:nummer", "p:p2:initialen", "p:p3:name"].every((s) => document.querySelector(`[data-schluessel="${s}"]`).getAttribute("aria-invalid") === "true") && document.querySelector('[data-schluessel="bezahlung:kleidung"]').classList.contains("bst-gruppe--luecke") && [...document.querySelectorAll('[data-bezahlung="kleidung"] input[type="checkbox"]')].every((c) => c.getAttribute("aria-invalid") === "true") && document.querySelector('[data-bezahlung="teambedarf"]').classList.contains("bst-gruppe--luecke") && [...document.querySelectorAll('[data-bezahlung="teambedarf"] input[type="checkbox"]')].every((c) => c.getAttribute("aria-invalid") === "true")));
     pruefe("Lücken: Felder ohne Lücke tragen es nicht", await page.evaluate(() => !document.getElementById("bst-team").hasAttribute("aria-invalid") && !document.querySelector('[data-schluessel="p:p1:name"]').hasAttribute("aria-invalid")));
     await pruefeLayout(page, "Lückenliste", 390);
     await pruefeTippflaechen(page, "Lückenliste");
@@ -705,7 +714,7 @@ async function ablaufLuecken(browser, server) {
     await page.type("#bst-sponsor-teambedarf", "Autohaus Beispiel");
     pruefe("alles behoben: Liste der Lücken weg", !(await sichtbar(page, "[data-bst-luecken]")));
     const mailto = await page.$eval("#bst-senden", (el) => el.dataset.mailto || "");
-    pruefe("alles behoben: Sendelink trägt jetzt den mailto", mailto.startsWith("mailto:") && dekodiere(mailto).text.includes("Bezahlung Teambedarf: Sponsor: Autohaus Beispiel\n"));
+    pruefe("alles behoben: Sendelink trägt jetzt den mailto", mailto.startsWith("mailto:") && dekodiere(mailto).text.includes("Bezahlung Teambedarf: Sponsor (Autohaus Beispiel)\n"));
     pruefe("alles behoben: Name der Mannschaft im Betreff", dekodiere(mailto).betreff.startsWith("[TEST] Bestellung D3-Jugend – 4 Teile, Teambedarf ("));
     pruefeProtokoll("Lückenliste", p, server);
   } finally {
@@ -830,13 +839,175 @@ async function ablaufFelder(browser, server) {
     gleich("keine Kleidung mehr: Personen zählen nicht (0)", await inhalt(page, '[data-u="personen"]'), "0");
     await page.click('[data-bezahlung="teambedarf"] input[value="sponsor"]');
     pruefe("Sponsor: Feld für den Namen erscheint und ist beschriftet", (await inhalt(page, '[data-bezahlung="teambedarf"] [data-sponsor-feld] label')) === "Name des Sponsors");
+    await page.click('[data-bezahlung="teambedarf"] input[value="sponsor"]');
+    pruefe("Haken weg: Feld für den Namen weg", !(await sichtbar(page, '[data-bezahlung="teambedarf"] [data-sponsor-feld]')));
     await page.click('[data-bezahlung="teambedarf"] input[value="vereinskasse"]');
-    pruefe("andere Antwort: Feld für den Namen weg", !(await sichtbar(page, '[data-bezahlung="teambedarf"] [data-sponsor-feld]')));
+    pruefe("andere Antwort angehakt: Feld für den Namen bleibt weg", !(await sichtbar(page, '[data-bezahlung="teambedarf"] [data-sponsor-feld]')));
     pruefe("Personen ohne Artikel erzeugen keine Lücke (nur die Bezahlung ist gewählt, Mannschaft und Name fehlen)", await page.evaluate(async () => { document.getElementById("bst-senden").click(); return [...document.querySelectorAll("[data-luecke]")].every((b) => ["team", "name"].includes(b.dataset.luecke)); }));
     await pruefeLayout(page, "Felder", 390);
     pruefeProtokoll("Felder und Tastatur", p, server);
   } finally {
     await schliessen();
+  }
+}
+
+// Bezahlung als Mehrfachauswahl (Runde 2): Kontrollkästchen, Sponsor mit Namen, Katalogreihenfolge, Lücke ohne Haken
+async function ablaufBezahlung(browser, server) {
+  abschnitt("390 x 844: Bezahlung als Mehrfachauswahl (Kontrollkästchen, Sponsor mit Name, Reihenfolge, Lücke ohne Haken)");
+  const { page, p, schliessen } = await oeffne(browser, server, { uhr: [2026, 10, 25, 14, 32] });
+  const haken = (block, id) => `[data-bezahlung="${block}"] input[value="${id}"]`;
+  const angehakt = (block) => page.$$eval(`[data-bezahlung="${block}"] input:checked`, (l) => l.map((x) => x.value).join(","));
+  const imEntwurf = (block) => page.evaluate((k, b) => JSON.parse(localStorage.getItem(k)).bezahlung[b], SCHLUESSEL_ENTWURF, block);
+  const vorschau = () => wert(page, "[data-bst-vorschau-text]");
+  const zeileMit = async (anfang) => (await vorschau()).split("\n").find((z) => z.startsWith(anfang));
+  // Die Referenzbestellung (a) mit anderen Antworten: nur die beiden Zeilen zur Bezahlung ändern sich
+  const fall = (kleidung, teambedarf = "Vereinskasse") => ({
+    betreff: FALL_A.betreff,
+    text: FALL_A.text.replace("Bezahlung Kleidung: Eltern bzw. Spieler\n", `Bezahlung Kleidung: ${kleidung}\n`).replace("Bezahlung Teambedarf: Vereinskasse\n", `Bezahlung Teambedarf: ${teambedarf}\n`),
+  });
+  const nameSponsor = "Autohaus Beispiel";
+  try {
+    await fuelleFall(page, FALL_A);
+
+    // Aufbau: Kontrollkästchen, vier Antworten in der Reihenfolge der Datei, Satz unter der Legende
+    for (const [block, frage] of [["kleidung", "Wer zahlt die Kleidung?"], ["teambedarf", "Wer zahlt den Teambedarf?"]]) {
+      const g = `[data-bezahlung="${block}"]`;
+      gleich(`Bezahlung ${block}: Fieldset mit Legende`, (await inhalt(page, `${g} legend`)), frage);
+      gleich(`Bezahlung ${block}: vier Kontrollkästchen, keine Auswahlknöpfe`, `${await page.$$eval(`${g} input[type="checkbox"]`, (l) => l.length)}|${await page.$$eval(`${g} input[type="radio"]`, (l) => l.length)}`, "4|0");
+      gleich(`Bezahlung ${block}: Antworten in der Reihenfolge der Datei`, (await page.$$eval(`${g} .bst-option`, (l) => l.map((x) => x.textContent.trim()))).join(" | "), "Eltern bzw. Spieler | Vereinskasse | Sponsor | Spenden / Mannschaftskasse");
+      gleich(`Bezahlung ${block}: Satz direkt unter der Legende`, await page.$eval(`${g} legend`, (l) => l.nextElementSibling.textContent.trim()), "Mehrere möglich. Wie geteilt wird, kannst du unten bei „Hinweis zur Bezahlung“ schreiben.");
+      gleich(`Bezahlung ${block}: der Satz gehört zur Gruppe (aria-describedby)`, await page.$eval(g, (f) => document.getElementById(f.getAttribute("aria-describedby")).textContent.trim().slice(0, 15)), "Mehrere möglich");
+      pruefe(`Bezahlung ${block}: jede Antwort ist als Ganzes tippbar (mindestens 44 px hoch)`, await page.$$eval(`${g} .bst-option`, (l) => l.every((x) => x.getBoundingClientRect().height >= 44)));
+    }
+    gleich("Bezahlung: der Satz verweist auf „Hinweis zur Bezahlung“, das Feld steht darunter", String(await page.evaluate(() => document.querySelector('[data-bezahlung="teambedarf"]').compareDocumentPosition(document.getElementById("bst-hinweis-bezahlung")) & Node.DOCUMENT_POSITION_FOLLOWING ? true : false)), "true");
+    gleich("Ausgangslage: eine Antwort je Block", `${await angehakt("kleidung")}|${await angehakt("teambedarf")}`, "eltern|vereinskasse");
+    await pruefeMail(page, "Bezahlung: nur Eltern", fall("Eltern bzw. Spieler"));
+
+    // Zwei Haken: Eltern + Sponsor. Ohne Namen fehlt der Name, die Mail geht nicht.
+    await page.click(haken("kleidung", "sponsor"));
+    gleich("Eltern + Sponsor: beide angehakt", await angehakt("kleidung"), "eltern,sponsor");
+    pruefe("Sponsor angehakt: Feld „Name des Sponsors“ erscheint", await sichtbar(page, '[data-bezahlung="kleidung"] [data-sponsor-feld]'));
+    gleich("Sponsor ohne Namen: die Vorschau nennt „Sponsor“ ohne Klammer", await zeileMit("Bezahlung Kleidung: "), "Bezahlung Kleidung: Eltern bzw. Spieler und Sponsor");
+    await page.click("#bst-senden");
+    gleich("Sponsor ohne Namen: Lücke in Klartext", (await page.$$eval("[data-luecke]", (l) => l.map((x) => x.textContent.trim()))).join(" | "), "Bitte trage den Namen des Sponsors ein (Kleidung)");
+    gleich("Sponsor ohne Namen: kein mailto ausgelöst", String((await gesendet(page)).length), "0");
+    await page.click('[data-luecke="sponsor:kleidung"]');
+    gleich("Sprung aus der Lücke: Feld „Name des Sponsors“", await page.evaluate(() => document.activeElement.id), "bst-sponsor-kleidung");
+    await page.type("#bst-sponsor-kleidung", nameSponsor);
+    pruefe("Name eingetragen: Lücke weg", !(await sichtbar(page, "[data-bst-luecken]")));
+    await pruefeMail(page, "Bezahlung: Eltern + Sponsor (Autohaus Beispiel)", fall(`Eltern bzw. Spieler und Sponsor (${nameSponsor})`));
+    await pruefeLayout(page, "Bezahlung mit zwei Haken", 390);
+    await pruefeTippflaechen(page, "Bezahlung mit zwei Haken");
+    await pruefeBeschriftungen(page, "Bezahlung mit zwei Haken");
+    await pruefeIds(page, "Bezahlung mit zwei Haken");
+    await pruefeAxe(page, "Bezahlung mit zwei Haken");
+    const abschnittBezahlung = await page.$('section[aria-labelledby="bst-h-bezahlung"]');
+    await abschnittBezahlung.screenshot({ path: path.join(AUSGABE, "390-bezahlung-mehrfach.png") });
+    await page.click("#bst-senden");
+    const geklickt = await gesendet(page);
+    pruefe("Eltern + Sponsor: Senden löst genau diese Mail aus", geklickt.length === 1 && dekodiere(geklickt[0]).text === fall(`Eltern bzw. Spieler und Sponsor (${nameSponsor})`).text, geklickt[0]);
+
+    // Sponsor wieder abhaken: Feld weg, Lücke weg, Zeile ändert sich, der Name bleibt im Entwurf, aber nicht in der Mail
+    await page.click(haken("kleidung", "sponsor"));
+    gleich("Sponsor abgehakt: nur Eltern", await angehakt("kleidung"), "eltern");
+    pruefe("Sponsor abgehakt: Feld „Name des Sponsors“ verschwindet", !(await sichtbar(page, '[data-bezahlung="kleidung"] [data-sponsor-feld]')));
+    await pruefeMail(page, "Bezahlung: Sponsor wieder abgehakt (Text wie in der Referenzbestellung)", FALL_A);
+    pruefe("Sponsor abgehakt: der Name steht nicht in der Mail", !(await vorschau()).includes("Autohaus") && !(await page.$eval("#bst-senden", (el) => el.dataset.mailto)).includes("Autohaus"));
+    gleichJson("Sponsor abgehakt: Entwurf behält den Namen, die Liste hat nur noch Eltern", { liste: await imEntwurf("kleidung"), name: await imEntwurf("kleidungSponsor") }, { liste: ["eltern"], name: nameSponsor });
+    await page.click(haken("kleidung", "sponsor"));
+    gleich("Sponsor wieder angehakt: der Name ist noch da", await wert(page, "#bst-sponsor-kleidung"), nameSponsor);
+    await pruefeMail(page, "Bezahlung: Sponsor wieder angehakt", fall(`Eltern bzw. Spieler und Sponsor (${nameSponsor})`));
+
+    // Drei und vier Antworten, Reihenfolge nach dem Katalog (nicht nach den Klicks)
+    for (const id of ["eltern", "vereinskasse", "sponsor", "spenden"]) {
+      if ((await angehakt("kleidung")).split(",").includes(id)) await page.click(haken("kleidung", id));
+    }
+    gleich("alle abgehakt", await angehakt("kleidung"), "");
+    gleichJson("alle abgehakt: leere Liste im Entwurf", await imEntwurf("kleidung"), []);
+    for (const id of ["spenden", "sponsor", "vereinskasse", "eltern"]) await page.click(haken("kleidung", id));
+    gleich("alle vier angehakt", await angehakt("kleidung"), "eltern,vereinskasse,sponsor,spenden");
+    gleichJson("Entwurf: Katalogreihenfolge, nicht die Reihenfolge der Klicks", await imEntwurf("kleidung"), ["eltern", "vereinskasse", "sponsor", "spenden"]);
+    await pruefeMail(page, "Bezahlung: vier Antworten", fall(`Eltern bzw. Spieler, Vereinskasse, Sponsor (${nameSponsor}) und Spenden / Mannschaftskasse`));
+    await page.click(haken("kleidung", "vereinskasse"));
+    await pruefeMail(page, "Bezahlung: drei Antworten (A, B und C)", fall(`Eltern bzw. Spieler, Sponsor (${nameSponsor}) und Spenden / Mannschaftskasse`));
+    await page.click(haken("kleidung", "sponsor"));
+    await pruefeMail(page, "Bezahlung: zwei Antworten ohne Sponsor (der Name im Entwurf zählt nicht)", fall("Eltern bzw. Spieler und Spenden / Mannschaftskasse"));
+
+    // Teambedarf: eigene Antworten, eigener Sponsorname
+    await page.click(haken("teambedarf", "spenden"));
+    gleich("Teambedarf: Vereinskasse + Spenden", await zeileMit("Bezahlung Teambedarf: "), "Bezahlung Teambedarf: Vereinskasse und Spenden / Mannschaftskasse");
+    await page.click(haken("teambedarf", "sponsor"));
+    pruefe("Teambedarf: Sponsor angehakt, eigenes Feld für den Namen", (await sichtbar(page, '[data-bezahlung="teambedarf"] [data-sponsor-feld]')) && (await wert(page, "#bst-sponsor-teambedarf")) === "");
+    await page.type("#bst-sponsor-teambedarf", "Bäckerei Beispiel");
+    gleich("Teambedarf: drei Antworten mit eigenem Sponsornamen", await zeileMit("Bezahlung Teambedarf: "), "Bezahlung Teambedarf: Vereinskasse, Sponsor (Bäckerei Beispiel) und Spenden / Mannschaftskasse");
+    gleich("Kleidung: Zeile bleibt, der Name der Kleidung steht nicht bei der Teambedarf-Zeile", await zeileMit("Bezahlung Kleidung: "), "Bezahlung Kleidung: Eltern bzw. Spieler und Spenden / Mannschaftskasse");
+    await page.click(haken("teambedarf", "sponsor"));
+    await page.click(haken("teambedarf", "spenden"));
+    gleich("Teambedarf zurück auf Vereinskasse", await zeileMit("Bezahlung Teambedarf: "), "Bezahlung Teambedarf: Vereinskasse");
+
+    // Kein Haken: Lücke, Rahmen um die Gruppe, Sprung zum ersten Kästchen
+    for (const id of ["eltern", "spenden"]) await page.click(haken("kleidung", id));
+    gleich("Kleidung: nichts mehr angehakt", await angehakt("kleidung"), "");
+    pruefe("Kleidung ohne Haken: die Vorschau hat keine Zeile „Bezahlung Kleidung“, der Sendelink keinen mailto", !(await vorschau()).includes("Bezahlung Kleidung") && (await page.$eval("#bst-senden", (el) => el.dataset.mailto === undefined)));
+    await page.click("#bst-senden");
+    gleich("Kleidung ohne Haken: Lücke in Klartext", (await page.$$eval("[data-luecke]", (l) => l.map((x) => x.textContent.trim()))).join(" | "), "Bitte wähle, wer die Kleidung zahlt");
+    gleich("Kleidung ohne Haken: Fokus auf der Lücke", await page.evaluate(() => document.activeElement.getAttribute("data-luecke")), "bezahlung:kleidung");
+    pruefe("Kleidung ohne Haken: Rahmen um die Gruppe, aria-invalid an den Kästchen (nicht an der Gruppe)", await page.evaluate(() => {
+      const g = document.querySelector('[data-bezahlung="kleidung"]');
+      return g.classList.contains("bst-gruppe--luecke") && !g.hasAttribute("aria-invalid") && [...g.querySelectorAll('input[type="checkbox"]')].every((c) => c.getAttribute("aria-invalid") === "true");
+    }));
+    pruefe("Kleidung ohne Haken: der andere Block ist nicht markiert", await page.evaluate(() => !document.querySelector('[data-bezahlung="teambedarf"]').classList.contains("bst-gruppe--luecke")));
+    gleich("Kleidung ohne Haken: kein mailto ausgelöst (außer dem ersten Senden von vorhin)", String((await gesendet(page)).length), "1");
+    await pruefeAxe(page, "Bezahlung mit Lücke");
+    await pruefeTippflaechen(page, "Bezahlung mit Lücke");
+    await page.click('[data-luecke="bezahlung:kleidung"]');
+    gleich("Sprung aus der Lücke: das erste Kästchen (Eltern bzw. Spieler)", await page.evaluate(() => `${document.activeElement.type}:${document.activeElement.name}:${document.activeElement.value}`), "checkbox:bez-kleidung:eltern");
+    await page.keyboard.press("Space");
+    gleich("Leertaste hakt es an", await angehakt("kleidung"), "eltern");
+    pruefe("ein Haken genügt: Lücke und Rahmen weg", !(await sichtbar(page, "[data-bst-luecken]")) && (await page.evaluate(() => !document.querySelector('[data-bezahlung="kleidung"]').classList.contains("bst-gruppe--luecke") && document.querySelectorAll('[data-bezahlung="kleidung"] [aria-invalid]').length === 0)));
+    await pruefeLayout(page, "Bezahlung Ende", 390);
+    pruefeProtokoll("Bezahlung als Mehrfachauswahl", p, server);
+  } finally {
+    await schliessen();
+  }
+}
+
+// Alte Entwürfe auf den Geräten (Text statt Liste) laden ohne Fehler, der passende Haken ist gesetzt
+async function ablaufAlterEntwurf(browser, server) {
+  abschnitt("390 x 844: alter Entwurf mit Text statt Liste bei der Bezahlung (erste Fassung, Handy von Olgay)");
+  const text = (kleidung, teambedarf) =>
+    FALL_A.text.replace("Bezahlung Kleidung: Eltern bzw. Spieler\n", `Bezahlung Kleidung: ${kleidung}\n`).replace("Bezahlung Teambedarf: Vereinskasse\n", `Bezahlung Teambedarf: ${teambedarf}\n`);
+  const alte = [
+    { name: "Text eltern / vereinskasse", bezahlung: { kleidung: "eltern", kleidungSponsor: "", teambedarf: "vereinskasse", teambedarfSponsor: "" }, kleidung: "eltern", teambedarf: "vereinskasse", sponsor: false, mail: FALL_A.text },
+    { name: "Text sponsor mit Namen, spenden", bezahlung: { kleidung: "sponsor", kleidungSponsor: "Autohaus Beispiel", teambedarf: "spenden", teambedarfSponsor: "" }, kleidung: "sponsor", teambedarf: "spenden", sponsor: true, mail: text("Sponsor (Autohaus Beispiel)", "Spenden / Mannschaftskasse") },
+    { name: "leere Texte", bezahlung: { kleidung: "", kleidungSponsor: "", teambedarf: "", teambedarfSponsor: "" }, kleidung: "", teambedarf: "", sponsor: false, mail: null },
+    { name: "unbekannte Einträge", bezahlung: { kleidung: ["spenden", "gibt-es-nicht", "eltern"], kleidungSponsor: "", teambedarf: "bar", teambedarfSponsor: "" }, kleidung: "eltern,spenden", teambedarf: "", sponsor: false, mail: null },
+    { name: "Schlüssel bezahlung fehlt ganz", bezahlung: undefined, kleidung: "", teambedarf: "", sponsor: false, mail: null },
+  ];
+  for (const a of alte) {
+    const { page, p, schliessen } = await oeffne(browser, server, { uhr: [2026, 10, 25, 14, 32] });
+    try {
+      // So lag der Entwurf in localStorage: derselbe Schlüssel, bezahlung mit einem Text je Block
+      const entwurf = { ...FALL_A.bestellung };
+      if (a.bezahlung === undefined) delete entwurf.bezahlung;
+      else entwurf.bezahlung = a.bezahlung;
+      await page.evaluate((k, daten) => localStorage.setItem(k, daten), SCHLUESSEL_ENTWURF, JSON.stringify(entwurf));
+      await page.reload({ waitUntil: "networkidle0" });
+      await page.waitForSelector("#bestellung[data-bereit]");
+      const angehakt = (block) => page.$$eval(`[data-bezahlung="${block}"] input:checked`, (l) => l.map((x) => x.value).join(","));
+      gleich(`alter Entwurf (${a.name}): Seite lädt, Kleidung angehakt`, await angehakt("kleidung"), a.kleidung);
+      gleich(`alter Entwurf (${a.name}): Teambedarf angehakt`, await angehakt("teambedarf"), a.teambedarf);
+      gleich(`alter Entwurf (${a.name}): Feld „Name des Sponsors“ ${a.sponsor ? "sichtbar mit dem Namen" : "verborgen"}`, a.sponsor ? `${await sichtbar(page, '[data-bezahlung="kleidung"] [data-sponsor-feld]')}|${await wert(page, "#bst-sponsor-kleidung")}` : String(await sichtbar(page, '[data-bezahlung="kleidung"] [data-sponsor-feld]')), a.sponsor ? "true|Autohaus Beispiel" : "false");
+      gleich(`alter Entwurf (${a.name}): Personen und Teambedarf bleiben`, `${await page.$$eval(".bst-person", (l) => l.length)}|${await wert(page, '[data-teamposten="baelle"] [data-n]')}`, "3|10");
+      if (a.mail) gleich(`alter Entwurf (${a.name}): Text in „Mail ansehen“ wie mit der Liste`, await wert(page, "[data-bst-vorschau-text]"), a.mail);
+      // Beim Laden wird der Entwurf in der neuen Form zurückgeschrieben: Listen, derselbe Schlüssel
+      const gespeichert = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)).bezahlung, SCHLUESSEL_ENTWURF);
+      pruefe(`alter Entwurf (${a.name}): gespeichert als Listen`, Array.isArray(gespeichert.kleidung) && Array.isArray(gespeichert.teambedarf) && gespeichert.kleidung.join(",") === a.kleidung && gespeichert.teambedarf.join(",") === a.teambedarf, JSON.stringify(gespeichert));
+      if (a.kleidung === "" ) pruefe(`alter Entwurf (${a.name}): ohne Haken meldet „Senden“ die Lücke`, await page.evaluate(() => { document.getElementById("bst-senden").click(); return [...document.querySelectorAll("[data-luecke]")].some((b) => b.dataset.luecke === "bezahlung:kleidung"); }));
+      pruefeProtokoll(`alter Entwurf (${a.name})`, p, server);
+    } finally {
+      await schliessen();
+    }
   }
 }
 
@@ -884,7 +1055,7 @@ async function ablaufLang(browser, server) {
   try {
     const viele = [];
     for (let i = 1; i <= 45; i++) viele.push(person("p" + i, "Spieler " + i, String((i % 98) + 1), i % 2 ? "140" : "M", GRUNDAUSSTATTUNG));
-    const entwurf = bestellung({ team: "e2", name: "Tina Beispiel", personen: viele, zaehler: 45, bezahlung: { kleidung: "eltern", kleidungSponsor: "", teambedarf: "", teambedarfSponsor: "" } });
+    const entwurf = bestellung({ team: "e2", name: "Tina Beispiel", personen: viele, zaehler: 45, bezahlung: { kleidung: ["eltern"], kleidungSponsor: "", teambedarf: [], teambedarfSponsor: "" } });
     await page.evaluate((k, daten) => localStorage.setItem(k, daten), SCHLUESSEL_ENTWURF, JSON.stringify(entwurf));
     await page.reload({ waitUntil: "networkidle0" });
     await page.waitForSelector("#bestellung[data-bereit]");
@@ -1047,13 +1218,15 @@ async function main() {
     await ablaufFaelleBC(browser, server);
     await ablaufLuecken(browser, server);
     await ablaufFelder(browser, server);
+    await ablaufBezahlung(browser, server);
+    await ablaufAlterEntwurf(browser, server);
     await ablaufZeichen(browser, server);
     await ablaufLang(browser, server);
     await ablaufKopieren(browser, server);
     await ablaufSpeicher(browser, server);
     await ablaufDesktop(browser, server);
     abschnitt("Bildschirmfotos");
-    for (const n of ["390-leer.png", "390-ausgefuellt.png", "390-luecken.png", "390-gesendet.png", "1440-ausgefuellt.png"]) {
+    for (const n of ["390-leer.png", "390-ausgefuellt.png", "390-luecken.png", "390-gesendet.png", "1440-ausgefuellt.png", "390-bezahlung-mehrfach.png"]) {
       const voll = path.join(AUSGABE, n);
       pruefe(`Bildschirmfoto ${n}`, existsSync(voll) && statSync(voll).size > 5000, voll);
     }

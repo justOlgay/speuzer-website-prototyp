@@ -198,6 +198,8 @@ Bestelladresse (`mailto:`). Es gibt keinen Server, kein Konto und keine Datenban
   mit Einzeldruck, nie die Liste je Kind), Teil 2 „Teambedarf“, Teil 3 „Nur intern“ (Zuordnung je Person mit den Preisen für Eltern bzw. Spieler).
   Die Nummern der Teile sind fest, ein leerer Teil entfällt samt Überschrift. Bestell-Nr. `KÜRZEL-JJMMTT-HHMM` (Ortszeit), sie entsteht beim ersten
   Senden. Ist die mailto-Adresse länger als 7.500 Zeichen, weist die Seite auf „Text kopieren“ hin; gekürzt wird nie.
+  Bei der Bezahlung kann man je Block (Kleidung, Teambedarf) mehrere Antworten ankreuzen (mindestens eine, bei „Sponsor“ mit Namen); die Mailzeile
+  nennt sie in der Reihenfolge der Datei, etwa „Eltern bzw. Spieler und Sponsor (Autohaus Beispiel)“, und ein alter Entwurf mit einem Text je Block lädt als Liste.
 - Code: `assets/js/bestellung/mailtext.js` (reine Funktionen ohne DOM: Prüfung, Zusammenfassung, Mailtext, mailto, Bestell-Nr., Entwurf),
   `assets/js/bestellung/seite.js` (Oberfläche, Zustand, Speichern auf dem Gerät; nur statische Importe), `assets/css/bestellung.css`,
   Gerüst und eingebettete Konfiguration `src/seiten/bestellung.mjs`.

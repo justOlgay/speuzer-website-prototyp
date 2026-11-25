@@ -179,26 +179,28 @@
   <section class="bst-abschnitt" aria-labelledby="bst-h-bezahlung">
     <h2 id="bst-h-bezahlung">Bezahlung</h2>
     <p class="bst-hinweis" data-bst-bezahlung-leer>Sobald du Kleidung oder Teambedarf ausgewählt hast, fragen wir hier, wer zahlt.</p>
-    <fieldset class="bst-gruppe" role="radiogroup" data-bezahlung="kleidung" data-schluessel="bezahlung:kleidung" hidden>
+    <fieldset class="bst-gruppe" data-bezahlung="kleidung" data-schluessel="bezahlung:kleidung" aria-describedby="bst-bez-kleidung-hilfe" hidden>
       <legend>Wer zahlt die Kleidung?</legend>
+      <p class="bst-hinweis" id="bst-bez-kleidung-hilfe">Mehrere möglich. Wie geteilt wird, kannst du unten bei „Hinweis zur Bezahlung“ schreiben.</p>
       <div class="bst-optionen">
-        <label class="bst-option"><input type="radio" name="bez-kleidung" value="eltern" data-bez-wert><span>Eltern bzw. Spieler</span></label>
-        <label class="bst-option"><input type="radio" name="bez-kleidung" value="vereinskasse" data-bez-wert><span>Vereinskasse</span></label>
-        <label class="bst-option"><input type="radio" name="bez-kleidung" value="sponsor" data-bez-wert><span>Sponsor</span></label>
-        <label class="bst-option"><input type="radio" name="bez-kleidung" value="spenden" data-bez-wert><span>Spenden / Mannschaftskasse</span></label>
+        <label class="bst-option"><input type="checkbox" name="bez-kleidung" value="eltern" data-bez-wert><span>Eltern bzw. Spieler</span></label>
+        <label class="bst-option"><input type="checkbox" name="bez-kleidung" value="vereinskasse" data-bez-wert><span>Vereinskasse</span></label>
+        <label class="bst-option"><input type="checkbox" name="bez-kleidung" value="sponsor" data-bez-wert><span>Sponsor</span></label>
+        <label class="bst-option"><input type="checkbox" name="bez-kleidung" value="spenden" data-bez-wert><span>Spenden / Mannschaftskasse</span></label>
       </div>
       <div class="bst-feld bst-sponsor" data-sponsor-feld hidden>
         <label for="bst-sponsor-kleidung">Name des Sponsors</label>
         <input type="text" id="bst-sponsor-kleidung" data-feld="bezahlung.kleidungSponsor" data-schluessel="sponsor:kleidung" maxlength="80" autocomplete="off">
       </div>
     </fieldset>
-    <fieldset class="bst-gruppe" role="radiogroup" data-bezahlung="teambedarf" data-schluessel="bezahlung:teambedarf" hidden>
+    <fieldset class="bst-gruppe" data-bezahlung="teambedarf" data-schluessel="bezahlung:teambedarf" aria-describedby="bst-bez-teambedarf-hilfe" hidden>
       <legend>Wer zahlt den Teambedarf?</legend>
+      <p class="bst-hinweis" id="bst-bez-teambedarf-hilfe">Mehrere möglich. Wie geteilt wird, kannst du unten bei „Hinweis zur Bezahlung“ schreiben.</p>
       <div class="bst-optionen">
-        <label class="bst-option"><input type="radio" name="bez-teambedarf" value="eltern" data-bez-wert><span>Eltern bzw. Spieler</span></label>
-        <label class="bst-option"><input type="radio" name="bez-teambedarf" value="vereinskasse" data-bez-wert><span>Vereinskasse</span></label>
-        <label class="bst-option"><input type="radio" name="bez-teambedarf" value="sponsor" data-bez-wert><span>Sponsor</span></label>
-        <label class="bst-option"><input type="radio" name="bez-teambedarf" value="spenden" data-bez-wert><span>Spenden / Mannschaftskasse</span></label>
+        <label class="bst-option"><input type="checkbox" name="bez-teambedarf" value="eltern" data-bez-wert><span>Eltern bzw. Spieler</span></label>
+        <label class="bst-option"><input type="checkbox" name="bez-teambedarf" value="vereinskasse" data-bez-wert><span>Vereinskasse</span></label>
+        <label class="bst-option"><input type="checkbox" name="bez-teambedarf" value="sponsor" data-bez-wert><span>Sponsor</span></label>
+        <label class="bst-option"><input type="checkbox" name="bez-teambedarf" value="spenden" data-bez-wert><span>Spenden / Mannschaftskasse</span></label>
       </div>
       <div class="bst-feld bst-sponsor" data-sponsor-feld hidden>
         <label for="bst-sponsor-teambedarf">Name des Sponsors</label>

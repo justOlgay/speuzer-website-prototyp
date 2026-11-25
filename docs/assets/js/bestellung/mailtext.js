@@ -23,7 +23,8 @@
       zaehler: 1,                    // für neue Personen-Nummern (p1, p2, …)
       teambedarf: { baelle: { n: 10, details: "Größe 4" } },
       sonstiges: "",
-      bezahlung: { kleidung: "eltern", kleidungSponsor: "", teambedarf: "vereinskasse", teambedarfSponsor: "" },
+      bezahlung: { kleidung: ["eltern", "sponsor"], kleidungSponsor: "Autohaus Beispiel",   // je Block eine Liste von ids in Katalogreihenfolge
+                   teambedarf: ["vereinskasse"], teambedarfSponsor: "" },                // (Entwürfe aus der ersten Fassung haben hier einen Text)
       hinweisBezahlung: "", hinweis: "",
       bestellNr: "", status: ""      // status: "" | "mail" | "kopiert" (nach dem ersten erfolgreichen Senden)
     }
@@ -151,6 +152,12 @@ export function effektiveInitialen(person) {
 // „Mia“ oder, wenn kein Name da ist, „Person 2“ (Stelle in der Liste, so heißt auch die Karte auf der Seite).
 export function personLabel(person, index) {
   return einzeilig(person && person.name) || "Person " + (index + 1);
+}
+
+// Deutsch aufzählen: eine Angabe „A“, zwei „A und B“, drei und mehr „A, B und C“.
+export function verbindeDeutsch(teile) {
+  if (teile.length <= 1) return teile.join("");
+  return teile.slice(0, -1).join(", ") + " und " + teile[teile.length - 1];
 }
 
 // ---------- Katalog ----------
@@ -314,6 +321,16 @@ export function pruefeKonfig(konfig) {
     slugs.add(m.slug);
   }
   return true;
+}
+
+// ---------- Antworten zur Bezahlung ----------
+
+// Die gewählten Antworten eines Blocks (Kleidung, Teambedarf) als Liste von ids in Katalogreihenfolge, jede id einmal.
+// Nimmt auch den alten Wert eines früheren Entwurfs, einen einzelnen Text: "" › [], "eltern" › ["eltern"].
+// Unbekannte Einträge fallen weg.
+export function bezahlungIds(konfig, wert) {
+  const roh = Array.isArray(wert) ? wert : typeof wert === "string" && wert !== "" ? [wert] : [];
+  return (konfig.bezahlung || []).map((o) => o.id).filter((id) => roh.includes(id));
 }
 
 // ---------- Größen, Preise, Vorauswahl ----------
@@ -531,11 +548,13 @@ export function pruefeBestellung(konfig, bestellung) {
     }
   }
 
+  // Mindestens eine Antwort je Block; ist „Sponsor“ (eine Antwort mit Namen) dabei, gehört der Name dazu.
+  // Ein Name bei abgewähltem Sponsor bleibt im Entwurf, zählt aber nicht.
   const pruefeBezahlung = (block, anzeigeFrage, anzeigeKlammer, wahl, sponsor) => {
-    const opt = (konfig.bezahlung || []).find((o) => o.id === wahl);
-    if (!opt) {
+    const gewaehlt = bezahlungIds(konfig, wahl);
+    if (gewaehlt.length === 0) {
       melde(`bezahlung:${block}`, `Bitte wähle, wer ${anzeigeFrage} zahlt`);
-    } else if (opt.mitName && einzeilig(sponsor) === "") {
+    } else if (gewaehlt.some((id) => konfig.bezahlung.find((o) => o.id === id).mitName) && einzeilig(sponsor) === "") {
       melde(`sponsor:${block}`, `Bitte trage den Namen des Sponsors ein (${anzeigeKlammer})`);
     }
   };
@@ -577,14 +596,16 @@ export function mailtoLink(empfaenger, betreff, text) {
   return "mailto:" + empfaenger + "?subject=" + kodiere(betreff) + "&body=" + kodiere(text);
 }
 
+// Die Antworten eines Blocks in Katalogreihenfolge, deutsch verbunden: „Eltern bzw. Spieler und Sponsor (Autohaus Beispiel)“.
+// Eine Antwort mit Namen (Sponsor) steht immer mit dem Namen in Klammern, auch allein; den Namen gibt es nur bei angehaktem Sponsor.
 function bezahlText(konfig, wahl, sponsor) {
-  const opt = (konfig.bezahlung || []).find((o) => o.id === wahl);
-  if (!opt) return "";
-  if (opt.mitName) {
-    const name = einzeilig(sponsor);
-    return name ? opt.text + ": " + name : opt.text;
-  }
-  return opt.text;
+  const name = einzeilig(sponsor);
+  return verbindeDeutsch(
+    bezahlungIds(konfig, wahl).map((id) => {
+      const opt = konfig.bezahlung.find((o) => o.id === id);
+      return opt.mitName && name ? `${opt.text} (${name})` : opt.text;
+    })
+  );
 }
 
 function druckText(d) {
@@ -695,7 +716,7 @@ export function leererEntwurf() {
     zaehler: 0,
     teambedarf: {},
     sonstiges: "",
-    bezahlung: { kleidung: "", kleidungSponsor: "", teambedarf: "", teambedarfSponsor: "" },
+    bezahlung: { kleidung: [], kleidungSponsor: "", teambedarf: [], teambedarfSponsor: "" },
     hinweisBezahlung: "",
     hinweis: "",
     bestellNr: "",
@@ -761,12 +782,13 @@ export function bereinigeEntwurf(roh, konfig) {
     if (n > 0 || details) e.teambedarf[t.id] = { n, details };
   }
 
+  // Bezahlung: je Block eine Liste von ids (Katalogreihenfolge). Entwürfe aus der ersten Fassung (ein Text je Block) laden mit:
+  // "" › [], "eltern" › ["eltern"]; unbekannte ids fallen weg.
   const b = objekt(roh.bezahlung);
-  const bekannt = (v) => ((konfig.bezahlung || []).some((o) => o.id === v) ? v : "");
   e.bezahlung = {
-    kleidung: bekannt(b.kleidung),
+    kleidung: bezahlungIds(konfig, b.kleidung),
     kleidungSponsor: text(b.kleidungSponsor, GRENZEN.sponsor),
-    teambedarf: bekannt(b.teambedarf),
+    teambedarf: bezahlungIds(konfig, b.teambedarf),
     teambedarfSponsor: text(b.teambedarfSponsor, GRENZEN.sponsor),
   };
 

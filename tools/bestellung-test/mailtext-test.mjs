@@ -4,9 +4,13 @@
 // Geprüft wird (Nummern wie im Arbeitspaket AP-1, Kriterium 5):
 //   (a) Referenzbestellung D3 (zwei Kinder, eine erwachsene Person, Teambedarf): Betreff und kompletter Text Zeichen für Zeichen
 //   (b) nur Teambedarf   (c) Torwartset in Erwachsenengröße (150 €, Erwachsenen-Bezeichnungen, Nr. 8936 bei der TW-Hose)
-//   (d) 116 + Winterjacke › Lieferant „Gr. 128“   (e) Regenjacke mit Initialen in den Druckdaten   (f) Bezahlung „Sponsor“ mit Name
+//   (d) 116 + Winterjacke › Lieferant „Gr. 128“   (e) Regenjacke mit Initialen in den Druckdaten   (f) Bezahlung, Sponsor als „Sponsor (Name)“
 //   (g) pruefmodus false: kein [TEST], keine Testzeile   (h) mailto-Hin- und Rückweg, Zeilenumbrüche \r\n
 //   (i) Lückenliste (Mannschaft, Name, Nummer, Initialen, Bezahlung, Sponsorname)   (j) Bestell-Nr. aus fester Uhrzeit
+// Runde 2 (Bezahlung als Mehrfachauswahl, AP-1 Änderungsauftrag vom 25.11.2026):
+//   (k) zwei Antworten mit Sponsor › „Eltern bzw. Spieler und Sponsor (…)“   (l) drei und mehr Antworten › „A, B und C“
+//   (m) Lücke, wenn kein Haken gesetzt ist (und Sponsor ohne Namen; Name bei abgewähltem Sponsor zählt nicht)
+//   (n) ein alter Entwurf mit Text statt Liste ergibt nach dem Laden (Bereinigung) dieselbe Mail wie die Liste
 // dazu der Katalog gegen die Spezifikation (Preise, Bezeichnungen, Druck, Größen, Schnellwahl), Formatierung, Sortierung,
 // Entwurf auf dem Gerät (bereinigeEntwurf), lange Bestellungen (nie gekürzt) und das Gerüst der Seite (src/seiten/bestellung.mjs).
 //
@@ -25,6 +29,7 @@ import {
   baueMail,
   bereinigeEntwurf,
   bestellNr,
+  bezahlungIds,
   datumDe,
   effektiveInitialen,
   formatEuro,
@@ -42,6 +47,7 @@ import {
   pruefeKonfig,
   pruefeNummer,
   schnellwahlAnwenden,
+  verbindeDeutsch,
   vorauswahlGroesse,
   vorauswahlHinweis,
   waehleBestellNr,
@@ -49,7 +55,7 @@ import {
   zusammenfassung,
 } from "../../assets/js/bestellung/mailtext.js";
 import { seite } from "../../src/seiten/bestellung.mjs";
-import { DATEN, FAELLE, FALL_A, GRUNDAUSSTATTUNG, KONFIG, TORWARTSET, bestellung, lokal, person } from "./faelle.mjs";
+import { DATEN, FAELLE, FALL_A, FALL_B, GRUNDAUSSTATTUNG, KONFIG, TORWARTSET, bestellung, lokal, person } from "./faelle.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const AUSFUEHRLICH = process.argv.includes("--ausfuehrlich");
@@ -112,7 +118,7 @@ function klein(teil) {
   return bestellung({
     team: "e2",
     name: "Tina Beispiel",
-    bezahlung: { kleidung: "eltern", kleidungSponsor: "", teambedarf: "", teambedarfSponsor: "" },
+    bezahlung: { kleidung: ["eltern"], kleidungSponsor: "", teambedarf: [], teambedarfSponsor: "" },
     ...teil,
   });
 }
@@ -282,7 +288,7 @@ for (const [id, fall] of Object.entries(FAELLE)) {
   const m = mail(FALL_A.bestellung, FALL_A.jetzt).text;
   const teil1 = m.slice(m.indexOf("== 1."), m.indexOf("== 2."));
   const teil3 = m.slice(m.indexOf("== 3."));
-  pruefe("(a) Teil 1 für den Lieferanten enthält keine Preise und kein „Zuordnung“", !/€|Zuordnung|Eltern|Sponsor:/.test(teil1.replace("Werbeaufdruck M 1C (Sponsorlogo)", "")));
+  pruefe("(a) Teil 1 für den Lieferanten enthält keine Preise und kein „Zuordnung“", !/€|Zuordnung|Eltern|Sponsor \(/.test(teil1.replace("Werbeaufdruck M 1C (Sponsorlogo)", "")));
   pruefe("(a) Teil 1 nennt Emil und Ben Kuhn nicht (nur Stücke mit Einzeldruck tragen einen Namen)", !teil1.includes("Emil") && !teil1.includes("Ben Kuhn"));
   pruefe("(a) Teil 3 steht ganz unten mit „NICHT WEITERLEITEN“", teil3.startsWith("== 3. NUR INTERN – NICHT WEITERLEITEN =="));
 }
@@ -335,27 +341,149 @@ abschnitt("(e) Regenjacke mit Initialen");
 
 abschnitt("(f) Bezahlung");
 {
+  const mia = [person("p1", "Mia", "7", "140", ["trikot"])];
   const b = klein({
-    personen: [person("p1", "Mia", "7", "140", ["trikot"])],
+    personen: mia,
     zaehler: 1,
     teambedarf: { baelle: { n: 2, details: "" } },
-    bezahlung: { kleidung: "sponsor", kleidungSponsor: "Autohaus Beispiel", teambedarf: "sponsor", teambedarfSponsor: "  Bäckerei\nBeispiel " },
+    bezahlung: { kleidung: ["sponsor"], kleidungSponsor: "Autohaus Beispiel", teambedarf: ["sponsor"], teambedarfSponsor: "  Bäckerei\nBeispiel " },
   });
   const m = mail(b);
-  pruefe("(f) Bezahlung Kleidung: Sponsor mit Name", zeilen(m.text).includes("Bezahlung Kleidung: Sponsor: Autohaus Beispiel"), m.text);
-  pruefe("(f) Bezahlung Teambedarf: Sponsorname in einer Zeile", zeilen(m.text).includes("Bezahlung Teambedarf: Sponsor: Bäckerei Beispiel"));
+  pruefe("(f) Bezahlung Kleidung: Sponsor allein steht als „Sponsor (Name)“", zeilen(m.text).includes("Bezahlung Kleidung: Sponsor (Autohaus Beispiel)"), m.text);
+  pruefe("(f) Bezahlung Teambedarf: Sponsorname in einer Zeile", zeilen(m.text).includes("Bezahlung Teambedarf: Sponsor (Bäckerei Beispiel)"));
+  pruefe("(f) die alte Schreibweise „Sponsor: Name“ gibt es nicht mehr", !m.text.includes("Sponsor: "));
   gleichJson("(f) mit Sponsorname keine Lücken", pruefeBestellung(KONFIG, b), []);
   for (const [id, text] of [["eltern", "Eltern bzw. Spieler"], ["vereinskasse", "Vereinskasse"], ["spenden", "Spenden / Mannschaftskasse"]]) {
-    const x = mail(klein({ personen: [person("p1", "Mia", "7", "140", ["trikot"])], zaehler: 1, bezahlung: { kleidung: id, kleidungSponsor: "", teambedarf: "", teambedarfSponsor: "" } }));
-    pruefe(`(f) Bezahlung ${id}`, zeilen(x.text).includes("Bezahlung Kleidung: " + text));
+    const x = mail(klein({ personen: mia, zaehler: 1, bezahlung: { kleidung: [id], kleidungSponsor: "", teambedarf: [], teambedarfSponsor: "" } }));
+    pruefe(`(f) Bezahlung ${id}: eine Antwort, ohne „und“`, zeilen(x.text).includes("Bezahlung Kleidung: " + text));
   }
-  const ohneName = mail(klein({ personen: [person("p1", "Mia", "7", "140", ["trikot"])], zaehler: 1, bezahlung: { kleidung: "sponsor", kleidungSponsor: "", teambedarf: "", teambedarfSponsor: "" } }));
+  const ohneName = mail(klein({ personen: mia, zaehler: 1, bezahlung: { kleidung: ["sponsor"], kleidungSponsor: "", teambedarf: [], teambedarfSponsor: "" } }));
   pruefe("(f) Sponsor ohne Name: Zeile nur „Sponsor“ (die Prüfung lässt es nicht zu)", zeilen(ohneName.text).includes("Bezahlung Kleidung: Sponsor"));
   // Die Zeile „Bezahlung Teambedarf“ gibt es nur mit Teambedarf, „Bezahlung Kleidung“ nur mit Kleidung
-  const nurKleidung = mail(klein({ personen: [person("p1", "Mia", "7", "140", ["trikot"])], zaehler: 1, bezahlung: { kleidung: "eltern", kleidungSponsor: "", teambedarf: "vereinskasse", teambedarfSponsor: "" } }));
+  const nurKleidung = mail(klein({ personen: mia, zaehler: 1, bezahlung: { kleidung: ["eltern"], kleidungSponsor: "", teambedarf: ["vereinskasse"], teambedarfSponsor: "" } }));
   pruefe("(f) ohne Teambedarf keine Zeile „Bezahlung Teambedarf“", !nurKleidung.text.includes("Bezahlung Teambedarf"));
-  const nurTeam = mail(klein({ teambedarf: { baelle: { n: 2, details: "" } }, bezahlung: { kleidung: "eltern", kleidungSponsor: "", teambedarf: "vereinskasse", teambedarfSponsor: "" } }));
+  const nurTeam = mail(klein({ teambedarf: { baelle: { n: 2, details: "" } }, bezahlung: { kleidung: ["eltern"], kleidungSponsor: "", teambedarf: ["vereinskasse"], teambedarfSponsor: "" } }));
   pruefe("(f) ohne Kleidung keine Zeile „Bezahlung Kleidung“", !nurTeam.text.includes("Bezahlung Kleidung") && nurTeam.text.includes("Bezahlung Teambedarf: Vereinskasse"));
+}
+
+// ---------- (k) zwei Antworten, auch mit Sponsor ----------
+
+abschnitt("(k) zwei Antworten mit Sponsor");
+{
+  // Die Referenzbestellung (a) mit zwei Antworten bei der Kleidung: nur diese Zeile ändert sich (Zeichen für Zeichen)
+  const zwei = bestellung({ ...FALL_A.bestellung, bezahlung: { ...FALL_A.bestellung.bezahlung, kleidung: ["eltern", "sponsor"], kleidungSponsor: "Autohaus Beispiel" } });
+  const erwartet = FALL_A.text.replace("Bezahlung Kleidung: Eltern bzw. Spieler\n", "Bezahlung Kleidung: Eltern bzw. Spieler und Sponsor (Autohaus Beispiel)\n");
+  const m = mail(zwei, FALL_A.jetzt);
+  pruefe("(k) die Vorlage hat die Zeile, die ersetzt wird", erwartet !== FALL_A.text);
+  gleich("(k) Eltern + Sponsor: ganzer Text wie (a), nur die Zeile „Bezahlung Kleidung“ ist anders", m.text, erwartet);
+  gleich("(k) Eltern + Sponsor: Betreff wie (a)", m.betreff, FALL_A.betreff);
+  gleichJson("(k) Eltern + Sponsor mit Namen: keine Lücken", pruefeBestellung(KONFIG, zwei), []);
+  pruefe("(k) die Zeile „Bezahlung Teambedarf: Vereinskasse“ bleibt", zeilen(m.text).includes("Bezahlung Teambedarf: Vereinskasse"));
+  // Weitere Paare, in Katalogreihenfolge (Eltern, Vereinskasse, Sponsor, Spenden), egal in welcher Reihenfolge sie ankommen
+  const zeile = (ids, name = "Autohaus Beispiel") =>
+    zeilen(mail(klein({ personen: [person("p1", "Mia", "7", "140", ["trikot"])], zaehler: 1, bezahlung: { kleidung: ids, kleidungSponsor: name, teambedarf: [], teambedarfSponsor: "" } })).text).find((z) => z.startsWith("Bezahlung Kleidung: "));
+  gleich("(k) Sponsor + Spenden", zeile(["sponsor", "spenden"]), "Bezahlung Kleidung: Sponsor (Autohaus Beispiel) und Spenden / Mannschaftskasse");
+  gleich("(k) Vereinskasse + Sponsor", zeile(["vereinskasse", "sponsor"]), "Bezahlung Kleidung: Vereinskasse und Sponsor (Autohaus Beispiel)");
+  gleich("(k) Eltern + Spenden (ohne Sponsor, der Name im Entwurf zählt nicht)", zeile(["eltern", "spenden"]), "Bezahlung Kleidung: Eltern bzw. Spieler und Spenden / Mannschaftskasse");
+  gleich("(k) Reihenfolge der Eingabe ist egal", zeile(["sponsor", "eltern"]), zeile(["eltern", "sponsor"]));
+  gleich("(k) Eltern + Vereinskasse", zeile(["eltern", "vereinskasse"]), "Bezahlung Kleidung: Eltern bzw. Spieler und Vereinskasse");
+  // Zwei Antworten im Teambedarf, der Sponsor dort mit eigenem Namen
+  const tb = mail(klein({ personen: [person("p1", "Mia", "7", "140", ["trikot"])], zaehler: 1, teambedarf: { baelle: { n: 2, details: "" } }, bezahlung: { kleidung: ["eltern"], kleidungSponsor: "Kleidungs-Sponsor", teambedarf: ["sponsor", "spenden"], teambedarfSponsor: "Bäckerei  Beispiel" } })).text;
+  pruefe("(k) Teambedarf: zwei Antworten mit eigenem Sponsornamen, der Name der Kleidung kommt nicht vor", zeilen(tb).includes("Bezahlung Teambedarf: Sponsor (Bäckerei Beispiel) und Spenden / Mannschaftskasse") && zeilen(tb).includes("Bezahlung Kleidung: Eltern bzw. Spieler") && !tb.includes("Kleidungs-Sponsor"), tb);
+}
+
+// ---------- (l) drei und mehr Antworten ----------
+
+abschnitt("(l) drei und mehr Antworten");
+{
+  const mia = [person("p1", "Mia", "7", "140", ["trikot"])];
+  const kleidung = (ids, name = "Autohaus Beispiel") => zeilen(mail(klein({ personen: mia, zaehler: 1, bezahlung: { kleidung: ids, kleidungSponsor: name, teambedarf: [], teambedarfSponsor: "" } })).text).find((z) => z.startsWith("Bezahlung Kleidung: "));
+  gleich("(l) drei Antworten: „A, B und C“", kleidung(["eltern", "vereinskasse", "spenden"]), "Bezahlung Kleidung: Eltern bzw. Spieler, Vereinskasse und Spenden / Mannschaftskasse");
+  gleich("(l) drei Antworten mit Sponsor am Ende", kleidung(["eltern", "vereinskasse", "sponsor"]), "Bezahlung Kleidung: Eltern bzw. Spieler, Vereinskasse und Sponsor (Autohaus Beispiel)");
+  gleich("(l) drei Antworten mit Sponsor in der Mitte", kleidung(["eltern", "sponsor", "spenden"]), "Bezahlung Kleidung: Eltern bzw. Spieler, Sponsor (Autohaus Beispiel) und Spenden / Mannschaftskasse");
+  gleich("(l) vier Antworten: „A, B, C und D“ (Katalogreihenfolge, Sponsor an dritter Stelle)", kleidung(["eltern", "vereinskasse", "sponsor", "spenden"]), "Bezahlung Kleidung: Eltern bzw. Spieler, Vereinskasse, Sponsor (Autohaus Beispiel) und Spenden / Mannschaftskasse");
+  gleich("(l) Reihenfolge der Eingabe ist egal", kleidung(["spenden", "sponsor", "vereinskasse", "eltern"]), kleidung(["eltern", "vereinskasse", "sponsor", "spenden"]));
+  gleich("(l) doppelte Einträge zählen einmal", kleidung(["eltern", "eltern", "spenden", "spenden"]), "Bezahlung Kleidung: Eltern bzw. Spieler und Spenden / Mannschaftskasse");
+  // Der ganze Text von (b) (nur Teambedarf) mit drei Antworten
+  const dreiTb = bestellung({ ...FALL_B.bestellung, bezahlung: { kleidung: [], kleidungSponsor: "", teambedarf: ["eltern", "vereinskasse", "spenden"], teambedarfSponsor: "" } });
+  gleich("(l) Fall (b) mit drei Antworten: nur die Zeile „Bezahlung Teambedarf“ ist anders", mail(dreiTb, FALL_B.jetzt).text, FALL_B.text.replace("Bezahlung Teambedarf: Spenden / Mannschaftskasse\n", "Bezahlung Teambedarf: Eltern bzw. Spieler, Vereinskasse und Spenden / Mannschaftskasse\n"));
+  // Die Aufzählung selbst
+  gleich("(l) verbindeDeutsch: keine Angabe", verbindeDeutsch([]), "");
+  gleich("(l) verbindeDeutsch: eine", verbindeDeutsch(["A"]), "A");
+  gleich("(l) verbindeDeutsch: zwei", verbindeDeutsch(["A", "B"]), "A und B");
+  gleich("(l) verbindeDeutsch: drei", verbindeDeutsch(["A", "B", "C"]), "A, B und C");
+  gleich("(l) verbindeDeutsch: vier", verbindeDeutsch(["A", "B", "C", "D"]), "A, B, C und D");
+}
+
+// ---------- (m) Lücke ohne Haken ----------
+
+abschnitt("(m) Lücke, wenn kein Haken gesetzt ist");
+{
+  const mia = [person("p1", "Mia", "7", "140", ["trikot"])];
+  const luecken = (bezahlung, extra = {}) => pruefeBestellung(KONFIG, klein({ personen: mia, zaehler: 1, bezahlung: { kleidung: [], kleidungSponsor: "", teambedarf: [], teambedarfSponsor: "", ...bezahlung }, ...extra }));
+  gleichJson("(m) Kleidung ohne Haken", luecken({}), [{ feld: "bezahlung:kleidung", text: "Bitte wähle, wer die Kleidung zahlt" }]);
+  gleichJson("(m) Teambedarf ohne Haken", luecken({ kleidung: ["eltern"] }, { teambedarf: { baelle: { n: 1, details: "" } } }), [{ feld: "bezahlung:teambedarf", text: "Bitte wähle, wer den Teambedarf zahlt" }]);
+  gleichJson("(m) beide Blöcke ohne Haken (Kleidung zuerst)", luecken({}, { teambedarf: { baelle: { n: 1, details: "" } } }).map((l) => l.feld), ["bezahlung:kleidung", "bezahlung:teambedarf"]);
+  gleichJson("(m) nur Teambedarf: nur dessen Block wird verlangt", pruefeBestellung(KONFIG, bestellung({ team: "d1", name: "Tina", teambedarf: { baelle: { n: 1, details: "" } } })).map((l) => l.feld), ["bezahlung:teambedarf"]);
+  gleichJson("(m) ein Haken genügt", luecken({ kleidung: ["spenden"] }), []);
+  gleichJson("(m) unbekannte ids zählen nicht als Haken", luecken({ kleidung: ["bar", "x"] }).map((l) => l.feld), ["bezahlung:kleidung"]);
+  // Sponsor angehakt: der Name ist Pflicht (Leerzeichen zählen nicht), auch neben anderen Antworten
+  gleichJson("(m) Sponsor allein ohne Namen", luecken({ kleidung: ["sponsor"] }), [{ feld: "sponsor:kleidung", text: "Bitte trage den Namen des Sponsors ein (Kleidung)" }]);
+  gleichJson("(m) Eltern + Sponsor ohne Namen (nur Leerzeichen)", luecken({ kleidung: ["eltern", "sponsor"], kleidungSponsor: "   " }).map((l) => l.feld), ["sponsor:kleidung"]);
+  gleichJson("(m) Eltern + Sponsor mit Namen", luecken({ kleidung: ["eltern", "sponsor"], kleidungSponsor: "Autohaus Beispiel" }), []);
+  gleichJson("(m) Sponsor im Teambedarf ohne Namen", luecken({ kleidung: ["eltern"], teambedarf: ["vereinskasse", "sponsor"] }, { teambedarf: { baelle: { n: 1, details: "" } } }), [{ feld: "sponsor:teambedarf", text: "Bitte trage den Namen des Sponsors ein (Teambedarf)" }]);
+  // Haken weg: Feld und Lücke verschwinden, der Name darf im Entwurf bleiben, steht aber nicht in der Mail
+  gleichJson("(m) Sponsor abgewählt: keine Lücke, auch ohne Namen", luecken({ kleidung: ["eltern"], kleidungSponsor: "" }), []);
+  const mitNameOhneHaken = klein({ personen: mia, zaehler: 1, bezahlung: { kleidung: ["eltern"], kleidungSponsor: "Autohaus Beispiel", teambedarf: [], teambedarfSponsor: "" } });
+  gleichJson("(m) Name bei abgewähltem Sponsor: keine Lücke", pruefeBestellung(KONFIG, mitNameOhneHaken), []);
+  const mailOhneHaken = mail(mitNameOhneHaken);
+  pruefe("(m) Name bei abgewähltem Sponsor: nicht in der Mail", !mailOhneHaken.text.includes("Autohaus") && !mailOhneHaken.mailto.includes("Autohaus") && zeilen(mailOhneHaken.text).includes("Bezahlung Kleidung: Eltern bzw. Spieler"));
+  const nurSponsorName = mail(klein({ personen: mia, zaehler: 1, bezahlung: { kleidung: ["spenden"], kleidungSponsor: "Autohaus Beispiel", teambedarf: [], teambedarfSponsor: "" } }));
+  pruefe("(m) Name im Entwurf, Sponsor nicht gewählt: Zeile nur mit der gewählten Antwort", zeilen(nurSponsorName.text).includes("Bezahlung Kleidung: Spenden / Mannschaftskasse") && !nurSponsorName.text.includes("Sponsor ("));
+  // In der Vorschau ohne Haken fehlt die Zeile einfach (gesendet wird nicht)
+  pruefe("(m) ohne Haken keine Zeile „Bezahlung Kleidung“ in der Vorschau", !mail(klein({ personen: mia, zaehler: 1, bezahlung: { kleidung: [], kleidungSponsor: "", teambedarf: [], teambedarfSponsor: "" } })).text.includes("Bezahlung Kleidung"));
+}
+
+// ---------- (n) alter Entwurf mit Text statt Liste ----------
+
+abschnitt("(n) alter Entwurf (ein Text je Block) wird beim Laden zur Liste");
+{
+  // So lag der Entwurf in der ersten Fassung auf den Geräten: ein Text je Block
+  const alt = (kleidung, teambedarf, kleidungSponsor = "", teambedarfSponsor = "") => {
+    const e = JSON.parse(JSON.stringify(FALL_A.bestellung));
+    e.bezahlung = { kleidung, kleidungSponsor, teambedarf, teambedarfSponsor };
+    return e;
+  };
+  const geladen = bereinigeEntwurf(alt("eltern", "vereinskasse"), KONFIG);
+  gleichJson("(n) Text wird Liste: eltern › [eltern], vereinskasse › [vereinskasse]", geladen.bezahlung, { kleidung: ["eltern"], kleidungSponsor: "", teambedarf: ["vereinskasse"], teambedarfSponsor: "" });
+  gleich("(n) alter Entwurf: dieselbe Mail wie die Liste (Betreff)", mail(geladen, FALL_A.jetzt).betreff, FALL_A.betreff);
+  gleich("(n) alter Entwurf: dieselbe Mail wie die Liste (Text)", mail(geladen, FALL_A.jetzt).text, FALL_A.text);
+  gleichJson("(n) alter Entwurf: ganzer Entwurf gleich dem mit der Liste", geladen, FALL_A.bestellung);
+  gleichJson("(n) alter Entwurf: keine Lücken", pruefeBestellung(KONFIG, geladen), []);
+  // Mit Sponsor: wie die Liste mit einem Eintrag
+  const sponsorAlt = bereinigeEntwurf(alt("sponsor", "spenden", "Autohaus Beispiel"), KONFIG);
+  const sponsorNeu = bestellung({ ...FALL_A.bestellung, bezahlung: { kleidung: ["sponsor"], kleidungSponsor: "Autohaus Beispiel", teambedarf: ["spenden"], teambedarfSponsor: "" } });
+  gleichJson("(n) alter Entwurf mit Sponsor: Text wird [sponsor], der Name bleibt", sponsorAlt.bezahlung, sponsorNeu.bezahlung);
+  gleich("(n) alter Entwurf mit Sponsor: dieselbe Mail wie die Liste", mail(sponsorAlt, FALL_A.jetzt).text, mail(sponsorNeu, FALL_A.jetzt).text);
+  pruefe("(n) alter Entwurf mit Sponsor: „Sponsor (Autohaus Beispiel)“ in der Mail", zeilen(mail(sponsorAlt, FALL_A.jetzt).text).includes("Bezahlung Kleidung: Sponsor (Autohaus Beispiel)"));
+  // Leer und unbekannt
+  gleichJson("(n) leerer Text › leere Liste", bereinigeEntwurf(alt("", ""), KONFIG).bezahlung, { kleidung: [], kleidungSponsor: "", teambedarf: [], teambedarfSponsor: "" });
+  gleichJson("(n) unbekannte id als Text › leere Liste", bereinigeEntwurf(alt("bar", "x"), KONFIG).bezahlung, { kleidung: [], kleidungSponsor: "", teambedarf: [], teambedarfSponsor: "" });
+  gleichJson("(n) Liste mit Unbekanntem, Doppeltem und falscher Reihenfolge › Katalogreihenfolge, nur Bekanntes", bereinigeEntwurf(alt(["spenden", "bar", "eltern", "eltern", 5, null, ["sponsor"]], ["sponsor", "vereinskasse"], "S"), KONFIG).bezahlung, { kleidung: ["eltern", "spenden"], kleidungSponsor: "S", teambedarf: ["vereinskasse", "sponsor"], teambedarfSponsor: "" });
+  for (const [name, wert] of [["fehlt", undefined], ["null", null], ["Zahl", 7], ["Objekt", { eltern: true }], ["Wahrheitswert", true]]) {
+    gleichJson(`(n) Wert ${name} › leere Liste (kein Fehler)`, bereinigeEntwurf(alt(wert, wert), KONFIG).bezahlung.kleidung, []);
+  }
+  gleichJson("(n) fehlender Schlüssel „bezahlung“ › beide Listen leer", bereinigeEntwurf({ team: "d3", name: "Lena" }, KONFIG).bezahlung, { kleidung: [], kleidungSponsor: "", teambedarf: [], teambedarfSponsor: "" });
+  gleichJson("(n) ganzer Block „bezahlung“ kaputt (Text statt Objekt) › beide Listen leer", bereinigeEntwurf({ team: "d3", bezahlung: "eltern" }, KONFIG).bezahlung, { kleidung: [], kleidungSponsor: "", teambedarf: [], teambedarfSponsor: "" });
+  // Auch ohne Bereinigung vertragen Prüfung und Mail den alten Text (zur Sicherheit)
+  const rohAlt = alt("eltern", "vereinskasse");
+  gleich("(n) Mail aus dem alten Text ohne Bereinigung: derselbe Text", mail(rohAlt, FALL_A.jetzt).text, FALL_A.text);
+  gleichJson("(n) Prüfung des alten Textes ohne Bereinigung: keine Lücken", pruefeBestellung(KONFIG, rohAlt), []);
+  // Der neue Entwurf übersteht Speichern und Laden unverändert (JSON)
+  const neu = bestellung({ ...FALL_A.bestellung, bezahlung: { kleidung: ["eltern", "sponsor"], kleidungSponsor: "Autohaus Beispiel", teambedarf: ["vereinskasse", "spenden"], teambedarfSponsor: "" } });
+  gleichJson("(n) neuer Entwurf: nach JSON und Bereinigung unverändert", bereinigeEntwurf(JSON.parse(JSON.stringify(neu)), KONFIG), neu);
+  gleichJson("(n) bezahlungIds: Text, Liste, Leeres, Müll", [bezahlungIds(KONFIG, "eltern"), bezahlungIds(KONFIG, ""), bezahlungIds(KONFIG, undefined), bezahlungIds(KONFIG, 5), bezahlungIds(KONFIG, {}), bezahlungIds(KONFIG, ["sponsor", "eltern"]), bezahlungIds(KONFIG, ["gibt-es-nicht"])], [["eltern"], [], [], [], [], ["eltern", "sponsor"], []]);
+  gleichJson("(n) leerer Entwurf: beide Listen leer", leererEntwurf().bezahlung, { kleidung: [], kleidungSponsor: "", teambedarf: [], teambedarfSponsor: "" });
 }
 
 // ---------- (g) Prüfmodus aus ----------
@@ -448,7 +576,7 @@ abschnitt("(i) Lückenliste");
     personen: [person("p1", "Mia", "7", "140", ["trikot"])],
     zaehler: 1,
     teambedarf: { ballpumpe: { n: 1, details: "" } },
-    bezahlung: { kleidung: "sponsor", kleidungSponsor: " ", teambedarf: "sponsor", teambedarfSponsor: "" },
+    bezahlung: { kleidung: ["sponsor"], kleidungSponsor: " ", teambedarf: ["sponsor"], teambedarfSponsor: "" },
   });
   gleichJson("(i) Sponsor ohne Namen", pruefeBestellung(KONFIG, s), [
     { feld: "sponsor:kleidung", text: "Bitte trage den Namen des Sponsors ein (Kleidung)" },
@@ -537,7 +665,7 @@ abschnitt("Sonderfälle");
   const eins = mail(klein({ personen: [person("p1", "Mia", "7", "140", ["trikot"])], zaehler: 1 }));
   gleich("ein Teil: Betreff", eins.betreff, "[TEST] Bestellung E2-Jugend – 1 Teil (E2-261125-1200)");
   pruefe("ein Teil: „Summe: 1 Teil“", zeilen(eins.text).includes("Summe: 1 Teil"));
-  const einsMitTeam = mail(klein({ personen: [person("p1", "Mia", "7", "140", ["trikot"])], zaehler: 1, teambedarf: { ballpumpe: { n: 1, details: "" } }, bezahlung: { kleidung: "eltern", kleidungSponsor: "", teambedarf: "eltern", teambedarfSponsor: "" } }));
+  const einsMitTeam = mail(klein({ personen: [person("p1", "Mia", "7", "140", ["trikot"])], zaehler: 1, teambedarf: { ballpumpe: { n: 1, details: "" } }, bezahlung: { kleidung: ["eltern"], kleidungSponsor: "", teambedarf: ["eltern"], teambedarfSponsor: "" } }));
   gleich("ein Teil und Teambedarf: Betreff", einsMitTeam.betreff, "[TEST] Bestellung E2-Jugend – 1 Teil, Teambedarf (E2-261125-1200)");
 
   // Stutzen: eigene Größe, Reihenfolge S vor M, Zusatz bei der Person
@@ -592,7 +720,7 @@ abschnitt("Sonderfälle");
       erste_hilfe: { n: 5, details: "unbekannter Posten" },
     },
     sonstiges: "  Tor aufbauen\n\n\n  Netz  ",
-    bezahlung: { kleidung: "", kleidungSponsor: "", teambedarf: "eltern", teambedarfSponsor: "" },
+    bezahlung: { kleidung: [], kleidungSponsor: "", teambedarf: ["eltern"], teambedarfSponsor: "" },
   })).text;
   pruefe("Teambedarf: Katalogreihenfolge, Details in einer Zeile, Anzahl 0 und unbekannte Posten fehlen", tb.includes("== 2. TEAMBEDARF (Preis bitte beim Lieferanten erfragen) ==\n- 2 × Leibchen: gelb, Kinder\n- 12 × Trinkflaschen\n- Sonstiges: Tor aufbauen\n\n  Netz\n\nViele Grüße"), tb);
   // Datum
@@ -656,7 +784,7 @@ abschnitt("Entwurf");
   gleichJson("Entwurf: Artikel nur aus dem Katalog, eigene Größe nur wenn gültig", muell.personen[0].artikel, { trikot: { groesse: "" }, shorts: { groesse: "" }, stutzen: { groesse: "L (Senior)" }, winterjacke: { groesse: "" } });
   gleich("Entwurf: Initialen kein Text werden „keine eigene Eingabe“", String(muell.personen[0].initialen), "null");
   gleichJson("Entwurf: Teambedarf bereinigt", muell.teambedarf, { baelle: { n: 12, details: "z".repeat(GRENZEN.details) }, leibchen: { n: GRENZEN.anzahl, details: "" } });
-  gleichJson("Entwurf: Bezahlung bereinigt", muell.bezahlung, { kleidung: "", kleidungSponsor: "", teambedarf: "sponsor", teambedarfSponsor: "Bäcker" });
+  gleichJson("Entwurf: Bezahlung bereinigt (alte Texte werden Listen, Unbekanntes fällt weg)", muell.bezahlung, { kleidung: [], kleidungSponsor: "", teambedarf: ["sponsor"], teambedarfSponsor: "Bäcker" });
   gleich("Entwurf: ungültige Bestell-Nr. wird leer, Status damit auch", muell.bestellNr + "|" + muell.status, "|");
   const mitNr = bereinigeEntwurf({ bestellNr: "G-JUGEND-261125-0905", status: "kopiert" }, KONFIG);
   gleich("Entwurf: gültige Bestell-Nr. und Status bleiben", mitNr.bestellNr + "|" + mitNr.status, "G-JUGEND-261125-0905|kopiert");
@@ -676,7 +804,7 @@ abschnitt("Seite");
   const s = seite(DATEN);
   gleich("Seite: URL", s.url, "/bestellung/");
   gleich("Seite: Titel", s.title, "Bestellung für dein Team");
-  pruefe("Seite: noindex im Kopf (dadurch nicht in der Sitemap)", /<meta name="robots" content="noindex">/.test(s.kopfZusatz));
+  pruefe("Seite: noindex im Kopf, ohneSitemap gesetzt (nicht in der Sitemap)", /<meta name="robots" content="noindex">/.test(s.kopfZusatz) && s.ohneSitemap === true);
   pruefe("Seite: bindet CSS und Skript ein (Pfade für docs/ws/)", s.kopfZusatz.includes('href="../assets/css/bestellung.css"') && s.kopfZusatz.includes('<script type="module" src="../assets/js/bestellung/seite.js"></script>'));
   pruefe("Seite: Beschreibung 50 bis 170 Zeichen (Prüfung der Website)", s.description.length >= 50 && s.description.length <= 170, String(s.description.length));
   const m = /<script type="application\/json" id="bestellung-konfig">([\s\S]*?)<\/script>/.exec(s.inhalt);
@@ -684,12 +812,24 @@ abschnitt("Seite");
   gleichJson("Seite: eingebettete Konfiguration = Konfiguration der Tests", JSON.parse(m[1]), KONFIG);
   pruefe("Seite: Pflegehinweis der Datei nicht in der Seite", !s.inhalt.includes("_hinweis") && !s.inhalt.includes("Pflegedatei"));
   pruefe("Seite: kein „<“ und keine Skript-Ende-Marke in der eingebetteten Konfiguration", !m[1].includes("<"));
+  // Bezahlung: je Block Kontrollkästchen (mehrere Antworten möglich) in der Reihenfolge der Datei, der Hinweis steht unter der Legende
+  const hinweisBezahlung = "Mehrere möglich. Wie geteilt wird, kannst du unten bei „Hinweis zur Bezahlung“ schreiben.";
+  for (const [block, frage] of [["kleidung", "Wer zahlt die Kleidung?"], ["teambedarf", "Wer zahlt den Teambedarf?"]]) {
+    const gruppe = new RegExp(`<fieldset class="bst-gruppe" data-bezahlung="${block}"[^>]*>[\\s\\S]*?</fieldset>`).exec(s.inhalt);
+    const html = gruppe ? gruppe[0] : "";
+    pruefe(`Seite: Bezahlung ${block}: Legende „${frage}“, darunter der Satz „Mehrere möglich …“`, html.includes(`<legend>${frage}</legend>\n      <p class="bst-hinweis" id="bst-bez-${block}-hilfe">${hinweisBezahlung}</p>`), html.slice(0, 400));
+    gleichJson(`Seite: Bezahlung ${block}: vier Kontrollkästchen in der Reihenfolge der Datei`, [...html.matchAll(/<input type="checkbox" name="bez-[a-z]+" value="([a-z-]+)" data-bez-wert>/g)].map((x) => x[1]), ["eltern", "vereinskasse", "sponsor", "spenden"]);
+    pruefe(`Seite: Bezahlung ${block}: keine Auswahlknöpfe (radio), keine Rolle radiogroup, anfangs verborgen`, !html.includes('type="radio"') && !html.includes("radiogroup") && /^<fieldset[^>]* hidden>/.test(html));
+    pruefe(`Seite: Bezahlung ${block}: Feld „Name des Sponsors“ verborgen im Block`, html.includes('data-sponsor-feld hidden>') && html.includes(`<label for="bst-sponsor-${block}">Name des Sponsors</label>`));
+  }
+  gleich("Seite: der Satz „Mehrere möglich …“ steht zweimal (je Block)", String(s.inhalt.split(hinweisBezahlung).length - 1), "2");
   pruefe("Seite: nur Namen und Kürzel der Mannschaften (keine Trainer, Mails, Plätze)", JSON.parse(m[1]).mannschaften.every((x) => Object.keys(x).sort().join() === "name,slug"));
   for (const text of [
     "Bestellung für dein Team", "Wer bestellt?", "Kleidung je Person", "Teambedarf", "Bezahlung", "Übersicht und Senden",
     "Hier stellst du zusammen, was dein Team braucht. Am Ende öffnet sich dein Mailprogramm mit der fertigen Bestellung an den Verein – du musst nur noch auf „Senden“ tippen.",
     "Name und Nummer werden auf Trikot, Präsi-Jacke und Winterjacke gedruckt.", "+ Person hinzufügen", "Preise klärt der Vorstand.",
     "Wer zahlt die Kleidung?", "Wer zahlt den Teambedarf?", "Name des Sponsors", "Hinweis zur Bezahlung (freiwillig)", "Sonstiger Hinweis (freiwillig)",
+    "Mehrere möglich. Wie geteilt wird, kannst du unten bei „Hinweis zur Bezahlung“ schreiben.",
     "Dein Name", "Telefon (freiwillig)", "Gebraucht bis (freiwillig)", "Bestellung per Mail senden", "Text kopieren", "Mail ansehen", "Neue Bestellung beginnen", "Sonstiges",
     "Die Seite speichert nichts auf einem Server. Deine Eingaben bleiben auf diesem Gerät, bis du sie per Mail verschickst.", "Preise für Eltern bzw. Spieler, Stand 11/26.",
     "Die Bestellung ist lang. Falls in der Mail etwas fehlt: „Text kopieren“ und einfügen.",

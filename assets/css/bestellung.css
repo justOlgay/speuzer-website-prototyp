@@ -272,7 +272,7 @@
 }
 
 .bst-check input[type="checkbox"],
-.bst-option input[type="radio"] {
+.bst-option input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
   flex: none;
@@ -286,15 +286,18 @@
   cursor: pointer;
 }
 
-.bst-check input[type="checkbox"] {
+.bst-check input[type="checkbox"],
+.bst-option input[type="checkbox"] {
   border-radius: var(--r-sm);
 }
 
-.bst-check input[type="checkbox"]:checked {
+.bst-check input[type="checkbox"]:checked,
+.bst-option input[type="checkbox"]:checked {
   background: var(--blau-700);
 }
 
-.bst-check input[type="checkbox"]:checked::after {
+.bst-check input[type="checkbox"]:checked::after,
+.bst-option input[type="checkbox"]:checked::after {
   content: "\2713";
   color: var(--weiss);
   font-size: 16px;
@@ -509,10 +512,10 @@
   margin-bottom: var(--sp-2);
 }
 
-.bst-gruppe[aria-invalid="true"] {
+/* Keine Antwort angehakt: Rahmen um die ganze Gruppe (seite.js setzt die Klasse; aria-invalid tragen die Kästchen) */
+.bst-gruppe--luecke {
   padding: var(--sp-3);
   border-color: var(--warn);
-  box-shadow: none;
 }
 
 .bst-optionen {
@@ -530,14 +533,6 @@
   border-radius: var(--r-md);
   background: var(--surface);
   cursor: pointer;
-}
-
-.bst-option input[type="radio"] {
-  border-radius: 50%;
-}
-
-.bst-option input[type="radio"]:checked {
-  background: radial-gradient(circle, var(--blau-700) 0, var(--blau-700) 45%, transparent 50%), var(--surface);
 }
 
 .bst-option:has(input:checked) {

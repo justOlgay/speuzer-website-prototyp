@@ -8,7 +8,7 @@
 // Die Karten je Person, die Prüfung und die Mail baut das Skript assets/js/bestellung/seite.js im Browser; Betreff, Text
 // und mailto kommen aus assets/js/bestellung/mailtext.js (reine Funktionen, in Node getestet: tools/bestellung-test/).
 //
-// Ein Prototyp: nicht im Menü, nicht in der Sitemap (tools/build.mjs: noindex), nicht im appack-Paket
+// Ein Prototyp: nicht im Menü, nicht in der Sitemap (ohneSitemap in seite(), tools/build.mjs), nicht im appack-Paket
 // (tools/appack-paket.mjs: AUSGESCHLOSSENE_DATEIEN). Den Prüfmodus (Hinweis oben, „[TEST]“ im Betreff, Testzeile in der
 // Mail) schaltet data/bestellung.json › einstellungen › pruefmodus; zum Livegang auf false setzen und neu bauen.
 
@@ -134,14 +134,18 @@ function teambedarfAbschnitt(konfig) {
   </section>`;
 }
 
+// Je Block (Kleidung, Teambedarf) Kontrollkästchen mit den Antworten aus data/bestellung.json in deren Reihenfolge: Mehrere Antworten
+// sind möglich, mindestens eine ist Pflicht (assets/js/bestellung/mailtext.js › pruefeBestellung). Das Feld für den Namen des Sponsors
+// zeigt seite.js nur bei angehaktem Sponsor (Antwort mit „mitName“).
 function bezahlGruppe(konfig, block, frage) {
   const optionen = konfig.bezahlung
     .map(
-      (b) => `<label class="bst-option"><input type="radio" name="bez-${block}" value="${escapeHtml(b.id)}" data-bez-wert><span>${escapeHtml(b.text)}</span></label>`
+      (b) => `<label class="bst-option"><input type="checkbox" name="bez-${block}" value="${escapeHtml(b.id)}" data-bez-wert><span>${escapeHtml(b.text)}</span></label>`
     )
     .join("\n        ");
-  return `<fieldset class="bst-gruppe" role="radiogroup" data-bezahlung="${block}" data-schluessel="bezahlung:${block}" hidden>
+  return `<fieldset class="bst-gruppe" data-bezahlung="${block}" data-schluessel="bezahlung:${block}" aria-describedby="bst-bez-${block}-hilfe" hidden>
       <legend>${frage}</legend>
+      <p class="bst-hinweis" id="bst-bez-${block}-hilfe">Mehrere möglich. Wie geteilt wird, kannst du unten bei „Hinweis zur Bezahlung“ schreiben.</p>
       <div class="bst-optionen">
         ${optionen}
       </div>
