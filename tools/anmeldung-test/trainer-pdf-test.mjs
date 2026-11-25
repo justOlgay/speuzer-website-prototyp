@@ -12,7 +12,8 @@
 //  K6   Unterschrift der Person auf genau vier Stellen; ohne Unterschrift oder ohne Foto ein Fehler mit klarer Meldung
 //  K7   Karneval („Gruppe“ statt „Mannschaft“) und Rollen (Torwarttrainer)
 //  K8   Aussehen: Seiten als PNG; kein Wort über dem Rand (pdftotext -bbox), Schrift mindestens 9 pt außer Fußzeilen (pdftohtml)
-//  K9   keine echten Daten: nur die zwei Beispielnummern, keine Rufnummer des Vereins
+//  K9   keine echten Daten: nur die zwei Beispielnummern, keine Rufnummer des Vereins, keine Namen aus dem Umfeld des Auftrags
+//       (öffentliche nur als SHA-256, private aus der git-ignorierten Liste tools/cache/pii-namen.txt wie tools/pii-check.py)
 //  K10  Vorschau des Antrags = Antrag der Dateien (Text)
 //  K11  Größe (höchstens 2 MB bei einem Foto von 600 × 800 Pixeln) und Zeit (höchstens 5 Sekunden)
 //  K12  Fristen, Sonderzeichen, sehr lange Angaben, Fehlerfälle, Metadaten, Wiederholbarkeit, Quelltext (kein DOM, keine Uhr, kein Name)
@@ -727,7 +728,46 @@ kontext = "K9 keine echten Daten";
   const gefunden = [...new Set(alles.match(muster) || [])].sort();
   ok(JSON.stringify(gefunden) === JSON.stringify(["0170 1234567", "0170 7654321"]), () => "Ziffernfolgen wie Telefonnummern: " + JSON.stringify(gefunden));
   for (const nummer of ["736868", "732193", "069 7", "+49 69"]) ok(!alles.includes(nummer), "keine Rufnummer des Vereins: " + nummer);
-  ok(!/Olgay|Özkan|Speuzer|Ilay/.test(alles), "keine Namen aus dem Umfeld des Auftrags in den Dateien");
+  // Namen aus dem Umfeld des Auftrags: Die Prüfung enthält keinen Namen im Klartext, und keine Meldung nennt einen. Verglichen
+  // wird ohne Groß-/Kleinschreibung (NFC) als Teilzeichenfolge, also mindestens so streng wie ein festes Muster mit den Namen.
+  const kleinNfc = (s) => s.normalize("NFC").toLowerCase();
+  const allesKlein = kleinNfc(alles);
+  // a) Öffentliche Namen (Vor- und Nachname der auftraggebenden Person, Projektname aus dem Repo-Namen) stehen gewollt im
+  //    Repo und deshalb nicht in der privaten Liste. Hier stehen nur Länge und SHA-256 ihrer Kleinschreibung (NFC, UTF-8);
+  //    der Hash schützt öffentliche Namen nicht, er hält nur den Quelltext frei. Geprüft wird jede gleich lange Zeichenfolge.
+  const OEFFENTLICHE_NAMEN = [
+    { laenge: 5, sha256: "791c6c29192b81334fa4316fb86ddc5bde91d6d6f53ed410274200b8357d87d7" },
+    { laenge: 5, sha256: "7a89f9ed1c14d1806b69b2c0d2e82d28237e917924b39e2d549edb3449d0df44" },
+    { laenge: 7, sha256: "32c2c68bb69be4650b556171430b065b98fbed6dd169707a2d0ebbf958c62a06" },
+  ];
+  const nachHash = new Map(OEFFENTLICHE_NAMEN.map((n, i) => [n.sha256, i + 1]));
+  const oeffentlich = new Set();
+  for (const laenge of new Set(OEFFENTLICHE_NAMEN.map((n) => n.laenge))) {
+    for (let i = 0; i + laenge <= allesKlein.length; i++) {
+      const nr = nachHash.get(createHash("sha256").update(allesKlein.slice(i, i + laenge), "utf8").digest("hex"));
+      if (nr) oeffentlich.add(nr);
+    }
+  }
+  ok(oeffentlich.size === 0, () => "kein öffentlicher Name aus dem Umfeld des Auftrags in den Dateien (Nr. " + [...oeffentlich].sort().join(", ") + ")");
+  // b) Private Namen stehen nur in der git-ignorierten Liste tools/cache/pii-namen.txt (eine Zeile je Name, # = Kommentar),
+  //    wie bei tools/pii-check.py; in einem git-worktree liegt sie im Haupt-Checkout. Ein Hash würde kurze Vornamen nicht
+  //    schützen. Fehlt die Liste, wird nur dieser Teil mit Hinweis übersprungen.
+  const listen = [path.join(WURZEL, "tools", "cache", "pii-namen.txt")];
+  const gemeinsam = spawnSync("git", ["rev-parse", "--git-common-dir"], { cwd: WURZEL, encoding: "utf8" });
+  if (!gemeinsam.error && gemeinsam.status === 0 && gemeinsam.stdout.trim()) {
+    listen.push(path.join(path.resolve(WURZEL, gemeinsam.stdout.trim()), "..", "tools", "cache", "pii-namen.txt"));
+  }
+  const liste = listen.find((p) => existsSync(p));
+  const privat = liste
+    ? readFileSync(liste, "utf8").split(/\r?\n/).map((z, i) => ({ zeile: i + 1, name: z.trim() })).filter((e) => e.name && !e.name.startsWith("#"))
+    : [];
+  if (privat.length) {
+    const treffer = privat.filter((e) => allesKlein.includes(kleinNfc(e.name))).map((e) => e.zeile);
+    ok(treffer.length === 0, () => "kein privater Name aus der Namensliste in den Dateien (Zeile " + treffer.join(", ") + " der Liste)");
+    console.log("    private Namensliste: " + privat.length + " Namen geprüft (" + path.relative(WURZEL, liste) + ")");
+  } else {
+    console.log("    Hinweis: keine private Namensliste (tools/cache/pii-namen.txt), Prüfung der privaten Namen übersprungen.");
+  }
   // Es gibt keine Unterschrift des Vereins („i.A.“ als Bild): die Antrags-PDF hat kein Bild (K5); das Paket nur die vier eigenen
   ok(bilder(paketPfad).filter((x) => x.art === "image").length === 4 && bilder(antragPfad).length === 0, "kein fremdes Unterschriftsbild: vier eigene Bilder im Paket, keines im Antrag");
 }
