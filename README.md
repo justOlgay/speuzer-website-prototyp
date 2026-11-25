@@ -176,6 +176,38 @@ Kopien der neuen Dateien unter `docs/assets/` kommen dazu. Der Bau bricht mit kl
   `npm run test:trainer-paket` (Paket im Browser und Bauabbrüche, Port 4203; setzt den Schalter für seine Bauten selbst und gilt mit dem Schalter im Code auf `false` wie auf `true`), `npm run test:trainer` (alle vier).
 - Livegang, Rückwege und Pflege: `tools/cache/orchestrierung-trainer/stufe2/UEBERGABE.md` (im Hauptordner des Projekts; `tools/cache/` ist nicht im Repo).
 
+## Bestellseite für Trainer (Prototyp)
+
+`docs/ws/bestellung.html` („Bestellung für dein Team“) ist ein Prototyp: Eine Trainerin oder ein Trainer stellt am Handy für die eigene Mannschaft
+Vereinskleidung je Person und Teambedarf (Trainingsmaterial) zusammen; ein Knopf öffnet das eigene Mailprogramm mit der fertigen Mail an die interne
+Bestelladresse (`mailto:`). Es gibt keinen Server, kein Konto und keine Datenbank; der Entwurf liegt nur auf dem Gerät (localStorage).
+**Nicht im appack-Paket, nicht in der Sitemap:** Die Seite trägt `noindex` und steht in keinem Menü. `tools/appack-paket.mjs` nimmt sie
+(`AUSGESCHLOSSENE_DATEIEN`, wie `styleguide.html`) aus dem Paket, `ohneSitemap: true` im Seitenmodul lässt sie aus `docs/sitemap.xml` weg (wie bei der Trainerseite).
+
+- Daten: `data/bestellung.json` ist die eine Pflegedatei. Sie enthält den Katalog (`artikel`: Anzeige, Beschreibung für Trainer, Preis für Kinder und
+  Erwachsene **nur für Eltern bzw. Spieler**, Größen, Angebotsbezeichnung und Herstellernummer des Lieferanten je Kinder-/Erwachsenenvariante,
+  Veredelungen, Einzeldruck), die Größenleitern, die Schnellwahl, den Teambedarf, die Antworten zur Bezahlung und die `einstellungen` (Empfänger,
+  `pruefmodus`, Preisstand, Lieferant). Einkaufspreise, Kundenkonto und Angebotsnummern des Lieferanten gehören nie in die Datei oder ins Repo.
+  Die Mannschaften kommen aus `data/teams.json` (angezeigt wird `name`, die Bestell-Nr. nutzt `slug`; neue Mannschaften erscheinen von selbst).
+  Ein Fehler in der Datei (fehlender Preis, unbekannte Veredelung …) bricht den Bau ab (`pruefeKonfig` in `assets/js/bestellung/mailtext.js`).
+  Nach jeder Änderung: `npm run build`, dann `npm run test:bestellung`.
+- Prüfmodus: `einstellungen › pruefmodus` (jetzt `true`) zeigt oben den Hinweis „Prototyp: Die Mail geht als TEST …“, setzt „[TEST]“ in den Betreff
+  und eine Testzeile in die Mail. Ausschalten: auf `false` setzen und neu bauen. Die Schlusszeile „Erstellt mit der Bestellseite für Trainer
+  (Prototyp).“ steht in `SCHLUSSZEILE` (`assets/js/bestellung/mailtext.js`) und ändert sich erst beim Livegang.
+- Mail: Teil 1 „Kleidung für den Lieferanten“ (nach Artikel und Größe mit Angebotsbezeichnung, Herstellernummer und Druck; Druckdaten nur für Stücke
+  mit Einzeldruck, nie die Liste je Kind), Teil 2 „Teambedarf“, Teil 3 „Nur intern“ (Zuordnung je Person mit den Preisen für Eltern bzw. Spieler).
+  Die Nummern der Teile sind fest, ein leerer Teil entfällt samt Überschrift. Bestell-Nr. `KÜRZEL-JJMMTT-HHMM` (Ortszeit), sie entsteht beim ersten
+  Senden. Ist die mailto-Adresse länger als 7.500 Zeichen, weist die Seite auf „Text kopieren“ hin; gekürzt wird nie.
+- Code: `assets/js/bestellung/mailtext.js` (reine Funktionen ohne DOM: Prüfung, Zusammenfassung, Mailtext, mailto, Bestell-Nr., Entwurf),
+  `assets/js/bestellung/seite.js` (Oberfläche, Zustand, Speichern auf dem Gerät; nur statische Importe), `assets/css/bestellung.css`,
+  Gerüst und eingebettete Konfiguration `src/seiten/bestellung.mjs`.
+- Tests (`npm run test:bestellung`, nach `npm run build`): `node tools/bestellung-test/mailtext-test.mjs` (ohne Browser: Katalog gegen die
+  Spezifikation, Betreff und Text Zeichen für Zeichen, Lückenliste, mailto hin und zurück, Bestell-Nr., Entwurf) und
+  `node tools/bestellung-test/e2e.mjs` (Chrome über puppeteer-core: die Referenzbestellung nur über die Oberfläche, Lücken, Senden, Kopieren, Neuladen,
+  „Neue Bestellung beginnen“, localStorage mit Fehlern, 390 und 1440 px, Tippflächen, axe-core; Bildschirmfotos nach `tools/cache/bestellung-test/`).
+  Die gemeinsamen Testbestellungen mit festen erwarteten Texten stehen in `tools/bestellung-test/faelle.mjs`. Der Browser-Test fängt den Klick auf
+  den mailto-Link ab: Es öffnet sich kein Mailprogramm und nichts wird gesendet.
+
 ## Befehle
 
 ```

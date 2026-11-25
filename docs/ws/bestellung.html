@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bestellung für dein Team – FFV Sportfreunde 04</title>
+<meta name="description" content="Bestellung für dein Team: Vereinskleidung je Person und Trainingsmaterial zusammenstellen und als fertige Mail an den Verein schicken.">
+<link rel="canonical" href="https://justolgay.github.io/speuzer-website-prototyp/ws/bestellung.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FFV Sportfreunde 04">
+<meta property="og:title" content="Bestellung für dein Team – FFV Sportfreunde 04">
+<meta property="og:description" content="Bestellung für dein Team: Vereinskleidung je Person und Trainingsmaterial zusammenstellen und als fertige Mail an den Verein schicken.">
+<meta property="og:url" content="https://justolgay.github.io/speuzer-website-prototyp/ws/bestellung.html">
+<meta property="og:image" content="https://justolgay.github.io/speuzer-website-prototyp/assets/og/standard.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#191793">
+<link rel="icon" href="../assets/logo/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/logo/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/logo/apple-touch-icon.png">
+<link rel="preload" href="../assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/css/site.css">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="../assets/css/bestellung.css">
+<link rel="modulepreload" href="../assets/js/bestellung/mailtext.js">
+<script type="module" src="../assets/js/bestellung/seite.js"></script>
+</head>
+<body class="ws bestellung">
+<main id="inhalt">
+<div class="bst" id="bestellung" data-bst-wurzel>
+  <header class="bst-kopf">
+    <div class="hinweis hinweis--info bst-pruefmodus" role="note">
+      <p><strong>Prototyp:</strong> Die Mail geht als TEST an die Bestelladresse und löst keine Bestellung aus.</p>
+    </div>
+    <h1 id="bst-titel" tabindex="-1">Bestellung für dein Team</h1>
+    <p class="bst-lead">Hier stellst du zusammen, was dein Team braucht. Am Ende öffnet sich dein Mailprogramm mit der fertigen Bestellung an den Verein – du musst nur noch auf „Senden“ tippen.</p>
+  </header>
+  <noscript><div class="hinweis hinweis--offen"><p>Diese Seite braucht JavaScript. Bitte schalte es in deinem Browser ein.</p></div></noscript>
+  <div class="hinweis hinweis--offen bst-ladefehler" data-bst-ladefehler hidden role="alert"><p>Die Seite konnte nicht geladen werden. Bitte lade sie neu.</p></div>
+  <form class="bst-form" id="bst-form" novalidate>
+  <section class="bst-abschnitt" aria-labelledby="bst-h-wer">
+    <h2 id="bst-h-wer">Wer bestellt?</h2>
+    <div class="bst-felder">
+      <div class="bst-feld">
+        <label for="bst-team">Mannschaft</label>
+        <select id="bst-team" data-feld="team" data-schluessel="team"><option value="">Bitte wählen</option><option value="herren">1. Herrenmannschaft</option><option value="soma">Soma (Sondermannschaft)</option><option value="a-jugend">A-Jugend</option><option value="d1">D1-Jugend</option><option value="d2">D2-Jugend</option><option value="d3">D3-Jugend</option><option value="e1">E1-Jugend</option><option value="e2">E2-Jugend</option><option value="e3">E3-Jugend</option><option value="f1">F1-Jugend</option><option value="f2">F2-Jugend</option><option value="g-jugend">G-Jugend (Bambinis)</option></select>
+      </div>
+      <div class="bst-feld">
+        <label for="bst-name">Dein Name</label>
+        <input type="text" id="bst-name" data-feld="name" data-schluessel="name" autocomplete="name" maxlength="60">
+      </div>
+      <div class="bst-feld">
+        <label for="bst-tel">Telefon (freiwillig)</label>
+        <input type="tel" id="bst-tel" data-feld="tel" autocomplete="tel" inputmode="tel" maxlength="30">
+      </div>
+      <div class="bst-feld">
+        <label for="bst-bis">Gebraucht bis (freiwillig)</label>
+        <input type="date" id="bst-bis" data-feld="bis">
+      </div>
+    </div>
+  </section>
+  <section class="bst-abschnitt" aria-labelledby="bst-h-kleidung">
+    <h2 id="bst-h-kleidung">Kleidung je Person</h2>
+    <p class="bst-hinweis">Name und Nummer werden auf Trikot, Präsi-Jacke und Winterjacke gedruckt.</p>
+    <div class="bst-personen" id="bst-personen" data-bst-personen></div>
+    <p class="bst-keine" id="bst-keine">Noch keine Person. Tippe auf „+ Person hinzufügen“.</p>
+    <p class="bst-aktion"><button type="button" class="knopf knopf--sekundaer" id="bst-person-neu" data-bst-person-neu data-schluessel="leer">+ Person hinzufügen</button></p>
+  </section>
+  <section class="bst-abschnitt" aria-labelledby="bst-h-team">
+    <h2 id="bst-h-team">Teambedarf</h2>
+    <p class="bst-hinweis">Trainingsmaterial für dein Team: Stelle mit „+“ die Anzahl ein.</p>
+    <ul class="bst-posten-liste" role="list">
+      <li class="bst-posten" data-teamposten="baelle">
+        <div class="bst-posten__kopf">
+          <span class="bst-posten__name" id="bst-t-baelle">Bälle</span>
+          <div class="bst-schritt" role="group" aria-labelledby="bst-t-baelle">
+            <button type="button" class="bst-schritt__knopf" data-schritt="-1" aria-label="Bälle: eine weniger">−</button>
+            <input type="number" class="bst-schritt__wert" data-n inputmode="numeric" min="0" max="999" step="1" value="0" aria-label="Bälle: Anzahl">
+            <button type="button" class="bst-schritt__knopf" data-schritt="1" aria-label="Bälle: eine mehr">+</button>
+          </div>
+        </div>
+        <div class="bst-posten__details bst-feld" data-details-feld hidden>
+          <label for="bst-d-baelle">Details</label>
+          <input type="text" id="bst-d-baelle" data-details maxlength="100" autocomplete="off" aria-label="Details zu Bälle" placeholder="z. B. Größe 4">
+        </div>
+      </li>
+      <li class="bst-posten" data-teamposten="leibchen">
+        <div class="bst-posten__kopf">
+          <span class="bst-posten__name" id="bst-t-leibchen">Leibchen</span>
+          <div class="bst-schritt" role="group" aria-labelledby="bst-t-leibchen">
+            <button type="button" class="bst-schritt__knopf" data-schritt="-1" aria-label="Leibchen: eine weniger">−</button>
+            <input type="number" class="bst-schritt__wert" data-n inputmode="numeric" min="0" max="999" step="1" value="0" aria-label="Leibchen: Anzahl">
+            <button type="button" class="bst-schritt__knopf" data-schritt="1" aria-label="Leibchen: eine mehr">+</button>
+          </div>
+        </div>
+        <div class="bst-posten__details bst-feld" data-details-feld hidden>
+          <label for="bst-d-leibchen">Details</label>
+          <input type="text" id="bst-d-leibchen" data-details maxlength="100" autocomplete="off" aria-label="Details zu Leibchen" placeholder="z. B. Farbe, Kinder oder Erwachsene">
+        </div>
+      </li>
+      <li class="bst-posten" data-teamposten="huetchen">
+        <div class="bst-posten__kopf">
+          <span class="bst-posten__name" id="bst-t-huetchen">Hütchen / Markierungsteller</span>
+          <div class="bst-schritt" role="group" aria-labelledby="bst-t-huetchen">
+            <button type="button" class="bst-schritt__knopf" data-schritt="-1" aria-label="Hütchen / Markierungsteller: eine weniger">−</button>
+            <input type="number" class="bst-schritt__wert" data-n inputmode="numeric" min="0" max="999" step="1" value="0" aria-label="Hütchen / Markierungsteller: Anzahl">
+            <button type="button" class="bst-schritt__knopf" data-schritt="1" aria-label="Hütchen / Markierungsteller: eine mehr">+</button>
+          </div>
+        </div>
+        <div class="bst-posten__details bst-feld" data-details-feld hidden>
+          <label for="bst-d-huetchen">Details</label>
+          <input type="text" id="bst-d-huetchen" data-details maxlength="100" autocomplete="off" aria-label="Details zu Hütchen / Markierungsteller" placeholder="z. B. Satz mit 40 Stück">
+        </div>
+      </li>
+      <li class="bst-posten" data-teamposten="ballnetz">
+        <div class="bst-posten__kopf">
+          <span class="bst-posten__name" id="bst-t-ballnetz">Ballnetz / Balltasche</span>
+          <div class="bst-schritt" role="group" aria-labelledby="bst-t-ballnetz">
+            <button type="button" class="bst-schritt__knopf" data-schritt="-1" aria-label="Ballnetz / Balltasche: eine weniger">−</button>
+            <input type="number" class="bst-schritt__wert" data-n inputmode="numeric" min="0" max="999" step="1" value="0" aria-label="Ballnetz / Balltasche: Anzahl">
+            <button type="button" class="bst-schritt__knopf" data-schritt="1" aria-label="Ballnetz / Balltasche: eine mehr">+</button>
+          </div>
+        </div>
+        <div class="bst-posten__details bst-feld" data-details-feld hidden>
+          <label for="bst-d-ballnetz">Details</label>
+          <input type="text" id="bst-d-ballnetz" data-details maxlength="100" autocomplete="off" aria-label="Details zu Ballnetz / Balltasche" placeholder="">
+        </div>
+      </li>
+      <li class="bst-posten" data-teamposten="ballpumpe">
+        <div class="bst-posten__kopf">
+          <span class="bst-posten__name" id="bst-t-ballpumpe">Ballpumpe</span>
+          <div class="bst-schritt" role="group" aria-labelledby="bst-t-ballpumpe">
+            <button type="button" class="bst-schritt__knopf" data-schritt="-1" aria-label="Ballpumpe: eine weniger">−</button>
+            <input type="number" class="bst-schritt__wert" data-n inputmode="numeric" min="0" max="999" step="1" value="0" aria-label="Ballpumpe: Anzahl">
+            <button type="button" class="bst-schritt__knopf" data-schritt="1" aria-label="Ballpumpe: eine mehr">+</button>
+          </div>
+        </div>
+        <div class="bst-posten__details bst-feld" data-details-feld hidden>
+          <label for="bst-d-ballpumpe">Details</label>
+          <input type="text" id="bst-d-ballpumpe" data-details maxlength="100" autocomplete="off" aria-label="Details zu Ballpumpe" placeholder="">
+        </div>
+      </li>
+      <li class="bst-posten" data-teamposten="erste-hilfe">
+        <div class="bst-posten__kopf">
+          <span class="bst-posten__name" id="bst-t-erste-hilfe">Erste-Hilfe-Material</span>
+          <div class="bst-schritt" role="group" aria-labelledby="bst-t-erste-hilfe">
+            <button type="button" class="bst-schritt__knopf" data-schritt="-1" aria-label="Erste-Hilfe-Material: eine weniger">−</button>
+            <input type="number" class="bst-schritt__wert" data-n inputmode="numeric" min="0" max="999" step="1" value="0" aria-label="Erste-Hilfe-Material: Anzahl">
+            <button type="button" class="bst-schritt__knopf" data-schritt="1" aria-label="Erste-Hilfe-Material: eine mehr">+</button>
+          </div>
+        </div>
+        <div class="bst-posten__details bst-feld" data-details-feld hidden>
+          <label for="bst-d-erste-hilfe">Details</label>
+          <input type="text" id="bst-d-erste-hilfe" data-details maxlength="100" autocomplete="off" aria-label="Details zu Erste-Hilfe-Material" placeholder="z. B. Kühlspray, Tape">
+        </div>
+      </li>
+      <li class="bst-posten" data-teamposten="trinkflaschen">
+        <div class="bst-posten__kopf">
+          <span class="bst-posten__name" id="bst-t-trinkflaschen">Trinkflaschen</span>
+          <div class="bst-schritt" role="group" aria-labelledby="bst-t-trinkflaschen">
+            <button type="button" class="bst-schritt__knopf" data-schritt="-1" aria-label="Trinkflaschen: eine weniger">−</button>
+            <input type="number" class="bst-schritt__wert" data-n inputmode="numeric" min="0" max="999" step="1" value="0" aria-label="Trinkflaschen: Anzahl">
+            <button type="button" class="bst-schritt__knopf" data-schritt="1" aria-label="Trinkflaschen: eine mehr">+</button>
+          </div>
+        </div>
+        <div class="bst-posten__details bst-feld" data-details-feld hidden>
+          <label for="bst-d-trinkflaschen">Details</label>
+          <input type="text" id="bst-d-trinkflaschen" data-details maxlength="100" autocomplete="off" aria-label="Details zu Trinkflaschen" placeholder="">
+        </div>
+      </li>
+    </ul>
+    <div class="bst-feld">
+      <label for="bst-sonstiges">Sonstiges</label>
+      <textarea id="bst-sonstiges" data-feld="sonstiges" rows="3" maxlength="600"></textarea>
+    </div>
+    <p class="bst-hinweis">Preise klärt der Vorstand.</p>
+  </section>
+  <section class="bst-abschnitt" aria-labelledby="bst-h-bezahlung">
+    <h2 id="bst-h-bezahlung">Bezahlung</h2>
+    <p class="bst-hinweis" data-bst-bezahlung-leer>Sobald du Kleidung oder Teambedarf ausgewählt hast, fragen wir hier, wer zahlt.</p>
+    <fieldset class="bst-gruppe" role="radiogroup" data-bezahlung="kleidung" data-schluessel="bezahlung:kleidung" hidden>
+      <legend>Wer zahlt die Kleidung?</legend>
+      <div class="bst-optionen">
+        <label class="bst-option"><input type="radio" name="bez-kleidung" value="eltern" data-bez-wert><span>Eltern bzw. Spieler</span></label>
+        <label class="bst-option"><input type="radio" name="bez-kleidung" value="vereinskasse" data-bez-wert><span>Vereinskasse</span></label>
+        <label class="bst-option"><input type="radio" name="bez-kleidung" value="sponsor" data-bez-wert><span>Sponsor</span></label>
+        <label class="bst-option"><input type="radio" name="bez-kleidung" value="spenden" data-bez-wert><span>Spenden / Mannschaftskasse</span></label>
+      </div>
+      <div class="bst-feld bst-sponsor" data-sponsor-feld hidden>
+        <label for="bst-sponsor-kleidung">Name des Sponsors</label>
+        <input type="text" id="bst-sponsor-kleidung" data-feld="bezahlung.kleidungSponsor" data-schluessel="sponsor:kleidung" maxlength="80" autocomplete="off">
+      </div>
+    </fieldset>
+    <fieldset class="bst-gruppe" role="radiogroup" data-bezahlung="teambedarf" data-schluessel="bezahlung:teambedarf" hidden>
+      <legend>Wer zahlt den Teambedarf?</legend>
+      <div class="bst-optionen">
+        <label class="bst-option"><input type="radio" name="bez-teambedarf" value="eltern" data-bez-wert><span>Eltern bzw. Spieler</span></label>
+        <label class="bst-option"><input type="radio" name="bez-teambedarf" value="vereinskasse" data-bez-wert><span>Vereinskasse</span></label>
+        <label class="bst-option"><input type="radio" name="bez-teambedarf" value="sponsor" data-bez-wert><span>Sponsor</span></label>
+        <label class="bst-option"><input type="radio" name="bez-teambedarf" value="spenden" data-bez-wert><span>Spenden / Mannschaftskasse</span></label>
+      </div>
+      <div class="bst-feld bst-sponsor" data-sponsor-feld hidden>
+        <label for="bst-sponsor-teambedarf">Name des Sponsors</label>
+        <input type="text" id="bst-sponsor-teambedarf" data-feld="bezahlung.teambedarfSponsor" data-schluessel="sponsor:teambedarf" maxlength="80" autocomplete="off">
+      </div>
+    </fieldset>
+    <div class="bst-feld">
+      <label for="bst-hinweis-bezahlung">Hinweis zur Bezahlung (freiwillig)</label>
+      <textarea id="bst-hinweis-bezahlung" data-feld="hinweisBezahlung" rows="2" maxlength="400"></textarea>
+    </div>
+    <div class="bst-feld">
+      <label for="bst-hinweis">Sonstiger Hinweis (freiwillig)</label>
+      <textarea id="bst-hinweis" data-feld="hinweis" rows="2" maxlength="400"></textarea>
+    </div>
+  </section>
+  <section class="bst-abschnitt" id="bst-senden-abschnitt" aria-labelledby="bst-h-senden">
+    <h2 id="bst-h-senden">Übersicht und Senden</h2>
+    <dl class="bst-uebersicht">
+      <div><dt>Personen</dt><dd data-u="personen">0</dd></div>
+      <div><dt>Teile</dt><dd data-u="teile">0</dd></div>
+      <div><dt>Summe (Preise für Eltern bzw. Spieler)</dt><dd data-u="summe">0 €</dd></div>
+      <div><dt>Teambedarf</dt><dd data-u="teambedarf">–</dd></div>
+    </dl>
+    <div class="hinweis hinweis--offen bst-luecken" data-bst-luecken role="group" aria-labelledby="bst-luecken-titel" hidden>
+      <p class="bst-luecken__titel" id="bst-luecken-titel">Bitte ergänze noch:</p>
+      <ul role="list" class="bst-luecken__liste" data-bst-luecken-liste></ul>
+    </div>
+    <div class="bst-senden-zeile">
+      <a class="knopf knopf--gross bst-senden" id="bst-senden" data-bst-senden href="#bst-senden-abschnitt">Bestellung per Mail senden</a>
+      <button type="button" class="knopf knopf--sekundaer knopf--gross" id="bst-kopieren" data-bst-kopieren>Text kopieren</button>
+    </div>
+    <p class="bst-hinweis" data-bst-lang hidden>Die Bestellung ist lang. Falls in der Mail etwas fehlt: „Text kopieren“ und einfügen.</p>
+    <p class="bst-meldung" data-bst-meldung role="status"></p>
+    <div class="hinweis hinweis--info bst-gesendet" data-bst-gesendet hidden>
+      <p data-bst-gesendet-text></p>
+      <p class="bst-gesendet__nr">Bestell-Nr.: <strong data-bst-nr></strong></p>
+      <p><button type="button" class="knopf knopf--sekundaer" data-bst-neu>Neue Bestellung beginnen</button></p>
+    </div>
+    <details class="bst-vorschau" data-bst-vorschau>
+      <summary>Mail ansehen</summary>
+      <p class="bst-vorschau__kopf"><span>An: <strong>Bestellungen@sportfreunde04.de</strong></span><span>Betreff: <strong data-bst-betreff></strong></span></p>
+      <label class="sr-only" for="bst-vorschau-text">Text der Mail</label>
+      <textarea id="bst-vorschau-text" class="bst-vorschau__text" data-bst-vorschau-text readonly rows="16" spellcheck="false"></textarea>
+    </details>
+  </section>
+  </form>
+  <div class="bst-fuss">
+    <p>Die Seite speichert nichts auf einem Server. Deine Eingaben bleiben auf diesem Gerät, bis du sie per Mail verschickst.</p>
+    <p>Preise für Eltern bzw. Spieler, Stand 11/26.</p>
+    <p class="hinweis hinweis--info bst-speicher" data-bst-speicher hidden>Dein Browser speichert deine Eingaben gerade nicht. Bleib auf dieser Seite, bis du die Mail gesendet hast.</p>
+  </div>
+</div>
+<script type="application/json" id="bestellung-konfig">{"stand":"2026-11-25","einstellungen":{"empfaenger":"Bestellungen@sportfreunde04.de","pruefmodus":true,"preisstand":"11/26","lieferant":"11Teamsport"},"groessen":{"kinder":["116","128","140","152","164"],"erwachsene":["S","M","L","XL","XXL","3XL"]},"veredelungen":{"W":"Vereinswappen einfarbig","V":"Vereinsnamen XL (SPEUZER)","SP":"Werbeaufdruck M 1C (Sponsorlogo)","ZG":"Zahlen 20-26cm (Rückennummer)","ZK":"Initialen / Zahlen 2-5cm","N":"Spielernamen S"},"artikel":[{"id":"trikot","anzeige":"Trikot","beschreibung":"JAKO T-Shirt One, weiß","preis":{"kinder":30,"erwachsene":35},"groessen":[{"gruppe":"kinder"},{"gruppe":"erwachsene"}],"lieferant":{"kinder":{"bezeichnung":"JAKO One T-Shirt Kids Weiß F0","nr":"6101"},"erwachsene":{"bezeichnung":"JAKO One T-Shirt Weiß F0","nr":"6101"}},"veredelung":["W","V","SP","ZG"],"einzeldruck":"nummer"},{"id":"shorts","anzeige":"Shorts","beschreibung":"JAKO Sporthose One, royal","preis":{"kinder":10,"erwachsene":10},"groessen":[{"gruppe":"kinder"},{"gruppe":"erwachsene"}],"lieferant":{"kinder":{"bezeichnung":"JAKO One Trainingshose Kids Blau F400","nr":"4420"},"erwachsene":{"bezeichnung":"JAKO One Trainingshose Blau F400","nr":"4420"}},"veredelung":[],"einzeldruck":null},{"id":"stutzen","anzeige":"Stutzen","beschreibung":"JAKO Tube Stutzen, royal","preis":5,"groessen":[{"gruppe":"kinder","werte":["S (Bambini)","M (Junior)"]},{"gruppe":"erwachsene","werte":["L (Senior)"]}],"vorauswahl":{"kinder":"M (Junior)","erwachsene":"L (Senior)"},"lieferant":{"bezeichnung":"JAKO Tube Stutzen Blau F04","nr":"3401"},"veredelung":[],"einzeldruck":null},{"id":"praesi-jacke","anzeige":"Präsi-Jacke","beschreibung":"JAKO Polyesterjacke One, royal","preis":{"kinder":35,"erwachsene":40},"groessen":[{"gruppe":"kinder"},{"gruppe":"erwachsene"}],"lieferant":{"kinder":{"bezeichnung":"JAKO One Trainingsjacke Kids Blau F400","nr":"9300"},"erwachsene":{"bezeichnung":"JAKO One Trainingsjacke Blau F400","nr":"9300"}},"veredelung":["W","ZK","V","N"],"einzeldruck":"name-nummer"},{"id":"praesi-hose","anzeige":"Präsi-Hose","beschreibung":"JAKO Polyesterhose One, schwarz","preis":{"kinder":20,"erwachsene":20},"groessen":[{"gruppe":"kinder"},{"gruppe":"erwachsene"}],"lieferant":{"kinder":{"bezeichnung":"JAKO One Trainingshose Kids Schwarz F880","nr":"9200"},"erwachsene":{"bezeichnung":"JAKO One Trainingshose Schwarz, NORMALE Länge (nicht Kurzgröße 9200S)","nr":"9200"}},"veredelung":[],"einzeldruck":null},{"id":"rucksack","anzeige":"Rucksack","beschreibung":"JAKO Rucksack Striker, royal","preis":20,"groessen":[{"gruppe":"alle","werte":["Einheitsgröße"]}],"einheitsgroesse":true,"lieferant":{"bezeichnung":"JAKO Striker Rucksack Blau F04","nr":"1816"},"veredelung":["W"],"einzeldruck":null},{"id":"winterjacke","anzeige":"Winterjacke","beschreibung":"JAKO Coachjacke mit Kapuze, royal","preis":{"kinder":65,"erwachsene":65},"groessen":[{"gruppe":"kinder","ohne":["116"]},{"gruppe":"erwachsene"}],"vorauswahl":{"116":"128"},"hinweis":"Winterjacke gibt es für Kinder erst ab 128","lieferant":{"kinder":{"bezeichnung":"JAKO Team Coach Kapuzenjacke Kids Blau F400","nr":"7103"},"erwachsene":{"bezeichnung":"JAKO Team Coach Kapuzenjacke Blau F400","nr":"7103"}},"veredelung":["V","N","ZK"],"einzeldruck":"name-nummer"},{"id":"regenjacke","anzeige":"Regenjacke","beschreibung":"JAKO Regenjacke Rainzip, royal","preis":{"kinder":30,"erwachsene":30},"groessen":[{"gruppe":"kinder"},{"gruppe":"erwachsene"}],"lieferant":{"bezeichnung":"JAKO Rainzip Team Royal F400 (Regenjacke, nicht im Angebot)","nr":"7302"},"veredelung":["W","V","ZK"],"einzeldruck":"initialen"},{"id":"tw-trikot","anzeige":"TW-Trikot","beschreibung":"JAKO Torwarttrikot Power, rot","preis":{"kinder":40,"erwachsene":40},"groessen":[{"gruppe":"kinder"},{"gruppe":"erwachsene"}],"lieferant":{"kinder":{"bezeichnung":"JAKO Power Torwarttrikot Kids Rot F100","nr":"8923"},"erwachsene":{"bezeichnung":"JAKO Power Torwarttrikot Rot F100","nr":"8923"}},"veredelung":["W","V","SP","ZG"],"einzeldruck":"nummer"},{"id":"tw-hose","anzeige":"TW-Hose lang","beschreibung":"JAKO Torwarthose lang, schwarz","preis":{"kinder":25,"erwachsene":25},"groessen":[{"gruppe":"kinder"},{"gruppe":"erwachsene"}],"lieferant":{"kinder":{"bezeichnung":"JAKO Inter Torwarthose Kids Schwarz F08","nr":"ISP8936"},"erwachsene":{"bezeichnung":"JAKO Striker Torwarthose Schwarz F08","nr":"8936"}},"veredelung":[],"einzeldruck":null}],"schnellwahl":[{"id":"grundausstattung","titel":"Grundausstattung","artikel":["trikot","shorts","stutzen","praesi-jacke","praesi-hose","rucksack"]},{"id":"torwartset","titel":"Torwartset","artikel":["praesi-jacke","praesi-hose","stutzen","tw-trikot","tw-hose","rucksack"]}],"teambedarf":[{"id":"baelle","anzeige":"Bälle","platzhalter":"z. B. Größe 4"},{"id":"leibchen","anzeige":"Leibchen","platzhalter":"z. B. Farbe, Kinder oder Erwachsene"},{"id":"huetchen","anzeige":"Hütchen / Markierungsteller","platzhalter":"z. B. Satz mit 40 Stück"},{"id":"ballnetz","anzeige":"Ballnetz / Balltasche","platzhalter":""},{"id":"ballpumpe","anzeige":"Ballpumpe","platzhalter":""},{"id":"erste-hilfe","anzeige":"Erste-Hilfe-Material","platzhalter":"z. B. Kühlspray, Tape"},{"id":"trinkflaschen","anzeige":"Trinkflaschen","platzhalter":""}],"bezahlung":[{"id":"eltern","text":"Eltern bzw. Spieler"},{"id":"vereinskasse","text":"Vereinskasse"},{"id":"sponsor","text":"Sponsor","mitName":true},{"id":"spenden","text":"Spenden / Mannschaftskasse"}],"mannschaften":[{"slug":"herren","name":"1. Herrenmannschaft"},{"slug":"soma","name":"Soma (Sondermannschaft)"},{"slug":"a-jugend","name":"A-Jugend"},{"slug":"d1","name":"D1-Jugend"},{"slug":"d2","name":"D2-Jugend"},{"slug":"d3","name":"D3-Jugend"},{"slug":"e1","name":"E1-Jugend"},{"slug":"e2","name":"E2-Jugend"},{"slug":"e3","name":"E3-Jugend"},{"slug":"f1","name":"F1-Jugend"},{"slug":"f2","name":"F2-Jugend"},{"slug":"g-jugend","name":"G-Jugend (Bambinis)"}]}</script>
+</main>
+<footer class="ws-fuss">
+  <div data-nur-prototyp>
+  <p>Prototyp · Testumgebung, keine Live-Seite · Inhalte Stand Mittwoch, 25. November 2026</p>
+  </div>
+</footer>
+</body>
+</html>

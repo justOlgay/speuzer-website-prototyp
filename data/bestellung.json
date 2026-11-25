@@ -1,0 +1,179 @@
+{
+  "_hinweis": "Pflegedatei der Bestellseite für Trainer (docs/ws/bestellung.html, Seitenmodul src/seiten/bestellung.mjs). Hier stehen nur Preise für Eltern bzw. Spieler. Einkaufspreise, Kundenkonto und Angebotsnummern des Lieferanten gehören nie in diese Datei. Nach einer Änderung neu bauen (npm run build) und npm run test:bestellung ausführen. Aufbau und Pflege: README.md, Abschnitt „Bestellseite für Trainer (Prototyp)“.",
+  "stand": "2026-11-25",
+  "einstellungen": {
+    "empfaenger": "Bestellungen@sportfreunde04.de",
+    "pruefmodus": true,
+    "preisstand": "11/26",
+    "lieferant": "11Teamsport"
+  },
+  "groessen": {
+    "kinder": ["116", "128", "140", "152", "164"],
+    "erwachsene": ["S", "M", "L", "XL", "XXL", "3XL"]
+  },
+  "veredelungen": {
+    "W": "Vereinswappen einfarbig",
+    "V": "Vereinsnamen XL (SPEUZER)",
+    "SP": "Werbeaufdruck M 1C (Sponsorlogo)",
+    "ZG": "Zahlen 20-26cm (Rückennummer)",
+    "ZK": "Initialen / Zahlen 2-5cm",
+    "N": "Spielernamen S"
+  },
+  "artikel": [
+    {
+      "id": "trikot",
+      "anzeige": "Trikot",
+      "beschreibung": "JAKO T-Shirt One, weiß",
+      "preis": { "kinder": 30, "erwachsene": 35 },
+      "groessen": [{ "gruppe": "kinder" }, { "gruppe": "erwachsene" }],
+      "lieferant": {
+        "kinder": { "bezeichnung": "JAKO One T-Shirt Kids Weiß F0", "nr": "6101" },
+        "erwachsene": { "bezeichnung": "JAKO One T-Shirt Weiß F0", "nr": "6101" }
+      },
+      "veredelung": ["W", "V", "SP", "ZG"],
+      "einzeldruck": "nummer"
+    },
+    {
+      "id": "shorts",
+      "anzeige": "Shorts",
+      "beschreibung": "JAKO Sporthose One, royal",
+      "preis": { "kinder": 10, "erwachsene": 10 },
+      "groessen": [{ "gruppe": "kinder" }, { "gruppe": "erwachsene" }],
+      "lieferant": {
+        "kinder": { "bezeichnung": "JAKO One Trainingshose Kids Blau F400", "nr": "4420" },
+        "erwachsene": { "bezeichnung": "JAKO One Trainingshose Blau F400", "nr": "4420" }
+      },
+      "veredelung": [],
+      "einzeldruck": null
+    },
+    {
+      "id": "stutzen",
+      "anzeige": "Stutzen",
+      "beschreibung": "JAKO Tube Stutzen, royal",
+      "preis": 5,
+      "groessen": [
+        { "gruppe": "kinder", "werte": ["S (Bambini)", "M (Junior)"] },
+        { "gruppe": "erwachsene", "werte": ["L (Senior)"] }
+      ],
+      "vorauswahl": { "kinder": "M (Junior)", "erwachsene": "L (Senior)" },
+      "lieferant": { "bezeichnung": "JAKO Tube Stutzen Blau F04", "nr": "3401" },
+      "veredelung": [],
+      "einzeldruck": null
+    },
+    {
+      "id": "praesi-jacke",
+      "anzeige": "Präsi-Jacke",
+      "beschreibung": "JAKO Polyesterjacke One, royal",
+      "preis": { "kinder": 35, "erwachsene": 40 },
+      "groessen": [{ "gruppe": "kinder" }, { "gruppe": "erwachsene" }],
+      "lieferant": {
+        "kinder": { "bezeichnung": "JAKO One Trainingsjacke Kids Blau F400", "nr": "9300" },
+        "erwachsene": { "bezeichnung": "JAKO One Trainingsjacke Blau F400", "nr": "9300" }
+      },
+      "veredelung": ["W", "ZK", "V", "N"],
+      "einzeldruck": "name-nummer"
+    },
+    {
+      "id": "praesi-hose",
+      "anzeige": "Präsi-Hose",
+      "beschreibung": "JAKO Polyesterhose One, schwarz",
+      "preis": { "kinder": 20, "erwachsene": 20 },
+      "groessen": [{ "gruppe": "kinder" }, { "gruppe": "erwachsene" }],
+      "lieferant": {
+        "kinder": { "bezeichnung": "JAKO One Trainingshose Kids Schwarz F880", "nr": "9200" },
+        "erwachsene": { "bezeichnung": "JAKO One Trainingshose Schwarz, NORMALE Länge (nicht Kurzgröße 9200S)", "nr": "9200" }
+      },
+      "veredelung": [],
+      "einzeldruck": null
+    },
+    {
+      "id": "rucksack",
+      "anzeige": "Rucksack",
+      "beschreibung": "JAKO Rucksack Striker, royal",
+      "preis": 20,
+      "groessen": [{ "gruppe": "alle", "werte": ["Einheitsgröße"] }],
+      "einheitsgroesse": true,
+      "lieferant": { "bezeichnung": "JAKO Striker Rucksack Blau F04", "nr": "1816" },
+      "veredelung": ["W"],
+      "einzeldruck": null
+    },
+    {
+      "id": "winterjacke",
+      "anzeige": "Winterjacke",
+      "beschreibung": "JAKO Coachjacke mit Kapuze, royal",
+      "preis": { "kinder": 65, "erwachsene": 65 },
+      "groessen": [{ "gruppe": "kinder", "ohne": ["116"] }, { "gruppe": "erwachsene" }],
+      "vorauswahl": { "116": "128" },
+      "hinweis": "Winterjacke gibt es für Kinder erst ab 128",
+      "lieferant": {
+        "kinder": { "bezeichnung": "JAKO Team Coach Kapuzenjacke Kids Blau F400", "nr": "7103" },
+        "erwachsene": { "bezeichnung": "JAKO Team Coach Kapuzenjacke Blau F400", "nr": "7103" }
+      },
+      "veredelung": ["V", "N", "ZK"],
+      "einzeldruck": "name-nummer"
+    },
+    {
+      "id": "regenjacke",
+      "anzeige": "Regenjacke",
+      "beschreibung": "JAKO Regenjacke Rainzip, royal",
+      "preis": { "kinder": 30, "erwachsene": 30 },
+      "groessen": [{ "gruppe": "kinder" }, { "gruppe": "erwachsene" }],
+      "lieferant": { "bezeichnung": "JAKO Rainzip Team Royal F400 (Regenjacke, nicht im Angebot)", "nr": "7302" },
+      "veredelung": ["W", "V", "ZK"],
+      "einzeldruck": "initialen"
+    },
+    {
+      "id": "tw-trikot",
+      "anzeige": "TW-Trikot",
+      "beschreibung": "JAKO Torwarttrikot Power, rot",
+      "preis": { "kinder": 40, "erwachsene": 40 },
+      "groessen": [{ "gruppe": "kinder" }, { "gruppe": "erwachsene" }],
+      "lieferant": {
+        "kinder": { "bezeichnung": "JAKO Power Torwarttrikot Kids Rot F100", "nr": "8923" },
+        "erwachsene": { "bezeichnung": "JAKO Power Torwarttrikot Rot F100", "nr": "8923" }
+      },
+      "veredelung": ["W", "V", "SP", "ZG"],
+      "einzeldruck": "nummer"
+    },
+    {
+      "id": "tw-hose",
+      "anzeige": "TW-Hose lang",
+      "beschreibung": "JAKO Torwarthose lang, schwarz",
+      "preis": { "kinder": 25, "erwachsene": 25 },
+      "groessen": [{ "gruppe": "kinder" }, { "gruppe": "erwachsene" }],
+      "lieferant": {
+        "kinder": { "bezeichnung": "JAKO Inter Torwarthose Kids Schwarz F08", "nr": "ISP8936" },
+        "erwachsene": { "bezeichnung": "JAKO Striker Torwarthose Schwarz F08", "nr": "8936" }
+      },
+      "veredelung": [],
+      "einzeldruck": null
+    }
+  ],
+  "schnellwahl": [
+    {
+      "id": "grundausstattung",
+      "titel": "Grundausstattung",
+      "artikel": ["trikot", "shorts", "stutzen", "praesi-jacke", "praesi-hose", "rucksack"]
+    },
+    {
+      "id": "torwartset",
+      "titel": "Torwartset",
+      "artikel": ["praesi-jacke", "praesi-hose", "stutzen", "tw-trikot", "tw-hose", "rucksack"]
+    }
+  ],
+  "teambedarf": [
+    { "id": "baelle", "anzeige": "Bälle", "platzhalter": "z. B. Größe 4" },
+    { "id": "leibchen", "anzeige": "Leibchen", "platzhalter": "z. B. Farbe, Kinder oder Erwachsene" },
+    { "id": "huetchen", "anzeige": "Hütchen / Markierungsteller", "platzhalter": "z. B. Satz mit 40 Stück" },
+    { "id": "ballnetz", "anzeige": "Ballnetz / Balltasche", "platzhalter": "" },
+    { "id": "ballpumpe", "anzeige": "Ballpumpe", "platzhalter": "" },
+    { "id": "erste-hilfe", "anzeige": "Erste-Hilfe-Material", "platzhalter": "z. B. Kühlspray, Tape" },
+    { "id": "trinkflaschen", "anzeige": "Trinkflaschen", "platzhalter": "" }
+  ],
+  "bezahlung": [
+    { "id": "eltern", "text": "Eltern bzw. Spieler" },
+    { "id": "vereinskasse", "text": "Vereinskasse" },
+    { "id": "sponsor", "text": "Sponsor", "mitName": true },
+    { "id": "spenden", "text": "Spenden / Mannschaftskasse" }
+  ]
+}

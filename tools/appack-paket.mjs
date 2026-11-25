@@ -50,7 +50,8 @@ const ZIEL_WORKSPACE_ORDNER = "https://cdn.appack.de/sportfreunde04/workspace/we
 // docs/ws/ enthält jetzt 38 Workspace-Seiten (37 wie zuvor + neu
 // verein-ueber-uns.html), das Paket entsprechend 37 (38 minus
 // styleguide.html) statt 38.
-const AUSGESCHLOSSENE_DATEIEN = new Set(["styleguide.html"]);
+// 25.11.2026: bestellung.html („Bestellung für dein Team“, Prototyp mit noindex, nicht in der Sitemap) bleibt ebenfalls draußen.
+const AUSGESCHLOSSENE_DATEIEN = new Set(["styleguide.html", "bestellung.html"]);
 // 28.09.2026: 39 (+ formular-gesendet.html, Bestätigung nach dem Absenden
 // der Mitgliedsbescheinigung), das Paket entsprechend 38. Am selben Tag 40
 // (+ termine.html, Menüpunkt „Termine“), das Paket entsprechend 39, dann 41
@@ -64,7 +65,9 @@ const AUSGESCHLOSSENE_DATEIEN = new Set(["styleguide.html"]);
 // und das Paket entsprechend 43; mit ANMELDUNG_LIVE 45 und 44.
 // 24.11.2026: + trainerteam.html (Seite „Neu im Trainerteam“, nur mit TRAINER_LIVE, nicht verlinkt): mit dem Schalter eine mehr, ohne ihn
 // bleibt die Zahl, wie sie war.
-const ERWARTETE_WS_DATEIEN = 44 + (ANMELDUNG_LIVE ? 1 : 0) + (TRAINER_LIVE ? 1 : 0);
+// 25.11.2026: + bestellung.html (Prototyp „Bestellung für dein Team“, nicht im Paket, siehe AUSGESCHLOSSENE_DATEIEN): eine mehr in
+// docs/ws/, das Paket bleibt gleich.
+const ERWARTETE_WS_DATEIEN = 45 + (ANMELDUNG_LIVE ? 1 : 0) + (TRAINER_LIVE ? 1 : 0);
 
 // Skripte im Workspace-Ordner (28.09.2026, Aufnahmeantrag online): Anders
 // als Schriften und Bilder (GitHub Pages) liegen die Skripte der Seite
