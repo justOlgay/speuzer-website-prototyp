@@ -6,7 +6,8 @@
     selbstauskunft       Selbstauskunft und Selbstverpflichtung (Wortlaut ap3/BERICHT.md 3.3)
     kodex                Erklärung zum Verhaltenskodex (nur die Erklärung, kein Volltext)
     datenschutz          Information nach Art. 13 DSGVO
-    fusszeilen           „Seite x von y“ und Kennzeile auf allen Seiten
+    passfoto             das Passfoto der Person (letzte Seite der Datei)
+    fusszeilen           „Seite x von y“ und Kennzeile auf allen Seiten (außer dem Brief, siehe trainer-pdf-antrag.js)
   Aussehen: A4, Wappen als Vektor, Liberation Sans, Vereinsblau, wie die Beispiel-Blätter (ap1/beispiele). Alle Texte stehen in
   trainer-pdf-texte.js.
 
@@ -383,13 +384,31 @@ export function datenschutz(dok, d) {
 }
 
 // ---------------------------------------------------------------------------
+// Passfoto: letzte Seite der Datei
+// ---------------------------------------------------------------------------
+
+// Das Foto der Person, wie es die Seite abgegeben hat (JPEG, unverändert eingebettet), 60 × 80 mm groß (im Seitenverhältnis des Fotos);
+// darunter ihr Name. Die Geschäftsstelle bekommt das Foto so in derselben Datei wie die Unterlagen.
+export function passfoto(dok, d, foto) {
+  const t = T.passfoto;
+  const s = new Schreiber(dok, { kopf: kopfBauen(dok, t.titel) });
+  const seite = s.neueSeite();
+  const oben = s.y - 6;
+  const groesse = seite.foto(foto, RAND, oben, 170.1, 226.8);
+  seite.text(ersetzePlatzhalter(t.zeile, { name: d.name }), RAND, oben - groesse.h - 22, 11, { nutzer: true });
+}
+
+// ---------------------------------------------------------------------------
 // Fußzeilen: Kennzeile links, „Seite x von y“ rechts (Fußzeilen dürfen kleiner als 9 pt sein)
 // ---------------------------------------------------------------------------
 
-export function fusszeilen(dok, d) {
+// o.ohne: Seiten (Rückgabe von neueSeite), die keine Fußzeile bekommen (der Brief des Vereins), aber mitgezählt werden
+export function fusszeilen(dok, d, o) {
+  const ohne = (o && o.ohne) || [];
   const gesamt = dok.seiten.length;
   const links = ersetzePlatzhalter(T.fuss.links, { verein: d.verein.name, name: d.name });
   dok.seiten.forEach((seite, i) => {
+    if (ohne.includes(seite)) return;
     seite.text(links, RAND, FUSS_Y, 8, { farbe: FARBE.tinte3, fuss: true, nutzer: true });
     seite.textRechts(ersetzePlatzhalter(T.fuss.seite, { nr: i + 1, gesamt: gesamt }), A4[0] - RAND, FUSS_Y, 8, { farbe: FARBE.tinte3, fuss: true });
   });

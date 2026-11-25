@@ -27,7 +27,7 @@
 */
 
 const WEITER = "Weiter";
-const PRIVAT = "Alles bleibt auf deinem Gerät, bis du die Dateien selbst schickst. Die Seite sendet nichts.";
+const PRIVAT = "Alles bleibt auf deinem Gerät, bis du die Datei selbst schickst. Die Seite sendet nichts.";
 
 export default {
   // ---------- Rahmen der Seite (Bauzeit) ----------
@@ -230,7 +230,7 @@ export default {
 
   notfall: {
     titel: "Wer ist im Notfall für dich da?",
-    hinweis: "Das Kontaktdatenblatt des Vereins fragt danach. Die Angaben gehen erst an den Verein, wenn du die Dateien selbst schickst. Sag der Person bitte Bescheid, dass du sie als Notfallkontakt angibst.",
+    hinweis: "Das Kontaktdatenblatt des Vereins fragt danach. Die Angaben gehen erst an den Verein, wenn du die Datei selbst schickst. Sag der Person bitte Bescheid, dass du sie als Notfallkontakt angibst.",
     name: "Name des Notfallkontakts",
     beziehung: "Beziehung zu dir",
     telefon: "Telefonnummer des Notfallkontakts",
@@ -260,7 +260,7 @@ export default {
     anderes: "Anderes Foto wählen",
     gespeichert: "Foto ist gespeichert.",
     vorschauAlt: "Vorschau deines Passfotos",
-    fussnote: "Das Foto geht als eigene Bilddatei mit der E-Mail mit.",
+    fussnote: "Das Foto steht auf der letzten Seite deiner Datei.",
     weiter: WEITER,
   },
 
@@ -403,30 +403,31 @@ export default {
     kastenTitel: "Das solltest du wissen",
     // {kurz}: Namensteil der Einsichtnehmenden ohne Funktion (trainer-einsicht.js)
     kastenText: "Dein Führungszeugnis bringst du persönlich zu {kurz}. Es wird nicht abgegeben.", // PRUEFEN_AP3
-    weiter: "Alles stimmt – Dateien erstellen",
+    weiter: "Alles stimmt – Datei erstellen",
   },
 
   // ---------- 13 fertig ----------
 
   fertig: {
     titel: "Dein Paket ist fertig",
-    titelArbeit: "Wir erstellen deine Dateien",
+    titelArbeit: "Wir erstellen deine Datei",
     titelFehler: "Das hat nicht geklappt",
-    arbeitet: "Einen Moment bitte. Die Dateien werden erstellt.",
+    arbeitet: "Einen Moment bitte. Die Datei wird erstellt.",
     nochmal: "Noch einmal versuchen",
     paketTitel: "Das steht im Paket",
-    teilen: "Dateien teilen",
-    herunterladen: "Dateien herunterladen",
+    teilen: "Datei teilen",
+    herunterladen: "Datei herunterladen",
     vorschau: "Vorschau",
-    gespeichert: "Die Dateien werden gespeichert. Sie liegen meist im Ordner „Downloads“.",
+    // Am iPhone zeigt Safari eine PDF oft nur an, statt sie zu speichern: Dann hilft „Teilen“ in der Ansicht.
+    gespeichert: "Die Datei wird gespeichert. Sie liegt meist im Ordner „Downloads“. Zeigt dein Handy sie nur an, tippe dort auf „Teilen“.",
     geteilt: "Geteilt.",
-    // „Dateien teilen“ legt die Adresse der Geschäftsstelle in die Zwischenablage (das Teilen kann keinen Empfänger mitgeben);
+    // „Datei teilen“ legt die Adresse der Geschäftsstelle in die Zwischenablage (das Teilen kann keinen Empfänger mitgeben);
     // die Meldung nennt das nur, wenn es geklappt hat.
     geteiltMitAdresse: "Geteilt. Die Adresse ist kopiert.",
-    teilenFehler: "Teilen geht hier nicht. Die Dateien wurden stattdessen gespeichert.",
+    teilenFehler: "Teilen geht hier nicht. Die Datei wurde stattdessen gespeichert.",
     // Hinweis, wenn die Erzeugung Mängel meldet (trainer-pdf.js › warnungen, zum Beispiel ein Zeichen, das die PDF-Schrift nicht kennt)
     warnungTitel: "Bitte prüfen",
-    warnung: "Bitte prüfe die Vorschau: In den Dateien fehlen vielleicht einzelne Zeichen.",
+    warnung: "Bitte prüfe die Vorschau: In der Datei fehlen vielleicht einzelne Zeichen.",
     // Meldungen, wenn das Erstellen scheitert (je Art des Fehlers, siehe trainer.js › FEHLER_SCHLUESSEL; {mail} ist die Adresse der Geschäftsstelle)
     fehler: {
       bibliothek: "Ein Programmteil lässt sich nicht laden. Bitte prüfe die Internetverbindung.",
@@ -434,25 +435,25 @@ export default {
       angaben: "Eine Angabe fehlt oder passt nicht. Bitte gehe zurück und prüfe deine Angaben.",
       unterschrift: "Deine Unterschrift fehlt oder lässt sich nicht lesen. Bitte gehe zurück und unterschreibe noch einmal.",
       foto: "Dein Passfoto fehlt oder lässt sich nicht lesen. Bitte gehe zurück und wähle das Foto noch einmal.",
-      pdf: "Die Dateien konnten nicht erstellt werden. Bitte versuche es noch einmal.",
+      pdf: "Die Datei konnte nicht erstellt werden. Bitte versuche es noch einmal.",
     },
     fehlerTitel: "Achtung",
     // Betreff und Text der E-Mail beim Teilen und beim Link „E-Mail öffnen“ (wie im Anmelde-Assistenten auf Deutsch)
     mail: {
       betreff: "Trainerunterlagen {vorname} {nachname}",
-      text: "Guten Tag,\n\nanbei meine Unterlagen für das Trainerteam: die Dateien als PDF und das Passfoto als Bild.\n\nViele Grüße",
+      text: "Guten Tag,\n\nanbei meine Unterlagen für das Trainerteam als PDF.\n\nViele Grüße",
     },
-    sendenTitel: "So schickst du die Dateien an den Verein",
+    sendenTitel: "So schickst du die Datei an den Verein",
     handy: "Am Handy",
     handySchritte: [
-      "Tippe oben auf „Dateien teilen“.",
+      "Tippe oben auf „Datei teilen“.",
       "Wähle dein Mail-Programm.",
       "Schicke die E-Mail an die Adresse unten.",
     ],
     computer: "Am Computer",
     computerSchritte: [
-      "Klicke oben auf „Dateien herunterladen“.",
-      "Schreibe eine neue E-Mail. Hänge die Dateien an.",
+      "Klicke oben auf „Datei herunterladen“.",
+      "Schreibe eine neue E-Mail. Hänge die Datei an.",
       "Schicke die E-Mail an die Adresse unten.",
     ],
     adresseTitel: "Die E-Mail-Adresse der Geschäftsstelle:",
@@ -460,7 +461,7 @@ export default {
     kopiert: "Die Adresse ist kopiert.",
     kopierenFehler: "Kopieren geht hier nicht. Die Adresse ist markiert. Kopiere die Adresse selbst.",
     oeffnen: "E-Mail an die Geschäftsstelle öffnen",
-    nichtWhatsapp: "Bitte schicke die Dateien nicht per WhatsApp. Sie enthalten persönliche Daten.",
+    nichtWhatsapp: "Bitte schicke die Datei nicht per WhatsApp. Sie enthält persönliche Daten.",
     weiterTitel: "So geht es weiter",
     // nur: "beantragen" = der Schritt gilt nur, wenn das Zeugnis noch beantragt werden muss. {kurz}: Namensteil der Einsichtnehmenden
     // ohne Funktion (trainer-einsicht.js); {frist}: Beginn plus Schnupperphase.
@@ -468,7 +469,7 @@ export default {
       { wer: "Verein:", text: "Unterschreibt deinen Antrag auf Gebührenbefreiung und schickt ihn dir zurück.", nur: "beantragen" }, // PRUEFEN_AP3
       { wer: "Du:", text: "Beantragst damit dein Führungszeugnis.", nur: "beantragen" }, // PRUEFEN_AP3
       { wer: "Du:", text: "Zeigst es persönlich {kurz}.", nur: null }, // PRUEFEN_AP3
-      { wer: null, text: "Bis zum {frist} sollte alles erledigt sein: Dateien geschickt, Zeugnis gezeigt.", nur: null },
+      { wer: null, text: "Bis zum {frist} sollte alles erledigt sein: Datei geschickt, Zeugnis gezeigt.", nur: null },
     ],
     fussnote: PRIVAT,
   },

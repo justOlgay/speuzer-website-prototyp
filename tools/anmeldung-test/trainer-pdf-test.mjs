@@ -4,7 +4,8 @@
 // Läuft ohne Browser: pdf-lib, fontkit und die Schrift kommen aus node_modules und assets/fonts (werkzeuge, siehe
 // trainer-pdf-lader.js). Mit erfundenen Beispieldaten entstehen die Dateien in tools/cache/trainer-pdf-test/ (git-ignoriert),
 // dazu Bilder der Seiten (pdftoppm, 100 dpi) in .../bilder/. Geprüft wird (Nummern wie die Akzeptanzkriterien in t2/AUFTRAG.md):
-//  K2   Dateien und Namen: beantragen = drei Dateien, vorhanden = zwei; Namen mit Umlauten, Leerzeichen und Sonderzeichen
+//  K2   Datei und Name: genau EINE Datei (seit 25.11.2026: Paket, bei „beantragen“ der Brief als vorletzte Seite, zuletzt das Passfoto);
+//       Namen mit Umlauten, Leerzeichen und Sonderzeichen
 //  K3   PDF gültig: pdf-lib, pdfinfo (A4, Seitenzahl), pdffonts (Liberation Sans eingebettet), pdftotext (Text auswählbar)
 //  K4   Wortlaute: Selbstauskunft (ap3/BERICHT.md 3.3), Brief (ap1/texte.mjs), Deckblatt, Löschfrist, vier Fälle der Einsichtnehmenden
 //       (eine Person als Standardfall, zwei, drei, leere Liste; Namensteil nur über trainer-einsicht.js, Sätze pronomenfrei)
@@ -13,7 +14,8 @@
 //  K7   Karneval („Gruppe“ statt „Mannschaft“) und Rollen (Torwarttrainer)
 //  K8   Aussehen: Seiten als PNG; kein Wort über dem Rand (pdftotext -bbox), Schrift mindestens 9 pt außer Fußzeilen (pdftohtml)
 //  K9   keine echten Daten: nur die zwei Beispielnummern, keine Rufnummer des Vereins
-//  K10  Vorschau des Antrags = Antrag der Dateien (Text)
+//  K10  Vorschau des Antrags = Brief in der Datei (Text und Bild der Seite)
+//  K14  Passfoto: letzte Seite, JPEG unverändert eingebettet (Bytes gleich), Größe 60 × 80 mm, Seitenzählung ohne Fußzeile auf dem Brief
 //  K11  Größe (höchstens 2 MB bei einem Foto von 600 × 800 Pixeln) und Zeit (höchstens 5 Sekunden)
 //  K12  Fristen, Sonderzeichen, sehr lange Angaben, Fehlerfälle, Metadaten, Wiederholbarkeit, Quelltext (kein DOM, keine Uhr, kein Name)
 //  K13  (T1b) Schrift im Paket: trainer-pdf-lader.js › leseModulText liest den Base64-Text aus dem Quelltext des Schriftmoduls (der Lader holt
@@ -130,6 +132,28 @@ function bilder(pfad) {
     const t = z.trim().split(/\s+/);
     return { seite: Number(t[0]), art: t[2] };
   });
+}
+
+// Bilder mit Maßen: [{ seite, art, breite, hoehe, ppi }] (Pixel; ppi = Auflösung, mit der das Bild auf der Seite steht: Pixel je Zoll)
+function bilderMass(pfad) {
+  const zeilen = sh("pdfimages", ["-list", pfad]).stdout.split("\n").slice(2).filter((z) => z.trim());
+  return zeilen.map((z) => {
+    const t = z.trim().split(/\s+/);
+    return { seite: Number(t[0]), art: t[2], breite: Number(t[3]), hoehe: Number(t[4]), ppi: Number(t[12]) };
+  });
+}
+
+// Pixelmaße eines JPEG aus dem Kopf der Datei (SOF-Marker)
+function jpegMass(bytes) {
+  let i = 2;
+  while (i + 9 < bytes.length) {
+    if (bytes[i] !== 0xff) return null;
+    const marker = bytes[i + 1];
+    const laenge = (bytes[i + 2] << 8) | bytes[i + 3];
+    if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) return { hoehe: (bytes[i + 5] << 8) | bytes[i + 6], breite: (bytes[i + 7] << 8) | bytes[i + 8] };
+    i += 2 + laenge;
+  }
+  return null;
 }
 
 function woerter(pfad) {
@@ -294,7 +318,30 @@ async function baue(fall, optionen) {
     writeFileSync(path.join(ordner, d.name), d.bytes);
     pfade[d.name] = path.join(ordner, d.name);
   }
-  return { r, pfade, ms, antworten, konfig, ordner };
+  // Die Datei der Trainerunterlagen für die Prüfung zerlegen (Hilfsdateien des Tests; ausgeliefert wird allein die eine Datei): paket = Deckblatt
+  // bis Datenschutz, antrag = der Brief als eigenes PDF (nur bei „beantragen“, auch unter dem alten Dateinamen in pfade), foto = letzte Seite
+  const gesamt = pfade[r.dateien[0].name];
+  const anzahlSeiten = (await PDFLib.PDFDocument.load(readFileSync(gesamt))).getPageCount();
+  const mitAntrag = antworten.zeugnis === "beantragen";
+  const nPaket = anzahlSeiten - (mitAntrag ? 2 : 1);
+  const teile = { gesamt, anzahlSeiten, nPaket, mitAntrag };
+  teile.paket = await teilePdf(gesamt, ordner, Array.from({ length: nPaket }, (_, i) => i), "teil-paket.pdf");
+  if (mitAntrag) {
+    teile.antrag = await teilePdf(gesamt, ordner, [nPaket], "teil-antrag.pdf");
+    pfade[antragName(antworten)] = teile.antrag;
+  }
+  teile.foto = await teilePdf(gesamt, ordner, [anzahlSeiten - 1], "teil-foto.pdf");
+  return { r, pfade, ms, antworten, konfig, ordner, teile };
+}
+
+// Eine Auswahl von Seiten einer PDF-Datei als eigene PDF-Datei (Test-Hilfsdatei)
+async function teilePdf(quelle, ordner, seiten, name) {
+  const doc = await PDFLib.PDFDocument.load(readFileSync(quelle));
+  const neu = await PDFLib.PDFDocument.create();
+  for (const seite of await neu.copyPages(doc, seiten)) neu.addPage(seite);
+  const ziel = path.join(ordner, name);
+  writeFileSync(ziel, await neu.save());
+  return ziel;
 }
 
 const paketName = (a) => "Trainerunterlagen_" + dateiteil(a.nachname) + "_" + dateiteil(a.vorname) + ".pdf";
@@ -354,13 +401,13 @@ const SOLL_DECKBLATT = [
   "Kontaktdatenblatt",
   "Selbstauskunft, unterschrieben",
   "Verhaltenskodex, unterschrieben",
-  "Passfoto (eigene Bilddatei)",
+  "Passfoto (letzte Seite)",
 ];
 const BESCHREIBUNG = {
-  paket: "Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Verhaltenskodex, Datenschutzinformation",
-  antrag: "Antrag für dein Führungszeugnis",
-  foto: "Dein Passfoto",
+  mitAntrag: "Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Verhaltenskodex, Datenschutzinformation, Antrag für dein Führungszeugnis, Passfoto",
+  ohneAntrag: "Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Verhaltenskodex, Datenschutzinformation, Passfoto",
 };
+const DECK_ZEUGNIS_BEANTRAGEN = (kurz) => "Erweitertes Führungszeugnis: Antrag auf Gebührenbefreiung (vorletzte Seite); Einsicht bei " + kurz + " steht aus";
 // Pronomenfreie Sätze der Einsicht (GEMEINSAM.md 3), vorn mit dem Namensteil
 const EINSICHT_REST = "Das Zeugnis wird nur angeschaut: Es wird nicht mitgenommen und nicht kopiert. Notiert werden nur: Datum der Einsicht, Datum des Zeugnisses und ob eine einschlägige Verurteilung darin steht (ja oder nein).";
 const einsichtSatzPerson = (lang) => "Die Person zeigt das Zeugnis persönlich " + lang + ". " + EINSICHT_REST;
@@ -375,26 +422,28 @@ const ohneFragen = (text) => FRAGEN.reduce((t, f) => t.split(f).join(""), norm(t
 const quellenGeprueft = [];
 const beginn = performance.now();
 
-// ============ K2, K3: Beispiel (beantragen), drei Dateien ============
+// ============ K2, K3: Beispiel (beantragen), eine Datei ============
 kontext = "K2 Dateien und Namen";
 const bsp = await baue("beispiel");
 {
   const dateien = bsp.r.dateien;
-  ok(dateien.length === 3, () => "beantragen: drei Dateien, bekommen " + dateien.length);
-  ok(JSON.stringify(dateien.map((d) => d.name)) === JSON.stringify(["Trainerunterlagen_Mustermann_Max.pdf", "Antrag_Gebuehrenbefreiung_Mustermann_Max.pdf", "Passfoto_Mustermann_Max.jpg"]), () => "Dateinamen: " + dateien.map((d) => d.name).join(", "));
-  ok(JSON.stringify(dateien.map((d) => d.typ)) === JSON.stringify(["application/pdf", "application/pdf", "image/jpeg"]), "Dateitypen");
-  ok(JSON.stringify(dateien.map((d) => d.beschreibung)) === JSON.stringify([BESCHREIBUNG.paket, BESCHREIBUNG.antrag, BESCHREIBUNG.foto]), () => "Beschreibungen wie Bildschirm 13: " + dateien.map((d) => d.beschreibung).join(" | "));
-  ok(dateien.every((d) => d.bytes instanceof Uint8Array && d.bytes.length > 0), "alle Dateien sind nicht leere Uint8Array");
-  ok(Buffer.compare(Buffer.from(dateien[2].bytes), Buffer.from(FOTO.bytes)) === 0, "Passfoto ist medien.foto, unverändert");
+  ok(dateien.length === 1, () => "beantragen: genau eine Datei, bekommen " + dateien.length);
+  ok(JSON.stringify(dateien.map((d) => d.name)) === JSON.stringify(["Trainerunterlagen_Mustermann_Max.pdf"]), () => "Dateiname: " + dateien.map((d) => d.name).join(", "));
+  ok(JSON.stringify(dateien.map((d) => d.typ)) === JSON.stringify(["application/pdf"]), "Dateityp application/pdf");
+  ok(JSON.stringify(dateien.map((d) => d.beschreibung)) === JSON.stringify([BESCHREIBUNG.mitAntrag]), () => "Beschreibung wie Bildschirm 13: " + dateien.map((d) => d.beschreibung).join(" | "));
+  ok(dateien.every((d) => d.bytes instanceof Uint8Array && d.bytes.length > 0), "die Datei ist eine nicht leere Uint8Array");
+  ok(dateien.every((d) => d.beschreibung.length <= 170), "Beschreibung höchstens 170 Zeichen (T1b)");
   ok(Array.isArray(bsp.r.warnungen) && bsp.r.warnungen.length === 0, () => "keine Warnungen: " + JSON.stringify(bsp.r.warnungen));
 
   const vorh = await baue("vorhanden", { antworten: Object.assign(kopie(BEISPIEL), { zeugnis: "vorhanden" }) });
-  ok(vorh.r.dateien.length === 2 && vorh.r.dateien.map((d) => d.name).join() === "Trainerunterlagen_Mustermann_Max.pdf,Passfoto_Mustermann_Max.jpg", () => "vorhanden: zwei Dateien, kein Antrag: " + vorh.r.dateien.map((d) => d.name).join(", "));
+  ok(vorh.r.dateien.length === 1 && vorh.r.dateien[0].name === "Trainerunterlagen_Mustermann_Max.pdf", () => "vorhanden: genau eine Datei: " + vorh.r.dateien.map((d) => d.name).join(", "));
+  ok(vorh.r.dateien[0].beschreibung === BESCHREIBUNG.ohneAntrag, () => "vorhanden: Beschreibung ohne Antrag: " + vorh.r.dateien[0].beschreibung);
   const vt = gesamtText(vorh.pfade["Trainerunterlagen_Mustermann_Max.pdf"]);
   wortlaut(vt, "Erweitertes Führungszeugnis: liegt der Person vor; Einsicht bei Melanie Seipp steht aus");
-  fehltIn(vt, "Antrag auf Gebührenbefreiung liegt bei", "vorhanden: Deckblatt nennt keinen beiliegenden Antrag");
+  fehltIn(vt, "Antrag auf Gebührenbefreiung (vorletzte Seite)", "vorhanden: Deckblatt nennt keinen Antrag in der Datei");
   fehltIn(vt, "Die Unterschrift des Vereins auf dem Antrag auf Gebührenbefreiung fehlt noch.", "vorhanden: kein Hinweis auf die fehlende Vereinsunterschrift");
-  ok(infoSeiten(vorh.pfade["Trainerunterlagen_Mustermann_Max.pdf"]).anzahl === 7, "vorhanden: Paket hat ebenfalls 7 Seiten");
+  fehltIn(vt, "ANTRAG AUF GEBÜHRENBEFREIUNG", "vorhanden: kein Brief in der Datei");
+  ok(infoSeiten(vorh.pfade["Trainerunterlagen_Mustermann_Max.pdf"]).anzahl === 8, "vorhanden: sieben Seiten Paket und das Passfoto, kein Brief (8 Seiten)");
 
   // Namen mit Umlauten, Leerzeichen und Sonderzeichen ergeben gültige Dateinamen (wie der Assistent: dateiteil)
   const namen = [
@@ -406,7 +455,7 @@ const bsp = await baue("beispiel");
   for (const [n, v, en, ev] of namen) {
     const a = Object.assign(kopie(BEISPIEL), { nachname: n, vorname: v });
     const r = await baue("namen-" + dateiteil(n), { antworten: a });
-    const soll = ["Trainerunterlagen_" + en + "_" + ev + ".pdf", "Antrag_Gebuehrenbefreiung_" + en + "_" + ev + ".pdf", "Passfoto_" + en + "_" + ev + ".jpg"];
+    const soll = ["Trainerunterlagen_" + en + "_" + ev + ".pdf"];
     ok(JSON.stringify(r.r.dateien.map((d) => d.name)) === JSON.stringify(soll), () => "Name „" + n + ", " + v + "“: " + r.r.dateien.map((d) => d.name).join(", "));
     ok(r.r.dateien.every((d) => /^[A-Za-z0-9._-]+$/.test(d.name)), () => "gültige Dateinamen (nur Buchstaben, Ziffern, _ . -): " + r.r.dateien.map((d) => d.name).join(", "));
     ok(r.r.warnungen.length === 0, () => "Name „" + n + "“ ohne Warnungen: " + JSON.stringify(r.r.warnungen));
@@ -418,8 +467,8 @@ kontext = "K3 PDF gültig";
   const paket = bsp.pfade["Trainerunterlagen_Mustermann_Max.pdf"];
   const antrag = bsp.pfade["Antrag_Gebuehrenbefreiung_Mustermann_Max.pdf"];
   const erwartet = [
-    [paket, 7, "Trainerunterlagen"],
-    [antrag, 1, "Antrag"],
+    [paket, 9, "Trainerunterlagen"],
+    [antrag, 1, "Brief (Teil der Datei)"],
   ];
   for (const [pfad, seiten, name] of erwartet) {
     const bytes = readFileSync(pfad);
@@ -443,12 +492,14 @@ kontext = "K3 PDF gültig";
     ok(texte.length === seiten && texte.every((t) => t.length > 60), () => name + ": auf jeder Seite Text (ausgewählter Text): " + texte.map((t) => t.length).join(","));
     console.log("    " + name + ": " + info.anzahl + " Seiten, " + bytes.length + " Byte, Schrift " + f.map((x) => x.name).join(","));
   }
-  // Seitenfolge: Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Kodex, Datenschutz (zwei Seiten)
+  // Seitenfolge: Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Kodex, Datenschutz (zwei Seiten), Brief, Passfoto
   const seiten = seitenText(paket);
   const reihenfolge = [SEITENTITEL.deckblatt, SEITENTITEL.anmeldung, SEITENTITEL.kontakt, SEITENTITEL.selbstauskunft, SEITENTITEL.kodex, SEITENTITEL.datenschutz].map((t) => seiteMit(seiten, t));
   ok(JSON.stringify(reihenfolge) === JSON.stringify([1, 2, 3, 4, 5, 6]), () => "Reihenfolge Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Kodex, Datenschutz: Seiten " + reihenfolge.join(","));
   ok(seiten[6].includes("Information zum Datenschutz (Fortsetzung)"), "Seite 7 ist die Fortsetzung der Information zum Datenschutz");
-  ok(seiten.every((t, i) => t.includes("Seite " + (i + 1) + " von 7")), "Fußzeile „Seite x von 7“ auf jeder Seite");
+  ok(seiten.every((t, i) => i === 7 || t.includes("Seite " + (i + 1) + " von 9")), "Fußzeile „Seite x von 9“ auf jeder Seite außer dem Brief");
+  ok(seiten[7].includes("ANTRAG AUF GEBÜHRENBEFREIUNG") && !/Seite \d+ von/.test(seiten[7]) && !seiten[7].includes("Trainerunterlagen ·"), "Seite 8 ist der Brief und hat keine Fußzeile (er geht, vom Verein unterschrieben, an das Bürgeramt)");
+  ok(seiten[8].includes("Passfoto von Max Mustermann") && seiten[8].includes("Seite 9 von 9"), "Seite 9 ist das Passfoto (mit Fußzeile)");
 }
 
 // ============ K4: Wortlaute ============
@@ -474,7 +525,7 @@ const antragText = gesamtText(antragPfad);
   // Deckblatt
   const db = paketSeiten[0];
   for (const s of SOLL_DECKBLATT) wortlaut(db, s, "Deckblatt");
-  wortlaut(db, "Erweitertes Führungszeugnis: Antrag auf Gebührenbefreiung liegt bei; Einsicht bei Melanie Seipp steht aus", "Deckblatt: Zeile Führungszeugnis (beantragen)");
+  wortlaut(db, DECK_ZEUGNIS_BEANTRAGEN("Melanie Seipp"), "Deckblatt: Zeile Führungszeugnis (beantragen)");
   wortlaut(db, "Die Unterschrift des Vereins auf dem Antrag auf Gebührenbefreiung fehlt noch.", "Deckblatt: Hinweis zur Vereinsunterschrift");
   ok((db.match(/erledigt/g) || []).length === 5 && (db.match(/\boffen\b/g) || []).length === 1, "Deckblatt: Symbol und Wort: fünfmal „erledigt“, einmal „offen“");
   // Löschfrist, Frist, Alter des Zeugnisses
@@ -493,7 +544,7 @@ const antragText = gesamtText(antragPfad);
   wortlaut(ds, "E-Mail: geschaeftsstelle@sportfreunde04.de", "Information zum Datenschutz: E-Mail aus der Konfiguration");
   // Anmeldung, Kontaktdatenblatt, Kodex-Erklärung
   const an = paketSeiten[seiteMit(paketSeiten, SEITENTITEL.anmeldung) - 1];
-  for (const s of ["Beitragsgruppe Trainer/Betreuer, beitragsfrei", "Mannschaft D3-Jugend", "Rolle Co-Trainer", "Ich habe die Satzung des Vereins (einsehbar unter www.sportfreunde04.de, Verein, Downloads) zur Kenntnis genommen.", "Information nach Artikel 13 DSGVO am Ende dieser Datei", "Frankfurt am Main, 24.11.2026 Ort, Datum"]) wortlaut(an, s, "Anmeldung");
+  for (const s of ["Beitragsgruppe Trainer/Betreuer, beitragsfrei", "Mannschaft D3-Jugend", "Rolle Co-Trainer", "Ich habe die Satzung des Vereins (einsehbar unter www.sportfreunde04.de, Verein, Downloads) zur Kenntnis genommen.", "Information nach Artikel 13 DSGVO in dieser Datei", "Frankfurt am Main, 24.11.2026 Ort, Datum"]) wortlaut(an, s, "Anmeldung");
   const ko = paketSeiten[seiteMit(paketSeiten, SEITENTITEL.kontakt) - 1];
   for (const s of ["Persönliche Angaben", "Adresse", "Notfallkontakt", "Berufliche/Trainerische Qualifikationen", "Erfahrungen als Trainer/Betreuer (falls vorhanden)", "Erste-Hilfe-Kurs", "Ja, absolviert am: 12.05.2025", "Nein, geplant bis:", "Sonstige Qualifikationen oder Fortbildungen", "Verfügbarkeit (bitte ankreuzen)", "Montags", "Dienstags", "Mittwochs", "Donnerstags", "Freitags", "Samstags", "Sonntags", "Zusätzliche Informationen / Anmerkungen", "Unterschrift Trainer/Betreuer", "Datum 24.11.2026", "Max", "Mustermann", "14.03.1988", "Musterstraße 12", "60326", "0170 1234567", "max.mustermann@example.com", "Erika Mustermann", "Partnerin", "0170 7654321", "Elektriker", "Drei Jahre Jugendtrainer bei einem anderen Verein (E-Jugend)."]) wortlaut(ko, s, "Kontaktdatenblatt");
   const kx = paketSeiten[seiteMit(paketSeiten, SEITENTITEL.kodex) - 1];
@@ -556,9 +607,10 @@ const antragText = gesamtText(antragPfad);
       saetze += 1;
       ok(D[k] === v, () => "Deckblatt „" + k + "“ weicht von ap1/texte.mjs ab");
     }
-    D.zeilen.slice(0, 5).forEach((z, i) => {
+    // Die fünfte Zeile („Passfoto“) weicht seit 25.11.2026 bewusst vom Entwurf ab: Das Foto ist keine eigene Bilddatei mehr, es steht auf der letzten Seite
+    D.zeilen.slice(0, 4).forEach((z, i) => {
       saetze += 1;
-      ok(z.text === [T.deckblatt.anmeldung, T.deckblatt.kontakt, T.deckblatt.selbstauskunft, T.deckblatt.kodex, T.deckblatt.foto][i], () => "Deckblatt Zeile " + (i + 1) + " weicht von ap1/texte.mjs ab");
+      ok(z.text === [T.deckblatt.anmeldung, T.deckblatt.kontakt, T.deckblatt.selbstauskunft, T.deckblatt.kodex][i], () => "Deckblatt Zeile " + (i + 1) + " weicht von ap1/texte.mjs ab");
     });
     const K = quelle.kontaktdatenblatt;
     for (const k of Object.keys(T.kontakt)) {
@@ -590,12 +642,13 @@ kontext = "K4 Einsicht";
       const konfig = Object.assign(kopie(KONFIG), { einsicht: kopie(f.einsicht) });
       const a = Object.assign(kopie(BEISPIEL), { zeugnis });
       const r = await baue("einsicht-" + f.titel.replace(/\W+/g, "-") + "-" + zeugnis, { konfig, antworten: a });
-      const seiten = seitenText(r.pfade["Trainerunterlagen_Mustermann_Max.pdf"]);
+      // nur das Paket (ohne Brief und Passfoto): Der Brief nennt immer die Unterzeichnerin der Konfiguration
+      const seiten = seitenText(r.teile.paket);
       const text = seiten.join(" ");
       const mit = f.titel + " / " + zeugnis;
       // Der Namensteil der Konfiguration kommt aus trainer-einsicht.js und stimmt mit dem erwarteten Wortlaut überein
       ok(einsichtNamen(konfig, "lang") === f.lang && einsichtNamen(konfig, "kurz") === f.kurz, () => mit + ": einsichtNamen liefert nicht den erwarteten Namensteil");
-      wortlaut(seiten[0], zeugnis === "beantragen" ? "Erweitertes Führungszeugnis: Antrag auf Gebührenbefreiung liegt bei; Einsicht bei " + f.kurz + " steht aus" : "Erweitertes Führungszeugnis: liegt der Person vor; Einsicht bei " + f.kurz + " steht aus", "Deckblatt (" + mit + ")");
+      wortlaut(seiten[0], zeugnis === "beantragen" ? DECK_ZEUGNIS_BEANTRAGEN(f.kurz) : "Erweitertes Führungszeugnis: liegt der Person vor; Einsicht bei " + f.kurz + " steht aus", "Deckblatt (" + mit + ")");
       wortlaut(seiten[0], einsichtSatzPerson(f.lang), "Deckblatt, Begleitsatz Einsicht (" + mit + ")");
       wortlaut(seiten.slice(5).join(" "), einsichtSatzDu(f.lang), "Information zum Datenschutz, Satz Einsicht (" + mit + ")");
       // Namen: genau die der Konfiguration, sonst keine
@@ -648,10 +701,10 @@ kontext = "K6 Unterschrift der Person";
 {
   const liste = bilder(paketPfad);
   const bildSeiten = liste.filter((x) => x.art === "image").map((x) => x.seite);
-  const soll = [SEITENTITEL.anmeldung, SEITENTITEL.kontakt, SEITENTITEL.selbstauskunft, SEITENTITEL.kodex].map((t) => seiteMit(paketSeiten, t));
-  ok(JSON.stringify(bildSeiten) === JSON.stringify(soll), () => "Unterschrift auf den Seiten " + bildSeiten.join(",") + ", erwartet (Anmeldung, Kontaktdatenblatt, Selbstauskunft, Kodex) " + soll.join(","));
-  ok(liste.filter((x) => x.art === "image").length === 4, "pdfimages -list: genau vier Bilder (je Unterschriftsstelle eines)");
-  ok(!bildSeiten.includes(1) && !bildSeiten.includes(6) && !bildSeiten.includes(7), "kein Bild auf Deckblatt und Datenschutzseiten");
+  const soll = [SEITENTITEL.anmeldung, SEITENTITEL.kontakt, SEITENTITEL.selbstauskunft, SEITENTITEL.kodex].map((t) => seiteMit(paketSeiten, t)).concat([9]);
+  ok(JSON.stringify(bildSeiten) === JSON.stringify(soll), () => "Bilder auf den Seiten " + bildSeiten.join(",") + ", erwartet (Anmeldung, Kontaktdatenblatt, Selbstauskunft, Kodex, Passfoto) " + soll.join(","));
+  ok(liste.filter((x) => x.art === "image").length === 5, "pdfimages -list: genau fünf Bilder (je Unterschriftsstelle eines und das Passfoto)");
+  ok(!bildSeiten.includes(1) && !bildSeiten.includes(6) && !bildSeiten.includes(7) && !bildSeiten.includes(8), "kein Bild auf Deckblatt, Datenschutzseiten und Brief");
   console.log("    pdfimages -list (Paket): " + liste.map((x) => "Seite " + x.seite + " " + x.art).join(", "));
   // Fehler statt stillem Weglassen
   const ohne = (ueberschreibe) => () => erzeugeDateien({ antworten: kopie(BEISPIEL), medien: Object.assign({ foto: FOTO.bytes, unterschrift: SIG }, ueberschreibe), konfig: kopie(KONFIG), heute: HEUTE, werkzeuge: WERKZEUGE });
@@ -698,7 +751,7 @@ kontext = "K8 Aussehen";
   for (const [bildName, pfad, art] of dateien) {
     rendere(pfad, bildName);
     const bilderListe = readdirSync(RENDER).filter((n) => n.startsWith(bildName + "-") && n.endsWith(".png"));
-    ok(bilderListe.length === (art === "paket" ? 7 : 1), () => bildName + ": " + bilderListe.length + " PNG");
+    ok(bilderListe.length === (art === "paket" ? 9 : 1), () => bildName + ": " + bilderListe.length + " PNG");
   }
   // Rand: kein Wort außerhalb der Ränder (18 mm links und rechts) und der Seite
   for (const [name, pfad] of [["Paket", paketPfad], ["Antrag", antragPfad]]) {
@@ -728,8 +781,8 @@ kontext = "K9 keine echten Daten";
   ok(JSON.stringify(gefunden) === JSON.stringify(["0170 1234567", "0170 7654321"]), () => "Ziffernfolgen wie Telefonnummern: " + JSON.stringify(gefunden));
   for (const nummer of ["736868", "732193", "069 7", "+49 69"]) ok(!alles.includes(nummer), "keine Rufnummer des Vereins: " + nummer);
   ok(!/Olgay|Özkan|Speuzer|Ilay/.test(alles), "keine Namen aus dem Umfeld des Auftrags in den Dateien");
-  // Es gibt keine Unterschrift des Vereins („i.A.“ als Bild): die Antrags-PDF hat kein Bild (K5); das Paket nur die vier eigenen
-  ok(bilder(paketPfad).filter((x) => x.art === "image").length === 4 && bilder(antragPfad).length === 0, "kein fremdes Unterschriftsbild: vier eigene Bilder im Paket, keines im Antrag");
+  // Es gibt keine Unterschrift des Vereins („i.A.“ als Bild): der Brief hat kein Bild (K5); die Datei nur die vier eigenen Unterschriften und das Foto
+  ok(bilder(paketPfad).filter((x) => x.art === "image").length === 5 && bilder(antragPfad).length === 0, "kein fremdes Unterschriftsbild: vier eigene Unterschriften und das Passfoto in der Datei, kein Bild im Brief");
 }
 
 // ============ K10: Vorschau ============
@@ -745,7 +798,12 @@ kontext = "K10 Vorschau";
   ok(info.seiten.length === 1 && Math.abs(info.seiten[0].b - 595.28) < 0.1, "Vorschau: A4 (pdfinfo)");
   ok(gesamtText(pfad) === antragText, "Vorschau: Text gleich dem Antrag aus erzeugeDateien");
   ok(bilder(pfad).length === 0, "Vorschau ohne Bild");
-  ok(Buffer.compare(Buffer.from(bytes), readFileSync(antragPfad)) === 0, "Vorschau ist byteweise gleich der Antragsdatei (gleiche Eingaben, gleiche Datei)");
+  // Der Brief steckt als Seite 8 in der Datei: Text gleich (oben) und Bild der Seite gleich (Rendern mit poppler, 100 dpi)
+  sh("pdftoppm", ["-r", "100", "-png", pfad, path.join(AUSGABE, "vorschau-seite")]);
+  sh("pdftoppm", ["-r", "100", "-png", "-f", "8", "-l", "8", paketPfad, path.join(AUSGABE, "brief-in-datei")]);
+  const vorschauBild = readdirSync(AUSGABE).find((n) => /^vorschau-seite-\d+\.png$/.test(n));
+  const briefBild = readdirSync(AUSGABE).find((n) => /^brief-in-datei-\d+\.png$/.test(n));
+  ok(!!vorschauBild && !!briefBild && Buffer.compare(readFileSync(path.join(AUSGABE, vorschauBild)), readFileSync(path.join(AUSGABE, briefBild))) === 0, "Vorschau und Seite 8 der Datei sehen gleich aus (Bild der Seite, Pixel für Pixel)");
   const ohneMedien = await vorschauAntrag({ antworten: kopie(BEISPIEL), konfig: Object.assign(kopie(KONFIG), { einsicht: [], schnupperMonate: undefined }), heute: HEUTE, werkzeuge: WERKZEUGE });
   ok(ohneMedien.length > 1000, "Vorschau braucht weder Medien noch Einsichtnehmende noch Frist");
   await wirft(() => vorschauAntrag({ antworten: Object.assign(kopie(BEISPIEL), { vorname: "" }), konfig: kopie(KONFIG), heute: HEUTE, werkzeuge: WERKZEUGE }), "angaben", "vorname", "Vorschau ohne Vornamen");
@@ -754,11 +812,61 @@ kontext = "K10 Vorschau";
   await wirft(() => vorschauAntrag({ antworten: kopie(BEISPIEL), konfig: k3, heute: HEUTE, werkzeuge: WERKZEUGE }), "konfig", "verein.unterzeichner", "Vorschau ohne Unterzeichner");
 }
 
+// ============ K14: Passfoto ============
+kontext = "K14 Passfoto";
+{
+  const fotoMass = jpegMass(FOTO.bytes);
+  ok(!!fotoMass, "Maße des Testfotos aus dem JPEG-Kopf gelesen");
+  const n = bsp.teile.anzahlSeiten;
+  ok(n === 9, () => "beantragen: 9 Seiten (sieben Paket, Brief, Passfoto): " + n);
+  const liste = bilderMass(paketPfad).filter((x) => x.art === "image");
+  const foto = liste.filter((x) => x.seite === n);
+  ok(foto.length === 1, () => "genau ein Bild auf der letzten Seite: " + JSON.stringify(foto));
+  if (foto.length === 1 && fotoMass) {
+    ok(foto[0].breite === fotoMass.breite && foto[0].hoehe === fotoMass.hoehe, () => "das Bild hat die Pixelmaße des Fotos (" + fotoMass.breite + " × " + fotoMass.hoehe + "): " + foto[0].breite + " × " + foto[0].hoehe);
+    const mmB = (foto[0].breite / foto[0].ppi) * 25.4;
+    const mmH = (foto[0].hoehe / foto[0].ppi) * 25.4;
+    ok(Math.abs(mmB - 60) < 0.5 && Math.abs(mmH - 80) < 0.5, () => "Foto 3:4 steht 60 × 80 mm groß auf der Seite: " + mmB.toFixed(1) + " × " + mmH.toFixed(1) + " mm");
+  }
+  // Die Bytes des Fotos in der Datei sind die des übergebenen JPEG (kein neues Kodieren): pdfimages -j schreibt den JPEG-Strom unverändert
+  const ziel = path.join(AUSGABE, "foto-aus-datei");
+  sh("pdfimages", ["-j", "-f", String(n), "-l", String(n), paketPfad, ziel]);
+  const gefunden = readdirSync(AUSGABE).filter((x) => x.startsWith("foto-aus-datei-") && x.endsWith(".jpg"));
+  ok(gefunden.length === 1 && Buffer.compare(readFileSync(path.join(AUSGABE, gefunden[0])), Buffer.from(FOTO.bytes)) === 0, () => "das JPEG in der Datei ist byteweise das übergebene Foto: " + gefunden.join(", "));
+  // Querformat: Das Foto passt in den Kasten 60 × 80 mm, im Seitenverhältnis (hier 2:1 → 60 × 30 mm)
+  const quer = path.join(AUSGABE, "foto-quer.jpg");
+  const sips = spawnSync("sips", ["-z", "400", "800", path.join(WURZEL, "tools", "anmeldung-test", "testbilder", "foto-3x4.jpg"), "--out", quer], { encoding: "utf8" });
+  if (!sips.error && sips.status === 0 && existsSync(quer)) {
+    const qb = new Uint8Array(readFileSync(quer));
+    const q = await baue("foto-quer", { medien: { foto: qb, unterschrift: SIG } });
+    const qn = q.teile.anzahlSeiten;
+    const qf = bilderMass(q.teile.gesamt).filter((x) => x.seite === qn && x.art === "image");
+    const qm = jpegMass(qb);
+    ok(qf.length === 1 && qm && qf[0].breite === qm.breite && qf[0].hoehe === qm.hoehe, () => "Querformat: ein Bild mit den Maßen des Fotos " + JSON.stringify(qm) + ": " + JSON.stringify(qf));
+    if (qf.length === 1) {
+      const mmB = (qf[0].breite / qf[0].ppi) * 25.4;
+      const mmH = (qf[0].hoehe / qf[0].ppi) * 25.4;
+      ok(Math.abs(mmB - 60) < 0.5 && Math.abs(mmH - 30) < 0.5, () => "Querformat 2:1 steht 60 × 30 mm groß (im Kasten, Seitenverhältnis erhalten): " + mmB.toFixed(1) + " × " + mmH.toFixed(1) + " mm");
+    }
+    ok(q.r.warnungen.length === 0, () => "Querformat ohne Warnung: " + JSON.stringify(q.r.warnungen));
+  } else {
+    console.log("    Querformat nicht geprüft (sips fehlt)");
+  }
+  // Ohne Antrag: das Passfoto ist wieder die letzte Seite, es gibt keinen Brief
+  const v = await baue("passfoto-vorhanden", { antworten: Object.assign(kopie(BEISPIEL), { zeugnis: "vorhanden" }) });
+  const vs = seitenText(v.teile.gesamt);
+  ok(vs.length === 8 && vs[7].includes("Passfoto von Max Mustermann") && vs[7].includes("Seite 8 von 8"), () => "vorhanden: Seite 8 ist das Passfoto mit „Seite 8 von 8“: " + vs.length + " Seiten");
+  ok(vs.every((t, i) => t.includes("Seite " + (i + 1) + " von 8")), "vorhanden: Fußzeile „Seite x von 8“ auf jeder Seite");
+  ok(bilderMass(v.teile.gesamt).filter((x) => x.art === "image").length === 5, "vorhanden: vier Unterschriften und das Foto");
+  // Die Seite zeigt den Namen der Person (Eingabe) und keinen Platzhalter
+  ok(/Passfoto von Max Mustermann/.test(seitenText(paketPfad)[n - 1]) && !/\{|\}/.test(seitenText(paketPfad)[n - 1]), "Passfoto-Seite: „Passfoto von Max Mustermann“, kein offener Platzhalter");
+}
+
 // ============ K11: Größe und Zeit ============
 kontext = "K11 Größe und Zeit";
 {
   const groesse = readFileSync(paketPfad).length;
-  ok(groesse <= 2 * 1024 * 1024, () => "Paket-PDF " + groesse + " Byte (höchstens 2 MB)");
+  ok(groesse <= 2 * 1024 * 1024, () => "Datei " + groesse + " Byte (höchstens 2 MB, mit Passfoto 600 × 800)");
   ok(FOTO.bytes.length > 5000 && /600 × 800/.test(FOTO.maß), () => "Foto der Probeläufe: " + FOTO.maß + ", " + FOTO.bytes.length + " Byte");
   const zeiten = [];
   for (let i = 0; i < 3; i++) {
@@ -767,7 +875,7 @@ kontext = "K11 Größe und Zeit";
     zeiten.push(performance.now() - t0);
   }
   ok(Math.max(...zeiten) <= 5000, () => "Erzeugung höchstens 5 s: " + zeiten.map((z) => Math.round(z)).join(", ") + " ms");
-  console.log("    Paket-PDF " + groesse + " Byte (" + (groesse / 1024).toFixed(0) + " KB), Antrag " + readFileSync(antragPfad).length + " Byte; Erzeugung aller drei Dateien: " + zeiten.map((z) => Math.round(z)).join(", ") + " ms; Foto " + FOTO.maß);
+  console.log("    Datei " + groesse + " Byte (" + (groesse / 1024).toFixed(0) + " KB, mit Brief und Passfoto); Erzeugung: " + zeiten.map((z) => Math.round(z)).join(", ") + " ms; Foto " + FOTO.maß);
 }
 
 // ============ K12: Fristen, Sonderzeichen, lange Angaben, Fehlerfälle, Metadaten, Wiederholbarkeit, Quelltext ============
@@ -803,11 +911,11 @@ kontext = "K12 Sonderzeichen und lange Angaben";
   const buchst = await baue("sonderzeichen-buchstaben", { antworten: Object.assign(kopie(BEISPIEL), { vorname: "Łukasz", nachname: "Weiß-Øverland Ærø" }) });
   ok(buchst.r.dateien[0].name === "Trainerunterlagen_Weiss-Overland-Aero_Lukasz.pdf", () => "ß, Ø, Æ, Ł in Dateinamen: " + buchst.r.dateien[0].name);
   ok(buchst.r.warnungen.length === 0, () => "ß, Ø, Æ, Ł ohne Warnung: " + JSON.stringify(buchst.r.warnungen));
-  ok(JSON.stringify(turk.r.dateien.map((d) => d.name)) === JSON.stringify(["Trainerunterlagen_Sahin-Ozturk_Ismail-Cagri.pdf", "Antrag_Gebuehrenbefreiung_Sahin-Ozturk_Ismail-Cagri.pdf", "Passfoto_Sahin-Ozturk_Ismail-Cagri.jpg"]), () => "Dateinamen: " + turk.r.dateien.map((d) => d.name).join(", "));
+  ok(JSON.stringify(turk.r.dateien.map((d) => d.name)) === JSON.stringify(["Trainerunterlagen_Sahin-Ozturk_Ismail-Cagri.pdf"]), () => "Dateiname: " + turk.r.dateien.map((d) => d.name).join(", "));
   // Zeichen, die die Schrift nicht kennt (Arabisch): Warnung, Datei bleibt gültig, kein Absturz
   const arab = await baue("sonderzeichen-arabisch", { antworten: Object.assign(kopie(BEISPIEL), { vorname: "محمد", nachname: "Mustermann" }) });
   ok(arab.r.warnungen.some((w) => /Angabe/.test(w)) && arab.r.warnungen.every((w) => /Angabe/.test(w)), () => "arabischer Vorname: Warnung zu einer Angabe: " + JSON.stringify(arab.r.warnungen));
-  ok(arab.r.dateien.map((d) => d.name).join() === "Trainerunterlagen_Mustermann_x.pdf,Antrag_Gebuehrenbefreiung_Mustermann_x.pdf,Passfoto_Mustermann_x.jpg", () => "Dateinamen bei nicht lateinischem Vornamen: " + arab.r.dateien.map((d) => d.name).join(", "));
+  ok(arab.r.dateien.map((d) => d.name).join() === "Trainerunterlagen_Mustermann_x.pdf", () => "Dateiname bei nicht lateinischem Vornamen: " + arab.r.dateien.map((d) => d.name).join(", "));
   await PDFLib.PDFDocument.load(arab.r.dateien[0].bytes);
   ok(true, "Datei mit nicht darstellbarem Vornamen bleibt ein gültiges PDF");
 
@@ -828,8 +936,8 @@ kontext = "K12 Sonderzeichen und lange Angaben";
   });
   const lg = await baue("lange-angaben", { antworten: lang });
   ok(lg.r.warnungen.length === 0, () => "lange Angaben ohne Warnung (Rand, 9 pt): " + JSON.stringify(lg.r.warnungen));
-  const lp = lg.pfade[Object.keys(lg.pfade)[0]];
-  const la = lg.pfade[Object.keys(lg.pfade)[1]];
+  const lp = lg.teile.gesamt;
+  const la = lg.teile.antrag;
   for (const s of woerter(lp).concat(woerter(la))) {
     const draussen = s.woerter.filter((w) => w.x0 < 50 || w.x1 > s.breite - 50 || w.y1 > s.hoehe);
     ok(draussen.length === 0, () => "lange Angaben, Seite " + s.nr + ": Wörter über dem Rand: " + draussen.slice(0, 3).map((w) => w.t).join(", "));
@@ -843,10 +951,10 @@ kontext = "K12 Sonderzeichen und lange Angaben";
   ok(lt.replace(/\s/g, "").includes(lang.sonstiges.replace(/\s/g, "")), "lange „Sonstige Qualifikationen“ vollständig im Text");
   ok(lt.includes("Nein, geplant bis: 31.03.2027"), "Erste-Hilfe-Kurs „Nein, geplant bis“ mit Datum");
   const seitenAnzahl = infoSeiten(lp).anzahl;
-  ok(seitenAnzahl >= 7 && seitenAnzahl <= 9, () => "lange Angaben: " + seitenAnzahl + " Seiten (7 bis 9 erwartet)");
+  ok(seitenAnzahl >= 9 && seitenAnzahl <= 11, () => "lange Angaben: " + seitenAnzahl + " Seiten (9 bis 11 erwartet: sieben bis neun Seiten Paket, Brief, Passfoto)");
   ok(infoSeiten(la).anzahl === 1, "lange Angaben: Antrag bleibt eine Seite");
   const lbilder = bilder(lp).filter((x) => x.art === "image");
-  ok(lbilder.length === 4, () => "lange Angaben: vier Unterschriften: " + lbilder.length);
+  ok(lbilder.length === 5, () => "lange Angaben: vier Unterschriften und das Passfoto: " + lbilder.length);
   rendere(lp, "paket-lange-angaben");
   rendere(la, "antrag-lange-angaben");
   rendere(turk.pfade[Object.keys(turk.pfade)[0]], "paket-tuerkisch");
@@ -894,7 +1002,7 @@ kontext = "K12 Fehlerfälle";
 
 kontext = "K12 Metadaten und Wiederholbarkeit";
 {
-  for (const [name, pfad, titel] of [["Paket", paketPfad, "Trainerunterlagen"], ["Antrag", antragPfad, "Antrag auf Gebührenbefreiung"]]) {
+  for (const [name, pfad, titel] of [["Datei", paketPfad, "Trainerunterlagen"], ["Vorschau des Briefs", path.join(AUSGABE, "vorschau-antrag.pdf"), "Antrag auf Gebührenbefreiung"]]) {
     const doc = await PDFLib.PDFDocument.load(readFileSync(pfad));
     ok(doc.getTitle() === titel, () => name + ": Titel „" + doc.getTitle() + "“");
     ok(doc.getCreator() === "FFV Sportfreunde 04", () => name + ": Ersteller „" + doc.getCreator() + "“");

@@ -6,11 +6,13 @@
   Schnittstelle (GEMEINSAM.md 4.3)
     erzeugeDateien({ antworten, medien, konfig, heute, werkzeuge? })
         → { dateien: [{ name, typ, bytes, beschreibung }], warnungen: [] }
-        Trainerunterlagen_<Nachname>_<Vorname>.pdf             Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft,
-                                                                Erklärung zum Verhaltenskodex, Information nach Art. 13 DSGVO
-        Antrag_Gebuehrenbefreiung_<Nachname>_<Vorname>.pdf      nur bei antworten.zeugnis === "beantragen"
-        Passfoto_<Nachname>_<Vorname>.jpg                       medien.foto unverändert
-    vorschauAntrag({ antworten, konfig, heute, werkzeuge? }) → Uint8Array (der Antrag, gleicher Inhalt wie in der Datei)
+        Seit 25.11.2026 genau EINE Datei (Safari am iPhone zeigt von mehreren Downloads nur den ersten, Browser am Computer fragen nach,
+        und beim Teilen nehmen Apps nicht immer alle Dateien):
+        Trainerunterlagen_<Nachname>_<Vorname>.pdf   Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Erklärung zum
+                                                      Verhaltenskodex, Information nach Art. 13 DSGVO, bei antworten.zeugnis ===
+                                                      "beantragen" der Antrag auf Gebührenbefreiung (vorletzte Seite, ohne Fußzeile),
+                                                      zuletzt das Passfoto (medien.foto, JPEG unverändert eingebettet)
+    vorschauAntrag({ antworten, konfig, heute, werkzeuge? }) → Uint8Array (der Antrag als eigenes PDF, gleicher Inhalt wie die Seite in der Datei)
   heute: „JJJJ-MM-TT“. werkzeuge: nur ohne Browser (Node-Test): { PDFLib, fontkit, schrift } (siehe trainer-pdf-lader.js); im Browser
   lädt trainer-pdf-lader.js pdf-lib, fontkit und die Schrift nach konfig.quellen, wie der Assistent.
 
@@ -34,8 +36,8 @@ import { LadeFehler } from "./pdf-lader.js";
 import { bereiteVor, pruefeMedien } from "./trainer-pdf-daten.js";
 import { Dokument, TrainerPdfFehler } from "./trainer-pdf-hilfen.js";
 import { ladeWerkzeuge } from "./trainer-pdf-lader.js";
-import { baueAntrag } from "./trainer-pdf-antrag.js";
-import { anmeldung, datenschutz, deckblatt, fusszeilen, kontaktdatenblatt, kodex, selbstauskunft } from "./trainer-pdf-seiten.js";
+import { baueAntrag, zeichneAntrag } from "./trainer-pdf-antrag.js";
+import { anmeldung, datenschutz, deckblatt, fusszeilen, kontaktdatenblatt, kodex, passfoto, selbstauskunft } from "./trainer-pdf-seiten.js";
 import { T } from "./trainer-pdf-texte.js";
 
 export { TrainerPdfFehler };
@@ -58,30 +60,29 @@ export async function erzeugeDateien({ antworten, medien, konfig, heute, werkzeu
     const d = bereiteVor({ antworten, konfig, heute }, "paket");
     pruefeMedien(medien);
     const wz = await ladeWerkzeuge(konfig, werkzeuge);
-    const warnungen = [];
 
     const dok = await Dokument.neu(wz);
     const sig = await dok.bettePng(medien.unterschrift);
+    const foto = await dok.betteJpeg(medien.foto);
     deckblatt(dok, d);
     anmeldung(dok, d, sig);
     kontaktdatenblatt(dok, d, sig);
     selbstauskunft(dok, d, sig);
     kodex(dok, d, sig);
     datenschutz(dok, d);
-    fusszeilen(dok, d);
+    // Der Brief des Vereins (nur mit Antrag) kommt vor das Passfoto und bekommt keine Fußzeile: Er geht, vom Verein unterschrieben, an
+    // das Bürgeramt. Die Seitenzählung („Seite x von y“) rechnet ihn mit.
+    const ohneFuss = [];
+    if (d.zeugnis === "beantragen") ohneFuss.push(zeichneAntrag(dok, d));
+    passfoto(dok, d, foto);
+    fusszeilen(dok, d, { ohne: ohneFuss });
     dok.setzeMetadaten({ titel: T.meta.titelPaket, betreff: T.meta.betreffPaket, ersteller: d.verein.name, heute: d.heute });
-    const paket = await dok.speichern();
-    warnungen.push(...warnungenVon(dok));
+    const bytes = await dok.speichern();
 
     const teile = d.dateiteile.nachname + "_" + d.dateiteile.vorname;
-    const dateien = [{ name: "Trainerunterlagen_" + teile + ".pdf", typ: "application/pdf", bytes: paket, beschreibung: T.dateien.paket }];
-    if (d.zeugnis === "beantragen") {
-      const antrag = await baueAntrag(wz, d);
-      warnungen.push(...warnungenVon(antrag.dok));
-      dateien.push({ name: "Antrag_Gebuehrenbefreiung_" + teile + ".pdf", typ: "application/pdf", bytes: antrag.bytes, beschreibung: T.dateien.antrag });
-    }
-    dateien.push({ name: "Passfoto_" + teile + ".jpg", typ: "image/jpeg", bytes: medien.foto, beschreibung: T.dateien.foto });
-    return { dateien, warnungen };
+    const beschreibung = d.zeugnis === "beantragen" ? T.dateien.mitAntrag : T.dateien.ohneAntrag;
+    const dateien = [{ name: "Trainerunterlagen_" + teile + ".pdf", typ: "application/pdf", bytes, beschreibung }];
+    return { dateien, warnungen: warnungenVon(dok) };
   } catch (fehler) {
     throw umhuellt(fehler);
   }

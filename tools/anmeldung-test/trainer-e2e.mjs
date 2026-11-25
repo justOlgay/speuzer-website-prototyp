@@ -19,7 +19,7 @@
 //   [6]  Einsichtnehmende aus der Konfiguration: eine Person (Standardfall), zwei, drei, keine; Wortlaut auf Bildschirm 10, 12 und 13
 //   [7]  Handy (390 px, Faktor 2): Bildschirmfotos, scrollWidth, Tippflächen, Eingabeschrift, Konsole, Netz, axe-core
 //   [8]  Foto (Datei, verkleinert, JPG, Vorschau, ersetzen, Fehler) und Unterschrift (Maus, Touch, löschen; Pixelprüfung)
-//   [9]  Ende: Löschen, Dateien erstellen (Aufruf von erzeugeDateien), Namen und Beschreibung, Teilen, Herunterladen, Vorschau,
+//   [9]  Ende: Löschen, Datei erstellen (Aufruf von erzeugeDateien), Name und Beschreibung der einen Datei, Teilen, Herunterladen, Vorschau,
 //        „Antrag ansehen“, Fehler beim Erstellen; trainer-pdf.js lädt mit der Seite (Anfrage beim Start mit Sec-Fetch-Dest: script, danach
 //        keine weitere) und scheitert es (Antwort 503), steht der Text „Ladefehler“ da (T1b: Safari merkt sich ein gescheitertes import())
 //   [11] Importe: alle eigenen Module statisch (auch trainer-pdf.js), einziges import() der Rückfall für die Schrift im Lader, der
@@ -198,7 +198,7 @@ const SOLL = {
     "Zwölf Zeichen. Bindestriche und Leerzeichen sind egal.",
     "Weiter",
     "Noch keinen Code? Code anfragen",
-    "Alles bleibt auf deinem Gerät, bis du die Dateien selbst schickst. Die Seite sendet nichts.",
+    "Alles bleibt auf deinem Gerät, bis du die Datei selbst schickst. Die Seite sendet nichts.",
   ],
   start: [
     "Schön, dass du dabei bist",
@@ -254,7 +254,7 @@ const SOLL = {
     "Name des Notfallkontakts",
     "Beziehung zu dir",
     "Telefonnummer des Notfallkontakts",
-    "Das Kontaktdatenblatt des Vereins fragt danach. Die Angaben gehen erst an den Verein, wenn du die Dateien selbst schickst. Sag der Person bitte Bescheid, dass du sie als Notfallkontakt angibst.",
+    "Das Kontaktdatenblatt des Vereins fragt danach. Die Angaben gehen erst an den Verein, wenn du die Datei selbst schickst. Sag der Person bitte Bescheid, dass du sie als Notfallkontakt angibst.",
     "Weiter",
   ],
   erfahrung: [
@@ -275,7 +275,7 @@ const SOLL = {
     "Anderes Foto wählen",
     "Foto machen",
     "Foto aus der Galerie wählen",
-    "Das Foto geht als eigene Bilddatei mit der E-Mail mit.",
+    "Das Foto steht auf der letzten Seite deiner Datei.",
     "Weiter",
   ],
   kodex: [
@@ -362,7 +362,7 @@ const SOLL = {
     "Prüfe deine Angaben. Mit „Ändern“ korrigierst du etwas.",
     "Antrag auf Gebührenbefreiung",
     "Das solltest du wissen",
-    "Alles stimmt – Dateien erstellen",
+    "Alles stimmt – Datei erstellen",
     "Alle Angaben löschen",
     // Werte aus den Beispieldaten
     "Max Mustermann",
@@ -382,24 +382,24 @@ const SOLL = {
   fertig: [
     "Dein Paket ist fertig",
     "Das steht im Paket",
-    "Dateien teilen",
-    "Dateien herunterladen",
+    "Datei teilen",
+    "Datei herunterladen",
     "Vorschau",
-    "So schickst du die Dateien an den Verein",
-    "Tippe oben auf „Dateien teilen“.",
+    "So schickst du die Datei an den Verein",
+    "Tippe oben auf „Datei teilen“.",
     "Wähle dein Mail-Programm.",
     "Schicke die E-Mail an die Adresse unten.",
-    "Klicke oben auf „Dateien herunterladen“.",
-    "Schreibe eine neue E-Mail. Hänge die Dateien an.",
+    "Klicke oben auf „Datei herunterladen“.",
+    "Schreibe eine neue E-Mail. Hänge die Datei an.",
     "Adresse kopieren",
     "E-Mail an die Geschäftsstelle öffnen",
-    "Bitte schicke die Dateien nicht per WhatsApp. Sie enthalten persönliche Daten.",
+    "Bitte schicke die Datei nicht per WhatsApp. Sie enthält persönliche Daten.",
     "So geht es weiter",
     "Verein: Unterschreibt deinen Antrag auf Gebührenbefreiung und schickt ihn dir zurück.",
     "Du: Beantragst damit dein Führungszeugnis.",
-    "Bis zum 02.12.2026 sollte alles erledigt sein: Dateien geschickt, Zeugnis gezeigt.",
+    "Bis zum 02.12.2026 sollte alles erledigt sein: Datei geschickt, Zeugnis gezeigt.",
     "Alle Angaben löschen",
-    "Alles bleibt auf deinem Gerät, bis du die Dateien selbst schickst. Die Seite sendet nichts.",
+    "Alles bleibt auf deinem Gerät, bis du die Datei selbst schickst. Die Seite sendet nichts.",
     // Dateinamen und Beschreibungen zeigt die Seite genau so, wie trainer-pdf.js sie zurückgibt: Sie werden gegen die Rückgabe der Attrappe
     // bzw. des echten Moduls verglichen (siehe [9]), nicht gegen feste Zeichenketten.
     MAIL,
@@ -588,10 +588,9 @@ export async function erzeugeDateien(arg) {
   });
   await new Promise((ok) => setTimeout(ok, 120));
   const teil = dateiteil(arg.antworten.nachname) + "_" + dateiteil(arg.antworten.vorname);
-  // Beschreibungen wie im echten Modul (T2); die Seite zeigt, was zurückkommt
-  const dateien = [{ name: "Trainerunterlagen_" + teil + ".pdf", typ: "application/pdf", bytes: PDF, beschreibung: "Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Verhaltenskodex, Datenschutzinformation" }];
-  if (arg.antworten.zeugnis === "beantragen") dateien.push({ name: "Antrag_Gebuehrenbefreiung_" + teil + ".pdf", typ: "application/pdf", bytes: PDF, beschreibung: "Antrag für dein Führungszeugnis" });
-  dateien.push({ name: "Passfoto_" + teil + ".jpg", typ: "image/jpeg", bytes: arg.medien.foto, beschreibung: "Dein Passfoto" });
+  // Seit 25.11.2026 genau eine Datei (Paket, Brief bei „beantragen“, Passfoto); Beschreibung wie im echten Modul, die Seite zeigt, was zurückkommt
+  const beschreibung = "Deckblatt, Anmeldung, Kontaktdatenblatt, Selbstauskunft, Verhaltenskodex, Datenschutzinformation, " + (arg.antworten.zeugnis === "beantragen" ? "Antrag für dein Führungszeugnis, " : "") + "Passfoto";
+  const dateien = [{ name: "Trainerunterlagen_" + teil + ".pdf", typ: "application/pdf", bytes: PDF, beschreibung }];
   const ergebnis = { dateien, warnungen: WARNUNGEN };
   stand.erzeugt[stand.erzeugt.length - 1].zurueck = { dateien: dateien.map((d) => ({ name: d.name, typ: d.typ, beschreibung: d.beschreibung })), warnungen: WARNUNGEN.length };
   return ergebnis;
@@ -1612,7 +1611,7 @@ async function haupt() {
       const anzeige = await page.$$eval("#anmeldung [data-dateien] li", (l) => l.map((e) => e.textContent.replace(/\s+/g, " ").trim()));
       // Die Anzeige ist genau die Rückgabe von erzeugeDateien (Name – Beschreibung); keine feste Zeichenkette in der Seite
       const sollAnzeige = neuerAufruf.zurueck.dateien.map((d) => d.name + " – " + d.beschreibung);
-      if (!gleich(anzeige, sollAnzeige) || anzeige.length !== 3) fehler.push("Anzeige der Dateien: " + JSON.stringify(anzeige) + " statt " + JSON.stringify(sollAnzeige));
+      if (!gleich(anzeige, sollAnzeige) || anzeige.length !== 1) fehler.push("Anzeige der Datei: " + JSON.stringify(anzeige) + " statt " + JSON.stringify(sollAnzeige));
       const keinWarnkasten = await page.$("#anmeldung [data-warnungen]");
       if (keinWarnkasten) fehler.push("Hinweiskasten zu Warnungen sichtbar, obwohl die Rückgabe keine hat");
       belege.push("Bildschirm 13 zeigt genau die zurückgegebenen Dateien (Name – beschreibung der Rückgabe): " + anzeige.join(" | ") + "; ohne Warnungen kein Hinweiskasten");
@@ -1625,18 +1624,20 @@ async function haupt() {
       for (let g = 0; g < 40; g++) {
         await warte(250);
         dateien = fs.readdirSync(downloads).filter((d) => /\.(pdf|jpg)$/.test(d)).sort();
-        if (dateien.length >= 3) break;
+        if (dateien.length >= 1) break;
       }
-      const sollNamen = ["Antrag_Gebuehrenbefreiung_Mustermann_Max.pdf", "Passfoto_Mustermann_Max.jpg", "Trainerunterlagen_Mustermann_Max.pdf"];
-      if (!gleich(dateien, sollNamen)) fehler.push("heruntergeladene Dateien: " + dateien.join(", "));
+      const sollNamen = ["Trainerunterlagen_Mustermann_Max.pdf"];
+      if (!gleich(dateien, sollNamen)) fehler.push("heruntergeladene Datei: " + dateien.join(", "));
       const gespeichert = dateien.map((d) => ({ name: d, bytes: fs.readFileSync(path.join(downloads, d)) }));
-      const pdfOk = gespeichert.filter((g) => g.name.endsWith(".pdf")).every((g) => g.bytes.slice(0, 5).toString() === "%PDF-");
-      const jpg = gespeichert.find((g) => g.name.endsWith(".jpg"));
-      const jpgOk = jpg && jpg.bytes[0] === 0xff && jpg.bytes[1] === 0xd8 && jpg.bytes[2] === 0xff;
-      if (!pdfOk || !jpgOk) fehler.push("Inhalt der Dateien: pdf " + pdfOk + ", jpg " + jpgOk);
+      const pdfOk = gespeichert.every((g) => g.name.endsWith(".pdf") && g.bytes.slice(0, 5).toString() === "%PDF-");
+      if (!pdfOk) fehler.push("Inhalt der Datei: kein PDF");
       const statusSpeichern = await page.$eval("#anmeldung [data-status=fertig] .anm-status", (e) => e.textContent);
-      if (!/Die Dateien werden gespeichert/.test(statusSpeichern)) fehler.push("Meldung nach dem Herunterladen: " + statusSpeichern);
-      belege.push(`„Dateien herunterladen“: ${dateien.length} Dateien gespeichert (${dateien.join(", ")}), PDF mit %PDF-, JPG mit FF D8 FF; Meldung „${statusSpeichern}“`);
+      if (statusSpeichern !== "Die Datei wird gespeichert. Sie liegt meist im Ordner „Downloads“. Zeigt dein Handy sie nur an, tippe dort auf „Teilen“.") fehler.push("Meldung nach dem Herunterladen: " + statusSpeichern);
+      // Genau ein Download aus einem Klick (Safari am iPhone zeigt von mehreren nur den ersten): nach einer Weile ist noch immer nur diese Datei da
+      await warte(1200);
+      const spaeter = fs.readdirSync(downloads).filter((d) => /\.(pdf|jpg)$/.test(d)).sort();
+      if (!gleich(spaeter, sollNamen)) fehler.push("nach dem Herunterladen kam eine weitere Datei dazu: " + spaeter.join(", "));
+      belege.push(`„Datei herunterladen“: genau eine Datei gespeichert (${dateien.join(", ")}), PDF mit %PDF-, nach 1,2 s keine weitere; Meldung „${statusSpeichern}“`);
       // Teilen (Stellvertreter für canShare, share und Zwischenablage)
       await page.evaluate(() => { window.__stub.share.length = 0; window.__stub.schreibe.length = 0; window.__stub.reihenfolge.length = 0; });
       const teilenSichtbar = await page.$eval('#anmeldung [data-aktion="teilen"]', (e) => e.getClientRects().length > 0);
@@ -1644,12 +1645,12 @@ async function haupt() {
       await warte(300);
       const stub = await page.evaluate(() => window.__stub);
       const t0 = stub.share[0];
-      if (!teilenSichtbar || stub.share.length !== 1 || !t0 || !gleich(t0.dateien.map((d) => d.name), ["Trainerunterlagen_Mustermann_Max.pdf", "Antrag_Gebuehrenbefreiung_Mustermann_Max.pdf", "Passfoto_Mustermann_Max.jpg"]) || !gleich(t0.dateien.map((d) => d.typ), ["application/pdf", "application/pdf", "image/jpeg"])) fehler.push("Teilen: " + JSON.stringify(stub.share));
+      if (!teilenSichtbar || stub.share.length !== 1 || !t0 || !gleich(t0.dateien.map((d) => d.name), ["Trainerunterlagen_Mustermann_Max.pdf"]) || !gleich(t0.dateien.map((d) => d.typ), ["application/pdf"])) fehler.push("Teilen: " + JSON.stringify(stub.share));
       if (!(t0 && t0.title === "Trainerunterlagen Max Mustermann" && /anbei meine Unterlagen/.test(t0.text))) fehler.push("Betreff/Text beim Teilen: " + JSON.stringify(t0 && [t0.title, t0.text]));
       if (!gleich(stub.reihenfolge, ["kopiert", "share"]) || !gleich(stub.schreibe, [MAIL])) fehler.push("Adresse beim Teilen kopiert? " + JSON.stringify(stub.reihenfolge) + JSON.stringify(stub.schreibe));
       const statusTeilen = await page.$eval("#anmeldung [data-status=fertig] .anm-status", (e) => e.textContent);
       if (statusTeilen !== "Geteilt. Die Adresse ist kopiert.") fehler.push("Meldung nach dem Teilen: " + statusTeilen);
-      belege.push(`„Dateien teilen“: navigator.share einmal mit ${t0 && t0.dateien.length} Dateien (${t0 && t0.dateien.map((d) => d.name + " " + d.typ).join("; ")}), Betreff „${t0 && t0.title}“; die Adresse wird vorher in die Zwischenablage gelegt (${stub.reihenfolge.join(" › ")}); Meldung „${statusTeilen}“`);
+      belege.push(`„Datei teilen“: navigator.share einmal mit ${t0 && t0.dateien.length} Datei (${t0 && t0.dateien.map((d) => d.name + " " + d.typ).join("; ")}), Betreff „${t0 && t0.title}“; die Adresse wird vorher in die Zwischenablage gelegt (${stub.reihenfolge.join(" › ")}); Meldung „${statusTeilen}“`);
       // Vorschau: neues Fenster mit der PDF
       await page.evaluate(() => { window.__stub.oeffne.length = 0; });
       await page.click('#anmeldung [data-aktion="ansehen"]');
@@ -1699,7 +1700,7 @@ async function haupt() {
       const a4 = await attrappe(page);
       const zweiter = a4.erzeugt[1];
       const neueNamen = await page.$$eval("#anmeldung [data-dateien] li", (l) => l.map((e) => e.getAttribute("data-datei")));
-      if (a4.erzeugt.length !== 2 || !zweiter || zweiter.antworten.vorname !== "Moritz" || !gleich(neueNamen, ["Trainerunterlagen_Mustermann_Moritz.pdf", "Antrag_Gebuehrenbefreiung_Mustermann_Moritz.pdf", "Passfoto_Mustermann_Moritz.jpg"])) fehler.push("Neuerstellen nach einer Änderung: " + a4.erzeugt.length + " Aufrufe, " + JSON.stringify(neueNamen));
+      if (a4.erzeugt.length !== 2 || !zweiter || zweiter.antworten.vorname !== "Moritz" || !gleich(neueNamen, ["Trainerunterlagen_Mustermann_Moritz.pdf"])) fehler.push("Neuerstellen nach einer Änderung: " + a4.erzeugt.length + " Aufrufe, " + JSON.stringify(neueNamen));
       belege.push(`Änderung nach dem Erstellen (Vorname „Moritz“): zweiter Aufruf von erzeugeDateien, neue Namen ${neueNamen.join(", ")}`);
       ende = { fehler, belege, pngKopf, pixel, png };
     }
@@ -2006,8 +2007,8 @@ async function haupt() {
           if (s === "fertig") {
             await page.waitForSelector('#anmeldung [data-status="fertig"]', { timeout: 8000 });
             const z = await page.evaluate(() => ({ dateien: Array.from(document.querySelectorAll("#anmeldung [data-dateien] li")).map((e) => e.getAttribute("data-datei")), schritte: Array.from(document.querySelectorAll("#anmeldung .anm-ergebnis ol.anm-naechste li")).map((e) => e.textContent.trim()) }));
-            if (z.dateien.length !== 2 || z.dateien.some((n) => /Antrag/.test(n)) || z.schritte.length !== 2 || !/^Du: Zeigst es persönlich/.test(z.schritte[0])) fehler.push("Zeugnis vorhanden, Bildschirm 13: " + JSON.stringify(z));
-            belege.push(`Bildschirm 13 bei vorhandenem Zeugnis: ${z.dateien.length} Dateien (ohne Antrag), ${z.schritte.length} Schritte (${z.schritte.map((t) => t.slice(0, 18)).join(" | ")})`);
+            if (z.dateien.length !== 1 || z.dateien.some((n) => /Antrag/.test(n)) || z.schritte.length !== 2 || !/^Du: Zeigst es persönlich/.test(z.schritte[0])) fehler.push("Zeugnis vorhanden, Bildschirm 13: " + JSON.stringify(z));
+            belege.push(`Bildschirm 13 bei vorhandenem Zeugnis: ${z.dateien.length} Datei (ohne Brief), ${z.schritte.length} Schritte (${z.schritte.map((t) => t.slice(0, 18)).join(" | ")})`);
             break;
           }
           await fuelle(page, s, d);
@@ -2113,7 +2114,7 @@ async function haupt() {
         if (erwartung === "ohne") {
           const primaer = await page.$eval('#anmeldung [data-aktion="herunterladen"]', (e) => !e.classList.contains("knopf--sekundaer"));
           if (teilenSichtbar || !primaer) fehler.push("ohne Teilen: Knopf sichtbar " + teilenSichtbar + ", Herunterladen primär " + primaer);
-          belege.push("Browser ohne navigator.share: „Dateien teilen“ ist verborgen, „Dateien herunterladen“ ist der Hauptknopf");
+          belege.push("Browser ohne navigator.share: „Datei teilen“ ist verborgen, „Datei herunterladen“ ist der Hauptknopf");
         } else {
           if (!teilenSichtbar) fehler.push(modus + ": Teilen nicht sichtbar");
           await page.click('#anmeldung [data-aktion="teilen"]');
@@ -2121,8 +2122,8 @@ async function haupt() {
           const status = await page.$eval("#anmeldung [data-status=fertig] .anm-status", (e) => e.textContent);
           const dateien = fs.readdirSync(ziel);
           if (erwartung === "gespeichert") {
-            if (dateien.length !== 3 || status !== "Teilen geht hier nicht. Die Dateien wurden stattdessen gespeichert.") fehler.push("Teilen scheitert: " + dateien.join(",") + " / " + status);
-            belege.push(`Teilen scheitert (Fehler des Browsers): ${dateien.length} Dateien stattdessen gespeichert, Meldung „${status}“`);
+            if (dateien.length !== 1 || status !== "Teilen geht hier nicht. Die Datei wurde stattdessen gespeichert.") fehler.push("Teilen scheitert: " + dateien.join(",") + " / " + status);
+            belege.push(`Teilen scheitert (Fehler des Browsers): ${dateien.length} Datei stattdessen gespeichert, Meldung „${status}“`);
           } else {
             if (dateien.length !== 0 || status !== "") fehler.push("Abbruch beim Teilen: " + dateien.join(",") + " / " + status);
             belege.push("Teilen abgebrochen (AbortError): nichts gespeichert, keine Meldung");
@@ -2257,17 +2258,17 @@ async function haupt() {
           const k = document.querySelector("#anmeldung [data-warnungen]");
           return k ? { n: k.getAttribute("data-warnungen"), sichtbar: k.getClientRects().length > 0, titel: k.querySelector("p:first-child").textContent, text: k.querySelector("p:last-child").textContent, klasse: k.className, alles: document.getElementById("anmeldung").innerText } : null;
         });
-        if (!w || !w.sichtbar || w.titel !== "Bitte prüfen" || w.text !== "Bitte prüfe die Vorschau: In den Dateien fehlen vielleicht einzelne Zeichen." || w.n !== "1") fehler.push("Hinweiskasten zu Warnungen: " + JSON.stringify(w));
+        if (!w || !w.sichtbar || w.titel !== "Bitte prüfen" || w.text !== "Bitte prüfe die Vorschau: In der Datei fehlen vielleicht einzelne Zeichen." || w.n !== "1") fehler.push("Hinweiskasten zu Warnungen: " + JSON.stringify(w));
         if (w && /steht als \?|Zeichen einer Angabe/.test(w.alles)) fehler.push("Der Text der Warnung steht auf dem Bildschirm");
         // Der Rest ist unverändert benutzbar: Dateien, Herunterladen, Wege zum Verein
         const rest = await page.evaluate(() => ({ dateien: document.querySelectorAll("#anmeldung [data-dateien] li").length, herunterladen: !!document.querySelector('#anmeldung [data-aktion="herunterladen"]'), senden: !!document.querySelector("#anmeldung [data-senden]"), weiter: !!document.querySelector("#anmeldung ol.anm-naechste") }));
         await page.click('#anmeldung [data-aktion="herunterladen"]');
         let dl = [];
-        for (let g = 0; g < 30 && dl.length < 3; g++) {
+        for (let g = 0; g < 30 && dl.length < 1; g++) {
           await warte(250);
           dl = fs.readdirSync(ziel);
         }
-        if (rest.dateien !== 3 || !rest.herunterladen || !rest.senden || !rest.weiter || dl.length !== 3) fehler.push("Bildschirm mit Warnung nicht voll benutzbar: " + JSON.stringify({ rest, dl }));
+        if (rest.dateien !== 1 || !rest.herunterladen || !rest.senden || !rest.weiter || dl.length !== 1) fehler.push("Bildschirm mit Warnung nicht voll benutzbar: " + JSON.stringify({ rest, dl }));
         belege.push(`Warnungen in der Rückgabe (${w && w.n}): Hinweiskasten „${w && w.titel}“ – „${w && w.text}“ (Klasse ${w && w.klasse.split(" ")[0]}), der Text der Warnung selbst steht nicht auf dem Bildschirm; Dateiliste, Knöpfe und Wege zum Verein unverändert, Herunterladen gibt ${dl.length} Dateien`);
         await schliesseSeite(page);
         server.pdfModus = "attrappe";
@@ -2288,9 +2289,9 @@ async function haupt() {
           "foto-fehlt": "Dein Passfoto fehlt oder lässt sich nicht lesen. Bitte gehe zurück und wähle das Foto noch einmal.",
           "foto-format": "Dein Passfoto fehlt oder lässt sich nicht lesen. Bitte gehe zurück und wähle das Foto noch einmal.",
           bibliothek: "Ein Programmteil lässt sich nicht laden. Bitte prüfe die Internetverbindung.",
-          pdf: "Die Dateien konnten nicht erstellt werden. Bitte versuche es noch einmal.",
-          intern: "Die Dateien konnten nicht erstellt werden. Bitte versuche es noch einmal.",
-          ohne: "Die Dateien konnten nicht erstellt werden. Bitte versuche es noch einmal.",
+          pdf: "Die Datei konnte nicht erstellt werden. Bitte versuche es noch einmal.",
+          intern: "Die Datei konnte nicht erstellt werden. Bitte versuche es noch einmal.",
+          ohne: "Die Datei konnte nicht erstellt werden. Bitte versuche es noch einmal.",
         };
         const lesen = () => page.evaluate(() => {
           const v = document.querySelector('#anmeldung [data-status="fehler"]');
@@ -2470,7 +2471,7 @@ async function haupt() {
           // Die Anzeige ist genau die Rückgabe des echten Moduls (Name – beschreibung)
           const soll = echt.dateien.map((x) => x.name + " – " + x.beschreibung);
           if (!gleich(anzeige, soll)) fehler.push(`${f.name}: Anzeige ${JSON.stringify(anzeige)} statt der Rückgabe ${JSON.stringify(soll)}`);
-          if (echt.dateien.length !== (f.d.zeugnis === "beantragen" ? 3 : 2) || echt.dateien.some((x) => x.laenge < 500)) fehler.push(`${f.name}: Dateien der Rückgabe ${JSON.stringify(echt.dateien.map((x) => x.name + " " + x.laenge))}`);
+          if (echt.dateien.length !== 1 || echt.dateien.some((x) => x.laenge < 500)) fehler.push(`${f.name}: Dateien der Rückgabe ${JSON.stringify(echt.dateien.map((x) => x.name + " " + x.laenge))}`);
           const warnkasten = !!(await page.$("#anmeldung [data-warnungen]"));
           if (warnkasten !== echt.warnungen.length > 0) fehler.push(`${f.name}: Hinweiskasten ${warnkasten}, Warnungen der Rückgabe ${echt.warnungen.length}`);
           // Herunterladen: Dateien da, PDF mit %PDF-, JPG mit FF D8 FF
@@ -2483,9 +2484,7 @@ async function haupt() {
           }
           const gross = dateien.map((d) => d + " " + fs.statSync(path.join(ziel, d)).size + " Byte");
           const pdfOk = dateien.filter((d) => d.endsWith(".pdf")).every((d) => fs.readFileSync(path.join(ziel, d)).slice(0, 5).toString() === "%PDF-");
-          const jpgDatei = dateien.find((d) => d.endsWith(".jpg"));
-          const jpgOk = jpgDatei && fs.readFileSync(path.join(ziel, jpgDatei)).slice(0, 3).toString("hex") === "ffd8ff";
-          if (!gleich(dateien, echt.dateien.map((x) => x.name).sort()) || !pdfOk || !jpgOk) fehler.push(`${f.name}: heruntergeladen ${gross.join(", ")}`);
+          if (!gleich(dateien, echt.dateien.map((x) => x.name).sort()) || !pdfOk || dateien.some((d) => d.endsWith(".jpg"))) fehler.push(`${f.name}: heruntergeladen ${gross.join(", ")}`);
           // Inhalt der Paket-PDF mit pdftotext (wenn vorhanden): Die Angaben der Seite stehen in der Datei
           let textInfo = "pdftotext nicht gefunden";
           if (pdftotext) {
@@ -2493,14 +2492,13 @@ async function haupt() {
             const r = spawnSync(pdftotext, ["-layout", path.join(ziel, paket), "-"], { encoding: "utf8" });
             const txt = (r.stdout || "").replace(/\s+/g, " ");
             const fehlen = f.suche.filter((x) => !txt.includes(x));
-            if (fehlen.length) fehler.push(`${f.name}: in der Paket-PDF fehlen ${JSON.stringify(fehlen)}`);
-            const antragDatei = dateien.find((d) => d.startsWith("Antrag_"));
-            if (antragDatei) {
-              const ra = spawnSync(pdftotext, ["-layout", path.join(ziel, antragDatei), "-"], { encoding: "utf8" });
-              const ta = (ra.stdout || "").replace(/\s+/g, " ");
-              if (!ta.includes(f.d.nachname.slice(0, 20)) || !/Nr\. 2 Buchst\. a/.test(ta)) fehler.push(`${f.name}: Antrag ohne Name oder ohne „Nr. 2 Buchst. a“`);
-            }
-            textInfo = `Paket-PDF enthält ${f.suche.length - fehlen.length} von ${f.suche.length} gesuchten Angaben${antragDatei ? "; Antrag enthält Name und „Nr. 2 Buchst. a“" : ""}`;
+            if (fehlen.length) fehler.push(`${f.name}: in der Datei fehlen ${JSON.stringify(fehlen)}`);
+            // Der Brief (nur bei „beantragen“) steckt als vorletzte Seite in derselben Datei, zuletzt das Passfoto
+            const mitBrief = f.d.zeugnis === "beantragen";
+            if (mitBrief && (!txt.includes(f.d.nachname.slice(0, 20)) || !/Nr\. 2 Buchst\. a/.test(txt) || !/ANTRAG AUF GEBÜHRENBEFREIUNG/.test(txt))) fehler.push(`${f.name}: Brief in der Datei ohne Name oder ohne „Nr. 2 Buchst. a“`);
+            if (!mitBrief && /ANTRAG AUF GEBÜHRENBEFREIUNG/.test(txt)) fehler.push(`${f.name}: Brief in der Datei, obwohl das Zeugnis vorhanden ist`);
+            if (!/Passfoto von /.test(txt)) fehler.push(`${f.name}: Seite „Passfoto von …“ fehlt in der Datei`);
+            textInfo = `Datei enthält ${f.suche.length - fehlen.length} von ${f.suche.length} gesuchten Angaben${mitBrief ? "; Brief mit Name und „Nr. 2 Buchst. a“" : "; kein Brief"}; Passfoto-Seite`;
           }
           belege.push(`${f.name}: ${anzeige.length} Dateien nach ${ms} ms (${anzeige.map((x) => x.split(" – ")[0]).join(", ")}); Anzeige = Rückgabe; Warnungen ${echt.warnungen.length} (Hinweiskasten ${warnkasten ? "ja" : "nein"}); heruntergeladen: ${gross.join(", ")}; ${textInfo}`);
           await schliesseSeite(page);

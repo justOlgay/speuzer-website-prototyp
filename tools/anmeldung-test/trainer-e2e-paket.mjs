@@ -517,7 +517,7 @@ async function geheDurch(page, d, bilder) {
   return reihenfolge;
 }
 
-// Läuft von „start“ bis „pruefen“ und drückt dort „Alles stimmt – Dateien erstellen“; wartet nicht auf das Ergebnis. Rückgabe: null oder die Meldung,
+// Läuft von „start“ bis „pruefen“ und drückt dort „Alles stimmt – Datei erstellen“; wartet nicht auf das Ergebnis. Rückgabe: null oder die Meldung,
 // wo es hakt.
 async function geheBisErstellen(page, d) {
   for (const s of SCHRITTE.slice(1, SCHRITTE.indexOf("pruefen"))) {
@@ -892,7 +892,7 @@ async function haupt() {
       const reihenfolge = await geheDurch(page, BEISPIEL, bilder);
       ok("alle Bildschirme in der Reihenfolge start › person › einsatz › notfall › erfahrung › foto › kodex › selbstauskunft › zeugnis › unterschriften › pruefen › fertig", JSON.stringify(reihenfolge) === JSON.stringify(SCHRITTE.slice(1)), reihenfolge.join(" › "));
       const korpus = await sichtbarerText(page);
-      ok("Bildschirm „fertig“: Titel, die drei Dateien mit ihren Namen, die Wege zum Verein mit der Adresse der Geschäftsstelle", /Dein Paket ist fertig/.test(korpus) && korpus.includes("Trainerunterlagen_Mustermann_Max.pdf") && korpus.includes("Antrag_Gebuehrenbefreiung_Mustermann_Max.pdf") && korpus.includes("Passfoto_Mustermann_Max.jpg") && korpus.includes("geschaeftsstelle@sportfreunde04.de"));
+      ok("Bildschirm „fertig“: Titel, die eine Datei mit ihrem Namen (kein Brief und kein Passfoto als eigene Datei), die Wege zum Verein mit der Adresse der Geschäftsstelle", /Dein Paket ist fertig/.test(korpus) && korpus.includes("Trainerunterlagen_Mustermann_Max.pdf") && !korpus.includes("Antrag_Gebuehrenbefreiung") && !korpus.includes("Passfoto_Mustermann") && korpus.includes("geschaeftsstelle@sportfreunde04.de"));
       ok("Bildschirm „fertig“: Einsicht bei der Person aus der Konfiguration (pronomenfrei): „Du: Zeigst es persönlich " + einsichtKurz + ".“", korpus.includes(`Du: Zeigst es persönlich ${einsichtKurz}.`) && !/\bEr\b|\bSie schaut/.test(korpus), "");
       // Teilen: die Dateien holen
       await page.click('#anmeldung [data-aktion="teilen"]');
@@ -900,22 +900,24 @@ async function haupt() {
       const geteilt = await liesDateienAusSeite(page);
       dateienHaupt = geteilt;
       const namen = geteilt.map((d) => d.name).sort();
-      ok("Teilen: genau drei Dateien mit den Namen Trainerunterlagen_Mustermann_Max.pdf, Antrag_Gebuehrenbefreiung_Mustermann_Max.pdf, Passfoto_Mustermann_Max.jpg", JSON.stringify(namen) === JSON.stringify(["Antrag_Gebuehrenbefreiung_Mustermann_Max.pdf", "Passfoto_Mustermann_Max.jpg", "Trainerunterlagen_Mustermann_Max.pdf"]), namen.join(", "));
+      ok("Teilen: genau eine Datei mit dem Namen Trainerunterlagen_Mustermann_Max.pdf (Typ application/pdf)", JSON.stringify(namen) === JSON.stringify(["Trainerunterlagen_Mustermann_Max.pdf"]) && geteilt.every((d) => d.typ === "application/pdf"), namen.join(", "));
       for (const d of geteilt) fs.writeFileSync(path.join(AUSGABE, "dateien", d.name), Buffer.from(d.b64, "base64"));
       const paket = geteilt.find((d) => d.name.startsWith("Trainerunterlagen"));
-      const antrag = geteilt.find((d) => d.name.startsWith("Antrag_"));
-      const jpg = geteilt.find((d) => d.name.startsWith("Passfoto"));
       const pp = paket ? pdfPruefen(Buffer.from(paket.b64, "base64"), "paket.pdf") : null;
-      const ap = antrag ? pdfPruefen(Buffer.from(antrag.b64, "base64"), "antrag.pdf") : null;
-      ok("Paket-PDF: gültig (pdfinfo), mehrere Seiten, Schrift eingebettet (Liberation Sans)", !!pp && pp.gueltig && pp.seiten >= 5 && /LiberationSans/.test(pp.schriften) && !/\b(Helvetica|Arial|Times)\b/.test(pp.schriften), pp ? pp.seiten + " Seiten" : "fehlt");
+      // Der Brief (Seite 8) und das Passfoto (Seite 9) stecken in derselben Datei: Text der Seite 8 und Bilder je Seite
+      const dateiPfad = path.join(AUSGABE, "dateien", paket ? paket.name : "fehlt.pdf");
+      const briefText = paket ? norm(ausfuehren("pdftotext", ["-f", "8", "-l", "8", dateiPfad, "-"]).stdout || "") : "";
+      const bildListe = paket ? (ausfuehren("pdfimages", ["-list", dateiPfad]).stdout || "").trim().split("\n").slice(2).map((z) => z.trim().split(/\s+/)) : [];
+      const bildSeiten = bildListe.filter((t) => t[2] === "image").map((t) => Number(t[0]));
+      ok("Datei: gültig (pdfinfo), neun Seiten (sieben Paket, Brief, Passfoto), Schrift eingebettet (Liberation Sans)", !!pp && pp.gueltig && pp.seiten === 9 && /LiberationSans/.test(pp.schriften) && !/\b(Helvetica|Arial|Times)\b/.test(pp.schriften), pp ? pp.seiten + " Seiten" : "fehlt");
       ok(`Paket-PDF (pdftotext): „Einsicht bei ${einsichtKurz}“ – der Name stammt aus der Konfiguration, nicht aus dem Code`, !!pp && pp.text.includes(`Einsicht bei ${einsichtKurz}`));
       ok("Paket-PDF: Name, Mannschaft, Verhaltenskodex, Selbstauskunft, Information nach Art. 13 DSGVO und die Anschrift des Vereins (Postfach) aus den Vereinsdaten", !!pp && /Max Mustermann/.test(pp.text) && /D3-Jugend/.test(pp.text) && /Verhaltenskodex/.test(pp.text) && /Selbstauskunft/.test(pp.text) && /Artikel 13/.test(pp.text) && /Postfach 190442/.test(pp.text) && /Frankfurter Fußballverein Sportfreunde 1904 e\. V\./.test(pp.text.replace(/\s+/g, " ")));
       ok("Paket-PDF: Fälligkeit nach der Schnupperphase aus der Konfiguration (Beginn 02.11.2026 + 1 Monat = 02.12.2026) und Datum der Unterschrift (heute des Tests)", !!pp && /02\.12\.2026/.test(pp.text) && /23\.11\.2026/.test(pp.text));
-      ok("Antrag-PDF: gültig (pdfinfo), genau eine Seite, Schrift eingebettet", !!ap && ap.gueltig && ap.seiten === 1 && /LiberationSans/.test(ap.schriften), ap ? ap.seiten + " Seite(n)" : "fehlt");
-      ok("Antrag-PDF (pdftotext): enthält „Nr. 2 Buchst. a“ (§ 30a Abs. 1 Nr. 2 Buchst. a BZRG) und den Namen der antragstellenden Person", !!ap && /Nr\. 2 Buchst\. a/.test(ap.text) && /Mustermann/.test(ap.text), ap ? (/Nr\. 2 Buchst\. a/.exec(ap.text) || [""])[0] : "");
-      ok("Antrag-PDF: der Antrag trägt den Unterzeichner aus der Konfiguration (Name und Funktion) und kein Unterschriftsbild des Vereins (kein Bild in der Datei)", !!ap && ap.text.includes(`${trainerJson.verein.unterzeichner.name}`) && ap.text.includes(trainerJson.verein.unterzeichner.funktion) && ((ausfuehren("pdfimages", ["-list", path.join(AUSGABE, "dateien", antrag.name)]).stdout || "").trim().split("\n").length <= 2), "");
-      ok("Passfoto: eine gültige JPG-Datei (Dateikopf FFD8FF, Typ image/jpeg)", !!jpg && Buffer.from(jpg.b64, "base64").subarray(0, 3).equals(Buffer.from([0xff, 0xd8, 0xff])) && jpg.typ === "image/jpeg", jpg ? Buffer.from(jpg.b64, "base64").length + " Byte" : "fehlt");
-      ok("Dateien: weder der Zugangscode noch sein Prüfwert steht in den PDF-Texten", !!pp && !!ap && ![pp.text, ap.text].some((t) => t.includes(TESTCODE) || t.includes(TESTCODE.replace(/-/g, "")) || t.includes(PRUEFWERT)));
+      ok("Brief (Seite 8, pdftotext): enthält „Nr. 2 Buchst. a“ (§ 30a Abs. 1 Nr. 2 Buchst. a BZRG) und den Namen der antragstellenden Person", /ANTRAG AUF GEBÜHRENBEFREIUNG/.test(briefText) && /Nr\. 2 Buchst\. a/.test(briefText) && /Mustermann/.test(briefText), (/Nr\. 2 Buchst\. a/.exec(briefText) || [""])[0]);
+      ok("Brief (Seite 8): trägt den Unterzeichner aus der Konfiguration (Name und Funktion), kein Unterschriftsbild des Vereins (kein Bild auf Seite 8), keine Fußzeile", briefText.includes(`${trainerJson.verein.unterzeichner.name}`) && briefText.includes(trainerJson.verein.unterzeichner.funktion) && !bildListe.some((t) => Number(t[0]) === 8) && !/Seite \d+ von/.test(briefText), "");
+      const fotoZeile = bildListe.find((t) => t[2] === "image" && Number(t[0]) === 9);
+      ok("Passfoto: Seite 9 („Passfoto von Max Mustermann“) trägt genau ein Bild, ein JPEG (pdfimages: Seite 9, Kodierung jpeg); Bilder sonst nur die vier Unterschriften auf den Seiten 2 bis 5", !!fotoZeile && fotoZeile[8] === "jpeg" && JSON.stringify(bildSeiten) === JSON.stringify([2, 3, 4, 5, 9]) && !!pp && /Passfoto von Max Mustermann/.test(pp.text), fotoZeile ? "Seite " + fotoZeile[0] + " " + fotoZeile[8] + " " + fotoZeile[3] + "×" + fotoZeile[4] : "fehlt");
+      ok("Datei: weder der Zugangscode noch sein Prüfwert steht im PDF-Text", !!pp && ![pp.text].some((t) => t.includes(TESTCODE) || t.includes(TESTCODE.replace(/-/g, "")) || t.includes(PRUEFWERT)));
       // Herunterladen (echte Downloads über Chrome)
       const dl = path.join(AUSGABE, "dateien", "herunterladen");
       fs.rmSync(dl, { recursive: true, force: true });
@@ -926,15 +928,16 @@ async function haupt() {
         const cdp = await browser.target().createCDPSession();
         await cdp.send("Browser.setDownloadBehavior", { behavior: "allow", downloadPath: dl });
         await page.click('#anmeldung [data-aktion="herunterladen"]');
-        for (let i = 0; i < 40 && fs.readdirSync(dl).filter((n) => !n.endsWith(".crdownload")).length < 3; i++) await warte(300);
+        for (let i = 0; i < 40 && fs.readdirSync(dl).filter((n) => !n.endsWith(".crdownload")).length < 1; i++) await warte(300);
         const geladen = fs.readdirSync(dl).filter((n) => !n.endsWith(".crdownload")).sort();
         const gleich = geteilt.every((d) => fs.existsSync(path.join(dl, d.name)) && sha256(fs.readFileSync(path.join(dl, d.name))) === sha256(Buffer.from(d.b64, "base64")));
-        dlOk = geladen.length === 3 && gleich;
+        await warte(1200); // nach einer Weile kommt keine weitere Datei dazu
+        dlOk = fs.readdirSync(dl).filter((n) => !n.endsWith(".crdownload")).length === 1 && geladen.length === 1 && gleich;
         dlDetail = geladen.join(", ");
       } catch (fehler) {
         dlDetail = "Herunterladen nicht prüfbar: " + fehler.message;
       }
-      ok("Herunterladen („Dateien herunterladen“, echte Downloads in Chrome): dieselben drei Dateien, Byte für Byte wie beim Teilen", dlOk, dlDetail);
+      ok("Herunterladen („Datei herunterladen“, echter Download in Chrome): genau eine Datei, Byte für Byte wie beim Teilen", dlOk, dlDetail);
       fs.rmSync(dl, { recursive: true, force: true });
       // Netz und Konsole
       const eigeneNachStart = st.eigene.slice(anfragenVorStart);
@@ -1011,7 +1014,7 @@ async function haupt() {
       await p1.click('#anmeldung [data-aktion="nochmal"]');
       const erholt1 = await p1.waitForSelector('#anmeldung [data-status="fertig"]', { timeout: 20000 }).then(() => true, () => false);
       const korpus1 = erholt1 ? await sichtbarerText(p1) : "";
-      ok("Schrift im Paket, zweiter Versuch („Noch einmal versuchen“): „Dein Paket ist fertig“ mit den drei Dateien", erholt1 && /Dein Paket ist fertig/.test(korpus1) && korpus1.includes("Trainerunterlagen_Mustermann_Max.pdf") && korpus1.includes("Antrag_Gebuehrenbefreiung_Mustermann_Max.pdf") && korpus1.includes("Passfoto_Mustermann_Max.jpg"), erholt1 ? "" : "nicht erholt");
+      ok("Schrift im Paket, zweiter Versuch („Noch einmal versuchen“): „Dein Paket ist fertig“ mit der Datei", erholt1 && /Dein Paket ist fertig/.test(korpus1) && korpus1.includes("Trainerunterlagen_Mustermann_Max.pdf"), erholt1 ? "" : "nicht erholt");
       ok("Schrift im Paket: zwei Abrufe, erst 503, dann 200, beide mit Sec-Fetch-Dest empty (fetch), keiner als script (kein import())", JSON.stringify(abrufe(SCHRIFT)) === JSON.stringify(["empty 503", "empty 200"]), abrufe(SCHRIFT).join("; "));
       await p1.click('#anmeldung [data-aktion="teilen"]');
       await warte(500);
@@ -1057,11 +1060,11 @@ async function haupt() {
       const reihenfolge = await geheDurch(page, BEISPIEL_KARNEVAL, null);
       ok("zweiter Lauf (Karneval, Gruppe Dreamboys, Rolle Betreuer, Zeugnis vorhanden): alle Bildschirme bis „fertig“", JSON.stringify(reihenfolge) === JSON.stringify(SCHRITTE.slice(1)), reihenfolge.join(" › "));
       const korpus = await sichtbarerText(page);
-      ok("zweiter Lauf: „Dein Paket ist fertig“ ohne Antrag (nur Paket und Passfoto), Einsicht bei der Person aus der Konfiguration", /Dein Paket ist fertig/.test(korpus) && korpus.includes("Trainerunterlagen_Beispielfrau_Erika.pdf") && korpus.includes("Passfoto_Beispielfrau_Erika.jpg") && !korpus.includes("Antrag_Gebuehrenbefreiung"), "");
+      ok("zweiter Lauf: „Dein Paket ist fertig“ mit der einen Datei, ohne Brief in der Beschreibung, Einsicht bei der Person aus der Konfiguration", /Dein Paket ist fertig/.test(korpus) && korpus.includes("Trainerunterlagen_Beispielfrau_Erika.pdf") && !korpus.includes("Antrag für dein Führungszeugnis") && !korpus.includes("Antrag_Gebuehrenbefreiung"), "");
       await page.click('#anmeldung [data-aktion="teilen"]');
       await warte(500);
       const geteilt = await liesDateienAusSeite(page);
-      ok("zweiter Lauf: genau zwei Dateien (Trainerunterlagen_Beispielfrau_Erika.pdf, Passfoto_Beispielfrau_Erika.jpg), kein Antrag", JSON.stringify(geteilt.map((d) => d.name).sort()) === JSON.stringify(["Passfoto_Beispielfrau_Erika.jpg", "Trainerunterlagen_Beispielfrau_Erika.pdf"]));
+      ok("zweiter Lauf: genau eine Datei (Trainerunterlagen_Beispielfrau_Erika.pdf), kein Brief", JSON.stringify(geteilt.map((d) => d.name).sort()) === JSON.stringify(["Trainerunterlagen_Beispielfrau_Erika.pdf"]));
       for (const d of geteilt) fs.writeFileSync(path.join(AUSGABE, "dateien", d.name), Buffer.from(d.b64, "base64"));
       const pp = pdfPruefen(Buffer.from(geteilt.find((d) => d.name.startsWith("Trainerunterlagen")).b64, "base64"), "karneval.pdf");
       ok(`zweiter Lauf: Paket-PDF gültig; „Einsicht bei ${einsichtKurz}“ steht auf dem Deckblatt; Gruppe Dreamboys, kein Antrag auf Gebührenbefreiung angekündigt`, pp.gueltig && pp.text.includes(`Einsicht bei ${einsichtKurz}`) && /Dreamboys/.test(pp.text), "");

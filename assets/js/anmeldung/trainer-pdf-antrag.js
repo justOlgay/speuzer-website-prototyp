@@ -1,5 +1,6 @@
 /*
-  Antrag auf Gebührenbefreiung (Brief des Vereins) als eigene PDF-Datei, eine A4-Seite.
+  Antrag auf Gebührenbefreiung (Brief des Vereins), eine A4-Seite. zeichneAntrag setzt sie als Seite in die Datei der Trainerunterlagen
+  (trainer-pdf.js: vorletzte Seite, vor dem Passfoto); baueAntrag macht daraus ein eigenes PDF für die Vorschau „Antrag ansehen“.
 
   Wortlaut und Aussehen wie ap1/beispiele/antrag-gebuehrenbefreiung (T.antrag in trainer-pdf-texte.js): Wappen oben links, Ort und
   Datum oben rechts, zwei Überschriften in Großbuchstaben, Anrede, vier Absätze im Blocksatz, die Angaben der Person (Name, Geburtsdatum,
@@ -20,8 +21,8 @@ import { T } from "./trainer-pdf-texte.js";
 const S = 10.5; // Schriftgröße des Briefs
 const LH = 15.75; // Zeilenabstand (1,5)
 
-export async function baueAntrag(werkzeuge, d) {
-  const dok = await Dokument.neu(werkzeuge);
+// Zeichnet den Brief auf eine neue Seite des Dokuments (ohne Fußzeile: Der Brief geht, vom Verein unterschrieben, an das Bürgeramt).
+export function zeichneAntrag(dok, d) {
   const t = T.antrag;
   const seite = dok.neueSeite();
   const s = new Schreiber(dok, { kopf: () => 0, unten: 20 });
@@ -136,7 +137,13 @@ export async function baueAntrag(werkzeuge, d) {
   const iaX = X0 + 62.4;
   const wIA = seite.text(t.iA, iaX, b, S, {});
   seite.linie(iaX + wIA + 8.5, b - 4.4, iaX + 235.3, b - 4.4, 1.1, FARBE.tinte);
+  return seite;
+}
 
+// Der Brief als eigenes PDF (Vorschau „Antrag ansehen“ vor dem Erstellen der Datei)
+export async function baueAntrag(werkzeuge, d) {
+  const dok = await Dokument.neu(werkzeuge);
+  zeichneAntrag(dok, d);
   dok.setzeMetadaten({ titel: T.meta.titelAntrag, betreff: T.meta.betreffAntrag, ersteller: d.verein.name, heute: d.heute });
   return { bytes: await dok.speichern(), dok: dok };
 }
