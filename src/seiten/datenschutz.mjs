@@ -4,6 +4,7 @@
 // juristische Prüfung).
 
 import { mailLink, telefonAnzeige, APP_MODUS_SKRIPT, AUFNAHMEANTRAG_VERSAND, ANMELDUNG_LIVE } from "../vorlagen/hilfen.mjs";
+import { TRAINER_LIVE } from "../vorlagen/hilfen.mjs";
 
 // Abschnitte mit zwei Fassungen je nach Versandweg des Online-Aufnahmeantrags
 // (hilfen.mjs, AUFNAHMEANTRAG_VERSAND): Im Weg "endpunkt" gilt
@@ -40,6 +41,48 @@ function pruefeLiveFassung(datenschutz) {
   if (!datenschutz.quelle_live) fehlt.push("quelle_live");
   if (!(datenschutz.abschnitte ?? []).some((a) => a.titel_live && a.absaetze_live?.length)) fehlt.push("titel_live/absaetze_live (Abschnitt 14)");
   if (fehlt.length) throw new Error(`datenschutz.mjs: Mit ANMELDUNG_LIVE fehlt in data/datenschutz.json: ${fehlt.join(", ")}`);
+}
+
+// Seite „Neu im Trainerteam“ (Stufe 2, 24.11.2026, Schalter TRAINER_LIVE in hilfen.mjs): Mit dem Schalter steht hinter Abschnitt 14 der
+// Abschnitt „14a. Seite für neue Trainerinnen, Trainer und Betreuer“. Er ist in data/datenschutz.json ein Eintrag von "abschnitte" mit dem
+// Kennzeichen "nur_mit_trainer_live": true und wird ohne den Schalter nicht ausgegeben (die Seite bleibt dann Zeichen für Zeichen, wie sie
+// war). Stand im Seitenkopf und Quellenzeile kommen mit dem Schalter aus "stand_trainer_live" und "quelle_trainer_live"; sie ersetzen
+// "stand_live" und "quelle_live" (die Seite braucht ANMELDUNG_LIVE, denn 14a verweist auf Abschnitt 14, die Anmeldung über den Assistenten).
+// Beim Livegang das Datum in "stand_trainer_live" und in "quelle_trainer_live" auf den Tag des Livegangs setzen.
+// Folge für die Sprungmarken: Mit dem Schalter rücken die Abschnitte nach 14a (ab „15. Links zu anderen Anbietern“) um eine Nummer weiter
+// (#abschnitt-N); Abschnitt 14 behält seine Nummer (auf sie verweist aufnahmeantrag.mjs).
+const istTrainerAbschnitt = (abschnitt) => abschnitt?.nur_mit_trainer_live === true;
+
+// Mit dem Schalter dürfen Abschnitt 14a, Stand und Quellenzeile nicht fehlen: Der Bau bricht ab, statt eine Datenschutzerklärung ohne den
+// Abschnitt zur Trainerseite zu veröffentlichen oder den alten Stand in den Kopf zu schreiben.
+function pruefeTrainerFassung(datenschutz) {
+  if (!ANMELDUNG_LIVE) {
+    throw new Error("datenschutz.mjs: TRAINER_LIVE verlangt ANMELDUNG_LIVE (Abschnitt 14a verweist auf „14. Anmeldung über den Anmelde-Assistenten“).");
+  }
+  const text = (wert) => (typeof wert === "string" ? wert.trim() : "");
+  const stand = text(datenschutz.stand_trainer_live);
+  const quelle = text(datenschutz.quelle_trainer_live);
+  const fehlt = [];
+  if (!stand) fehlt.push("stand_trainer_live");
+  if (!quelle) fehlt.push("quelle_trainer_live");
+  const vorhanden = (datenschutz.abschnitte ?? []).some((a) => istTrainerAbschnitt(a) && text(a.titel) && Array.isArray(a.absaetze) && a.absaetze.length);
+  if (!vorhanden) fehlt.push("Abschnitt 14a (Eintrag in abschnitte mit nur_mit_trainer_live, titel und absaetze)");
+  if (fehlt.length) throw new Error(`datenschutz.mjs: Mit TRAINER_LIVE fehlt in data/datenschutz.json: ${fehlt.join(", ")}`);
+  if (!quelle.includes(stand)) {
+    throw new Error(`datenschutz.mjs: In data/datenschutz.json nennt quelle_trainer_live nicht das Datum aus stand_trainer_live (${stand}): beide Stellen auf denselben Tag setzen.`);
+  }
+}
+
+// Gibt die Daten so zurück, wie seite() sie braucht: ohne den Schalter ohne den Abschnitt 14a (sonst dieselben Daten, Objekt für Objekt), mit
+// dem Schalter mit dem Abschnitt und mit Stand und Quellenzeile der Trainerseite an der Stelle von "stand_live" und "quelle_live".
+function mitTrainerFassung(daten) {
+  const datenschutz = daten.datenschutz ?? {};
+  if (TRAINER_LIVE) {
+    pruefeTrainerFassung(datenschutz);
+    return { ...daten, datenschutz: { ...datenschutz, stand_live: datenschutz.stand_trainer_live, quelle_live: datenschutz.quelle_trainer_live } };
+  }
+  if (!Array.isArray(datenschutz.abschnitte) || !datenschutz.abschnitte.some(istTrainerAbschnitt)) return daten;
+  return { ...daten, datenschutz: { ...datenschutz, abschnitte: datenschutz.abschnitte.filter((abschnitt) => !istTrainerAbschnitt(abschnitt)) } };
 }
 
 function escapeHtml(text) {
@@ -414,6 +457,7 @@ function quelleAbschnitt(datenschutz) {
 }
 
 export function seite(daten) {
+  daten = mitTrainerFassung(daten); // Seite „Neu im Trainerteam“: nur mit TRAINER_LIVE wirksam (siehe oben)
   pruefeLiveFassung(daten.datenschutz ?? {});
   const datenschutz = mitLiveKopf(daten.datenschutz ?? {});
   const abschnitte = (datenschutz.abschnitte ?? []).map(mitVersandweg).map(mitLiveFassung);

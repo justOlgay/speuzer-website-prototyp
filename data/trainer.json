@@ -1,0 +1,29 @@
+{
+  "hinweis": "Konfiguration der Seite „Neu im Trainerteam“ (src/begleit/trainerteam.mjs, assets/js/anmeldung/trainer.js; die Seite entsteht nur mit dem Schalter TRAINER_LIVE in src/vorlagen/hilfen.mjs). Hier steht nur, was keine andere Datei kennt. Name, Registername, Anschrift, E-Mail-Adresse und Ort des Vereins (data/verein.json), die Adresse der Satzung (data/downloads.json), die Mannschaften (data/teams.json) und die Gruppen des Karnevals (data/karneval.json) leitet der Bau daraus ab; die Quellen für pdf-lib, fontkit und Schrift trägt tools/appack-paket.mjs ins Paket ein. Einsichtnehmende: Melanie Seipp allein (Entscheidung von Olgay Özkan vom 24.11.2026); die Liste bleibt erweiterbar, eine Vertretung kommt ohne Änderung am Code dazu. Unterzeichner des Antrags auf Gebührenbefreiung: wie bisher übernommen (der Antrag entsteht ohne Unterschrift des Vereins, der Verein unterschreibt von Hand). Stand 24.11.2026.",
+  "zugang": {
+    "parameter": "code",
+    "pruefwerte": [],
+    "hinweis": "Zugang nur mit Code. Jeder Prüfwert ist der SHA-256 (hex, klein) des Codes ohne Leerzeichen und Bindestriche in Großbuchstaben. Mehrere Prüfwerte gelten nebeneinander. Leere Liste: Die Seite bleibt für jeden Code zu, und der Bau mit dem Schalter TRAINER_LIVE bricht ab. Setzen und prüfen mit tools/trainer-zugang.mjs. Der Code selbst steht nie in dieser Datei."
+  },
+  "verein": {
+    "unterzeichner": {
+      "name": "Melanie Seipp",
+      "funktion": "Vorstand"
+    },
+    "kodexUrl": "https://www.landessportbund-hessen.de/fileadmin/media/Schule_Bildung_Personalentwicklung/Verhaltenskodex/Verhaltenskodex_10-2023_Vers._2026_beschreibbar.pdf"
+  },
+  "einsicht": [
+    {
+      "name": "Melanie Seipp",
+      "funktion": "1. Vorsitzende"
+    }
+  ],
+  "mannschaften": {
+    "hinweis": "Auswahl der Abteilung, der „Mannschaft“ und der „Gruppe“ auf der Seite. „abteilungen“ nennt die Abteilungen, die die Seite anbietet (fussball, karneval); mit nur einer entfällt die Frage danach. Stand 24.11.2026: nur fussball (Melli: „KV erstmal außen vor lassen“); der Karneval kommt mit „karneval“ in der Liste zurück, dann gelten auch die Gruppen aus data/karneval.json (und der Brief spricht noch vom Fußballsport, siehe stufe2/UEBERGABE.md). Ein erweitertes Führungszeugnis gibt es nur für Tätigkeiten mit Kontakt zu Minderjährigen (§ 30a Abs. 1 Nr. 2 BZRG): Aus data/teams.json erscheinen darum nur Mannschaften der hier genannten Kategorien (Standard: Jugend; Herren und Soma fehlen). „ausgenommen“ nimmt einzelne Mannschaften oder Gruppen (Name genau wie in den Dateien) zusätzlich heraus, zum Beispiel eine Karneval-Gruppe ohne Minderjährige.",
+    "abteilungen": ["fussball"],
+    "kategorien": ["Jugend"],
+    "ausgenommen": []
+  },
+  "schnupperMonate": 1,
+  "zeugnisJahre": 5
+}

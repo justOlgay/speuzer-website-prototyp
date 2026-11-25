@@ -138,6 +138,44 @@ Assistent, auf der Website und aus der App.
   gegen die Stilregeln „einfach und wenig Text“ (Startschritt höchstens 40 Wörter); `--vergleich vorher,nachher` legt zwei Messungen nebeneinander (Ausgabe unter `tools/cache/orchestrierung-anmeldung/pruefung/p3/`).
 - Tests: `tools/anmeldung-test/` (siehe Befehle `test:anmeldung…`)
 
+### Seite „Neu im Trainerteam“
+
+Neue Trainer, Co-Trainer und Betreuer erledigen darauf alle Unterlagen in einem Zug am Handy: Angaben und Passfoto, Verhaltenskodex und
+Selbstauskunft, Antrag auf Gebührenbefreiung für das erweiterte Führungszeugnis, Unterschrift am Bildschirm. Der Browser erzeugt daraus das
+Paket-PDF, den Antrag (PDF) und das Passfoto (JPG); die Person schickt die Dateien selbst per E-Mail an die Geschäftsstelle. Es wird nichts
+übertragen und nichts gespeichert (kein Backend), und das Führungszeugnis wird nie hochgeladen oder gemailt, sondern persönlich gezeigt
+(§ 72a Abs. 5 SGB VIII). Die Seite ist öffentlich erreichbar, öffnet sich aber nur mit einem Code; sie steht nicht in der Sitemap, nicht im Menü
+und trägt `noindex`.
+
+Schalter (Standard **aus**): `TRAINER_LIVE_SCHALTER` in `src/vorlagen/hilfen.mjs` steht auf `false`; für einen einzelnen Bau gilt `TRAINER_LIVE=1`
+(`0` = aus), und `TRAINER_DATEN=<Datei>` ersetzt `data/trainer.json` nur für diesen Bau (Testprüfwert, nur für Tests). Der Schalter verlangt
+`ANMELDUNG_LIVE`, weil die Seite Module, Schrift und pdf-lib mit dem Anmelde-Assistenten teilt. Mit dem Schalter entsteht `docs/ws/trainerteam.html`
+(im Paket `web/trainerteam.html` samt `trainer.css`, `anmeldung-trainer*.js` und `anmeldung-texte-trainer-de.js`) und die Datenschutzerklärung
+bekommt den Abschnitt „14a“. Ohne den Schalter sind `docs/ws/*`, `docs/sitemap.xml` und `dist/appack-paket/*` Byte für Byte wie ohne die Seite; nur die
+Kopien der neuen Dateien unter `docs/assets/` kommen dazu. Der Bau bricht mit klarer Meldung ab, wenn die Konfiguration nicht stimmt.
+
+- Konfiguration: `data/trainer.json` (Zugang, Unterzeichner des Antrags, Einsichtnehmende als Liste, Auswahl der Mannschaften, Fristen, Adresse des
+  Verhaltenskodex). Name, Anschrift und Adresse des Vereins kommen aus `data/verein.json`, die Satzung aus `data/downloads.json`, Mannschaften und
+  Gruppen aus `data/teams.json` und `data/karneval.json`; `quellen` trägt `tools/appack-paket.mjs` ein. Kein Name einer Person steht im Code.
+  Ein erweitertes Führungszeugnis gibt es nur für Tätigkeiten mit Kontakt zu Minderjährigen (§ 30a Abs. 1 Nr. 2 BZRG): Aus `data/teams.json`
+  erscheinen darum nur Mannschaften der Kategorien in `data/trainer.json › mannschaften › kategorien` (Standard „Jugend“; Herren und Soma fehlen),
+  aus `data/karneval.json` die Gruppen, aber nur, wenn `mannschaften › abteilungen` den Karneval nennt (Standard seit 24.11.2026: nur `fussball`, der
+  Vorstand lässt den Karneval vorerst weg; mit nur einer Abteilung entfällt auf der Seite die Frage danach); `mannschaften › ausgenommen` nimmt
+  einzelne Namen zusätzlich heraus.
+- Zugang mit Code: Link `https://cdn.appack.de/sportfreunde04/workspace/web/trainerteam.html?code=<CODE>`. Werkzeug `tools/trainer-zugang.mjs`:
+  `--neu --blatt <Ordner außerhalb des Repos>` erzeugt einen Code (12 Zeichen aus A–Z ohne I, O und L sowie 2–9), schreibt nur seinen Prüfwert
+  (SHA-256) nach `data/trainer.json › zugang › pruefwerte` und legt Blatt (PDF), QR-Code (PNG) und den Text für die Mail im Ordner ab; `--pruefen`,
+  `--leeren`, `--behalten` wie bei `tools/anmeldung-zugang.mjs`. Der Klartext-Code steht nie im Repo. Eine **leere Liste der Prüfwerte** heißt hier „die
+  Seite bleibt für jeden Code zu“ (nicht „keine Abfrage“), und der Bau mit dem Schalter bricht dann ab.
+- Dateien: `src/begleit/trainerteam.mjs` (Rahmen der Seite), `assets/js/anmeldung/trainer*.js` (Einstieg `trainer.js`; PDF in `trainer-pdf*.js`),
+  `assets/js/anmeldung/texte/trainer-de.js` (alle Texte), `assets/css/trainer.css`; die Namen der Einsichtnehmenden bildet allein `trainer-einsicht.js`.
+- Datenschutzerklärung: Abschnitt „14a. Seite für neue Trainerinnen, Trainer und Betreuer“ in `data/datenschutz.json` (Kennzeichen `nur_mit_trainer_live`,
+  Stand und Quelle in `stand_trainer_live` und `quelle_trainer_live`), eingebunden in `src/seiten/datenschutz.mjs`; er erscheint nur mit dem Schalter. Der
+  Text muss zur „Information zum Datenschutz“ im Paket-PDF passen (`assets/js/anmeldung/trainer-pdf-texte.js`).
+- Tests: `npm run test:trainer-zugang` und `npm run test:trainer-pdf` (ohne Browser), `npm run test:trainer-e2e` (Browser, Port 4201),
+  `npm run test:trainer-paket` (Paket im Browser und Bauabbrüche, Port 4203; setzt den Schalter für seine Bauten selbst und gilt mit dem Schalter im Code auf `false` wie auf `true`), `npm run test:trainer` (alle vier).
+- Livegang, Rückwege und Pflege: `tools/cache/orchestrierung-trainer/stufe2/UEBERGABE.md` (im Hauptordner des Projekts; `tools/cache/` ist nicht im Repo).
+
 ## Befehle
 
 ```

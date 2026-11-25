@@ -94,6 +94,25 @@ export const ANMELDUNG_SPRACHEN_LIVE = ANMELDUNG_SPRACHEN_TEST.length
   ? ANMELDUNG_SPRACHEN_ALLE.filter((s) => s === "de" || ANMELDUNG_SPRACHEN_TEST.includes(s))
   : ["de", "en", "tr", "ar"]; // 12.10.2026: Türkisch und Arabisch nach eigener Sprachprüfung (M12) freigegeben (Olgay)
 
+// ---------- Seite „Neu im Trainerteam“ (Stufe 2, 24.11.2026) ----------
+
+// Die Seite „Neu im Trainerteam“ (src/begleit/trainerteam.mjs, assets/js/anmeldung/trainer*.js, Konfiguration data/trainer.json) ist eine
+// öffentlich erreichbare Seite, die sich nur mit einem Code öffnet (Zugang: tools/trainer-zugang.mjs). Mit TRAINER_LIVE = true:
+//   - tools/build.mjs baut sie als Workspace-Seite docs/ws/trainerteam.html (noindex, ohne Begleitrahmen, Entwurfsband und Werkzeuge der
+//     Vorführung; es gibt weder eine Begleitseite noch einen Eintrag in der Sitemap oder im Menü) und bricht mit einer klaren Meldung ab,
+//     wenn die Konfiguration nicht stimmt (zum Beispiel keine Prüfwerte, keine Einsichtnehmenden),
+//   - tools/appack-paket.mjs legt sie als trainerteam.html samt trainer.css, anmeldung-trainer*.js und anmeldung-texte-trainer-de.js in den
+//     Ordner web/ des appack-Pakets. Die Seite teilt Module, Schrift und pdf-lib mit dem Anmelde-Assistenten (keine Doppelung); darum
+//     verlangt sie ANMELDUNG_LIVE.
+// Solange der Schalter AUS ist (Standard), sind docs/ws/*, docs/sitemap.xml, dist/appack-paket/* und docs/appack-paket/* Byte für Byte wie
+// ohne die Seite; nur die neuen Dateien unter docs/assets/ (Kopien von assets/) kommen dazu. Der Schalter bleibt aus, bis Olgay den
+// Livegang freigibt; der Ablauf steht in tools/cache/orchestrierung-trainer/stufe2/ (UEBERGABE.md). Für einen Test-Bau setzt die
+// Umgebungsvariable TRAINER_LIVE=1 (an) bzw. TRAINER_LIVE=0 (aus) den Wert nur für diesen Bau – danach wieder ohne sie bauen.
+const TRAINER_LIVE_SCHALTER = false;
+const TRAINER_LIVE_TEST = globalThis.process?.env?.TRAINER_LIVE;
+export const TRAINER_LIVE =
+  TRAINER_LIVE_TEST === "1" ? true : TRAINER_LIVE_TEST === "0" ? false : TRAINER_LIVE_SCHALTER;
+
 // ---------- Organigramm „Wer macht was“ (M13, 11.10.2026) ----------
 
 // Die Seite src/seiten/verein/organigramm.mjs (Workspace-Seite web/verein-organigramm.html, Daten data/organigramm.json

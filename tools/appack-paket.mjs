@@ -29,6 +29,7 @@ import { isDeepStrictEqual } from "node:util";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { ANMELDUNG_LIVE, ANMELDUNG_SPRACHEN_LIVE } from "../src/vorlagen/hilfen.mjs";
+import { TRAINER_LIVE } from "../src/vorlagen/hilfen.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = path.join(ROOT, "docs");
@@ -61,7 +62,9 @@ const AUSGESCHLOSSENE_DATEIEN = new Set(["styleguide.html"]);
 // entsprechend 42; mit ANMELDUNG_LIVE 44 und 43.
 // 23.11.2026: + mannschaften-soma.html (Soma, Freizeitmannschaft; eine Weiterleitung spielplan-soma.html gibt es nicht): 44
 // und das Paket entsprechend 43; mit ANMELDUNG_LIVE 45 und 44.
-const ERWARTETE_WS_DATEIEN = 44 + (ANMELDUNG_LIVE ? 1 : 0);
+// 24.11.2026: + trainerteam.html (Seite „Neu im Trainerteam“, nur mit TRAINER_LIVE, nicht verlinkt): mit dem Schalter eine mehr, ohne ihn
+// bleibt die Zahl, wie sie war.
+const ERWARTETE_WS_DATEIEN = 44 + (ANMELDUNG_LIVE ? 1 : 0) + (TRAINER_LIVE ? 1 : 0);
 
 // Skripte im Workspace-Ordner (28.09.2026, Aufnahmeantrag online): Anders
 // als Schriften und Bilder (GitHub Pages) liegen die Skripte der Seite
@@ -201,6 +204,30 @@ function schreibeSeiteUm(html, dateiname, zaehler) {
       throw new Error(`${dateiname}: erwartet je 1× Stylesheet und Skript des Assistenten, gefunden ${css}× und ${skript}×`);
     }
     zaehler.anmeldungVerweise += css + skript;
+  }
+
+  // 0d) Seite „Neu im Trainerteam“ (nur trainerteam.html, nur mit TRAINER_LIVE): Stylesheets und Startskript liegen im Ordner der Seite
+  // (anmeldung.css, trainer.css, anmeldung-trainer.js; siehe baueTrainerDateien). Jeder Verweis muss genau einmal da sein.
+  if (dateiname === TR_SEITE) {
+    let anmCss = 0;
+    let trCss = 0;
+    let skript = 0;
+    ergebnis = ergebnis.replace(ANM_CSS_MUSTER, () => {
+      anmCss += 1;
+      return 'href="anmeldung.css"';
+    });
+    ergebnis = ergebnis.replace(TR_CSS_MUSTER, () => {
+      trCss += 1;
+      return 'href="trainer.css"';
+    });
+    ergebnis = ergebnis.replace(TR_IMPORT_MUSTER, () => {
+      skript += 1;
+      return `import("./${anmDateiname(TR_EINSTIEG)}")`;
+    });
+    if (anmCss !== 1 || trCss !== 1 || skript !== 1) {
+      throw new Error(`${dateiname}: erwartet je 1× Stylesheet anmeldung.css, Stylesheet trainer.css und Import von trainer.js, gefunden ${anmCss}×, ${trCss}× und ${skript}×`);
+    }
+    zaehler.trainerVerweise = (zaehler.trainerVerweise ?? 0) + anmCss + trCss + skript;
   }
 
   // 1) site.css: gleicher Ordner wie die Seite selbst, kein "../assets/" mehr.
@@ -654,6 +681,111 @@ function anmPruefeSyntax(dateien) {
   }
 }
 
+// ---------- Seite „Neu im Trainerteam“ im Paket (Stufe 2, nur mit TRAINER_LIVE) ----------
+// Nur mit TRAINER_LIVE (src/vorlagen/hilfen.mjs); verlangt ANMELDUNG_LIVE. Zur Seite docs/ws/trainerteam.html (wird wie alle Seiten
+// umgeschrieben, siehe schreibeSeiteUm) kommen diese Dateien in den Ordner web/:
+//   trainer.css                     Stylesheet (assets/css/trainer.css, ohne Kommentare)
+//   anmeldung-trainer*.js           die ES-Module der Seite (assets/js/anmeldung/trainer*.js, ohne Kommentare, Importe auf die flachen Namen)
+//   anmeldung-texte-trainer-de.js   ihre Texte (assets/js/anmeldung/texte/trainer-de.js, als Modul mit reinen Daten)
+// Was die Seite mit dem Anmelde-Assistenten teilt (bausteine.js, hilfen.js, zugang.js, unterschrift.js, bilder.js, pdf-lader.js, pdf.js, regeln.js
+// und ihre Importe, dazu Schrift, pdf-lib und fontkit), liegt schon im Ordner (baueAnmeldungDateien) und kommt nicht noch einmal dazu: keine
+// Doppelung, und die Dateien des Assistenten bleiben, wie sie sind (Inhalt und Reihenfolge im Paket). Namen und Format wie dort: flach, nur
+// .html/.css/.js, ohne Kommentare, geprüft mit node --check. Die Konfiguration der Seite trägt die Quellen von pdf-lib, fontkit und Schrift erst
+// hier ein (wie anmTraegeQuellenEin): die Fassung in docs/ws/ hat keine "quellen" und läuft auf GitHub Pages mit den Standardpfaden.
+
+const TR_SEITE = "trainerteam.html";
+const TR_EINSTIEG = "trainer.js";
+const TR_QUELLE_CSS = path.join(DOCS, "assets", "css", "trainer.css");
+const TR_CSS_MUSTER = /href="\.\.\/assets\/css\/trainer\.css"/g;
+const TR_IMPORT_MUSTER = /import\("\.\.\/assets\/js\/anmeldung\/trainer\.js"\)/g;
+const TR_KONFIG_MUSTER = /(<script type="application\/json" id="trainer-konfig">)([\s\S]*?)(<\/script>)/;
+
+function trLeseKonfig(html) {
+  const treffer = html.match(TR_KONFIG_MUSTER);
+  if (!treffer) throw new Error(`${TR_SEITE}: <script id="trainer-konfig"> fehlt`);
+  return JSON.parse(treffer[2]);
+}
+
+// Schreibt die Konfiguration in die Seite zurück (wie src/begleit/trainerteam.mjs › jsonImSkript: "<" als <).
+function trSchreibeKonfig(html, konfig) {
+  return html.replace(TR_KONFIG_MUSTER, (_treffer, vor, _alt, nach) => vor + JSON.stringify(konfig).replace(/</g, "\\u003c") + nach);
+}
+
+// Von trainer.js aus erreichbare Module (Quelle: docs/assets/js/anmeldung/), einschließlich der geteilten und trainer-pdf.js (das trainer.js seit
+// 24.11.2026 statisch importiert und mit der Seite lädt: Safari merkt sich ein gescheitertes import(), siehe Kopfkommentar von trainer.js).
+function trSammleModule() {
+  const warteschlange = [TR_EINSTIEG];
+  const reihenfolge = [];
+  const gesehen = new Set();
+  while (warteschlange.length) {
+    const rel = warteschlange.shift();
+    if (gesehen.has(rel)) continue;
+    gesehen.add(rel);
+    reihenfolge.push(rel);
+    const pfad = path.join(ANM_QUELLE_JS, rel);
+    if (!existsSync(pfad)) throw new Error(`Trainerseite: docs/assets/js/anmeldung/${rel} fehlt`);
+    if (rel.startsWith("texte/")) continue; // Textmodule: reine Daten, ohne Importe
+    for (const ziel of anmImporteVon(anmEntferneJsKommentare(readFileSync(pfad, "utf8")))) warteschlange.push(ziel);
+  }
+  return reihenfolge;
+}
+
+// Jeder Import eines Moduls der Trainerseite muss auf eine Datei zeigen, die es gibt (im Paket der Trainerseite oder, für die geteilten Module, beim
+// Assistenten). Die geteilten Module hat anmPruefeVerweise schon geprüft.
+function trPruefeVerweise(dateien, anmDateien) {
+  for (const [name, inhalt] of dateien) {
+    if (!name.endsWith(".js")) continue;
+    const ohne = anmEntferneJsKommentare(inhalt);
+    for (const ziel of anmImporteVon(ohne)) {
+      if (!dateien.has(ziel) && !anmDateien.has(ziel)) throw new Error(`${name}: Import "./${ziel}" zeigt auf keine Datei im Paket`);
+    }
+    if (/\.\/texte\//.test(ohne)) throw new Error(`${name}: enthält noch "./texte/" nach dem Umschreiben`);
+    if (/\.\.\/assets\//.test(ohne)) throw new Error(`${name}: enthält noch "../assets/" nach dem Umschreiben`);
+  }
+}
+
+// Erzeugt die Dateien der Trainerseite für den Ordner web/ (noch nicht geschrieben): { dateien: Map(Name -> Text), quellen, module, gemeinsam }.
+// `quellen` trägt der Aufruf in die Konfiguration der Seite ein; `gemeinsam` sind die Namen der Module, die der Assistent schon liefert.
+async function baueTrainerDateien(anmeldung) {
+  if (!anmeldung) throw new Error("TRAINER_LIVE verlangt ANMELDUNG_LIVE: Die Seite „Neu im Trainerteam“ teilt Module, Schrift und pdf-lib mit dem Anmelde-Assistenten.");
+  const seitenPfad = path.join(WS_DIR, TR_SEITE);
+  if (!existsSync(seitenPfad)) throw new Error(`${path.relative(ROOT, seitenPfad)} fehlt – zuerst "npm run build" mit TRAINER_LIVE ausführen`);
+  const konfig = trLeseKonfig(readFileSync(seitenPfad, "utf8"));
+  if (konfig.live !== true) throw new Error(`${TR_SEITE}: Konfiguration ohne live = true`);
+  if (konfig.quellen !== undefined) throw new Error(`${TR_SEITE}: Die Konfiguration in docs/ws/ trägt schon "quellen" – sie trägt erst das Paket ein`);
+
+  const dateien = new Map();
+  const gemeinsam = [];
+  const modulListe = trSammleModule();
+  for (const rel of modulListe) {
+    const name = anmDateiname(rel);
+    if (anmeldung.dateien.has(name)) {
+      gemeinsam.push(name); // schon im Paket (vom Assistenten): nicht noch einmal
+    } else if (rel.startsWith("texte/")) {
+      dateien.set(name, await anmBaueTextModul(rel));
+    } else {
+      const { code } = anmSchreibeModulPfadeUm(anmEntferneJsKommentare(readFileSync(path.join(ANM_QUELLE_JS, rel), "utf8")));
+      dateien.set(name, code);
+    }
+  }
+  dateien.set("trainer.css", anmEntferneCssKommentare(readFileSync(TR_QUELLE_CSS, "utf8")));
+
+  // pdf-lib, fontkit und die Schrift liegen schon im Ordner (Assistent): dieselben Dateien, dieselben Orte wie dort.
+  const quellen = { pdfLib: ANM_PDFLIB, fontkit: ANM_FONTKIT, schriftModul: "anmeldung-schrift.js" };
+  for (const q of Object.values(quellen)) {
+    if (!anmeldung.dateien.has(q) && !existsSync(path.join(WEB_SKRIPTE_DIR, q))) throw new Error(`Trainerseite: Quelle ${q} liegt nicht im Paket`);
+  }
+  trPruefeVerweise(dateien, anmeldung.dateien);
+  return { dateien, quellen, module: modulListe, gemeinsam };
+}
+
+// Die Seite trainerteam.html: Konfiguration um die Quellen von pdf-lib, fontkit und Schrift ergänzen.
+function trTraegeQuellenEin(html, quellen) {
+  const konfig = trLeseKonfig(html);
+  konfig.quellen = quellen;
+  return trSchreibeKonfig(html, konfig);
+}
+
 // ---------- LIESMICH.md ----------
 
 // Abschnitt zum Anmelde-Assistenten (nur mit ANMELDUNG_LIVE; sonst leer, dann bleibt die LIESMICH wie vorher).
@@ -862,6 +994,38 @@ ${dateiliste.map((d) => `- ${d}`).join("\n")}
 `;
 }
 
+// Abschnitt zur Seite „Neu im Trainerteam“ (nur mit TRAINER_LIVE; steht am Ende der LIESMICH, nach der Dateiliste).
+function baueLiesmichTrainer(trainer) {
+  const namen = [...trainer.dateien.keys()];
+  const module = namen.filter((n) => /^anmeldung-trainer.*\.js$/.test(n));
+  const texte = namen.filter((n) => n.startsWith("anmeldung-texte-trainer-"));
+  return `
+## Seite „Neu im Trainerteam“ (Stufe 2; nur mit dem Schalter TRAINER_LIVE)
+
+Dieser Abschnitt steht nur im Paket, das mit dem Schalter \`TRAINER_LIVE\` (\`src/vorlagen/hilfen.mjs\`, verlangt \`ANMELDUNG_LIVE\`)
+gebaut wurde. Ohne den Schalter gibt es diese Dateien nicht, und das Paket ist Byte für Byte wie ohne die Seite.
+
+\`${TR_SEITE}\` ist eine öffentlich erreichbare Seite, die sich nur mit einem Code öffnet: Link \`${TR_SEITE}?code=<CODE>\` (Code, QR-Code und
+Blatt: \`node tools/trainer-zugang.mjs\`), sonst ist die Code-Seite der erste Bildschirm. Im Paket stehen nur die Prüfwerte (SHA-256) aus
+\`data/trainer.json › zugang › pruefwerte\` in der Konfiguration der Seite; ohne Prüfwert bricht der Bau ab. Neue Trainer, Co-Trainer und Betreuer
+erledigen darauf alles in einem Zug am Handy und schicken die erzeugten Dateien selbst per E-Mail an die Geschäftsstelle; die Seite überträgt und
+speichert nichts. Sie ist von keiner Seite verlinkt, nicht im Menü und nicht in der Sitemap (\`noindex\`). Alle Dateien liegen flach im Ordner \`web\`:
+
+- \`trainer.css\` – Stylesheet (ohne Kommentare)
+- ${module.length} Module \`anmeldung-trainer*.js\` – Code der Seite (ES-Module; Einstieg \`anmeldung-trainer.js\`; ohne Kommentare, Importe auf diese
+  Namen umgeschrieben; \`anmeldung-trainer-pdf.js\` und seine Teile laden mit der Seite, nur die Schrift, pdf-lib und fontkit erst beim Erstellen der Dateien)
+- ${texte.length} Textmodul \`anmeldung-texte-trainer-de.js\`
+- geteilt mit dem Anmelde-Assistenten (liegen schon im Ordner, keine Doppelung): ${trainer.gemeinsam.length} Module (\`${trainer.gemeinsam.join("`, `")}\`),
+  \`anmeldung-schrift.js\`, \`${ANM_PDFLIB}\` und \`${ANM_FONTKIT}\`
+
+Reihenfolge beim Einspielen: erst \`trainer.css\`, \`anmeldung-texte-trainer-de.js\` und alle \`anmeldung-trainer*.js\`, zuletzt \`${TR_SEITE}\`. So ist
+nie eine Seite sichtbar, deren Dateien noch fehlen. Wechsel des Codes: neuen Prüfwert in \`data/trainer.json\` setzen (\`--behalten\` lässt den alten
+bis zum Wechsel gelten), neu bauen, \`${TR_SEITE}\` neu einspielen. Rückweg: \`${TR_SEITE}\`, \`trainer.css\`, \`anmeldung-trainer*.js\` und
+\`anmeldung-texte-trainer-de.js\` im CMS löschen; die Dateien des Assistenten bleiben. Prüfen nach dem Einspielen: \`node tools/appack-paket-pruefen.mjs\`
+für das Paket und der Abgleich der SHA-256 aus \`manifest.json\` mit den Dateien im CMS.
+`;
+}
+
 // ---------- Hauptablauf ----------
 
 async function main() {
@@ -898,12 +1062,16 @@ async function main() {
       if (!webSkripte.includes(datei)) throw new Error(`Anmelde-Assistent: ${datei} fehlt in docs/assets/js/antrag/ (wird mitbenutzt)`);
     }
   }
+  // Seite „Neu im Trainerteam“ (Stufe 2, nur mit TRAINER_LIVE): Ihre Dateien entstehen nach denen des Assistenten (sie teilen dessen Module) und
+  // vor den Seiten, denn trainerteam.html verweist auf sie und pruefeAusgabe() prüft das.
+  const trainer = TRAINER_LIVE ? await baueTrainerDateien(anmeldung) : null;
   // Mit dem Anmelde-Assistenten (P1, Runde 2) ist aufnahmeantrag.html eine Weiterleitung auf mitglied-werden.html (src/seiten/aufnahmeantrag.mjs) und
   // lädt kein Skript mehr. aufnahmeantrag.js (Formular und PDF-Erzeugung der alten Seite) kommt dann nicht ins Paket; im CMS bleibt die alte Datei liegen
   // (es wird nichts gelöscht). pdf-lib und fontkit braucht der Assistent: Sie bleiben und zählen als verwendet.
   const NUR_ALTE_SEITE = new Set(["aufnahmeantrag.js"]);
   const paketSkripte = anmeldung ? webSkripte.filter((datei) => !NUR_ALTE_SEITE.has(datei)) : webSkripte;
   const paketDateien = new Set([...htmlDateien, "site.css", ...paketSkripte, ...(anmeldung ? anmeldung.dateien.keys() : [])]);
+  if (trainer) for (const name of trainer.dateien.keys()) paketDateien.add(name);
   const zaehler = {
     cssLink: 0, href: 0, src: 0, srcset: 0, content: 0, poster: 0, dataStern: 0, cssUrl: 0,
     nurAppackHidden: 0, nurPrototyp: 0, canonical: 0, ogUrl: 0,
@@ -918,6 +1086,7 @@ async function main() {
     const html = readFileSync(quellPfad, "utf8");
     let umgeschrieben = schreibeSeiteUm(html, dateiname, zaehler);
     if (anmeldung && dateiname === ANM_SEITE) umgeschrieben = anmTraegeQuellenEin(umgeschrieben, anmeldung.quellen);
+    if (trainer && dateiname === TR_SEITE) umgeschrieben = trTraegeQuellenEin(umgeschrieben, trainer.quellen);
     pruefeAusgabe(dateiname, umgeschrieben, paketDateien);
 
     const zielPfad = path.join(WEB_DIR, dateiname);
@@ -962,6 +1131,19 @@ async function main() {
     anmPruefeSyntax(anmeldung.dateien);
   }
 
+  // Dateien der Trainerseite (nur mit TRAINER_LIVE, siehe baueTrainerDateien): alle sind Text. Die Module, die sie mit dem Assistenten teilt, stehen
+  // schon oben und sind nicht doppelt.
+  if (trainer) {
+    for (const name of [...trainer.dateien.keys()].sort()) {
+      const inhalt = trainer.dateien.get(name);
+      writeFileSync(path.join(WEB_DIR, name), inhalt, "utf8");
+      const bytes = Buffer.byteLength(inhalt, "utf8");
+      gesamtBytes += bytes;
+      manifestEintraege.push({ datei: `web/${name}`, bytes, sha256: sha256(inhalt) });
+    }
+    anmPruefeSyntax(trainer.dateien);
+  }
+
   // W3b, Prüfer-Befund "klein": kein Zeitstempel im Manifest – die
   // committete Kopie docs/appack-paket/manifest.json (DOCS_KOPIE unten)
   // änderte sich sonst bei jedem "npm run build", ohne dass sich am Inhalt
@@ -975,6 +1157,7 @@ async function main() {
 
   const liesmich = baueLiesmich(manifestEintraege.map((e) => e.datei), anmeldung);
   writeFileSync(LIESMICH_PFAD, liesmich, "utf8");
+  if (trainer) writeFileSync(LIESMICH_PFAD, readFileSync(LIESMICH_PFAD, "utf8") + baueLiesmichTrainer(trainer), "utf8");
 
   console.log("=== appack-paket.mjs: Zusammenfassung ===");
   console.log(`Dateien: ${manifestEintraege.length} (${htmlDateien.length} HTML + 1 site.css + ${paketSkripte.length} Skripte)`);
@@ -997,6 +1180,10 @@ async function main() {
   if (anmeldung) {
     const anmBytes = [...anmeldung.dateien.values()].reduce((summe, inhalt) => summe + Buffer.byteLength(inhalt, "utf8"), 0);
     console.log(`Anmelde-Assistent (ANMELDUNG_LIVE): ${anmeldung.dateien.size} Dateien (${anmBytes} Bytes), Sprachen ${anmeldung.sprachen.join(", ")}, ${zaehler.anmeldungVerweise} Verweise in ${ANM_SEITE} auf den Ordner web/ umgeschrieben, node --check ohne Fehler`);
+  }
+  if (trainer) {
+    const trBytes = [...trainer.dateien.values()].reduce((summe, inhalt) => summe + Buffer.byteLength(inhalt, "utf8"), 0);
+    console.log(`Seite „Neu im Trainerteam“ (TRAINER_LIVE): ${trainer.dateien.size} eigene Dateien (${trBytes} Bytes), ${trainer.gemeinsam.length} Module mit dem Anmelde-Assistenten geteilt (nicht doppelt), ${zaehler.trainerVerweise} Verweise in ${TR_SEITE} auf den Ordner web/ umgeschrieben, node --check ohne Fehler`);
   }
   console.log(`Ausgeschlossen: ${[...AUSGESCHLOSSENE_DATEIEN].join(", ")} (${AUSGESCHLOSSENE_DATEIEN.size} Datei(en), nicht im Paket)`);
   console.log(`Paket: ${path.relative(ROOT, PAKET_DIR)}/`);

@@ -26,15 +26,24 @@
 // (#anmeldung[data-bereit]) ohne Fehler in der Konsole, mit der Sprachwahl aus der Konfiguration und ohne Begleitrahmen,
 // Entwurfs-Band, Werkzeugkasten und noindex. Ohne anmeldung.html muss das Paket auch ohne Verweise darauf sein. Für eine
 // Kopie des Ordners web/ (zum Beispiel einen Schnappschuss) gibt PAKET_WEB_DIR den Ort an; --statisch lässt den Browser weg.
+//
+// Seite „Neu im Trainerteam“ (Stufe 2): Enthält das Paket die Seite trainerteam.html (Bau mit TRAINER_LIVE, siehe src/vorlagen/hilfen.mjs),
+// kommen Prüfungen dafür dazu (pruefeTrainerDateien, pruefeTrainerImBrowser): Konfiguration lesbar und vollständig (Zugang mit Prüfwert, Einsicht,
+// Mannschaften, Vereinsdaten, Quellen), Namen für das CMS, Größe, node --check, jede Datei, auf die etwas verweist, liegt im Paket und umgekehrt
+// ist jede trainer*-Datei erreichbar, keine Doppelung (kein Inhalt zweimal), kein Verweis auf ../assets/, keine Wörter wie Prototyp oder Entwurf, keine
+// fremden Hosts, noindex, von keiner anderen Seite verlinkt; die Seite startet auf der Code-Seite ohne Fehler in der Konsole, ohne Begleitrahmen und
+// Werkzeuge der Vorführung. Ohne trainerteam.html darf es keine Datei der Trainerseite im Paket geben. Die Prüfungen des Assistenten gelten unverändert.
 
 import puppeteer from "puppeteer-core";
 import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
 import { createServer } from "node:http";
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { ANMELDUNG_LIVE } from "../src/vorlagen/hilfen.mjs";
+import { TRAINER_LIVE } from "../src/vorlagen/hilfen.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const WEB_DIR = process.env.PAKET_WEB_DIR ? path.resolve(process.env.PAKET_WEB_DIR) : path.join(ROOT, "dist", "appack-paket", "web");
@@ -99,6 +108,10 @@ function starteMiniServer() {
 // ---------- Anmelde-Assistent im Paket (Livegang, M6) ----------
 
 const MIT_ANMELDUNG = existsSync(path.join(WEB_DIR, "anmeldung.html"));
+// Seite „Neu im Trainerteam“ (Stufe 2): Dateien der Seite im Paket; die Namen gehören nicht zu den Dateien des Assistenten (pruefeAnmeldungDateien).
+const MIT_TRAINER = existsSync(path.join(WEB_DIR, "trainerteam.html"));
+const TRAINER_DATEI = /^(?:anmeldung-(?:texte-)?trainer(?:-[a-z0-9]+)*\.js|trainer\.css|trainerteam\.html)$/;
+const TRAINER_MODUL = /^anmeldung-(?:texte-)?trainer(?:-[a-z0-9]+)*\.js$/;
 const ANM_GROESSE_MAX = 800 * 1000; // bewährt im CMS: aufnahmeantrag-fontkit.js mit 760 110 Byte
 const ANM_NAME_MUSTER = /^[a-z0-9]+(?:-[a-z0-9]+)*\.(?:html|css|js)$/;
 // Groß geschrieben wie im sichtbaren Text; Namen im Code (entwurf, vorfuehrung, Array.prototype) treffen nicht.
@@ -135,7 +148,7 @@ function pruefeAnmeldungDateien() {
     console.log(`${ok ? "OK  " : "FEHLER"} ${name}${detail ? " – " + detail : ""}`);
     if (!ok) fehler.push(name + (detail ? ": " + detail : ""));
   };
-  const namen = readdirSync(WEB_DIR).filter((n) => /^anmeldung[.-]/.test(n)).sort();
+  const namen = readdirSync(WEB_DIR).filter((n) => /^anmeldung[.-]/.test(n) && !TRAINER_MODUL.test(n)).sort();
   const lies = (n) => readFileSync(path.join(WEB_DIR, n), "utf8");
   const konfig = leseKonfigAnmeldung();
   melde("anmeldung.html: Konfiguration lesbar, live = true, Sprachen mit Deutsch zuerst, Quellen für Schrift und Vordrucke", !!konfig && konfig.live === true && Array.isArray(konfig.sprachen) && konfig.sprachen[0] === "de" && !!konfig.quellen && !!konfig.quellen.schriftModul && !!konfig.quellen.vorlagenModule, konfig ? JSON.stringify(konfig.sprachen) : "nicht lesbar");
@@ -315,6 +328,174 @@ function pruefeMitgliedWerden() {
   return fehler;
 }
 
+// ---------- Seite „Neu im Trainerteam“ im Paket (Stufe 2, nur mit TRAINER_LIVE) ----------
+
+// Hosts, die in den Dateien der Trainerseite vorkommen dürfen: cdn.appack.de (Adressen im Paket) und der Landessportbund Hessen (Link zum
+// Verhaltenskodex in der Konfiguration, nur ein Verweis zum Anklicken). Der Namensraum http://www.w3.org/2000/svg im Blatt-Sinnbild ist
+// keine Adresse, die jemand anfragt.
+const TR_ERLAUBTE_HOSTS = ["cdn.appack.de", "www.landessportbund-hessen.de"];
+const TR_SVG_NAMENSRAUM = "http://www.w3.org/2000/svg";
+const SHA256_MUSTER = /^[0-9a-f]{64}$/;
+
+function leseKonfigTrainer() {
+  const html = readFileSync(path.join(WEB_DIR, "trainerteam.html"), "utf8");
+  const treffer = /<script type="application\/json" id="trainer-konfig">([\s\S]*?)<\/script>/.exec(html);
+  if (!treffer) return null;
+  try {
+    return JSON.parse(treffer[1]);
+  } catch {
+    return null;
+  }
+}
+
+// Statische Prüfungen der Seite „Neu im Trainerteam“. Gibt die Fehler als Liste zurück und druckt je Prüfung eine Zeile. Ohne trainerteam.html:
+// Es darf keine Datei der Trainerseite im Paket liegen (der Schalter ist aus, das Paket wie ohne die Seite).
+function pruefeTrainerDateien() {
+  const fehler = [];
+  const melde = (name, ok, detail) => {
+    console.log(`${ok ? "OK  " : "FEHLER"} ${name}${detail ? " – " + detail : ""}`);
+    if (!ok) fehler.push(name + (detail ? ": " + detail : ""));
+  };
+  const alle = readdirSync(WEB_DIR).sort();
+  const eigene = alle.filter((n) => TRAINER_DATEI.test(n));
+  if (!MIT_TRAINER) {
+    melde("ohne Schalter liegt keine Datei der Trainerseite im Paket (trainerteam.html, trainer.css, anmeldung-trainer*.js, anmeldung-texte-trainer-*.js)", eigene.length === 0, eigene.slice(0, 3).join(", "));
+    const verweise = alle.filter((n) => n.endsWith(".html")).filter((n) => /trainerteam\.html/.test(readFileSync(path.join(WEB_DIR, n), "utf8")));
+    melde("ohne Schalter verweist keine Seite des Pakets auf trainerteam.html", verweise.length === 0, verweise.slice(0, 3).join(", "));
+    return fehler;
+  }
+  const lies = (n) => readFileSync(path.join(WEB_DIR, n), "utf8");
+  const konfig = leseKonfigTrainer();
+  melde("trainerteam.html: Konfiguration (#trainer-konfig) lesbar", !!konfig);
+  if (!konfig) return fehler;
+
+  // 1. Konfiguration vollständig (wie tools/build.mjs sie verlangt, dazu die Quellen, die erst das Paket einträgt)
+  const text = (x) => typeof x === "string" && x.trim() !== "";
+  const z = konfig.zugang || {};
+  const v = konfig.verein || {};
+  const a = v.anschrift || {};
+  const pruefwerte = Array.isArray(z.pruefwerte) ? z.pruefwerte : [];
+  melde("Konfiguration: live = true und Zugang mit mindestens einem Prüfwert (SHA-256, 64 Zeichen, klein; eine leere Liste ließe die Seite für jeden Code zu)", konfig.live === true && z.parameter === "code" && pruefwerte.length >= 1 && pruefwerte.every((w) => typeof w === "string" && SHA256_MUSTER.test(w)), `${pruefwerte.length} Prüfwert(e)`);
+  melde("Konfiguration: Einsichtnehmende (mindestens ein Eintrag, jeder mit Namen), Abteilungen (fussball, karneval; mindestens eine) mit Mannschaften je angebotener Abteilung, Fristen (schnupperMonate 1 bis 12, zeugnisJahre)",
+    Array.isArray(konfig.einsicht) && konfig.einsicht.length >= 1 && konfig.einsicht.every((p) => text(p && p.name)) && Array.isArray(konfig.mannschaften) && Array.isArray(konfig.abteilungen) && konfig.abteilungen.length >= 1 && konfig.abteilungen.every((a) => a === "fussball" || a === "karneval") && konfig.abteilungen.every((a) => konfig.mannschaften.some((m) => m.abteilung === a)) && konfig.mannschaften.every((m) => konfig.abteilungen.includes(m.abteilung) && text(m.name)) && Number.isInteger(konfig.schnupperMonate) && konfig.schnupperMonate >= 1 && konfig.schnupperMonate <= 12 && Number.isInteger(konfig.zeugnisJahre) && konfig.zeugnisJahre >= 0,
+    `${(konfig.einsicht || []).length} Einsichtnehmende, ${(konfig.mannschaften || []).length} Mannschaften und Gruppen, Abteilungen ${JSON.stringify(konfig.abteilungen)}`);
+  melde("Konfiguration: Vereinsdaten (Name, Registername, E-Mail, Ort, Anschrift mit Postfach und Besuchsadresse, Unterzeichner) und Adressen von Satzung und Kodex (https)",
+    text(v.name) && text(v.name_register) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.mail || "") && text(v.ort) && ["postfach", "postfachPlz", "postfachOrt", "strasse", "plz", "ort"].every((k) => text(a[k])) && text((v.unterzeichner || {}).name) && text((v.unterzeichner || {}).funktion) && /^https:\/\//.test(v.satzungUrl || "") && /^https:\/\//.test(v.kodexUrl || ""),
+    `${v.mail || "keine E-Mail"}, ${v.satzungUrl ? "Satzung" : "ohne Satzung"}, ${v.kodexUrl ? "Kodex" : "ohne Kodex"}`);
+  const q = konfig.quellen || {};
+  melde("Konfiguration: Quellen für pdf-lib, fontkit und Schrift (vom Paket eingetragen) zeigen auf Dateien im Ordner", ["pdfLib", "fontkit", "schriftModul"].every((k) => text(q[k]) && existsSync(path.join(WEB_DIR, q[k]))), JSON.stringify(q));
+  melde("Konfiguration: keine Klartext-Zugangsdaten (kein Feld „code“, kein Wert außer den Prüfwerten in zugang)", !("code" in z) && !("code" in konfig), "");
+
+  // 2. Namen und Größe
+  const schlechteNamen = eigene.filter((n) => !ANM_NAME_MUSTER.test(n));
+  melde(`${eigene.length} Dateien der Trainerseite: Namen für das CMS (Kleinbuchstaben, Ziffern, Bindestriche, genau ein Punkt, .html/.css/.js)`, schlechteNamen.length === 0, schlechteNamen.join(", "));
+  const groessen = eigene.map((n) => [n, statSync(path.join(WEB_DIR, n)).size]).sort((x, y) => y[1] - x[1]);
+  melde(`Größe je Datei höchstens ${ANM_GROESSE_MAX} Byte`, groessen.every(([, g]) => g > 0 && g <= ANM_GROESSE_MAX), `größte: ${groessen.slice(0, 3).map(([n, g]) => n + " " + g).join(", ")}; zusammen ${groessen.reduce((s, [, g]) => s + g, 0)} Byte`);
+
+  // 3. Syntax jedes Moduls (über stdin als ES-Modul, siehe pruefeAnmeldungDateien)
+  const syntax = eigene
+    .filter((n) => n.endsWith(".js"))
+    .filter((n) => spawnSync(process.execPath, ["--input-type=module", "--check"], { input: readFileSync(path.join(WEB_DIR, n)), encoding: "utf8" }).status !== 0);
+  melde("node --check (als ES-Modul) für jedes Modul der Trainerseite", syntax.length === 0, syntax.join(", "));
+
+  // 4. Verweise: alles, worauf etwas zeigt, liegt im Paket; jede Datei der Trainerseite wird gebraucht
+  const html = lies("trainerteam.html");
+  const fehlen = [];
+  const erreichbar = new Set(["trainerteam.html"]);
+  for (const m of html.matchAll(/(?:href|src)="([^"#?]+)"/g)) {
+    if (/^(?:https?:|mailto:|tel:|data:|ext:|nav:|\/)/.test(m[1])) continue;
+    if (!existsSync(path.join(WEB_DIR, m[1]))) fehlen.push(`trainerteam.html -> ${m[1]}`);
+    erreichbar.add(m[1]);
+  }
+  const startImport = [...html.matchAll(/import\("\.\/([^"]+)"\)/g)].map((m) => m[1]);
+  melde("trainerteam.html: genau ein Start der Seite, import(\"./anmeldung-trainer.js\")", startImport.length === 1 && startImport[0] === "anmeldung-trainer.js", startImport.join(", "));
+  const warteschlange = [...startImport, ...["pdfLib", "fontkit", "schriftModul"].map((k) => q[k]).filter(Boolean)];
+  while (warteschlange.length) {
+    const n = warteschlange.shift();
+    if (erreichbar.has(n)) continue;
+    erreichbar.add(n);
+    if (!n.endsWith(".js") || !existsSync(path.join(WEB_DIR, n)) || /^anmeldung-(?:schrift|vorlage-)/.test(n) || /^aufnahmeantrag-/.test(n)) continue;
+    for (const m of lies(n).matchAll(/(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)(["'`])\.\/([^"'`\n$]+)\1/g)) {
+      if (!existsSync(path.join(WEB_DIR, m[2]))) fehlen.push(`${n} -> ./${m[2]}`);
+      else if (!erreichbar.has(m[2])) warteschlange.push(m[2]);
+    }
+  }
+  melde("jede referenzierte Datei liegt im Paket (Seite, Stylesheets, Importe auch über anmeldung-trainer-pdf.js, Quellen in der Konfiguration)", fehlen.length === 0 && eigene.length > 0, fehlen.join("; "));
+  const verwaist = eigene.filter((n) => !erreichbar.has(n));
+  melde("jede Datei der Trainerseite wird gebraucht (keine verwaiste trainer*-Datei)", verwaist.length === 0, verwaist.join(", "));
+  const verlinkt = alle.filter((n) => n.endsWith(".html") && n !== "trainerteam.html").filter((n) => /trainerteam\.html/.test(lies(n)));
+  melde("keine andere Seite des Pakets nennt trainerteam.html (kein Menüpunkt, kein Link, auch nicht in Skripten)", verlinkt.length === 0, verlinkt.slice(0, 3).join(", "));
+
+  // 5. keine Doppelung: kein Inhalt kommt in zwei Dateien des Pakets vor (die Seite teilt Module, Schrift und pdf-lib mit dem Assistenten, sie kopiert sie nicht)
+  const hashes = new Map();
+  for (const n of alle.filter((x) => /^(?:anmeldung|aufnahmeantrag|trainer)[.-]/.test(x))) {
+    const h = createHash("sha256").update(readFileSync(path.join(WEB_DIR, n))).digest("hex");
+    hashes.set(h, [...(hashes.get(h) || []), n]);
+  }
+  const doppelt = [...hashes.values()].filter((l) => l.length > 1).map((l) => l.join(" = "));
+  melde("keine Doppelung: kein Inhalt steht in zwei Dateien des Assistenten und der Trainerseite", doppelt.length === 0, doppelt.slice(0, 3).join("; "));
+
+  // 6. Verweise auf ../assets/ und die Seite im Kopf
+  // Die Standardpfade in trainer-pdf-lader.js (../antrag/…, ../../fonts/…) gelten nur ohne "quellen" (GitHub Pages) und stehen genauso im pdf-lader.js des Assistenten.
+  const zurueck = eigene.filter((n) => /\.\.\/assets\//.test(lies(n)));
+  melde("kein Verweis auf ../assets/ in den Dateien der Trainerseite", zurueck.length === 0, zurueck.join(", "));
+  melde("trainerteam.html: noindex, Titel „Neu im Trainerteam – FFV Sportfreunde 04“, genau eine h1, Stylesheets site.css, anmeldung.css und trainer.css in dieser Reihenfolge",
+    /<meta name="robots" content="noindex">/.test(html) && /<title>Neu im Trainerteam – FFV Sportfreunde 04<\/title>/.test(html) && (html.match(/<h1[ >]/g) || []).length === 1 && /href="site\.css">[\s\S]*href="anmeldung\.css">[\s\S]*href="trainer\.css">/.test(html));
+  melde("trainerteam.html: kein Entwurfs-Band, keine Werkzeuge der Vorführung, keine Sprachleiste, kein Rahmen der Begleitseite im Dokument", !/data-anm-band|data-anm-werkzeuge|data-anm-vorfuehrung|data-anm-vereinssicht|data-beispiel|anm-sprachleiste|begleit-kopf/.test(html));
+
+  // 7. verbotene Wörter und fremde Hosts
+  const treffer = [];
+  const fremd = new Set();
+  for (const n of eigene) {
+    let t = lies(n);
+    if (n === "trainerteam.html") t = t.replace(ANM_GEMEINSAME_ADRESSE, "");
+    const w = t.match(ANM_VERBOTEN);
+    if (w) treffer.push(`${n}: „${w[0]}“ …${t.slice(Math.max(0, w.index - 30), w.index + 40).replace(/\s+/g, " ")}…`);
+    const ohneNamensraum = t.split(TR_SVG_NAMENSRAUM).join("");
+    for (const m of ohneNamensraum.matchAll(/https?:\/\/([A-Za-z0-9.-]+)/g)) if (!TR_ERLAUBTE_HOSTS.includes(m[1])) fremd.add(`${n}: ${m[1]}`);
+    for (const m of ohneNamensraum.matchAll(/[\s"'(=]\/\/([A-Za-z0-9.-]+\.[a-z]{2,})/g)) fremd.add(`${n}: ${m[1]}`);
+  }
+  melde("keine Wörter wie Prototyp, Entwurf, Vorführung, justolgay, github in den Dateien der Trainerseite", treffer.length === 0, treffer.slice(0, 3).join(" | "));
+  melde(`keine fremden Hosts außer ${TR_ERLAUBTE_HOSTS.join(", ")} (und den gemeinsamen Adressen im Seitenkopf)`, fremd.size === 0, [...fremd].slice(0, 5).join(" | "));
+  const gemeinsam = [...html.matchAll(ANM_GEMEINSAME_ADRESSE)].map((m) => m[0]);
+  const mw = lies("mitglied-werden.html");
+  const nurHier = gemeinsam.filter((x) => !mw.includes(x));
+  melde("GitHub-Pages-Adressen in trainerteam.html nur die gemeinsamen des Seitenkopfs (auch auf mitglied-werden.html)", nurHier.length === 0, nurHier.slice(0, 3).join(", "));
+  return fehler;
+}
+
+// Die Seite „Neu im Trainerteam“ im Browser (ohne Code): Sie startet auf der Code-Seite, dahinter ist nichts im Dokument, und vom Rahmen der Begleitseite,
+// vom Entwurfs-Band und von den Werkzeugen der Vorführung ist nichts da; noindex.
+async function pruefeTrainerImBrowser(page) {
+  const fehler = [];
+  try {
+    await page.waitForSelector("#anmeldung[data-bereit]", { timeout: 15000 });
+  } catch {
+    return ["Trainerseite startet nicht (#anmeldung[data-bereit] fehlt nach 15 s)"];
+  }
+  const d = await page.evaluate(() => ({
+    schritt: document.getElementById("anmeldung").dataset.schritt,
+    codeFeld: !!document.querySelector('#anmeldung input[data-pfad="zugang.code"]'),
+    weitereAngaben: !!document.querySelector('#anmeldung [data-pfad="vorname"], #anmeldung [data-pfad="nachname"], #anmeldung [data-pfad="email"]'),
+    werkzeuge: !!document.querySelector("[data-anm-band], [data-anm-werkzeuge], [data-anm-vorfuehrung], [data-anm-vereinssicht], [data-beispiel]"),
+    rahmen: !!document.querySelector(".begleit-kopf"),
+    sprachleiste: !!document.querySelector(".anm-sprachleiste"),
+    noindex: !!document.querySelector('meta[name="robots"][content="noindex"]'),
+    titel: document.title,
+    h1: document.querySelectorAll("h1").length,
+  }));
+  if (d.schritt !== "code") fehler.push(`Trainerseite steht ohne Code auf "${d.schritt}" statt auf "code"`);
+  if (!d.codeFeld) fehler.push("Trainerseite: kein Feld für den Code auf der ersten Seite");
+  if (d.weitereAngaben) fehler.push("Trainerseite: Felder der Angaben (Vorname, Nachname, E-Mail) sind ohne Code im Dokument");
+  if (d.werkzeuge) fehler.push("Trainerseite: Entwurfs-Band, Werkzeugkasten, Knopf „Vorführung“ oder Beispiel-Knöpfe");
+  if (d.rahmen) fehler.push("Trainerseite: Rahmen der Begleitseite (.begleit-kopf)");
+  if (d.sprachleiste) fehler.push("Trainerseite: Sprachleiste (die Seite gibt es nur auf Deutsch)");
+  if (!d.noindex) fehler.push("Trainerseite: kein meta robots noindex");
+  if (d.h1 !== 1) fehler.push(`Trainerseite: ${d.h1} h1 statt einer`);
+  if (/Entwurf|Prototyp/.test(d.titel)) fehler.push(`Titel enthält Entwurf oder Prototyp: ${d.titel}`);
+  return fehler;
+}
+
 // ---------- Prüfung je Seite und Breite ----------
 
 // W2: die FUSSBALL.DE-Widgets sind bei FUSSBALL.DE nur für die Domain
@@ -395,6 +576,18 @@ async function pruefeSeiteBeiBreite(browser, dateiname, breite) {
       fehler.push(`Anfrage an einen fremden Host: ${u}`);
     });
   }
+  // Die Trainerseite (Stufe 2) meldet Ladefehler ebenfalls mit console.error und darf außer dem Paket und den gemeinsamen Assets nichts anfragen.
+  if (dateiname === "trainerteam.html") {
+    page.on("console", (m) => {
+      if (m.type() === "error") fehler.push(`console.error: ${m.text()}`);
+      if (m.type() === "warning" && /Text fehlt/.test(m.text())) fehler.push(`console.warn: ${m.text()}`);
+    });
+    page.on("request", (req) => {
+      const u = req.url();
+      if (/^(?:data|blob|about):/.test(u) || u.startsWith(`${BASIS}/`) || u.startsWith("https://justolgay.github.io/speuzer-website-prototyp/assets/")) return;
+      fehler.push(`Anfrage an einen fremden Host: ${u}`);
+    });
+  }
   page.on("requestfailed", (req) => {
     const eintrag = `requestfailed: ${req.url()} (${req.failure()?.errorText ?? "unbekannt"})`;
     if (istDomainFreigabeAdresse(req.url())) {
@@ -422,6 +615,7 @@ async function pruefeSeiteBeiBreite(browser, dateiname, breite) {
   }
 
   if (dateiname === "anmeldung.html") fehler.push(...(await pruefeAnmeldungImBrowser(page)));
+  if (dateiname === "trainerteam.html") fehler.push(...(await pruefeTrainerImBrowser(page)));
 
   try {
     // document.fonts.ready allein löst nur Schriften aus, die die Seite beim
@@ -475,7 +669,8 @@ async function main() {
   // mit dem Assistenten (ANMELDUNG_LIVE) 42 (+ anmeldung.html);
   // 31.10.2026: + platzbelegung.html (Platzbelegung, Zeile auf verein.html): 42, mit dem Assistenten 43
   // 23.11.2026: + mannschaften-soma.html (Soma, Freizeitmannschaft, ohne Weiterleitung spielplan-soma.html): 43, mit dem Assistenten 44
-  const erwarteteSeiten = 43 + (MIT_ANMELDUNG ? 1 : 0);
+  // 24.11.2026: + trainerteam.html (Seite „Neu im Trainerteam“, nur mit TRAINER_LIVE): mit dem Schalter eine mehr
+  const erwarteteSeiten = 43 + (MIT_ANMELDUNG ? 1 : 0) + (MIT_TRAINER ? 1 : 0);
   if (seiten.length !== erwarteteSeiten) {
     console.error(`Erwartet ${erwarteteSeiten} Seiten in ${path.relative(ROOT, WEB_DIR)}/, gefunden ${seiten.length}.`);
     process.exit(1);
@@ -485,6 +680,10 @@ async function main() {
     console.error(`Der Schalter ANMELDUNG_LIVE ist ${ANMELDUNG_LIVE ? "an" : "aus"}, das Paket enthält anmeldung.html ${MIT_ANMELDUNG ? "" : "nicht "}– zuerst mit demselben Schalter neu bauen (sh tools/cache/bau-sperre.sh build).`);
     process.exit(1);
   }
+  if (!process.env.PAKET_WEB_DIR && TRAINER_LIVE !== MIT_TRAINER) {
+    console.error(`Der Schalter TRAINER_LIVE ist ${TRAINER_LIVE ? "an" : "aus"}, das Paket enthält trainerteam.html ${MIT_TRAINER ? "" : "nicht "}– zuerst mit demselben Schalter neu bauen (npm run build, mit TRAINER_LIVE=1 für die Seite).`);
+    process.exit(1);
+  }
 
   let allesOk = true;
   const bericht = [];
@@ -492,9 +691,17 @@ async function main() {
   // Prüfungen, die ohne Browser auskommen: der Assistent (nur mit anmeldung.html) und der Verweis von "Mitglied werden"
   console.log(`\n=== Anmelde-Assistent im Paket: ${MIT_ANMELDUNG ? "enthalten (ANMELDUNG_LIVE)" : "nicht enthalten (Schalter aus)"} ===`);
   const statisch = [...(MIT_ANMELDUNG ? pruefeAnmeldungDateien() : []), ...pruefeMitgliedWerden()];
+  // Seite „Neu im Trainerteam“ (Stufe 2): eigene Prüfungen, eigene Fehlerliste (ohne die Seite nur: keine Datei von ihr im Paket)
+  console.log(`\n=== Seite „Neu im Trainerteam“ im Paket: ${MIT_TRAINER ? "enthalten (TRAINER_LIVE)" : "nicht enthalten (Schalter aus)"} ===`);
+  const trainerFehler = pruefeTrainerDateien();
+  if (trainerFehler.length) allesOk = false;
   if (statisch.length) allesOk = false;
   console.log("");
   // --statisch: nur diese Prüfungen ohne Browser (schnell, zum Beispiel für eine Kopie des Ordners web/ über PAKET_WEB_DIR)
+  if (process.argv.includes("--statisch") && trainerFehler.length) {
+    console.error(`appack-paket-pruefen.mjs --statisch: FEHLGESCHLAGEN (${trainerFehler.length} Fehler bei der Seite „Neu im Trainerteam“)`);
+    process.exit(1);
+  }
   if (process.argv.includes("--statisch")) {
     if (statisch.length) {
       console.error(`appack-paket-pruefen.mjs --statisch: FEHLGESCHLAGEN (${statisch.length} Fehler)`);
@@ -538,6 +745,10 @@ async function main() {
   if (statisch.length) {
     console.error(`${statisch.length} Fehler bei den Prüfungen zum Anmelde-Assistenten:`);
     for (const f of statisch) console.error(`  - ${f}`);
+  }
+  if (trainerFehler.length) {
+    console.error(`${trainerFehler.length} Fehler bei den Prüfungen zur Seite „Neu im Trainerteam“:`);
+    for (const f of trainerFehler) console.error(`  - ${f}`);
   }
   if (!allesOk) {
     console.error("\nappack-paket-pruefen.mjs: FEHLGESCHLAGEN");

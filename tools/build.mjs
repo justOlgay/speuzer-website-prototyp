@@ -7,6 +7,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
 import { datumLang, ANMELDUNG_LIVE } from "../src/vorlagen/hilfen.mjs";
+import { TRAINER_LIVE } from "../src/vorlagen/hilfen.mjs";
 import { bildschirme } from "../src/appkonzept/bildschirme.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -74,6 +75,25 @@ async function sammleSeiten(daten) {
   if (ANMELDUNG_LIVE) {
     const modul = await import(pathToFileURL(path.join(SRC, "begleit", "anmeldung.mjs")).href);
     alleSeiten.push(modul.seiteLive(daten));
+  }
+  // Seite „Neu im Trainerteam“ (Stufe 2): mit TRAINER_LIVE (src/vorlagen/hilfen.mjs) kommt die code-geschützte Workspace-Seite
+  // docs/ws/trainerteam.html dazu (src/begleit/trainerteam.mjs › seiteLive; Konfiguration data/trainer.json). Es gibt keine Begleitseite
+  // und keinen Sitemap-Eintrag (seite.ohneSitemap, siehe unten). Stimmt die Konfiguration nicht, bricht der Bau mit der Meldung ab. Die
+  // Seite teilt Module, Schrift und pdf-lib mit dem Anmelde-Assistenten und verlangt darum auch ANMELDUNG_LIVE. Ohne den Schalter
+  // ändert sich nichts.
+  if (TRAINER_LIVE) {
+    if (!ANMELDUNG_LIVE) {
+      console.error("Bau abgebrochen: TRAINER_LIVE verlangt ANMELDUNG_LIVE (die Seite „Neu im Trainerteam“ teilt Module, Schrift und pdf-lib mit dem Anmelde-Assistenten).");
+      process.exit(1);
+    }
+    const modul = await import(pathToFileURL(path.join(SRC, "begleit", "trainerteam.mjs")).href);
+    try {
+      alleSeiten.push(modul.seiteLive(daten));
+    } catch (fehler) {
+      if (!(fehler instanceof modul.TrainerKonfigFehler)) throw fehler;
+      console.error(`Bau abgebrochen (TRAINER_LIVE): ${fehler.message}`);
+      process.exit(1);
+    }
   }
   return alleSeiten;
 }
@@ -418,6 +438,8 @@ async function main() {
 
   for (const modulPfad of begleitModule) {
     const modul = await import(pathToFileURL(modulPfad).href);
+    // Module mit nur einer Live-Seite (seiteLive, ohne seite): keine Begleitseite, auch keine Warnung (Trainerseite, siehe sammleSeiten).
+    if (typeof modul.seite !== "function" && typeof modul.seiteLive === "function") continue;
     if (typeof modul.seite !== "function") {
       console.warn(`  Warnung: ${path.relative(ROOT, modulPfad)} exportiert kein seite()`);
       continue;
@@ -566,6 +588,8 @@ async function main() {
   // Prüfungen bzw. Messungen; tools/screenshots.mjs nimmt beide ebenso in der
   // allgemeinen Schleife mit und screenshottet die Hülle zusätzlich gezielt
   // (siehe screenshotHuelle() dort).
+  // Workspace-Seiten, die bewusst nicht in die Sitemap sollen (seite.ohneSitemap; bisher nur die Trainerseite, nur mit TRAINER_LIVE).
+  const ohneSitemapNamen = new Set(seiten.filter((seite) => seite.ohneSitemap).map((seite) => wsName(normUrl(seite.url))));
   const sitemapEintraege = [
     `  <url><loc>${BASIS_URL}</loc></url>`,
     ...begleitGeschrieben.filter((s) => !s.noindex).map((s) => `  <url><loc>${BASIS_URL.replace(/\/$/, "")}${s.url}</loc></url>`),
@@ -575,7 +599,7 @@ async function main() {
     // W6, Spezifikation A3: Weiterleitungsseiten (spielplan.html,
     // spielplan-<team>.html, tabellen.html) nicht in der Sitemap.
     ...geschrieben
-      .filter((s) => !s.istWeiterleitung)
+      .filter((s) => !s.istWeiterleitung && !ohneSitemapNamen.has(s.name))
       .map((s) => `  <url><loc>${BASIS_URL.replace(/\/$/, "")}/ws/${s.name}.html</loc></url>`),
   ].join("\n");
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEintraege}\n</urlset>\n`;

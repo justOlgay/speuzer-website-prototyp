@@ -3,6 +3,8 @@
   "stand_live": "20.10.2026",
   "quelle": "Datenschutzerklärung der Vereins-App (cdn.appack.de), Fassung vom 17.07.2026, für Website und App ergänzt am 24.09.2026 (Hosting, GitHub Pages, Online-Aufnahmeantrag, Links, Fotos, Aufsichtsbehörde) und am 28.09.2026 (Aufnahmeantrag online auf der Website)",
   "quelle_live": "Datenschutzerklärung der Vereins-App (cdn.appack.de), Fassung vom 17.07.2026, für Website und App ergänzt am 24.09.2026 (Hosting, GitHub Pages, Links, Fotos, Aufsichtsbehörde), am 12.10.2026 (Anmeldung über den Anmelde-Assistenten) und am 20.10.2026 (Ansprechpartner, Aufsichtsbehörde, FUSSBALL.DE)",
+  "stand_trainer_live": "24.11.2026",
+  "quelle_trainer_live": "Datenschutzerklärung der Vereins-App (cdn.appack.de), Fassung vom 17.07.2026, für Website und App ergänzt am 24.09.2026 (Hosting, GitHub Pages, Links, Fotos, Aufsichtsbehörde), am 12.10.2026 (Anmeldung über den Anmelde-Assistenten), am 20.10.2026 (Ansprechpartner, Aufsichtsbehörde, FUSSBALL.DE) und am 24.11.2026 (Seite für neue Trainerinnen, Trainer und Betreuer)",
   "hinweis": "Fragen beantwortet die Geschäftsstelle.",
   "abschnitte": [
     {
@@ -248,6 +250,24 @@
         "Am Ende erzeugt Ihr Browser aus Ihren Angaben eine PDF-Datei auf Ihrem Gerät. Sie enthält alle Angaben, Fotos und Unterschriften, zum Beispiel Anschrift und Bankverbindung. Wenn Sie die Datei speichern, bleibt sie auf Ihrem Gerät, bis Sie sie löschen. Der Verein erhält die Angaben erst, wenn Sie die Datei selbst per E-Mail an die Geschäftsstelle schicken oder ausgedruckte Blätter im Verein abgeben. Für die E-Mail gilt „4. Kontaktmöglichkeiten“.",
         "In der Datei steht die „Information zum Datenschutz“ nach Art. 13 DSGVO. Dort lesen Sie, wofür wir die Angaben verwenden, auf welcher Rechtsgrundlage, an wen wir sie weitergeben und wie lange wir sie speichern. Enthält die Datei Angaben zur Gesundheit (Teil C), bewahrt der Verein diesen Teil getrennt von den übrigen Unterlagen auf.",
         "Ihr Browser lädt die Seite, die Programmdateien, die Schrift für die PDF-Datei und die leeren Vordrucke von cdn.appack.de. Dabei verarbeiten die Server von appack die unter „2. Erfassung von allgemeinen Daten / Informationen“ genannten Zugriffsdaten, insbesondere Ihre IP-Adresse (siehe „12. Hosting von Website und App“). Schriften und Bilder der Seite selbst liefert GitHub Pages aus (siehe „13. Schriften, Bilder, Spielpläne und Kalender über GitHub Pages“)."
+      ]
+    },
+    {
+      "titel": "14a. Seite für neue Trainerinnen, Trainer und Betreuer",
+      "nur_mit_trainer_live": true,
+      "absaetze": [
+        "Für neue Trainerinnen, Trainer und Betreuer gibt es eine eigene Seite für die Unterlagen. Den Code dafür bekommen Sie auf Anfrage vom Verein. Sie geben den Code ein oder öffnen den Link mit dem Code. Der Code enthält keine persönlichen Angaben.",
+        "Die Seite arbeitet wie der Anmelde-Assistent (siehe „14. Anmeldung über den Anmelde-Assistenten“) in Ihrem Browser. Ihre Angaben, Ihr Passfoto und Ihre Unterschrift bleiben auf Ihrem Gerät. Nichts davon wird an einen Server übertragen oder im Browser gespeichert. Beim Schließen oder Neuladen der Seite ist alles gelöscht. Unabhängig davon kann Ihr Browser mit der Funktion zum automatischen Ausfüllen anbieten, Angaben wie Anschrift oder E-Mail-Adresse zu speichern. Ob Sie das zulassen, entscheiden Sie in Ihrem Browser.",
+        "Am Ende erzeugt Ihr Browser aus Ihren Angaben die Dateien auf Ihrem Gerät: die Unterlagen für den Verein als PDF mit Ihren Angaben und Ihrer Unterschrift, das Passfoto als Bilddatei und, wenn Sie das Zeugnis noch beantragen müssen, den Antrag auf Gebührenbefreiung als zweites PDF. Gespeicherte Dateien bleiben auf Ihrem Gerät, bis Sie diese löschen. Der Verein erhält die Dateien erst, wenn Sie diese selbst per E-Mail an die Geschäftsstelle schicken. Für die E-Mail gilt „4. Kontaktmöglichkeiten“.",
+        "Ihr erweitertes Führungszeugnis laden Sie nirgends hoch und schicken es nicht per E-Mail. Sie zeigen es persönlich einer vom Vorstand dafür bestimmten Person. Das Zeugnis wird nur angeschaut: Es wird nicht mitgenommen und nicht kopiert. Notiert werden nur: Datum der Einsicht, Datum des Zeugnisses und ob eine einschlägige Verurteilung darin steht (ja oder nein). Der Verein löscht diese Angaben unverzüglich, wenn Sie die Tätigkeit nicht aufnehmen, sonst spätestens sechs Monate nach der letzten Ausübung Ihrer Tätigkeit (§ 30a Abs. 3 BZRG, § 72a Abs. 5 SGB VIII).",
+        "Wofür wir Ihre Angaben verwenden und auf welcher Rechtsgrundlage:",
+        "§L§ Aufnahme als beitragsfreies Mitglied, Organisation von Training und Betreuung, Kontakt zu Ihnen: Art. 6 Abs. 1 lit. b DSGVO.",
+        "§L§ Planung Ihres Einsatzes, Notfallkontakt, Passfoto für die internen Vereinsunterlagen: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse). Dem Passfoto können Sie widersprechen.",
+        "§L§ Selbstauskunft zur Kinder- und Jugendarbeit, Erklärung zum Verhaltenskodex, Einsicht in das erweiterte Führungszeugnis (nur die drei Vermerke): Art. 6 Abs. 1 lit. f in Verbindung mit Art. 10 DSGVO (berechtigtes Interesse am Schutz der Kinder), für die Einsicht außerdem § 30a Abs. 3 BZRG.",
+        "§L§ Antrag auf Gebührenbefreiung (Bestätigung Ihrer ehrenamtlichen Tätigkeit): Art. 6 Abs. 1 lit. f DSGVO (Aufforderung und Bestätigung nach § 30a Abs. 2 Bundeszentralregistergesetz).",
+        "§L§ Fotos von Ihnen in Internetseite, App und Presse des Vereins, nur wenn Sie gesondert einwilligen: Art. 6 Abs. 1 lit. a DSGVO (siehe „16. Fotos von Personen“).",
+        "Die Person, die Sie als Notfallkontakt nennen, informieren Sie bitte darüber, dass der Verein Name, Beziehung zu Ihnen und Telefonnummer speichert (Art. 14 DSGVO). Die Dateien enthalten die „Information zum Datenschutz“ nach Art. 13 DSGVO. Dort lesen Sie, welche Angaben Pflicht sind, an wen wir Angaben weitergeben und wie lange wir diese speichern.",
+        "Ihr Browser lädt die Seite, die Programmdateien und die Schrift für die PDF-Datei von cdn.appack.de. Dabei verarbeiten die Server von appack die unter „2. Erfassung von allgemeinen Daten / Informationen“ genannten Zugriffsdaten, insbesondere Ihre IP-Adresse (siehe „12. Hosting von Website und App“). Schriften und Bilder der Seite selbst liefert GitHub Pages aus (siehe „13. Schriften, Bilder, Spielpläne und Kalender über GitHub Pages“)."
       ]
     },
     {
