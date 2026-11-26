@@ -235,13 +235,21 @@ darum nur **verschlüsselt** im Repo (`data/bestellung-preise.enc.json`). Im aus
   Bei der Bezahlung kann man je Block (Kleidung, Teambedarf) mehrere Antworten ankreuzen (mindestens eine); die Mailzeile
   nennt sie in der Reihenfolge der Datei, bei „Sponsor“ mit der Firma („Sponsor (Firma)“). Alte Entwürfe auf den Geräten (ein Text je Block, `kleidungSponsor`, keine Aufdrucke, keine Lieferanschrift) laden mit den Standard-Aufdrucken
   und übernehmen den Sponsor als Firma.
+- Produktbilder (seit 26.11.2026): Jede Artikelzeile zeigt links eine kleine weiße Kachel mit dem JAKO-Produktbild (angezeigt 48 × 48, Datei 144 × 144, WebP, 1 bis 3 KB) aus
+  `assets/bilder/bestellung/<id>.webp`; unter der Liste „Kleidung je Person“ steht klein „Produktbilder: JAKO“. Die Zuordnung steht in `data/bestellung.json` (`artikel[].bild`; ohne Eintrag bleibt die
+  Kachel leer, fehlt die Datei, bricht der Bau ab). **Die Herstellerbilder liegen nur außerhalb des Repos** (hier: `tools/cache/orchestrierung-bestellung/bilder/quelle/` im Hauptordner, die Herkunft in
+  `HERKUNFT.md` darüber; `tools/cache/` ist nicht im Repo), je Artikel eine Datei `<id>.jpg` (auch `.png`, `.webp`; jede Größe). Die Kacheln erzeugt `python3 tools/bestellung-bilder.py <Quellordner>`
+  (Python 3 mit Pillow): Rand wegschneiden, Produkt mittig auf weiße Fläche (die längere Seite füllt 84 %), mit LANCZOS auf 144 × 144, WebP in Qualität 90; ein zweiter Lauf ändert nichts. Danach
+  `npm run build` und `npm run test:bestellung`. `seite.js` bildet die Adresse der Bilder aus dem eigenen Standort (`import.meta.url`): Sie stimmt so auf GitHub Pages im Unterordner wie auf dem Testserver.
 - Code: `assets/js/bestellung/mailtext.js` (reine Funktionen ohne DOM: Prüfung, Zusammenfassung, Preise, Mailtext, mailto, Bestell-Nr., Entwurf), `zugang.js` (Verschlüsselung), `formular.js` (Formular als Text, erst nach dem Entschlüsseln),
   `seite.js` (Zugang, Oberfläche, Zustand, Speichern auf dem Gerät; nur statische Importe), `assets/css/bestellung.css`, Hülle und eingebettete Konfiguration `src/seiten/bestellung.mjs`.
 - Tests (`npm run test:bestellung`, nach `npm run build`; sie rechnen mit erfundenen Testpreisen und einem Testcode, nie mit echten Preisen): `node tools/bestellung-test/mailtext-test.mjs` (ohne Browser: Katalog gegen die Spezifikation,
-  Preise und Rundung, Betreff und Text Zeichen für Zeichen, Lückenliste, Aufdrucke, doppelte Nummern, Sponsor, Lieferung, mailto hin und zurück, Bestell-Nr., Entwurf, alte Entwürfe, Hülle und Formular),
+  Preise und Rundung, Betreff und Text Zeichen für Zeichen, Lückenliste, Aufdrucke, doppelte Nummern, Sponsor, Lieferung, mailto hin und zurück, Bestell-Nr., Entwurf, alte Entwürfe, Hülle und Formular,
+  das Feld `bild` und die zehn Kacheln, das Bilder-Skript mit erfundenen Quellbildern),
   `node tools/bestellung-test/zugang-test.mjs` (Verschlüsselung gegen eine unabhängige Umsetzung mit `node:crypto`, falsche und veränderte Pakete, das Werkzeug mit Wegwerfordnern unter `tools/cache/`),
   `node tools/bestellung-test/geheim-test.mjs` (siehe unten) und `node tools/bestellung-test/e2e.mjs` (Chrome über puppeteer-core, Bau mit Testpreisen in einem Wegwerf-Ordner: Zugang, die Referenzbestellung nur über die Oberfläche, Aufdrucke,
-  Sponsor, Lieferung, Lücken, Senden, Kopieren, Neuladen, „Neue Bestellung beginnen“, alte Entwürfe, localStorage mit Fehlern, 320 bis 1440 px, Tippflächen, axe-core; Bildschirmfotos nach `tools/cache/bestellung-test/`).
+  Sponsor, Lieferung, Lücken, Senden, Kopieren, Neuladen, „Neue Bestellung beginnen“, alte Entwürfe, localStorage mit Fehlern, 320 bis 1440 px, Tippflächen, axe-core, Produktbilder in den Zeilen;
+  Bildschirmfotos nach `tools/cache/bestellung-test/`).
   Die gemeinsamen Testbestellungen mit festen, von Hand gerechneten Texten stehen in `tools/bestellung-test/faelle.mjs`, die Testpreise in `testdaten.mjs`. Der Browser-Test fängt den Klick auf
   den mailto-Link ab: Es öffnet sich kein Mailprogramm und nichts wird gesendet.
 - Geheimhaltung prüfen: `BESTELLUNG_PREISE_PRIVAT=<private Preisdatei> node tools/bestellung-test/geheim-test.mjs` sucht alle Beträge der Datei (Listen-, Grund- und Stückpreise, Zuschläge, Prüfsummen; Punkt und Komma) und den Rabattsatz in allen

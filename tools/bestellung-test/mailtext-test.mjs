@@ -15,11 +15,15 @@
 //   (q) doppelte Rückennummern   (r) Lieferanschrift   (s) Block „Sponsor“   (t) Schnellwahl mit Standard-Aufdrucken
 // dazu Formatierung, Sortierung, Entwurf auf dem Gerät (bereinigeEntwurf), lange Bestellungen (nie gekürzt), die Hülle der Seite
 // (src/seiten/bestellung.mjs) und das Formular nach dem Entschlüsseln (formular.js).
+// Produktbilder: das Feld „bild“ im Katalog (gültige und ungültige Namen), der Bau bricht ab, wenn eine Bilddatei fehlt, die zehn Kacheln in
+// assets/bilder/bestellung/ (WebP, 144 x 144, höchstens 12 KB) und das Skript tools/bestellung-bilder.py mit erfundenen Quellbildern (Zuschnitt, Rand,
+// zweiter Lauf byte-gleich, Fehlerfälle; entfällt mit einem Hinweis, wenn python3 mit Pillow fehlt).
 //
 // Aufruf: node tools/bestellung-test/mailtext-test.mjs [--ausfuehrlich]
 // Ausgabe: eine Zeile je Fehler, am Ende die Zusammenfassung; Exit 0 nur, wenn alles bestanden ist.
 
-import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -93,6 +97,7 @@ import {
   lokal,
   person,
 } from "./faelle.mjs";
+import { BILDER_ORDNER, BILD_KANTE, BILD_MAX_BYTES, webpMasse } from "./bilder.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const AUSFUEHRLICH = process.argv.includes("--ausfuehrlich");
@@ -173,6 +178,9 @@ abschnitt("Katalog");
 {
   const k = katalogVon(KONFIG);
   gleichJson("Artikel in Katalogreihenfolge", k.artikel.map((a) => a.id), ["trikot", "shorts", "stutzen", "praesi-jacke", "praesi-hose", "rucksack", "winterjacke", "regenjacke", "tw-trikot", "tw-hose"]);
+  gleichJson("Bilder: zehn Artikel, zehn Bilder (Dateiname = id + .webp)", k.artikel.map((a) => a.bild), [
+    "trikot.webp", "shorts.webp", "stutzen.webp", "praesi-jacke.webp", "praesi-hose.webp", "rucksack.webp", "winterjacke.webp", "regenjacke.webp", "tw-trikot.webp", "tw-hose.webp",
+  ]);
   gleichJson("Größen Kinder", KONFIG.groessen.kinder, ["116", "128", "140", "152", "164"]);
   gleichJson("Größen Erwachsene", KONFIG.groessen.erwachsene, ["S", "M", "L", "XL", "XXL", "3XL"]);
   gleichJson("zwölf Mannschaften in der Reihenfolge von data/teams.json", KONFIG.mannschaften.map((m) => m.slug), ["herren", "soma", "a-jugend", "d1", "d2", "d3", "e1", "e2", "e3", "f1", "f2", "g-jugend"]);
@@ -304,6 +312,24 @@ abschnitt("Katalog");
   wirft("Konfiguration: pruefmodus kein Wahrheitswert", () => pruefeKonfig(kaputt((c) => (c.einstellungen.pruefmodus = "ja"))), "pruefmodus");
   wirft("Konfiguration: Lieferantenbezeichnung fehlt", () => pruefeKonfig(kaputt((c) => delete c.artikel[0].lieferant.erwachsene)), "Lieferantenbezeichnung für „erwachsene“ fehlt");
   wirft("Konfiguration: Vorauswahl ist keine Größe", () => pruefeKonfig(kaputt((c) => (c.artikel[2].vorauswahl.kinder = "XXS"))), "Vorauswahl „XXS“");
+  // Bild je Artikel: optional; sonst ein Dateiname <name>.webp aus a–z, 0–9 und „-“ – kein Pfad, keine andere Endung, kein anderer Typ
+  for (const [name, bild] of [
+    ["mit anderer Endung", "trikot.png"], ["mit Großbuchstaben", "Trikot.webp"], ["mit Pfad nach außen", "../trikot.webp"], ["in einem Unterordner", "bilder/trikot.webp"],
+    ["mit Schrägstrich am Anfang", "/trikot.webp"], ["ohne Namen", ".webp"], ["leer", ""], ["mit doppelter Endung", "trikot.webp.webp"], ["mit Leerzeichen", "mein trikot.webp"],
+    ["mit Umlaut", "jäckchen.webp"], ["als Zahl", 5], ["als Wahrheitswert", true], ["als null", null], ["als Liste", ["trikot.webp"]],
+  ]) {
+    wirft(`Konfiguration: bild ${name} (${JSON.stringify(bild)}) wird abgelehnt`, () => pruefeKonfig(kaputt((c) => (c.artikel[0].bild = bild))), `bild ${JSON.stringify(bild)} ist ungültig`);
+  }
+  wirft("Konfiguration: die Meldung zum Bild nennt wie die übrigen Fehler den Katalog und den Artikel", () => pruefeKonfig(kaputt((c) => (c.artikel[1].bild = "shorts.jpg"))), "Bestellkatalog: shorts: bild");
+  wirft("Konfiguration: die Meldung zum Bild sagt, was erwartet wird (Beispiel mit der id)", () => pruefeKonfig(kaputt((c) => (c.artikel[1].bild = "shorts.jpg"))), "zum Beispiel „shorts.webp“");
+  {
+    const ohneBild = kaputt((c) => delete c.artikel[3].bild);
+    pruefe("Konfiguration: ein Artikel ohne bild ist gültig, seine Kachel bleibt leer (bild im Katalog leer)", pruefeKonfig(ohneBild) === true && katalogVon(ohneBild).artikel[3].bild === "");
+    const eigenerName = kaputt((c) => (c.artikel[3].bild = "praesi-jacke-2.webp"));
+    pruefe("Konfiguration: ein anderer gültiger Dateiname (Kleinbuchstaben, Ziffer, Bindestrich) wird übernommen", pruefeKonfig(eigenerName) === true && katalogVon(eigenerName).artikel[3].bild === "praesi-jacke-2.webp");
+    const alleOhne = kaputt((c) => c.artikel.forEach((a) => delete a.bild));
+    pruefe("Konfiguration: ganz ohne Bilder gültig (die Seite funktioniert wie vor den Bildern)", pruefeKonfig(alleOhne) === true && katalogVon(alleOhne).artikel.every((a) => a.bild === ""));
+  }
   pruefe("gültige Konfiguration besteht die Prüfung", pruefeKonfig(KONFIG_OEFFENTLICH) === true);
 
   // Die öffentlichen Daten tragen keine Preise: keine Schlüssel dafür, keine Beträge mit Nachkommastellen
@@ -1302,6 +1328,19 @@ abschnitt("Seite");
   pruefe("Seite: keine TODO-Reste und kein console.log", !/TODO|FIXME|console\.log/.test(s.inhalt));
   wirft("Seite: ohne data/bestellung.json bricht der Bau ab", () => seite({ teams: DATEN.teams }), "data/bestellung.json fehlt");
 
+  // Die Bilder im Bau: Jede Datei aus „bild“ muss unter assets/bilder/bestellung/ liegen, sonst bricht der Bau mit klarer Meldung ab (und zeigt, wie man sie erzeugt)
+  {
+    const mitBild = (id, bild) => ({ ...DATEN, bestellung: { ...DATEN.bestellung, artikel: DATEN.bestellung.artikel.map((a) => (a.id === id ? { ...a, bild } : a)) } });
+    const ohneBilder = { ...DATEN, bestellung: { ...DATEN.bestellung, artikel: DATEN.bestellung.artikel.map(({ bild, ...rest }) => rest) } };
+    wirft("Bau: ein Bild, das es nicht gibt, bricht den Bau ab (Meldung mit Dateiname und Artikel)", () => baueKonfig(mitBild("shorts", "gibt-es-nicht.webp")), "Das Bild „gibt-es-nicht.webp“ von Artikel „shorts“");
+    wirft("Bau: die Meldung nennt den Ort der Datei (assets/bilder/bestellung/…)", () => baueKonfig(mitBild("shorts", "gibt-es-nicht.webp")), "assets/bilder/bestellung/gibt-es-nicht.webp");
+    wirft("Bau: die Meldung sagt, wie man die Bilder erzeugt (Skript) oder den Eintrag entfernt", () => baueKonfig(mitBild("shorts", "gibt-es-nicht.webp")), "python3 tools/bestellung-bilder.py <Quellordner>");
+    wirft("Bau: auch seite() bricht ab, nicht nur baueKonfig()", () => seite(mitBild("tw-hose", "tw-hose-neu.webp")), "tw-hose-neu.webp");
+    wirft("Bau: ein Bild mit ungültigem Namen bricht ab, bevor nach einer Datei gesucht wird (kein Pfad nach außen)", () => baueKonfig(mitBild("shorts", "../../data/bestellung.json")), "ist ungültig");
+    pruefe("Bau: ohne jedes bild in den Daten bricht nichts ab (die Kacheln bleiben leer)", baueKonfig(ohneBilder).artikel.every((a) => a.bild === undefined));
+    pruefe("Bau: mit den Daten aus dem Repo bricht nichts ab (alle zehn Bilder liegen da)", baueKonfig(DATEN).artikel.every((a) => typeof a.bild === "string"));
+  }
+
   // Das Preispaket im Bau: aus den Daten, aus der Testvariable, beschädigt oder fehlend
   const paket = DATEN["bestellung-preise.enc"];
   gleichJson("Bau: das Paket aus data/bestellung-preise.enc.json steht in der Konfiguration (preiseVerschluesselt)", baueKonfig(DATEN).preiseVerschluesselt, paket);
@@ -1419,6 +1458,140 @@ abschnitt("Dateien");
   gleichJson("data/bestellung-preise.enc.json: genau die Felder des Formats", Object.keys(paket), ["format", "kdf", "iter", "salt", "iv", "ct"]);
   pruefe("data/bestellung-preise.enc.json: kein Klartext (kein „uvp“, „rabatt“, „quelle“, „€“)", !/uvp|rabatt|quelle|veredelung|Angebot|€/i.test(paketText.replace(/"(salt|iv|ct)": "[^"]*"/g, "")) && !/uvp|rabatt/i.test(Buffer.from(paket.ct, "base64").toString("latin1")));
   gleich("data/bestellung-preise.enc.json: Format, Verfahren und Runden", [paket.format, paket.kdf, paket.iter].join("|"), "speuzer-bestellung-preise-v1|PBKDF2-SHA256|600000");
+}
+
+// ---------- Produktbilder: die Kacheln im Repo ----------
+
+abschnitt("Produktbilder");
+{
+  const namen = KONFIG_OEFFENTLICH.artikel.map((a) => a.bild);
+  gleich("Bilder: jeder der zehn Artikel in data/bestellung.json hat ein bild", String(namen.filter((n) => typeof n === "string").length), "10");
+  gleichJson("assets/bilder/bestellung: genau die zehn Bilder aus den Daten, keine weiteren Dateien", readdirSync(BILDER_ORDNER).sort(), [...namen].sort());
+  for (const a of KONFIG_OEFFENTLICH.artikel) {
+    const datei = path.join(BILDER_ORDNER, a.bild);
+    const daten = existsSync(datei) ? readFileSync(datei) : Buffer.alloc(0);
+    const m = webpMasse(daten);
+    pruefe(`Bild ${a.bild} (${a.id}): ein WebP von ${BILD_KANTE} x ${BILD_KANTE} Pixeln`, !!m && m.breite === BILD_KANTE && m.hoehe === BILD_KANTE, JSON.stringify(m));
+    pruefe(`Bild ${a.bild}: höchstens ${BILD_MAX_BYTES} Byte (${daten.length})`, daten.length > 0 && daten.length <= BILD_MAX_BYTES);
+    pruefe(`Bild ${a.bild}: heißt wie der Artikel (id + .webp)`, a.bild === a.id + ".webp");
+  }
+}
+
+// ---------- Produktbilder: das Skript tools/bestellung-bilder.py mit erfundenen Quellbildern ----------
+
+abschnitt("Bilder-Skript");
+{
+  const python = (...args) => spawnSync("python3", args, { cwd: ROOT, encoding: "utf8" });
+  const hatPillow = python("-c", "import PIL.features, sys; sys.exit(0 if PIL.features.check('webp') else 1)").status === 0;
+  if (!hatPillow) {
+    console.log("  Hinweis: python3 mit Pillow und WebP fehlt, die Prüfungen von tools/bestellung-bilder.py entfallen.");
+  } else {
+    const arbeit = path.join(ROOT, "tools", "cache", "bestellung-test", "bilder-skript");
+    rmSync(arbeit, { recursive: true, force: true });
+    const ordner = (name) => {
+      const d = path.join(arbeit, name);
+      mkdirSync(d, { recursive: true });
+      return d;
+    };
+    const skript = (quelle, ziel) => python("tools/bestellung-bilder.py", quelle, "--ziel", ziel);
+    const erzeuge = (d, code) => {
+      const r = python("-c", "import sys\nfrom PIL import Image, ImageDraw\nd = sys.argv[1]\n" + code, d);
+      if (r.status !== 0) throw new Error("Testbild nicht erzeugt: " + r.stderr);
+    };
+
+    // Erfundene Quellen, so verschieden wie die echten: groß und quadratisch, klein mit Transparenz, Querformat; dazu ein Name, der kein Artikel ist
+    const quelle = ordner("quelle");
+    erzeuge(quelle, `
+im = Image.new("RGB", (1200, 1200), (255, 255, 255))
+ImageDraw.Draw(im).rectangle([300, 200, 799, 999], fill=(20, 60, 180))
+im.save(d + "/trikot.jpg", quality=92)
+im = Image.new("RGBA", (120, 144), (0, 0, 0, 0))
+ImageDraw.Draw(im).rectangle([10, 20, 69, 119], fill=(20, 60, 180, 255))
+im.save(d + "/shorts.png")
+im = Image.new("RGB", (300, 200), (255, 255, 255))
+ImageDraw.Draw(im).rectangle([30, 50, 269, 149], fill=(200, 30, 30))
+im.save(d + "/regenjacke.webp", quality=95)
+Image.new("RGB", (50, 50), (255, 255, 255)).save(d + "/unbekannt.jpg")
+open(d + "/notiz.txt", "w").write("kein Bild")
+`);
+    const ziel = path.join(arbeit, "ziel");
+    const lauf1 = skript(quelle, ziel);
+    gleich("Skript: erster Lauf endet mit Exit 0", String(lauf1.status), "0");
+    gleichJson("Skript: schreibt genau die drei Kacheln der bekannten Artikel (nicht „unbekannt“, nicht die Textdatei)", readdirSync(ziel).sort(), ["regenjacke.webp", "shorts.webp", "trikot.webp"]);
+    pruefe("Skript: warnt vor dem Namen, der kein Artikel ist, und überspringt ihn (auch ohne ihn zu lesen)", lauf1.stderr.includes("Warnung: unbekannt.jpg") && lauf1.stderr.includes("übersprungen"), lauf1.stderr);
+    pruefe("Skript: die Tabelle nennt id, Quellgröße und Bytes (neu)", /trikot\s+1200x1200\s+\d+\s+\d+\s+neu/.test(lauf1.stdout) && /shorts\s+120x144\s+\d+/.test(lauf1.stdout) && /regenjacke\s+300x200\s+\d+/.test(lauf1.stdout), lauf1.stdout);
+    pruefe("Skript: nennt die Artikel ohne Quelle (die Kachel bleibt dort leer)", lauf1.stdout.includes("ohne Quelle") && lauf1.stdout.includes("stutzen"), lauf1.stdout);
+    const ausgabe1 = {};
+    for (const n of readdirSync(ziel)) {
+      const daten = readFileSync(path.join(ziel, n));
+      ausgabe1[n] = daten;
+      const m = webpMasse(daten);
+      pruefe(`Skript: ${n} ist ein WebP von ${BILD_KANTE} x ${BILD_KANTE} (${JSON.stringify(m)})`, !!m && m.breite === BILD_KANTE && m.hoehe === BILD_KANTE);
+      pruefe(`Skript: ${n} hat höchstens ${BILD_MAX_BYTES} Byte (${daten.length})`, daten.length <= BILD_MAX_BYTES);
+    }
+
+    // Zuschnitt und Rand: Das Produkt füllt die längere Seite zu rund 84 % (121 von 144 Pixeln), steht mittig, der Rand ist weiß – egal ob groß, klein, hoch, quer oder mit Transparenz
+    const messung = python("-c", `
+import sys, json
+from PIL import Image, ImageChops
+res = {}
+for n in sys.argv[2:]:
+    im = Image.open(sys.argv[1] + "/" + n + ".webp").convert("RGB")
+    r, g, b = im.split()
+    dunkel = ImageChops.darker(ImageChops.darker(r, g), b)
+    bb = dunkel.point(lambda p: 255 if p < 231 else 0).getbbox()
+    px = im.load()
+    res[n] = {"bbox": bb, "ecken": [px[0, 0], px[143, 0], px[0, 143], px[143, 143]]}
+print(json.dumps(res))
+`, ziel, "trikot", "shorts", "regenjacke");
+    const gemessen = JSON.parse(measure(messung));
+    function measure(r) {
+      if (r.status !== 0) throw new Error("Messung gescheitert: " + r.stderr);
+      return r.stdout;
+    }
+    const erwartet = { trikot: { lang: "hoehe", kurz: [73, 78] }, shorts: { lang: "hoehe", kurz: [70, 76] }, regenjacke: { lang: "breite", kurz: [48, 53] } };
+    for (const [n, soll] of Object.entries(erwartet)) {
+      const [l, o, r, u] = gemessen[n].bbox;
+      const breite = r - l;
+      const hoehe = u - o;
+      const lang = soll.lang === "hoehe" ? hoehe : breite;
+      const kurz = soll.lang === "hoehe" ? breite : hoehe;
+      pruefe(`Skript: ${n}: die längere Seite füllt rund 84 % (121 von 144 Pixeln, gemessen ${lang})`, lang >= 119 && lang <= 123);
+      pruefe(`Skript: ${n}: die kürzere Seite bleibt im Seitenverhältnis des Produkts (gemessen ${kurz})`, kurz >= soll.kurz[0] && kurz <= soll.kurz[1]);
+      pruefe(`Skript: ${n}: mittig (Rand links ${l} / rechts ${144 - r}, oben ${o} / unten ${144 - u}, je höchstens 2 Pixel Unterschied)`, Math.abs(l - (144 - r)) <= 2 && Math.abs(o - (144 - u)) <= 2);
+      pruefe(`Skript: ${n}: die vier Ecken sind weiß (${JSON.stringify(gemessen[n].ecken)})`, gemessen[n].ecken.every((e) => e.every((k) => k >= 250)));
+    }
+
+    // Zweiter Lauf: byte-gleich, nichts geändert
+    const lauf2 = skript(quelle, ziel);
+    gleich("Skript: zweiter Lauf endet mit Exit 0", String(lauf2.status), "0");
+    pruefe("Skript: zweiter Lauf schreibt byte-gleiche Dateien", Object.entries(ausgabe1).every(([n, daten]) => readFileSync(path.join(ziel, n)).equals(daten)));
+    gleich("Skript: zweiter Lauf meldet dreimal „unverändert“ und nichts als neu oder geändert", String((lauf2.stdout.match(/unverändert/g) || []).length) + "|" + String(/\bneu\b|geändert\b/.test(lauf2.stdout.replaceAll("unverändert", ""))), "3|false");
+    // Neu in einen anderen Ordner: dieselben Bytes (der Zustand des Zielordners spielt keine Rolle)
+    const ziel2 = path.join(arbeit, "ziel2");
+    skript(quelle, ziel2);
+    pruefe("Skript: derselbe Quellordner in einen frischen Zielordner ergibt dieselben Bytes", Object.entries(ausgabe1).every(([n, daten]) => readFileSync(path.join(ziel2, n)).equals(daten)));
+
+    // Fehlerfälle: Exit 1 mit klarer Meldung, und es wird nichts geschrieben
+    const fall = (name, vorbereiten, teilText, erwartetStatus = 1) => {
+      const q = ordner(name + "-quelle");
+      const z = path.join(arbeit, name + "-ziel");
+      vorbereiten(q);
+      const r = skript(q, z);
+      pruefe(`Skript: ${name}: Exit ${erwartetStatus} und Meldung „${teilText}“`, r.status === erwartetStatus && r.stderr.includes(teilText), `Exit ${r.status}: ${r.stderr}`);
+      pruefe(`Skript: ${name}: nichts geschrieben (der Zielordner bleibt leer oder fehlt, auch ein gültiges Bild daneben wird dann nicht geschrieben)`, !existsSync(z) || readdirSync(z).length === 0);
+    };
+    fall("doppelte Quelle", (q) => erzeuge(q, 'Image.new("RGB", (40, 40), (20, 60, 180)).save(d + "/trikot.jpg")\nImage.new("RGB", (40, 40), (20, 60, 180)).save(d + "/trikot.png")'), "mehrere Quellen für einen Artikel: trikot");
+    fall("ganz weißes Bild", (q) => erzeuge(q, 'Image.new("RGB", (40, 40), (20, 60, 180)).save(d + "/trikot.jpg")\nImage.new("RGB", (40, 40), (255, 255, 255)).save(d + "/shorts.png")'), "shorts.png: das Bild ist ganz weiß");
+    fall("kein Bild in der Datei", (q) => writeFileSync(path.join(q, "stutzen.jpg"), "das ist kein Bild"), "stutzen.jpg: lässt sich nicht als Bild lesen");
+    fall("nur ein unbekannter Name", (q) => erzeuge(q, 'Image.new("RGB", (40, 40), (20, 60, 180)).save(d + "/hallo.jpg")'), "liegt keine Datei");
+    {
+      const r = skript(path.join(arbeit, "gibt-es-nicht"), path.join(arbeit, "kein-ziel"));
+      pruefe("Skript: ein Quellordner, den es nicht gibt: Exit 1 und Meldung", r.status === 1 && r.stderr.includes("gibt es nicht"), r.stderr);
+      pruefe("Skript: ohne Quellordner im Aufruf: Exit 2 (falscher Aufruf)", python("tools/bestellung-bilder.py").status === 2);
+    }
+    rmSync(arbeit, { recursive: true, force: true });
+  }
 }
 
 // ---------- Zusammenfassung ----------

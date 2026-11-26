@@ -20,11 +20,15 @@
 
   Aufbau der Oberfläche: Die Felder werden einmal gebaut und danach nur noch aus dem Zustand nachgeführt (aktualisiere); so bleibt der Fokus
   beim Tippen, wo er ist. Ein Eingabefeld mit Fokus wird nie von außen überschrieben.
+
+  Produktbilder: Jede Artikelzeile trägt links eine kleine Kachel mit dem Bild des Artikels (data/bestellung.json › artikel[].bild, die Dateien liegen unter
+  assets/bilder/bestellung/); ohne Eintrag bleibt die Kachel leer. Der Hinweis „Produktbilder: JAKO“ steht einmal unter der Liste der Personen.
 */
 
 import {
   GRENZEN,
   MAILTO_LAENGE_MAX,
+  PREIS_AUF_ANFRAGE,
   artikelAufdrucke,
   artikelGroesse,
   baueMail,
@@ -62,6 +66,13 @@ const TEXT_CODE_FALSCH = "Der Code stimmt nicht. Bitte prüf ihn oder frag im Vo
 const TEXT_CODE_LEER = "Bitte gib den Code ein.";
 const TEXT_CODE_ALT = "Der gemerkte Code passt nicht mehr. Bitte gib den Code ein, den du vom Verein bekommen hast.";
 const TEXT_DATEN_DEFEKT = "Die Preisdaten dieser Seite sind beschädigt oder unvollständig. Bitte sag im Vorstand Bescheid.";
+const TEXT_BILDNACHWEIS = "Produktbilder: JAKO";
+
+// Die Produktbilder der Artikelzeilen (Kacheln 144 x 144, erzeugt mit tools/bestellung-bilder.py) liegen unter assets/bilder/bestellung/. Ihre Adresse
+// wird vom Skript selbst aus gebildet (dieses Skript liegt in assets/js/bestellung/, die Bilder zwei Ordner höher): So stimmt sie überall, wo das
+// Skript liegt (GitHub Pages im Unterordner, Testserver), ohne dass die Seite ihren eigenen Pfad kennen muss (wie assets/js/anmeldung/pdf-lader.js).
+const BILDER_BASIS = new URL("../../bilder/bestellung/", import.meta.url);
+const bildAdresse = (datei) => new URL(datei, BILDER_BASIS).href;
 
 // ---------- Speicher auf dem Gerät (jeder Zugriff in try/catch) ----------
 
@@ -310,6 +321,14 @@ function starteApp(app, konfig, haken) {
     vergessen: $("[data-bst-vergessen]"),
   };
 
+  // Herkunft der Produktbilder: einmal klein unter der Liste „Kleidung je Person“ (nach dem Knopf „+ Person hinzufügen“), solange es Bilder zu sehen gibt,
+  // also ab der ersten Person (syncPersonen). Die Bilder hängen an den Karten, darum entsteht der Hinweis hier und nicht im Formular-Text.
+  const bildnachweis = document.createElement("p");
+  bildnachweis.className = "bst-bildnachweis";
+  bildnachweis.hidden = true;
+  bildnachweis.textContent = TEXT_BILDNACHWEIS;
+  el.neu.parentElement.after(bildnachweis);
+
   const jetzt = () => new Date();
 
   // Zustand: der Entwurf (bleibt auf dem Gerät) und was nur die Anzeige betrifft
@@ -400,9 +419,15 @@ function starteApp(app, konfig, haken) {
           <input type="text" id="${idp}-ini-${a.id}" data-a="initialen" data-schluessel="p:${p.id}:initialen" maxlength="${GRENZEN.initialen}" autocomplete="off" autocapitalize="characters" placeholder="z. B. BK" aria-describedby="${idp}-titel">
         </div>`
       : "";
+    // Kachel mit dem Produktbild, nur zur Wiedererkennung (alt leer, vor Hilfstechnik verborgen: Name und Beschreibung stehen daneben). Sie liegt im Label:
+    // Ein Tipp aufs Bild hakt den Artikel an. Hat ein Artikel kein Bild (data/bestellung.json), bleibt die Kachel leer, damit alle Texte bündig bleiben.
+    const kachel = a.bild
+      ? `<span class="bst-check__bild" aria-hidden="true"><img src="${esc(bildAdresse(a.bild))}" alt="" width="48" height="48" loading="lazy" decoding="async"></span>`
+      : `<span class="bst-check__bild bst-check__bild--leer" aria-hidden="true"></span>`;
     return `<li class="bst-artikel" data-artikel="${esc(a.id)}">
         <label class="bst-check" for="${idp}-a-${a.id}">
           <input type="checkbox" id="${idp}-a-${a.id}" data-a="an">
+          ${kachel}
           <span class="bst-check__text"><span class="bst-check__name">${esc(a.anzeige)}</span><span class="bst-check__beschr">${esc(a.beschreibung)}</span></span>
           <span class="bst-check__preis" data-a-preis></span>
         </label>
@@ -465,6 +490,24 @@ function starteApp(app, konfig, haken) {
     if (knoten.textContent !== text) knoten.textContent = text;
   }
 
+  // Der Stückpreis rechts in der Zeile. Ein Vorspann vor dem Betrag („ab “ oder „Preis auf “ vor „Anfrage“) steht in einem eigenen Element: Am schmalen Handy
+  // steht er über dem Betrag (CSS), damit der Preis neben Bild und Text in der Zeile bleibt. Der Text selbst ändert sich dadurch nicht (textContent
+  // bleibt „ab 21,74 €“).
+  function setzePreis(knoten, text) {
+    if (knoten.textContent === text) return;
+    let vor = "";
+    if (text === PREIS_AUF_ANFRAGE) vor = text.slice(0, text.lastIndexOf(" ") + 1);
+    else if (text.startsWith("ab ")) vor = "ab ";
+    if (!vor) {
+      knoten.textContent = text;
+      return;
+    }
+    const kopf = document.createElement("span");
+    kopf.className = vor === "ab " ? "bst-check__vor bst-check__vor--klein" : "bst-check__vor";
+    kopf.textContent = vor;
+    knoten.replaceChildren(kopf, document.createTextNode(text.slice(vor.length)));
+  }
+
   function syncKarte(karte, p, index, z) {
     const idp = "bst-" + p.id;
     const titel = $("#" + idp + "-titel", karte);
@@ -481,7 +524,7 @@ function starteApp(app, konfig, haken) {
       const groesse = artikelGroesse(konfig, p, a.id);
       // Ist der Artikel nicht gewählt, zeigt die Zeile den Preis mit den Standard-Aufdrucken (so beginnt die Auswahl).
       const codes = gewaehlt ? artikelAufdrucke(konfig, p, a.id) : a.aufdrucke.standard;
-      setzeText($("[data-a-preis]", zeile), preisText(konfig, a.id, groesse, codes));
+      setzePreis($("[data-a-preis]", zeile), preisText(konfig, a.id, groesse, codes));
       if (!gewaehlt) continue;
       setzeWert($('[data-a="groesse"]', zeile), groesse);
       for (const d of zeile.querySelectorAll('[data-a="druck"]')) {
@@ -519,6 +562,7 @@ function starteApp(app, konfig, haken) {
       syncKarte(karte, p, index, z);
     });
     el.keine.hidden = zustand.personen.length > 0;
+    bildnachweis.hidden = zustand.personen.length === 0;
     el.neu.disabled = zustand.personen.length >= GRENZEN.personen;
   }
 
@@ -714,6 +758,16 @@ function starteApp(app, konfig, haken) {
   form.addEventListener("input", beiEingabe);
   form.addEventListener("change", beiEingabe);
   form.addEventListener("submit", (e) => e.preventDefault());
+
+  // Lädt ein Produktbild nicht (kein Netz, Datei fehlt auf dem Server), bleibt die Kachel leer, statt das Zeichen für ein kaputtes Bild zu zeigen.
+  // Das Ereignis „error“ eines Bildes steigt nicht auf: Darum hört das Formular schon in der Erfassungsphase (true) zu.
+  form.addEventListener(
+    "error",
+    (e) => {
+      if (e.target instanceof HTMLImageElement) e.target.hidden = true;
+    },
+    true
+  );
 
   // ---------- Klicks ----------
 

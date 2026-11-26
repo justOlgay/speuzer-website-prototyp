@@ -335,11 +335,22 @@ function baueKatalog(konfig) {
       aufdruckNamen[code] = String(namen[code + ":" + druckdaten[code]] || namen[code]);
     }
 
+    // Bild der Artikelzeile (optional): der Dateiname unter assets/bilder/bestellung/ (Kachel 144 x 144, erzeugt mit tools/bestellung-bilder.py).
+    // Ohne Angabe bleibt die Kachel leer. Dass die Datei da ist, prüft der Bau (src/seiten/bestellung.mjs).
+    let bild = "";
+    if (roh.bild !== undefined) {
+      if (typeof roh.bild !== "string" || !/^[a-z0-9-]+\.webp$/.test(roh.bild)) {
+        fehler(`${id}: bild ${JSON.stringify(roh.bild)} ist ungültig (erwartet: ein Dateiname aus a–z, 0–9 und „-“ mit der Endung .webp, zum Beispiel „${id}.webp“)`);
+      }
+      bild = roh.bild;
+    }
+
     const eintrag = {
       id,
       index,
       anzeige: String(roh.anzeige),
       beschreibung: String(roh.beschreibung || ""),
+      bild,
       groessen,
       groessenNachWert: nachWert,
       gruppen: [...gruppenImArtikel],
@@ -363,7 +374,7 @@ function baueKatalog(konfig) {
   return { artikel, nachId, gruppeNachGroesse };
 }
 
-// Prüft die ganze Konfiguration der Seite (Katalog, Schnellwahl, Teambedarf, Bezahlung, Einstellungen, Mannschaften).
+// Prüft die ganze Konfiguration der Seite (Katalog samt Bildnamen, Schnellwahl, Teambedarf, Bezahlung, Einstellungen, Mannschaften).
 // Wirft bei einem Fehler; der Bau (src/seiten/bestellung.mjs) bricht dann ab, statt eine kaputte Seite zu liefern.
 export function pruefeKonfig(konfig) {
   const fehler = (text) => {

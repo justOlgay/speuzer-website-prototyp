@@ -3,8 +3,10 @@
 // Bedient wird eine Kopie der Dateien, die die Seite braucht (Schnappschuss unter tools/cache/bestellung-test/site/), nicht
 // docs/ selbst: Ein Bau, den jemand gleichzeitig ausführt, löscht docs/assets kurz und würde den Test stören. Der Schnappschuss kommt aus
 // docs/ des Arbeitsordners oder aus einem anderen docs-Ordner (der Browser-Test baut mit Testpreisen in einem Wegwerf-Ordner).
-// Port 0 = freier Port (nie 4173). Es werden nur diese Pfade ausgeliefert: ws/bestellung.html und assets/{css,fonts,logo,js/bestellung}.
+// Port 0 = freier Port (nie 4173). Es werden nur diese Pfade ausgeliefert: ws/bestellung.html und assets/{css,fonts,logo,js/bestellung,bilder/bestellung}.
 // Alles andere ist 404; die Anfragen werden mitgezählt (server.anfragen), damit der Test sieht, ob die Seite etwas Unerwartetes lädt.
+// Die Seite ist auch unter /speuzer-website-prototyp/ws/bestellung.html erreichbar (server.seiteImUnterordner): So liegt sie auf GitHub Pages. Der Test
+// prüft damit, dass CSS, Skripte und Produktbilder auch aus einem Unterordner geladen werden (die Adressen dürfen nicht an der Wurzel hängen).
 //
 // Aufruf allein: node tools/bestellung-test/testserver.mjs  (Adresse wird gezeigt)
 
@@ -23,7 +25,11 @@ const KOPIEREN = [
   ["assets/fonts", "assets/fonts"],
   ["assets/logo", "assets/logo"],
   ["assets/js/bestellung", "assets/js/bestellung"],
+  ["assets/bilder/bestellung", "assets/bilder/bestellung"],
 ];
+
+// Der Ordner, unter dem die Seite auf GitHub Pages liegt (https://justolgay.github.io/speuzer-website-prototyp/ws/bestellung.html)
+export const UNTERORDNER = "/speuzer-website-prototyp";
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -32,6 +38,7 @@ const MIME = {
   ".json": "application/json; charset=utf-8",
   ".svg": "image/svg+xml",
   ".png": "image/png",
+  ".webp": "image/webp",
   ".woff2": "font/woff2",
 };
 
@@ -66,7 +73,8 @@ export async function starteTestserver(docs = DOCS) {
   const server = createServer((req, res) => {
     const pfad = decodeURIComponent((req.url || "/").split("?")[0]);
     anfragen.push(pfad);
-    const ziel = path.join(wurzel, pfad);
+    // Unter dem Unterordner liegt dieselbe Ablage wie an der Wurzel (wie GitHub Pages); der Ordner selbst wird abgeschnitten
+    const ziel = path.join(wurzel, pfad.startsWith(UNTERORDNER + "/") ? pfad.slice(UNTERORDNER.length) : pfad);
     if (!ziel.startsWith(wurzel) || !existsSync(ziel) || statSync(ziel).isDirectory()) {
       res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
       res.end("Nicht gefunden");
@@ -83,6 +91,7 @@ export async function starteTestserver(docs = DOCS) {
   return {
     basis,
     seite: basis + "/ws/bestellung.html",
+    seiteImUnterordner: basis + UNTERORDNER + "/ws/bestellung.html",
     wurzel,
     anfragen,
     schliessen: () => new Promise((resolve) => server.close(resolve)),

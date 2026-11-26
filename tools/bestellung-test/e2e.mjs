@@ -24,7 +24,12 @@
 //   - lange Bestellung (Hinweis, mailto nie gekürzt), Zwischenablage mit und ohne Rückfall, localStorage wirft Fehler und kaputte gespeicherte Daten
 //   - kein waagrechtes Scrollen ab 320 px, die Auswahl der Größe ist nie abgeschnitten, keine Konsolenfehler, keine Anfragen nach außen,
 //     Tippflächen mindestens 44 px, axe-core ohne Verstöße; ein Durchlauf bei 1440 x 900 (Spalte höchstens 720 px)
-//   - Bildschirmfotos nach tools/cache/bestellung-test/ (390-zugang, 390-ausgefuellt, 390-aufdrucke, 390-sponsor-lieferung, 390-luecken, 1440-ausgefuellt, …)
+//   - Produktbilder (AP-3): die zehn Kacheln im Bau (WebP, 144 x 144, gleich den Quellen); in jeder Artikelzeile ein geladenes Bild (naturalWidth 144),
+//     Klick aufs Bild hakt an, Kästchen, Bild, Text und Preis in einer Zeile ohne Überlappung (360 bis 414 px, 1440 px; auch mit „ab“-Preisen und
+//     „Preis auf Anfrage“), kein waagrechtes Scrollen, der Hinweis „Produktbilder: JAKO“, leere Kachel ohne bild in den Daten, Ladefehler eines Bildes,
+//     Adressen auch unter einem Unterordner (GitHub Pages)
+//   - Bildschirmfotos nach tools/cache/bestellung-test/ (390-zugang, 390-ausgefuellt, 390-aufdrucke, 390-sponsor-lieferung, 390-luecken, 1440-ausgefuellt,
+//     390-bilder, 1440-bilder, …)
 //
 // Aufruf: node tools/bestellung-test/e2e.mjs [--ausfuehrlich] [--nur=zugang,leer,…]   (--nur nur zum Entwickeln: einzelne Abläufe)
 // Chrome-Tests nie über eine Pipe laufen lassen (der Chrome-Updater hält den Ausgabekanal offen): die Ausgabe in eine Datei umleiten.
@@ -41,6 +46,7 @@ import { kopierText, stueckpreis } from "../../assets/js/bestellung/mailtext.js"
 import { TEXT_HINWEIS_SPONSOR, TEXT_LEAD } from "../../assets/js/bestellung/formular.js";
 import { verschluessele } from "../../assets/js/bestellung/zugang.js";
 import { baueKonfig } from "../../src/seiten/bestellung.mjs";
+import { BILDER_ORDNER, BILD_KANTE, BILD_MAX_BYTES, webpMasse } from "./bilder.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
@@ -476,6 +482,97 @@ async function pruefeAuswahlfelder(page, name) {
   gleich(`${name}: keine Auswahl ist zu schmal für ihren Text (nichts abgeschnitten)`, zuSchmal.join(" | "), "");
 }
 
+// ---------- Produktbilder in den Artikelzeilen ----------
+
+// Wartet, bis die Bilder der Zeilen einer Person geladen sind. Sie laden erst, wenn ihre Zeile nahe am sichtbaren Bereich ist (loading="lazy"): Darum
+// wird eine Zeile nach der anderen in die Mitte geholt. Eine Zeile ohne Bild oder mit einem Bild, das nicht lädt (die Seite blendet es aus), ist sofort fertig.
+async function ladeBilder(page, karte) {
+  const anzahl = await page.$$eval(`${karte} [data-artikel]`, (l) => l.length);
+  for (let i = 0; i < anzahl; i++) {
+    await page.evaluate((k, n) => document.querySelectorAll(`${k} [data-artikel]`)[n].scrollIntoView({ block: "center" }), karte, i);
+    await page.waitForFunction(
+      (k, n) => {
+        const img = document.querySelectorAll(`${k} [data-artikel]`)[n].querySelector(".bst-check__bild img");
+        return !img || img.hidden || (img.complete && img.naturalWidth > 0);
+      },
+      { timeout: 15000 },
+      karte,
+      i
+    );
+  }
+  await page.evaluate(() => window.scrollTo(0, 0));
+}
+
+// Maße (Rechtecke im Fenster, alle in einer Messung, also bei derselben Bildlaufposition) und Zustand der Zeilen einer Person
+function messeZeilen(page, karte) {
+  return page.$$eval(`${karte} [data-artikel]`, (zeilen) =>
+    zeilen.map((z) => {
+      const rechteck = (s) => {
+        const e = z.querySelector(s);
+        if (!e || e.getClientRects().length === 0) return null;
+        const b = e.getBoundingClientRect();
+        return { l: b.left, t: b.top, r: b.right, b: b.bottom, w: b.width, h: b.height };
+      };
+      const kachel = z.querySelector(".bst-check__bild");
+      const img = kachel && kachel.querySelector("img");
+      const text = z.querySelector(".bst-check__text");
+      const stil = kachel ? getComputedStyle(kachel) : null;
+      return {
+        id: z.dataset.artikel,
+        angehakt: z.querySelector('[data-a="an"]').checked,
+        zeile: rechteck(".bst-check"),
+        haken: rechteck('input[data-a="an"]'),
+        kachel: rechteck(".bst-check__bild"),
+        text: rechteck(".bst-check__text"),
+        preis: rechteck("[data-a-preis]"),
+        preisText: z.querySelector("[data-a-preis]").textContent,
+        textUeberlauf: text ? text.scrollWidth - text.clientWidth : 0,
+        kachelAriaHidden: kachel ? kachel.getAttribute("aria-hidden") : null,
+        kachelLeer: kachel ? kachel.classList.contains("bst-check__bild--leer") : null,
+        kachelGrund: stil ? stil.backgroundColor : null,
+        kachelRand: stil ? stil.borderTopWidth + " " + stil.borderTopStyle : null,
+        zeilenGrund: getComputedStyle(z).backgroundColor,
+        imLabel: !!(kachel && kachel.closest("label.bst-check")),
+        img: img
+          ? { src: img.currentSrc || img.src, alt: img.getAttribute("alt"), breite: img.getAttribute("width"), hoehe: img.getAttribute("height"), loading: img.getAttribute("loading"), decoding: img.getAttribute("decoding"), fertig: img.complete, nat: img.naturalWidth, natH: img.naturalHeight, hidden: img.hidden, anzeige: getComputedStyle(img).display }
+          : null,
+      };
+    })
+  );
+}
+
+const schneiden = (a, b) => a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b;
+const kurz = (z) => JSON.stringify({ haken: z.haken, kachel: z.kachel, text: z.text, preis: z.preis, ueberlauf: z.textUeberlauf });
+
+// Die Regeln für das Aussehen jeder Zeile. nebeneinander: Kästchen, Kachel, Text und Preis stehen in einer Zeile (ab 360 px); sonst (320 px) darf der
+// Preis unter den Text rutschen, überlappen darf nichts. bildAdresse: wohin die Bilder zeigen müssen (Anfang der Adresse); ohneBild: Artikel ohne bild in den Daten.
+function pruefeBildzeilen(name, zeilen, { nebeneinander = true, bildAdresse = null, ohneBild = [] } = {}) {
+  gleich(`${name}: zehn Zeilen`, String(zeilen.length), "10");
+  for (const z of zeilen) {
+    const n = `${name}: ${z.id}`;
+    pruefe(`${n}: die Kachel ist 48 x 48 Pixel groß, weiß, mit 1 Pixel Rand, vor Hilfstechnik verborgen und liegt im Label (ein Tipp aufs Bild gilt der Zeile)`, !!z.kachel && Math.abs(z.kachel.w - 48) < 0.5 && Math.abs(z.kachel.h - 48) < 0.5 && z.kachelGrund === "rgb(255, 255, 255)" && z.kachelRand === "1px solid" && z.kachelAriaHidden === "true" && z.imLabel, kurz(z));
+    pruefe(`${n}: nichts überlappt (Kästchen, Kachel, Text, Preis)`, !schneiden(z.haken, z.kachel) && !schneiden(z.kachel, z.text) && !schneiden(z.text, z.preis) && !schneiden(z.kachel, z.preis) && !schneiden(z.haken, z.text), kurz(z));
+    pruefe(`${n}: der Text läuft nicht über seinen Platz hinaus (kein Wort ragt in den Preis)`, z.textUeberlauf <= 0.5, kurz(z));
+    pruefe(`${n}: Preis und Kachel liegen innerhalb der Zeile`, z.preis.r <= z.zeile.r + 0.5 && z.kachel.l >= z.zeile.l && z.haken.l >= z.zeile.l, kurz(z));
+    pruefe(`${n}: die Kachel steht oben bündig mit dem Text, das Kästchen auf der Höhe seiner ersten Zeile`, Math.abs(z.kachel.t - z.text.t) <= 1.5 && z.haken.t - z.text.t >= -0.5 && z.haken.t - z.text.t <= 3, kurz(z));
+    if (nebeneinander) {
+      pruefe(`${n}: Kästchen, Kachel, Text und Preis stehen von links nach rechts in einer Zeile`, z.haken.r <= z.kachel.l + 0.5 && z.kachel.r <= z.text.l + 0.5 && z.text.r <= z.preis.l + 0.5, kurz(z));
+      pruefe(`${n}: der Preis liegt in derselben Zeile wie die Kachel (Rechteck-Vergleich) und steht oben auf der Höhe des Namens`, z.preis.t < z.kachel.b && z.preis.b > z.kachel.t && Math.abs(z.preis.t - z.text.t) <= 1.5, kurz(z));
+    }
+    if (z.angehakt) pruefe(`${n}: in der angehakten Zeile (${z.zeilenGrund}) bleibt die Kachel weiß`, z.zeilenGrund !== "rgb(255, 255, 255)" && z.kachelGrund === "rgb(255, 255, 255)");
+    if (ohneBild.includes(z.id)) {
+      pruefe(`${n}: ohne bild in den Daten: dieselbe Kachel leer (Klasse bst-check__bild--leer), kein img darin`, z.kachelLeer === true && z.img === null);
+    } else {
+      const i = z.img;
+      pruefe(`${n}: das Bild ist geladen (complete, naturalWidth ${BILD_KANTE}, naturalHeight ${BILD_KANTE}), nicht ausgeblendet`, !!i && i.fertig && i.nat === BILD_KANTE && i.natH === BILD_KANTE && !i.hidden && i.anzeige !== "none", JSON.stringify(i));
+      pruefe(`${n}: img mit leerem alt, width und height 48, loading lazy, decoding async`, !!i && i.alt === "" && i.breite === "48" && i.hoehe === "48" && i.loading === "lazy" && i.decoding === "async" && z.kachelLeer === false, JSON.stringify(i));
+      if (bildAdresse) pruefe(`${n}: das Bild kommt von ${bildAdresse}${z.id}.webp`, !!i && i.src === bildAdresse + z.id + ".webp", i && i.src);
+    }
+  }
+  // Alle Texte stehen bündig: Die Kachel ist immer da (auch leer), also beginnt der Text in jeder Zeile an derselben Stelle
+  gleich(`${name}: alle Texte beginnen an derselben Stelle (bündig)`, [...new Set(zeilen.map((z) => Math.round(z.text.l - z.zeile.l)))].join(","), String(Math.round(zeilen[0].text.l - zeilen[0].zeile.l)));
+}
+
 // ---------- Bildschirmfotos ----------
 
 async function foto(page, datei) {
@@ -575,6 +672,19 @@ function statisch(bau) {
   for (const d of ["css/bestellung.css", "js/bestellung/seite.js", "js/bestellung/mailtext.js", "js/bestellung/zugang.js", "js/bestellung/formular.js"]) {
     pruefe(`docs/assets/${d} vorhanden und gleich der Quelle`, existsSync(path.join(DOCS, "assets", d)) && readFileSync(path.join(DOCS, "assets", d), "utf8") === readFileSync(path.join(ROOT, "assets", d), "utf8"), "Bau veraltet? npm run build");
   }
+  // Produktbilder: Die zehn Kacheln liegen im Bau (docs/ des Arbeitsordners und Wegwerf-Bau), gleich den Quellen, als WebP von 144 x 144 und höchstens 12 KB
+  const bildNamen = KONFIG.artikel.map((a) => a.bild);
+  const bildDaten = bildNamen.map((b) => readFileSync(path.join(BILDER_ORDNER, b)));
+  for (const [name, docs] of [["docs/ des Arbeitsordners", DOCS], ["Bau mit Testpreisen", bau.docs]]) {
+    const ordner = path.join(docs, "assets", "bilder", "bestellung");
+    gleichJson(`${name}: assets/bilder/bestellung enthält genau die zehn Bilder aus den Daten`, existsSync(ordner) ? readdirSync(ordner).sort() : [], [...bildNamen].sort());
+    for (const b of bildNamen) {
+      const daten = existsSync(path.join(ordner, b)) ? readFileSync(path.join(ordner, b)) : Buffer.alloc(0);
+      const m = webpMasse(daten);
+      pruefe(`${name}: ${b} ist gleich der Quelle in assets/bilder/bestellung, ein WebP von ${BILD_KANTE} x ${BILD_KANTE} und höchstens ${BILD_MAX_BYTES} Byte`, daten.length > 0 && daten.equals(readFileSync(path.join(BILDER_ORDNER, b))) && !!m && m.breite === BILD_KANTE && m.hoehe === BILD_KANTE && daten.length <= BILD_MAX_BYTES, "Bau veraltet? npm run build");
+    }
+  }
+  pruefe("docs/ws/bestellung.html: ohne Code kein Bild im HTML (die Kacheln entstehen erst nach dem Öffnen)", !/<img\b/.test(html));
   pruefe("assets/js/bestellung: keine weiteren Dateien als die geprüften (seite, mailtext, zugang, formular)", readdirSync(path.join(ROOT, "assets", "js", "bestellung")).sort().join(",") === "formular.js,mailtext.js,seite.js,zugang.js");
   const sitemap = readFileSync(path.join(DOCS, "sitemap.xml"), "utf8");
   pruefe("docs/sitemap.xml ohne die Bestellseite", !/bestellung/i.test(sitemap));
@@ -587,6 +697,7 @@ function statisch(bau) {
     }
     const dateien = dateienUnter(ordner);
     pruefe(`${rel}: keine Datei der Bestellseite`, !dateien.some((d) => /bestellung/i.test(path.basename(d))), dateien.filter((d) => /bestellung/i.test(path.basename(d))).join(", "));
+    pruefe(`${rel}: keines der Produktbilder der Bestellseite (keine .webp-Datei gleich einer Kachel)`, !dateien.filter((d) => /\.webp$/i.test(d)).some((d) => { const x = readFileSync(d); return bildDaten.some((b) => b.equals(x)); }));
     pruefe(`${rel}: keine Seite verweist auf die Bestellseite`, !dateien.filter((d) => /\.(html|js|css)$/.test(d)).some((d) => /bestellung\.html/.test(readFileSync(d, "utf8"))));
     pruefe(`${rel}: weder die Module der Bestellseite (zugang.js, formular.js) noch das verschlüsselte Paket der Preise`, !dateien.some((d) => /(^|[\\/])(zugang|formular)\.js$/.test(d)) && !dateien.filter((d) => /\.(html|js|json)$/.test(d)).some((d) => /preiseVerschluesselt|speuzer-bestellung-preise/.test(readFileSync(d, "utf8"))));
   }
@@ -1714,7 +1825,9 @@ async function ablaufZeichen(browser, server) {
     await page.type("#bst-sonstiges", `Tor <script>window.__xss=2</script> & Ersatz "Netz" 50% sicher?=#`);
     await page.click("#bst-senden");
     gleich("Sonderzeichen: Lücke zeigt den Namen als Text", (await luecken(page)).filter((t) => t.includes("Rückennummer")).join("|"), `Bei ${name} fehlt die Rückennummer (Trikot)`);
-    gleich("Sonderzeichen: kein Element aus den Namen entstanden", String(await page.$$eval("[data-bst-luecken] img, [data-bst-luecken] b, .bst-person img, form b, form i, form u, form script", (l) => l.length)), "0");
+    // Bilder in den Kacheln der Artikelzeilen (.bst-check__bild, je Zeile eines) sind gewollt; ein Bild außerhalb davon käme aus dem Namen
+    gleich("Sonderzeichen: kein Element aus den Namen entstanden", String(await page.$$eval("[data-bst-luecken] img, [data-bst-luecken] b, .bst-person :not(.bst-check__bild) > img, form b, form i, form u, form script", (l) => l.length)), "0");
+    gleich("Sonderzeichen: die zehn Kacheln der Zeilen tragen weiter genau ihr Produktbild (kein Bild mehr, keines weniger)", String(await page.$$eval(".bst-person .bst-check__bild > img", (l) => l.length)), "10");
     gleich("Sonderzeichen: nichts ausgeführt", String(await page.evaluate(() => window.__xss)), "undefined");
     await page.type('[data-person="p1"] [data-p="nummer"]', "7");
     await page.click('[data-bezahlung="kleidung"] input[value="eltern"]');
@@ -1865,6 +1978,241 @@ async function ablaufSpeicher(browser, server) {
   }
 }
 
+// Die Produktbilder in den Artikelzeilen (AP-3): 390 x 844 und 1440 x 900, dazu 360, 375, 414 und 320 px, der Hinweis zur Herkunft, die leere Kachel
+// (ein Artikel ohne bild in den Daten), der Ladefehler eines Bildes und die Adressen unter einem Unterordner (wie auf GitHub Pages)
+async function ablaufBilder(browser, server) {
+  abschnitt("Produktbilder: 390 x 844 und 1440 x 900 (geladen, Klick, Zeilen), weitere Breiten, leere Kachel, Ladefehler, Unterordner");
+  const karte = '[data-person="p1"]';
+  const ids = KONFIG.artikel.map((a) => a.id);
+  const wurzel = server.basis + "/assets/bilder/bestellung/";
+  const mobil = (breite, dichte = 1) => ({ width: breite, height: 844, deviceScaleFactor: dichte, isMobile: true, hasTouch: true });
+  // Eine Person mit vielen angehakten Artikeln (Grundausstattung und Winterjacke); Regenjacke, TW-Trikot und TW-Hose bleiben unangehakt
+  async function fuellePerson(page, groesse) {
+    await page.click("#bst-person-neu");
+    if (groesse) await page.select(`${karte} [data-p="groesse"]`, groesse);
+    await page.click(`${karte} [data-schnellwahl="grundausstattung"]`);
+    await page.click(`${karte} [data-artikel="winterjacke"] [data-a="an"]`);
+  }
+  const angehakt = (page, auswahl) => page.$eval(`${auswahl} [data-a="an"]`, (el) => el.checked);
+  // Der Zustand für die Bildschirmfotos: mehrere angehakte Artikel mit kurzer Auswahl darunter (so bleibt das Foto überschaubar), dazwischen unangehakte.
+  // Die weiße Trikot-Kachel steht in einer angehakten (hellblauen) Zeile; Regenjacke und Winterjacke stehen unangehakt nebeneinander.
+  async function fotoZustand(page) {
+    const soll = { trikot: true, shorts: true, stutzen: true, "praesi-jacke": false, "praesi-hose": true, rucksack: true, winterjacke: false, regenjacke: false, "tw-trikot": false, "tw-hose": true };
+    for (const [id, an] of Object.entries(soll)) {
+      if ((await angehakt(page, `${karte} [data-artikel="${id}"]`)) !== an) await page.click(`${karte} [data-artikel="${id}"] [data-a="an"]`);
+    }
+  }
+  // Foto vom Ausschnitt einer Person: von der Überschrift „Was braucht die Person?“ bis zum Ende der Liste, mit dem Rand der Karte (so sieht man, wie die Liste
+  // in der Karte sitzt)
+  async function fotoListe(page, kartenAuswahl, datei) {
+    const r = await page.evaluate((k) => {
+      const kar = document.querySelector(k).getBoundingClientRect();
+      const legende = document.querySelector(`${k} .bst-artikelgruppe legend`).getBoundingClientRect();
+      const liste = document.querySelector(`${k} .bst-artikelliste`).getBoundingClientRect();
+      return { x: kar.left + window.scrollX, y: legende.top + window.scrollY - 12, breite: kar.width, hoehe: liste.bottom - legende.top + 24 };
+    }, kartenAuswahl);
+    await page.screenshot({ path: path.join(AUSGABE, datei), clip: { x: r.x, y: r.y, width: r.breite, height: r.hoehe }, captureBeyondViewport: true });
+  }
+
+  // ----- 390 x 844 -----
+  {
+    const { page, p, schliessen } = await oeffne(browser, server);
+    try {
+      pruefe("Hinweis „Produktbilder: JAKO“: ohne Person nicht zu sehen (es gibt noch kein Bild)", !(await sichtbar(page, ".bst-bildnachweis")));
+      await fuellePerson(page, "140");
+      await ladeBilder(page, karte);
+      gleich("Person mit Grundausstattung und Winterjacke: sieben Artikel angehakt, drei nicht (Regenjacke, TW-Trikot, TW-Hose)", (await page.$$eval(`${karte} [data-a="an"]`, (l) => l.map((x) => (x.checked ? "1" : "0")))).join(""), "1111111000");
+      const zeilen = await messeZeilen(page, karte);
+      pruefeBildzeilen("390 px", zeilen, { bildAdresse: wurzel });
+      gleich("390 px: die Preise stehen unverändert da (Text wie vor den Bildern)", zeilen.map((z) => z.preisText).join(" | "), "21,74 € | 10,38 € | 4,02 € | 29,04 € | 17,99 € | 15,21 € | 39,93 € | Preis auf Anfrage | 29,42 € | 16,79 €");
+      pruefe("390 px: „Preis auf Anfrage“ (Regenjacke) steht in der Zeile des Bildes, in zwei Zeilen, ohne den Namen zu überlappen", (() => { const z = zeilen.find((x) => x.id === "regenjacke"); return z.preis.h > 30 && z.preis.t < z.kachel.b && !schneiden(z.text, z.preis); })());
+      pruefe("390 px: die aufgeklappte Auswahl beginnt unter der Zeile (keine Überschneidung mit Bild, Text und Preis)", await page.evaluate((k) => [...document.querySelectorAll(`${k} [data-artikel]`)].every((z) => { const l = z.querySelector(".bst-check").getBoundingClientRect(); const o = z.querySelector("[data-a-optionen]"); return o.hidden || o.getBoundingClientRect().top >= l.bottom - 0.5; }), karte));
+      await pruefeLayout(page, "Bildzeilen 390", 390);
+      await pruefeBeschriftungen(page, "Bildzeilen 390");
+      await pruefeIds(page, "Bildzeilen 390");
+      await pruefeTippflaechen(page, "Bildzeilen 390");
+      await pruefeAxe(page, "Bildzeilen 390");
+      pruefe("alle Bilder wurden vom Testserver geladen (zehn Adressen angefragt, keine fremde)", ids.every((id) => p.anfragen.includes(wurzel + id + ".webp")) && !p.anfragen.some((u) => u.includes("/bilder/") && !u.startsWith(wurzel)));
+
+      // Ein Tipp aufs Bild gilt der Zeile: Haken an, Auswahl da, Entwurf auf dem Gerät; ein zweiter Tipp nimmt ihn wieder weg
+      const zeile = `${karte} [data-artikel="tw-hose"]`;
+      await page.$eval(`${zeile} .bst-check__bild img`, (el) => el.scrollIntoView({ block: "center" }));
+      pruefe("TW-Hose ist anfangs nicht angehakt", !(await angehakt(page, zeile)));
+      pruefe("ein Tipp aufs Bild trifft die Kachel, nicht das Bild selbst (pointer-events: none, kein Bildmenü beim langen Drücken)", await page.evaluate((s) => { const k = document.querySelector(s + " .bst-check__bild").getBoundingClientRect(); const e = document.elementFromPoint(k.left + k.width / 2, k.top + k.height / 2); return !!e && e.tagName !== "IMG" && e.classList.contains("bst-check__bild"); }, zeile));
+      await page.click(`${zeile} .bst-check__bild img`);
+      pruefe("Klick aufs Bild hakt den Artikel an (Label-Verhalten): Haken, Auswahl darunter und Entwurf auf dem Gerät", (await angehakt(page, zeile)) && (await sichtbar(page, `${zeile} [data-a-optionen]`)) && !!(await entwurfImSpeicher(page)).personen[0].artikel["tw-hose"]);
+      await page.click(`${zeile} .bst-check__bild img`);
+      pruefe("zweiter Klick aufs Bild nimmt den Haken wieder weg", !(await angehakt(page, zeile)) && !(await sichtbar(page, `${zeile} [data-a-optionen]`)));
+      await page.click(`${zeile} .bst-check__name`);
+      pruefe("Klick auf den Namen wirkt weiter wie vorher (hakt an)", await angehakt(page, zeile));
+      await page.click(`${zeile} [data-a="an"]`);
+      pruefe("Klick aufs Kästchen wirkt weiter wie vorher (nimmt den Haken weg)", !(await angehakt(page, zeile)));
+      await page.focus(`${zeile} [data-a="an"]`);
+      await page.keyboard.press("Space");
+      pruefe("Leertaste auf dem fokussierten Kästchen wirkt weiter wie vorher (hakt an)", await angehakt(page, zeile));
+      await page.keyboard.press("Space");
+      pruefe("Leertaste noch einmal: Haken wieder weg", !(await angehakt(page, zeile)));
+
+      // Dunkles Farbschema des Geräts: Die Seite hat keines, die Kachel bleibt hell (die Produktbilder haben weißen Grund)
+      await page.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "dark" }]);
+      pruefe("dunkles Farbschema: die Kacheln bleiben weiß", (await messeZeilen(page, karte)).every((z) => z.kachelGrund === "rgb(255, 255, 255)"));
+      await page.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "light" }]);
+
+      // Bildschirmfoto: eine Person mit mehreren angehakten Artikeln (doppelt scharf, damit man die Kacheln beurteilen kann)
+      await fotoZustand(page);
+      await page.setViewport(mobil(390, 2));
+      await ladeBilder(page, karte);
+      await fotoListe(page, karte, "390-bilder.png");
+
+      // Hinweis zur Herkunft: genau einmal, klein und gedämpft, im Abschnitt „Kleidung je Person“ unter der Liste der Personen
+      gleich("Hinweis „Produktbilder: JAKO“: genau ein Hinweis, Wortlaut", String(await page.$$eval(".bst-bildnachweis", (l) => l.length)) + "|" + (await inhalt(page, ".bst-bildnachweis")), "1|Produktbilder: JAKO");
+      pruefe("Hinweis: sichtbar, im Abschnitt „Kleidung je Person“, unter der Liste der Personen und dem Knopf „+ Person hinzufügen“", (await sichtbar(page, ".bst-bildnachweis")) && (await page.evaluate(() => { const h = document.querySelector(".bst-bildnachweis"); const knopf = document.getElementById("bst-person-neu"); const liste = document.getElementById("bst-personen"); return h.closest("section").querySelector("h2").textContent === "Kleidung je Person" && !!(liste.compareDocumentPosition(h) & Node.DOCUMENT_POSITION_FOLLOWING) && h.getBoundingClientRect().top >= knopf.getBoundingClientRect().bottom; })));
+      pruefe("Hinweis: klein und gedämpft (kleiner als der Fließtext, Farbe wie die Nebentexte, kein Rot)", await page.evaluate(() => { const h = getComputedStyle(document.querySelector(".bst-bildnachweis")); const b = getComputedStyle(document.body); return parseFloat(h.fontSize) < parseFloat(b.fontSize) && h.color === "rgb(91, 96, 121)"; }));
+      await page.setViewport(mobil(390, 1));
+      await page.click("#bst-person-neu");
+      gleich("Hinweis: auch mit zwei Personen nur einmal", String(await page.$$eval(".bst-bildnachweis", (l) => l.length)), "1");
+      await page.click('[data-person="p2"] [data-person-entfernen]');
+      await page.click(`${karte} [data-person-entfernen]`);
+      pruefe("Hinweis: ohne Person wieder verborgen", !(await sichtbar(page, ".bst-bildnachweis")) && (await page.$$eval(".bst-bildnachweis", (l) => l.length)) === 1);
+      pruefeProtokoll("Produktbilder 390", p, server);
+    } finally {
+      await schliessen();
+    }
+  }
+
+  // ----- weitere Breiten: der Preis bleibt neben Kästchen, Bild und Text; eine zweite Person ohne Größe zeigt die „ab“-Preise -----
+  {
+    const { page, p, schliessen } = await oeffne(browser, server);
+    try {
+      await fuellePerson(page, "140");
+      await page.click("#bst-person-neu");
+      await ladeBilder(page, karte);
+      await ladeBilder(page, '[data-person="p2"]');
+      gleich("zweite Person ohne Größe: „ab“-Preise (Trikot, Shorts) und ein Preis (Rucksack), Text wie vor den Bildern", [await inhalt(page, '[data-person="p2"] [data-artikel="trikot"] [data-a-preis]'), await inhalt(page, '[data-person="p2"] [data-artikel="shorts"] [data-a-preis]'), await inhalt(page, '[data-person="p2"] [data-artikel="rucksack"] [data-a-preis]')].join(" | "), "ab 21,74 € | ab 10,38 € | 15,21 €");
+      for (const breite of [360, 375, 390, 414, 320]) {
+        await page.setViewport(mobil(breite));
+        const nebeneinander = breite >= 360;
+        pruefeBildzeilen(`${breite} px, Person mit Größe`, await messeZeilen(page, karte), { nebeneinander });
+        const ohneGroesse = await messeZeilen(page, '[data-person="p2"]');
+        pruefeBildzeilen(`${breite} px, Person ohne Größe („ab“-Preise)`, ohneGroesse, { nebeneinander });
+        gleich(`${breite} px: bei „ab“-Preisen steht das „ab“ als eigenes Element im Preis, der Text bleibt „ab 21,74 €“`, await page.$eval('[data-person="p2"] [data-artikel="trikot"] [data-a-preis]', (el) => `${el.textContent}|${el.querySelector(".bst-check__vor") ? el.querySelector(".bst-check__vor").textContent : "-"}`), "ab 21,74 €|ab ");
+        await pruefeLayout(page, `Bildzeilen bei ${breite} px`, breite);
+        if (breite === 360 || breite === 390) {
+          // Bildschirmfotos (doppelt scharf): Person mit angehakten Artikeln und Person ohne Größe („ab“-Preise); 360 px ist die engste Breite, bei der der Preis
+          // noch neben dem Text stehen soll
+          await fotoZustand(page);
+          await page.setViewport(mobil(breite, 2));
+          await ladeBilder(page, karte);
+          if (breite === 360) await fotoListe(page, karte, "360-bilder-mehrere.png"); // bei 390 px ist das 390-bilder.png aus dem ersten Ablauf
+          await fotoListe(page, '[data-person="p2"]', `${breite}-bilder-ab.png`);
+          await page.setViewport(mobil(breite, 1));
+        }
+      }
+      pruefeProtokoll("Produktbilder weitere Breiten", p, server);
+    } finally {
+      await schliessen();
+    }
+  }
+
+  // ----- 1440 x 900 -----
+  {
+    const { page, p, schliessen } = await oeffne(browser, server, { breite: 1440, hoehe: 900, mobil: false });
+    try {
+      await fuellePerson(page, "140");
+      await page.click("#bst-person-neu");
+      await ladeBilder(page, karte);
+      await ladeBilder(page, '[data-person="p2"]');
+      pruefeBildzeilen("1440 px", await messeZeilen(page, karte), { bildAdresse: wurzel });
+      pruefeBildzeilen("1440 px, Person ohne Größe („ab“-Preise)", await messeZeilen(page, '[data-person="p2"]'), { bildAdresse: wurzel });
+      pruefe("1440 px: das „ab“ steht vor dem Betrag in derselben Zeile (kein Block wie am Handy)", await page.$eval('[data-person="p2"] [data-artikel="trikot"] .bst-check__vor', (el) => getComputedStyle(el).display === "inline"));
+      await pruefeLayout(page, "Bildzeilen 1440", 1440);
+      await pruefeBeschriftungen(page, "Bildzeilen 1440");
+      await pruefeTippflaechen(page, "Bildzeilen 1440");
+      await pruefeAxe(page, "Bildzeilen 1440");
+      const zeile = `${karte} [data-artikel="tw-trikot"]`;
+      await page.$eval(`${zeile} .bst-check__bild img`, (el) => el.scrollIntoView({ block: "center" }));
+      await page.click(`${zeile} .bst-check__bild img`);
+      pruefe("1440 px: Klick aufs Bild hakt den Artikel an", await angehakt(page, zeile));
+      await page.click(`${zeile} .bst-check__bild img`);
+      pruefe("1440 px: zweiter Klick nimmt den Haken weg", !(await angehakt(page, zeile)));
+      await page.click('[data-person="p2"] [data-person-entfernen]');
+      await fotoZustand(page);
+      await page.setViewport({ width: 1440, height: 900, deviceScaleFactor: 2, isMobile: false, hasTouch: false });
+      await ladeBilder(page, karte);
+      await fotoListe(page, karte, "1440-bilder.png");
+      pruefeProtokoll("Produktbilder 1440", p, server);
+    } finally {
+      await schliessen();
+    }
+  }
+
+  // ----- ein Artikel ohne bild in den Daten: dieselbe Kachel leer, alle Texte bündig -----
+  {
+    let geaendert = false;
+    const { page, p, schliessen } = await oeffne(browser, server, {
+      aendereHtml: (html) => {
+        geaendert = html.includes(',"bild":"shorts.webp"');
+        return html.replace(',"bild":"shorts.webp"', "");
+      },
+    });
+    try {
+      pruefe("Testkonfiguration: das Bild der Shorts wurde aus der eingebetteten Konfiguration entfernt (sonst gilt der Test nichts)", geaendert);
+      await fuellePerson(page, "140");
+      await ladeBilder(page, karte);
+      const zeilen = await messeZeilen(page, karte);
+      pruefeBildzeilen("Shorts ohne bild", zeilen, { ohneBild: ["shorts"], bildAdresse: wurzel });
+      const shorts = zeilen.find((z) => z.id === "shorts");
+      const trikot = zeilen.find((z) => z.id === "trikot");
+      pruefe("Shorts ohne bild: die leere Kachel ist so groß und liegt an derselben Stelle wie die Kachel mit Bild (Text bündig)", Math.abs(shorts.kachel.w - trikot.kachel.w) < 0.5 && Math.abs(shorts.kachel.h - trikot.kachel.h) < 0.5 && Math.abs(shorts.kachel.l - shorts.zeile.l - (trikot.kachel.l - trikot.zeile.l)) < 0.5 && Math.abs(shorts.text.l - shorts.zeile.l - (trikot.text.l - trikot.zeile.l)) < 0.5);
+      pruefe("Shorts ohne bild: es wurde kein Bild der Shorts angefragt, die anderen neun schon", !p.anfragen.some((u) => u.endsWith("/shorts.webp")) && ids.filter((id) => id !== "shorts").every((id) => p.anfragen.includes(wurzel + id + ".webp")));
+      await page.$eval(`${karte} [data-artikel="shorts"] .bst-check__bild`, (el) => el.scrollIntoView({ block: "center" }));
+      await page.click(`${karte} [data-artikel="shorts"] .bst-check__bild`);
+      pruefe("Shorts ohne bild: ein Tipp auf die leere Kachel wirkt wie auf ein Bild (Haken weg)", !(await angehakt(page, `${karte} [data-artikel="shorts"]`)));
+      await page.click(`${karte} [data-artikel="shorts"] .bst-check__bild`);
+      pruefe("Shorts ohne bild: noch einmal getippt, Haken wieder da", await angehakt(page, `${karte} [data-artikel="shorts"]`));
+      await pruefeAxe(page, "Kachel ohne Bild");
+      pruefeProtokoll("Kachel ohne Bild", p, server);
+    } finally {
+      await schliessen();
+    }
+  }
+
+  // ----- ein Bild lädt nicht: kein Zeichen für ein kaputtes Bild, die Kachel bleibt leer, alles andere funktioniert -----
+  {
+    const { page, p, schliessen } = await oeffne(browser, server);
+    try {
+      await page.setRequestInterception(true);
+      page.on("request", (req) => (req.url().endsWith("/stutzen.webp") ? req.abort("failed") : req.continue()));
+      await fuellePerson(page, "140");
+      await ladeBilder(page, karte);
+      const zeilen = await messeZeilen(page, karte);
+      const st = zeilen.find((z) => z.id === "stutzen");
+      pruefe("Ladefehler: das Bild der Stutzen ist ausgeblendet (hidden, display none), die Kachel steht leer da (48 x 48, weiß, mit Rand)", !!st.img && st.img.hidden && st.img.anzeige === "none" && Math.abs(st.kachel.w - 48) < 0.5 && Math.abs(st.kachel.h - 48) < 0.5 && st.kachelGrund === "rgb(255, 255, 255)" && st.kachelRand === "1px solid", JSON.stringify(st));
+      pruefe("Ladefehler: die übrigen neun Bilder sind geladen und sichtbar", zeilen.filter((z) => z.id !== "stutzen").every((z) => z.img && z.img.fertig && z.img.nat === BILD_KANTE && !z.img.hidden));
+      gleich("Ladefehler: genau ein Aufruf ist fehlgeschlagen (das Bild), kein Fehler im Skript der Seite", String(p.fehlgeschlagen.length) + "|" + String(p.fehlgeschlagen[0] || "").includes("/stutzen.webp") + "|" + p.seitenfehler.join(","), "1|true|");
+      pruefe("Ladefehler: Preis, Text und Haken der Zeile funktionieren weiter", await page.evaluate((k) => { const z = document.querySelector(`${k} [data-artikel="stutzen"]`); return z.querySelector("[data-a-preis]").textContent === "4,02 €" && z.querySelector(".bst-check__name").textContent === "Stutzen" && z.querySelector('[data-a="an"]').checked; }, karte));
+    } finally {
+      await schliessen();
+    }
+  }
+
+  // ----- unter einem Unterordner (GitHub Pages): CSS, Skripte und Bilder werden dort gefunden -----
+  {
+    const unter = server.basis + "/speuzer-website-prototyp/assets/bilder/bestellung/";
+    const { page, p, schliessen } = await oeffne(browser, server, { url: server.seiteImUnterordner });
+    try {
+      gleich("Unterordner: die Seite liegt unter /speuzer-website-prototyp/ws/ und ist offen", await page.evaluate(() => location.pathname + "|" + document.getElementById("bestellung").dataset.zustand), "/speuzer-website-prototyp/ws/bestellung.html|offen");
+      await fuellePerson(page, "140");
+      await ladeBilder(page, karte);
+      pruefeBildzeilen("Unterordner", await messeZeilen(page, karte), { bildAdresse: unter });
+      pruefe("Unterordner: alle zehn Bilder wurden unter dem Unterordner angefragt, keines an der Wurzel", ids.every((id) => p.anfragen.includes(unter + id + ".webp")) && !p.anfragen.some((u) => u.startsWith(wurzel)));
+      pruefeProtokoll("Produktbilder im Unterordner", p, server);
+    } finally {
+      await schliessen();
+    }
+  }
+}
+
 // Ein Durchlauf bei 1440 x 900
 async function ablaufDesktop(browser, server) {
   abschnitt("1440 x 900: Zugang, Referenzbestellung und Torwartset am Rechner");
@@ -1940,14 +2288,14 @@ async function main() {
   const laeufe = [
     ["zugang", ablaufZugang], ["leer", ablaufLeer], ["referenz", ablaufReferenz], ["faelle", ablaufFaelleBC], ["aufdrucke", ablaufAufdrucke],
     ["sponsor", ablaufSponsorLieferung], ["luecken", ablaufLuecken], ["felder", ablaufFelder], ["breiten", ablaufAuswahlbreiten],
-    ["bezahlung", ablaufBezahlung], ["alt", ablaufAlterEntwurf], ["zeichen", ablaufZeichen], ["lang", ablaufLang], ["kopieren", ablaufKopieren],
+    ["bilder", ablaufBilder], ["bezahlung", ablaufBezahlung], ["alt", ablaufAlterEntwurf], ["zeichen", ablaufZeichen], ["lang", ablaufLang], ["kopieren", ablaufKopieren],
     ["speicher", ablaufSpeicher], ["desktop", ablaufDesktop],
   ];
   try {
     for (const [name, lauf] of laeufe) if (NUR.length === 0 || NUR.includes(name)) await lauf(browser, server);
     if (NUR.length === 0) {
       abschnitt("Bildschirmfotos");
-      for (const n of ["390-zugang.png", "390-ausgefuellt.png", "390-aufdrucke.png", "390-sponsor-lieferung.png", "390-luecken.png", "1440-ausgefuellt.png", "390-leer.png", "390-gesendet.png", "390-bezahlung-mehrfach.png", "1440-torwartset.png"]) {
+      for (const n of ["390-zugang.png", "390-ausgefuellt.png", "390-aufdrucke.png", "390-sponsor-lieferung.png", "390-luecken.png", "1440-ausgefuellt.png", "390-leer.png", "390-gesendet.png", "390-bezahlung-mehrfach.png", "1440-torwartset.png", "390-bilder.png", "1440-bilder.png"]) {
         const voll = path.join(AUSGABE, n);
         pruefe(`Bildschirmfoto ${n}`, existsSync(voll) && statSync(voll).size > 5000, voll);
       }

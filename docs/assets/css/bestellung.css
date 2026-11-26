@@ -4,7 +4,8 @@
   Nur Vereinsblau und die Tokens aus tokens.css; die Komponenten der Website (.knopf, .hinweis, .sr-only …)
   kommen aus site.css. Mobil zuerst (390 px), am Rechner eine schmale Spalte (720 px). Kein Grün und kein Rot:
   Hinweise sind blau (.hinweis--info), Lücken in der Farbe der Pflichtangaben der Website (--warn).
-  Alle Tippflächen sind mindestens 44 px hoch.
+  Alle Tippflächen sind mindestens 44 px hoch. Die Artikelzeile (.bst-check) zeigt Kästchen, Produktbild, Text und Preis nebeneinander; bis 420 px Breite
+  rückt sie enger zusammen, damit der Preis neben dem Text bleibt (siehe dort).
 
   Ohne Code zeigt die Seite nur den Kopf und die Zugangsbox (.bst-zugang); das Formular (.bst-app) setzt seite.js erst nach dem Entschlüsseln ein.
 */
@@ -341,10 +342,12 @@
   background: var(--blau-50);
 }
 
+/* Eine Zeile: Kästchen, Bild, Name mit Beschreibung, Preis. Alles hängt oben an derselben Linie (bei mehrzeiligem Text bleibt das Bild oben bündig mit
+   dem Namen, der Preis steht auf der Höhe des Namens). Reicht der Platz nicht, rutscht der Preis in eine zweite Zeile rechts unter den Text. */
 .bst-check {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--sp-1) var(--sp-3);
   min-height: 52px;
   padding: var(--sp-2) var(--sp-3);
@@ -388,11 +391,42 @@
   line-height: 1;
 }
 
+/* das Kästchen steht auf der Höhe der ersten Zeile (des Namens) */
+.bst-check input[type="checkbox"] {
+  margin-top: 1px;
+}
+
+/* Produktbild: kleine weiße Kachel zwischen Kästchen und Text (Bild 144 x 144, gezeigt 48 x 48, also dreifach scharf). Die Bilder haben weißen Grund,
+   darum bleibt die Kachel auch in der angehakten Zeile weiß. Ohne Bild (--leer) steht dieselbe Kachel leer da, damit alle Texte bündig bleiben. */
+.bst-check__bild {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+}
+
+.bst-check__bild img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none; /* ein Tipp aufs Bild gilt der Zeile (Label), kein Bildmenü beim langen Drücken */
+}
+
+/* lädt ein Bild nicht (seite.js setzt hidden), bleibt die Kachel leer, statt das Zeichen für ein kaputtes Bild zu zeigen */
+.bst-check__bild img[hidden] {
+  display: none;
+}
+
+/* Die Basis ist klein, damit der Preis neben dem Text bleibt, solange es geht (ab 350 px Breite); ein Wort, das trotzdem nicht passt, bricht um. */
 .bst-check__text {
-  flex: 1 1 8rem;
+  flex: 1 1 92px;
   min-width: 0;
   display: flex;
   flex-direction: column;
+  overflow-wrap: break-word;
 }
 
 .bst-check__name {
@@ -512,9 +546,40 @@
   display: none;
 }
 
+/* Am schmalen Handy (bis 420 px) soll der Preis neben Kästchen, Bild und Text in der Zeile bleiben: Die Liste ragt etwas in den Innenabstand der Karte,
+   Innenabstand und Lücken der Zeile werden enger, der Vorspann des Preises (seite.js › setzePreis) steht über dem Betrag: ein kleines „ab“, bei „Preis auf Anfrage“
+   „Preis auf“ über „Anfrage“. */
+@media (max-width: 420px) {
+  .bst-artikelgruppe .bst-artikelliste {
+    margin-inline: calc(var(--sp-2) * -1);
+  }
+
+  .bst-check {
+    padding-inline: var(--sp-2);
+    column-gap: var(--sp-2);
+  }
+
+  .bst-check__vor {
+    display: block;
+  }
+
+  .bst-check__vor--klein {
+    font-size: var(--fs-xs);
+    font-weight: 400;
+    line-height: 120%;
+    color: var(--ink-3);
+  }
+
+  /* die Auswahl unter der Zeile beginnt wie die Zeile (Kästchen links) */
+  .bst-artikel__optionen {
+    padding-inline: var(--sp-2);
+    padding-left: calc(var(--sp-2) + 24px + var(--sp-2));
+  }
+}
+
 @media (max-width: 399px) {
   .bst-artikel__optionen {
-    padding-left: var(--sp-3);
+    padding-left: var(--sp-2);
   }
 }
 
@@ -551,6 +616,16 @@
 
 .bst-textknopf:hover {
   color: var(--blau-600);
+}
+
+/* „Produktbilder: JAKO“ unter der Liste der Personen: klein und gedämpft */
+.bst-bildnachweis {
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+}
+
+.bst-bildnachweis[hidden] {
+  display: none;
 }
 
 .bst-aktion .knopf {

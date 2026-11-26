@@ -21,8 +21,9 @@
 // Nur für Tests: Die Umgebungsvariable BESTELLUNG_PREISE_ENC=<Datei> ersetzt data/bestellung-preise.enc.json für diesen Bau (ein mit einem
 // Testcode verschlüsseltes Paket mit erfundenen Preisen), ohne dass die Datei im Repo angefasst wird. Sie wirkt nur beim Bau.
 
-import { readFileSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { pruefeKonfig } from "../../assets/js/bestellung/mailtext.js";
 import { pruefePaket } from "../../assets/js/bestellung/zugang.js";
 
@@ -71,6 +72,32 @@ function ladePreisPaket(daten) {
   return paket;
 }
 
+// Die Bilder der Artikelzeilen (Kacheln 144 x 144, erzeugt mit tools/bestellung-bilder.py) liegen unter assets/bilder/bestellung/; kopiereAssets()
+// (tools/build.mjs) nimmt sie mit nach docs/assets/bilder/bestellung/. Der Ordner wird vom Modul aus gesucht (nicht vom Arbeitsordner des Prozesses
+// aus): So stimmt er auch im Wegwerf-Bau der Tests, der src/ und assets/ zusammen kopiert.
+const BILDER_ORDNER = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "assets", "bilder", "bestellung");
+
+// Jedes „bild“ in data/bestellung.json muss als Datei da sein (der Name selbst ist schon von pruefeKonfig geprüft: nur a–z, 0–9, „-“ und .webp,
+// also kein Pfad nach außen). Sonst bräche die Seite mit leeren Kacheln aus: Der Bau bricht ab und sagt, was fehlt und wie man es erzeugt.
+function pruefeBilder(konfig) {
+  for (const a of konfig.artikel) {
+    if (a.bild === undefined) continue;
+    let vorhanden = false;
+    try {
+      const info = statSync(path.join(BILDER_ORDNER, a.bild));
+      vorhanden = info.isFile() && info.size > 0;
+    } catch {
+      vorhanden = false;
+    }
+    if (!vorhanden) {
+      throw new Error(
+        `Bestellseite: Das Bild „${a.bild}“ von Artikel „${a.id}“ (data/bestellung.json) fehlt oder ist leer: assets/bilder/bestellung/${a.bild}. ` +
+          "Erzeugen mit: python3 tools/bestellung-bilder.py <Quellordner> (oder den Eintrag „bild“ bei dem Artikel entfernen)."
+      );
+    }
+  }
+}
+
 // Konfiguration der Seite: data/bestellung.json (ohne den Pflegehinweis) plus die Mannschaften aus data/teams.json
 // (Reihenfolge der Datei; angezeigt wird name, die Bestell-Nr. nutzt slug) und das verschlüsselte Preispaket (preiseVerschluesselt).
 // Preise stehen nie darin. Wird auch von den Tests benutzt.
@@ -82,6 +109,7 @@ export function baueKonfig(daten) {
   const konfig = { ...rest, mannschaften: teams.map((t) => ({ slug: t.slug, name: t.name })), preiseVerschluesselt: ladePreisPaket(daten) };
   if (konfig.mannschaften.length === 0) console.warn("Bestellseite: data/teams.json enthält keine Mannschaften – die Auswahl auf der Seite bleibt leer.");
   pruefeKonfig(konfig);
+  pruefeBilder(konfig);
   return konfig;
 }
 
