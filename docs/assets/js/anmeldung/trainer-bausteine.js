@@ -67,11 +67,12 @@ export function blattSinnbildUrl() {
 // ---------- Eingaben ----------
 
 // Auswahlfeld (select) im Aufbau der Rollenauswahl des Vorbilds (seiten-person.js › rollenAuswahl; dort nicht exportiert).
-// optionen: Texte oder { wert, label }.
-export function auswahlFeld(k, { pfad, label, optionen }) {
+// optionen: Texte oder { wert, label }. pflicht: false = freiwilliges Feld (kein aria-required, wie bei textfeld in bausteine.js; die Seite sagt
+// in ihrem Hinweis, dass alles freiwillig ist, die Beschriftung bleibt ohne Zusatz).
+export function auswahlFeld(k, { pfad, label, optionen, pflicht }) {
   const id = k.nextId("r");
   const eintraege = optionen.map((o) => (typeof o === "string" ? { wert: o, label: o } : o));
-  const auswahl = h("select", { id, name: pfad, "data-pfad": pfad, klasse: "anm-eingabe anm-eingabe--auswahl", "aria-required": "true" },
+  const auswahl = h("select", { id, name: pfad, "data-pfad": pfad, klasse: "anm-eingabe anm-eingabe--auswahl", "aria-required": pflicht === false ? null : "true" },
     h("option", { value: "" }, k.text("allgemein.bitteWaehlen")),
     eintraege.map((o) => h("option", { value: o.wert }, o.label)));
   auswahl.value = hole(k.a, pfad) || "";

@@ -76,6 +76,7 @@ export default {
   "notfallName": "Bitte trage den Namen ein.",
   "notfallBeziehung": "Bitte trage ein, wer die Person für dich ist.",
   "notfallTelefon": "Bitte trage die Telefonnummer ein.",
+  "ausstattungGroesse": "Bitte wähle eine Größe aus der Liste.",
   "kodex": "Bitte lies den Verhaltenskodex und setze den Haken.",
   "selbstauskunft": "Bitte setze den Haken. Trifft die Erklärung nicht auf dich zu, melde dich bitte bei der Geschäftsstelle.",
   "zeugnis": "Bitte wähle eine Antwort.",
@@ -129,7 +130,8 @@ export default {
   "wissen": [
    "{zeitraum} (Schnupperphase) bist du nie allein auf dem Platz: Ein gemeldeter Trainer des Vereins ist immer dabei.",
    "Trainer und Betreuer sind beitragsfrei Mitglied.",
-   "Spätestens nach der Schnupperphase braucht der Verein deine Unterlagen."
+   "Spätestens nach der Schnupperphase braucht der Verein deine Unterlagen.",
+   "Es gibt auch Trainerausstattung vom Verein: Shirt, Pullover, Anzug und Regenjacke. Dafür trägst du später deine Größen ein."
   ],
   "los": "Los geht’s"
  },
@@ -192,6 +194,16 @@ export default {
   "erfahrung": "Erfahrung und Qualifikationen",
   "erfahrungHinweis": "Zum Beispiel Trainerlizenz, frühere Vereine oder Fortbildungen.",
   "ersteHilfe": "Erste-Hilfe-Kurs absolviert am",
+  "weiter": "Weiter"
+ },
+ "ausstattung": {
+  "titel": "Welche Größen hast du?",
+  "hinweis": "Das ist freiwillig. Du kannst diese Seite überspringen. Die Größen brauchen wir für die Trainerausstattung des Vereins: Shirt, Pullover, Anzug und Regenjacke.",
+  "shirt": "Shirt",
+  "pullover": "Pullover",
+  "anzug": "Anzug",
+  "regenjacke": "Regenjacke",
+  "fussnote": "Weißt du eine Größe nicht? Lass das Feld leer.",
   "weiter": "Weiter"
  },
  "foto": {
@@ -281,6 +293,7 @@ export default {
    "einsatz": "Einsatz",
    "notfall": "Notfall",
    "erfahrung": "Erfahrung",
+   "ausstattung": "Trainerausstattung",
    "unterlagen": "Unterlagen",
    "zeugnis": "Führungszeugnis",
    "unterschrift": "Unterschrift"
@@ -300,6 +313,7 @@ export default {
    "notfall": "Notfallkontakt",
    "erfahrung": "Erfahrung und Qualifikationen",
    "ersteHilfe": "Erste-Hilfe-Kurs",
+   "groessen": "Größen",
    "foto": "Passfoto",
    "kodex": "Verhaltenskodex",
    "selbstauskunft": "Selbstauskunft",
@@ -315,7 +329,8 @@ export default {
    "ja": "Ja",
    "offen": "Noch offen",
    "nichtAngegeben": "Nicht angegeben (freiwillig)",
-   "ersteHilfe": "Absolviert am {datum}"
+   "ersteHilfe": "Absolviert am {datum}",
+   "groesse": "{artikel}: {groesse}"
   },
   "unterschriftAlt": "Deine Unterschrift",
   "kastenTitel": "Das solltest du wissen",

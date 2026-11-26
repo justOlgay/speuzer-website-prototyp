@@ -5,15 +5,15 @@ import { unterschriftFeld } from "./anmeldung-unterschrift.js";
 import { pruefeCode, normalisiereCode } from "./anmeldung-zugang.js";
 import { einsichtNamen } from "./anmeldung-trainer-einsicht.js";
 import { karte, punktListe, nummerierteListe, mitLink, sichereUrl, blattSinnbildUrl, auswahlFeld, dateiKnopf, pflichtKaestchen, speichern, teilenMoeglich, kopiereAdresse, kopiereBeimTeilen, oeffneFensterSofort, zeigeInFenster } from "./anmeldung-trainer-bausteine.js";
-import { pruefeSeite, ABTEILUNGEN, ROLLEN, WOCHENTAGE, abteilungenFuer, mannschaftenFuer, datumText, fristVon, schnupperWoerter } from "./anmeldung-trainer-regeln.js";
+import { pruefeSeite, ABTEILUNGEN, ROLLEN, WOCHENTAGE, AUSSTATTUNG_ARTIKEL, GROESSEN, abteilungenFuer, mannschaftenFuer, datumText, fristVon, schnupperWoerter } from "./anmeldung-trainer-regeln.js";
 
-export const REIHENFOLGE = ["code", "start", "person", "einsatz", "notfall", "erfahrung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften", "pruefen", "fertig"];
+export const REIHENFOLGE = ["code", "start", "person", "einsatz", "notfall", "erfahrung", "ausstattung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften", "pruefen", "fertig"];
 
 export const ABSCHNITTE = ["du", "einsatz", "unterlagen", "zeugnis", "unterschrift", "fertig"];
 
 export const ABSCHNITT_VON = {
   person: "du",
-  einsatz: "einsatz", notfall: "einsatz", erfahrung: "einsatz",
+  einsatz: "einsatz", notfall: "einsatz", erfahrung: "einsatz", ausstattung: "einsatz",
   foto: "unterlagen", kodex: "unterlagen", selbstauskunft: "unterlagen",
   zeugnis: "zeugnis",
   unterschriften: "unterschrift",
@@ -238,6 +238,24 @@ export const erfahrung = {
     };
   },
   pruefe: regelnFuer("erfahrung"),
+};
+
+export const ausstattung = {
+  id: "ausstattung",
+  abschnitt: "einsatz",
+
+  render(k) {
+    return {
+      titel: k.text("ausstattung.titel"),
+      weiterText: k.text("ausstattung.weiter"),
+      inhalt: [
+        ...absaetze(k.text("ausstattung.hinweis"), "anm-hinweis"),
+        ...AUSSTATTUNG_ARTIKEL.map((artikel) => auswahlFeld(k, { pfad: "ausstattung." + artikel, label: k.text("ausstattung." + artikel), optionen: GROESSEN, pflicht: false })),
+        h("p", { klasse: "anm-hinweis tr-fussnote" }, k.text("ausstattung.fussnote")),
+      ],
+    };
+  },
+  pruefe: regelnFuer("ausstattung"),
 };
 
 export const foto = {
@@ -481,6 +499,9 @@ export const pruefen = {
     const an = a.anschrift || {};
     const n = a.notfall || {};
 
+    const ausstattungWerte = a.ausstattung || {};
+    const groessen = alsText(...AUSSTATTUNG_ARTIKEL.filter((x) => ausstattungWerte[x]).map((x) => P("werte.groesse", { artikel: k.text("ausstattung." + x), groesse: ausstattungWerte[x] })));
+
     const bereiche = [
       ["du", [
         [P("zeilen.name"), verbinde(" ", a.vorname, a.nachname), "person"],
@@ -502,6 +523,9 @@ export const pruefen = {
       ["erfahrung", [
         [P("zeilen.erfahrung"), sauber(a.erfahrung) || nichtAngegeben, "erfahrung"],
         [P("zeilen.ersteHilfe"), ersteHilfe, "erfahrung"],
+      ]],
+      ["ausstattung", [
+        [P("zeilen.groessen"), groessen || nichtAngegeben, "ausstattung"],
       ]],
       ["unterlagen", [
         [P("zeilen.foto"), k.medien.foto ? P("werte.foto") : nichtAngegeben, "foto"],
@@ -700,4 +724,4 @@ export const fertig = {
   pruefe: regelnFuer("fertig"),
 };
 
-export const SEITEN = { code, start, person, einsatz, notfall, erfahrung, foto, kodex, selbstauskunft, zeugnis, unterschriften, pruefen, fertig };
+export const SEITEN = { code, start, person, einsatz, notfall, erfahrung, ausstattung, foto, kodex, selbstauskunft, zeugnis, unterschriften, pruefen, fertig };

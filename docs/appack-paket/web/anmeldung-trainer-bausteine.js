@@ -47,10 +47,10 @@ export function blattSinnbildUrl() {
   return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
 }
 
-export function auswahlFeld(k, { pfad, label, optionen }) {
+export function auswahlFeld(k, { pfad, label, optionen, pflicht }) {
   const id = k.nextId("r");
   const eintraege = optionen.map((o) => (typeof o === "string" ? { wert: o, label: o } : o));
-  const auswahl = h("select", { id, name: pfad, "data-pfad": pfad, klasse: "anm-eingabe anm-eingabe--auswahl", "aria-required": "true" },
+  const auswahl = h("select", { id, name: pfad, "data-pfad": pfad, klasse: "anm-eingabe anm-eingabe--auswahl", "aria-required": pflicht === false ? null : "true" },
     h("option", { value: "" }, k.text("allgemein.bitteWaehlen")),
     eintraege.map((o) => h("option", { value: o.wert }, o.label)));
   auswahl.value = hole(k.a, pfad) || "";

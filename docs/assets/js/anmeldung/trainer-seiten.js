@@ -1,5 +1,5 @@
 /*
-  Die 13 Seiten der Seite „Neu im Trainerteam“ (Aufbau und Aussehen wie im Entwurf ap1/ und wie die Seiten des Anmelde-Assistenten:
+  Die 14 Seiten der Seite „Neu im Trainerteam“ (Aufbau und Aussehen wie im Entwurf ap1/ und wie die Seiten des Anmelde-Assistenten:
   seiten-person.js, seiten-verein.js, seiten-unterlagen.js, seiten-ende.js, seiten-zugang.js).
 
     code            Zugang mit Code (erster Bildschirm, solange der Zugang nicht frei ist)
@@ -8,6 +8,7 @@
     einsatz         Abteilung, Mannschaft (Karneval: Gruppe), Rolle, seit wann, wann
     notfall         Notfallkontakt (freiwillig)
     erfahrung       Erfahrung und Qualifikationen, Erste-Hilfe-Kurs (alles freiwillig)
+    ausstattung     Größen für die Trainerausstattung: Shirt, Pullover, Anzug, Regenjacke (alles freiwillig; seit 26.11.2026)
     foto            Passfoto
     kodex           Verhaltenskodex lesen und bestätigen
     selbstauskunft  Selbstauskunft zur Kinder- und Jugendarbeit
@@ -31,18 +32,18 @@ import { unterschriftFeld } from "./unterschrift.js";
 import { pruefeCode, normalisiereCode } from "./zugang.js";
 import { einsichtNamen } from "./trainer-einsicht.js";
 import { karte, punktListe, nummerierteListe, mitLink, sichereUrl, blattSinnbildUrl, auswahlFeld, dateiKnopf, pflichtKaestchen, speichern, teilenMoeglich, kopiereAdresse, kopiereBeimTeilen, oeffneFensterSofort, zeigeInFenster } from "./trainer-bausteine.js";
-import { pruefeSeite, ABTEILUNGEN, ROLLEN, WOCHENTAGE, abteilungenFuer, mannschaftenFuer, datumText, fristVon, schnupperWoerter } from "./trainer-regeln.js";
+import { pruefeSeite, ABTEILUNGEN, ROLLEN, WOCHENTAGE, AUSSTATTUNG_ARTIKEL, GROESSEN, abteilungenFuer, mannschaftenFuer, datumText, fristVon, schnupperWoerter } from "./trainer-regeln.js";
 
 // ---------- Reihenfolge und Abschnitte ----------
 
-export const REIHENFOLGE = ["code", "start", "person", "einsatz", "notfall", "erfahrung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften", "pruefen", "fertig"];
+export const REIHENFOLGE = ["code", "start", "person", "einsatz", "notfall", "erfahrung", "ausstattung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften", "pruefen", "fertig"];
 
 // Abschnitte der Zeile oben („Du · Einsatz · …“) in der Reihenfolge der Anzeige; code und start haben keinen.
 export const ABSCHNITTE = ["du", "einsatz", "unterlagen", "zeugnis", "unterschrift", "fertig"];
 
 export const ABSCHNITT_VON = {
   person: "du",
-  einsatz: "einsatz", notfall: "einsatz", erfahrung: "einsatz",
+  einsatz: "einsatz", notfall: "einsatz", erfahrung: "einsatz", ausstattung: "einsatz",
   foto: "unterlagen", kodex: "unterlagen", selbstauskunft: "unterlagen",
   zeugnis: "zeugnis",
   unterschriften: "unterschrift",
@@ -288,6 +289,28 @@ export const erfahrung = {
     };
   },
   pruefe: regelnFuer("erfahrung"),
+};
+
+// ---------- ausstattung ----------
+
+export const ausstattung = {
+  id: "ausstattung",
+  abschnitt: "einsatz",
+  // Alles auf dieser Seite ist freiwillig (26.11.2026): vier Auswahlfelder für die Größen der Trainerausstattung (Shirt, Pullover, Anzug,
+  // Regenjacke), je Feld S bis 3XL oder „Bitte wählen“ (leer = keine Angabe). Die Felder tragen weder Pflicht noch „(freiwillig)“: Der Hinweis
+  // darüber sagt es für die ganze Seite (wie auf „notfall“).
+  render(k) {
+    return {
+      titel: k.text("ausstattung.titel"),
+      weiterText: k.text("ausstattung.weiter"),
+      inhalt: [
+        ...absaetze(k.text("ausstattung.hinweis"), "anm-hinweis"),
+        ...AUSSTATTUNG_ARTIKEL.map((artikel) => auswahlFeld(k, { pfad: "ausstattung." + artikel, label: k.text("ausstattung." + artikel), optionen: GROESSEN, pflicht: false })),
+        h("p", { klasse: "anm-hinweis tr-fussnote" }, k.text("ausstattung.fussnote")),
+      ],
+    };
+  },
+  pruefe: regelnFuer("ausstattung"),
 };
 
 // ---------- foto ----------
@@ -542,6 +565,9 @@ export const pruefen = {
     const ersteHilfe = a.ersteHilfeAm ? P("werte.ersteHilfe", { datum: datumText(a.ersteHilfeAm) }) : nichtAngegeben;
     const an = a.anschrift || {};
     const n = a.notfall || {};
+    // Größen der Trainerausstattung: nur die angegebenen, „Shirt: M, Anzug: L“; ohne Angabe „Nicht angegeben (freiwillig)“
+    const ausstattungWerte = a.ausstattung || {};
+    const groessen = alsText(...AUSSTATTUNG_ARTIKEL.filter((x) => ausstattungWerte[x]).map((x) => P("werte.groesse", { artikel: k.text("ausstattung." + x), groesse: ausstattungWerte[x] })));
     // Abschnitte der Zusammenfassung: [Bereich, [[Beschriftung, Wert, Seite für „Ändern“], …]]; leere Werte entfallen.
     const bereiche = [
       ["du", [
@@ -564,6 +590,9 @@ export const pruefen = {
       ["erfahrung", [
         [P("zeilen.erfahrung"), sauber(a.erfahrung) || nichtAngegeben, "erfahrung"],
         [P("zeilen.ersteHilfe"), ersteHilfe, "erfahrung"],
+      ]],
+      ["ausstattung", [
+        [P("zeilen.groessen"), groessen || nichtAngegeben, "ausstattung"],
       ]],
       ["unterlagen", [
         [P("zeilen.foto"), k.medien.foto ? P("werte.foto") : nichtAngegeben, "foto"],
@@ -774,4 +803,4 @@ export const fertig = {
 
 // ---------- Alle Seiten ----------
 
-export const SEITEN = { code, start, person, einsatz, notfall, erfahrung, foto, kodex, selbstauskunft, zeugnis, unterschriften, pruefen, fertig };
+export const SEITEN = { code, start, person, einsatz, notfall, erfahrung, ausstattung, foto, kodex, selbstauskunft, zeugnis, unterschriften, pruefen, fertig };

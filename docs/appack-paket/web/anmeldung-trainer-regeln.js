@@ -18,7 +18,10 @@ export const ROLLEN = {
 };
 export const WOCHENTAGE = ["mo", "di", "mi", "do", "fr", "sa", "so"];
 
-export const PRUEF_SEITEN = ["person", "einsatz", "notfall", "erfahrung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften"];
+export const AUSSTATTUNG_ARTIKEL = ["shirt", "pullover", "anzug", "regenjacke"];
+export const GROESSEN = ["S", "M", "L", "XL", "XXL", "3XL"];
+
+export const PRUEF_SEITEN = ["person", "einsatz", "notfall", "erfahrung", "ausstattung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften"];
 
 export function neueAntworten() {
   return {
@@ -36,6 +39,7 @@ export function neueAntworten() {
     notfall: { name: "", beziehung: "", telefon: "" },
     erfahrung: "",
     ersteHilfeAm: null,
+    ausstattung: { shirt: "", pullover: "", anzug: "", regenjacke: "" },
     foto: false,
     kodexGelesen: false,
     selbstauskunft: false,
@@ -135,6 +139,10 @@ export function datumProblem(roh, iso, heute, optionen) {
   return null;
 }
 
+export function groesseGueltig(wert) {
+  return wert === undefined || wert === null || wert === "" || GROESSEN.includes(wert);
+}
+
 export function mannschaftenFuer(konfig, abteilung) {
   const liste = Array.isArray(konfig && konfig.mannschaften) ? konfig.mannschaften : [];
   const namen = [];
@@ -210,6 +218,11 @@ const REGELN = {
     const p = datumProblem(c.roh && c.roh.ersteHilfeAm, a.ersteHilfeAm, c.heute, { zukunftErlaubt: false });
     if (p && p !== "datumLeer") f.push(fehler("ersteHilfeAm", M[p]));
     return f;
+  },
+
+  ausstattung(a) {
+    const g = a.ausstattung && typeof a.ausstattung === "object" ? a.ausstattung : {};
+    return AUSSTATTUNG_ARTIKEL.filter((artikel) => !groesseGueltig(g[artikel])).map((artikel) => fehler("ausstattung." + artikel, M.ausstattungGroesse));
   },
 
   foto: () => [],

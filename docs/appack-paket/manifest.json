@@ -17,8 +17,8 @@
     },
     {
       "datei": "web/datenschutz.html",
-      "bytes": 67286,
-      "sha256": "957b55cb058f772c971db0e33d892895995692c78a3cb145e4fd6005b3fccfe4"
+      "bytes": 67653,
+      "sha256": "6dfce57b45c5b562a28cb279428e645f1ebe5655f6f753ff265c71f531d6990a"
     },
     {
       "datei": "web/formular-gesendet.html",
@@ -427,13 +427,13 @@
     },
     {
       "datei": "web/anmeldung-texte-trainer-de.js",
-      "bytes": 18285,
-      "sha256": "409f923e2956b99fa817c7178e859792fab9c592599def6e9d344e2aec444148"
+      "bytes": 19017,
+      "sha256": "77881233bc946d1fb688b53407c2541e92cb2f6b6e89799755750670c3a98b54"
     },
     {
       "datei": "web/anmeldung-trainer-bausteine.js",
-      "bytes": 6346,
-      "sha256": "a11d7e2b1ad3fcec6334bb638d510de17366697bbe06c99016ca65af2881117c"
+      "bytes": 6382,
+      "sha256": "2ce2c1510b5fcd287e3f4b514e0e57719303ee9484a9dad2a6fc38334eec86f4"
     },
     {
       "datei": "web/anmeldung-trainer-einsicht.js",
@@ -447,8 +447,8 @@
     },
     {
       "datei": "web/anmeldung-trainer-pdf-daten.js",
-      "bytes": 5965,
-      "sha256": "660e7b003bbd8032c127cb7a126284c3b6525f395e58f0913c383ddc101cff71"
+      "bytes": 6401,
+      "sha256": "d2f65f023c4187030f581f096b3236f3b436c6be133d7609d0100f931925b265"
     },
     {
       "datei": "web/anmeldung-trainer-pdf-hilfen.js",
@@ -462,13 +462,13 @@
     },
     {
       "datei": "web/anmeldung-trainer-pdf-seiten.js",
-      "bytes": 14392,
-      "sha256": "c0bce283d1fa740560d90d45ffa469052d1f63432de6556c93fcde7b125bc168"
+      "bytes": 14579,
+      "sha256": "bd096e50286aefbd9b5938fcaf22bbc659737e88ea063c458082e2a7fea63a99"
     },
     {
       "datei": "web/anmeldung-trainer-pdf-texte.js",
-      "bytes": 15033,
-      "sha256": "c6a0b9649e9955c697d717fd4ef5e2dbfadee8d425867d5698b3f5806030ce19"
+      "bytes": 15655,
+      "sha256": "dfb531fef6779ece97ae630e6a7c35db163f951fee8a46ec32bba230c5c2cbd2"
     },
     {
       "datei": "web/anmeldung-trainer-pdf-wappen.js",
@@ -482,13 +482,13 @@
     },
     {
       "datei": "web/anmeldung-trainer-regeln.js",
-      "bytes": 8567,
-      "sha256": "4d4c2eaf8b6c62bb6ad786f445a5bb97d766b05f4d81281fc1b717defdc94b49"
+      "bytes": 9194,
+      "sha256": "7c2316b48c4b55d12ae0789bcdc0548b24afe5091a4daf8905bdfd310a45573c"
     },
     {
       "datei": "web/anmeldung-trainer-seiten.js",
-      "bytes": 30145,
-      "sha256": "1867814d0dd617cb099819f3a014ba260cb1b75a484d2829843047729cca086d"
+      "bytes": 31181,
+      "sha256": "21bad3f4d57bb3e8a46fee81877d4e11085092c1c4cdc25ff3c88fe60c855fc2"
     },
     {
       "datei": "web/anmeldung-trainer.js",

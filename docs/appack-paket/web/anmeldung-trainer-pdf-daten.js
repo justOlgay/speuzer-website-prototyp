@@ -109,6 +109,15 @@ export function bereiteVor(eingabe, art) {
     d.notfall = { name: text(notfall.name), beziehung: text(notfall.beziehung), telefon: text(notfall.telefon) };
     d.erfahrung = text(a.erfahrung);
     d.ersteHilfeAm = istIso(a.ersteHilfeAm) ? datumDe(a.ersteHilfeAm) : "";
+
+    const ausstattung = objekt(a.ausstattung);
+    d.ausstattung = [];
+    for (const [schluessel, artikel] of T.ausstattung.artikel) {
+      const wert = ausstattung[schluessel];
+      if (wert === undefined || wert === null || wert === "") continue;
+      if (typeof wert === "string" && T.ausstattung.groessen.includes(wert)) d.ausstattung.push({ artikel, groesse: wert });
+      else fehlt.push("ausstattung." + schluessel);
+    }
     const tage = Array.isArray(a.tage) ? a.tage : [];
     d.tage = T.tage.map((x) => x[0]).filter((code) => tage.includes(code));
   }

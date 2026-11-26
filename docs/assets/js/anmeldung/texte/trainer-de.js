@@ -1,18 +1,20 @@
 /*
   Texte der Seite „Neu im Trainerteam“ (FFV Sportfreunde 04) – nur Deutsch, Anrede „du“, keine Ausrufezeichen
-  außer wo der Entwurf sie hat. Stand 24.11.2026.
+  außer wo der Entwurf sie hat. Stand 26.11.2026.
 
   Alle sichtbaren Texte der Seite stehen hier (Bildschirme, Fehlermeldungen, Dialoge, Meldungen am Ende). Sie sind aus dem
   abgenommenen Entwurf übernommen (Wortlaute in den Bildschirmen 01 bis 13, rechtlich geprüft in der Faktenprüfung AP-3);
   der Aufbau folgt den Textmodulen des Anmelde-Assistenten (de-oberflaeche.js). Das Modul braucht keinen Browser: Der Bau der
-  Seite (Titel, Überschrift, Lead) und die Tests lesen es in Node.
+  Seite (Titel, Überschrift, Lead) und die Tests lesen es in Node. Die Nummern 01 bis 13 sind die des Entwurfs; der Bildschirm
+  „Welche Größen hast du?“ (ausstattung) kam am 26.11.2026 dazu und heißt 06a, damit die übrigen Nummern gleich bleiben (die Seite
+  hat jetzt 14 Bildschirme).
 
   Aufbau
     - seite          Rahmen der Seite (Bauzeit): Titel, Überschrift, Lead, Meldungen vor dem Start. {mail} ist die Adresse der
                      Geschäftsstelle aus der Konfiguration (verein.mail).
     - rahmen, allgemein, fehler, loeschen    Rahmen des Assistenten (Leiste, Abschnitte, Fuß), Kleinigkeiten, Fehlermeldungen
-    - code … fertig  je Bildschirm ein Eintrag (code, start, person, einsatz, notfall, erfahrung, foto, kodex, selbstauskunft,
-                     zeugnis, unterschriften, pruefen, fertig)
+    - code … fertig  je Bildschirm ein Eintrag (code, start, person, einsatz, notfall, erfahrung, ausstattung, foto, kodex,
+                     selbstauskunft, zeugnis, unterschriften, pruefen, fertig)
     - Platzhalter in geschweiften Klammern ({frist}, {datum}, {nachname}, {mail} …) setzt die Seite ein. Wo ein Text eine oder
       mehrere Einsichtnehmende nennt, steht {lang} (mit Funktion) oder {kurz} (nur Name): Den Namensteil bildet allein
       trainer-einsicht.js aus konfig.einsicht. Kein Name steht fest in einem Text.
@@ -119,6 +121,8 @@ export default {
     notfallName: "Bitte trage den Namen ein.",
     notfallBeziehung: "Bitte trage ein, wer die Person für dich ist.",
     notfallTelefon: "Bitte trage die Telefonnummer ein.",
+    // Größen für die Trainerausstattung: Der Wert ist keine Größe der Liste (das Auswahlfeld erzeugt so etwas nicht; die Regel schützt vor veränderten Werten)
+    ausstattungGroesse: "Bitte wähle eine Größe aus der Liste.",
     kodex: "Bitte lies den Verhaltenskodex und setze den Haken.",
     selbstauskunft: "Bitte setze den Haken. Trifft die Erklärung nicht auf dich zu, melde dich bitte bei der Geschäftsstelle.",
     zeugnis: "Bitte wähle eine Antwort.",
@@ -182,6 +186,7 @@ export default {
       "{zeitraum} (Schnupperphase) bist du nie allein auf dem Platz: Ein gemeldeter Trainer des Vereins ist immer dabei.",
       "Trainer und Betreuer sind beitragsfrei Mitglied.",
       "Spätestens nach der Schnupperphase braucht der Verein deine Unterlagen.",
+      "Es gibt auch Trainerausstattung vom Verein: Shirt, Pullover, Anzug und Regenjacke. Dafür trägst du später deine Größen ein.",
     ],
     los: "Los geht’s",
   },
@@ -241,6 +246,21 @@ export default {
     erfahrung: "Erfahrung und Qualifikationen",
     erfahrungHinweis: "Zum Beispiel Trainerlizenz, frühere Vereine oder Fortbildungen.",
     ersteHilfe: "Erste-Hilfe-Kurs absolviert am",
+    weiter: WEITER,
+  },
+
+  // ---------- 06a ausstattung (neu seit 26.11.2026; die Nummern 07 bis 13 des Entwurfs bleiben, wie sie sind) ----------
+  // Alles freiwillig: vier Auswahlfelder für die Größen der Trainerausstattung des Vereins. Die Namen der Artikel (shirt … regenjacke) sind
+  // zugleich die Beschriftungen der Felder, der Zeilen auf „Prüfen“ und (in trainer-pdf-texte.js) des Kontaktdatenblatts.
+
+  ausstattung: {
+    titel: "Welche Größen hast du?",
+    hinweis: "Das ist freiwillig. Du kannst diese Seite überspringen. Die Größen brauchen wir für die Trainerausstattung des Vereins: Shirt, Pullover, Anzug und Regenjacke.",
+    shirt: "Shirt",
+    pullover: "Pullover",
+    anzug: "Anzug",
+    regenjacke: "Regenjacke",
+    fussnote: "Weißt du eine Größe nicht? Lass das Feld leer.",
     weiter: WEITER,
   },
 
@@ -356,6 +376,7 @@ export default {
       einsatz: "Einsatz",
       notfall: "Notfall",
       erfahrung: "Erfahrung",
+      ausstattung: "Trainerausstattung",
       unterlagen: "Unterlagen",
       zeugnis: "Führungszeugnis",
       unterschrift: "Unterschrift",
@@ -375,6 +396,7 @@ export default {
       notfall: "Notfallkontakt",
       erfahrung: "Erfahrung und Qualifikationen",
       ersteHilfe: "Erste-Hilfe-Kurs",
+      groessen: "Größen",
       foto: "Passfoto",
       kodex: "Verhaltenskodex",
       selbstauskunft: "Selbstauskunft",
@@ -391,6 +413,8 @@ export default {
       offen: "Noch offen",
       nichtAngegeben: "Nicht angegeben (freiwillig)",
       ersteHilfe: "Absolviert am {datum}",
+      // eine Größe auf „Prüfen“: „Shirt: M“ ({artikel} ist die Beschriftung aus ausstattung.shirt …, {groesse} die gewählte Größe)
+      groesse: "{artikel}: {groesse}",
     },
     unterschriftAlt: "Deine Unterschrift",
     kastenTitel: "Das solltest du wissen",

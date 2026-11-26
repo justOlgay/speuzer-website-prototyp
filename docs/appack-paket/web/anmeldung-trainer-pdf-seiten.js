@@ -207,6 +207,11 @@ export function kontaktdatenblatt(dok, d, sig) {
   if (d.ersteHilfeAm) s.seite.text(d.ersteHilfeAm, fx + 2.8, s.y - 10.5, 10.5, {});
   s.y -= 24 + 4;
 
+  if (d.ausstattung.length) {
+    s.ueberschrift(T.ausstattung.abschnitt, 4);
+    s.raster(d.ausstattung.map((x) => ({ label: x.artikel, wert: x.groesse, s: 1.5, nutzer: false })));
+  }
+
   s.ueberschrift(t.verfuegbarkeit, 4);
   s.platz(2 * 20 + 6);
   T.tage.forEach(([code, name], i) => {
