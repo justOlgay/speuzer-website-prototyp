@@ -247,6 +247,14 @@ export function kontaktdatenblatt(dok, d, sig) {
   if (d.ersteHilfeAm) s.seite.text(d.ersteHilfeAm, fx + 2.8, s.y - 10.5, 10.5, {});
   s.y -= 24 + 4;
 
+  // Trainerausstattung (freiwillig, seit 26.11.2026): Der Abschnitt steht nur, wenn mindestens eine Größe angegeben ist, und zeigt nur die angegebenen
+  // Größen: je Artikel ein Feld wie bei den übrigen Angaben (Beschriftung darüber, Größe auf der Linie), von links nach rechts; die Felder haben
+  // immer dieselbe Breite (vier passen in eine Zeile). Ohne Angabe bleibt das Blatt, wie es war: kein Abschnitt, keine leere Zeile.
+  if (d.ausstattung.length) {
+    s.ueberschrift(T.ausstattung.abschnitt, 4);
+    s.raster(d.ausstattung.map((x) => ({ label: x.artikel, wert: x.groesse, s: 1.5, nutzer: false })));
+  }
+
   // Verfügbarkeit: vier Spalten zum Ankreuzen
   s.ueberschrift(t.verfuegbarkeit, 4);
   s.platz(2 * 20 + 6);

@@ -17,6 +17,9 @@
 //       (öffentliche nur als SHA-256, private aus der git-ignorierten Liste tools/cache/pii-namen.txt wie tools/pii-check.py)
 //  K10  Vorschau des Antrags = Brief in der Datei (Text und Bild der Seite)
 //  K15  freiwillige Angaben (Passfoto, Notfallkontakt, Erfahrung, Erste-Hilfe-Kurs): ohne sie entsteht die Datei ohne Fotoseite und mit leeren Feldern
+//  K16  Trainerausstattung (freiwillig, 26.11.2026): Größen auf dem Kontaktdatenblatt im genauen Wortlaut (nur Angegebenes, Abschnitt nur bei mindestens
+//       einer Größe), ohne Größen unveränderte Ausgabe (Text und Bild jeder Seite gleich, ganze Datei byteweise gleich bei leeren Größen), gleiche
+//       Seitenzahl (7, 8, 9) und Fußzeilen, ungültige Werte werden von der Regel abgelehnt und nie in die Datei geschrieben, Datenschutzinformation
 //  K14  Passfoto: letzte Seite, JPEG unverändert eingebettet (Bytes gleich), Größe 60 × 80 mm, Seitenzählung ohne Fußzeile auf dem Brief
 //  K11  Größe (höchstens 2 MB bei einem Foto von 600 × 800 Pixeln) und Zeit (höchstens 5 Sekunden)
 //  K12  Fristen, Sonderzeichen, sehr lange Angaben, Fehlerfälle, Metadaten, Wiederholbarkeit, Quelltext (kein DOM, keine Uhr, kein Name)
@@ -41,6 +44,7 @@ import { einsichtNamen } from "../../assets/js/anmeldung/trainer-einsicht.js";
 import { T } from "../../assets/js/anmeldung/trainer-pdf-texte.js";
 import SCREEN_TEXTE from "../../assets/js/anmeldung/texte/trainer-de.js";
 import { dateiteil } from "../../assets/js/anmeldung/hilfen.js";
+import { pruefeSeite, neueAntworten, GROESSEN, AUSSTATTUNG_ARTIKEL, groesseGueltig } from "../../assets/js/anmeldung/trainer-regeln.js";
 import { LadeFehler } from "../../assets/js/anmeldung/pdf-lader.js";
 import { leseModulText } from "../../assets/js/anmeldung/trainer-pdf-lader.js";
 
@@ -535,7 +539,18 @@ const antragText = gesamtText(antragPfad);
   wortlaut(ds, "spätestens sechs Monate nach der letzten Ausübung deiner Tätigkeit (§ 30a Abs. 3 BZRG, § 72a Abs. 5 SGB VIII)", "Information zum Datenschutz: Löschfrist der Vermerke");
   wortlaut(ds, "Art. 6 Abs. 1 lit. f in Verbindung mit Art. 10 DSGVO", "Information zum Datenschutz: Art. 10 DSGVO bei Selbstauskunft und Einsicht");
   wortlaut(ds, "Pflicht sind: Name, Anschrift, Geburtsdatum, Handynummer, E-Mail-Adresse und die Angaben zum Einsatz (Mannschaft oder Gruppe, Rolle, Beginn).", "Information zum Datenschutz: Pflichtangaben");
-  wortlaut(ds, "Freiwillig sind dein Passfoto, ein Notfallkontakt, deine Erfahrung und Qualifikationen, das Datum deines Erste-Hilfe-Kurses und die Wochentage, an denen du kannst.", "Information zum Datenschutz: freiwillige Angaben");
+  // Seit 26.11.2026 nennt der Satz auch die Größen für die Trainerausstattung (freiwillig); der Wortlaut davor ist ersetzt
+  wortlaut(ds, "Freiwillig sind dein Passfoto, ein Notfallkontakt, deine Erfahrung und Qualifikationen, das Datum deines Erste-Hilfe-Kurses, deine Größen für die Trainerausstattung und die Wochentage, an denen du kannst.", "Information zum Datenschutz: freiwillige Angaben");
+  fehltIn(ds, "das Datum deines Erste-Hilfe-Kurses und die Wochentage", "Information zum Datenschutz: der Satz zu den freiwilligen Angaben nennt die Größen");
+  // Trainerausstattung (26.11.2026): Kategorie, Zweck mit Rechtsgrundlage (zwischen Notfallkontakt und Passfoto) und Speicherdauer, auch ohne angegebene Größen (der Text gilt für alle)
+  wortlaut(ds, "Größen für die Trainerausstattung (freiwillig): Größen für Shirt, Pullover, Anzug und Regenjacke.", "Information zum Datenschutz: Kategorie der Größen");
+  wortlaut(ds, "Bestellung und Ausgabe der Trainerausstattung (freiwillig) Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Ausstattung des Trainerteams)", "Information zum Datenschutz: Zweck und Rechtsgrundlage der Trainerausstattung");
+  wortlaut(ds, "Kontaktdatenblatt, Notfallkontakt, Größen für die Trainerausstattung, Selbstauskunft, Erklärung zum Verhaltenskodex und Passfoto: so lange du im Verein tätig bist.", "Information zum Datenschutz: Speicherdauer der Größen");
+  {
+    const zeile = (x) => ds.indexOf(x);
+    ok(zeile("Notfallkontakt (freiwillig) Art. 6") >= 0 && zeile("Notfallkontakt (freiwillig) Art. 6") < zeile("Bestellung und Ausgabe der Trainerausstattung (freiwillig)") && zeile("Bestellung und Ausgabe der Trainerausstattung (freiwillig)") < zeile("Passfoto für die internen Vereinsunterlagen (freiwillig) Art. 6"), "Information zum Datenschutz: die Zeile zur Trainerausstattung steht in der Tabelle der Zwecke zwischen Notfallkontakt und Passfoto");
+    ok(zeile("Angaben zu deiner Erfahrung (freiwillig)") < zeile("Größen für die Trainerausstattung (freiwillig): Größen für") && zeile("Größen für die Trainerausstattung (freiwillig): Größen für") < zeile("Ein Passfoto für die internen Vereinsunterlagen (freiwillig)."), "Information zum Datenschutz: die Kategorie der Größen steht in der Liste der Daten zwischen Erfahrung und Passfoto");
+  }
   fehltIn(ds, "dein Beruf", "Information zum Datenschutz: kein Beruf mehr");
   fehltIn(ds, "Pflicht sind: Name, Anschrift, Geburtsdatum, Handynummer, E-Mail-Adresse, die Angaben zum Einsatz, der Notfallkontakt", "Information zum Datenschutz: Notfallkontakt ist keine Pflicht");
   // Information nach Art. 13: Bestandteile
@@ -898,6 +913,180 @@ kontext = "K15 freiwillige Angaben";
   ok(ft.length === 9 && /Passfoto von Max Mustermann/.test(ft[8]) && nurFoto.r.dateien[0].beschreibung === BESCHREIBUNG.mitAntrag, "nur das Foto: Seite „Passfoto“ und Beschreibung wie bisher");
   // ein Foto, das kein JPEG ist, bleibt ein Fehler (nur das Foto ist freiwillig, nicht seine Gültigkeit)
   await wirft(() => erzeugeDateien({ antworten: kopie(ohneAlles), medien: { foto: SIG, unterschrift: SIG }, konfig: kopie(KONFIG), heute: HEUTE, werkzeuge: WERKZEUGE }), "foto-format", "JPEG", "Foto kein JPEG");
+}
+
+// ============ K16: Trainerausstattung (Größen, freiwillig) ============
+kontext = "K16 Trainerausstattung";
+{
+  // Seit 26.11.2026 gibt es auf der Seite die freiwillige Frage nach den Größen für Shirt, Pullover, Anzug und Regenjacke (S bis 3XL). Auf dem
+  // Kontaktdatenblatt steht ein Abschnitt „Trainerausstattung (freiwillig)“ nur, wenn mindestens eine Größe angegeben ist, und nur mit den angegebenen
+  // Größen. Ohne Größen bleibt die Ausgabe, wie sie war (die Information zum Datenschutz gilt für alle und ist deshalb in jeder Datei dieselbe).
+  const GROESSEN_SOLL = ["S", "M", "L", "XL", "XXL", "3XL"];
+  const ARTIKEL_SOLL = [["shirt", "Shirt"], ["pullover", "Pullover"], ["anzug", "Anzug"], ["regenjacke", "Regenjacke"]];
+  const ABSCHNITT = "Trainerausstattung (freiwillig)";
+  const VOLL = { shirt: "M", pullover: "L", anzug: "XL", regenjacke: "XXL" }; // vier verschiedene Größen: die Zuordnung Artikel › Größe ist so prüfbar
+  const mitAusstattung = (a, ausstattung) => Object.assign(kopie(a), { ausstattung });
+  const medienMit = (foto) => ({ foto: foto ? FOTO.bytes : null, unterschrift: SIG });
+  const bilderVon = (pfad, name) => {
+    const vorsatz = path.join(RENDER, name);
+    sh("pdftoppm", ["-r", "100", "-png", pfad, vorsatz]);
+    return readdirSync(RENDER).filter((n) => n.startsWith(name + "-") && n.endsWith(".png")).sort().map((n) => path.join(RENDER, n));
+  };
+  const gleicheBytes = (x, y) => Buffer.compare(readFileSync(x), readFileSync(y)) === 0;
+
+  // Listen und Beschriftungen: Regel (trainer-regeln.js), Datei (trainer-pdf-texte.js) und Bildschirm (texte/trainer-de.js) stimmen überein
+  ok(JSON.stringify(GROESSEN) === JSON.stringify(GROESSEN_SOLL) && JSON.stringify(T.ausstattung.groessen) === JSON.stringify(GROESSEN_SOLL), () => "Größen der Auswahl: S, M, L, XL, XXL, 3XL (Regel " + JSON.stringify(GROESSEN) + ", Datei " + JSON.stringify(T.ausstattung.groessen) + ")");
+  ok(JSON.stringify(AUSSTATTUNG_ARTIKEL) === JSON.stringify(ARTIKEL_SOLL.map(([k]) => k)) && JSON.stringify(T.ausstattung.artikel) === JSON.stringify(ARTIKEL_SOLL), "vier Artikel in der Reihenfolge Shirt, Pullover, Anzug, Regenjacke (Regel und Datei)");
+  ok(ARTIKEL_SOLL.every(([k, name]) => SCREEN_TEXTE.ausstattung[k] === name), "die Beschriftungen der Felder auf dem Bildschirm sind die der Datei");
+  ok(T.ausstattung.abschnitt === ABSCHNITT, () => "Überschrift des Abschnitts: " + T.ausstattung.abschnitt);
+  ok(neueAntworten().ausstattung && JSON.stringify(neueAntworten().ausstattung) === JSON.stringify({ shirt: "", pullover: "", anzug: "", regenjacke: "" }), "leere Antworten: vier leere Größen");
+
+  // ---- mit vier Größen: genauer Wortlaut, Stelle, Seitenzahl, Fußzeilen ----
+  const mit = await baue("groessen-voll", { antworten: mitAusstattung(BEISPIEL, VOLL) });
+  const mitSeiten = seitenText(mit.teile.gesamt);
+  ok(mit.r.dateien.length === 1 && mit.r.warnungen.length === 0, () => "mit Größen: eine Datei, keine Warnung: " + JSON.stringify(mit.r.warnungen));
+  ok(mit.r.dateien[0].beschreibung === BESCHREIBUNG.mitAntrag && mit.r.dateien[0].name === "Trainerunterlagen_Mustermann_Max.pdf", "mit Größen: Name und Beschreibung der Datei wie ohne Größen");
+  const kontaktMit = mitSeiten[2];
+  wortlaut(kontaktMit, "Erste-Hilfe-Kurs (freiwillig) Ja, absolviert am: 12.05.2025 Trainerausstattung (freiwillig) Shirt M Pullover L Anzug XL Regenjacke XXL Verfügbarkeit (bitte ankreuzen)", "Kontaktdatenblatt: Abschnitt Trainerausstattung zwischen Erste-Hilfe-Kurs und Verfügbarkeit, Größe je Artikel");
+  ok(mitSeiten.length === 9 && seiteMit(mitSeiten, SEITENTITEL.kontakt) === 3 && seiteMit(mitSeiten, ABSCHNITT + " Shirt M") === 3, () => "mit Größen: weiter neun Seiten, der Abschnitt steht auf Seite 3 (Kontaktdatenblatt): " + mitSeiten.length + " / Seite " + seiteMit(mitSeiten, ABSCHNITT + " Shirt M"));
+  ok(mitSeiten.filter((t) => t.includes(ABSCHNITT + " Shirt M")).length === 1, "der Abschnitt mit den Größen steht genau einmal in der Datei");
+  ok(mitSeiten.every((t, i) => i === 7 || t.includes("Seite " + (i + 1) + " von 9")) && !/Seite \d+ von/.test(mitSeiten[7]), "mit Größen: Fußzeile „Seite x von 9“ auf jeder Seite außer dem Brief, wie ohne Größen");
+  const reihenfolgeMit = [SEITENTITEL.deckblatt, SEITENTITEL.anmeldung, SEITENTITEL.kontakt, SEITENTITEL.selbstauskunft, SEITENTITEL.kodex, SEITENTITEL.datenschutz].map((t) => seiteMit(mitSeiten, t));
+  ok(JSON.stringify(reihenfolgeMit) === JSON.stringify([1, 2, 3, 4, 5, 6]) && mitSeiten[6].includes("Information zum Datenschutz (Fortsetzung)") && mitSeiten[7].includes("ANTRAG AUF GEBÜHRENBEFREIUNG") && mitSeiten[8].includes("Passfoto von Max Mustermann"), () => "mit Größen: Reihenfolge der Seiten unverändert: " + reihenfolgeMit.join(","));
+  ok(/Trainerausstattung/.test(mitSeiten[0]) === false && /Trainerausstattung/.test(mitSeiten[1]) === false && /Trainerausstattung/.test(mitSeiten[3]) === false && /Trainerausstattung/.test(mitSeiten[4]) === false, "mit Größen: Deckblatt, Anmeldung, Selbstauskunft und Kodex-Erklärung erwähnen die Größen nicht");
+
+  // ---- die eigene Prüfung: Text und Bild der Seiten mit und ohne Größen ----
+  // ohne Größen = das Beispiel dieses Tests (das Feld ausstattung fehlt ganz); paketSeiten sind seine neun Seiten
+  const ohneKontakt = paketSeiten[2];
+  ok(!/Trainerausstattung|\bShirt\b|\bPullover\b|\bAnzug\b|Regenjacke/.test(ohneKontakt), "ohne Größen: kein Abschnitt, kein Artikel auf dem Kontaktdatenblatt");
+  const VOR = "Ja, absolviert am: 12.05.2025 Verfügbarkeit (bitte ankreuzen)";
+  ok(ohneKontakt.split(VOR).length === 2, "ohne Größen: Erste-Hilfe-Kurs und Verfügbarkeit stehen unmittelbar hintereinander");
+  ok(kontaktMit === ohneKontakt.replace(VOR, "Ja, absolviert am: 12.05.2025 " + ABSCHNITT + " Shirt M Pullover L Anzug XL Regenjacke XXL Verfügbarkeit (bitte ankreuzen)"), "Kontaktdatenblatt mit Größen = das ohne Größen plus der eingefügte Abschnitt (sonst Zeichen für Zeichen gleich)");
+  const ohneSonst = paketSeiten.map((t, i) => (i === 2 ? null : t === mitSeiten[i])).filter((x) => x !== null);
+  ok(ohneSonst.length === 8 && ohneSonst.every(Boolean), () => "alle anderen acht Seiten haben mit und ohne Größen denselben Text (auch die Information zum Datenschutz): " + ohneSonst.join(","));
+  const bilderOhne = bilderVon(paketPfad, "paket-ohne-groessen-bild");
+  const bilderMit = bilderVon(mit.teile.gesamt, "paket-mit-groessen-bild");
+  const bildGleich = bilderOhne.map((p, i) => (i === 2 ? null : gleicheBytes(p, bilderMit[i]))).filter((x) => x !== null);
+  ok(bilderOhne.length === 9 && bilderMit.length === 9 && bildGleich.length === 8 && bildGleich.every(Boolean), () => "alle anderen acht Seiten sehen mit und ohne Größen gleich aus (Bild, Pixel für Pixel): " + bildGleich.join(","));
+  ok(!gleicheBytes(bilderOhne[2], bilderMit[2]), "das Kontaktdatenblatt mit Größen sieht anders aus als ohne");
+  // das Aussehen: kein Wort über dem Rand, keine Schrift unter 9 pt (außer Fußzeilen), alles auf Seite 3
+  for (const s of woerter(mit.teile.gesamt)) {
+    const draussen = s.woerter.filter((w) => w.x0 < 50 || w.x1 > s.breite - 50 || w.y0 < 0 || w.y1 > s.hoehe);
+    ok(draussen.length === 0, () => "mit Größen, Seite " + s.nr + ": Wörter über dem Rand: " + draussen.slice(0, 3).map((w) => w.t).join(", "));
+  }
+  for (const s of groessen(mit.teile.gesamt)) ok(s.texte.filter((x) => x.size < 9 && x.top < 790).length === 0, () => "mit Größen, Seite " + s.nr + ": Schrift unter 9 pt");
+
+  // ---- leere Größen (so liefert die Seite „ohne Auswahl“): dieselbe Datei wie ohne das Feld, Byte für Byte ----
+  const leer = await baue("groessen-leer", { antworten: mitAusstattung(BEISPIEL, { shirt: "", pullover: "", anzug: "", regenjacke: "" }) });
+  ok(Buffer.compare(Buffer.from(leer.r.dateien[0].bytes), Buffer.from(bsp.r.dateien[0].bytes)) === 0, "vier leere Größen: dieselbe Datei wie ohne das Feld ausstattung (byteweise)");
+  const leer2 = await baue("groessen-null", { antworten: mitAusstattung(BEISPIEL, { shirt: null, pullover: undefined }) });
+  ok(Buffer.compare(Buffer.from(leer2.r.dateien[0].bytes), Buffer.from(bsp.r.dateien[0].bytes)) === 0, "Größen null oder nicht vorhanden: dieselbe Datei wie ohne das Feld (byteweise)");
+  const leer3 = await baue("groessen-kein-objekt", { antworten: Object.assign(kopie(BEISPIEL), { ausstattung: null }) });
+  ok(Buffer.compare(Buffer.from(leer3.r.dateien[0].bytes), Buffer.from(bsp.r.dateien[0].bytes)) === 0, "ausstattung null: dieselbe Datei wie ohne das Feld (byteweise)");
+
+  // ---- nur Angegebenes: Teilangaben, jede Größe einzeln, jeder Artikel einzeln ----
+  const teil = await baue("groessen-teil", { antworten: mitAusstattung(BEISPIEL, { shirt: "", pullover: "XXL", anzug: "", regenjacke: "3XL" }) });
+  const teilKontakt = seitenText(teil.teile.gesamt)[2];
+  wortlaut(teilKontakt, "Erste-Hilfe-Kurs (freiwillig) Ja, absolviert am: 12.05.2025 Trainerausstattung (freiwillig) Pullover XXL Regenjacke 3XL Verfügbarkeit (bitte ankreuzen)", "zwei Größen: nur die angegebenen stehen im Blatt");
+  ok(!/\bShirt\b|\bAnzug\b/.test(teilKontakt), "zwei Größen: Shirt und Anzug (nicht angegeben) stehen nicht im Blatt");
+  ok(seitenText(teil.teile.gesamt).length === 9, "zwei Größen: weiter neun Seiten");
+  for (const [schluessel, artikel] of ARTIKEL_SOLL) {
+    const nurEiner = await baue("groessen-nur-" + schluessel, { antworten: mitAusstattung(BEISPIEL, { [schluessel]: "S" }) });
+    const t = seitenText(nurEiner.teile.gesamt);
+    wortlaut(t[2], "Trainerausstattung (freiwillig) " + artikel + " S Verfügbarkeit (bitte ankreuzen)", "nur " + artikel + ": ein Feld im Abschnitt");
+    ok(t.length === 9 && ARTIKEL_SOLL.filter(([, a]) => a !== artikel).every(([, a]) => !new RegExp("\\b" + a + "\\b").test(t[2])), "nur " + artikel + ": die anderen drei Artikel stehen nicht im Blatt, neun Seiten");
+  }
+  for (const g of GROESSEN_SOLL) {
+    const alle = await baue("groessen-" + g, { antworten: mitAusstattung(BEISPIEL, { shirt: g, pullover: g, anzug: g, regenjacke: g }) });
+    wortlaut(seitenText(alle.teile.gesamt)[2], "Trainerausstattung (freiwillig) Shirt " + g + " Pullover " + g + " Anzug " + g + " Regenjacke " + g + " Verfügbarkeit", "Größe " + g + " auf allen vier Feldern");
+    ok(alle.r.warnungen.length === 0, "Größe " + g + ": keine Warnung");
+  }
+  // unbekannte Schlüssel kommen nie in die Datei, auch eine Zeichenkette statt des Objekts bleibt ohne Wirkung
+  const fremd = await baue("groessen-fremd", { antworten: mitAusstattung(BEISPIEL, { shirt: "M", hose: "L" }) });
+  const ft = seitenText(fremd.teile.gesamt)[2];
+  ok(/Trainerausstattung \(freiwillig\) Shirt M Verfügbarkeit/.test(ft) && !/Hose/.test(ft), "ein Artikel, den es nicht gibt (hose), steht nicht im Blatt");
+  const zeichenkette = await baue("groessen-zeichenkette", { antworten: Object.assign(kopie(BEISPIEL), { ausstattung: "M" }) });
+  ok(Buffer.compare(Buffer.from(zeichenkette.r.dateien[0].bytes), Buffer.from(bsp.r.dateien[0].bytes)) === 0, "ausstattung als Zeichenkette statt Objekt: dieselbe Datei wie ohne das Feld, nichts davon in der Datei");
+
+  // ---- Seitenzahl 9 / 8 / 8 / 7 (Brief und Foto) und Fußzeilen mit und ohne Größen ----
+  for (const [zeugnis, foto, soll] of [["beantragen", true, 9], ["beantragen", false, 8], ["vorhanden", true, 8], ["vorhanden", false, 7]]) {
+    const a = Object.assign(kopie(BEISPIEL), { zeugnis, foto });
+    const ohne = await baue("seiten-ohne-" + zeugnis + (foto ? "-foto" : ""), { antworten: a, medien: medienMit(foto) });
+    const mitG = await baue("seiten-mit-" + zeugnis + (foto ? "-foto" : ""), { antworten: mitAusstattung(a, VOLL), medien: medienMit(foto) });
+    const tOhne = seitenText(ohne.teile.gesamt);
+    const tMit = seitenText(mitG.teile.gesamt);
+    const was = zeugnis + (foto ? ", mit Foto" : ", ohne Foto");
+    const brief = zeugnis === "beantragen" ? (foto ? soll - 2 : soll - 1) : -1;
+    ok(tOhne.length === soll && tMit.length === soll, () => was + ": " + soll + " Seiten mit und ohne Größen (ohne " + tOhne.length + ", mit " + tMit.length + ")");
+    ok(tMit.every((t, i) => i === brief || t.includes("Seite " + (i + 1) + " von " + soll)), () => was + ": Fußzeile „Seite x von " + soll + "“ mit Größen auf jeder Seite außer dem Brief");
+    ok(tMit.map((t, i) => (i === 2 ? true : t === tOhne[i])).every(Boolean) && tMit[2].includes(ABSCHNITT + " Shirt M Pullover L Anzug XL Regenjacke XXL") && !tOhne[2].includes("Trainerausstattung"), () => was + ": nur das Kontaktdatenblatt ist anders (mit Abschnitt, ohne nicht)");
+    ok(mitG.r.dateien[0].beschreibung === ohne.r.dateien[0].beschreibung, () => was + ": Beschreibung der Datei gleich");
+  }
+  // sehr lange Angaben (wie K12): auch mit Größen kein Wort über dem Rand, keine Warnung, nicht mehr Seiten als ohne Größen
+  {
+    const lang = Object.assign(kopie(BEISPIEL), {
+      vorname: "Maximilian Alexander Friedrich",
+      nachname: "Müller-Lüdenscheidt-Hohenlohe-Langenburg",
+      anschrift: { strasse: "Sehr-langer-Straßenname-der-Gemeinde-Oberursel 123 b", plz: "61440", ort: "Oberursel (Taunus) Stierstadt Hochtaunuskreis" },
+      email: "maximilian.alexander.mueller-luedenscheidt-hohenlohe@sehr-lange-domain-der-firma.example.com",
+      mannschaft: "1. Herrenmannschaft (Kreisliga A) Spielgemeinschaft Nord",
+      erfahrung: "Zehn Jahre Jugendtrainer in verschiedenen Vereinen, Lizenz C und B, Fortbildungen zur Torwartschule, Koordination und Athletik. ".repeat(6).trim(),
+      notfall: { name: "Erika Mustermann-Müller-Lüdenscheidt", beziehung: "Lebenspartnerin und Mutter der gemeinsamen Kinder", telefon: "0170 7654321" },
+      ersteHilfeAm: "2024-03-31",
+    });
+    const langOhne = (await baue("groessen-lange-angaben-ohne", { antworten: lang })).teile.anzahlSeiten;
+    const langMit = await baue("groessen-lange-angaben", { antworten: mitAusstattung(lang, VOLL) });
+    ok(langMit.r.warnungen.length === 0 && langMit.teile.anzahlSeiten === langOhne, () => "lange Angaben mit Größen: keine Warnung, " + langMit.teile.anzahlSeiten + " Seiten wie ohne Größen (" + langOhne + ")");
+    for (const s of woerter(langMit.teile.gesamt)) {
+      const draussen = s.woerter.filter((w) => w.x0 < 50 || w.x1 > s.breite - 50 || w.y1 > s.hoehe);
+      ok(draussen.length === 0, () => "lange Angaben mit Größen, Seite " + s.nr + ": Wörter über dem Rand: " + draussen.slice(0, 3).map((w) => w.t).join(", "));
+    }
+    rendere(langMit.teile.gesamt, "paket-lange-angaben-groessen");
+  }
+
+  // ---- ungültige Werte: die Regel lehnt sie ab, die Erzeugung bricht ab, nichts davon steht je in einer Datei ----
+  const UNGUELTIG = ["XXXL", "M; DROP", "m", " M", "M ", " ", "xl", "4XL", "S/M", "<b>M</b>", "Größe M", "M\n", 5, ["M"], { a: 1 }, true];
+  const ctx = { heute: HEUTE, roh: {}, medien: { unterschrift: SIG }, konfig: KONFIG };
+  for (const wert of UNGUELTIG) {
+    const a = Object.assign(kopie(BEISPIEL), { ausstattung: { shirt: wert, pullover: "", anzug: "", regenjacke: "" } });
+    const f = pruefeSeite("ausstattung", Object.assign(neueAntworten(), a), ctx);
+    ok(f.length === 1 && f[0].feld === "ausstattung.shirt" && f[0].meldung === SCREEN_TEXTE.fehler.ausstattungGroesse && !groesseGueltig(wert), () => "Regel lehnt " + JSON.stringify(wert) + " ab (Feld ausstattung.shirt, eigene Meldung): " + JSON.stringify(f));
+    await wirft(() => erzeugeDateien({ antworten: a, medien: medienMit(true), konfig: kopie(KONFIG), heute: HEUTE, werkzeuge: WERKZEUGE }), "angaben", "ausstattung.shirt", "die Erzeugung mit Größe " + JSON.stringify(wert) + " (keine Datei)");
+  }
+  ok(SCREEN_TEXTE.fehler.ausstattungGroesse === "Bitte wähle eine Größe aus der Liste.", "Meldung der Regel: „Bitte wähle eine Größe aus der Liste.“");
+  // jeder Artikel für sich, und mehrere Fehler zugleich: Die Regel und die Erzeugung nennen genau die falschen Felder
+  for (const [schluessel] of ARTIKEL_SOLL) {
+    const a = Object.assign(kopie(BEISPIEL), { ausstattung: { shirt: "M", pullover: "L", anzug: "XL", regenjacke: "XXL", [schluessel]: "XXXL" } });
+    const f = pruefeSeite("ausstattung", Object.assign(neueAntworten(), a), ctx);
+    ok(f.length === 1 && f[0].feld === "ausstattung." + schluessel, () => "nur " + schluessel + " ist falsch: die Regel nennt genau dieses Feld: " + JSON.stringify(f));
+    await wirft(() => erzeugeDateien({ antworten: a, medien: medienMit(true), konfig: kopie(KONFIG), heute: HEUTE, werkzeuge: WERKZEUGE }), "angaben", "ausstattung." + schluessel, "nur " + schluessel + " ist falsch");
+  }
+  {
+    const a = Object.assign(kopie(BEISPIEL), { ausstattung: { shirt: "M", pullover: "XXXL", anzug: "", regenjacke: "M; DROP" } });
+    const f = pruefeSeite("ausstattung", Object.assign(neueAntworten(), a), ctx);
+    ok(JSON.stringify(f.map((x) => x.feld)) === JSON.stringify(["ausstattung.pullover", "ausstattung.regenjacke"]), () => "zwei falsche Werte: die Regel nennt beide in der Reihenfolge der Seite: " + JSON.stringify(f));
+    let fehler2 = null;
+    try {
+      await erzeugeDateien({ antworten: a, medien: medienMit(true), konfig: kopie(KONFIG), heute: HEUTE, werkzeuge: WERKZEUGE });
+    } catch (e) {
+      fehler2 = e;
+    }
+    ok(fehler2 instanceof TrainerPdfFehler && fehler2.art === "angaben" && /ausstattung\.pullover/.test(fehler2.message) && /ausstattung\.regenjacke/.test(fehler2.message) && !/ausstattung\.shirt/.test(fehler2.message) && !/DROP|XXXL/.test(fehler2.message), () => "zwei falsche Werte: die Erzeugung nennt beide Felder, aber nicht den gültigen Wert und nicht die falschen Werte selbst: " + (fehler2 && fehler2.message));
+  }
+  // gültige Werte aller Artikel sind kein Fehler der Regel
+  {
+    const a = Object.assign(neueAntworten(), kopie(BEISPIEL), { ausstattung: kopie(VOLL) });
+    ok(pruefeSeite("ausstattung", a, ctx).length === 0 && pruefeSeite("ausstattung", neueAntworten(), ctx).length === 0 && pruefeSeite("ausstattung", Object.assign(kopie(BEISPIEL), {}), ctx).length === 0, "gültige, leere und fehlende Größen: kein Fehler der Regel (freiwillig)");
+  }
+  // Die Regel gilt als eigene Seite des Ablaufs (Sicherung vor „Dateien erstellen“): PRUEF_SEITEN enthält „ausstattung“ zwischen erfahrung und foto
+  {
+    const R = await import("../../assets/js/anmeldung/trainer-regeln.js");
+    const i = R.PRUEF_SEITEN.indexOf("ausstattung");
+    ok(i > 0 && R.PRUEF_SEITEN[i - 1] === "erfahrung" && R.PRUEF_SEITEN[i + 1] === "foto", () => "PRUEF_SEITEN: ausstattung zwischen erfahrung und foto: " + R.PRUEF_SEITEN.join(","));
+    const a = Object.assign(neueAntworten(), kopie(BEISPIEL), { ausstattung: { shirt: "XXXL", pullover: "", anzug: "", regenjacke: "" } });
+    const offen = R.ersteOffeneSeite(a, Object.assign({}, ctx, { medien: { unterschrift: new Uint8Array([137, 80, 78, 71]) } }));
+    ok(!!offen && offen.seite === "ausstattung" && offen.fehler[0].feld === "ausstattung.shirt", () => "ersteOffeneSeite findet die falsche Größe: " + JSON.stringify(offen));
+  }
 }
 
 // ============ K14: Passfoto ============

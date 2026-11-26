@@ -10,8 +10,8 @@
   Aufbau und Aussehen wie der Anmelde-Assistent (assistent.js; dessen Dateien bleiben unverändert): gleiche Stylesheets (site.css,
   anmeldung.css) und Klassen, dieselben Bausteine (bausteine.js, unterschrift.js, bilder.js, zugang.js, hilfen.js). Eigene Dateien:
     trainer.js            dieser Einstieg: Rahmen, Navigation, Zugang, Zustand, Löschen, Dateien erstellen
-    trainer-seiten.js     die 13 Seiten (code, start, person, einsatz, notfall, erfahrung, foto, kodex, selbstauskunft, zeugnis,
-                          unterschriften, pruefen, fertig)
+    trainer-seiten.js     die 14 Seiten (code, start, person, einsatz, notfall, erfahrung, ausstattung, foto, kodex, selbstauskunft,
+                          zeugnis, unterschriften, pruefen, fertig)
     trainer-bausteine.js  Bausteine, die bausteine.js, seiten-unterlagen.js und seiten-ende.js nicht ausgeben
     trainer-regeln.js     Prüfregeln, leere Antworten, Datumshilfen (reine Funktionen, ohne DOM)
     trainer-einsicht.js   Namensteil der Einsichtnehmenden (vom Orchestrator; einsichtNamen, einsichtAnzahl)
@@ -66,7 +66,8 @@
   ---------- Zustand ----------
   { antworten, medien }: antworten hat die Felder von trainer-regeln.js › neueAntworten (vorname, nachname, geburtsdatum (ISO), anschrift
   { strasse, plz, ort }, handy, email, abteilung, mannschaft, rolle, seit (ISO), tage[], notfall { name, beziehung, telefon } (freiwillig, alle
-  drei oder keine), erfahrung (freiwillig, ein Textfeld), ersteHilfeAm (freiwillig, ISO oder null), foto (Boolean, freiwillig), kodexGelesen,
+  drei oder keine), erfahrung (freiwillig, ein Textfeld), ersteHilfeAm (freiwillig, ISO oder null), ausstattung { shirt, pullover, anzug,
+  regenjacke } (freiwillig, je Artikel eine Größe von S bis 3XL oder "" für keine Angabe), foto (Boolean, freiwillig), kodexGelesen,
   selbstauskunft, zeugnis "beantragen" | "vorhanden", satzung); medien = { foto: Uint8Array | null (JPG, 3:4, höchstens 750 × 1000 Pixel; freiwillig),
   unterschrift: Uint8Array | null (PNG, auf die Striche zugeschnitten) }.
   Wie im Anmelde-Assistenten (übernommen): Alles liegt nur im Arbeitsspeicher; nichts im Speicher des Browsers, keine Cookies, nichts wird
@@ -81,12 +82,13 @@
   Meldung darunter. Es gibt keine Adresse, die einen Bildschirm ohne Code öffnet.
 
   ---------- Ablauf ----------
-  code › start › person › einsatz › notfall › erfahrung › foto › kodex › selbstauskunft › zeugnis › unterschriften › pruefen › fertig.
+  code › start › person › einsatz › notfall › erfahrung › ausstattung › foto › kodex › selbstauskunft › zeugnis › unterschriften › pruefen › fertig.
   Jede Seite ist ein Eintrag im Verlauf des Browsers; „Zurück“ und die Zurück-Taste gehen eine Seite zurück. „Weiter“ prüft die Seite
   (trainer-regeln.js). Auf „pruefen“ führt „Ändern“ zur Seite der Zeile; „Weiter“ geht von dort wieder in der Reihenfolge weiter. „Alles
   stimmt – Dateien erstellen“ prüft vorher alle Seiten (führt bei einer Lücke zur ersten offenen Seite) und ruft trainer-pdf.js auf.
   Die Abschnittszeile: Du · Einsatz · Unterlagen · Führungszeugnis · Unterschrift · Fertig (nicht auf code und start).
-  „Alle Angaben löschen“ fragt nach, leert Antworten, Foto, Unterschrift und erzeugte Dateien und führt zur Seite „start“ (der Zugang bleibt).
+  „Alle Angaben löschen“ fragt nach, leert Antworten (auch die Größen der Trainerausstattung), Foto, Unterschrift und erzeugte Dateien und führt
+  zur Seite „start“ (der Zugang bleibt).
 
   ---------- Schnittstelle zu trainer-pdf.js (T2) ----------
     erzeugeDateien({ antworten, medien, konfig, heute })   heute: ISO "JJJJ-MM-TT"

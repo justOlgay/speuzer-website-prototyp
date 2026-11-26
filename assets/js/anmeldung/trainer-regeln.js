@@ -14,7 +14,8 @@
       Gruppe), Rolle, „Seit wann“, Verhaltenskodex und Selbstauskunft angekreuzt, Führungszeugnis gewählt, Unterschrift, Satzung angekreuzt.
       Quellen: Checkliste für neue Trainer/Betreuer (Name, Anschrift, Telefon, E-Mail, Unterlagen), Aufnahmeantrag (Geburtsdatum), Brief des Vereins.
     - Freiwillig: Passfoto, Notfallkontakt (alle drei Angaben oder keine), „Erfahrung und Qualifikationen“ (ein Textfeld), Datum des
-      Erste-Hilfe-Kurses, „Wann kannst du?“. Beruf, sonstige Qualifikationen und „geplant bis“ gibt es nicht mehr.
+      Erste-Hilfe-Kurses, „Wann kannst du?“, Größen für die Trainerausstattung (seit 26.11.2026: Shirt, Pullover, Anzug, Regenjacke; jede
+      Größe ist leer oder eine aus GROESSEN, sonst ein Fehler). Beruf, sonstige Qualifikationen und „geplant bis“ gibt es nicht mehr.
     - PLZ: genau fünf Ziffern. E-Mail: wie im Anmelde-Assistenten (ein @, dahinter eine Domain mit Punkt). Handynummer und Telefon des Notfallkontakts
       (wenn angegeben): nur Ziffern, Leerzeichen und + - /, mindestens 6 Ziffern.
     - Geburtsdatum: gültig, nicht in der Zukunft und zum Stichtag (heute) mindestens 18 Jahre alt.
@@ -46,12 +47,17 @@ export const ROLLEN = {
   karneval: ["trainer", "co-trainer", "betreuer"],
 };
 export const WOCHENTAGE = ["mo", "di", "mi", "do", "fr", "sa", "so"];
+// Trainerausstattung (freiwillig, seit 26.11.2026): die Artikel in der Reihenfolge der Seite (zugleich die Schlüssel in antworten.ausstattung und
+// in texte/trainer-de.js › ausstattung) und die Größen zur Auswahl (wie data/bestellung.json › groessen › erwachsene)
+export const AUSSTATTUNG_ARTIKEL = ["shirt", "pullover", "anzug", "regenjacke"];
+export const GROESSEN = ["S", "M", "L", "XL", "XXL", "3XL"];
 // Seiten mit Eingaben in der Reihenfolge des Ablaufs (für die Sicherung vor dem Erstellen der Dateien)
-export const PRUEF_SEITEN = ["person", "einsatz", "notfall", "erfahrung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften"];
+export const PRUEF_SEITEN = ["person", "einsatz", "notfall", "erfahrung", "ausstattung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften"];
 
 // ---------- Leere Antworten ----------
 
-// Alle Felder sind da und leer (Felder wie ap1/daten.mjs › BEISPIEL). foto steht für „es gibt ein Foto“ (das Bild selbst liegt in medien.foto).
+// Alle Felder sind da und leer (Felder wie ap1/daten.mjs › BEISPIEL, dazu ausstattung seit 26.11.2026: eine Größe je Artikel, leer = keine Angabe).
+// foto steht für „es gibt ein Foto“ (das Bild selbst liegt in medien.foto).
 export function neueAntworten() {
   return {
     vorname: "",
@@ -68,6 +74,7 @@ export function neueAntworten() {
     notfall: { name: "", beziehung: "", telefon: "" },
     erfahrung: "",
     ersteHilfeAm: null,
+    ausstattung: { shirt: "", pullover: "", anzug: "", regenjacke: "" },
     foto: false,
     kodexGelesen: false,
     selbstauskunft: false,
@@ -184,6 +191,12 @@ export function datumProblem(roh, iso, heute, optionen) {
   return null;
 }
 
+// Eine Größe der Trainerausstattung: leer (keine Angabe; fehlt der Wert ganz, gilt das auch) oder genau eine der Größen aus GROESSEN, in genau dieser
+// Schreibweise (kein „m“, kein „ M“, kein „XXXL“).
+export function groesseGueltig(wert) {
+  return wert === undefined || wert === null || wert === "" || GROESSEN.includes(wert);
+}
+
 // Die Namen der Mannschaften (Abteilung Fußball) oder Gruppen (Karneval) aus konfig.mannschaften, in der Reihenfolge der Konfiguration.
 export function mannschaftenFuer(konfig, abteilung) {
   const liste = Array.isArray(konfig && konfig.mannschaften) ? konfig.mannschaften : [];
@@ -265,6 +278,13 @@ const REGELN = {
     const p = datumProblem(c.roh && c.roh.ersteHilfeAm, a.ersteHilfeAm, c.heute, { zukunftErlaubt: false });
     if (p && p !== "datumLeer") f.push(fehler("ersteHilfeAm", M[p]));
     return f;
+  },
+
+  // Die Größen für die Trainerausstattung sind freiwillig: Jede ist leer (keine Angabe) oder eine Größe aus GROESSEN. Alles andere kann das
+  // Auswahlfeld nicht erzeugen und ist ein veränderter Wert: Fehler am Feld des Artikels, nichts davon geht je in eine Datei.
+  ausstattung(a) {
+    const g = a.ausstattung && typeof a.ausstattung === "object" ? a.ausstattung : {};
+    return AUSSTATTUNG_ARTIKEL.filter((artikel) => !groesseGueltig(g[artikel])).map((artikel) => fehler("ausstattung." + artikel, M.ausstattungGroesse));
   },
 
   // Das Passfoto ist freiwillig (die Checkliste des Vereins nennt es, es ist aber nicht zwingend nötig).

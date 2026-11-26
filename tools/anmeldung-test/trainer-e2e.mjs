@@ -9,14 +9,15 @@
 // zweiter Durchgang mit dem echten Modul (mit --ohne-echt übersprungen).
 //
 // Geprüft wird (Nummern wie in den Akzeptanzkriterien von T1):
-//   [2]  alle 13 Bildschirme von „Code“ bis „Fertig“, zurück bis „Code“, „Ändern“ (Name) von „Prüfen“ aus und danach wieder in der
+//   [2]  alle 14 Bildschirme von „Code“ bis „Fertig“, zurück bis „Code“, „Ändern“ (Name) von „Prüfen“ aus und danach wieder in der
 //        Reihenfolge weiter; die Abschnittszeile je Bildschirm; Kopf, Lead, Leiste
 //   [3]  Zugangsschutz: ohne Code nur die Code-Seite (die übrigen Bildschirme sind nicht im Dokument), leer, falsch, richtig in jeder
 //        Schreibweise, ?code=richtig, ?code=falsch, keine Adresse an der Code-Abfrage vorbei, leere Prüfwerteliste
 //   [4]  Prüfregeln: Fehlerfälle je Seite im Browser (Meldung, „Weiter“ blockiert, gültige Eingabe geht weiter) und trainer-regeln.js
 //        einzeln in Node
-//   [5]  jede verbindliche Zeichenkette der 13 Bildschirme steht im sichtbaren Text (ohne die Stellen für Einsichtnehmende)
+//   [5]  jede verbindliche Zeichenkette der 14 Bildschirme steht im sichtbaren Text (ohne die Stellen für Einsichtnehmende)
 //   [6]  Einsichtnehmende aus der Konfiguration: eine Person (Standardfall), zwei, drei, keine; Wortlaut auf Bildschirm 10, 12 und 13
+//        (Bildschirm-Nummern wie im Entwurf ap1/: Der Bildschirm „ausstattung“ vom 26.11.2026 heißt dort 06a, die übrigen Nummern bleiben)
 //   [7]  Handy (390 px, Faktor 2): Bildschirmfotos, scrollWidth, Tippflächen, Eingabeschrift, Konsole, Netz, axe-core
 //   [8]  Foto (Datei, verkleinert, JPG, Vorschau, ersetzen, Fehler) und Unterschrift (Maus, Touch, löschen; Pixelprüfung)
 //   [9]  Ende: Löschen, Datei erstellen (Aufruf von erzeugeDateien), Name und Beschreibung der einen Datei, Teilen, Herunterladen, Vorschau,
@@ -24,6 +25,8 @@
 //        keine weitere) und scheitert es (Antwort 503), steht der Text „Ladefehler“ da (T1b: Safari merkt sich ein gescheitertes import())
 //   [11] Importe: alle eigenen Module statisch (auch trainer-pdf.js), einziges import() der Rückfall für die Schrift im Lader, der
 //        Importgraph ab trainer.js ist geschlossen (keine Verweise auf andere Ordner)
+//   [13] Trainerausstattung (26.11.2026): der freiwillige Bildschirm „Welche Größen hast du?“ zwischen „erfahrung“ und „foto“: leer überspringen, vier
+//        Auswahlfelder mit S bis 3XL, Auswahl auf „Prüfen“ und in der Datei, „Alle Angaben löschen“, geänderter Wert wird abgelehnt, axe-core und Handy
 //
 // Aufruf: node tools/anmeldung-test/trainer-e2e.mjs [--ausgabe=<Ordner>] [--echt | --ohne-echt] [--nur-regeln] [--ohne-bilder] [--server]
 //   --ausgabe     Ordner für Bildschirmfotos (bilder/NN-<name>-390.png) und das Protokoll (ergebnis.txt); Standard:
@@ -107,12 +110,16 @@ const BEISPIEL = {
   notfall: { name: "Erika Mustermann", beziehung: "Partnerin", telefon: "0170 7654321" },
   erfahrung: "Drei Jahre Jugendtrainer bei einem anderen Verein (E-Jugend).",
   ersteHilfeAm: "2025-05-12",
+  // Trainerausstattung (freiwillig, 26.11.2026): vier verschiedene Größen, damit die Zuordnung Artikel › Größe prüfbar ist
+  ausstattung: { shirt: "M", pullover: "L", anzug: "XL", regenjacke: "XXL" },
   foto: true,
   kodexGelesen: true,
   selbstauskunft: true,
   zeugnis: "beantragen",
   satzung: true,
 };
+// dieselben Angaben ohne Größen: Die Seite überspringen (vier leere Größen, so liefert sie es)
+const OHNE_GROESSEN = { shirt: "", pullover: "", anzug: "", regenjacke: "" };
 
 const MANNSCHAFTEN_FUSSBALL = ["G-Jugend (Bambinis)", "F1-Jugend", "F2-Jugend", "E1-Jugend", "E2-Jugend", "E3-Jugend", "D1-Jugend", "D2-Jugend", "D3-Jugend", "A-Jugend", "1. Herrenmannschaft", "Soma (Sondermannschaft)"];
 const GRUPPEN_KARNEVAL = ["Kinderprinzenpaar-Garde", "Funkengarde Beispiel"];
@@ -176,13 +183,15 @@ const VARIANTEN = {
   }),
 };
 
-// ---------- Soll-Texte der 13 Bildschirme ----------
-// Verbindliche Zeichenketten aus ap1/AUFTRAG.md (Abschnitt „Verbindliche Texte der 13 Bildschirme“, ausgelesen mit der Logik von ap1/pruefen.mjs).
+// ---------- Soll-Texte der 14 Bildschirme ----------
+// Verbindliche Zeichenketten aus ap1/AUFTRAG.md (Abschnitt „Verbindliche Texte der 13 Bildschirme“, ausgelesen mit der Logik von ap1/pruefen.mjs), dazu
+// seit 26.11.2026 die des Bildschirms „ausstattung“ (06a) und der vierte Punkt unter „Gut zu wissen“ auf „start“ (Wortlaut aus dem Auftrag vom 26.11.2026).
 // Ohne die Stellen für Einsichtnehmende (Bildschirm 10 Punkt 4, 12 „Das solltest du wissen“, 13 „So geht es weiter“): Sie stehen unter [6].
+// Die Nummern 10, 12 und 13 sind die des Entwurfs (zeugnis, pruefen, fertig), nicht die Stelle in der Reihenfolge.
 
-const SCHRITTE = ["code", "start", "person", "einsatz", "notfall", "erfahrung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften", "pruefen", "fertig"];
+const SCHRITTE = ["code", "start", "person", "einsatz", "notfall", "erfahrung", "ausstattung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften", "pruefen", "fertig"];
 const nn = (schritt) => String(SCHRITTE.indexOf(schritt) + 1).padStart(2, "0");
-const ABSCHNITT_VON = { person: "du", einsatz: "einsatz", notfall: "einsatz", erfahrung: "einsatz", foto: "unterlagen", kodex: "unterlagen", selbstauskunft: "unterlagen", zeugnis: "zeugnis", unterschriften: "unterschrift", pruefen: "fertig", fertig: "fertig" };
+const ABSCHNITT_VON = { person: "du", einsatz: "einsatz", notfall: "einsatz", erfahrung: "einsatz", ausstattung: "einsatz", foto: "unterlagen", kodex: "unterlagen", selbstauskunft: "unterlagen", zeugnis: "zeugnis", unterschriften: "unterschrift", pruefen: "fertig", fertig: "fertig" };
 const ABSCHNITT_TEXTE = ["Du", "Einsatz", "Unterlagen", "Führungszeugnis", "Unterschrift", "Fertig"];
 const VOLL = ["code", "start", "fertig"];
 
@@ -212,6 +221,7 @@ const SOLL = {
     "Im ersten Monat (Schnupperphase) bist du nie allein auf dem Platz: Ein gemeldeter Trainer des Vereins ist immer dabei.",
     "Trainer und Betreuer sind beitragsfrei Mitglied.",
     "Spätestens nach der Schnupperphase braucht der Verein deine Unterlagen.",
+    "Es gibt auch Trainerausstattung vom Verein: Shirt, Pullover, Anzug und Regenjacke. Dafür trägst du später deine Größen ein.",
     "Los geht’s",
   ],
   person: [
@@ -259,6 +269,18 @@ const SOLL = {
     "Erfahrung und Qualifikationen",
     "Zum Beispiel Trainerlizenz, frühere Vereine oder Fortbildungen.",
     "Erste-Hilfe-Kurs absolviert am (freiwillig)",
+    "Weiter",
+  ],
+  // neuer Bildschirm 06a (26.11.2026): Titel, Hinweis, vier Beschriftungen (ohne „(freiwillig)“: Der Hinweis sagt es für die Seite), Zeile unter den Feldern; die
+  // gewählten Größen stehen als Werte der Auswahlfelder im Text (M, L, XL, XXL)
+  ausstattung: [
+    "Welche Größen hast du?",
+    "Das ist freiwillig. Du kannst diese Seite überspringen. Die Größen brauchen wir für die Trainerausstattung des Vereins: Shirt, Pullover, Anzug und Regenjacke.",
+    "Shirt",
+    "Pullover",
+    "Anzug",
+    "Regenjacke",
+    "Weißt du eine Größe nicht? Lass das Feld leer.",
     "Weiter",
   ],
   foto: [
@@ -340,6 +362,8 @@ const SOLL = {
     "Notfallkontakt",
     "Erfahrung und Qualifikationen",
     "Erste-Hilfe-Kurs",
+    "Trainerausstattung",
+    "Größen",
     "Unterlagen",
     "Passfoto",
     "Foto ist gespeichert",
@@ -370,6 +394,7 @@ const SOLL = {
     "Erika Mustermann, Partnerin, 0170 7654321",
     "Drei Jahre Jugendtrainer bei einem anderen Verein (E-Jugend).",
     "Absolviert am 12.05.2025",
+    "Shirt: M, Pullover: L, Anzug: XL, Regenjacke: XXL",
   ],
   fertig: [
     "Dein Paket ist fertig",
@@ -441,7 +466,7 @@ async function pruefeRegelnInNode() {
   };
   const M = T.fehler;
   // gültige Beispieldaten: keine Fehler auf jeder Seite
-  for (const s of ["person", "einsatz", "notfall", "erfahrung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften", "pruefen", "fertig", "start"]) fall("gültig " + s, s, null, []);
+  for (const s of ["person", "einsatz", "notfall", "erfahrung", "ausstattung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften", "pruefen", "fertig", "start"]) fall("gültig " + s, s, null, []);
   // person
   fall("person: unter 18 (heute minus 17 Jahre)", "person", (a) => { a.geburtsdatum = "2009-11-24"; }, [{ feld: "geburtsdatum", meldung: M.unter18 }]);
   fall("person: genau 18 am Stichtag", "person", (a) => { a.geburtsdatum = "2008-11-23"; }, []);
@@ -486,6 +511,17 @@ async function pruefeRegelnInNode() {
   fall("erfahrung: Kursdatum gibt es nicht", "erfahrung", (a) => { a.ersteHilfeAm = null; }, [{ feld: "ersteHilfeAm", meldung: M.datumUngueltig }], () => ({ roh: { ersteHilfeAm: { t: "31", m: "02", j: "2025" } } }));
   fall("erfahrung: Kursdatum ganz leer im Rohtext ist in Ordnung", "erfahrung", (a) => { a.ersteHilfeAm = null; }, [], () => ({ roh: { ersteHilfeAm: { t: "", m: "", j: "" } } }));
   fall("erfahrung: Zeichen außerhalb der Schrift im Textfeld", "erfahrung", (a) => { a.erfahrung = "Тренер"; }, [{ feld: "erfahrung", meldung: M.lateinischText }]);
+  // ausstattung: alles freiwillig (26.11.2026); jede Größe ist leer oder eine aus S, M, L, XL, XXL, 3XL, sonst ein Fehler am Feld des Artikels
+  fall("ausstattung: alles leer ist in Ordnung (freiwillig)", "ausstattung", (a) => { a.ausstattung = { ...OHNE_GROESSEN }; }, []);
+  fall("ausstattung: nur eine Größe", "ausstattung", (a) => { a.ausstattung = { ...OHNE_GROESSEN, anzug: "3XL" }; }, []);
+  fall("ausstattung: das Feld fehlt ganz (alte Antworten)", "ausstattung", (a) => { delete a.ausstattung; }, []);
+  fall("ausstattung: alle vier Größen", "ausstattung", (a) => { a.ausstattung = { shirt: "S", pullover: "M", anzug: "L", regenjacke: "XL" }; }, []);
+  for (const g of ["S", "M", "L", "XL", "XXL", "3XL"]) fall("ausstattung: Größe " + g, "ausstattung", (a) => { a.ausstattung = { shirt: g, pullover: g, anzug: g, regenjacke: g }; }, []);
+  fall("ausstattung: XXXL gibt es nicht", "ausstattung", (a) => { a.ausstattung = { ...OHNE_GROESSEN, shirt: "XXXL" }; }, [{ feld: "ausstattung.shirt", meldung: M.ausstattungGroesse }]);
+  fall("ausstattung: Text mit Anhang (M; DROP)", "ausstattung", (a) => { a.ausstattung = { ...OHNE_GROESSEN, pullover: "M; DROP" }; }, [{ feld: "ausstattung.pullover", meldung: M.ausstattungGroesse }]);
+  fall("ausstattung: Kleinbuchstabe und Leerzeichen zählen nicht", "ausstattung", (a) => { a.ausstattung = { shirt: "m", pullover: " M", anzug: "M ", regenjacke: "xl" }; }, [{ feld: "ausstattung.shirt", meldung: M.ausstattungGroesse }, { feld: "ausstattung.pullover", meldung: M.ausstattungGroesse }, { feld: "ausstattung.anzug", meldung: M.ausstattungGroesse }, { feld: "ausstattung.regenjacke", meldung: M.ausstattungGroesse }]);
+  fall("ausstattung: eine Zahl und eine Liste statt Text", "ausstattung", (a) => { a.ausstattung = { ...OHNE_GROESSEN, anzug: 5, regenjacke: ["M"] }; }, [{ feld: "ausstattung.anzug", meldung: M.ausstattungGroesse }, { feld: "ausstattung.regenjacke", meldung: M.ausstattungGroesse }]);
+  fall("ausstattung: eine gültige und eine falsche Größe (nur die falsche wird gemeldet)", "ausstattung", (a) => { a.ausstattung = { ...OHNE_GROESSEN, shirt: "M", regenjacke: "4XL" }; }, [{ feld: "ausstattung.regenjacke", meldung: M.ausstattungGroesse }]);
   // foto: freiwillig (25.11.2026), es gibt keine Regel mehr
   fall("foto: kein Foto ist in Ordnung (freiwillig)", "foto", (a, c) => { c.medien.foto = null; }, []);
   fall("foto: leere Bytes sind in Ordnung (freiwillig)", "foto", (a, c) => { c.medien.foto = new Uint8Array(0); }, []);
@@ -538,7 +574,12 @@ async function pruefeRegelnInNode() {
     ["datumProblem in Ordnung", R.datumProblem({ t: "14", m: "03", j: "1988" }, "1988-03-14", HEUTE, { zukunftErlaubt: false }), null],
     ["datumProblem gespeicherter Wert ohne Rohtext", R.datumProblem(undefined, "1988-03-14", HEUTE, { zukunftErlaubt: false }), null],
     ["Konstanten: Mindestalter 18, höchstens 3 Monate voraus", [R.MIN_ALTER, R.MAX_MONATE_VORAUS], [18, 3]],
-    ["PRUEF_SEITEN in der Reihenfolge des Ablaufs", R.PRUEF_SEITEN, ["person", "einsatz", "notfall", "erfahrung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften"]],
+    ["PRUEF_SEITEN in der Reihenfolge des Ablaufs", R.PRUEF_SEITEN, ["person", "einsatz", "notfall", "erfahrung", "ausstattung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften"]],
+    ["GROESSEN: S, M, L, XL, XXL, 3XL (wie data/bestellung.json › groessen › erwachsene)", R.GROESSEN, ["S", "M", "L", "XL", "XXL", "3XL"]],
+    ["AUSSTATTUNG_ARTIKEL: Shirt, Pullover, Anzug, Regenjacke", R.AUSSTATTUNG_ARTIKEL, ["shirt", "pullover", "anzug", "regenjacke"]],
+    ["neueAntworten: vier leere Größen", R.neueAntworten().ausstattung, OHNE_GROESSEN],
+    ["groesseGueltig: leer, fehlend und die sechs Größen", [R.groesseGueltig(""), R.groesseGueltig(undefined), R.groesseGueltig(null), ...["S", "M", "L", "XL", "XXL", "3XL"].map((g) => R.groesseGueltig(g))], [true, true, true, true, true, true, true, true, true]],
+    ["groesseGueltig: falsche Werte (XXXL, m,  M, M;, 4XL, 5, Liste, Objekt)", ["XXXL", "m", " M", "M;", "4XL", 5, ["M"], {}].map((w) => R.groesseGueltig(w)), [false, false, false, false, false, false, false, false]],
     ["mannschaftenFuer Karneval", R.mannschaftenFuer(konfig, "karneval"), GRUPPEN_KARNEVAL],
     ["mannschaftenFuer ohne Konfiguration", R.mannschaftenFuer(null, "fussball"), []],
     ["abteilungenFuer ohne Konfiguration (beide)", R.abteilungenFuer(null), ["fussball", "karneval"]],
@@ -551,6 +592,8 @@ async function pruefeRegelnInNode() {
     ["ersteOffeneSeite (Notfall leer ist kein Fehler)", (() => { const a = gut(); a.notfall = { name: "", beziehung: "", telefon: "" }; return R.ersteOffeneSeite(a, ctxVoll()); })(), null],
     ["ersteOffeneSeite (Nachname leer)", (() => { const a = gut(); a.nachname = ""; const r = R.ersteOffeneSeite(a, ctxVoll()); return r && r.seite; })(), "person"],
     ["ersteOffeneSeite (nur Notfallname, Rest fehlt)", (() => { const a = gut(); a.notfall = { name: "Erika", beziehung: "", telefon: "" }; const r = R.ersteOffeneSeite(a, ctxVoll()); return r && r.seite; })(), "notfall"],
+    ["ersteOffeneSeite (Größen leer sind kein Fehler)", (() => { const a = gut(); a.ausstattung = { ...OHNE_GROESSEN }; return R.ersteOffeneSeite(a, ctxVoll()); })(), null],
+    ["ersteOffeneSeite (falsche Größe: Seite ausstattung, Feld des Artikels)", (() => { const a = gut(); a.ausstattung = { ...OHNE_GROESSEN, anzug: "XXXL" }; const r = R.ersteOffeneSeite(a, ctxVoll()); return r && [r.seite, r.fehler.map((f) => f.feld)]; })(), ["ausstattung", ["ausstattung.anzug"]]],
   ];
   const rechenFehler = rechnen.filter(([, ist, soll]) => !gleich(ist, soll)).map(([n, ist, soll]) => `${n}: ${JSON.stringify(ist)} statt ${JSON.stringify(soll)}`);
   return { faelle, fehlt, rechnen: rechnen.length, rechenFehler };
@@ -936,6 +979,9 @@ async function fuelle(page, s, d, art) {
     // freiwillig: ein Textfeld und das Datum des Erste-Hilfe-Kurses
     if (d.erfahrung) await text(page, "erfahrung", d.erfahrung);
     if (d.ersteHilfeAm) await datum(page, "ersteHilfeAm", d.ersteHilfeAm);
+  } else if (s === "ausstattung") {
+    // freiwillig: nur, was in d.ausstattung steht (leer = „Bitte wählen“ bleibt stehen)
+    for (const artikel of ["shirt", "pullover", "anzug", "regenjacke"]) if (d.ausstattung && d.ausstattung[artikel]) await page.select(feldSel("ausstattung." + artikel), d.ausstattung[artikel]);
   } else if (s === "foto") {
     // freiwillig: nur mit d.foto
     if (d.foto) {
@@ -957,7 +1003,7 @@ async function fuelle(page, s, d, art) {
 
 // Von „start“ bis „pruefen“ mit den Beispieldaten (jede Seite lesen, füllen, „Weiter“)
 async function bisPruefen(page, d, art) {
-  for (const s of SCHRITTE.slice(1, 11)) {
+  for (const s of SCHRITTE.slice(1, SCHRITTE.indexOf("pruefen"))) {
     await warteSchritt(page, s);
     await fuelle(page, s, d || BEISPIEL, art || "maus");
     await weiter(page, SCHRITTE[SCHRITTE.indexOf(s) + 1]);
@@ -1098,7 +1144,7 @@ async function jpgInfo(page, bytes) {
   }, bytes);
 }
 
-// ---------- Hauptlauf: alle 13 Bildschirme mit Messungen ----------
+// ---------- Hauptlauf: alle 14 Bildschirme mit Messungen ----------
 
 async function hauptlauf(browser, ergebnis) {
   const page = await neueSeite(browser, "standard", "");
@@ -1468,7 +1514,7 @@ async function haupt() {
     }
 
     // =====================================================================
-    // [2] [5] [7] Hauptlauf mit allen 13 Bildschirmen, dann zurück, „Ändern“
+    // [2] [5] [7] Hauptlauf mit allen 14 Bildschirmen, dann zurück, „Ändern“
     // =====================================================================
     const haupt1 = {};
     const hp = await hauptlauf(browser, haupt1);
@@ -1480,8 +1526,8 @@ async function haupt() {
     const aufruf = erstellt && erstellt.erzeugt && erstellt.erzeugt[0];
 
     kriterium(5, "Texte vollständig: jede verbindliche Zeichenkette ist im sichtbaren Text des Bildschirms", haupt1.textFehlt.length === 0 && haupt1.kopfFehler.length === 0 && hilfeOk,
-      `${haupt1.sollAnzahl} Zeichenketten (aus ap1/AUFTRAG.md, ohne die Stellen für Einsichtnehmende) auf 13 Bildschirmen geprüft: ${haupt1.textFehlt.length} fehlende${haupt1.textFehlt.length ? "\n" + haupt1.textFehlt.join("\n") : ""}\n` +
-      `Kopf (Überschrift, Lead nur auf code/start/fertig, kompakt sonst), Leiste (Zurück nie auf code, Hilfe), Abschnittszeile „Du · Einsatz · Unterlagen · Führungszeugnis · Unterschrift · Fertig“ mit richtigem aktivem Abschnitt, keine Sprachleiste: ${haupt1.kopfFehler.length === 0 ? "stimmt auf allen 13" : "\n" + haupt1.kopfFehler.join("\n")}\n` +
+      `${haupt1.sollAnzahl} Zeichenketten (aus ap1/AUFTRAG.md, ohne die Stellen für Einsichtnehmende) auf ${SCHRITTE.length} Bildschirmen geprüft: ${haupt1.textFehlt.length} fehlende${haupt1.textFehlt.length ? "\n" + haupt1.textFehlt.join("\n") : ""}\n` +
+      `Kopf (Überschrift, Lead nur auf code/start/fertig, kompakt sonst), Leiste (Zurück nie auf code, Hilfe), Abschnittszeile „Du · Einsatz · Unterlagen · Führungszeugnis · Unterschrift · Fertig“ mit richtigem aktivem Abschnitt, keine Sprachleiste: ${haupt1.kopfFehler.length === 0 ? "stimmt auf allen " + SCHRITTE.length : "\n" + haupt1.kopfFehler.join("\n")}\n` +
       `Hilfe: ${haupt1.hilfe ? "„" + haupt1.hilfe.text + "“ (aria-expanded " + haupt1.hilfe.expanded + "), schließt wieder: " + haupt1.hilfeZu : "nicht geprüft"}`);
 
     // ---- [2] Reihenfolge, zurück, Ändern ----
@@ -1507,12 +1553,13 @@ async function haupt() {
       const imFeld = await hp.$eval(feldSel("zugang.code"), (e) => e.value);
       if (normalisiere(imFeld) !== normalisiere(TESTCODE)) fehler.push("Code nach „Zurück“ nicht mehr im Feld: " + imFeld);
       const wieder = [await schritt(hp)];
-      for (let i = 1; i <= 11; i++) {
+      const iPruefen = SCHRITTE.indexOf("pruefen");
+      for (let i = 1; i <= iPruefen; i++) {
         await weiter(hp, SCHRITTE[i]);
         wieder.push(await schritt(hp));
       }
-      if (!gleich(wieder, SCHRITTE.slice(0, 12))) fehler.push("wieder vorwärts: " + wieder.join(" > "));
-      belege.push("danach wieder Weiter ohne neue Eingabe bis „pruefen“: " + (gleich(wieder, SCHRITTE.slice(0, 12)) ? "ja (Angaben blieben erhalten)" : wieder.join(" > ")));
+      if (!gleich(wieder, SCHRITTE.slice(0, iPruefen + 1))) fehler.push("wieder vorwärts: " + wieder.join(" > "));
+      belege.push("danach wieder Weiter ohne neue Eingabe bis „pruefen“: " + (gleich(wieder, SCHRITTE.slice(0, iPruefen + 1)) ? "ja (Angaben blieben erhalten)" : wieder.join(" > ")));
       // Ändern (Name) → Du, danach in der Reihenfolge weiter
       const erstes = await hp.$eval('#anmeldung .anm-pruefzeile [data-aktion="aendern"]', (e) => ({ label: e.getAttribute("aria-label"), zeile: e.closest(".anm-pruefzeile").querySelector("dt").textContent }));
       await hp.click('#anmeldung .anm-pruefzeile [data-aktion="aendern"]');
@@ -1523,7 +1570,8 @@ async function haupt() {
       const nachWeiter = await schritt(hp);
       await weiter(hp, "notfall");
       await weiter(hp, "erfahrung");
-      belege.push(`„Ändern“ (${erstes.zeile}, Beschriftung „${erstes.label}“) von „pruefen“ › ${nachAendern} (Abschnitt ${aktivAendern}, Vorname noch „${vorname}“); „Weiter“ › ${nachWeiter} › notfall › erfahrung (in der Reihenfolge)`);
+      await weiter(hp, "ausstattung");
+      belege.push(`„Ändern“ (${erstes.zeile}, Beschriftung „${erstes.label}“) von „pruefen“ › ${nachAendern} (Abschnitt ${aktivAendern}, Vorname noch „${vorname}“); „Weiter“ › ${nachWeiter} › notfall › erfahrung › ausstattung (in der Reihenfolge)`);
       if (nachAendern !== "person" || aktivAendern !== "du" || vorname !== "Max" || nachWeiter !== "einsatz") fehler.push(`Ändern: ${nachAendern}, ${aktivAendern}, ${vorname}, ${nachWeiter}`);
       // jede Zeile der Zusammenfassung führt zu ihrer Seite
       for (const s of ["foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften"]) await weiter(hp, s);
@@ -1543,24 +1591,24 @@ async function haupt() {
         await hp.click('[data-aktion="zurueck"]');
         await warteSchritt(hp, "pruefen");
       }
-      const erwartet = ["person", "person", "person", "person", "person", "einsatz", "einsatz", "einsatz", "einsatz", "einsatz", "notfall", "erfahrung", "erfahrung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften", "unterschriften"];
+      const erwartet = ["person", "person", "person", "person", "person", "einsatz", "einsatz", "einsatz", "einsatz", "einsatz", "notfall", "erfahrung", "erfahrung", "ausstattung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften", "unterschriften"];
       const istZiele = ziele.map((z) => z.split(" › ")[1]);
       if (!gleich(istZiele, erwartet)) fehler.push("Ändern-Ziele: " + ziele.join("; "));
       belege.push(`jede Zeile der Zusammenfassung hat „Ändern“ (${anzahl} Zeilen) und führt zur passenden Seite: ${ziele.map((z) => z.split(" › ")[1]).join(", ")}`);
-      kriterium(2, "13 Bildschirme durchlaufbar: Weiter, Zurück bis Code, Ändern und wieder in der Reihenfolge weiter", fehler.length === 0, belege.join("\n") + (fehler.length ? "\nFEHLER:\n" + fehler.join("\n") : ""));
+      kriterium(2, "14 Bildschirme durchlaufbar: Weiter, Zurück bis Code, Ändern und wieder in der Reihenfolge weiter", fehler.length === 0, belege.join("\n") + (fehler.length ? "\nFEHLER:\n" + fehler.join("\n") : ""));
     }
 
     // ---- [7] Aussehen und Handy ----
     {
       const fehler = [];
-      const bildOk = OHNE_BILDER || (haupt1.bilder.length === 13 && haupt1.bilder.every((b) => b.breite === 780));
+      const bildOk = OHNE_BILDER || (haupt1.bilder.length === SCHRITTE.length && haupt1.bilder.every((b) => b.breite === 780));
       if (!bildOk) fehler.push("Bildschirmfotos: " + JSON.stringify(haupt1.bilder));
       kriterium(7, "Aussehen und Handy (390 px, Faktor 2): Bildschirmfotos, Überlauf, Tippflächen, Schrift, Barrierefreiheit",
         bildOk && haupt1.ueberlauf.length === 0 && haupt1.tippFehler.length === 0 && haupt1.axeFehler.length === 0,
         (OHNE_BILDER ? "Bildschirmfotos übersprungen (--ohne-bilder)\n" : `Bildschirmfotos: ${haupt1.bilder.length} in ${path.join(AUSGABE, "bilder")} (${haupt1.bilder.map((b) => b.datei + " " + b.breite + "×" + b.hoehe).join(", ")})\n`) +
         `scrollWidth je Bildschirm: ${haupt1.scrollWidth.join(", ")} (Grenze 390)${haupt1.ueberlauf.length ? " – ÜBERLAUF: " + haupt1.ueberlauf.join("; ") : ""}\n` +
-        `Knöpfe, Karten, Eingaben mindestens 44 px hoch und Eingabeschrift mindestens 16 px: ${haupt1.tippFehler.length === 0 ? "ja, auf allen 13" : "NEIN\n" + haupt1.tippFehler.join("\n")}\n` +
-        `axe-core (Standardregeln): ${haupt1.axeFehler.length === 0 ? "0 Verstöße auf allen 13 Bildschirmen" : "\n" + haupt1.axeFehler.join("\n")}`);
+        `Knöpfe, Karten, Eingaben mindestens 44 px hoch und Eingabeschrift mindestens 16 px: ${haupt1.tippFehler.length === 0 ? "ja, auf allen " + SCHRITTE.length : "NEIN\n" + haupt1.tippFehler.join("\n")}\n` +
+        `axe-core (Standardregeln): ${haupt1.axeFehler.length === 0 ? "0 Verstöße auf allen " + SCHRITTE.length + " Bildschirmen" : "\n" + haupt1.axeFehler.join("\n")}`);
     }
 
     // =====================================================================
@@ -1692,7 +1740,7 @@ async function haupt() {
       await page.click('#anmeldung .anm-pruefzeile [data-aktion="aendern"]');
       await warteSchritt(page, "person");
       await text(page, "vorname", "Moritz");
-      for (const s of ["einsatz", "notfall", "erfahrung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften", "pruefen"]) await weiter(page, s);
+      for (const s of ["einsatz", "notfall", "erfahrung", "ausstattung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften", "pruefen"]) await weiter(page, s);
       await weiter(page, "fertig");
       await page.waitForSelector('#anmeldung [data-status="fertig"]', { timeout: 8000 });
       const a4 = await attrappe(page);
@@ -1711,7 +1759,7 @@ async function haupt() {
       const belege = [];
       const page = await neueSeite(browser, "standard", "?code=" + TESTCODE);
       // bis zur Seite „foto“ mit den Beispieldaten
-      for (const s of ["start", "person", "einsatz", "notfall", "erfahrung"]) {
+      for (const s of ["start", "person", "einsatz", "notfall", "erfahrung", "ausstattung"]) {
         if (s !== "start") await fuelle(page, s, BEISPIEL);
         await weiter(page, SCHRITTE[SCHRITTE.indexOf(s) + 1]);
       }
@@ -1891,6 +1939,17 @@ async function haupt() {
       await datum(page, "ersteHilfeAm", "2027-05-12");
       await erwarte("erfahrung: Kursdatum in der Zukunft", "erfahrung", [["ersteHilfeAm", M.datumZukunft]]);
       await datum(page, "ersteHilfeAm", "2025-05-12");
+      await weiter(page, "ausstattung");
+      // ausstattung: alles freiwillig; ein geänderter Wert (hier ein untergeschobenes <option> mit „XXXL“) wird abgelehnt: Meldung am Feld und in der Liste
+      // oben, Feld markiert, „Weiter“ blockiert; mit einer gültigen Größe verschwindet die Meldung
+      await page.$eval(feldSel("ausstattung.shirt"), (e) => { const o = document.createElement("option"); o.value = "XXXL"; o.textContent = "XXXL"; e.append(o); });
+      await page.select(feldSel("ausstattung.shirt"), "XXXL");
+      await erwarte("ausstattung: Größe XXXL gibt es nicht", "ausstattung", [["ausstattung.shirt", M.ausstattungGroesse]]);
+      await page.select(feldSel("ausstattung.shirt"), "M");
+      await warte(100);
+      anz = await fehlerAnzeige(page);
+      if (anz.amFeld.length || anz.liste.length) fehler.push("Fehler zur Größe bleibt nach der Korrektur stehen: " + JSON.stringify(anz));
+      await page.select(feldSel("ausstattung.anzug"), "XL");
       await weiter(page, "foto");
       // foto: freiwillig, hier mit Foto (der Weg ohne Foto steht in den Läufen ohne freiwillige Angaben)
       const eingabe = await page.$('#anmeldung input[data-aktion="foto-machen"]');
@@ -1918,10 +1977,10 @@ async function haupt() {
       // Browsers nach „fertig“ springt, kommt nicht an: Die erste Seite mit einer Lücke öffnet mit ihren Meldungen.
       await weiter(page, "fertig");
       await page.waitForSelector('#anmeldung [data-status="fertig"]', { timeout: 8000 });
-      await page.evaluate(() => history.go(-10));
+      await page.evaluate(() => history.go(-11));
       await warteSchritt(page, "person");
       await text(page, "nachname", "");
-      await page.evaluate(() => history.go(10));
+      await page.evaluate(() => history.go(11));
       await warte(400);
       const nachVor = await schritt(page);
       const luecke = await fehlerAnzeige(page);
@@ -1939,6 +1998,133 @@ async function haupt() {
       belege.push(`${faelle} Fehlermeldungen im Browser (je Seite 1 bis 3; Meldung am Feld und in der Liste oben, Feld markiert, „Weiter“ blockiert, Meldung verschwindet nach der Korrektur) und ${node.faelle} Fälle in Node = ${alleFaelle} Prüfungen`);
       kriterium(4, "Prüfregeln im Browser: Fehlerfälle zeigen die Meldung und blockieren „Weiter“; gültige Eingaben lassen weiter", fehler.length === 0 && faelle >= 15, belege.join("\n") + (fehler.length ? "\nFEHLER:\n" + fehler.join("\n") : ""));
       await schliesseSeite(page);
+    }
+
+    // =====================================================================
+    // [13] Trainerausstattung (26.11.2026): freiwilliger Bildschirm „Welche Größen hast du?“ zwischen „erfahrung“ und „foto“
+    // =====================================================================
+    {
+      const fehler = [];
+      const belege = [];
+      const SEL = '#anmeldung select[data-pfad^="ausstattung."]';
+      const ARTIKEL = [["shirt", "Shirt"], ["pullover", "Pullover"], ["anzug", "Anzug"], ["regenjacke", "Regenjacke"]];
+      const OPTIONEN_SOLL = ["|Bitte wählen", "S|S", "M|M", "L|L", "XL|XL", "XXL|XXL", "3XL|3XL"];
+      // Füllt die Bildschirme ab „ab“ bis vor „bis“ (mit den Daten d, jede Seite lesen, füllen, „Weiter“) und wartet auf „bis“
+      const laufe = async (page, ab, bis, d) => {
+        for (const s of SCHRITTE.slice(SCHRITTE.indexOf(ab), SCHRITTE.indexOf(bis))) {
+          await warteSchritt(page, s);
+          await fuelle(page, s, d, "maus");
+          await weiter(page, SCHRITTE[SCHRITTE.indexOf(s) + 1]);
+        }
+        return warteSchritt(page, bis);
+      };
+      // Nur „Weiter“ (die Eingaben der früheren Läufe bleiben stehen; ein zweites Füllen würde Kästchen wieder abwählen)
+      const weiterBis = async (page, ab, bis) => {
+        for (const s of SCHRITTE.slice(SCHRITTE.indexOf(ab), SCHRITTE.indexOf(bis))) {
+          await warteSchritt(page, s);
+          await weiter(page, SCHRITTE[SCHRITTE.indexOf(s) + 1]);
+        }
+        return warteSchritt(page, bis);
+      };
+      // Zeile „Größen“ auf „Prüfen“: Wert, Überschrift des Bereichs, Beschriftung des Knopfes „Ändern“; mit klick: den Knopf drücken
+      const pruefZeile = (page, klick) => page.evaluate((k) => {
+        const z = Array.from(document.querySelectorAll("#anmeldung .anm-pruefzeile")).find((e) => e.querySelector("dt").textContent === "Größen");
+        if (!z) return null;
+        const r = { wert: z.querySelector(".anm-pruefzeile__wert").textContent.trim(), bereich: z.closest("section").querySelector("h3").textContent, aria: z.querySelector('[data-aktion="aendern"]').getAttribute("aria-label") };
+        if (k) z.querySelector('[data-aktion="aendern"]').click();
+        return r;
+      }, !!klick);
+      // Bild der Seite bei 375 px (ohne den Fuß der Testseite): das Element <main> mit Kopf, Leiste und Bildschirm
+      const bild375 = async (page, dateiname) => {
+        if (OHNE_BILDER) return;
+        await page.evaluate(() => { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); window.scrollTo(0, 0); });
+        fs.mkdirSync(path.join(AUSGABE, "bilder"), { recursive: true });
+        await (await page.$("#inhalt")).screenshot({ path: path.join(AUSGABE, "bilder", dateiname) });
+      };
+      const messe375 = async (page, name) => {
+        const m = { scroll: await page.evaluate(() => document.documentElement.scrollWidth), tipp: await messeTipp(page), axe: await messeAxe(page) };
+        if (m.scroll > 375) fehler.push(`${name} bei 375 px: seitliches Scrollen (scrollWidth ${m.scroll})`);
+        if (m.tipp.zu.length || m.tipp.klein.length) fehler.push(`${name} bei 375 px: Tippflächen oder Schrift zu klein: ${[...m.tipp.zu, ...m.tipp.klein].join("; ")}`);
+        if (m.axe.length) fehler.push(`${name} bei 375 px: axe-core ${m.axe.map((v) => `${v.id} (${v.impact}, ${v.knoten}×)`).join(", ")}`);
+        await bild375(page, `${nn("ausstattung")}-ausstattung-${name}-375.png`);
+        return `${name}: scrollWidth ${m.scroll} (Grenze 375), Tippflächen mindestens 44 px und Schrift mindestens 16 px: ${m.tipp.zu.length + m.tipp.klein.length === 0 ? "ja" : "NEIN"}, axe-core ${m.axe.length} Verstöße`;
+      };
+      const erzeugtVon = async (page) => (await attrappe(page)).erzeugt;
+
+      // ---- überspringen: Weiter ohne Auswahl, „Prüfen“ nennt „Nicht angegeben (freiwillig)“, die Datei bekommt vier leere Größen ----
+      const dLeer = { ...BEISPIEL, ausstattung: { ...OHNE_GROESSEN } };
+      const page = await neueSeite(browser, "standard", "?code=" + TESTCODE);
+      await page.setViewport({ width: 375, height: 812, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+      await warteSchritt(page, "start");
+      await bild375(page, `${nn("start")}-start-375.png`); // „Gut zu wissen“ mit dem vierten Punkt (Trainerausstattung)
+      await laufe(page, "start", "ausstattung", dLeer);
+      const aufbau = await page.evaluate((sel) => {
+        const felder = Array.from(document.querySelectorAll(sel)).map((e) => {
+          const label = document.querySelector('label[for="' + e.id + '"]');
+          return { pfad: e.getAttribute("data-pfad"), label: label ? label.textContent : null, wert: e.value, optionen: Array.from(e.options).map((o) => o.value + "|" + o.textContent), pflicht: e.getAttribute("aria-required"), tag: e.tagName };
+        });
+        const aktiv = document.querySelector(".anm-abschnitte__punkt[aria-current]");
+        return { felder, h2: document.querySelector("#anmeldung h2").textContent, abschnitt: aktiv ? aktiv.getAttribute("data-abschnitt") : null, fehler: Array.from(document.querySelectorAll("#anmeldung .anm-fehler")).filter((e) => e.getClientRects().length > 0).length };
+      }, SEL);
+      if (!gleich(aufbau.felder.map((f) => f.pfad), ARTIKEL.map(([k]) => "ausstattung." + k))) fehler.push("Felder: " + JSON.stringify(aufbau.felder.map((f) => f.pfad)));
+      if (!gleich(aufbau.felder.map((f) => f.label), ARTIKEL.map(([, n]) => n))) fehler.push("Beschriftungen: " + JSON.stringify(aufbau.felder.map((f) => f.label)) + " (ohne „(freiwillig)“: Der Hinweis sagt es für die ganze Seite)");
+      if (aufbau.felder.some((f) => f.tag !== "SELECT" || !gleich(f.optionen, OPTIONEN_SOLL) || f.wert !== "" || f.pflicht !== null)) fehler.push("Auswahlfelder: " + JSON.stringify(aufbau.felder));
+      if (aufbau.h2 !== "Welche Größen hast du?" || aufbau.abschnitt !== "einsatz" || aufbau.fehler !== 0) fehler.push("Kopf: " + JSON.stringify({ h2: aufbau.h2, abschnitt: aufbau.abschnitt, fehler: aufbau.fehler }));
+      belege.push(`Aufbau: Seite „${aufbau.h2}“ im Abschnitt „${aufbau.abschnitt}“, vier Auswahlfelder (${aufbau.felder.map((f) => f.label).join(", ")}), je „Bitte wählen“, S, M, L, XL, XXL, 3XL, alle leer, ohne aria-required (freiwillig), keine Meldung`);
+      belege.push("leere Seite, " + (await messe375(page, "leer")));
+      await weiter(page, "foto");
+      const anzSkip = await fehlerAnzeige(page);
+      if ((await schritt(page)) !== "foto" || anzSkip.amFeld.length || anzSkip.liste.length) fehler.push("Überspringen ohne Auswahl: " + (await schritt(page)) + " " + JSON.stringify(anzSkip));
+      await page.click('[data-aktion="zurueck"]');
+      await warteSchritt(page, "ausstattung");
+      const nochLeer = await page.$$eval(SEL, (l) => l.map((e) => e.value));
+      if (!gleich(nochLeer, ["", "", "", ""])) fehler.push("nach Weiter und Zurück sind die Felder nicht leer: " + JSON.stringify(nochLeer));
+      belege.push("ohne Auswahl: „Weiter“ geht ohne Fehlermeldung zu „foto“, „Zurück“ führt zur Seite mit vier leeren Feldern");
+      await laufe(page, "ausstattung", "pruefen", dLeer);
+      const leerZeile = await pruefZeile(page);
+      if (!leerZeile || leerZeile.wert !== "Nicht angegeben (freiwillig)" || leerZeile.bereich !== "Trainerausstattung" || leerZeile.aria !== "Größen ändern") fehler.push("Zeile „Größen“ ohne Auswahl: " + JSON.stringify(leerZeile));
+      await weiter(page, "fertig");
+      await page.waitForSelector('#anmeldung [data-status="fertig"]', { timeout: 8000 });
+      let erzeugt = await erzeugtVon(page);
+      if (erzeugt.length !== 1 || !gleich(erzeugt[0].antworten.ausstattung, OHNE_GROESSEN)) fehler.push("Datei ohne Auswahl: antworten.ausstattung " + JSON.stringify(erzeugt.map((e) => e.antworten.ausstattung)));
+      belege.push(`„Prüfen“: Bereich „${leerZeile && leerZeile.bereich}“, Zeile „Größen“ = „${leerZeile && leerZeile.wert}“, Knopf „${leerZeile && leerZeile.aria}“; erzeugeDateien bekommt vier leere Größen (${JSON.stringify(erzeugt[0] && erzeugt[0].antworten.ausstattung)})`);
+
+      // ---- Auswahl: „Ändern“ auf „Prüfen“ führt zur Seite; die Auswahl steht auf „Prüfen“ und in den Antworten für die Datei ----
+      await page.click('[data-aktion="zurueck"]');
+      await warteSchritt(page, "pruefen");
+      await pruefZeile(page, true);
+      if ((await warteSchritt(page, "ausstattung")) !== "ausstattung") fehler.push("„Ändern“ bei den Größen führt nicht zur Seite ausstattung");
+      for (const [k] of ARTIKEL) await page.select(feldSel("ausstattung." + k), BEISPIEL.ausstattung[k]);
+      const gewaehlt = await page.$$eval(SEL, (l) => l.map((e) => e.value));
+      if (!gleich(gewaehlt, ARTIKEL.map(([k]) => BEISPIEL.ausstattung[k]))) fehler.push("gewählte Größen: " + JSON.stringify(gewaehlt));
+      belege.push("mit Auswahl, " + (await messe375(page, "gewaehlt")));
+      await weiterBis(page, "ausstattung", "pruefen");
+      const mitZeile = await pruefZeile(page);
+      if (!mitZeile || mitZeile.wert !== "Shirt: M, Pullover: L, Anzug: XL, Regenjacke: XXL" || mitZeile.bereich !== "Trainerausstattung") fehler.push("Zeile „Größen“ mit Auswahl: " + JSON.stringify(mitZeile));
+      await bild375(page, `${nn("pruefen")}-pruefen-groessen-375.png`);
+      await weiter(page, "fertig");
+      await page.waitForSelector('#anmeldung [data-status="fertig"]', { timeout: 8000 });
+      erzeugt = await erzeugtVon(page);
+      if (erzeugt.length !== 2 || !gleich(erzeugt[1].antworten.ausstattung, BEISPIEL.ausstattung)) fehler.push("Datei mit Auswahl: " + erzeugt.length + " Aufrufe, antworten.ausstattung " + JSON.stringify(erzeugt.map((e) => e.antworten.ausstattung)));
+      belege.push(`Auswahl: „Prüfen“ zeigt „${mitZeile && mitZeile.wert}“; die Änderung macht die Datei ungültig (zweiter Aufruf von erzeugeDateien mit ${JSON.stringify(erzeugt[1] && erzeugt[1].antworten.ausstattung)})`);
+
+      // ---- eine Größe wieder auf „Bitte wählen“: leer, nicht mehr auf „Prüfen“, nicht in der Datei ----
+      await page.click('[data-aktion="zurueck"]');
+      await warteSchritt(page, "pruefen");
+      await pruefZeile(page, true);
+      await warteSchritt(page, "ausstattung");
+      await page.select(feldSel("ausstattung.shirt"), "");
+      const dEine = { ...BEISPIEL, ausstattung: { ...BEISPIEL.ausstattung, shirt: "" } };
+      await weiterBis(page, "ausstattung", "pruefen");
+      const teilZeile = await pruefZeile(page);
+      if (!teilZeile || teilZeile.wert !== "Pullover: L, Anzug: XL, Regenjacke: XXL") fehler.push("Zeile „Größen“ nach „Bitte wählen“ beim Shirt: " + JSON.stringify(teilZeile));
+      await weiter(page, "fertig");
+      await page.waitForSelector('#anmeldung [data-status="fertig"]', { timeout: 8000 });
+      erzeugt = await erzeugtVon(page);
+      if (erzeugt.length !== 3 || !gleich(erzeugt[2].antworten.ausstattung, dEine.ausstattung)) fehler.push("Datei nach „Bitte wählen“: " + JSON.stringify(erzeugt.map((e) => e.antworten.ausstattung)));
+      belege.push(`„Bitte wählen“ beim Shirt: „Prüfen“ zeigt „${teilZeile && teilZeile.wert}“, die Datei bekommt shirt = „${erzeugt[2] && erzeugt[2].antworten.ausstattung.shirt}“`);
+      await schliesseSeite(page);
+      kriterium(13, "Trainerausstattung: freiwilliger Bildschirm „Welche Größen hast du?“ (überspringen, Auswahl, „Prüfen“, Datei, Handy 375 px, axe-core)", fehler.length === 0, belege.join("\n") + (fehler.length ? "\nFEHLER:\n" + fehler.join("\n") : ""));
     }
 
     // =====================================================================
@@ -2059,6 +2245,10 @@ async function haupt() {
         await weiter(page, "erfahrung");
         leer.erfahrung = await page.evaluate(() => ({ text: document.querySelector('[data-pfad="erfahrung"]').value, datum: Array.from(document.querySelectorAll("#anmeldung input[data-pfad^='ersteHilfeAm.']")).map((e) => e.value) }));
         await fuelle(page, "erfahrung", BEISPIEL);
+        await weiter(page, "ausstattung");
+        // Trainerausstattung: nach „Alle Angaben löschen“ steht in jedem der vier Felder wieder „Bitte wählen“ (leerer Wert), und der Zustand ist leer
+        leer.ausstattung = await page.evaluate(() => Array.from(document.querySelectorAll('#anmeldung select[data-pfad^="ausstattung."]')).map((e) => e.value));
+        await fuelle(page, "ausstattung", BEISPIEL);
         await weiter(page, "foto");
         leer.foto = await page.evaluate(() => ({ vorschau: document.querySelector("#anmeldung .anm-vorschau-foto").getClientRects().length > 0 }));
         await fuelle(page, "foto", BEISPIEL);
@@ -2073,9 +2263,9 @@ async function haupt() {
         await fuelle(page, "zeugnis", BEISPIEL);
         await weiter(page, "unterschriften");
         leer.unterschrift = await page.evaluate(() => ({ stand: document.querySelector("#anmeldung .anm-unterschrift__stand").textContent, satzung: document.querySelector('[data-pfad="satzung"]').checked }));
-        const gesamtLeer = leer.person.length === 0 && leer.einsatz.gewaehlt === 0 && !leer.einsatz.auswahl && leer.einsatz.datum.every((v) => v === "") && leer.notfall === 0 && leer.erfahrung.text === "" && leer.erfahrung.datum.every((v) => v === "") && leer.foto.vorschau === false && leer.kodex === 0 && leer.selbst === 0 && leer.zeugnis === 0 && leer.unterschrift.stand === "Noch nicht unterschrieben" && !leer.unterschrift.satzung;
+        const gesamtLeer = leer.person.length === 0 && leer.einsatz.gewaehlt === 0 && !leer.einsatz.auswahl && leer.einsatz.datum.every((v) => v === "") && leer.notfall === 0 && leer.erfahrung.text === "" && leer.erfahrung.datum.every((v) => v === "") && leer.ausstattung.length === 4 && leer.ausstattung.every((v) => v === "") && leer.foto.vorschau === false && leer.kodex === 0 && leer.selbst === 0 && leer.zeugnis === 0 && leer.unterschrift.stand === "Noch nicht unterschrieben" && !leer.unterschrift.satzung;
         if (!gesamtLeer) fehler.push("nach dem Löschen nicht leer: " + JSON.stringify(leer));
-        belege.push(`„Alle Angaben löschen“: Rückfrage („Nein, behalten“ ändert nichts); „Ja, alles löschen“ › Bildschirm „start“ mit „${meldung}“; danach sind alle Felder leer (Person, Einsatz, Notfall, Erfahrung, Foto, Kodex, Selbstauskunft, Zeugnis, Unterschrift, Satzung), die Warnung vor dem Verlassen entfällt (vorher: ${mitDaten ? "ja" : "nein"}, frisch: ${frisch ? "ja" : "nein"})`);
+        belege.push(`„Alle Angaben löschen“: Rückfrage („Nein, behalten“ ändert nichts); „Ja, alles löschen“ › Bildschirm „start“ mit „${meldung}“; danach sind alle Felder leer (Person, Einsatz, Notfall, Erfahrung, die vier Größen der Trainerausstattung, Foto, Kodex, Selbstauskunft, Zeugnis, Unterschrift, Satzung), die Warnung vor dem Verlassen entfällt (vorher: ${mitDaten ? "ja" : "nein"}, frisch: ${frisch ? "ja" : "nein"})`);
         // Neues Foto und Unterschrift nach dem Löschen kommen frisch an (nicht die alten Bytes): komplett durchlaufen, Attrappe prüft
         await unterschreibe(page, "touch");
         await kreuze(page, "satzung");
@@ -2329,7 +2519,7 @@ async function haupt() {
         if (!feldArt.eingabe || feldArt.select || feldArt.label !== "Gruppe") fehler.push("Karneval ohne Gruppen: " + JSON.stringify(feldArt));
         if (hinweis !== "Die Schnupperphase dauert 2 Monate. Deine Unterlagen sind spätestens am 02.01.2027 fällig.") fehler.push("Schnupperphase 2 Monate: " + hinweis);
         belege.push(`Sonderfall: Karneval ohne Gruppen in der Konfiguration › freies Textfeld „${feldArt.label}“; zwei Monate Schnupperphase › „${hinweis}“`);
-        for (const s of ["einsatz", "notfall", "erfahrung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften"]) {
+        for (const s of ["einsatz", "notfall", "erfahrung", "ausstattung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften"]) {
           if (s !== "einsatz") {
             await warteSchritt(page, s);
             await fuelle(page, s, BEISPIEL);
@@ -2418,7 +2608,10 @@ async function haupt() {
           { name: "Karneval, Betreuer, ohne Erste-Hilfe-Angabe", d: { ...BEISPIEL, abteilung: "karneval", mannschaft: GRUPPEN_KARNEVAL[0], rolle: "betreuer", ersteHilfeAm: null }, antrag: true, suche: ["Betreuer", GRUPPEN_KARNEVAL[0]] },
           { name: "längste Eingaben (alle Felder an der Grenze)", d: BEISPIEL_LANG, antrag: true, suche: [] },
           // 25.11.2026: Passfoto, Notfallkontakt, Erfahrung, Erste-Hilfe-Kurs und Wochentage sind freiwillig; die Datei entsteht auch ohne sie
-          { name: "ohne alle freiwilligen Angaben", d: { ...BEISPIEL, notfall: { name: "", beziehung: "", telefon: "" }, erfahrung: "", ersteHilfeAm: null, tage: [], foto: false }, antrag: true, ohneFreiwillige: true, suche: ["Mustermann", "D3-Jugend", "Melanie Seipp"] },
+          // 26.11.2026: dazu gehören auch die Größen für die Trainerausstattung (vier leere Größen: die Seite wurde übersprungen)
+          { name: "ohne alle freiwilligen Angaben", d: { ...BEISPIEL, notfall: { name: "", beziehung: "", telefon: "" }, erfahrung: "", ersteHilfeAm: null, tage: [], foto: false, ausstattung: { ...OHNE_GROESSEN } }, antrag: true, ohneFreiwillige: true, suche: ["Mustermann", "D3-Jugend", "Melanie Seipp"] },
+          // nur zwei der vier Größen: Im Blatt stehen nur diese (Pullover und Regenjacke), nicht Shirt und Anzug
+          { name: "nur zwei Größen der Trainerausstattung (Pullover, Regenjacke)", d: { ...BEISPIEL, ausstattung: { shirt: "", pullover: "S", anzug: "", regenjacke: "3XL" } }, antrag: false, suche: ["Mustermann", "D3-Jugend"] },
         ];
         for (const f of faelle) {
           const page = await neueSeite(browser, "standard", "?code=" + TESTCODE, { ohneStubs: false });
@@ -2429,10 +2622,10 @@ async function haupt() {
           if (f.ohneFreiwillige) {
             // Zusammenfassung: Freiwilliges ohne Eintrag steht als „Nicht angegeben (freiwillig)“ da, das Pflichtige ist vollständig
             const zeilen = await page.$$eval("#anmeldung .anm-pruefzeile", (l) => l.map((e) => e.querySelector("dt").textContent.trim() + ": " + e.querySelector(".anm-pruefzeile__wert").textContent.trim()));
-            const sollZeilen = ["Notfallkontakt: Nicht angegeben (freiwillig)", "Erfahrung und Qualifikationen: Nicht angegeben (freiwillig)", "Erste-Hilfe-Kurs: Nicht angegeben (freiwillig)", "Passfoto: Nicht angegeben (freiwillig)"];
+            const sollZeilen = ["Notfallkontakt: Nicht angegeben (freiwillig)", "Erfahrung und Qualifikationen: Nicht angegeben (freiwillig)", "Erste-Hilfe-Kurs: Nicht angegeben (freiwillig)", "Größen: Nicht angegeben (freiwillig)", "Passfoto: Nicht angegeben (freiwillig)"];
             const fehlenZeilen = sollZeilen.filter((x) => !zeilen.includes(x));
             if (fehlenZeilen.length || zeilen.some((z) => /Noch offen/.test(z))) fehler.push(`${f.name}: Zusammenfassung ohne ${JSON.stringify(fehlenZeilen)} oder mit „Noch offen“: ${JSON.stringify(zeilen)}`);
-            belege.push(`  ${f.name}: Zusammenfassung zeigt die vier freiwilligen Angaben als „Nicht angegeben (freiwillig)“, nichts „Noch offen“`);
+            belege.push(`  ${f.name}: Zusammenfassung zeigt die fünf freiwilligen Angaben (auch die Größen) als „Nicht angegeben (freiwillig)“, nichts „Noch offen“`);
           }
           if (f.antrag === true && f.d === BEISPIEL) {
             // Antrag ansehen (Bildschirm 10) mit dem echten Modul
@@ -2507,7 +2700,17 @@ async function haupt() {
             if (f.d.foto && !/Passfoto von /.test(txt)) fehler.push(`${f.name}: Seite „Passfoto von …“ fehlt in der Datei`);
             if (!f.d.foto && (/Passfoto von /.test(txt) || !/Passfoto: nicht abgegeben \(freiwillig\)/.test(txt))) fehler.push(`${f.name}: ohne Foto darf die Seite „Passfoto von …“ nicht da sein, das Deckblatt muss „nicht abgegeben“ sagen`);
             if (f.ohneFreiwillige && (/Erika Mustermann|Partnerin/.test(txt) || /Ja, absolviert am:\s*\d/.test(txt))) fehler.push(`${f.name}: freiwillige Angaben stehen in der Datei, obwohl sie fehlen`);
-            textInfo = `Datei enthält ${f.suche.length - fehlen.length} von ${f.suche.length} gesuchten Angaben${mitBrief ? "; Brief mit Name und „Nr. 2 Buchst. a“" : "; kein Brief"}; ${f.d.foto ? "Passfoto-Seite" : "ohne Passfoto-Seite"}`;
+            // Trainerausstattung (26.11.2026): Mit Größen steht der Abschnitt auf dem Kontaktdatenblatt, mit genau den angegebenen Größen (Lesefluss, ohne -layout),
+            // ohne Größen steht er nicht; die Information zum Datenschutz nennt die Größen immer (der Text gilt für alle)
+            const roh = (spawnSync(pdftotext, ["-raw", path.join(ziel, paket), "-"], { encoding: "utf8" }).stdout || "").replace(/\s+/g, " ");
+            const gr = f.d.ausstattung || {};
+            const angegeben = [["shirt", "Shirt"], ["pullover", "Pullover"], ["anzug", "Anzug"], ["regenjacke", "Regenjacke"]].filter(([k]) => gr[k]);
+            const sollAbschnitt = angegeben.length ? "Trainerausstattung (freiwillig) " + angegeben.map(([k, n]) => n + " " + gr[k]).join(" ") : null;
+            if (sollAbschnitt && !roh.includes(sollAbschnitt)) fehler.push(`${f.name}: Kontaktdatenblatt ohne „${sollAbschnitt}“`);
+            if (!sollAbschnitt && /Trainerausstattung \(freiwillig\) (Shirt|Pullover|Anzug|Regenjacke)/.test(roh)) fehler.push(`${f.name}: Der Abschnitt Trainerausstattung steht in der Datei, obwohl keine Größe angegeben ist`);
+            // nur Angegebenes: Bei zwei Größen steht „… Pullover S Regenjacke 3XL“ unmittelbar hintereinander, ohne Shirt und Anzug dazwischen (sonst passte sollAbschnitt nicht)
+            if (!roh.includes("Größen für die Trainerausstattung (freiwillig): Größen für Shirt, Pullover, Anzug und Regenjacke.") || !roh.includes("Bestellung und Ausgabe der Trainerausstattung (freiwillig)")) fehler.push(`${f.name}: Die Information zum Datenschutz nennt die Größen für die Trainerausstattung nicht`);
+            textInfo = `Datei enthält ${f.suche.length - fehlen.length} von ${f.suche.length} gesuchten Angaben${mitBrief ? "; Brief mit Name und „Nr. 2 Buchst. a“" : "; kein Brief"}; ${f.d.foto ? "Passfoto-Seite" : "ohne Passfoto-Seite"}; ${sollAbschnitt ? "Kontaktdatenblatt: „" + sollAbschnitt + "“" : "ohne Abschnitt Trainerausstattung"}`;
           }
           belege.push(`${f.name}: ${anzeige.length} Dateien nach ${ms} ms (${anzeige.map((x) => x.split(" – ")[0]).join(", ")}); Anzeige = Rückgabe; Warnungen ${echt.warnungen.length} (Hinweiskasten ${warnkasten ? "ja" : "nein"}); heruntergeladen: ${gross.join(", ")}; ${textInfo}`);
           await schliesseSeite(page);

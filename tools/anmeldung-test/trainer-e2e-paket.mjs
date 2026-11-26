@@ -21,9 +21,10 @@
 //       im Dokument kein Name einer Person im Code der Module (die Einsichtnehmenden kommen aus der Konfiguration).
 //   [4] Zugang im Browser: ohne Code nur die Code-Seite (die übrigen Bildschirme sind nicht im Dokument), falscher Code mit Meldung, richtiger Code in
 //       anderer Schreibweise, Link mit ?code=richtig (Start ohne Code-Seite), Link mit ?code=falsch, leere Liste der Prüfwerte (bleibt zu).
-//   [5] Alle 13 Bildschirme mit den Beispieldaten (Fußball, Antrag auf Gebührenbefreiung) bis zu den fertigen Dateien: Namen, PDF (pdfinfo, pdftotext:
-//       „Nr. 2 Buchst. a“, „Einsicht bei <Name aus der Konfiguration>“), JPG, Teilen und Herunterladen, „Antrag ansehen“; dazu ein zweiter Lauf
-//       (Karneval, Zeugnis vorhanden: kein Antrag); die Einsichtnehmenden aus einer anderen Konfiguration erscheinen auf dem Bildschirm und in den PDF.
+//   [5] Alle 14 Bildschirme mit den Beispieldaten (Fußball, Antrag auf Gebührenbefreiung, Größen für die Trainerausstattung) bis zu den fertigen Dateien:
+//       Namen, PDF (pdfinfo, pdftotext: „Nr. 2 Buchst. a“, „Einsicht bei <Name aus der Konfiguration>“, die Größen auf dem Kontaktdatenblatt), JPG, Teilen
+//       und Herunterladen, „Antrag ansehen“; dazu ein zweiter Lauf (Karneval, Zeugnis vorhanden: kein Antrag, keine Größen: kein Abschnitt dafür); die
+//       Einsichtnehmenden aus einer anderen Konfiguration erscheinen auf dem Bildschirm und in den PDF.
 //   [6] Konsole ohne Fehler und Warnungen, keine Anfrage an einen fremden Host, nichts wird gesendet (nur GET von Dateien des Pakets, kein Body), der Code
 //       geht weder in eine Anfrage noch in den Referer, kein horizontales Scrollen bei 390 px; ein nicht ladbares Modul zeigt den Text „Ladefehler“.
 //   [7] (T1b: Safari merkt sich ein gescheitertes import() für die ganze Sitzung) Das PDF-Modul lädt mit der Seite (Anfrage beim Start, Sec-Fetch-Dest script,
@@ -112,9 +113,12 @@ const BEISPIEL = {
   notfall: { name: "Erika Mustermann", beziehung: "Partnerin", telefon: "0170 7654321" },
   erfahrung: "Drei Jahre Jugendtrainer bei einem anderen Verein (E-Jugend).",
   ersteHilfeAm: "2025-05-12",
+  // Trainerausstattung (freiwillig, 26.11.2026): vier verschiedene Größen
+  ausstattung: { shirt: "M", pullover: "L", anzug: "XL", regenjacke: "XXL" },
   zeugnis: "beantragen",
 };
-// zweiter Lauf: Karneval, Zeugnis vorhanden (kein Antrag) und ohne die freiwilligen Angaben Notfallkontakt, Erfahrung, Erste-Hilfe-Kurs und Passfoto (25.11.2026)
+// zweiter Lauf: Karneval, Zeugnis vorhanden (kein Antrag) und ohne die freiwilligen Angaben Notfallkontakt, Erfahrung, Erste-Hilfe-Kurs, Größen für die
+// Trainerausstattung und Passfoto (25.11.2026, Größen seit 26.11.2026)
 const BEISPIEL_KARNEVAL = {
   ...BEISPIEL,
   vorname: "Erika",
@@ -127,10 +131,11 @@ const BEISPIEL_KARNEVAL = {
   notfall: { name: "", beziehung: "", telefon: "" },
   erfahrung: "",
   ersteHilfeAm: null,
+  ausstattung: { shirt: "", pullover: "", anzug: "", regenjacke: "" },
   foto: false,
   zeugnis: "vorhanden",
 };
-const SCHRITTE = ["code", "start", "person", "einsatz", "notfall", "erfahrung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften", "pruefen", "fertig"];
+const SCHRITTE = ["code", "start", "person", "einsatz", "notfall", "erfahrung", "ausstattung", "foto", "kodex", "selbstauskunft", "zeugnis", "unterschriften", "pruefen", "fertig"];
 const nn = (schritt) => String(SCHRITTE.indexOf(schritt) + 1).padStart(2, "0");
 
 // ---------- Bau in Wegwerf-Ordnern ----------
@@ -409,6 +414,9 @@ async function fuelle(page, s, d) {
   } else if (s === "erfahrung") {
     if (d.erfahrung) await text(page, "erfahrung", d.erfahrung);
     if (d.ersteHilfeAm) await datum(page, "ersteHilfeAm", d.ersteHilfeAm);
+  } else if (s === "ausstattung") {
+    // freiwillig: nur, was in d.ausstattung steht (leer = die Seite wird übersprungen)
+    for (const artikel of ["shirt", "pullover", "anzug", "regenjacke"]) if (d.ausstattung && d.ausstattung[artikel]) await page.select(feldSel("ausstattung." + artikel), d.ausstattung[artikel]);
   } else if (s === "foto") {
     // freiwillig: ohne d.foto === false gibt es ein Foto
     if (d.foto !== false) {
@@ -875,8 +883,8 @@ async function haupt() {
       await schliesseSeite(pNach);
     }
 
-    // ---------- [5] Alle 13 Bildschirme ----------
-    abschnitt("[5] Alle 13 Bildschirme mit den Beispieldaten (Fußball, Antrag auf Gebührenbefreiung) bis zu den fertigen Dateien");
+    // ---------- [5] Alle 14 Bildschirme ----------
+    abschnitt("[5] Alle 14 Bildschirme mit den Beispieldaten (Fußball, Antrag auf Gebührenbefreiung, Größen für die Trainerausstattung) bis zu den fertigen Dateien");
     const einsichtDefault = `${trainerJson.einsicht[0].name} (${trainerJson.einsicht[0].funktion})`;
     const einsichtKurz = trainerJson.einsicht[0].name;
     let dateienHaupt = null;
@@ -886,7 +894,7 @@ async function haupt() {
       const st = page.__st;
       const anfragenVorStart = st.eigene.length;
       const reihenfolge = await geheDurch(page, BEISPIEL, bilder);
-      ok("alle Bildschirme in der Reihenfolge start › person › einsatz › notfall › erfahrung › foto › kodex › selbstauskunft › zeugnis › unterschriften › pruefen › fertig", JSON.stringify(reihenfolge) === JSON.stringify(SCHRITTE.slice(1)), reihenfolge.join(" › "));
+      ok("alle Bildschirme in der Reihenfolge start › person › einsatz › notfall › erfahrung › ausstattung › foto › kodex › selbstauskunft › zeugnis › unterschriften › pruefen › fertig", JSON.stringify(reihenfolge) === JSON.stringify(SCHRITTE.slice(1)), reihenfolge.join(" › "));
       const korpus = await sichtbarerText(page);
       ok("Bildschirm „fertig“: Titel, die eine Datei mit ihrem Namen (kein Brief und kein Passfoto als eigene Datei), die Wege zum Verein mit der Adresse der Geschäftsstelle", /Dein Paket ist fertig/.test(korpus) && korpus.includes("Trainerunterlagen_Mustermann_Max.pdf") && !korpus.includes("Antrag_Gebuehrenbefreiung") && !korpus.includes("Passfoto_Mustermann") && korpus.includes("geschaeftsstelle@sportfreunde04.de"));
       ok("Bildschirm „fertig“: Einsicht bei der Person aus der Konfiguration (pronomenfrei): „Du: Zeigst es persönlich " + einsichtKurz + ".“", korpus.includes(`Du: Zeigst es persönlich ${einsichtKurz}.`) && !/\bEr\b|\bSie schaut/.test(korpus), "");
@@ -909,6 +917,11 @@ async function haupt() {
       ok(`Paket-PDF (pdftotext): „Einsicht bei ${einsichtKurz}“ – der Name stammt aus der Konfiguration, nicht aus dem Code`, !!pp && pp.text.includes(`Einsicht bei ${einsichtKurz}`));
       ok("Paket-PDF: Name, Mannschaft, Verhaltenskodex, Selbstauskunft, Information nach Art. 13 DSGVO und die Anschrift des Vereins (Postfach) aus den Vereinsdaten", !!pp && /Max Mustermann/.test(pp.text) && /D3-Jugend/.test(pp.text) && /Verhaltenskodex/.test(pp.text) && /Selbstauskunft/.test(pp.text) && /Artikel 13/.test(pp.text) && /Postfach 190442/.test(pp.text) && /Frankfurter Fußballverein Sportfreunde 1904 e\. V\./.test(pp.text.replace(/\s+/g, " ")));
       ok("Paket-PDF: Fälligkeit nach der Schnupperphase aus der Konfiguration (Beginn 02.11.2026 + 1 Monat = 02.12.2026) und Datum der Unterschrift (heute des Tests)", !!pp && /02\.12\.2026/.test(pp.text) && /23\.11\.2026/.test(pp.text));
+      // Trainerausstattung (26.11.2026): Die gewählten Größen stehen auf dem Kontaktdatenblatt (Seite 3, Lesefluss ohne Spalten: pdftotext -raw), die Information zum Datenschutz nennt sie
+      const kontaktText = paket ? norm(ausfuehren("pdftotext", ["-raw", "-f", "3", "-l", "3", dateiPfad, "-"]).stdout || "") : "";
+      const datenschutzText = paket ? norm(ausfuehren("pdftotext", ["-raw", "-f", "6", "-l", "7", dateiPfad, "-"]).stdout || "") : "";
+      ok("Paket-PDF: Kontaktdatenblatt (Seite 3) mit „Trainerausstattung (freiwillig)“ und den gewählten Größen (Shirt M, Pullover L, Anzug XL, Regenjacke XXL)", kontaktText.includes("Trainerausstattung (freiwillig) Shirt M Pullover L Anzug XL Regenjacke XXL"), kontaktText.slice(kontaktText.indexOf("Trainerausstattung"), kontaktText.indexOf("Trainerausstattung") + 90));
+      ok("Paket-PDF: die Information zum Datenschutz (Seite 6 und 7) nennt die Größen für die Trainerausstattung mit Zweck und Rechtsgrundlage", datenschutzText.includes("Größen für die Trainerausstattung (freiwillig): Größen für Shirt, Pullover, Anzug und Regenjacke.") && datenschutzText.includes("Bestellung und Ausgabe der Trainerausstattung (freiwillig) Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Ausstattung des Trainerteams)"), "");
       ok("Brief (Seite 8, pdftotext): enthält „Nr. 2 Buchst. a“ (§ 30a Abs. 1 Nr. 2 Buchst. a BZRG) und den Namen der antragstellenden Person", /ANTRAG AUF GEBÜHRENBEFREIUNG/.test(briefText) && /Nr\. 2 Buchst\. a/.test(briefText) && /Mustermann/.test(briefText), (/Nr\. 2 Buchst\. a/.exec(briefText) || [""])[0]);
       ok("Brief (Seite 8): trägt den Unterzeichner aus der Konfiguration (Name und Funktion), kein Unterschriftsbild des Vereins (kein Bild auf Seite 8), keine Fußzeile", briefText.includes(`${trainerJson.verein.unterzeichner.name}`) && briefText.includes(trainerJson.verein.unterzeichner.funktion) && !bildListe.some((t) => Number(t[0]) === 8) && !/Seite \d+ von/.test(briefText), "");
       const fotoZeile = bildListe.find((t) => t[2] === "image" && Number(t[0]) === 9);
@@ -1064,6 +1077,9 @@ async function haupt() {
       for (const d of geteilt) fs.writeFileSync(path.join(AUSGABE, "dateien", d.name), Buffer.from(d.b64, "base64"));
       const pp = pdfPruefen(Buffer.from(geteilt.find((d) => d.name.startsWith("Trainerunterlagen")).b64, "base64"), "karneval.pdf");
       ok(`zweiter Lauf: Paket-PDF gültig; „Einsicht bei ${einsichtKurz}“ steht auf dem Deckblatt; Gruppe Dreamboys, kein Antrag auf Gebührenbefreiung angekündigt`, pp.gueltig && pp.text.includes(`Einsicht bei ${einsichtKurz}`) && /Dreamboys/.test(pp.text), "");
+      // Ohne Größen (Seite „Welche Größen hast du?“ übersprungen) steht auf dem Kontaktdatenblatt kein Abschnitt dafür; die Information zum Datenschutz gilt für alle und nennt die Größen trotzdem
+      const kontaktOhne = norm(ausfuehren("pdftotext", ["-raw", "-f", "3", "-l", "3", path.join(AUSGABE, "dateien", "Trainerunterlagen_Beispielfrau_Erika.pdf"), "-"]).stdout || "");
+      ok("zweiter Lauf (Größen übersprungen): Kontaktdatenblatt ohne Abschnitt „Trainerausstattung“ und ohne die Artikel; die Information zum Datenschutz nennt die Größen trotzdem", kontaktOhne.length > 100 && !/Trainerausstattung|\bShirt\b|\bPullover\b|\bAnzug\b|Regenjacke/.test(kontaktOhne) && /Größen für die Trainerausstattung \(freiwillig\)/.test(pp.text), kontaktOhne.slice(0, 80));
       ok("zweiter Lauf ohne freiwillige Angaben: sieben Seiten (kein Brief, keine Seite „Passfoto“), Deckblatt „Passfoto: nicht abgegeben (freiwillig)“, kein Notfallkontakt im Blatt", pp.seiten === 7 && /Passfoto: nicht abgegeben \(freiwillig\)/.test(pp.text) && !/Passfoto von/.test(pp.text) && !/Erika Mustermann|Partnerin|0170 7654321/.test(pp.text), pp.seiten + " Seiten");
       ok("zweiter Lauf: Konsole und Netz sauber (keine Fehler, kein POST, kein fremder Host)", st.konsole.length === 0 && st.fremd.length === 0 && st.eigene.every((a) => a.methode === "GET" && !a.body), st.konsole.slice(0, 2).join(" | "));
       await schliesseSeite(page);

@@ -17,7 +17,9 @@
   lädt trainer-pdf-lader.js pdf-lib, fontkit und die Schrift nach konfig.quellen, wie der Assistent.
 
   Eingaben und Fehler
-    antworten, medien   Felder wie im Zustand der Seite (GEMEINSAM.md 4.2): medien.foto JPEG, medien.unterschrift PNG
+    antworten, medien   Felder wie im Zustand der Seite (GEMEINSAM.md 4.2): medien.foto JPEG, medien.unterschrift PNG. antworten.ausstattung
+                        { shirt, pullover, anzug, regenjacke } (freiwillig; seit 26.11.2026): je Artikel leer oder eine Größe von S bis 3XL; nur
+                        angegebene Größen stehen im Kontaktdatenblatt (ohne Angabe kein Abschnitt), eine andere Größe ist ein Fehler „angaben“
     konfig (Pflicht)    verein.name, verein.ort, schnupperMonate (ganze Zahl ab 0; Frist „Unterlagen fällig am“),
                         verein.unterzeichner { name, funktion } (Fußblock des Antrags; nur gebraucht, wenn ein Antrag entsteht)
     konfig (optional)   verein.name_register (Name des Verantwortlichen in der Information nach Art. 13, sonst verein.name),

@@ -4,7 +4,8 @@
   Ein Rechtsdokument wird nie mit stillen Lücken oder unbestätigten Erklärungen gebaut.
 
   Fehlerarten (TrainerPdfFehler.art):
-    angaben        Angaben der Person fehlen oder sind ungültig (Detail: die Namen der Felder)
+    angaben        Angaben der Person fehlen oder sind ungültig (Detail: die Namen der Felder; auch eine Größe der Trainerausstattung, die keine
+                   Größe der Liste ist: „ausstattung.shirt“ …; leer ist erlaubt)
     konfig         Konfiguration unvollständig (Detail: die Namen der Felder)
     unterschrift-fehlt, unterschrift-format   medien.unterschrift fehlt oder ist kein PNG
     foto-format                               medien.foto ist da, aber kein JPEG (das Foto ist freiwillig: ohne Foto entsteht die Datei ohne Fotoseite)
@@ -128,6 +129,17 @@ export function bereiteVor(eingabe, art) {
     d.notfall = { name: text(notfall.name), beziehung: text(notfall.beziehung), telefon: text(notfall.telefon) };
     d.erfahrung = text(a.erfahrung);
     d.ersteHilfeAm = istIso(a.ersteHilfeAm) ? datumDe(a.ersteHilfeAm) : "";
+    // Größen für die Trainerausstattung (freiwillig, seit 26.11.2026): nur die angegebenen kommen in die Liste (Artikel in der Reihenfolge der Seite).
+    // Jede Größe ist leer oder genau eine aus T.ausstattung.groessen; alles andere ist ein veränderter Wert und bricht die Erzeugung ab: Es steht
+    // nie etwas anderes als eine Größe der Liste in der Datei.
+    const ausstattung = objekt(a.ausstattung);
+    d.ausstattung = [];
+    for (const [schluessel, artikel] of T.ausstattung.artikel) {
+      const wert = ausstattung[schluessel];
+      if (wert === undefined || wert === null || wert === "") continue;
+      if (typeof wert === "string" && T.ausstattung.groessen.includes(wert)) d.ausstattung.push({ artikel, groesse: wert });
+      else fehlt.push("ausstattung." + schluessel);
+    }
     const tage = Array.isArray(a.tage) ? a.tage : [];
     d.tage = T.tage.map((x) => x[0]).filter((code) => tage.includes(code));
   }
