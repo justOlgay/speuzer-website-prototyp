@@ -905,9 +905,9 @@ abschnitt("(s) Block „Sponsor“ in Teil 3");
   const drei = mail(klein({ personen: [person("p1", "Mia", "1", "140", ["trikot"]), person("p2", "Ben", "2", "M", ["trikot", "tw-trikot"]), person("p3", "Cem", "3", "140", ["trikot"], {}, null, { trikot: ["W", "V", "ZG"] })], zaehler: 3, sponsor: FIRMA })).text;
   pruefe("(s) Sponsorlogo zählt Stücke (Trikot Mia, Trikot und TW-Trikot Ben; Cems Trikot nicht): 3 × 2,95 € = 8,85 €", zeilen(drei).includes("Sponsorlogo: 3 Stück × 2,95 € = 8,85 €"), drei);
   const teurerPreis = kopieTestpreise();
-  teurerPreis.veredelungPreis.SP = 4;
+  teurerPreis.veredelungPreis.SP = 4.25;
   const konfigTeurer = mitPreisen(KONFIG_OEFFENTLICH, teurerPreis);
-  pruefe("(s) Zuschlag und Summe liefern die Daten: bei 4,00 € je Sponsorlogo „2 Stück × 4,00 € = 8,00 €“", zeilen(mail(FALL_A.bestellung, FALL_A.jetzt, konfigTeurer).text).includes("Sponsorlogo: 2 Stück × 4,00 € = 8,00 €"));
+  pruefe("(s) Zuschlag und Summe liefern die Daten: bei 4,25 € je Sponsorlogo „2 Stück × 4,25 € = 8,50 €“", zeilen(mail(FALL_A.bestellung, FALL_A.jetzt, konfigTeurer).text).includes("Sponsorlogo: 2 Stück × 4,25 € = 8,50 €"));
   pruefe("(s) ohne Sponsorlogo an einem Stück entfällt die Zeile (der Block bleibt wegen der Antwort „Sponsor“)", !zeilen(mail(klein({ personen: shorts, zaehler: 1, bezahlung: { kleidung: ["sponsor"], teambedarf: [] }, sponsor: FIRMA })).text).some((z) => z.startsWith("Sponsorlogo:")));
   // Nur Teambedarf mit Sponsor: Teil 3 enthält nur den Block „Sponsor“ (keine Zuordnung)
   const nurTb = mail(klein({ teambedarf: { ballpumpe: { n: 1, details: "" } }, bezahlung: { kleidung: [], teambedarf: ["sponsor"] }, sponsor: FIRMA })).text;

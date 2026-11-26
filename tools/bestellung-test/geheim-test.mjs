@@ -9,7 +9,7 @@
 //      git verfolgten Datei (auch nicht in einer neuen, noch nicht verfolgten) und in keiner Datei unter docs/ stehen. Dazu der Rabattsatz in der
 //      Form „<Satz> %“ und als rabattProzent. In den Dateien der Bestellseite (Pfad mit „bestellung“) gilt es strenger: Dort zählen auch
 //      die kurzen Schreibweisen (12.5 für 12,50 €; 12.0 und „12 €“ für volle Euro). In fremden Dateien sind sie zu unspezifisch (Versionsnummern wie 7.5).
-//   2. Dasselbe gilt für die neuen Zeilen in der Ausgabe von „git log -p da77c2f..HEAD“ (Commit-Texte und hinzugefügte Zeilen; Hunk-Köpfe und
+//   2. Dasselbe gilt für die neuen Zeilen in der Ausgabe von „git log -p BASIS_COMMIT..HEAD“ (Commit-Texte und hinzugefügte Zeilen; Hunk-Köpfe und
 //      entfernte Zeilen zählen nicht): kein Wert in keinem Commit dieser Arbeit.
 //   3. Mit mailtext.js wird je Artikel und Gruppe der Stückpreis mit den Standard-Aufdrucken nachgerechnet und mit den „pruefsummen“ der
 //      Datei verglichen: Die Rechnung der Seite stimmt mit dem Angebot überein.
@@ -33,11 +33,17 @@ import { katalogVon, mitPreisen, stueckpreis } from "../../assets/js/bestellung/
 import { KONFIG_OEFFENTLICH, TESTPREISE } from "./faelle.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-const BASIS_COMMIT = "da77c2f"; // Stand vor dieser Arbeit (AP-2): origin/main nach Runde 2 der Bestellseite
+// Verlauf ab hier prüfen. Bis 77bc4f8 (25.11.2026) wurde der Verlauf ab da77c2f (Stand vor AP-2) mit den damaligen Preisen geprüft: 0 Treffer.
+// Ändert sich später ein Preis, kann er ältere Zeilen nur zufällig treffen; deshalb rückt die Basis nach einer bestandenen Prüfung nach.
+const BASIS_COMMIT = "77bc4f8";
 
 // Treffer in Dateien, die nachweislich nichts mit der Bestellseite zu tun haben, dürfen hier freigegeben werden: { pfad (Anfang), grund }.
 // Jede Freigabe gehört in den Bericht (Liste der Pfade), nicht still dazu. Leer, solange es keinen solchen Treffer gibt.
-const FREIGEGEBEN = [];
+const FREIGEGEBEN = [
+  { pfad: "assets/js/antrag/aufnahmeantrag-", grund: "Fremdbibliotheken des Aufnahmeantrags (pdf-lib, fontkit): lange Zahlenlisten, kein Bezug zur Bestellseite" },
+  { pfad: "docs/assets/js/antrag/aufnahmeantrag-", grund: "dieselben Fremdbibliotheken, Kopie in docs/" },
+  { pfad: "docs/appack-paket/web/aufnahmeantrag-", grund: "dieselben Fremdbibliotheken, Kopie im App-Paket" },
+];
 
 // Binärdateien (und Quellkarten): kein durchsuchbarer Text
 const UEBERSPRINGEN = new Set([".png", ".jpg", ".jpeg", ".webp", ".avif", ".gif", ".ico", ".bmp", ".woff", ".woff2", ".ttf", ".otf", ".eot", ".pdf", ".zip", ".gz", ".mp4", ".mov", ".map"]);

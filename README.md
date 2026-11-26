@@ -245,7 +245,7 @@ darum nur **verschlüsselt** im Repo (`data/bestellung-preise.enc.json`). Im aus
   Die gemeinsamen Testbestellungen mit festen, von Hand gerechneten Texten stehen in `tools/bestellung-test/faelle.mjs`, die Testpreise in `testdaten.mjs`. Der Browser-Test fängt den Klick auf
   den mailto-Link ab: Es öffnet sich kein Mailprogramm und nichts wird gesendet.
 - Geheimhaltung prüfen: `BESTELLUNG_PREISE_PRIVAT=<private Preisdatei> node tools/bestellung-test/geheim-test.mjs` sucht alle Beträge der Datei (Listen-, Grund- und Stückpreise, Zuschläge, Prüfsummen; Punkt und Komma) und den Rabattsatz in allen
-  von git verfolgten Dateien, in `docs/` und in den neuen Zeilen von `git log -p da77c2f..HEAD` und rechnet die Prüfsummen mit `mailtext.js` nach. Die Ausgabe nennt nie einen Wert: „n Werte geprüft, 0 Treffer, n Prüfsummen stimmen“.
+  von git verfolgten Dateien, in `docs/` und in den neuen Zeilen von `git log -p <Basis>..HEAD` (Basis siehe `BASIS_COMMIT` im Test; sie rückt nach einer bestandenen Prüfung nach) und rechnet die Prüfsummen mit `mailtext.js` nach. Die Ausgabe nennt nie einen Wert: „n Werte geprüft, 0 Treffer, n Prüfsummen stimmen“.
   Ohne die Variable gibt der Test nur einen Hinweis aus (und prüft seine Suche an erfundenen Zahlen).
 
 ## Befehle
