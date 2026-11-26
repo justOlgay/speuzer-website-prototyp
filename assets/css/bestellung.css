@@ -5,6 +5,8 @@
   kommen aus site.css. Mobil zuerst (390 px), am Rechner eine schmale Spalte (720 px). Kein Grün und kein Rot:
   Hinweise sind blau (.hinweis--info), Lücken in der Farbe der Pflichtangaben der Website (--warn).
   Alle Tippflächen sind mindestens 44 px hoch.
+
+  Ohne Code zeigt die Seite nur den Kopf und die Zugangsbox (.bst-zugang); das Formular (.bst-app) setzt seite.js erst nach dem Entschlüsseln ein.
 */
 
 .bst {
@@ -43,6 +45,78 @@
 
 .bst-ladefehler[hidden] {
   display: none;
+}
+
+/* ---------- Zugang (Code) ---------- */
+
+.bst-zugang {
+  display: grid;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-1);
+}
+
+.bst-zugang[hidden],
+.bst-app[hidden] {
+  display: none;
+}
+
+.bst-zugang > * {
+  margin: 0;
+  min-width: 0;
+}
+
+.bst-zugang__form {
+  display: grid;
+  gap: var(--sp-4);
+}
+
+.bst-zugang__form .bst-feld input {
+  font-size: 1.125rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.bst-zugang__form .bst-feld input::placeholder {
+  letter-spacing: normal;
+}
+
+.bst-zugang__meldung {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.bst-zugang__meldung:empty {
+  display: none;
+}
+
+.bst-zugang__meldung--fehler {
+  padding: var(--sp-3) var(--sp-4);
+  border-left: 4px solid var(--warn);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  background: var(--warn-bg);
+}
+
+.bst-zugang__knopf {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .bst-zugang {
+    padding: var(--sp-5);
+  }
+
+  .bst-zugang__knopf {
+    width: auto;
+    justify-self: start;
+  }
+
+  .bst-zugang__form .bst-feld {
+    max-width: 22rem;
+  }
 }
 
 /* ---------- Abschnitte ---------- */
@@ -105,6 +179,10 @@
   .bst-felder {
     grid-template-columns: 1fr 1fr;
   }
+}
+
+.bst-felder .bst-feld--breit {
+  grid-column: 1 / -1;
 }
 
 .bst-feld {
@@ -182,9 +260,10 @@
   font-size: var(--fs-lg);
 }
 
+/* Die Rückennummer braucht wenig Platz, die Auswahl der Größe mehr (auch bei 320 px soll nichts abgeschnitten wirken) */
 .bst-person__felder {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
   gap: var(--sp-3);
 }
 
@@ -264,15 +343,17 @@
 
 .bst-check {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--sp-3);
+  gap: var(--sp-1) var(--sp-3);
   min-height: 52px;
   padding: var(--sp-2) var(--sp-3);
   cursor: pointer;
 }
 
 .bst-check input[type="checkbox"],
-.bst-option input[type="checkbox"] {
+.bst-option input[type="checkbox"],
+.bst-aufdruck input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
   flex: none;
@@ -287,17 +368,20 @@
 }
 
 .bst-check input[type="checkbox"],
-.bst-option input[type="checkbox"] {
+.bst-option input[type="checkbox"],
+.bst-aufdruck input[type="checkbox"] {
   border-radius: var(--r-sm);
 }
 
 .bst-check input[type="checkbox"]:checked,
-.bst-option input[type="checkbox"]:checked {
+.bst-option input[type="checkbox"]:checked,
+.bst-aufdruck input[type="checkbox"]:checked {
   background: var(--blau-700);
 }
 
 .bst-check input[type="checkbox"]:checked::after,
-.bst-option input[type="checkbox"]:checked::after {
+.bst-option input[type="checkbox"]:checked::after,
+.bst-aufdruck input[type="checkbox"]:checked::after {
   content: "\2713";
   color: var(--weiss);
   font-size: 16px;
@@ -305,7 +389,7 @@
 }
 
 .bst-check__text {
-  flex: 1;
+  flex: 1 1 8rem;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -322,9 +406,15 @@
 
 .bst-check__preis {
   flex: none;
+  margin-left: auto;
+  text-align: right;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+.bst-check__preis:empty {
+  display: none;
 }
 
 .bst-artikel__optionen {
@@ -342,16 +432,25 @@
 .bst-artikel__optionen .bst-feld {
   flex: 0 1 auto;
   flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--sp-2);
+  gap: var(--sp-1) var(--sp-2);
+}
+
+.bst-artikel__optionen .bst-feld[hidden] {
+  display: none;
 }
 
 .bst-artikel__optionen .bst-feld label {
   flex: none;
 }
 
+/* Die Auswahl der Größe ist so breit, dass auch „S (Bambini)“ ganz zu lesen ist; reicht der Platz neben dem Wort „Größe“ nicht, rutscht sie darunter. */
 .bst-artikel__optionen .bst-feld select {
-  width: 130px;
+  flex: 1 1 9.5rem;
+  width: auto;
+  min-width: 9.5rem;
+  max-width: 100%;
   min-height: 44px;
 }
 
@@ -362,6 +461,61 @@
 
 .bst-artikel__optionen .bst-hinweis {
   flex: 1 1 100%;
+}
+
+/* Was soll drauf? Je Aufdruck ein Kästchen mit Name und Zuschlag */
+.bst-aufdrucke {
+  flex: 1 1 100%;
+  display: grid;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.bst-aufdrucke legend {
+  padding: 0;
+  margin-bottom: var(--sp-1);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+}
+
+.bst-aufdruck {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+  cursor: pointer;
+  font-size: var(--fs-sm);
+}
+
+.bst-aufdruck__name {
+  flex: 1;
+  min-width: 0;
+}
+
+.bst-aufdruck__preis {
+  flex: none;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.bst-preiszeile {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: var(--ink-2);
+}
+
+.bst-preiszeile[hidden] {
+  display: none;
+}
+
+@media (max-width: 399px) {
+  .bst-artikel__optionen {
+    padding-left: var(--sp-3);
+  }
 }
 
 .bst-einheit {
@@ -516,6 +670,12 @@
 .bst-gruppe--luecke {
   padding: var(--sp-3);
   border-color: var(--warn);
+}
+
+/* Lieferanschrift und Sponsor: Feldgruppen ohne Rahmen (bei einer Lücke markiert die Seite die einzelnen Felder, nicht die Gruppe) */
+.bst-lieferung,
+.bst-sponsorblock {
+  border: 0;
 }
 
 .bst-optionen {
@@ -698,4 +858,12 @@
 
 .bst-fuss .hinweis {
   color: var(--ink);
+}
+
+.bst-fuss__aktion {
+  margin-top: var(--sp-2);
+}
+
+.bst-fuss__aktion .bst-textknopf {
+  padding-left: 0;
 }

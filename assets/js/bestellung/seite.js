@@ -1,53 +1,67 @@
 /*
   Bestellung für dein Team (Prototyp) – Oberfläche.
 
-  Das Gerüst der Seite baut src/seiten/bestellung.mjs (Kopf, Felder, Teambedarf, Bezahlung, Übersicht, Fuß) und bettet die
-  Konfiguration ein (#bestellung-konfig). Dieses Skript baut die Karten je Person, hält den Zustand, speichert den Entwurf auf
-  dem Gerät, prüft die Eingaben und öffnet beim Senden das Mailprogramm (mailto). Betreff, Text, Prüfung und Bestell-Nr. kommen
-  aus mailtext.js (reine Funktionen, ohne DOM).
+  Die Hülle der Seite baut src/seiten/bestellung.mjs: Kopf, Prototyp-Hinweis und die Zugangsbox, dazu die Konfiguration (#bestellung-konfig)
+  samt verschlüsseltem Preispaket. Ohne Code sieht man nur das. Dieses Skript
 
-  Es gibt keinen Server: Der Entwurf liegt in localStorage (Schlüssel speuzer-bestellung-v1-entwurf; Mannschaft, Name und
-  Telefon zusätzlich unter speuzer-bestellung-v1-absender). Jeder Zugriff darauf steht in try/catch, die Seite funktioniert
+    1. nimmt den Code aus dem Feld, aus dem Link (?code=…, danach entfernt history.replaceState den Parameter aus der Adresse) oder vom
+       Gerät (ein richtiger Code wird unter speuzer-bestellung-v1-code gemerkt),
+    2. entschlüsselt damit die Preise (zugang.js; ein falscher Code zeigt „Der Code stimmt nicht …“),
+    3. setzt erst dann das Formular in die Seite (formular.js; alle Texte mit Preisen und Rabatt entstehen erst hier) und startet die
+       eigentliche Oberfläche: Karten je Person, Zustand, Speichern auf dem Gerät, Prüfung und Senden per mailto.
+  „Code auf diesem Gerät vergessen“ unten im Formular schließt die Seite wieder.
+
+  Betreff, Text, Prüfung, Preise und Bestell-Nr. kommen aus mailtext.js (reine Funktionen, ohne DOM).
+
+  Es gibt keinen Server: Der Entwurf liegt in localStorage (Schlüssel speuzer-bestellung-v1-entwurf; Mannschaft, Name, Telefon und
+  Lieferanschrift zusätzlich unter speuzer-bestellung-v1-absender). Jeder Zugriff darauf steht in try/catch, die Seite funktioniert
   auch ohne Speicher. Nur statische Importe (nie ein dynamischer Import zur Laufzeit): Safari merkt sich einen gescheiterten
   dynamischen Import für die ganze Sitzung.
 
-  Aufbau: Die Felder werden einmal gebaut und danach nur noch aus dem Zustand nachgeführt (aktualisiere); so bleibt der Fokus
+  Aufbau der Oberfläche: Die Felder werden einmal gebaut und danach nur noch aus dem Zustand nachgeführt (aktualisiere); so bleibt der Fokus
   beim Tippen, wo er ist. Ein Eingabefeld mit Fokus wird nie von außen überschrieben.
 */
 
 import {
   GRENZEN,
   MAILTO_LAENGE_MAX,
+  artikelAufdrucke,
   artikelGroesse,
   baueMail,
   bereinigeEntwurf,
   bezahlungIds,
-  formatEuro,
+  druckBedarf,
   ganzzahl,
   initialenVorschlag,
   katalogVon,
   kopierText,
   leererEntwurf,
+  mitPreisen,
   preisText,
+  preisZeile,
   pruefeBestellung,
   schnellwahlAnwenden,
+  sponsorAktiv,
+  summeText,
   vorauswahlGroesse,
   vorauswahlHinweis,
   waehleBestellNr,
   zahlwort,
   zusammenfassung,
+  zuschlagText,
 } from "./mailtext.js";
+import { ZugangFehler, entschluessele, normalisiereCode, pruefePaket } from "./zugang.js";
+import { baueFormular, esc } from "./formular.js";
 
 const SCHLUESSEL_ENTWURF = "speuzer-bestellung-v1-entwurf";
 const SCHLUESSEL_ABSENDER = "speuzer-bestellung-v1-absender";
+const SCHLUESSEL_CODE = "speuzer-bestellung-v1-code";
 
-function esc(text) {
-  return String(text === null || text === undefined ? "" : text)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}
+const TEXT_WARTEN = "Einen Moment …";
+const TEXT_CODE_FALSCH = "Der Code stimmt nicht. Bitte prüf ihn oder frag im Vorstand nach.";
+const TEXT_CODE_LEER = "Bitte gib den Code ein.";
+const TEXT_CODE_ALT = "Der gemerkte Code passt nicht mehr. Bitte gib den Code ein, den du vom Verein bekommen hast.";
+const TEXT_DATEN_DEFEKT = "Die Preisdaten dieser Seite sind beschädigt oder unvollständig. Bitte sag im Vorstand Bescheid.";
 
 // ---------- Speicher auf dem Gerät (jeder Zugriff in try/catch) ----------
 
@@ -87,12 +101,26 @@ function leseJson(schluessel) {
   }
 }
 
-// ---------- Start ----------
+// ---------- Start: Zugang ----------
+
+// Der Code steht nach dem Lesen nicht mehr in der Adresse (und damit nicht im Verlauf oder in einer weitergegebenen Adresse).
+function entferneCodeAusAdresse() {
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("code");
+    window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
+  } catch (e) {
+    /* ohne Verlauf bleibt die Adresse, wie sie ist */
+  }
+}
 
 function start() {
   const wurzel = document.getElementById("bestellung");
   const konfigKnoten = document.getElementById("bestellung-konfig");
   if (!wurzel || !konfigKnoten) return;
+  const zugang = wurzel.querySelector("[data-bst-zugang]");
+  const app = wurzel.querySelector("[data-bst-app]");
+  if (!zugang || !app) return;
 
   let konfig;
   try {
@@ -101,22 +129,171 @@ function start() {
   } catch (e) {
     const fehler = wurzel.querySelector("[data-bst-ladefehler]");
     if (fehler) fehler.hidden = false;
+    zugang.hidden = true;
+    wurzel.dataset.zustand = "fehler";
     return;
   }
+
+  const feld = zugang.querySelector("[data-bst-code]");
+  const knopf = zugang.querySelector("[data-bst-oeffnen]");
+  const meldung = zugang.querySelector("[data-bst-zugang-meldung]");
+  const formular = zugang.querySelector("[data-bst-zugang-form]");
+  const titel = document.getElementById("bst-titel");
+  let prueft = false;
+
+  function zustand(z) {
+    wurzel.dataset.zustand = z;
+  }
+
+  // art: "info" (Einen Moment …) oder "fehler"; ohne Text verschwindet die Meldung (CSS: :empty)
+  function zeigeMeldung(text, art) {
+    meldung.textContent = text;
+    meldung.classList.toggle("bst-zugang__meldung--fehler", art === "fehler" && text !== "");
+  }
+
+  function sperre(an) {
+    prueft = an;
+    knopf.disabled = an;
+    feld.readOnly = an;
+  }
+
+  // Das Formular setzen und die Oberfläche starten. Danach ist die Zugangsbox weg.
+  function zeigeApp(konfigMitPreisen, mitFokus) {
+    app.innerHTML = baueFormular(konfigMitPreisen);
+    app.hidden = false;
+    zugang.hidden = true;
+    zeigeMeldung("", "info");
+    feld.value = "";
+    zustand("offen");
+    starteApp(app, konfigMitPreisen, { vergessen });
+    if (mitFokus) {
+      window.scrollTo(0, 0);
+      if (titel) titel.focus({ preventScroll: true });
+    }
+  }
+
+  // „Code auf diesem Gerät vergessen“: der Code ist weg, das Formular auch, die Zugangsbox ist wieder da. Der Entwurf bleibt auf dem Gerät.
+  function vergessen() {
+    speicher.loesche(SCHLUESSEL_CODE);
+    app.textContent = "";
+    app.hidden = true;
+    zugang.hidden = false;
+    feld.value = "";
+    zeigeMeldung("", "info");
+    sperre(false);
+    zustand("zu");
+    feld.focus();
+  }
+
+  // Versucht den Code. quelle: "eingabe" (Feld), "link" (?code=) oder "gemerkt" (vom Gerät). Gibt zurück, ob die Seite jetzt offen ist.
+  async function oeffnen(code, quelle) {
+    if (prueft) return false;
+    sperre(true);
+    zustand("pruefe");
+    zeigeMeldung(TEXT_WARTEN, "info");
+    let preise;
+    try {
+      preise = await entschluessele(konfig.preiseVerschluesselt, code);
+    } catch (e) {
+      sperre(false);
+      zustand("zu");
+      if (e instanceof ZugangFehler && e.art === "code") {
+        if (quelle === "gemerkt") {
+          speicher.loesche(SCHLUESSEL_CODE); // der Code wurde ausgetauscht: nicht noch einmal versuchen
+          zeigeMeldung(TEXT_CODE_ALT, "fehler");
+        } else {
+          zeigeMeldung(TEXT_CODE_FALSCH, "fehler");
+        }
+      } else if (e instanceof ZugangFehler && e.art === "technik") {
+        zeigeMeldung(e.message, "fehler");
+      } else {
+        zeigeMeldung(TEXT_DATEN_DEFEKT, "fehler");
+      }
+      return false;
+    }
+    let mitPreis;
+    try {
+      mitPreis = mitPreisen(konfig, preise);
+    } catch (e) {
+      sperre(false);
+      zustand("zu");
+      zeigeMeldung(TEXT_DATEN_DEFEKT, "fehler");
+      return false;
+    }
+    if (quelle !== "gemerkt") speicher.schreibe(SCHLUESSEL_CODE, normalisiereCode(code));
+    sperre(false);
+    try {
+      zeigeApp(mitPreis, quelle === "eingabe");
+    } catch (e) {
+      // Ein Fehler beim Aufbau darf nicht als leere Seite enden: Hinweis zeigen, den Fehler aber weitergeben (er soll auffallen).
+      const fehler = wurzel.querySelector("[data-bst-ladefehler]");
+      if (fehler) fehler.hidden = false;
+      app.textContent = "";
+      app.hidden = true;
+      zugang.hidden = true;
+      zustand("fehler");
+      throw e;
+    }
+    return true;
+  }
+
+  formular.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (prueft) return;
+    if (normalisiereCode(feld.value) === "") {
+      zeigeMeldung(TEXT_CODE_LEER, "fehler");
+      feld.focus();
+      return;
+    }
+    oeffnen(feld.value, "eingabe");
+  });
+
+  // Der Code aus dem Link hat Vorrang; die Adresse verliert den Parameter in jedem Fall (auch bei falschem Code).
+  const suche = new URLSearchParams(window.location.search);
+  const ausLink = suche.get("code");
+  if (suche.has("code")) entferneCodeAusAdresse();
+
+  // Ist das Paket der Preisdaten schon in der Form kaputt (oder gar nicht da), zeigt die Seite gleich den Hinweis; der Code hilft dann nicht.
+  let paketFehler = null;
+  try {
+    pruefePaket(konfig.preiseVerschluesselt);
+  } catch (e) {
+    paketFehler = e;
+  }
+  if (paketFehler) {
+    feld.disabled = true;
+    knopf.disabled = true;
+    zeigeMeldung(TEXT_DATEN_DEFEKT, "fehler");
+    zustand("defekt");
+    wurzel.setAttribute("data-bereit", "");
+    return;
+  }
+
+  const gemerkt = speicher.lies(SCHLUESSEL_CODE);
+  const versuch = ausLink ? oeffnen(ausLink, "link") : gemerkt ? oeffnen(gemerkt, "gemerkt") : Promise.resolve(false);
+  versuch.finally(() => wurzel.setAttribute("data-bereit", ""));
+}
+
+// ---------- Die Oberfläche (nach dem Entschlüsseln) ----------
+
+// app: der Platz in der Hülle, in dem baueFormular() das Formular gesetzt hat. konfig trägt die Preise (konfig.preise).
+// haken.vergessen: wird vom Knopf „Code auf diesem Gerät vergessen“ aufgerufen.
+function starteApp(app, konfig, haken) {
   const katalog = katalogVon(konfig);
   const empfaenger = konfig.einstellungen.empfaenger;
   const TEXT_MAIL = `Dein Mailprogramm öffnet sich mit der fertigen Mail. Tippe dort auf „Senden“. Öffnet sich nichts? Dann „Text kopieren“ und an ${empfaenger} schicken.`;
   const TEXT_KOPIERT = `Der Text ist kopiert. Füge ihn in eine neue Mail an ${empfaenger} ein und tippe dort auf „Senden“.`;
 
-  const $ = (auswahl, ort) => (ort || wurzel).querySelector(auswahl);
+  const $ = (auswahl, ort) => (ort || app).querySelector(auswahl);
   const form = $("#bst-form");
   const el = {
-    titel: $("#bst-titel"),
+    titel: document.getElementById("bst-titel"),
     personen: $("#bst-personen"),
     keine: $("#bst-keine"),
     neu: $("#bst-person-neu"),
     teamListe: $(".bst-posten-liste"),
     bezahlungLeer: $("[data-bst-bezahlung-leer]"),
+    sponsor: $("[data-bst-sponsorblock]"),
     luecken: $("[data-bst-luecken]"),
     lueckenListe: $("[data-bst-luecken-liste]"),
     senden: $("[data-bst-senden]"),
@@ -130,6 +307,7 @@ function start() {
     betreff: $("[data-bst-betreff]"),
     vorschauText: $("[data-bst-vorschau-text]"),
     speicher: $("[data-bst-speicher]"),
+    vergessen: $("[data-bst-vergessen]"),
   };
 
   const jetzt = () => new Date();
@@ -145,13 +323,21 @@ function start() {
       if (!e.team && konfig.mannschaften.some((m) => m.slug === absender.team)) e.team = absender.team;
       if (!e.name && typeof absender.name === "string") e.name = absender.name.slice(0, GRENZEN.besteller);
       if (!e.tel && typeof absender.tel === "string") e.tel = absender.tel.slice(0, GRENZEN.tel);
+      if (e.lieferName === null && typeof absender.lieferName === "string") e.lieferName = absender.lieferName.slice(0, GRENZEN.lieferName);
+      if (!e.lieferStrasse && typeof absender.lieferStrasse === "string") e.lieferStrasse = absender.lieferStrasse.slice(0, GRENZEN.strasse);
+      if (!e.lieferOrt && typeof absender.lieferOrt === "string") e.lieferOrt = absender.lieferOrt.slice(0, GRENZEN.ort);
     }
     return e;
   }
 
+  // Der Absender (Mannschaft, Name, Telefon, Lieferanschrift) bleibt auch nach „Neue Bestellung beginnen“.
+  function absenderVon(z) {
+    return { team: z.team, name: z.name, tel: z.tel, lieferName: z.lieferName, lieferStrasse: z.lieferStrasse, lieferOrt: z.lieferOrt };
+  }
+
   function speichere() {
     const a = speicher.schreibe(SCHLUESSEL_ENTWURF, JSON.stringify(zustand));
-    const b = speicher.schreibe(SCHLUESSEL_ABSENDER, JSON.stringify({ team: zustand.team, name: zustand.name, tel: zustand.tel }));
+    const b = speicher.schreibe(SCHLUESSEL_ABSENDER, JSON.stringify(absenderVon(zustand)));
     ui.speicherFehler = !(a && b);
   }
 
@@ -164,20 +350,39 @@ function start() {
   // ---------- Karten je Person ----------
 
   const personGroessen =
-    `<option value="">Bitte wählen</option>` +
+    `<option value="">wählen</option>` +
     `<optgroup label="Kindergrößen">${konfig.groessen.kinder.map((w) => `<option value="${esc(w)}">${esc(w)}</option>`).join("")}</optgroup>` +
     `<optgroup label="Erwachsenengrößen">${konfig.groessen.erwachsene.map((w) => `<option value="${esc(w)}">${esc(w)}</option>`).join("")}</optgroup>`;
 
   function artikelGroessenOptionen(a) {
     const option = (g) => `<option value="${esc(g.wert)}">${esc(g.wert)}</option>`;
-    if (!a.gruppiert) return `<option value="">Bitte wählen</option>` + a.groessen.map(option).join("");
+    if (!a.gruppiert) return `<option value="">wählen</option>` + a.groessen.map(option).join("");
     const kinder = a.groessen.filter((g) => g.gruppe === "kinder");
     const erwachsene = a.groessen.filter((g) => g.gruppe === "erwachsene");
     return (
-      `<option value="">Bitte wählen</option>` +
+      `<option value="">wählen</option>` +
       (kinder.length ? `<optgroup label="Kindergrößen">${kinder.map(option).join("")}</optgroup>` : "") +
       (erwachsene.length ? `<optgroup label="Erwachsenengrößen">${erwachsene.map(option).join("")}</optgroup>` : "")
     );
+  }
+
+  // „Was soll drauf?“: je möglichem Aufdruck ein Kästchen mit kurzem Namen und dem Zuschlag (die Preise stehen schon fest)
+  function aufdruckFeld(a, p) {
+    if (a.aufdrucke.moeglich.length === 0) return "";
+    const idp = "bst-" + p.id;
+    const kaesten = a.aufdrucke.moeglich
+      .map(
+        (code) => `<label class="bst-aufdruck" for="${idp}-d-${a.id}-${code}">
+            <input type="checkbox" id="${idp}-d-${a.id}-${code}" data-a="druck" data-code="${esc(code)}" aria-describedby="${idp}-titel">
+            <span class="bst-aufdruck__name">${esc(a.aufdruckNamen[code])}</span>
+            <span class="bst-aufdruck__preis">${esc(zuschlagText(konfig, code))}</span>
+          </label>`
+      )
+      .join("\n          ");
+    return `<fieldset class="bst-aufdrucke" data-a-aufdrucke>
+          <legend>Was soll drauf?<span class="sr-only"> (${esc(a.anzeige)})</span></legend>
+          ${kaesten}
+        </fieldset>`;
   }
 
   function artikelZeile(a, p) {
@@ -189,13 +394,12 @@ function start() {
           <select id="${idp}-g-${a.id}" data-a="groesse" data-schluessel="p:${p.id}:a:${a.id}" aria-describedby="${idp}-titel">${artikelGroessenOptionen(a)}</select>
         </div>`
         : `<p class="bst-einheit">${esc(a.groessen[0].wert)}</p>`;
-    const initialenFeld =
-      a.einzeldruck === "initialen"
-        ? `<div class="bst-feld">
-          <label for="${idp}-ini">Initialen<span class="sr-only"> (${esc(a.anzeige)})</span></label>
-          <input type="text" id="${idp}-ini" data-a="initialen" data-schluessel="p:${p.id}:initialen" maxlength="${GRENZEN.initialen}" autocomplete="off" autocapitalize="characters" placeholder="z. B. BK" aria-describedby="${idp}-titel">
+    const initialenFeld = a.aufdrucke.moeglich.some((c) => a.druckdaten[c] === "initialen")
+      ? `<div class="bst-feld" data-a-initialen-feld hidden>
+          <label for="${idp}-ini-${a.id}">Initialen<span class="sr-only"> (${esc(a.anzeige)})</span></label>
+          <input type="text" id="${idp}-ini-${a.id}" data-a="initialen" data-schluessel="p:${p.id}:initialen" maxlength="${GRENZEN.initialen}" autocomplete="off" autocapitalize="characters" placeholder="z. B. BK" aria-describedby="${idp}-titel">
         </div>`
-        : "";
+      : "";
     return `<li class="bst-artikel" data-artikel="${esc(a.id)}">
         <label class="bst-check" for="${idp}-a-${a.id}">
           <input type="checkbox" id="${idp}-a-${a.id}" data-a="an">
@@ -205,6 +409,8 @@ function start() {
         <div class="bst-artikel__optionen" data-a-optionen hidden>
           ${groessenFeld}
           ${initialenFeld}
+          ${aufdruckFeld(a, p)}
+          <p class="bst-preiszeile" data-a-preiszeile hidden></p>
           <p class="bst-hinweis bst-hinweis--klein" data-a-hinweis hidden></p>
         </div>
       </li>`;
@@ -219,7 +425,7 @@ function start() {
     karte.innerHTML = `<h3 class="bst-person__titel" id="${idp}-titel"></h3>
       <div class="bst-person__felder">
         <div class="bst-feld bst-feld--breit">
-          <label for="${idp}-name">Name (wird aufgedruckt)</label>
+          <label for="${idp}-name">Name</label>
           <input type="text" id="${idp}-name" data-p="name" data-schluessel="p:${p.id}:name" maxlength="${GRENZEN.person}" autocomplete="off" autocapitalize="words" aria-describedby="${idp}-titel">
         </div>
         <div class="bst-feld">
@@ -255,6 +461,10 @@ function start() {
     if (feld && feld.value !== wert && document.activeElement !== feld) feld.value = wert;
   }
 
+  function setzeText(knoten, text) {
+    if (knoten.textContent !== text) knoten.textContent = text;
+  }
+
   function syncKarte(karte, p, index, z) {
     const idp = "bst-" + p.id;
     const titel = $("#" + idp + "-titel", karte);
@@ -265,25 +475,36 @@ function start() {
     for (const a of katalog.artikel) {
       const zeile = $(`[data-artikel="${a.id}"]`, karte);
       const gewaehlt = !!p.artikel[a.id];
-      const haken = $('[data-a="an"]', zeile);
-      if (haken.checked !== gewaehlt) haken.checked = gewaehlt;
+      const hakenAn = $('[data-a="an"]', zeile);
+      if (hakenAn.checked !== gewaehlt) hakenAn.checked = gewaehlt;
       $("[data-a-optionen]", zeile).hidden = !gewaehlt;
       const groesse = artikelGroesse(konfig, p, a.id);
-      const preis = preisText(konfig, a.id, groesse);
-      const preisKnoten = $("[data-a-preis]", zeile);
-      if (preisKnoten.textContent !== preis) preisKnoten.textContent = preis;
+      // Ist der Artikel nicht gewählt, zeigt die Zeile den Preis mit den Standard-Aufdrucken (so beginnt die Auswahl).
+      const codes = gewaehlt ? artikelAufdrucke(konfig, p, a.id) : a.aufdrucke.standard;
+      setzeText($("[data-a-preis]", zeile), preisText(konfig, a.id, groesse, codes));
       if (!gewaehlt) continue;
       setzeWert($('[data-a="groesse"]', zeile), groesse);
-      setzeWert($('[data-a="initialen"]', zeile), p.initialen === null || p.initialen === undefined ? initialenVorschlag(p.name) : p.initialen);
+      for (const d of zeile.querySelectorAll('[data-a="druck"]')) {
+        const an = codes.includes(d.dataset.code);
+        if (d.checked !== an) d.checked = an;
+      }
+      // Die Initialen braucht nur, wer einen Aufdruck mit Initialen gewählt hat
+      const iniFeld = $("[data-a-initialen-feld]", zeile);
+      if (iniFeld) {
+        iniFeld.hidden = !druckBedarf(konfig, a.id, codes).initialen;
+        setzeWert($('[data-a="initialen"]', zeile), p.initialen === null || p.initialen === undefined ? initialenVorschlag(p.name) : p.initialen);
+      }
+      const preiszeile = preisZeile(konfig, a.id, groesse, codes);
+      const pz = $("[data-a-preiszeile]", zeile);
+      setzeText(pz, preiszeile);
+      pz.hidden = preiszeile === "";
       const hinweis = $("[data-a-hinweis]", zeile);
       const text = p.artikel[a.id].groesse ? "" : vorauswahlHinweis(konfig, a.id, p.groesse);
-      if (hinweis.textContent !== text) hinweis.textContent = text;
+      setzeText(hinweis, text);
       hinweis.hidden = text === "";
     }
     const summe = z.personen.find((x) => x.person === p);
-    const text = summe ? `Zwischensumme: ${formatEuro(summe.summeCent)} (${zahlwort(summe.teile, "Teil", "Teile")})` : "Noch kein Artikel gewählt.";
-    const summeKnoten = $("[data-p-summe]", karte);
-    if (summeKnoten.textContent !== text) summeKnoten.textContent = text;
+    setzeText($("[data-p-summe]", karte), summe ? `Zwischensumme: ${summeText(summe.summeCent, summe.ohnePreis)} · ${zahlwort(summe.teile, "Teil", "Teile")}` : "Noch kein Artikel gewählt.");
   }
 
   function syncPersonen(z) {
@@ -306,6 +527,8 @@ function start() {
       const teile = feld.dataset.feld.split(".");
       let wert = zustand;
       for (const t of teile) wert = wert === null || wert === undefined ? undefined : wert[t];
+      // Der Name für die Lieferung folgt „Dein Name“, solange er nicht geändert wurde (null)
+      if (feld.dataset.feld === "lieferName" && (wert === null || wert === undefined)) wert = zustand.name;
       setzeWert(feld, typeof wert === "string" ? wert : "");
     }
     for (const li of el.teamListe.querySelectorAll("[data-teamposten]")) {
@@ -320,26 +543,23 @@ function start() {
     for (const block of ["kleidung", "teambedarf"]) {
       const gruppe = $(`[data-bezahlung="${block}"]`);
       gruppe.hidden = !(block === "kleidung" ? z.hatKleidung : z.hatTeambedarf);
-      // Mehrere Antworten möglich; das Feld für den Namen gibt es nur bei angehaktem Sponsor (Antwort mit „mitName“).
-      // Ein Name bei abgewähltem Sponsor bleibt im Entwurf stehen, geht aber nicht in die Mail.
       const gewaehlt = bezahlungIds(konfig, zustand.bezahlung[block]);
-      for (const haken of gruppe.querySelectorAll('input[type="checkbox"]')) {
-        const an = gewaehlt.includes(haken.value);
-        if (haken.checked !== an) haken.checked = an;
+      for (const kasten of gruppe.querySelectorAll('input[type="checkbox"]')) {
+        const an = gewaehlt.includes(kasten.value);
+        if (kasten.checked !== an) kasten.checked = an;
       }
-      $("[data-sponsor-feld]", gruppe).hidden = !konfig.bezahlung.some((o) => o.mitName && gewaehlt.includes(o.id));
     }
+    // Der Block „Sponsor“ erscheint bei angehaktem „Sponsor“ (Kleidung oder Teambedarf) oder einem Stück mit Sponsorlogo.
+    // Angaben bei abgewähltem Sponsor bleiben im Entwurf stehen, gehen aber nicht in die Mail.
+    el.sponsor.hidden = !sponsorAktiv(konfig, zustand, z);
     el.bezahlungLeer.hidden = z.hatKleidung || z.hatTeambedarf;
   }
 
   function syncUebersicht(z) {
-    const setze = (name, text) => {
-      const k = $(`[data-u="${name}"]`);
-      if (k.textContent !== text) k.textContent = text;
-    };
+    const setze = (name, text) => setzeText($(`[data-u="${name}"]`), text);
     setze("personen", String(z.personen.length));
     setze("teile", String(z.teile));
-    setze("summe", formatEuro(z.summeCent));
+    setze("summe", summeText(z.summeCent, z.ohnePreis));
     const posten = z.teambedarf.length + (z.sonstiges ? 1 : 0);
     setze("teambedarf", posten ? zahlwort(posten, "Posten", "Posten") : "–");
   }
@@ -361,7 +581,8 @@ function start() {
       el.lueckenListe.innerHTML = "";
       ui.lueckenHtml = "";
     }
-    const felder = new Set(sichtbar ? luecken.map((l) => l.feld) : []);
+    // Eine Lücke kann mehrere Felder betreffen (doppelte Rückennummer): „felder“ nennt alle, „feld“ ist das Ziel des Sprungs.
+    const felder = new Set(sichtbar ? luecken.flatMap((l) => l.felder || [l.feld]) : []);
     const markiere = (knoten, an) => {
       if (an && knoten.getAttribute("aria-invalid") !== "true") knoten.setAttribute("aria-invalid", "true");
       if (!an && knoten.hasAttribute("aria-invalid")) knoten.removeAttribute("aria-invalid");
@@ -372,7 +593,7 @@ function start() {
       if (knoten.tagName === "FIELDSET") {
         // Antworten zur Bezahlung: Rahmen um die Gruppe, aria-invalid an den Kontrollkästchen (die Gruppe selbst trägt es nicht)
         knoten.classList.toggle("bst-gruppe--luecke", an);
-        for (const haken of knoten.querySelectorAll('input[type="checkbox"]')) markiere(haken, an);
+        for (const kasten of knoten.querySelectorAll('input[type="checkbox"]')) markiere(kasten, an);
       } else {
         markiere(knoten, an);
       }
@@ -399,11 +620,10 @@ function start() {
     const aktiv = zustand.status !== "";
     el.gesendet.hidden = !aktiv;
     if (aktiv) {
-      const text = zustand.status === "kopiert" ? TEXT_KOPIERT : TEXT_MAIL;
-      if (el.gesendetText.textContent !== text) el.gesendetText.textContent = text;
-      if (el.nr.textContent !== zustand.bestellNr) el.nr.textContent = zustand.bestellNr;
+      setzeText(el.gesendetText, zustand.status === "kopiert" ? TEXT_KOPIERT : TEXT_MAIL);
+      setzeText(el.nr, zustand.bestellNr);
     }
-    if (el.meldung.textContent !== ui.meldung) el.meldung.textContent = ui.meldung;
+    setzeText(el.meldung, ui.meldung);
     el.speicher.hidden = !ui.speicherFehler;
   }
 
@@ -442,7 +662,7 @@ function start() {
       if (gruppe) {
         zustand.bezahlung[gruppe.dataset.bezahlung] = bezahlungIds(
           konfig,
-          [...gruppe.querySelectorAll('input[type="checkbox"]:checked')].map((haken) => haken.value)
+          [...gruppe.querySelectorAll('input[type="checkbox"]:checked')].map((kasten) => kasten.value)
         );
       }
       verarbeitet = true;
@@ -452,12 +672,20 @@ function start() {
       const zeile = t.closest("[data-artikel]");
       if (zeile && t.dataset.a) {
         const id = zeile.dataset.artikel;
+        const a = katalog.nachId.get(id);
         if (t.dataset.a === "an") {
-          if (t.checked) p.artikel[id] = p.artikel[id] || { groesse: "" };
+          // Ein neu gewählter Artikel beginnt mit seinen Standard-Aufdrucken
+          if (t.checked) p.artikel[id] = p.artikel[id] || { groesse: "", aufdrucke: a.aufdrucke.standard.slice() };
           else delete p.artikel[id];
         } else if (t.dataset.a === "groesse" && p.artikel[id]) {
           // gleich der Vorauswahl › „Vorauswahl“ merken, damit die Größe der Person weiter mitgeht
           p.artikel[id].groesse = t.value === vorauswahlGroesse(konfig, id, p.groesse) ? "" : t.value;
+        } else if (t.dataset.a === "druck" && p.artikel[id]) {
+          // Aufdruck an- oder abgehakt: die Liste bleibt in der Reihenfolge von aufdrucke.moeglich
+          const codes = new Set(artikelAufdrucke(konfig, p, id));
+          if (t.checked) codes.add(t.dataset.code);
+          else codes.delete(t.dataset.code);
+          p.artikel[id].aufdrucke = a.aufdrucke.moeglich.filter((c) => codes.has(c));
         } else if (t.dataset.a === "initialen") {
           p.initialen = t.value;
         }
@@ -608,9 +836,8 @@ function start() {
   });
 
   function neueBestellung() {
-    if (!window.confirm("Neue Bestellung beginnen? Deine Eingaben für diese Bestellung werden gelöscht. Mannschaft, Name und Telefon bleiben erhalten.")) return;
-    const { team, name, tel } = zustand;
-    zustand = Object.assign(leererEntwurf(), { team, name, tel });
+    if (!window.confirm("Neue Bestellung beginnen? Deine Eingaben für diese Bestellung werden gelöscht. Mannschaft, Name, Telefon und Lieferanschrift bleiben erhalten.")) return;
+    zustand = Object.assign(leererEntwurf(), absenderVon(zustand));
     ui.zeigeLuecken = false;
     ui.meldung = "";
     el.personen.textContent = "";
@@ -644,9 +871,10 @@ function start() {
     if (el.vorschau.open) aktualisiere();
   });
 
+  el.vergessen.addEventListener("click", () => haken.vergessen());
+
   speichere();
   aktualisiere();
-  wurzel.setAttribute("data-bereit", "");
 }
 
 start();

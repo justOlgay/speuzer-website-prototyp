@@ -184,31 +184,69 @@ Bestelladresse (`mailto:`). Es gibt keinen Server, kein Konto und keine Datenban
 **Nicht im appack-Paket, nicht in der Sitemap:** Die Seite trägt `noindex` und steht in keinem Menü. `tools/appack-paket.mjs` nimmt sie
 (`AUSGESCHLOSSENE_DATEIEN`, wie `styleguide.html`) aus dem Paket, `ohneSitemap: true` im Seitenmodul lässt sie aus `docs/sitemap.xml` weg (wie bei der Trainerseite).
 
-- Daten: `data/bestellung.json` ist die eine Pflegedatei. Sie enthält den Katalog (`artikel`: Anzeige, Beschreibung für Trainer, Preis für Kinder und
-  Erwachsene **nur für Eltern bzw. Spieler**, Größen, Angebotsbezeichnung und Herstellernummer des Lieferanten je Kinder-/Erwachsenenvariante,
-  Veredelungen, Einzeldruck), die Größenleitern, die Schnellwahl, den Teambedarf, die Antworten zur Bezahlung und die `einstellungen` (Empfänger,
-  `pruefmodus`, Preisstand, Lieferant). Einkaufspreise, Kundenkonto und Angebotsnummern des Lieferanten gehören nie in die Datei oder ins Repo.
+**Code-Schutz und Preise (seit 25.11.2026):** Die Seite öffnet sich nur mit einem Code und nur für Trainerinnen und Trainer. Ohne Code zeigt sie Kopf,
+Prototyp-Hinweis und eine Zugangsbox. Das Repo und GitHub Pages sind öffentlich; die Preise laut Angebot (Listenpreise, Rabatt, Preise je Aufdruck) liegen
+darum nur **verschlüsselt** im Repo (`data/bestellung-preise.enc.json`). Im ausgelieferten HTML und JS steht kein Preis, kein Listenpreis und kein Rabattsatz.
+
+- Verfahren (`assets/js/bestellung/zugang.js`, nur Web Crypto, läuft im Browser und in Node ab Version 20): Der Code wird normalisiert (Leerzeichen, Bindestriche und
+  Unterstriche weg, Großbuchstaben); Schlüssel = PBKDF2-HMAC-SHA256 (600.000 Runden, Salt 16 Byte zufällig) › AES-GCM-256; verschlüsselt wird mit IV 12 Byte
+  zufällig und den zusätzlichen Daten (AAD) „speuzer-bestellung-preise-v1“. Das Paket hat die Felder `format`, `kdf`, `iter`, `salt`, `iv`, `ct` (Base64). Ein
+  falscher Code gibt `ZugangFehler("Der Code stimmt nicht.")`, ein Paket in falscher Form eine eigene Meldung (die Seite zeigt dann einen Hinweis statt eines Absturzes).
+- Der Bau (`src/seiten/bestellung.mjs`) bettet das Paket als `preiseVerschluesselt` in die Konfiguration der Seite ein (`#bestellung-konfig`). Das Formular
+  (`assets/js/bestellung/formular.js`) und alle Texte mit Preisen entstehen erst nach dem Entschlüsseln im Browser (`seite.js`).
+- Der Code kommt aus dem Feld, aus dem Link `…/ws/bestellung.html?code=<CODE>` (danach entfernt `history.replaceState` den Parameter aus der Adresse) oder vom Gerät: Ein richtiger
+  Code wird unter `speuzer-bestellung-v1-code` gemerkt, die Seite öffnet beim nächsten Besuch ohne Eingabe. „Code auf diesem Gerät vergessen“ (unten) schließt sie wieder. Passt ein gemerkter
+  Code nach einem Wechsel nicht mehr, steht ein Hinweis da und der alte Code ist gelöscht.
+- Erzeugen und wechseln: `node tools/bestellung-zugang.mjs --preise <private Datei> --neu --blatt <Ordner außerhalb des Repos>` (auch `npm run bestellung-zugang -- …`). Das Werkzeug erzeugt
+  einen Code (10 Zeichen aus `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`), prüft die Preisdaten gegen den Katalog, verschlüsselt sie, prüft das Ergebnis durch Entschlüsseln und schreibt
+  `data/bestellung-preise.enc.json` (ohne `pruefsummen` und `_hinweis`). Im Ordner entsteht „Bestellseite – Zugang für Trainer.txt“ mit Code und Link. Mit `--code <CODE>` (oder `--code -` von der
+  Standardeingabe) gibt man den Code vor. Die Konsole zeigt den Code nie, außer mit `--zeigen`; `--neu` ohne `--blatt` und ohne `--zeigen` ist ein Fehler (der Code ginge verloren); ein Ordner
+  im Repo wird verweigert (nur unter `tools/cache/` geht es). Danach `npm run build` und veröffentlichen. Neuer Code = neues Paket: Alle alten Links und gemerkten Codes passen dann nicht mehr.
+- Die **private Preisdatei** (zum Beispiel `tools/cache/bestellung-preise.json`, gitignoriert, nie committen, nie ins Repo kopieren) hat die Form
+  `{ stand: "JJJJ-MM-TT", quelle: "Angebot …", rabattProzent, veredelungPreis: { W, V, SP, ZG, N, ZK }, uvp: { <artikel>: { kinder, erwachsene } | { alle } | null }, pruefsummen }`; Beträge in Euro mit höchstens zwei Nachkommastellen,
+  `uvp: null` heißt „Preis auf Anfrage“ (Regenjacke), `pruefsummen` (Stückpreis je Artikel und Gruppe mit den Standard-Aufdrucken) dienen nur dem Test.
+- **Bis zum Livegang** ist `data/bestellung-preise.enc.json` mit erfundenen Testpreisen und dem Testcode aus `tools/bestellung-test/testdaten.mjs` verschlüsselt. Vor dem Livegang mit dem Werkzeug durch das Paket mit den echten Preisen
+  und dem echten Code ersetzen. Die Tests hängen nicht an dieser Datei: Der Browser-Test baut in einem Wegwerf-Ordner mit der Umgebungsvariable `BESTELLUNG_PREISE_ENC=<Paket>` (nur für Tests, sie wirkt nur beim Bau).
+
+- Daten: `data/bestellung.json` ist die eine Pflegedatei, **ohne Preise**. Sie enthält den Katalog (`artikel`: Anzeige, Beschreibung für Trainer, Größen, Angebotsbezeichnung und Herstellernummer des Lieferanten
+  je Kinder-/Erwachsenenvariante, `aufdrucke.moeglich` und `aufdrucke.standard` als Kürzel in der Reihenfolge der Anzeige, `druckdaten` = was ein Aufdruck von der Person braucht: `nummer`, `name` oder `initialen`),
+  die Texte der Aufdrucke für den Lieferanten (`veredelungen`) und ihre kurzen Namen für die Auswahl (`aufdruckNamen`), die Größenleitern, die Schnellwahl, den Teambedarf, die Antworten zur Bezahlung und die
+  `einstellungen` (Empfänger, `pruefmodus`, Lieferant). Einkaufspreise, Kundenkonto und Angebotsnummern des Lieferanten gehören nie in die Datei oder ins Repo.
   Die Mannschaften kommen aus `data/teams.json` (angezeigt wird `name`, die Bestell-Nr. nutzt `slug`; neue Mannschaften erscheinen von selbst).
-  Ein Fehler in der Datei (fehlender Preis, unbekannte Veredelung …) bricht den Bau ab (`pruefeKonfig` in `assets/js/bestellung/mailtext.js`).
+  Ein Fehler in der Datei (unbekannte Veredelung, Standard-Aufdruck ohne Möglichkeit …) bricht den Bau ab (`pruefeKonfig` in `assets/js/bestellung/mailtext.js`).
   Nach jeder Änderung: `npm run build`, dann `npm run test:bestellung`.
+- Rechnung (`mailtext.js`, ganze Cent): Grundpreis = Listenpreis (UVP) minus Rabatt, auf Cent gerundet; Stückpreis = Grundpreis plus die Zuschläge der gewählten Aufdrucke. Die Größe bestimmt die Gruppe
+  (`kinder`: Kindergrößen und Stutzen S/M, sonst `erwachsene`, Rucksack `alle`). Ohne Listenpreis steht überall „Preis auf Anfrage“: Das Stück zählt bei den Teilen mit, aber nicht in Summen; hinter jeder Summe
+  steht dann „(ohne Regenjacke, Preis auf Anfrage)“.
+- Aufdrucke: Je Artikel wählt man, was draufkommt (Kästchen „Was soll drauf?“ mit Zuschlag je Aufdruck, vorausgewählt ist `aufdrucke.standard`); unter dem Stückpreis steht die Rechnung
+  („Listenpreis … − … % = … · Aufdrucke + …“). Name, Rückennummer und Initialen sind nur Pflicht, wenn ein gewählter Aufdruck sie braucht (`druckdaten`); die Lücke nennt den Artikel. Haben zwei Personen
+  einer Bestellung dieselbe Nummer (und unterschiedliche Namen), ist das eine Lücke.
+- Sponsor: Der Block „Sponsor“ im Abschnitt Bezahlung (Firma Pflicht; Ansprechpartner, E-Mail, Telefon, Anschrift für die Rechnung freiwillig) erscheint, sobald „Sponsor“ bei Kleidung oder Teambedarf angehakt ist
+  oder ein gewähltes Stück das Sponsorlogo (`SP`) trägt. Rechnung und Vertrag macht die Geschäftsstelle, nicht die Seite; die Angaben stehen in Teil 3 der Mail.
+- Lieferung: „Lieferanschrift (die Bestellung kommt zu dir)“ ist Pflicht (Name folgt „Dein Name“, solange man ihn nicht ändert; Straße und Hausnummer; fünf Ziffern und Ort). Sie wird wie Mannschaft, Name und
+  Telefon auf dem Gerät gemerkt und bleibt bei „Neue Bestellung beginnen“.
 - Prüfmodus: `einstellungen › pruefmodus` (jetzt `true`) zeigt oben den Hinweis „Prototyp: Die Mail geht als TEST …“, setzt „[TEST]“ in den Betreff
   und eine Testzeile in die Mail. Ausschalten: auf `false` setzen und neu bauen. Die Schlusszeile „Erstellt mit der Bestellseite für Trainer
   (Prototyp).“ steht in `SCHLUSSZEILE` (`assets/js/bestellung/mailtext.js`) und ändert sich erst beim Livegang.
-- Mail: Teil 1 „Kleidung für den Lieferanten“ (nach Artikel und Größe mit Angebotsbezeichnung, Herstellernummer und Druck; Druckdaten nur für Stücke
-  mit Einzeldruck, nie die Liste je Kind), Teil 2 „Teambedarf“, Teil 3 „Nur intern“ (Zuordnung je Person mit den Preisen für Eltern bzw. Spieler).
+- Mail: Kopf mit „Bestellt von“ und „Lieferung an“; Teil 1 „Kleidung für den Lieferanten“ (Lieferanschrift, dann nach Artikel, Variante und Aufdruck-Kombination mit Angebotsbezeichnung, Herstellernummer, „Druck:“-Zeile und Größen;
+  Druckdaten nur für Stücke, deren Aufdrucke Daten brauchen, nie die Liste je Kind), Teil 2 „Teambedarf“, Teil 3 „Nur intern“ (Angaben zum Sponsor für die Geschäftsstelle, Zuordnung je Person mit den Preisen laut Angebot).
   Die Nummern der Teile sind fest, ein leerer Teil entfällt samt Überschrift. Bestell-Nr. `KÜRZEL-JJMMTT-HHMM` (Ortszeit), sie entsteht beim ersten
   Senden. Ist die mailto-Adresse länger als 7.500 Zeichen, weist die Seite auf „Text kopieren“ hin; gekürzt wird nie.
-  Bei der Bezahlung kann man je Block (Kleidung, Teambedarf) mehrere Antworten ankreuzen (mindestens eine, bei „Sponsor“ mit Namen); die Mailzeile
-  nennt sie in der Reihenfolge der Datei, etwa „Eltern bzw. Spieler und Sponsor (Autohaus Beispiel)“, und ein alter Entwurf mit einem Text je Block lädt als Liste.
-- Code: `assets/js/bestellung/mailtext.js` (reine Funktionen ohne DOM: Prüfung, Zusammenfassung, Mailtext, mailto, Bestell-Nr., Entwurf),
-  `assets/js/bestellung/seite.js` (Oberfläche, Zustand, Speichern auf dem Gerät; nur statische Importe), `assets/css/bestellung.css`,
-  Gerüst und eingebettete Konfiguration `src/seiten/bestellung.mjs`.
-- Tests (`npm run test:bestellung`, nach `npm run build`): `node tools/bestellung-test/mailtext-test.mjs` (ohne Browser: Katalog gegen die
-  Spezifikation, Betreff und Text Zeichen für Zeichen, Lückenliste, mailto hin und zurück, Bestell-Nr., Entwurf) und
-  `node tools/bestellung-test/e2e.mjs` (Chrome über puppeteer-core: die Referenzbestellung nur über die Oberfläche, Lücken, Senden, Kopieren, Neuladen,
-  „Neue Bestellung beginnen“, localStorage mit Fehlern, 390 und 1440 px, Tippflächen, axe-core; Bildschirmfotos nach `tools/cache/bestellung-test/`).
-  Die gemeinsamen Testbestellungen mit festen erwarteten Texten stehen in `tools/bestellung-test/faelle.mjs`. Der Browser-Test fängt den Klick auf
+  Bei der Bezahlung kann man je Block (Kleidung, Teambedarf) mehrere Antworten ankreuzen (mindestens eine); die Mailzeile
+  nennt sie in der Reihenfolge der Datei, bei „Sponsor“ mit der Firma („Sponsor (Firma)“). Alte Entwürfe auf den Geräten (ein Text je Block, `kleidungSponsor`, keine Aufdrucke, keine Lieferanschrift) laden mit den Standard-Aufdrucken
+  und übernehmen den Sponsor als Firma.
+- Code: `assets/js/bestellung/mailtext.js` (reine Funktionen ohne DOM: Prüfung, Zusammenfassung, Preise, Mailtext, mailto, Bestell-Nr., Entwurf), `zugang.js` (Verschlüsselung), `formular.js` (Formular als Text, erst nach dem Entschlüsseln),
+  `seite.js` (Zugang, Oberfläche, Zustand, Speichern auf dem Gerät; nur statische Importe), `assets/css/bestellung.css`, Hülle und eingebettete Konfiguration `src/seiten/bestellung.mjs`.
+- Tests (`npm run test:bestellung`, nach `npm run build`; sie rechnen mit erfundenen Testpreisen und einem Testcode, nie mit echten Preisen): `node tools/bestellung-test/mailtext-test.mjs` (ohne Browser: Katalog gegen die Spezifikation,
+  Preise und Rundung, Betreff und Text Zeichen für Zeichen, Lückenliste, Aufdrucke, doppelte Nummern, Sponsor, Lieferung, mailto hin und zurück, Bestell-Nr., Entwurf, alte Entwürfe, Hülle und Formular),
+  `node tools/bestellung-test/zugang-test.mjs` (Verschlüsselung gegen eine unabhängige Umsetzung mit `node:crypto`, falsche und veränderte Pakete, das Werkzeug mit Wegwerfordnern unter `tools/cache/`),
+  `node tools/bestellung-test/geheim-test.mjs` (siehe unten) und `node tools/bestellung-test/e2e.mjs` (Chrome über puppeteer-core, Bau mit Testpreisen in einem Wegwerf-Ordner: Zugang, die Referenzbestellung nur über die Oberfläche, Aufdrucke,
+  Sponsor, Lieferung, Lücken, Senden, Kopieren, Neuladen, „Neue Bestellung beginnen“, alte Entwürfe, localStorage mit Fehlern, 320 bis 1440 px, Tippflächen, axe-core; Bildschirmfotos nach `tools/cache/bestellung-test/`).
+  Die gemeinsamen Testbestellungen mit festen, von Hand gerechneten Texten stehen in `tools/bestellung-test/faelle.mjs`, die Testpreise in `testdaten.mjs`. Der Browser-Test fängt den Klick auf
   den mailto-Link ab: Es öffnet sich kein Mailprogramm und nichts wird gesendet.
+- Geheimhaltung prüfen: `BESTELLUNG_PREISE_PRIVAT=<private Preisdatei> node tools/bestellung-test/geheim-test.mjs` sucht alle Beträge der Datei (Listen-, Grund- und Stückpreise, Zuschläge, Prüfsummen; Punkt und Komma) und den Rabattsatz in allen
+  von git verfolgten Dateien, in `docs/` und in den neuen Zeilen von `git log -p <Basis>..HEAD` (Basis siehe `BASIS_COMMIT` im Test; sie rückt nach einer bestandenen Prüfung nach) und rechnet die Prüfsummen mit `mailtext.js` nach. Die Ausgabe nennt nie einen Wert: „n Werte geprüft, 0 Treffer, n Prüfsummen stimmen“.
+  Ohne die Variable gibt der Test nur einen Hinweis aus (und prüft seine Suche an erfundenen Zahlen).
 
 ## Befehle
 

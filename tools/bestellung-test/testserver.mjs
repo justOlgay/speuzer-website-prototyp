@@ -1,7 +1,8 @@
 // Statischer Testserver für die Bestellseite (nur Tests, nichts davon gehört in die Auslieferung).
 //
 // Bedient wird eine Kopie der Dateien, die die Seite braucht (Schnappschuss unter tools/cache/bestellung-test/site/), nicht
-// docs/ selbst: Ein Bau, den jemand gleichzeitig ausführt, löscht docs/assets kurz und würde den Test stören.
+// docs/ selbst: Ein Bau, den jemand gleichzeitig ausführt, löscht docs/assets kurz und würde den Test stören. Der Schnappschuss kommt aus
+// docs/ des Arbeitsordners oder aus einem anderen docs-Ordner (der Browser-Test baut mit Testpreisen in einem Wegwerf-Ordner).
 // Port 0 = freier Port (nie 4173). Es werden nur diese Pfade ausgeliefert: ws/bestellung.html und assets/{css,fonts,logo,js/bestellung}.
 // Alles andere ist 404; die Anfragen werden mitgezählt (server.anfragen), damit der Test sieht, ob die Seite etwas Unerwartetes lädt.
 //
@@ -39,16 +40,16 @@ function warte(ms) {
 }
 
 // Kopiert die nötigen Teile von docs/ und wiederholt das, falls docs/ gerade neu gebaut wird.
-export async function macheSchnappschuss() {
-  if (!existsSync(path.join(DOCS, "ws", "bestellung.html"))) {
-    throw new Error("docs/ws/bestellung.html fehlt – zuerst bauen: npm run build");
+export async function macheSchnappschuss(docs = DOCS) {
+  if (!existsSync(path.join(docs, "ws", "bestellung.html"))) {
+    throw new Error(`${path.relative(ROOT, docs)}/ws/bestellung.html fehlt – zuerst bauen: npm run build`);
   }
   for (let versuch = 0; versuch < 8; versuch++) {
     try {
       rmSync(SCHNAPPSCHUSS, { recursive: true, force: true });
       for (const [von, nach] of KOPIEREN) {
         mkdirSync(path.dirname(path.join(SCHNAPPSCHUSS, nach)), { recursive: true });
-        cpSync(path.join(DOCS, von), path.join(SCHNAPPSCHUSS, nach), { recursive: true });
+        cpSync(path.join(docs, von), path.join(SCHNAPPSCHUSS, nach), { recursive: true });
       }
       if (existsSync(path.join(SCHNAPPSCHUSS, "assets", "js", "bestellung", "seite.js"))) return SCHNAPPSCHUSS;
     } catch (e) {
@@ -59,8 +60,8 @@ export async function macheSchnappschuss() {
   throw new Error("docs/ ändert sich ständig (läuft gerade ein Bau?) – bitte später noch einmal");
 }
 
-export async function starteTestserver() {
-  const wurzel = await macheSchnappschuss();
+export async function starteTestserver(docs = DOCS) {
+  const wurzel = await macheSchnappschuss(docs);
   const anfragen = [];
   const server = createServer((req, res) => {
     const pfad = decodeURIComponent((req.url || "/").split("?")[0]);
