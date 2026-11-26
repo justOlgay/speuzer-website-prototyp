@@ -1,6 +1,6 @@
 {
   "_hinweis": "Pflegedatei der Bestellseite für Trainer (docs/ws/bestellung.html, Seitenmodul src/seiten/bestellung.mjs). Hier stehen keine Preise: Die Preise laut Angebot (Listenpreise, Rabatt, Preise je Aufdruck) liegen nur verschlüsselt in data/bestellung-preise.enc.json (Werkzeug: tools/bestellung-zugang.mjs, ohne Code nicht lesbar). Einkaufspreise, Kundenkonto und Angebotsnummern des Lieferanten gehören nie in diese Datei. Nach einer Änderung neu bauen (npm run build) und npm run test:bestellung ausführen. Aufbau und Pflege: README.md, Abschnitt „Bestellseite für Trainer (Prototyp)“.",
-  "stand": "2026-11-25",
+  "stand": "2026-11-26",
   "einstellungen": {
     "empfaenger": "Bestellungen@sportfreunde04.de",
     "pruefmodus": true,
@@ -31,11 +31,11 @@
     {
       "id": "trikot",
       "anzeige": "Trikot",
-      "beschreibung": "JAKO T-Shirt One, weiß",
+      "beschreibung": "JAKO Team Trikot kurzarm, weiß",
       "groessen": [{ "gruppe": "kinder" }, { "gruppe": "erwachsene" }],
       "lieferant": {
-        "kinder": { "bezeichnung": "JAKO One T-Shirt Kids Weiß F0", "nr": "6101" },
-        "erwachsene": { "bezeichnung": "JAKO One T-Shirt Weiß F0", "nr": "6101" }
+        "kinder": { "bezeichnung": "JAKO Team Trikot kurzarm Kids Weiß F00", "nr": "4233" },
+        "erwachsene": { "bezeichnung": "JAKO Team Trikot kurzarm Weiß F00", "nr": "4233" }
       },
       "aufdrucke": { "moeglich": ["W", "V", "SP", "ZG"], "standard": ["W", "V", "SP", "ZG"] },
       "druckdaten": { "ZG": "nummer" }

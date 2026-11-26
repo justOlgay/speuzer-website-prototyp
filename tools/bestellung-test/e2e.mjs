@@ -1086,7 +1086,7 @@ async function ablaufAufdrucke(browser, server) {
     gleich("Sponsorlogo abgewählt: Preis 18,79 € (13,14 + 1,05 + 2,15 + 2,45)", await preis("trikot"), "18,79 €");
     gleich("Sponsorlogo abgewählt: Preiszeile mit 5,65 € für die Aufdrucke", await preiszeile("trikot"), "Listenpreis 21,90 € − 40 % = 13,14 € · Aufdrucke + 5,65 €");
     gleich("Sponsorlogo abgewählt: Zwischensumme", await summe(), "Zwischensumme: 73,42 € (ohne Regenjacke, Preis auf Anfrage) · 5 Teile");
-    pruefe("Sponsorlogo abgewählt: Teil 1 ohne „Werbeaufdruck“, der Block „Sponsor“ ist weg, nichts vom Sponsor in der Mail", (await vorschau()).includes("JAKO One T-Shirt Kids Weiß F0 (6101)\nDruck: Vereinswappen einfarbig, Vereinsnamen XL (SPEUZER), Zahlen 20-26cm (Rückennummer)\n- Gr. 140: 1 Stück\n") && !(await vorschau()).includes("Werbeaufdruck") && !(await sichtbar(page, "[data-bst-sponsorblock]")) && !(await vorschau()).includes("Sponsor"));
+    pruefe("Sponsorlogo abgewählt: Teil 1 ohne „Werbeaufdruck“, der Block „Sponsor“ ist weg, nichts vom Sponsor in der Mail", (await vorschau()).includes("JAKO Team Trikot kurzarm Kids Weiß F00 (4233)\nDruck: Vereinswappen einfarbig, Vereinsnamen XL (SPEUZER), Zahlen 20-26cm (Rückennummer)\n- Gr. 140: 1 Stück\n") && !(await vorschau()).includes("Werbeaufdruck") && !(await sichtbar(page, "[data-bst-sponsorblock]")) && !(await vorschau()).includes("Sponsor"));
     await page.click(druck("trikot", "SP"));
     pruefe("Sponsorlogo wieder angehakt: Preis wie vorher, der Block „Sponsor“ ist wieder da", (await preis("trikot")) === "21,74 €" && (await sichtbar(page, "[data-bst-sponsorblock]")));
 
@@ -1095,7 +1095,7 @@ async function ablaufAufdrucke(browser, server) {
     gleich("Trikot ohne Aufdrucke: Kästchen", await haken("trikot"), "W:0,V:0,SP:0,ZG:0");
     gleich("Trikot ohne Aufdrucke: Preis = Grundpreis", await preis("trikot"), "13,14 €");
     gleich("Trikot ohne Aufdrucke: Preiszeile ohne „Aufdrucke“", await preiszeile("trikot"), "Listenpreis 21,90 € − 40 % = 13,14 €");
-    pruefe("Trikot ohne Aufdrucke: im Text keine „Druck:“-Zeile beim Trikot und keine Druckdaten dafür", (await vorschau()).includes("JAKO One T-Shirt Kids Weiß F0 (6101)\n- Gr. 140: 1 Stück\n") && !(await vorschau()).includes("- Trikot 6101"));
+    pruefe("Trikot ohne Aufdrucke: im Text keine „Druck:“-Zeile beim Trikot und keine Druckdaten dafür", (await vorschau()).includes("JAKO Team Trikot kurzarm Kids Weiß F00 (4233)\n- Gr. 140: 1 Stück\n") && !(await vorschau()).includes("- Trikot 4233"));
     await tippe(page, `${karte} [data-p="nummer"]`, "", true);
     await page.click("#bst-senden");
     pruefe("Nummer gelöscht: die Lücke nennt nur noch die Präsi-Jacke (das Trikot braucht keine Nummer mehr)", (await luecken(page)).includes("Bei Mia fehlt die Rückennummer (Präsi-Jacke)"), (await luecken(page)).join(" | "));

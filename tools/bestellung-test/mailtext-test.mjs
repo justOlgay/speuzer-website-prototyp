@@ -178,11 +178,11 @@ abschnitt("Katalog");
   gleichJson("zwölf Mannschaften in der Reihenfolge von data/teams.json", KONFIG.mannschaften.map((m) => m.slug), ["herren", "soma", "a-jugend", "d1", "d2", "d3", "e1", "e2", "e3", "f1", "f2", "g-jugend"]);
   gleich("Mannschaft: angezeigt wird der Name", KONFIG.mannschaften.find((m) => m.slug === "d3").name, "D3-Jugend");
   gleichJson("Einstellungen (ohne Preisstand: Stand und Quelle kommen aus den verschlüsselten Preisdaten)", KONFIG.einstellungen, { empfaenger: "Bestellungen@sportfreunde04.de", pruefmodus: true, lieferant: "11Teamsport" });
-  gleich("Stand der Daten", KONFIG.stand, "2026-11-25");
+  gleich("Stand der Daten", KONFIG.stand, "2026-11-26");
 
   // Angebotsbezeichnung (Herstellernummer) je Artikel, Kinder / Erwachsene, wörtlich aus der Spezifikation
   const lieferant = {
-    trikot: ["JAKO One T-Shirt Kids Weiß F0 (6101)", "JAKO One T-Shirt Weiß F0 (6101)"],
+    trikot: ["JAKO Team Trikot kurzarm Kids Weiß F00 (4233)", "JAKO Team Trikot kurzarm Weiß F00 (4233)"],
     shorts: ["JAKO One Trainingshose Kids Blau F400 (4420)", "JAKO One Trainingshose Blau F400 (4420)"],
     stutzen: ["JAKO Tube Stutzen Blau F04 (3401)", "JAKO Tube Stutzen Blau F04 (3401)"],
     "praesi-jacke": ["JAKO One Trainingsjacke Kids Blau F400 (9300)", "JAKO One Trainingsjacke Blau F400 (9300)"],
@@ -255,7 +255,7 @@ abschnitt("Katalog");
   gleichJson("Rucksack: Einheitsgröße", k.nachId.get("rucksack").groessen.map((g) => g.wert), ["Einheitsgröße"]);
   gleichJson("Winterjacke: Kinder ab 128", k.nachId.get("winterjacke").groessen.map((g) => g.wert), ["128", "140", "152", "164", "S", "M", "L", "XL", "XXL", "3XL"]);
   gleichJson("Trikot: alle Größen", k.nachId.get("trikot").groessen.map((g) => g.wert), ["116", "128", "140", "152", "164", "S", "M", "L", "XL", "XXL", "3XL"]);
-  gleichJson("Beschreibung Trikot für Trainer", [k.nachId.get("trikot").beschreibung, k.nachId.get("tw-trikot").beschreibung], ["JAKO T-Shirt One, weiß", "JAKO Torwarttrikot Power, rot"]);
+  gleichJson("Beschreibung Trikot für Trainer", [k.nachId.get("trikot").beschreibung, k.nachId.get("tw-trikot").beschreibung], ["JAKO Team Trikot kurzarm, weiß", "JAKO Torwarttrikot Power, rot"]);
 
   // Schnellwahl: Inhalt
   const set = (id) => KONFIG.schnellwahl.find((s) => s.id === id);
@@ -477,7 +477,7 @@ for (const [id, fall] of Object.entries(FAELLE)) {
   const teil3 = m.slice(m.indexOf("== 3."));
   pruefe("(a) Teil 1 für den Lieferanten enthält keine Preise, keinen Sponsor und kein „Zuordnung“", !/€|Zuordnung|Eltern bzw|Autohaus|Frau Beispiel|autohaus|Sponsor \(|Firma/.test(teil1.replace("Werbeaufdruck M 1C (Sponsorlogo)", "")), teil1);
   pruefe("(a) Teil 1 nennt Emil und Ben Kuhn nicht (nur Stücke mit Daten tragen einen Namen)", !teil1.includes("Emil") && !teil1.includes("Ben Kuhn"));
-  pruefe("(a) Teil 1: die Lieferanschrift steht direkt unter „Dieser Teil kann so weitergeleitet werden.“ (nach einer Leerzeile)", teil1.includes("Dieser Teil kann so weitergeleitet werden.\n\nLieferanschrift:\nLena Beispiel\nBeispielweg 12\n60439 Frankfurt\n\nJAKO One T-Shirt Kids"));
+  pruefe("(a) Teil 1: die Lieferanschrift steht direkt unter „Dieser Teil kann so weitergeleitet werden.“ (nach einer Leerzeile)", teil1.includes("Dieser Teil kann so weitergeleitet werden.\n\nLieferanschrift:\nLena Beispiel\nBeispielweg 12\n60439 Frankfurt\n\nJAKO Team Trikot kurzarm Kids"));
   pruefe("(a) Teil 3 steht ganz unten mit „NICHT WEITERLEITEN“", teil3.startsWith("== 3. NUR INTERN – NICHT WEITERLEITEN =="));
   pruefe("(a) Teil 3: der Block „Sponsor“ steht vor der Zuordnung", teil3.indexOf("Sponsor (für die Geschäftsstelle):") > 0 && teil3.indexOf("Sponsor (für die Geschäftsstelle):") < teil3.indexOf("Zuordnung je Person"));
   pruefe("(a) Teil 2 und Kopf enthalten keine Preise", !/€/.test(m.slice(0, m.indexOf("== 3."))));
@@ -737,24 +737,24 @@ abschnitt("(o) Aufdruck-Kombinationen: eigene Blöcke, Reihenfolge, Druckdaten")
   const V = "Vereinsnamen XL (SPEUZER)";
   const SP = "Werbeaufdruck M 1C (Sponsorlogo)";
   const ZG = "Zahlen 20-26cm (Rückennummer)";
-  const teil1 = m.slice(m.indexOf("JAKO One T-Shirt Kids"), m.indexOf("Druckdaten je Stück:"));
+  const teil1 = m.slice(m.indexOf("JAKO Team Trikot kurzarm Kids"), m.indexOf("Druckdaten je Stück:"));
   gleich("(o) Blöcke: Kinder zuerst (mehr Aufdrucke zuerst, bei gleich vielen die früheren Kürzel), dann Erwachsene; ohne Aufdruck keine „Druck:“-Zeile", teil1, [
-    "JAKO One T-Shirt Kids Weiß F0 (6101)", druck(W, V, SP, ZG), "- Gr. 140: 1 Stück", "- Gr. 152: 1 Stück", "",
-    "JAKO One T-Shirt Kids Weiß F0 (6101)", druck(W, V, SP), "- Gr. 140: 1 Stück", "",
-    "JAKO One T-Shirt Kids Weiß F0 (6101)", druck(W, V, ZG), "- Gr. 140: 1 Stück", "",
-    "JAKO One T-Shirt Kids Weiß F0 (6101)", druck(V, SP, ZG), "- Gr. 140: 1 Stück", "",
-    "JAKO One T-Shirt Kids Weiß F0 (6101)", druck(W), "- Gr. 140: 1 Stück", "",
-    "JAKO One T-Shirt Kids Weiß F0 (6101)", "- Gr. 140: 1 Stück", "",
-    "JAKO One T-Shirt Weiß F0 (6101)", druck(ZG), "- Gr. M: 1 Stück", "",
+    "JAKO Team Trikot kurzarm Kids Weiß F00 (4233)", druck(W, V, SP, ZG), "- Gr. 140: 1 Stück", "- Gr. 152: 1 Stück", "",
+    "JAKO Team Trikot kurzarm Kids Weiß F00 (4233)", druck(W, V, SP), "- Gr. 140: 1 Stück", "",
+    "JAKO Team Trikot kurzarm Kids Weiß F00 (4233)", druck(W, V, ZG), "- Gr. 140: 1 Stück", "",
+    "JAKO Team Trikot kurzarm Kids Weiß F00 (4233)", druck(V, SP, ZG), "- Gr. 140: 1 Stück", "",
+    "JAKO Team Trikot kurzarm Kids Weiß F00 (4233)", druck(W), "- Gr. 140: 1 Stück", "",
+    "JAKO Team Trikot kurzarm Kids Weiß F00 (4233)", "- Gr. 140: 1 Stück", "",
+    "JAKO Team Trikot kurzarm Weiß F00 (4233)", druck(ZG), "- Gr. M: 1 Stück", "",
     "",
   ].join("\n"));
   gleich("(o) Druckdaten nur für Stücke, deren Aufdrucke Daten brauchen (ZG): ohne Cem (kein ZG), Lea und Tim", m.slice(m.indexOf("Druckdaten je Stück:"), m.indexOf("Summe:")), [
     "Druckdaten je Stück:",
-    "- Trikot 6101, Gr. 140: Nr. 1",
-    "- Trikot 6101, Gr. 140: Nr. 2",
-    "- Trikot 6101, Gr. 140: Nr. 4",
-    "- Trikot 6101, Gr. 152: Nr. 5",
-    "- Trikot 6101, Gr. M: Nr. 8",
+    "- Trikot 4233, Gr. 140: Nr. 1",
+    "- Trikot 4233, Gr. 140: Nr. 2",
+    "- Trikot 4233, Gr. 140: Nr. 4",
+    "- Trikot 4233, Gr. 152: Nr. 5",
+    "- Trikot 4233, Gr. M: Nr. 8",
     "",
     "",
   ].join("\n"));
@@ -1149,12 +1149,12 @@ abschnitt("Sonderfälle");
   const druckZeilen = zeilen(druck.slice(druck.indexOf("Druckdaten je Stück:"), druck.indexOf("Summe:"))).filter(Boolean);
   gleichJson("Druckdaten sortiert (Katalog › Größe › Nummer numerisch › Name)", druckZeilen, [
     "Druckdaten je Stück:",
-    "- Trikot 6101, Gr. 128: Nr. 2",
-    "- Trikot 6101, Gr. 152: Nr. 5",
-    "- Trikot 6101, Gr. 152: Nr. 5",
-    "- Trikot 6101, Gr. 152: Nr. 9",
-    "- Trikot 6101, Gr. 152: Nr. 10",
-    "- Trikot 6101, Gr. XL: Nr. 1",
+    "- Trikot 4233, Gr. 128: Nr. 2",
+    "- Trikot 4233, Gr. 152: Nr. 5",
+    "- Trikot 4233, Gr. 152: Nr. 5",
+    "- Trikot 4233, Gr. 152: Nr. 9",
+    "- Trikot 4233, Gr. 152: Nr. 10",
+    "- Trikot 4233, Gr. XL: Nr. 1",
     "- Präsi-Jacke 9300, Gr. 152: Name „Ina“, Nr. 3",
     "- Präsi-Jacke 9300, Gr. 152: Name „Max“, Nr. 10",
     "- TW-Trikot 8923, Gr. 152: Nr. 3",
