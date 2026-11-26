@@ -25,6 +25,7 @@
     {
       team: "d3",                    // slug der Mannschaft
       name: "Lena Beispiel", tel: "", bis: "2027-01-15",
+      email: "",                     // E-Mail-Adresse des Bestellers (optional): Ist sie gültig, bekommt er eine Kopie (Cc im mailto-Link, ccAdresse)
       lieferName: null,              // Name für die Lieferung; null = folgt „Dein Name“ (noch nicht geändert)
       lieferStrasse: "Beispielweg 12", lieferOrt: "60439 Frankfurt",
       personen: [ { id: "p1", name: "Mia", nummer: "7", groesse: "140",
@@ -40,6 +41,7 @@
     }
   Entwürfe aus den ersten Fassungen (ein Text statt einer Liste bei der Bezahlung, „kleidungSponsor“ und „teambedarfSponsor“,
   keine Aufdrucke je Artikel, keine Lieferanschrift) lädt bereinigeEntwurf mit den Standard-Aufdrucken und übernimmt den Sponsor.
+  Entwürfe ohne „email“ (alles vor der Kopie an den Besteller) laden mit leerer Adresse, also ohne Cc.
 */
 
 // ---------- Konstanten ----------
@@ -61,6 +63,7 @@ export const SPONSOR_AUFDRUCK = "SP";
 export const GRENZEN = {
   besteller: 60,
   tel: 30,
+  email: 254,
   lieferName: 60,
   strasse: 60,
   ort: 60,
@@ -895,10 +898,32 @@ export function waehleBestellNr(alt, slug, jetzt) {
 
 // ---------- Mail ----------
 
+// Genau eine einfache Adresse: vor dem @ Buchstaben, Ziffern und . _ + -, danach Namen aus Buchstaben, Ziffern und Bindestrichen (je höchstens 63 Zeichen,
+// am Anfang und Ende kein Bindestrich), durch Punkte getrennt, mindestens ein Punkt. Leerraum, Komma, Semikolon, Zeilenumbruch, Steuerzeichen, ein zweites @,
+// spitze Klammern, & = ? # % und alles außerhalb von ASCII passen nicht.
+const CC_MUSTER = /^[A-Za-z0-9._+-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$/;
+
+// Die Adresse für die Kopie (Cc) der Bestellmail, aus dem Feld „E-Mail-Adresse (freiwillig)“:
+//   ""    nichts eingetragen (nur Leerraum zählt als nichts): keine Kopie, kein Hinweis
+//   Text  die getrimmte Adresse, wenn sie gültig ist (CC_MUSTER, höchstens GRENZEN.email Zeichen)
+//   null  alles andere: kein Cc im Link, die Seite weist am Feld darauf hin
+// Nur was hier als Text herauskommt, darf in den Link; es steckt darin nie ein zweiter Empfänger und nie eine zusätzliche Kopfzeile (Bcc, Zeilenumbruch …).
+export function ccAdresse(text) {
+  if (text === null || text === undefined) return "";
+  if (typeof text !== "string") return null;
+  const t = text.trim();
+  if (t === "") return "";
+  // Die Länge zuerst: Die Prüfung läuft so nie über einen langen Text
+  return t.length <= GRENZEN.email && CC_MUSTER.test(t) ? t : null;
+}
+
 // mailto-Adresse: Betreff und Text mit encodeURIComponent, Zeilenumbrüche als %0D%0A (RFC 6068); die Adresse bleibt, wie sie ist.
-export function mailtoLink(empfaenger, betreff, text) {
+// cc (optional): die Adresse für eine Kopie. Sie kommt nur in den Link, wenn ccAdresse sie als gültig erkennt (sonst bleibt der Link byte-gleich zu dem ohne cc),
+// ganz am Ende als „&cc=“ mit encodeURIComponent: Betreff und Text stehen davor, wo sie immer standen.
+export function mailtoLink(empfaenger, betreff, text, cc) {
   const kodiere = (t) => encodeURIComponent(String(t).replace(/\r?\n/g, "\r\n"));
-  return "mailto:" + empfaenger + "?subject=" + kodiere(betreff) + "&body=" + kodiere(text);
+  const kopie = ccAdresse(cc);
+  return "mailto:" + empfaenger + "?subject=" + kodiere(betreff) + "&body=" + kodiere(text) + (kopie ? "&cc=" + encodeURIComponent(kopie) : "");
 }
 
 // Die Antworten eines Blocks in Katalogreihenfolge, deutsch verbunden: „Eltern bzw. Spieler und Sponsor (Autohaus Beispiel)“.
@@ -1025,7 +1050,8 @@ export function baueMail(konfig, bestellung, jetzt) {
 
   zeilen.push("Viele Grüße", besteller, "", SCHLUSSZEILE);
   const text = zeilen.join("\n");
-  const mailto = mailtoLink(einst.empfaenger, betreff, text);
+  // Die Adresse des Bestellers steht nie im Text: Nur der Link trägt sie (cc), das Mailprogramm zeigt sie in der Zeile „Cc“. Die Länge im Link zählt sie mit.
+  const mailto = mailtoLink(einst.empfaenger, betreff, text, bestellung.email);
   return { betreff, text, mailto, mailtoLaenge: mailto.length, bestellNr: nr, zusammenfassung: z };
 }
 
@@ -1041,6 +1067,7 @@ export function leererEntwurf() {
     team: "",
     name: "",
     tel: "",
+    email: "",
     bis: "",
     lieferName: null,
     lieferStrasse: "",
@@ -1071,6 +1098,9 @@ export function bereinigeEntwurf(roh, konfig) {
   e.team = (konfig.mannschaften || []).some((m) => m.slug === roh.team) ? roh.team : "";
   e.name = text(roh.name, GRENZEN.besteller);
   e.tel = text(roh.tel, GRENZEN.tel);
+  // Alte Entwürfe kennen das Feld nicht (dann ""); was drinsteht, prüft erst ccAdresse, bevor es in einen Link kommt. Eine zu lange Angabe wird verworfen
+  // statt gekürzt: Das Kürzen könnte eine andere, gültige Adresse daraus machen.
+  e.email = typeof roh.email === "string" && roh.email.length <= GRENZEN.email ? text(roh.email, GRENZEN.email) : "";
   e.bis = datumDe(roh.bis) ? roh.bis : "";
   e.lieferName = typeof roh.lieferName === "string" ? text(roh.lieferName, GRENZEN.lieferName) : null;
   e.lieferStrasse = text(roh.lieferStrasse, GRENZEN.strasse);

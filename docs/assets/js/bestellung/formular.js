@@ -17,6 +17,11 @@ export const TEXT_LEAD =
 export const TEXT_HINWEIS_SPONSOR =
   "Für die Geschäftsstelle: Die Kosten für den Sponsordruck werden künftig getrennt in Rechnung gestellt. Dazu gibt es einen kurzen Sponsorenvertrag. Darum kümmert sich die Geschäftsstelle.";
 
+// Feld „E-Mail-Adresse (freiwillig)“ im Block „Wer bestellt?“: Eine gültige Adresse kommt als Cc in den mailto-Link, das Mailprogramm schickt dem Besteller die Kopie.
+// Der erste Satz steht immer unter dem Feld, der zweite nur bei einer Eingabe, die keine Adresse ist (seite.js zeigt ihn; Senden bleibt möglich).
+export const TEXT_HINWEIS_EMAIL = "Du bekommst eine Kopie der Bestellung. Die Adresse bleibt auf deinem Gerät, bis du die Mail abschickst.";
+export const TEXT_EMAIL_UNGUELTIG = "Das sieht nicht wie eine E-Mail-Adresse aus – so geht keine Kopie raus.";
+
 export function esc(text) {
   return String(text === null || text === undefined ? "" : text)
     .replaceAll("&", "&amp;")
@@ -45,6 +50,12 @@ function werBestelltAbschnitt(konfig) {
       <div class="bst-feld">
         <label for="bst-tel">Telefon (freiwillig)</label>
         <input type="tel" id="bst-tel" data-feld="tel" autocomplete="tel" inputmode="tel" maxlength="${GRENZEN.tel}">
+      </div>
+      <div class="bst-feld">
+        <label for="bst-email">E-Mail-Adresse (freiwillig)</label>
+        <input type="email" id="bst-email" data-feld="email" autocomplete="email" inputmode="email" maxlength="${GRENZEN.email}" autocapitalize="none" spellcheck="false" aria-describedby="bst-email-hilfe">
+        <p class="bst-hinweis" id="bst-email-hilfe">${esc(TEXT_HINWEIS_EMAIL)}</p>
+        <p class="bst-hinweis bst-hinweis--achtung" id="bst-email-fehler" data-bst-email-fehler hidden>${esc(TEXT_EMAIL_UNGUELTIG)}</p>
       </div>
       <div class="bst-feld">
         <label for="bst-bis">Gebraucht bis (freiwillig)</label>

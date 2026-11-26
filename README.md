@@ -225,6 +225,10 @@ darum nur **verschlüsselt** im Repo (`data/bestellung-preise.enc.json`). Im aus
   oder ein gewähltes Stück das Sponsorlogo (`SP`) trägt. Rechnung und Vertrag macht die Geschäftsstelle, nicht die Seite; die Angaben stehen in Teil 3 der Mail.
 - Lieferung: „Lieferanschrift (die Bestellung kommt zu dir)“ ist Pflicht (Name folgt „Dein Name“, solange man ihn nicht ändert; Straße und Hausnummer; fünf Ziffern und Ort). Sie wird wie Mannschaft, Name und
   Telefon auf dem Gerät gemerkt und bleibt bei „Neue Bestellung beginnen“.
+- Kopie an den Besteller (seit 26.11.2026): Das Feld „E-Mail-Adresse (freiwillig)“ im Block „Wer bestellt?“ (nach „Telefon“) hängt bei einer gültigen Adresse `&cc=<Adresse>` ans Ende des mailto-Links,
+  sodass das Mailprogramm der Trainerin oder des Trainers die Bestellung auch als Kopie an sie oder ihn schickt (kein Server, kein Mail-Dienst; `ccAdresse` in `mailtext.js` lässt genau eine einfache Adresse zu, alles andere,
+  auch jeder Einschleus-Versuch mit zweitem Empfänger oder Zeilenumbruch, ergibt kein cc und den Hinweis „Das sieht nicht wie eine E-Mail-Adresse aus …“; Senden bleibt möglich; Mailtext, „Text kopieren“ und der Link ohne Adresse
+  bleiben unverändert; die Adresse wird wie Name und Telefon auf dem Gerät gemerkt, im Absender-Speicher nur, wenn eine eingetragen ist).
 - Prüfmodus: `einstellungen › pruefmodus` (jetzt `true`) zeigt oben den Hinweis „Prototyp: Die Mail geht als TEST …“, setzt „[TEST]“ in den Betreff
   und eine Testzeile in die Mail. Ausschalten: auf `false` setzen und neu bauen. Die Schlusszeile „Erstellt mit der Bestellseite für Trainer
   (Prototyp).“ steht in `SCHLUSSZEILE` (`assets/js/bestellung/mailtext.js`) und ändert sich erst beim Livegang.
@@ -244,11 +248,11 @@ darum nur **verschlüsselt** im Repo (`data/bestellung-preise.enc.json`). Im aus
 - Code: `assets/js/bestellung/mailtext.js` (reine Funktionen ohne DOM: Prüfung, Zusammenfassung, Preise, Mailtext, mailto, Bestell-Nr., Entwurf), `zugang.js` (Verschlüsselung), `formular.js` (Formular als Text, erst nach dem Entschlüsseln),
   `seite.js` (Zugang, Oberfläche, Zustand, Speichern auf dem Gerät; nur statische Importe), `assets/css/bestellung.css`, Hülle und eingebettete Konfiguration `src/seiten/bestellung.mjs`.
 - Tests (`npm run test:bestellung`, nach `npm run build`; sie rechnen mit erfundenen Testpreisen und einem Testcode, nie mit echten Preisen): `node tools/bestellung-test/mailtext-test.mjs` (ohne Browser: Katalog gegen die Spezifikation,
-  Preise und Rundung, Betreff und Text Zeichen für Zeichen, Lückenliste, Aufdrucke, doppelte Nummern, Sponsor, Lieferung, mailto hin und zurück, Bestell-Nr., Entwurf, alte Entwürfe, Hülle und Formular,
+  Preise und Rundung, Betreff und Text Zeichen für Zeichen, Lückenliste, Aufdrucke, doppelte Nummern, Sponsor, Lieferung, die Kopie an den Besteller (`ccAdresse`, mailto mit und ohne cc, Einschleus-Versuche), mailto hin und zurück, Bestell-Nr., Entwurf, alte Entwürfe, Hülle und Formular,
   das Feld `bild` und die zehn Kacheln, das Bilder-Skript mit erfundenen Quellbildern),
   `node tools/bestellung-test/zugang-test.mjs` (Verschlüsselung gegen eine unabhängige Umsetzung mit `node:crypto`, falsche und veränderte Pakete, das Werkzeug mit Wegwerfordnern unter `tools/cache/`),
   `node tools/bestellung-test/geheim-test.mjs` (siehe unten) und `node tools/bestellung-test/e2e.mjs` (Chrome über puppeteer-core, Bau mit Testpreisen in einem Wegwerf-Ordner: Zugang, die Referenzbestellung nur über die Oberfläche, Aufdrucke,
-  Sponsor, Lieferung, Lücken, Senden, Kopieren, Neuladen, „Neue Bestellung beginnen“, alte Entwürfe, localStorage mit Fehlern, 320 bis 1440 px, Tippflächen, axe-core, Produktbilder in den Zeilen;
+  Sponsor, Lieferung, das Feld für die Kopie an den Besteller (cc im Link, Hinweis, Merken), Lücken, Senden, Kopieren, Neuladen, „Neue Bestellung beginnen“, alte Entwürfe, localStorage mit Fehlern, 320 bis 1440 px, Tippflächen, axe-core, Produktbilder in den Zeilen;
   Bildschirmfotos nach `tools/cache/bestellung-test/`).
   Die gemeinsamen Testbestellungen mit festen, von Hand gerechneten Texten stehen in `tools/bestellung-test/faelle.mjs`, die Testpreise in `testdaten.mjs`. Der Browser-Test fängt den Klick auf
   den mailto-Link ab: Es öffnet sich kein Mailprogramm und nichts wird gesendet.

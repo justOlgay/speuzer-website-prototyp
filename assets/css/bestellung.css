@@ -155,6 +155,12 @@
   font-size: var(--fs-xs);
 }
 
+/* Hinweis am Feld „E-Mail-Adresse“, wenn keine Kopie rausgeht: kräftiger als der Standardhinweis, in der Farbe der Pflichtangaben (blockiert nichts) */
+.bst-hinweis--achtung {
+  color: var(--warn);
+  font-weight: 600;
+}
+
 .bst-hinweis[hidden],
 .bst-keine[hidden],
 .bst-meldung:empty {

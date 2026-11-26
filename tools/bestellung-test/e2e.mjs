@@ -28,8 +28,12 @@
 //     Klick aufs Bild hakt an, Kästchen, Bild, Text und Preis in einer Zeile ohne Überlappung (360 bis 414 px, 1440 px; auch mit „ab“-Preisen und
 //     „Preis auf Anfrage“), kein waagrechtes Scrollen, der Hinweis „Produktbilder: JAKO“, leere Kachel ohne bild in den Daten, Ladefehler eines Bildes,
 //     Adressen auch unter einem Unterordner (GitHub Pages)
+//   - Kopie an den Besteller (AP-4, 390 und 1440 px): das Feld „E-Mail-Adresse (freiwillig)“ (Beschriftung, Hinweis, Reihenfolge, Eigenschaften, Lage), eine gültige Adresse
+//     › cc im Link (kodiert, genau einmal, ganz am Ende; Betreff, Mailtext und „Text kopieren“ unverändert), Eingaben ohne einzelne Adresse und Einschleus-Versuche
+//     (Zeilenumbruch mit Bcc, Komma, Semikolon, Parameter, spitze Klammern …) › kein cc und Hinweis am Feld (Senden bleibt möglich), Merken (Neuladen, Absender,
+//     „Neue Bestellung beginnen“), alter Entwurf ohne das Feld, veränderter Speicher
 //   - Bildschirmfotos nach tools/cache/bestellung-test/ (390-zugang, 390-ausgefuellt, 390-aufdrucke, 390-sponsor-lieferung, 390-luecken, 1440-ausgefuellt,
-//     390-bilder, 1440-bilder, …)
+//     390-bilder, 1440-bilder, 390-cc, 390-cc-ungueltig, 1440-cc, …)
 //
 // Aufruf: node tools/bestellung-test/e2e.mjs [--ausfuehrlich] [--nur=zugang,leer,…]   (--nur nur zum Entwickeln: einzelne Abläufe)
 // Chrome-Tests nie über eine Pipe laufen lassen (der Chrome-Updater hält den Ausgabekanal offen): die Ausgabe in eine Datei umleiten.
@@ -41,9 +45,9 @@ import { fileURLToPath } from "node:url";
 import puppeteer from "puppeteer-core";
 import { DOCS, starteTestserver } from "./testserver.mjs";
 import { baueMitTestdaten } from "./testbau.mjs";
-import { DATEN, FAELLE, FALL_A, FALL_B, FALL_C, GRUNDAUSSTATTUNG, KONFIG, STANDARD, TESTCODE, TESTPREISE, bestellung, kopieTestpreise, person } from "./faelle.mjs";
+import { CC_ADRESSE, CC_ADRESSE_KODIERT, CC_LANG_GUELTIG, CC_UNGUELTIG, DATEN, FAELLE, FALL_A, FALL_B, FALL_C, GRUNDAUSSTATTUNG, KONFIG, STANDARD, TESTCODE, TESTPREISE, bestellung, kopieTestpreise, person } from "./faelle.mjs";
 import { kopierText, stueckpreis } from "../../assets/js/bestellung/mailtext.js";
-import { TEXT_HINWEIS_SPONSOR, TEXT_LEAD } from "../../assets/js/bestellung/formular.js";
+import { TEXT_EMAIL_UNGUELTIG, TEXT_HINWEIS_EMAIL, TEXT_HINWEIS_SPONSOR, TEXT_LEAD } from "../../assets/js/bestellung/formular.js";
 import { verschluessele } from "../../assets/js/bestellung/zugang.js";
 import { baueKonfig } from "../../src/seiten/bestellung.mjs";
 import { BILDER_ORDNER, BILD_KANTE, BILD_MAX_BYTES, webpMasse } from "./bilder.mjs";
@@ -917,7 +921,7 @@ async function ablaufLeer(browser, server) {
     gleich("zwei Sätze unter der Überschrift", await inhalt(page, "[data-bst-app] .bst-lead"), "Hier stellst du zusammen, was dein Team braucht. Am Ende öffnet sich dein Mailprogramm mit der fertigen Bestellung an den Verein – du musst nur noch auf „Senden“ tippen.");
     gleich("zwölf Mannschaften zur Auswahl (und „Bitte wählen“)", String(await page.$$eval("#bst-team option", (l) => l.length)), "13");
     gleich("Mannschaften in der Reihenfolge von data/teams.json", (await page.$$eval("#bst-team option", (l) => l.slice(1).map((o) => o.value))).join(","), "herren,soma,a-jugend,d1,d2,d3,e1,e2,e3,f1,f2,g-jugend");
-    gleich("Beschriftungen der Felder zu „Wer bestellt?“", (await texte(page, "#bst-h-wer ~ .bst-felder label")).join(" | "), "Mannschaft | Dein Name | Telefon (freiwillig) | Gebraucht bis (freiwillig)");
+    gleich("Beschriftungen der Felder zu „Wer bestellt?“", (await texte(page, "#bst-h-wer ~ .bst-felder label")).join(" | "), "Mannschaft | Dein Name | Telefon (freiwillig) | E-Mail-Adresse (freiwillig) | Gebraucht bis (freiwillig)");
     gleich("Lieferanschrift: Legende", await inhalt(page, ".bst-lieferung legend"), "Lieferanschrift (die Bestellung kommt zu dir)");
     gleich("Lieferanschrift: drei Felder mit Beschriftung", (await texte(page, ".bst-lieferung label")).join(" | "), "Name | Straße und Hausnummer | PLZ und Ort");
     gleich("Lieferanschrift: Beispiel im Feld „PLZ und Ort“", await page.$eval("#bst-liefer-ort", (el) => el.placeholder), "z. B. 60439 Frankfurt");
@@ -1384,6 +1388,218 @@ async function ablaufSponsorLieferung(browser, server) {
     pruefeProtokoll("Sponsor und Lieferanschrift", p, server);
   } finally {
     await schliessen();
+  }
+}
+
+// Kopie an den Besteller (AP-4): das Feld „E-Mail-Adresse (freiwillig)“ im Block „Wer bestellt?“. Eine gültige Adresse kommt als cc in den mailto-Link (ganz am Ende,
+// kodiert, genau einmal); Betreff, Mailtext und „Text kopieren“ bleiben, wie sie waren. Alles andere (keine Adresse, eingeschleuste Zeilen oder Empfänger) ergibt kein cc,
+// dafür einen Hinweis am Feld; Senden bleibt möglich. Die Adresse wird wie Name und Telefon gemerkt. 390 x 844 und 1440 x 900.
+async function ablaufKopie(browser, server) {
+  abschnitt("Kopie an den Besteller (Cc): Feld, Link mit und ohne cc, Hinweise, Einschleus-Versuche, Merken (390 x 844 und 1440 x 900)");
+  const FELD = "#bst-email";
+  const FEHLER = "[data-bst-email-fehler]";
+  // Diese Eingaben werden wirklich getippt (Tastenanschläge), alle Einträge von CC_UNGUELTIG zusätzlich über den Wert des Feldes gesetzt
+  const getippt = ["keine Adresse", "ohne Punkt in der Domain", "Leerzeichen im Namen", "zwei Adressen mit Komma", "zwei Adressen mit Semikolon und Leerzeichen", "zwei Adressen mit Leerzeichen", "Parameter &bcc=", "Parameter ?bcc=", "spitze Klammern um die Adresse", "Name mit Adresse in spitzen Klammern", "Anführungszeichen", "zweites @ in der Domain"];
+  const absenderOhne = JSON.stringify({ team: "d3", name: "Lena Beispiel", tel: "030 23125 123", lieferName: null, lieferStrasse: "Beispielweg 12", lieferOrt: "60439 Frankfurt" });
+  const absenderMit = (email) => JSON.stringify({ team: "d3", name: "Lena Beispiel", tel: "030 23125 123", email, lieferName: null, lieferStrasse: "Beispielweg 12", lieferOrt: "60439 Frankfurt" });
+  const parameter = (href) => href.slice(href.indexOf("?") + 1).split("&").map((t) => t.slice(0, t.indexOf("=")));
+  // Der Zustand rund um die Kopie in einer Messung: Sendelink (href, data-mailto), Wert im Feld, Hinweis „keine Kopie“, Rahmen und Beschreibung des Feldes
+  const messeKopie = (page) =>
+    page.evaluate(() => {
+      const f = document.getElementById("bst-email");
+      const a = document.getElementById("bst-senden");
+      const h = document.querySelector("[data-bst-email-fehler]");
+      return {
+        href: a.getAttribute("href"),
+        mailto: a.dataset.mailto || "",
+        feld: f.value,
+        fehlerSichtbar: !h.hidden && h.getClientRects().length > 0,
+        fehlerText: h.textContent.trim(),
+        ungueltig: f.getAttribute("aria-invalid"),
+        beschrieben: f.getAttribute("aria-describedby"),
+      };
+    });
+  // Den Wert des Feldes setzen wie ein Skript oder eine Autofill-Funktion es tut (ohne Tastenanschläge; maxlength gilt hier nicht)
+  const setzeFeld = (page, roh) =>
+    page.$eval(FELD, (el, v) => {
+      el.focus();
+      el.value = v;
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    }, roh);
+  const fotoBlock = async (page, datei) => (await page.$('section[aria-labelledby="bst-h-wer"]')).screenshot({ path: path.join(AUSGABE, datei) });
+
+  for (const ansicht of [{ n: "390", breite: 390, hoehe: 844, mobil: true }, { n: "1440", breite: 1440, hoehe: 900, mobil: false }]) {
+    const { n } = ansicht;
+    const { page, p, schliessen } = await oeffne(browser, server, { breite: ansicht.breite, hoehe: ansicht.hoehe, mobil: ansicht.mobil, uhr: [2026, 10, 25, 14, 32] });
+    try {
+      // Das Feld im leeren Formular: Beschriftung, Eigenschaften, Hinweis, Reihenfolge, Lage
+      gleich(`Kopie ${n}: Beschriftung des Feldes`, await inhalt(page, 'label[for="bst-email"]'), "E-Mail-Adresse (freiwillig)");
+      pruefe(`Kopie ${n}: Feld: type email, autocomplete email, inputmode email, maxlength 254, keine Pflicht, genau eine Beschriftung, beschrieben durch den Hinweis, leer, ohne Rahmen`, await page.$eval(FELD, (el) => el.type === "email" && el.autocomplete === "email" && el.inputMode === "email" && el.maxLength === 254 && !el.required && el.labels.length === 1 && el.getAttribute("aria-describedby") === "bst-email-hilfe" && el.value === "" && !el.hasAttribute("aria-invalid")));
+      gleich(`Kopie ${n}: Hinweis unter dem Feld wörtlich`, await inhalt(page, "#bst-email-hilfe"), TEXT_HINWEIS_EMAIL);
+      pruefe(`Kopie ${n}: der Hinweis ist sichtbar, der Hinweis „keine Kopie“ nicht (ein leeres Feld ist in Ordnung)`, (await sichtbar(page, "#bst-email-hilfe")) && !(await sichtbar(page, FEHLER)));
+      gleich(`Kopie ${n}: Beschriftungen im Block „Wer bestellt?“: nach dem Telefon die E-Mail-Adresse, vor „Gebraucht bis“`, (await texte(page, "#bst-h-wer ~ .bst-felder label")).join(" | "), "Mannschaft | Dein Name | Telefon (freiwillig) | E-Mail-Adresse (freiwillig) | Gebraucht bis (freiwillig)");
+      pruefe(`Kopie ${n}: Reihenfolge im Abschnitt „Wer bestellt?“: Telefon, E-Mail-Adresse, Hinweis, Hinweis „keine Kopie“, Gebraucht bis`, await page.evaluate(() => {
+        const knoten = ["bst-tel", "bst-email", "bst-email-hilfe", "bst-email-fehler", "bst-bis"].map((i) => document.getElementById(i));
+        const folgt = knoten.every((k, i) => i === 0 || (knoten[i - 1].compareDocumentPosition(k) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0);
+        return folgt && knoten.every((k) => k.closest("section").getAttribute("aria-labelledby") === "bst-h-wer") && knoten[1].parentElement === knoten[2].parentElement && knoten[1].parentElement === knoten[3].parentElement;
+      }));
+      const lage = await page.evaluate(() => {
+        const r = (id) => {
+          const b = document.getElementById(id).getBoundingClientRect();
+          return { l: b.left, t: b.top, r: b.right, b: b.bottom };
+        };
+        return { tel: r("bst-tel"), email: r("bst-email"), hilfe: r("bst-email-hilfe"), bis: r("bst-bis") };
+      });
+      pruefe(`Kopie ${n}: der Hinweis steht unter dem Feld, innerhalb seiner Breite, und über dem nächsten Feld`, lage.hilfe.t >= lage.email.b - 0.5 && lage.hilfe.l >= lage.email.l - 0.5 && lage.hilfe.r <= lage.email.r + 0.5 && lage.hilfe.b <= lage.bis.t + 0.5, JSON.stringify(lage));
+      if (ansicht.mobil) pruefe(`Kopie ${n}: am Handy steht das Feld unter dem Telefon, beide gleich breit`, lage.email.t >= lage.tel.b && Math.abs(lage.email.l - lage.tel.l) < 1 && Math.abs(lage.email.r - lage.tel.r) < 1, JSON.stringify(lage));
+      else pruefe(`Kopie ${n}: am Rechner steht das Feld neben dem Telefon (gleiche Zeile, zweite Spalte)`, Math.abs(lage.email.t - lage.tel.t) < 1.5 && lage.email.l >= lage.tel.r, JSON.stringify(lage));
+
+      // Die Referenzbestellung ohne Adresse: kein cc, alles wie bisher
+      await fuelleFall(page, FALL_A);
+      await pruefeMail(page, `Kopie ${n}: Referenzbestellung (a) ohne Adresse`, FALL_A);
+      let m = await messeKopie(page);
+      const LINK = m.href; // der Link ohne cc
+      pruefe(`Kopie ${n}: ohne Adresse: kein cc im Link, nur subject und body, keine Warnung am Feld`, !/[?&](cc|bcc|to)=/i.test(LINK) && LINK === m.mailto && parameter(LINK).join() === "subject,body" && !m.fehlerSichtbar && m.ungueltig === null && m.beschrieben === "bst-email-hilfe", LINK.slice(-100));
+
+      // Eine gültige Adresse (mit Leerzeichen an den Rändern getippt)
+      await tippe(page, FELD, "  " + CC_ADRESSE + "  ", true);
+      m = await messeKopie(page);
+      gleich(`Kopie ${n}: gültige Adresse: der Link ist der von vorher plus „&cc=“ und die kodierte Adresse (genau einmal, ganz am Ende)`, m.href, LINK + "&cc=" + CC_ADRESSE_KODIERT);
+      gleich(`Kopie ${n}: gültige Adresse: href = data-mailto`, m.href, m.mailto);
+      gleichJson(`Kopie ${n}: gültige Adresse: die Parameter des Links sind genau subject, body, cc`, parameter(m.href), ["subject", "body", "cc"]);
+      gleichJson(`Kopie ${n}: gültige Adresse: als Adresse gelesen (URL) genau ein cc, und es ist die Adresse (das + bleibt ein +)`, new URL(m.href).searchParams.getAll("cc"), [CC_ADRESSE]);
+      pruefe(`Kopie ${n}: gültige Adresse: keine Warnung am Feld (kein Hinweis „keine Kopie“, kein aria-invalid, beschrieben nur durch den Hinweis)`, !m.fehlerSichtbar && m.ungueltig === null && m.beschrieben === "bst-email-hilfe");
+      const d = dekodiere(m.href);
+      gleich(`Kopie ${n}: gültige Adresse: Betreff im Link unverändert`, d.betreff, FALL_A.betreff);
+      gleich(`Kopie ${n}: gültige Adresse: Text im Link unverändert (Zeichen für Zeichen der Text aus faelle.mjs)`, d.text, FALL_A.text);
+      gleich(`Kopie ${n}: gültige Adresse: „Mail ansehen“ zeigt denselben Text und denselben Betreff`, (await wert(page, "[data-bst-vorschau-text]")) + "\u0000" + (await inhalt(page, "[data-bst-betreff]")), FALL_A.text + "\u0000" + FALL_A.betreff);
+      pruefe(`Kopie ${n}: gültige Adresse: die Adresse steht weder im Text noch im Betreff`, !(await wert(page, "[data-bst-vorschau-text]")).includes("verein-beispiel") && !d.betreff.includes("verein-beispiel"));
+      await pruefeLayout(page, `Kopie ${n}: mit Adresse`, ansicht.breite);
+      await pruefeBeschriftungen(page, `Kopie ${n}: mit Adresse`);
+      await pruefeIds(page, `Kopie ${n}: mit Adresse`);
+      await pruefeTippflaechen(page, `Kopie ${n}: mit Adresse`);
+      await pruefeAxe(page, `Kopie ${n}: mit Adresse`);
+      // Für das Bildschirmfoto die Adresse ohne die Leerzeichen an den Rändern, das Feld ohne Fokus (dann beginnt der Text vorn)
+      await tippe(page, FELD, CC_ADRESSE, true);
+      await page.$eval(FELD, (el) => el.blur());
+      gleich(`Kopie ${n}: dieselbe Adresse ohne Leerzeichen an den Rändern getippt: derselbe Link`, (await messeKopie(page)).href, LINK + "&cc=" + CC_ADRESSE_KODIERT);
+      await fotoBlock(page, ansicht.mobil ? "390-cc.png" : "1440-cc.png");
+
+      // Senden und „Text kopieren“ mit Adresse
+      await page.click("#bst-senden");
+      let geklickt = await gesendet(page);
+      gleich(`Kopie ${n}: Senden löst genau einen mailto aus, und es ist der Link mit cc`, `${geklickt.length}|${geklickt[0]}`, `1|${LINK}&cc=${CC_ADRESSE_KODIERT}`);
+      gleich(`Kopie ${n}: Senden: die Meldung ist dieselbe wie ohne Adresse (wörtlich)`, await inhalt(page, "[data-bst-gesendet-text]"), TEXT_GESENDET);
+      await page.click("#bst-kopieren");
+      gleich(`Kopie ${n}: „Text kopieren“ mit Adresse unverändert: Zwischenablage = Betreff, Leerzeile, Text (ohne die Adresse)`, await page.evaluate(() => navigator.clipboard.readText()), kopierText({ betreff: FALL_A.betreff, text: FALL_A.text }));
+      gleich(`Kopie ${n}: „Text kopieren“: Meldung und Hinweis wie ohne Adresse`, (await inhalt(page, "[data-bst-meldung]")) + "|" + (await inhalt(page, "[data-bst-gesendet-text]")), "Kopiert.|Der Text ist kopiert. Füge ihn in eine neue Mail an Bestellungen@sportfreunde04.de ein und tippe dort auf „Senden“.");
+      gleich(`Kopie ${n}: „Text kopieren“ öffnet kein Mailprogramm`, String((await gesendet(page)).length), "1");
+
+      // Eingaben, die keine einzelne Adresse sind: kein cc, Hinweis am Feld (erst getippt, dann alle über den Wert des Feldes gesetzt)
+      const keineKopie = (name, wie, mm) => {
+        pruefe(`Kopie ${n}: ${wie} „${name}“: kein cc, der Link ist der ohne Adresse (kein zweiter Empfänger, keine zusätzliche Kopfzeile)`, mm.href === LINK && mm.mailto === LINK, mm.href.slice(-160));
+        pruefe(`Kopie ${n}: ${wie} „${name}“: der Hinweis „keine Kopie“ steht am Feld (Wortlaut), das Feld trägt aria-invalid, beschrieben durch beide Hinweise`, mm.fehlerSichtbar && mm.fehlerText === TEXT_EMAIL_UNGUELTIG && mm.ungueltig === "true" && mm.beschrieben === "bst-email-hilfe bst-email-fehler", JSON.stringify({ ...mm, href: "…" }));
+      };
+      for (const name of getippt) {
+        await tippe(page, FELD, CC_UNGUELTIG.find(([x]) => x === name)[1], true);
+        keineKopie(name, "getippt", await messeKopie(page));
+      }
+      for (const [name, roh] of CC_UNGUELTIG) {
+        await setzeFeld(page, roh);
+        const mm = await messeKopie(page);
+        if (name === "Zeilenumbruch mitten im Namen") {
+          // Der Browser entfernt Zeilenumbrüche aus dem Wert eines E-Mail-Feldes: Übrig bleibt eine einzelne gültige Adresse, nur sie kommt als cc in den Link
+          gleich(`Kopie ${n}: gesetzt „${name}“: der Browser entfernt den Zeilenumbruch, übrig bleibt eine einzelne Adresse: nur sie kommt als cc in den Link, sonst nichts`, mm.href, LINK + "&cc=" + encodeURIComponent("ab@c.example"));
+          continue;
+        }
+        keineKopie(name, "gesetzt", mm);
+      }
+      // korrigiert: das cc ist wieder da, die Warnung weg
+      await tippe(page, FELD, CC_ADRESSE, true);
+      m = await messeKopie(page);
+      gleich(`Kopie ${n}: Adresse korrigiert: das cc ist wieder da, die Warnung weg`, `${m.href === LINK + "&cc=" + CC_ADRESSE_KODIERT}|${m.fehlerSichtbar}|${m.ungueltig}|${m.beschrieben}`, "true|false|null|bst-email-hilfe");
+      // Grenzen: 254 Zeichen sind gültig; getippt nimmt das Feld nicht mehr an (maxlength)
+      await setzeFeld(page, CC_LANG_GUELTIG);
+      m = await messeKopie(page);
+      gleich(`Kopie ${n}: die längste gültige Adresse (254 Zeichen): im Link, ohne Warnung`, `${m.href === LINK + "&cc=" + encodeURIComponent(CC_LANG_GUELTIG)}|${m.fehlerSichtbar}`, "true|false");
+      if (ansicht.mobil) {
+        await tippe(page, FELD, "a".repeat(300), true);
+        m = await messeKopie(page);
+        gleich(`Kopie ${n}: getippt: das Feld nimmt höchstens 254 Zeichen an (maxlength); das ist keine Adresse: Warnung, kein cc`, `${m.feld.length}|${m.href === LINK}|${m.fehlerSichtbar}`, "254|true|true");
+      }
+
+      // Keine gültige Adresse: Senden bleibt möglich
+      await tippe(page, FELD, "kaputt", true);
+      const vorher = (await gesendet(page)).length;
+      await page.click("#bst-senden");
+      geklickt = await gesendet(page);
+      gleich(`Kopie ${n}: keine gültige Adresse: Senden bleibt möglich (ein weiterer mailto, ohne cc), keine Lückenliste`, `${geklickt.length - vorher}|${geklickt[geklickt.length - 1] === LINK}|${await sichtbar(page, "[data-bst-luecken]")}`, "1|true|false");
+      await pruefeLayout(page, `Kopie ${n}: mit Hinweis am Feld`, ansicht.breite);
+      await pruefeBeschriftungen(page, `Kopie ${n}: mit Hinweis am Feld`);
+      await pruefeIds(page, `Kopie ${n}: mit Hinweis am Feld`);
+      await pruefeTippflaechen(page, `Kopie ${n}: mit Hinweis am Feld`);
+      await pruefeAxe(page, `Kopie ${n}: mit Hinweis am Feld`);
+      if (ansicht.mobil) await fotoBlock(page, "390-cc-ungueltig.png");
+
+      // Gemerkt: Entwurf und Absender, Neuladen, „Neue Bestellung beginnen“
+      await tippe(page, FELD, CC_ADRESSE, true);
+      const gespeichert = await page.evaluate((k1, k2) => ({ entwurf: JSON.parse(localStorage.getItem(k1)), absender: localStorage.getItem(k2) }), SCHLUESSEL_ENTWURF, SCHLUESSEL_ABSENDER);
+      gleich(`Kopie ${n}: gemerkt im Entwurf`, gespeichert.entwurf.email, CC_ADRESSE);
+      gleich(`Kopie ${n}: gemerkt im Speicher des Absenders (nach dem Telefon, vor der Lieferanschrift)`, gespeichert.absender, absenderMit(CC_ADRESSE));
+      await neuLaden(page);
+      m = await messeKopie(page);
+      gleich(`Kopie ${n}: nach dem Neuladen steht die Adresse im Feld, der Link trägt das cc, keine Warnung`, `${m.feld}|${m.href === LINK + "&cc=" + CC_ADRESSE_KODIERT}|${m.fehlerSichtbar}`, `${CC_ADRESSE}|true|false`);
+      p.dialogAntwort = false;
+      await page.click("[data-bst-neu]");
+      gleich(`Kopie ${n}: „Neue Bestellung beginnen“: die Rückfrage nennt auch die E-Mail-Adresse`, p.dialoge[p.dialoge.length - 1].text, "Neue Bestellung beginnen? Deine Eingaben für diese Bestellung werden gelöscht. Mannschaft, Name, Telefon, E-Mail-Adresse und Lieferanschrift bleiben erhalten.");
+      p.dialogAntwort = true;
+      await page.click("[data-bst-neu]");
+      gleich(`Kopie ${n}: nach „Neue Bestellung beginnen“ bleibt die Adresse (Feld, Entwurf, Absender)`, [await wert(page, FELD), (await entwurfImSpeicher(page)).email, await imSpeicher(page, SCHLUESSEL_ABSENDER)].join("|"), [CC_ADRESSE, CC_ADRESSE, absenderMit(CC_ADRESSE)].join("|"));
+      await tippe(page, FELD, "", true);
+      gleich(`Kopie ${n}: Feld geleert: im Speicher des Absenders steht kein email-Eintrag mehr (der Speicher ist wie vor dem Feld), keine Warnung`, (await imSpeicher(page, SCHLUESSEL_ABSENDER)) + "|" + String(await sichtbar(page, FEHLER)), absenderOhne + "|false");
+
+      // Alter Entwurf ohne das Feld: lädt weiter, Feld leer, Link wie bisher
+      const alt = JSON.parse(JSON.stringify(FALL_A.bestellung));
+      delete alt.email;
+      await page.evaluate((k1, k2, daten) => {
+        localStorage.setItem(k1, daten);
+        localStorage.removeItem(k2);
+      }, SCHLUESSEL_ENTWURF, SCHLUESSEL_ABSENDER, JSON.stringify(alt));
+      await neuLaden(page);
+      m = await messeKopie(page);
+      gleich(`Kopie ${n}: alter Entwurf ohne das Feld: Feld leer, keine Warnung, der Link ist der von früher (kein cc)`, [m.feld, m.fehlerSichtbar, m.href === LINK].join("|"), "|false|true");
+      gleich(`Kopie ${n}: alter Entwurf ohne das Feld: danach liegt er in der neuen Form im Speicher (email leer), der Absender ohne email-Eintrag`, (await entwurfImSpeicher(page)).email + "|" + (await imSpeicher(page, SCHLUESSEL_ABSENDER)), "|" + absenderOhne);
+
+      // Veränderter Speicher (Entwurf und Absender mit derselben Angabe): nie ein cc daraus
+      for (const [name, roh, hinweis] of [
+        ["Zeilenumbruch (CRLF) mit Bcc-Zeile", "a@b.example\r\nBcc: x@y.example", true],
+        ["Zeilenumbruch mit Cc-Zeile, Leerzeile und Text", "a@b.example\r\nCc: x@y.example\r\n\r\nText", true],
+        ["Parameter &bcc=", "a@b.example&bcc=x@y.example", true],
+        ["zwei Adressen mit Komma", "a@b.example,x@y.example", true],
+        ["spitze Klammern um die Adresse", "<a@b.example>", true],
+        ["255 Zeichen (wird verworfen, nicht gekürzt)", "a".repeat(245) + "@b.example", false],
+      ]) {
+        await page.evaluate((k1, k2, daten, absender) => {
+          localStorage.setItem(k1, daten);
+          localStorage.setItem(k2, absender);
+        }, SCHLUESSEL_ENTWURF, SCHLUESSEL_ABSENDER, JSON.stringify({ ...alt, email: roh }), JSON.stringify({ team: "d3", name: "Lena Beispiel", email: roh }));
+        await neuLaden(page);
+        m = await messeKopie(page);
+        pruefe(`Kopie ${n}: veränderter Speicher mit „${name}“: der Link bleibt ohne cc (kein zweiter Empfänger, keine zusätzliche Kopfzeile)`, m.href === LINK && m.mailto === LINK, m.href.slice(-160));
+        gleich(`Kopie ${n}: veränderter Speicher mit „${name}“: Hinweis „keine Kopie“ ${hinweis ? "sichtbar" : "nicht nötig (die Angabe ist weg)"}`, String(m.fehlerSichtbar), String(hinweis));
+      }
+      // Nur im Speicher des Absenders: Die Adresse kommt von dort ins Feld (der Entwurf kennt sie nicht)
+      await page.evaluate((k1, k2, daten, absender) => {
+        localStorage.setItem(k1, daten);
+        localStorage.setItem(k2, absender);
+      }, SCHLUESSEL_ENTWURF, SCHLUESSEL_ABSENDER, JSON.stringify(alt), JSON.stringify({ team: "d3", name: "Lena Beispiel", tel: "030 23125 123", email: CC_ADRESSE }));
+      await neuLaden(page);
+      m = await messeKopie(page);
+      gleich(`Kopie ${n}: nur im Speicher des Absenders: die Adresse kommt von dort ins Feld und in den Link`, `${m.feld}|${m.href === LINK + "&cc=" + CC_ADRESSE_KODIERT}`, `${CC_ADRESSE}|true`);
+      pruefeProtokoll(`Kopie ${n}`, p, server);
+    } finally {
+      await schliessen();
+    }
   }
 }
 
@@ -2287,7 +2503,7 @@ async function main() {
   const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ["--no-first-run"] });
   const laeufe = [
     ["zugang", ablaufZugang], ["leer", ablaufLeer], ["referenz", ablaufReferenz], ["faelle", ablaufFaelleBC], ["aufdrucke", ablaufAufdrucke],
-    ["sponsor", ablaufSponsorLieferung], ["luecken", ablaufLuecken], ["felder", ablaufFelder], ["breiten", ablaufAuswahlbreiten],
+    ["sponsor", ablaufSponsorLieferung], ["kopie", ablaufKopie], ["luecken", ablaufLuecken], ["felder", ablaufFelder], ["breiten", ablaufAuswahlbreiten],
     ["bilder", ablaufBilder], ["bezahlung", ablaufBezahlung], ["alt", ablaufAlterEntwurf], ["zeichen", ablaufZeichen], ["lang", ablaufLang], ["kopieren", ablaufKopieren],
     ["speicher", ablaufSpeicher], ["desktop", ablaufDesktop],
   ];
@@ -2295,7 +2511,7 @@ async function main() {
     for (const [name, lauf] of laeufe) if (NUR.length === 0 || NUR.includes(name)) await lauf(browser, server);
     if (NUR.length === 0) {
       abschnitt("Bildschirmfotos");
-      for (const n of ["390-zugang.png", "390-ausgefuellt.png", "390-aufdrucke.png", "390-sponsor-lieferung.png", "390-luecken.png", "1440-ausgefuellt.png", "390-leer.png", "390-gesendet.png", "390-bezahlung-mehrfach.png", "1440-torwartset.png", "390-bilder.png", "1440-bilder.png"]) {
+      for (const n of ["390-zugang.png", "390-ausgefuellt.png", "390-aufdrucke.png", "390-sponsor-lieferung.png", "390-luecken.png", "1440-ausgefuellt.png", "390-leer.png", "390-gesendet.png", "390-bezahlung-mehrfach.png", "1440-torwartset.png", "390-bilder.png", "1440-bilder.png", "390-cc.png", "390-cc-ungueltig.png", "1440-cc.png"]) {
         const voll = path.join(AUSGABE, n);
         pruefe(`Bildschirmfoto ${n}`, existsSync(voll) && statSync(voll).size > 5000, voll);
       }

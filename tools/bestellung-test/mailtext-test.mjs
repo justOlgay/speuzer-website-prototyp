@@ -13,6 +13,7 @@
 //   (i) Lückenliste   (j) Bestell-Nr.   (k) bis (n) Bezahlung als Mehrfachauswahl, alte Entwürfe
 //   (o) Aufdruck-Kombinationen: eigene Blöcke, Reihenfolge, Druckdaten   (p) Name, Nummer und Initialen nur, wenn ein gewählter Aufdruck sie braucht
 //   (q) doppelte Rückennummern   (r) Lieferanschrift   (s) Block „Sponsor“   (t) Schnellwahl mit Standard-Aufdrucken
+//   (u) Kopie an den Besteller (Cc): ccAdresse (leer, Ränder, gültig, ungültig, Einschleusen, 254/255 Zeichen), mailtoLink mit und ohne cc, Länge mit cc, Entwurf, Formular
 // dazu Formatierung, Sortierung, Entwurf auf dem Gerät (bereinigeEntwurf), lange Bestellungen (nie gekürzt), die Hülle der Seite
 // (src/seiten/bestellung.mjs) und das Formular nach dem Entschlüsseln (formular.js).
 // Produktbilder: das Feld „bild“ im Katalog (gültige und ungültige Namen), der Bau bricht ab, wenn eine Bilddatei fehlt, die zehn Kacheln in
@@ -38,6 +39,7 @@ import {
   bereinigeEntwurf,
   bestellNr,
   bezahlungIds,
+  ccAdresse,
   datumDe,
   druckBedarf,
   effektiveInitialen,
@@ -78,9 +80,13 @@ import {
   zuschlagSumme,
   zuschlagText,
 } from "../../assets/js/bestellung/mailtext.js";
-import { TEXT_HINWEIS_SPONSOR, TEXT_LEAD, baueFormular, preisFussText } from "../../assets/js/bestellung/formular.js";
+import { TEXT_EMAIL_UNGUELTIG, TEXT_HINWEIS_EMAIL, TEXT_HINWEIS_SPONSOR, TEXT_LEAD, baueFormular, preisFussText } from "../../assets/js/bestellung/formular.js";
 import { baueKonfig, seite } from "../../src/seiten/bestellung.mjs";
 import {
+  CC_ADRESSE,
+  CC_ADRESSE_KODIERT,
+  CC_LANG_GUELTIG,
+  CC_UNGUELTIG,
   DATEN,
   FAELLE,
   FALL_A,
@@ -974,6 +980,154 @@ abschnitt("(t) Schnellwahl setzt Artikel mit ihren Standard-Aufdrucken");
   gleich("(t) Torwartset Erwachsene: 32,94 + 20,22 + 4,74 + 30,92 + 18,96 + 15,21 = 122,99 €", summe("torwartset", "M"), "122,99 €");
 }
 
+// ---------- (u) Kopie an den Besteller (Cc) ----------
+
+abschnitt("(u) Kopie an den Besteller (Cc)");
+{
+  const kurz = (t) => (t.length > 40 ? t.slice(0, 20) + "…(" + t.length + " Zeichen)" : t);
+  const zeigt = (t) => (typeof t === "string" ? JSON.stringify(kurz(t)) : String(t));
+  const ohne = mail(FALL_A.bestellung, FALL_A.jetzt);
+  // Zeichen von U+0000 bis U+02FF an sechs Stellen einer gültigen Adresse (am Anfang, im Namen, nach dem @, in der Domain, am Ende, vor einer zweiten Adresse)
+  const mitZeichen = (c) => {
+    const z = String.fromCharCode(c);
+    return [z + "a@b.example", "a" + z + "@b.example", "a@" + z + "b.example", "a@b" + z + ".example", "a@b.example" + z, "a@b.example" + z + "x@y.example"];
+  };
+
+  // ccAdresse: leer, Ränder, gültig
+  for (const leer of [undefined, null, "", " ", "   ", "\t", "\n", " \r\n\t ", " "]) {
+    gleich(`(u) ccAdresse: ${zeigt(leer)} ist leer (""): keine Kopie, kein Hinweis`, ccAdresse(leer), "");
+  }
+  for (const [roh, soll] of [[" a@b.example", "a@b.example"], ["a@b.example ", "a@b.example"], ["\ta@b.example\n", "a@b.example"], ["\r\n a@b.example \r\n", "a@b.example"], [" a@b.example ", "a@b.example"]]) {
+    gleich(`(u) ccAdresse: Ränder fallen weg: ${JSON.stringify(roh)}`, ccAdresse(roh), soll);
+  }
+  for (const a of ["a@b.example", CC_ADRESSE, "a+b@c.example", "A.B_C-D+E@Sub-Domain.Beispiel.example", "x@y.co", "a@" + "x".repeat(63) + ".example", CC_LANG_GUELTIG]) {
+    gleich(`(u) ccAdresse: gültig und unverändert: ${zeigt(a)}`, ccAdresse(a), a);
+  }
+  gleich("(u) ccAdresse: die Grenze ist 254 Zeichen (GRENZEN.email), die längste gültige Adresse hat genau so viele", `${GRENZEN.email}|${CC_LANG_GUELTIG.length}`, "254|254");
+
+  // ccAdresse: ungültig, darunter alles, womit sich ein zweiter Empfänger oder eine zusätzliche Kopfzeile einschleusen ließe
+  for (const [name, roh] of CC_UNGUELTIG) gleich(`(u) ccAdresse: ungültig (${name}) ergibt null`, ccAdresse(roh), null);
+  // dieselben Fälle wörtlich, wie sie im Arbeitspaket AP-4 stehen
+  for (const roh of ["a@b", "a b@c.de", "a@b.de,x@y.de", "a@b.de;x@y.de", "a@b.de\r\nBcc: x@y.de", "a@b.de&bcc=x@y.de", "<a@b.de>", "a".repeat(250) + "@b.de"]) {
+    gleich(`(u) ccAdresse: ungültig (Fall aus dem Arbeitspaket) ${zeigt(roh)} ergibt null`, ccAdresse(roh), null);
+  }
+  for (const roh of [5, 0, true, {}, ["a@b.example"], () => "a@b.example"]) gleich(`(u) ccAdresse: eine Eingabe, die kein Text ist (${typeof roh}), ist ungültig`, ccAdresse(roh), null);
+  {
+    const verletzt = [];
+    for (let c = 0; c <= 0x2ff; c++) {
+      for (const roh of mitZeichen(c)) {
+        const r = ccAdresse(roh);
+        if (r === null || r === "") continue;
+        if (r !== roh.trim() || !/^[A-Za-z0-9._+-]+@[A-Za-z0-9.-]+$/.test(r) || r.split("@").length !== 2 || r.length > 254) verletzt.push("U+" + c.toString(16).padStart(4, "0") + " in " + JSON.stringify(roh));
+      }
+    }
+    gleich("(u) ccAdresse: mit keinem Zeichen von U+0000 bis U+02FF an irgendeiner der sechs Stellen kommt etwas anderes heraus als eine einzelne einfache Adresse", verletzt.slice(0, 5).join(" | "), "");
+    const t0 = Date.now();
+    for (let i = 0; i < 3000; i++) {
+      ccAdresse("a".repeat(200) + "@" + "b".repeat(50));
+      ccAdresse("a@" + "b-".repeat(110) + "!");
+      ccAdresse("a@" + "b.".repeat(120) + "!");
+    }
+    const dauer = Date.now() - t0;
+    pruefe("(u) ccAdresse: lange, fast passende Eingaben kosten keine Rechenzeit (kein Backtracking-Problem, 9000 Läufe unter 3 Sekunden)", dauer < 3000, dauer + " ms");
+  }
+
+  // mailtoLink mit und ohne cc
+  const basis = mailtoLink("a@b.de", "Be treff", "x\ny");
+  const mitCc = mailtoLink("a@b.de", "Be treff", "x\ny", CC_ADRESSE);
+  const parameter = (link) => link.slice(link.indexOf("?") + 1).split("&").map((t) => t.slice(0, t.indexOf("=")));
+  gleich("(u) mailtoLink ohne cc: wie bisher", basis, "mailto:a@b.de?subject=Be%20treff&body=x%0D%0Ay");
+  for (const leer of [undefined, null, "", "   ", "\n"]) gleich(`(u) mailtoLink mit leerem cc (${zeigt(leer)}): byte-gleich zu dem ohne cc`, mailtoLink("a@b.de", "Be treff", "x\ny", leer), basis);
+  gleich("(u) mailtoLink mit gültigem cc: ganz am Ende „&cc=“ und die kodierte Adresse (@ als %40, + als %2B)", mitCc, basis + "&cc=" + CC_ADRESSE_KODIERT);
+  gleich("(u) mailtoLink: das cc wird getrimmt", mailtoLink("a@b.de", "Be treff", "x\ny", "  " + CC_ADRESSE + "\r\n"), mitCc);
+  gleich("(u) mailtoLink: ein ganzer Link von Hand geschrieben", mailtoLink("Bestellungen@sportfreunde04.de", "s", "t", "x+y@z.example"), "mailto:Bestellungen@sportfreunde04.de?subject=s&body=t&cc=x%2By%40z.example");
+  for (const [name, roh] of CC_UNGUELTIG) gleich(`(u) mailtoLink: ungültiges cc (${name}): der Link ist byte-gleich zu dem ohne cc`, mailtoLink("a@b.de", "Be treff", "x\ny", roh), basis);
+  gleichJson("(u) mailtoLink mit cc: genau die Parameter subject, body, cc, je einmal", parameter(mitCc), ["subject", "body", "cc"]);
+  gleichJson("(u) mailtoLink ohne cc: genau die Parameter subject und body", parameter(basis), ["subject", "body"]);
+  gleich("(u) mailtoLink mit cc: als Adresse gelesen (URL) kommt dieselbe Adresse heraus (das + bleibt ein +)", new URL(mitCc).searchParams.get("cc"), CC_ADRESSE);
+  pruefe("(u) mailtoLink mit cc: nur erlaubte Zeichen (alles mit encodeURIComponent kodiert)", /^mailto:[^?\s]+\?subject=[A-Za-z0-9\-_.!~*'()%]*&body=[A-Za-z0-9\-_.!~*'()%]*&cc=[A-Za-z0-9\-_.!~*'()%]+$/.test(mitCc), mitCc);
+  {
+    // Was auch im Feld steht: Im Link steht höchstens ein cc, das genau die eine getrimmte Adresse ist; sonst nur Betreff und Text
+    const verletzt = [];
+    for (let c = 0; c <= 0x2ff; c++) {
+      for (const roh of mitZeichen(c)) {
+        const link = mailtoLink("Bestellungen@sportfreunde04.de", "s", "t", roh);
+        const namen = parameter(link).join();
+        const ccTeil = link.includes("&cc=") ? decodeURIComponent(link.slice(link.indexOf("&cc=") + "&cc=".length)) : null;
+        const ok = (namen === "subject,body" && ccTeil === null) || (namen === "subject,body,cc" && ccTeil === roh.trim() && ccTeil.split("@").length === 2 && !/[\s,;<>"&=?#%]/.test(ccTeil));
+        if (!ok) verletzt.push("U+" + c.toString(16).padStart(4, "0") + " in " + JSON.stringify(roh) + " › " + namen);
+      }
+    }
+    gleich("(u) mailtoLink: mit keinem Zeichen von U+0000 bis U+02FF im cc entsteht ein weiterer Parameter, ein zweiter Empfänger oder eine zusätzliche Kopfzeile", verletzt.slice(0, 5).join(" | "), "");
+  }
+
+  // baueMail: die Referenzbestellungen mit und ohne Adresse
+  for (const f of [FALL_A, FALL_B, FALL_C]) {
+    // So entstand der Link vor der Kopie: Betreff und Text aus faelle.mjs, keine weiteren Teile
+    const frueher = "mailto:Bestellungen@sportfreunde04.de?subject=" + encodeURIComponent(f.betreff) + "&body=" + encodeURIComponent(f.text.replace(/\n/g, "\r\n"));
+    const o = mail(f.bestellung, f.jetzt);
+    const m = mail({ ...f.bestellung, email: CC_ADRESSE }, f.jetzt);
+    gleich(`(u) ${f.titel} ohne Adresse: der Link ist byte-gleich zu dem von früher (Betreff und Text wie in faelle.mjs)`, o.mailto, frueher);
+    gleich(`(u) ${f.titel} mit Adresse: der Text ist unverändert (Zeichen für Zeichen der Text aus faelle.mjs)`, m.text, f.text);
+    gleich(`(u) ${f.titel} mit Adresse: der Betreff ist unverändert`, m.betreff, f.betreff);
+    gleich(`(u) ${f.titel} mit Adresse: der Link ist der von früher plus „&cc=“ und die kodierte Adresse`, m.mailto, frueher + "&cc=" + CC_ADRESSE_KODIERT);
+    pruefe(`(u) ${f.titel} mit Adresse: die Adresse steht weder im Text noch im Betreff (auch nicht in Teil 1)`, !m.text.includes("verein-beispiel") && !m.text.includes("lena+d3") && !m.betreff.includes("verein-beispiel"));
+    gleich(`(u) ${f.titel} mit Adresse: „Text kopieren“ ist unverändert`, kopierText(m), kopierText(o));
+    gleich(`(u) ${f.titel} mit Adresse: die Länge zählt das cc mit (&cc= und die kodierte Adresse)`, String(m.mailtoLaenge), String(o.mailtoLaenge + "&cc=".length + CC_ADRESSE_KODIERT.length));
+    gleich(`(u) ${f.titel}: mailtoLaenge ist die Länge des Links, mit und ohne Adresse`, `${m.mailtoLaenge === m.mailto.length}|${o.mailtoLaenge === o.mailto.length}`, "true|true");
+  }
+  gleich("(u) Adresse mit Leerraum an den Rändern: im Link getrimmt, der Text bleibt", mail({ ...FALL_A.bestellung, email: "\n  " + CC_ADRESSE + "  " }, FALL_A.jetzt).mailto, ohne.mailto + "&cc=" + CC_ADRESSE_KODIERT);
+  for (const [name, roh] of CC_UNGUELTIG) {
+    const m = mail({ ...FALL_A.bestellung, email: roh }, FALL_A.jetzt);
+    gleich(`(u) Eingabe „${name}“: der Link ist byte-gleich zu dem ohne Adresse (kein cc, kein zweiter Empfänger, keine zusätzliche Kopfzeile)`, m.mailto, ohne.mailto);
+    gleich(`(u) Eingabe „${name}“: Text und Betreff bleiben, wie sie waren`, m.text + "\u0000" + m.betreff, ohne.text + "\u0000" + ohne.betreff);
+  }
+
+  // Länge inklusive cc: Eine Bestellung knapp unter der Grenze ist mit der Adresse darüber (seite.js zeigt den Hinweis „Die Bestellung ist lang“ nach mailtoLaenge)
+  {
+    const gruppe = (n, hinweis) => klein({ personen: Array.from({ length: n }, (_, i) => person("p" + (i + 1), "Spieler " + (i + 1), String((i % 98) + 1), i % 2 ? "140" : "M", GRUNDAUSSTATTUNG)), zaehler: n, sponsor: FIRMA, hinweis });
+    let n = 1;
+    while (mail(gruppe(n, "")).mailtoLaenge < MAILTO_LAENGE_MAX - 400) n += 1;
+    let fuell = 1;
+    while (fuell < 5000 && mail(gruppe(n, "x".repeat(fuell))).mailtoLaenge < MAILTO_LAENGE_MAX - 10) fuell += 1;
+    const knapp = gruppe(n, "x".repeat(fuell));
+    const knappOhne = mail(knapp);
+    const knappMit = mail({ ...knapp, email: CC_ADRESSE });
+    const knappKaputt = mail({ ...knapp, email: "a@b.example, x@y.example" });
+    pruefe(`(u) Länge: die Bestellung liegt ohne Adresse knapp unter der Grenze (${knappOhne.mailtoLaenge} von ${MAILTO_LAENGE_MAX})`, knappOhne.mailtoLaenge <= MAILTO_LAENGE_MAX && knappOhne.mailtoLaenge >= MAILTO_LAENGE_MAX - 10, String(knappOhne.mailtoLaenge));
+    pruefe(`(u) Länge: mit der Adresse liegt sie darüber (${knappMit.mailtoLaenge}): Das cc zählt zur Länge, der Hinweis „Die Bestellung ist lang“ erscheint`, knappMit.mailtoLaenge > MAILTO_LAENGE_MAX && knappMit.mailtoLaenge === knappOhne.mailtoLaenge + "&cc=".length + CC_ADRESSE_KODIERT.length, String(knappMit.mailtoLaenge));
+    gleich("(u) Länge: mit einer ungültigen Adresse bleibt die Länge, wie sie ohne Adresse ist (kein cc im Link)", String(knappKaputt.mailtoLaenge), String(knappOhne.mailtoLaenge));
+    gleich("(u) Länge: auch über der Grenze wird nie gekürzt (der Text im Link ist vollständig, das cc steht dahinter)", decodeURIComponent(knappMit.mailto.slice(knappMit.mailto.indexOf("&body=") + "&body=".length, knappMit.mailto.indexOf("&cc="))).replace(/\r\n/g, "\n"), knappMit.text);
+  }
+
+  // Entwurf: alte Entwürfe ohne das Feld, Müll, Kürzung
+  {
+    const alt = JSON.parse(JSON.stringify(FALL_A.bestellung));
+    delete alt.email;
+    const geladen = bereinigeEntwurf(alt, KONFIG);
+    gleich("(u) leerer Entwurf: die E-Mail-Adresse ist leer", leererEntwurf().email, "");
+    gleich("(u) alter Entwurf ohne das Feld: die E-Mail-Adresse ist leer", geladen.email, "");
+    gleichJson("(u) alter Entwurf ohne das Feld: sonst derselbe Entwurf wie (a)", geladen, FALL_A.bestellung);
+    gleich("(u) alter Entwurf ohne das Feld: derselbe Link wie (a), kein cc", mail(geladen, FALL_A.jetzt).mailto, ohne.mailto);
+    gleichJson("(u) Entwurf mit Adresse: Bereinigung ändert ihn nicht (JSON hin und zurück)", bereinigeEntwurf(JSON.parse(JSON.stringify({ ...FALL_A.bestellung, email: CC_ADRESSE })), KONFIG), { ...FALL_A.bestellung, email: CC_ADRESSE });
+    gleich("(u) Entwurf mit Adresse: nach JSON und Bereinigung derselbe Link mit cc", mail(bereinigeEntwurf(JSON.parse(JSON.stringify({ ...FALL_A.bestellung, email: CC_ADRESSE })), KONFIG), FALL_A.jetzt).mailto, ohne.mailto + "&cc=" + CC_ADRESSE_KODIERT);
+    gleich("(u) Entwurf: eine Adresse, die kein Text ist, wird leer", [5, {}, ["a@b.example"], null, true].map((x) => bereinigeEntwurf({ email: x }, KONFIG).email).join("|"), "||||");
+    gleich("(u) Entwurf: die längste gültige Adresse (254 Zeichen) bleibt", bereinigeEntwurf({ email: CC_LANG_GUELTIG }, KONFIG).email, CC_LANG_GUELTIG);
+    gleich("(u) Entwurf: eine zu lange Angabe (255 und 500 Zeichen) wird verworfen, nicht gekürzt (das Kürzen könnte eine andere, gültige Adresse daraus machen)", [CC_UNGUELTIG.find(([n]) => n.startsWith("255"))[1], "a".repeat(500)].map((x) => bereinigeEntwurf({ email: x }, KONFIG).email).join("|"), "|");
+    // Verändert (der Speicher des Browsers kann alles enthalten): Aus keiner dieser Adressen wird ein cc
+    for (const [name, roh] of CC_UNGUELTIG) {
+      gleich(`(u) Entwurf mit der Adresse „${name}“: der Link hat kein cc`, mail(bereinigeEntwurf({ ...FALL_A.bestellung, email: roh }, KONFIG), FALL_A.jetzt).mailto, ohne.mailto);
+    }
+  }
+
+  // Prüfung: Die Adresse ist freiwillig. Sie erzeugt nie eine Lücke und nie einen Platzhalter im Text.
+  for (const roh of ["", CC_ADRESSE, "kaputt", "a@b.example, x@y.example", "a@b.example\r\nBcc: x@y.example"]) {
+    gleichJson(`(u) pruefeBestellung: die Adresse ${zeigt(roh)} ändert die Lücken nicht (Senden bleibt möglich)`, pruefeBestellung(KONFIG, { ...FALL_A.bestellung, email: roh }), []);
+    pruefe(`(u) Mailtext: die Adresse ${zeigt(roh)} bringt keinen Platzhalter „${FEHLT}“ in den Text`, !mail({ ...FALL_A.bestellung, email: roh }, FALL_A.jetzt).text.includes(FEHLT));
+  }
+  gleichJson("(u) pruefeBestellung: die Lücken des leeren Entwurfs bleiben mit und ohne Adresse dieselben", [pruefeBestellung(KONFIG, { ...leererEntwurf(), email: CC_ADRESSE }), pruefeBestellung(KONFIG, { ...leererEntwurf(), email: "kaputt" })], [pruefeBestellung(KONFIG, leererEntwurf()), pruefeBestellung(KONFIG, leererEntwurf())]);
+}
+
 // ---------- (g) Prüfmodus aus ----------
 
 abschnitt("(g) pruefmodus false");
@@ -1424,6 +1578,23 @@ abschnitt("Formular");
   pruefe("Formular: kein Skript, kein TODO, kein console.log", !/<script|TODO|FIXME|console\.log/.test(html));
   pruefe("Formular: Eingaben haben Beschriftungen (jedes Feld mit id hat ein label for)", [...html.matchAll(/<(?:input|select|textarea)[^>]* id="([^"]+)"/g)].filter((x) => !/^bst-d-/.test(x[1])).every((x) => html.includes(`for="${x[1]}"`)));
   pruefe("Formular: der Fuß nennt Quelle und Rabatt aus den Daten (40 %), ein anderer Rabatt ändert den Text", baueFormular(mitPreisen(KONFIG_OEFFENTLICH, { ...kopieTestpreise(), rabattProzent: 12.5 })).includes("(Listenpreis − 12,5 %, Aufdrucke einzeln)."));
+  // Feld „E-Mail-Adresse (freiwillig)“ im Block „Wer bestellt?“ (Kopie an den Besteller)
+  {
+    const wer = html.slice(html.indexOf('id="bst-h-wer"'), html.indexOf('id="bst-h-kleidung"'));
+    gleichJson("Formular: Beschriftungen im Block „Wer bestellt?“: die E-Mail-Adresse steht nach dem Telefon und vor „Gebraucht bis“", [...wer.matchAll(/<label for="[^"]+">([^<]*)<\/label>/g)].map((x) => x[1]).slice(0, 5), ["Mannschaft", "Dein Name", "Telefon (freiwillig)", "E-Mail-Adresse (freiwillig)", "Gebraucht bis (freiwillig)"]);
+    const eingabe = /<input type="email" id="bst-email"[^>]*>/.exec(html);
+    const feld = eingabe ? eingabe[0] : "";
+    pruefe("Formular: E-Mail-Adresse: Beschriftung mit dem Feld verbunden (for und id)", wer.includes('<label for="bst-email">E-Mail-Adresse (freiwillig)</label>') && feld.includes('id="bst-email"'));
+    pruefe("Formular: E-Mail-Adresse: type email, autocomplete email, inputmode email, maxlength 254", feld.includes('type="email"') && feld.includes('autocomplete="email"') && feld.includes('inputmode="email"') && feld.includes('maxlength="254"'), feld);
+    pruefe("Formular: E-Mail-Adresse: gebunden an den Entwurf (data-feld email), nie eine Lücke (kein data-schluessel), keine Pflicht (kein required)", feld.includes('data-feld="email"') && !feld.includes("data-schluessel") && !/required/.test(feld), feld);
+    pruefe("Formular: E-Mail-Adresse: ohne Großschreibung am Anfang und ohne Rechtschreibprüfung, beschrieben durch den Hinweis darunter", feld.includes('autocapitalize="none"') && feld.includes('spellcheck="false"') && feld.includes('aria-describedby="bst-email-hilfe"'), feld);
+    gleich("Formular: Hinweis zur E-Mail-Adresse wörtlich (TEXT_HINWEIS_EMAIL)", TEXT_HINWEIS_EMAIL, "Du bekommst eine Kopie der Bestellung. Die Adresse bleibt auf deinem Gerät, bis du die Mail abschickst.");
+    gleich("Formular: Hinweis bei einer Eingabe ohne Adresse wörtlich (TEXT_EMAIL_UNGUELTIG)", TEXT_EMAIL_UNGUELTIG, "Das sieht nicht wie eine E-Mail-Adresse aus – so geht keine Kopie raus.");
+    pruefe("Formular: der Hinweis steht direkt unter dem Feld und ist immer sichtbar", html.includes(`${feld}\n        <p class="bst-hinweis" id="bst-email-hilfe">${TEXT_HINWEIS_EMAIL}</p>`));
+    pruefe("Formular: der Hinweis „keine Kopie“ steht darunter und ist anfangs verborgen (seite.js zeigt ihn nur bei einer Eingabe, die keine Adresse ist)", html.includes(`id="bst-email-hilfe">${TEXT_HINWEIS_EMAIL}</p>\n        <p class="bst-hinweis bst-hinweis--achtung" id="bst-email-fehler" data-bst-email-fehler hidden>${TEXT_EMAIL_UNGUELTIG}</p>`));
+    pruefe("Formular: beide Hinweise stehen im selben Feld (.bst-feld) wie die Eingabe, vor dem Feld „Gebraucht bis“", html.indexOf('id="bst-email-fehler"') > html.indexOf('id="bst-email"') && html.indexOf('id="bst-email-fehler"') < html.indexOf('for="bst-bis"') && html.indexOf('id="bst-tel"') < html.indexOf('id="bst-email"'));
+    pruefe("Formular: nur eine E-Mail-Adresse des Bestellers (der Block „Sponsor“ hat sein eigenes Feld mit anderer id)", (html.match(/id="bst-email"/g) || []).length === 1 && (html.match(/id="bst-sponsor-email"/g) || []).length === 1);
+  }
 }
 
 // ---------- öffentliche Ausgabe: keine internen Daten, kein Grün, keine fremden Adressen ----------

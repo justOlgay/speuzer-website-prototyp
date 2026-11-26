@@ -13,8 +13,8 @@
 
   Betreff, Text, Prüfung, Preise und Bestell-Nr. kommen aus mailtext.js (reine Funktionen, ohne DOM).
 
-  Es gibt keinen Server: Der Entwurf liegt in localStorage (Schlüssel speuzer-bestellung-v1-entwurf; Mannschaft, Name, Telefon und
-  Lieferanschrift zusätzlich unter speuzer-bestellung-v1-absender). Jeder Zugriff darauf steht in try/catch, die Seite funktioniert
+  Es gibt keinen Server: Der Entwurf liegt in localStorage (Schlüssel speuzer-bestellung-v1-entwurf; Mannschaft, Name, Telefon, E-Mail-Adresse (nur wenn
+  eine eingetragen ist) und Lieferanschrift zusätzlich unter speuzer-bestellung-v1-absender). Jeder Zugriff darauf steht in try/catch, die Seite funktioniert
   auch ohne Speicher. Nur statische Importe (nie ein dynamischer Import zur Laufzeit): Safari merkt sich einen gescheiterten
   dynamischen Import für die ganze Sitzung.
 
@@ -23,6 +23,9 @@
 
   Produktbilder: Jede Artikelzeile trägt links eine kleine Kachel mit dem Bild des Artikels (data/bestellung.json › artikel[].bild, die Dateien liegen unter
   assets/bilder/bestellung/); ohne Eintrag bleibt die Kachel leer. Der Hinweis „Produktbilder: JAKO“ steht einmal unter der Liste der Personen.
+
+  Kopie an den Besteller: Das Feld „E-Mail-Adresse (freiwillig)“ (Block „Wer bestellt?“) ist ein ganz gewöhnliches Feld des Entwurfs (email). Ob die Adresse als Cc in den
+  Link kommt, entscheidet allein mailtext.js (ccAdresse); hier zeigt syncKopie nur den Hinweis am Feld, wenn etwas drinsteht, das keine Adresse ist. Senden bleibt dann möglich.
 */
 
 import {
@@ -34,6 +37,7 @@ import {
   baueMail,
   bereinigeEntwurf,
   bezahlungIds,
+  ccAdresse,
   druckBedarf,
   ganzzahl,
   initialenVorschlag,
@@ -47,6 +51,7 @@ import {
   schnellwahlAnwenden,
   sponsorAktiv,
   summeText,
+  verbindeDeutsch,
   vorauswahlGroesse,
   vorauswahlHinweis,
   waehleBestellNr,
@@ -319,6 +324,8 @@ function starteApp(app, konfig, haken) {
     vorschauText: $("[data-bst-vorschau-text]"),
     speicher: $("[data-bst-speicher]"),
     vergessen: $("[data-bst-vergessen]"),
+    email: $("#bst-email"),
+    emailFehler: $("[data-bst-email-fehler]"),
   };
 
   // Herkunft der Produktbilder: einmal klein unter der Liste „Kleidung je Person“ (nach dem Knopf „+ Person hinzufügen“), solange es Bilder zu sehen gibt,
@@ -342,6 +349,8 @@ function starteApp(app, konfig, haken) {
       if (!e.team && konfig.mannschaften.some((m) => m.slug === absender.team)) e.team = absender.team;
       if (!e.name && typeof absender.name === "string") e.name = absender.name.slice(0, GRENZEN.besteller);
       if (!e.tel && typeof absender.tel === "string") e.tel = absender.tel.slice(0, GRENZEN.tel);
+      // eine zu lange Angabe wird verworfen, nicht gekürzt (wie in bereinigeEntwurf)
+      if (!e.email && typeof absender.email === "string" && absender.email.length <= GRENZEN.email) e.email = absender.email;
       if (e.lieferName === null && typeof absender.lieferName === "string") e.lieferName = absender.lieferName.slice(0, GRENZEN.lieferName);
       if (!e.lieferStrasse && typeof absender.lieferStrasse === "string") e.lieferStrasse = absender.lieferStrasse.slice(0, GRENZEN.strasse);
       if (!e.lieferOrt && typeof absender.lieferOrt === "string") e.lieferOrt = absender.lieferOrt.slice(0, GRENZEN.ort);
@@ -349,9 +358,10 @@ function starteApp(app, konfig, haken) {
     return e;
   }
 
-  // Der Absender (Mannschaft, Name, Telefon, Lieferanschrift) bleibt auch nach „Neue Bestellung beginnen“.
+  // Der Absender (Mannschaft, Name, Telefon, E-Mail-Adresse, Lieferanschrift) bleibt auch nach „Neue Bestellung beginnen“. Die E-Mail-Adresse steht nur dabei,
+  // wenn eine eingetragen ist: Ohne sie sieht der Speicher aus wie vor dem Feld.
   function absenderVon(z) {
-    return { team: z.team, name: z.name, tel: z.tel, lieferName: z.lieferName, lieferStrasse: z.lieferStrasse, lieferOrt: z.lieferOrt };
+    return { team: z.team, name: z.name, tel: z.tel, ...(z.email ? { email: z.email } : {}), lieferName: z.lieferName, lieferStrasse: z.lieferStrasse, lieferOrt: z.lieferOrt };
   }
 
   function speichere() {
@@ -583,6 +593,17 @@ function starteApp(app, konfig, haken) {
     }
   }
 
+  // Kopie an den Besteller: Steht im Feld etwas, das keine einzelne Adresse ist (ccAdresse: null), kommt kein cc in den Link; der Hinweis am Feld sagt es,
+  // und das Feld trägt aria-invalid. Leer ist in Ordnung (das Feld ist optional), Senden bleibt immer möglich.
+  function syncKopie() {
+    if (!el.email || !el.emailFehler) return; // ein älteres formular.js aus dem Zwischenspeicher des Browsers kennt das Feld noch nicht
+    const ungueltig = ccAdresse(zustand.email) === null;
+    el.emailFehler.hidden = !ungueltig;
+    el.email.setAttribute("aria-describedby", ungueltig ? "bst-email-hilfe bst-email-fehler" : "bst-email-hilfe");
+    if (ungueltig) el.email.setAttribute("aria-invalid", "true");
+    else el.email.removeAttribute("aria-invalid");
+  }
+
   function syncBezahlung(z) {
     for (const block of ["kleidung", "teambedarf"]) {
       const gruppe = $(`[data-bezahlung="${block}"]`);
@@ -675,6 +696,7 @@ function starteApp(app, konfig, haken) {
     const z = zusammenfassung(konfig, zustand);
     const luecken = pruefeBestellung(konfig, zustand);
     syncFelder();
+    syncKopie();
     syncPersonen(z);
     syncBezahlung(z);
     syncUebersicht(z);
@@ -890,7 +912,9 @@ function starteApp(app, konfig, haken) {
   });
 
   function neueBestellung() {
-    if (!window.confirm("Neue Bestellung beginnen? Deine Eingaben für diese Bestellung werden gelöscht. Mannschaft, Name, Telefon und Lieferanschrift bleiben erhalten.")) return;
+    // Die Rückfrage nennt, was bleibt: Mannschaft, Name, Telefon, Lieferanschrift und, wenn eine eingetragen ist, die E-Mail-Adresse (ohne sie: der Satz wie bisher)
+    const bleibt = verbindeDeutsch(["Mannschaft", "Name", "Telefon", ...(zustand.email ? ["E-Mail-Adresse"] : []), "Lieferanschrift"]);
+    if (!window.confirm(`Neue Bestellung beginnen? Deine Eingaben für diese Bestellung werden gelöscht. ${bleibt} bleiben erhalten.`)) return;
     zustand = Object.assign(leererEntwurf(), absenderVon(zustand));
     ui.zeigeLuecken = false;
     ui.meldung = "";

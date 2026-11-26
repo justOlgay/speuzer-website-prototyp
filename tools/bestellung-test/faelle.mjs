@@ -330,3 +330,72 @@ export const FALL_C = {
 };
 
 export const FAELLE = { a: FALL_A, b: FALL_B, c: FALL_C };
+
+// ---------- Kopie an den Besteller (Cc, AP-4) ----------
+// Die Adresse für das Feld „E-Mail-Adresse (freiwillig)“ (erfunden, mit „+“, damit auch die Kodierung im Link geprüft wird) und ihre Form im Link.
+export const CC_ADRESSE = "lena+d3@verein-beispiel.example";
+export const CC_ADRESSE_KODIERT = "lena%2Bd3%40verein-beispiel.example";
+
+// Eingaben, aus denen nie ein cc im Link entstehen darf: [Beschreibung, Eingabe]. Darunter alles, womit jemand einen zweiten Empfänger (Komma, Semikolon,
+// zwei Adressen) oder eine zusätzliche Kopfzeile (Zeilenumbruch mit Bcc, Parameter im Link) einschleusen könnte, Steuerzeichen, ein zweites „@“, spitze Klammern,
+// und die Längengrenze (254 Zeichen sind gültig, 255 nicht; die 254 stehen in CC_LANG_GUELTIG).
+export const CC_UNGUELTIG = [
+  ["keine Adresse", "kaputt"],
+  ["ohne Punkt in der Domain", "a@b"],
+  ["ohne @", "ab.example"],
+  ["nur das @", "@"],
+  ["ohne Namen vor dem @", "@b.example"],
+  ["ohne Domain", "a@"],
+  ["Domain beginnt mit einem Punkt", "a@.example"],
+  ["Domain endet mit einem Punkt", "a@b.example."],
+  ["zwei Punkte hintereinander in der Domain", "a@b..example"],
+  ["Bindestrich am Anfang eines Domain-Namens", "a@-b.example"],
+  ["Bindestrich am Ende eines Domain-Namens", "a@b-.example"],
+  ["Domain-Name mit 64 Zeichen", "a@" + "x".repeat(64) + ".example"],
+  ["Leerzeichen im Namen", "a b@c.example"],
+  ["Leerzeichen in der Domain", "a@b .example"],
+  ["Text hinter der Adresse", "a@b.example bitte"],
+  ["Tabulator zwischen zwei Adressen", "a@b.example\tx@y.example"],
+  ["zwei Adressen mit Komma", "a@b.example,x@y.example"],
+  ["zwei Adressen mit Komma und Leerzeichen", "a@b.example, x@y.example"],
+  ["zwei Adressen mit Semikolon", "a@b.example;x@y.example"],
+  ["zwei Adressen mit Semikolon und Leerzeichen", "a@b.example; x@y.example"],
+  ["zwei Adressen mit Leerzeichen", "a@b.example x@y.example"],
+  ["Zeilenumbruch (CRLF) mit Bcc-Zeile", "a@b.example\r\nBcc: x@y.example"],
+  ["Zeilenumbruch (LF) mit Bcc-Zeile", "a@b.example\nBcc: x@y.example"],
+  ["Zeilenumbruch (CR) mit Bcc-Zeile", "a@b.example\rBcc: x@y.example"],
+  ["Zeilenumbruch mit Cc-Zeile, Leerzeile und Text", "a@b.example\r\nCc: x@y.example\r\n\r\nText"],
+  ["Zeilenumbruch mitten im Namen", "a\r\nb@c.example"],
+  ["Zeilentrenner U+2028 mit Bcc-Zeile", "a@b.example Bcc: x@y.example"],
+  ["Parameter &bcc=", "a@b.example&bcc=x@y.example"],
+  ["Parameter &cc=", "a@b.example&cc=x@y.example"],
+  ["Parameter ?bcc=", "a@b.example?bcc=x@y.example"],
+  ["Parameter &body=", "a@b.example&body=Text"],
+  ["Parameter &subject=", "a@b.example&subject=Betreff"],
+  ["schon kodierter Zeilenumbruch %0D%0A", "a@b.example%0D%0ABcc:x@y.example"],
+  ["schon kodiertes @ (%40)", "a%40b.example"],
+  ["Doppelkreuz", "a@b.example#x"],
+  ["Gleichheitszeichen", "a=b@c.example"],
+  ["spitze Klammern um die Adresse", "<a@b.example>"],
+  ["Name mit Adresse in spitzen Klammern", "Lena <a@b.example>"],
+  ["nur die schließende spitze Klammer", "a@b.example>"],
+  ["Anführungszeichen", '"a"@b.example'],
+  ["runde Klammern", "a(b)@c.example"],
+  ["Backslash", "a\\b@c.example"],
+  ["zweites @ direkt dahinter", "a@@b.example"],
+  ["zweites @ in der Domain", "a@b@c.example"],
+  ["zwei Adressen ohne Trenner (drei @)", "a@b.example@x@y.example"],
+  ["Steuerzeichen NUL", "a\u0000@b.example"],
+  ["Steuerzeichen BEL am Ende", "a@b.example\u0007"],
+  ["Steuerzeichen US", "a\u001f@b.example"],
+  ["Steuerzeichen DEL", "a\u007f@b.example"],
+  ["Umlaut im Namen", "ä@b.example"],
+  ["Umlaut in der Domain", "a@bü.example"],
+  ["geschütztes Leerzeichen im Namen", "a b@c.example"],
+  ["@ in voller Breite (U+FF20)", "a＠b.example"],
+  ["255 Zeichen (eines zu viel)", "a".repeat(245) + "@b.example"],
+  ["sehr lang (3000 Zeichen)", "a".repeat(2990) + "@b.example"],
+];
+
+// Genau 254 Zeichen: die längste Adresse, die gilt
+export const CC_LANG_GUELTIG = "a".repeat(244) + "@b.example";
